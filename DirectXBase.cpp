@@ -6,10 +6,11 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx12.h"
 #include "imgui/imgui_impl_win32.h"
+#include <stdexcept>
 
 WindowsAPI DirectXBase::windowsAPI{};
 ComPtr<ID3D12Debug> DirectXBase::debugController{};
-ComPtr<ID3D12Device> DirectXBase::dev{};
+ComPtr<ID3D12Device5> DirectXBase::dev{};
 ComPtr<IDXGIFactory6> DirectXBase::dxgiFactory{};
 vector<ComPtr<IDXGIAdapter1>> DirectXBase::adapters{};
 ComPtr<IDXGIAdapter1> DirectXBase::tmpAdapter{};
@@ -17,7 +18,7 @@ vector<D3D_FEATURE_LEVEL> DirectXBase::levels{};
 D3D_FEATURE_LEVEL DirectXBase::featureLevel{};
 ComPtr<IDXGISwapChain4> DirectXBase::swapchain{};
 ComPtr<ID3D12CommandAllocator> DirectXBase::cmdAllocator{};
-ComPtr<ID3D12GraphicsCommandList> DirectXBase::cmdList{};
+ComPtr<ID3D12GraphicsCommandList4> DirectXBase::cmdList{};
 ComPtr<ID3D12CommandQueue> DirectXBase::cmdQueue{};
 ComPtr<ID3D12DescriptorHeap> DirectXBase::rtvHeaps{};
 ComPtr<ID3D12Resource> DirectXBase::depthBuffer{};
@@ -77,7 +78,7 @@ void DirectXBase::Init() {
 	}
 
 	//デバイスの生成
-	levels.push_back(D3D_FEATURE_LEVEL_12_1);
+	//levels.push_back(D3D_FEATURE_LEVEL_12_1);
 	levels.push_back(D3D_FEATURE_LEVEL_12_0);
 	levels.push_back(D3D_FEATURE_LEVEL_11_1);
 	levels.push_back(D3D_FEATURE_LEVEL_11_0);
@@ -92,6 +93,17 @@ void DirectXBase::Init() {
 			break;
 		}
 	}
+
+	//DXR サポートしているか確認
+	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options{};
+	result = dev->CheckFeatureSupport(
+		D3D12_FEATURE_D3D12_OPTIONS5, &options, sizeof(options));
+	if (FAILED(result) ||
+		options.RaytracingTier == D3D12_RAYTRACING_TIER_NOT_SUPPORTED)
+	{
+		throw std::runtime_error("DirectX Raytracing not supported.");
+	}
+
 
 	//コマンドアロケータの生成
 	result = dev->CreateCommandAllocator(

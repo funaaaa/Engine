@@ -55,7 +55,7 @@ class DirectXBase : public Singleton<DirectXBase> {
 public:
 	static WindowsAPI windowsAPI;						//WindowsAPIクラス
 	static ComPtr<ID3D12Debug> debugController;
-	static ComPtr<ID3D12Device> dev;
+	static ComPtr<ID3D12Device5> dev;
 	static ComPtr<IDXGIFactory6> dxgiFactory;
 	static vector<ComPtr<IDXGIAdapter1>> adapters;		//アダプターの列挙用
 	static ComPtr<IDXGIAdapter1> tmpAdapter;			//特定の名前を持つアダプターオブジェクトを入れる
@@ -63,7 +63,7 @@ public:
 	static D3D_FEATURE_LEVEL featureLevel;
 	static ComPtr<IDXGISwapChain4> swapchain;
 	static ComPtr<ID3D12CommandAllocator> cmdAllocator;
-	static ComPtr<ID3D12GraphicsCommandList> cmdList;
+	static ComPtr<ID3D12GraphicsCommandList4> cmdList;
 	static ComPtr<ID3D12CommandQueue> cmdQueue;
 	static ComPtr<ID3D12DescriptorHeap> rtvHeaps;
 	static vector<ComPtr<ID3D12Resource>> backBuffers;

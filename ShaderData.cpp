@@ -2,6 +2,9 @@
 #include "FString.h"
 #include <d3dcompiler.h>
 #include <system_error>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 ShaderData::ShaderData(const string& shaderPath, const string& entryPoint, const string& shaderModel)
 {
@@ -16,6 +19,22 @@ ShaderData::ShaderData(const string& shaderPath, const string& entryPoint, const
 
 	//シェーダーをロード。
 	LoadShader();
+
+}
+
+ShaderData::ShaderData(const string& shaderPath, const string& entryPoint, const string& shaderModel, const bool& isDXC)
+{
+
+	/*-- コンストラクタ --*/
+
+	// 引数を保存。
+	this->shaderPath = shaderPath;
+	this->entryPoint = entryPoint;
+	this->shaderModel = shaderModel;
+	this->shaderBlob = nullptr;
+
+	//シェーダーをロード。
+	LoadShaderDXC();
 
 }
 
@@ -56,5 +75,57 @@ void ShaderData::LoadShader()
 		OutputDebugStringA(errstr.c_str());
 		exit(1);
 	}
+
+}
+
+void ShaderData::LoadShaderDXC()
+{
+	HRESULT hr;
+	std::ifstream infile(shaderPath, std::ifstream::binary);
+	if (!infile) {
+		throw std::runtime_error("failed shader compile.");
+	}
+	std::wstring fileName = StringToWString(shaderPath);
+	std::stringstream strstream;
+	strstream << infile.rdbuf();
+	std::string shaderCode = strstream.str();
+	ComPtr<IDxcLibrary> library;
+	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
+	ComPtr<IDxcCompiler> compiler;
+	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
+	ComPtr<IDxcBlobEncoding> source;
+	library->CreateBlobWithEncodingFromPinned(
+		(LPBYTE)shaderCode.c_str(), (UINT32)shaderCode.size(), CP_UTF8, &source);
+	ComPtr<IDxcIncludeHandler> includeHandler;
+	// インクルードを使う場合には適切に設定すること.
+	library->CreateIncludeHandler(&includeHandler);
+	// コンパイルオプションの指定.
+	std::vector<LPCWSTR> arguments;
+	arguments.emplace_back(L"/Od");
+	const auto target = L"lib_6_4";
+	ComPtr<IDxcOperationResult> dxcResult;
+	hr = compiler->Compile(source.Get(), fileName.c_str(),
+		L"", target, arguments.data(), UINT(arguments.size()),
+		nullptr, 0, includeHandler.Get(), &dxcResult);
+	if (FAILED(hr)) {
+		throw std::runtime_error("failed shader compile.");
+	}
+	dxcResult->GetStatus(&hr);
+	if (FAILED(hr)) {
+		ComPtr<IDxcBlobEncoding> errBlob;
+		dxcResult->GetErrorBuffer(&errBlob);
+		// ... errBlob の内容をエラーメッセージとして表示 (省略)
+		throw std::runtime_error("failed shader compile");
+	}
+	ComPtr<IDxcBlob> blob;
+	dxcResult->GetResult(&blob);
+
+	shaderBlobDxc = blob;
+
+	std::vector<char> result;
+	auto size = blob->GetBufferSize();
+	result.resize(size);
+	memcpy(result.data(), blob->GetBufferPointer(), size);
+	shaderBin = result;
 
 }

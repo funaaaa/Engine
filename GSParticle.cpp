@@ -136,7 +136,7 @@ void GSParticle::Draw()
 	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &vbView);
 
 	//•`‰æƒRƒ}ƒ“ƒh
-	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
+	DirectXBase::Instance()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
 	DirectXBase::Instance()->cmdList->DrawInstanced(1, 1, 0, 0);
 
 }
@@ -179,7 +179,7 @@ void GSParticle::DrawInstance(vector<GSConstBufferDataB0> instanceData)
 	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &vbView);
 
 	//•`‰æƒRƒ}ƒ“ƒh
-	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
+	DirectXBase::Instance()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
 	DirectXBase::Instance()->cmdList->DrawInstanced(1, instanceCount, 0, 0);
 
 }

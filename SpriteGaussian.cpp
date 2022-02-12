@@ -164,7 +164,7 @@ void SpriteGaussian::Draw()
 	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &vbView);
 
 	// •`‰æƒRƒ}ƒ“ƒh
-	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
+	DirectXBase::Instance()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
 	DirectXBase::Instance()->cmdList->DrawInstanced(vertex.size(), 1, 0, 0);
 }
 

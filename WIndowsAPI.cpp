@@ -27,7 +27,7 @@ void WindowsAPI::Init()
 	//ウィンドウクラスを設定
 	windowClass.cbSize = sizeof(WNDCLASSEX);
 	windowClass.lpfnWndProc = (WNDPROC)WindowProc;		//ウィンドウプロシージャを設定
-	windowClass.lpszClassName = L"ライティング";			//ウィンドウクラス名
+	windowClass.lpszClassName = L"レイトレーシング";			//ウィンドウクラス名
 	windowClass.hInstance = GetModuleHandle(nullptr);	//ウィンドウハンドル
 	windowClass.hIcon = LoadIcon(windowClass.hInstance, TEXT("icon"));
 
@@ -39,7 +39,7 @@ void WindowsAPI::Init()
 
 	// ウィンドウオブジェクトの生成
 	hwnd = CreateWindow(windowClass.lpszClassName,		//クラス名
-		L"ライティング",									//タイトルバーの文字
+		L"レイトレーシング",									//タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,							//標準的なウィンドウスタイル
 		CW_USEDEFAULT,									//表示X座標（OSに任せる）
 		CW_USEDEFAULT,									//表示Y座標（OSに任せる）

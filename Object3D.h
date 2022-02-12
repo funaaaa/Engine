@@ -25,4 +25,9 @@ public:
 	// 頂点インデックスコンテナを取得する
 	inline vector<unsigned short> GetIndex() { return index; }
 
+	/*-- レイトレーシング実装時に臨時で実装したやつ --*/
+
+	// 頂点バッファを取得する。
+	inline Microsoft::WRL::ComPtr<ID3D12Resource> GetVertexBuff() { return vertBuff; }
+
 };

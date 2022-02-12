@@ -398,6 +398,9 @@
     <FxCompile Include="Resource\ShaderFiles\ObjectGetShadowMapVS.hlsl">
       <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
     </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\triangleShaderHeader.hlsl">
+      <Filter>エンジン\シェーダー\レイトレーシング用シェーダー</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -584,6 +587,9 @@
     </Filter>
     <Filter Include="エンジン\定数バッファ">
       <UniqueIdentifier>{05828882-30f8-47a2-91c2-24317500e41b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\シェーダー\レイトレーシング用シェーダー">
+      <UniqueIdentifier>{9300465c-466d-4cd5-a854-6aaf768c72b9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

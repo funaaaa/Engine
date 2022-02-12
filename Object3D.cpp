@@ -17,6 +17,7 @@ void Object3D::Generate(XMFLOAT3 centerPos, int projectionID, int piplineID, str
 
 	// パイプラインのIDによってライティングのマップ処理を行うかどうかのフラグを更新する。
 	if (piplineID == PIPLINE_OBJECT_LIGHT_ALPHA ||
+		piplineID == PIPLINE_OBJECT_NOLIGHT_ALPHA ||
 		piplineID == PIPLINE_OBJECT_LIGHT_FOG_ALPHA ||
 		piplineID == PIPLINE_OBJECT_LIGHT_FOG_BUMP_ALPHA ||
 		piplineID == PIPLINE_OBJECT_TOONSHADER_ALPHA ||
@@ -326,6 +327,7 @@ void Object3D::UpdatePiplineID(int piplineID)
 {
 	// パイプラインのIDによってライティングのマップ処理を行うかどうかのフラグを更新する。
 	if (piplineID == PIPLINE_OBJECT_LIGHT_ALPHA ||
+		piplineID == PIPLINE_OBJECT_NOLIGHT_ALPHA ||
 		piplineID == PIPLINE_OBJECT_LIGHT_FOG_ALPHA ||
 		piplineID == PIPLINE_OBJECT_LIGHT_FOG_BUMP_ALPHA ||
 		piplineID == PIPLINE_OBJECT_TOONSHADER_ALPHA ||

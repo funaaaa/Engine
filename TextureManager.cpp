@@ -226,7 +226,7 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 	//テクスチャバッファの生成
 	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	ComPtr<ID3D12Resource> texbuff = nullptr;
-	HRESULT result = DirectXBase::dev->CreateCommittedResource(
+	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
 		&prop,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
