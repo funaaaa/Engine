@@ -36,7 +36,7 @@ public:
 	// シェーダーデータを返す。
 	ComPtr<ID3DBlob> GetShaderData(const string& shaderPath);
 	ComPtr<IDxcBlob> GetShaderDataForDXC(const string& shaderPath);
-	vector<char> GetShaderBin(const string& shaderPath);
+	vector<char>& GetShaderBin(const string& shaderPath);
 
 };
 

@@ -91,7 +91,7 @@ ComPtr<IDxcBlob> ShaderStorage::GetShaderDataForDXC(const string& shaderPath)
 	return ComPtr<IDxcBlob>();
 }
 
-vector<char> ShaderStorage::GetShaderBin(const string& shaderPath)
+vector<char>& ShaderStorage::GetShaderBin(const string& shaderPath)
 {
 	/*-- シェーダーデータを返す処理 --*/
 

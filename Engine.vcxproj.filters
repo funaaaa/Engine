@@ -115,6 +115,27 @@
     <ClCompile Include="ShaderStorage.cpp">
       <Filter>エンジン\シェーダー\シェーダー管理クラス</Filter>
     </ClCompile>
+    <ClCompile Include="PorygonMeshBLAS.cpp">
+      <Filter>レイトレーシング\BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="PorygonInstance.cpp">
+      <Filter>レイトレーシング\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="PorygonInstanceRegister.cpp">
+      <Filter>レイトレーシング\InstanceRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="TLAS.cpp">
+      <Filter>レイトレーシング\TLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="RayRootsignature.cpp">
+      <Filter>レイトレーシング\レイトレーシングルートシグネチャ</Filter>
+    </ClCompile>
+    <ClCompile Include="RayDescriptor.cpp">
+      <Filter>レイトレーシング\レイディスクリプタ</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicConstBuffer.cpp">
+      <Filter>レイトレーシング\動的定数バッファ</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h">
@@ -261,6 +282,30 @@
     <ClInclude Include="ConstBufferData.h">
       <Filter>エンジン\定数バッファ</Filter>
     </ClInclude>
+    <ClInclude Include="PorygonMeshBLAS.h">
+      <Filter>レイトレーシング\BLAS</Filter>
+    </ClInclude>
+    <ClInclude Include="PorygonInstance.h">
+      <Filter>レイトレーシング\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="InstanceIDMgr.h">
+      <Filter>レイトレーシング\Instance</Filter>
+    </ClInclude>
+    <ClInclude Include="PorygonInstanceRegister.h">
+      <Filter>レイトレーシング\InstanceRegister</Filter>
+    </ClInclude>
+    <ClInclude Include="TLAS.h">
+      <Filter>レイトレーシング\TLAS</Filter>
+    </ClInclude>
+    <ClInclude Include="RayRootsignature.h">
+      <Filter>レイトレーシング\レイトレーシングルートシグネチャ</Filter>
+    </ClInclude>
+    <ClInclude Include="RayDescriptor.h">
+      <Filter>レイトレーシング\レイディスクリプタ</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicConstBuffer.h">
+      <Filter>レイトレーシング\動的定数バッファ</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\ShaderFiles\GSParticlePS.hlsl">
@@ -399,7 +444,7 @@
       <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\triangleShaderHeader.hlsl">
-      <Filter>エンジン\シェーダー\レイトレーシング用シェーダー</Filter>
+      <Filter>レイトレーシング\シェーダー</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -588,8 +633,32 @@
     <Filter Include="エンジン\定数バッファ">
       <UniqueIdentifier>{05828882-30f8-47a2-91c2-24317500e41b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="エンジン\シェーダー\レイトレーシング用シェーダー">
-      <UniqueIdentifier>{9300465c-466d-4cd5-a854-6aaf768c72b9}</UniqueIdentifier>
+    <Filter Include="レイトレーシング">
+      <UniqueIdentifier>{53aa4391-833f-4167-8cec-2d49f0fe089e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\シェーダー">
+      <UniqueIdentifier>{834c0fb9-c8d1-4aa5-a7b7-020ecbb0e4dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\BLAS">
+      <UniqueIdentifier>{55bd6c2a-ebbe-4ab6-a212-885bb8c66649}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\Instance">
+      <UniqueIdentifier>{cdfc1d28-7ae1-4274-997d-b1bcecec08c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\InstanceRegister">
+      <UniqueIdentifier>{409860f1-33ce-4b9a-9f58-66ca542d38df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\TLAS">
+      <UniqueIdentifier>{3b69c815-aa06-4f55-b4e4-3181b72270ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\レイトレーシングルートシグネチャ">
+      <UniqueIdentifier>{2dee10ef-ae11-407f-904a-0656717c5a8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\レイディスクリプタ">
+      <UniqueIdentifier>{33b90ca8-cb92-4665-8159-fa0b92fce967}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\動的定数バッファ">
+      <UniqueIdentifier>{4ef98c17-6994-4e1a-81d4-6fe47737563d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

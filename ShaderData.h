@@ -36,7 +36,7 @@ public:
 	// シェーダーのデータを取得する処理
 	const ComPtr<ID3DBlob>& GetShaderBlob() { return shaderBlob; }
 	const ComPtr<IDxcBlob>& GetShaderBlobDXC() { return shaderBlobDxc; }
-	const vector<char>& GetShaderBin() { return shaderBin; }
+	vector<char>& GetShaderBin() { return shaderBin; }
 
 
 private:

@@ -335,7 +335,7 @@ struct ConstBufferDataMultiPath {
 //ModelDataManagerとObject3D間のデータの受け渡し用関数
 struct Object3DDeliveryData {
 	vector<Vertex> vertex;
-	vector<unsigned short> index;
+	vector<UINT> index;
 	ConstBufferDataB1 constBufferDataB1;
 };
 
