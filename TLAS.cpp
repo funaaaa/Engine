@@ -1,7 +1,8 @@
 #include "TLAS.h"
 #include "PorygonInstanceRegister.h"
+#include "DescriptorHeapMgr.h"
 
-void TLAS::GenerateTLAS()
+void TLAS::GenerateTLAS(const wchar_t* name)
 {
 
 	/*===== TLAS生成処理 =====*/
@@ -13,21 +14,34 @@ void TLAS::GenerateTLAS()
 
 	/*-- TLAS用のディスクリプタを生成する --*/
 
-	// ディスクリプタの準備。 AllocateDescriptorではディスクリプターを生成して確保しているので、既存のコードから持ってくる。
-	D3D12_DESCRIPTOR_HEAP_DESC tlasDescHeapDesc{};
-	tlasDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	tlasDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
-	tlasDescHeapDesc.NumDescriptors = 32;
-	// ディスクリプタヒープの生成
-	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateDescriptorHeap(&tlasDescHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+	// ディスクリプタヒープのインデックスを取得
+	descriptorHeapIndex = DescriptorHeapMgr::Instance()->GetHead();
+
 	// ディスクリプタヒープにSRVを確保
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.RaytracingAccelerationStructure.Location = tlasBuffer->GetGPUVirtualAddress();
-	DirectXBase::Instance()->dev->CreateShaderResourceView(nullptr, &srvDesc, descriptorHeap->GetCPUDescriptorHandleForHeapStart());
+	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Instance()->GetHead(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	DirectXBase::Instance()->dev->CreateShaderResourceView(nullptr, &srvDesc,
+		basicHeapHandle);
+
+	// ディスクリプタヒープをインクリメント
+	DescriptorHeapMgr::Instance()->IncrementHead();
 
 }
+
+//void TLAS::UpdateInstanceData()
+//{
+//
+//	// インスタンスの情報を記録したバッファを準備する。
+//	size_t sizeOfInstanceDescs = PorygonInstanceRegister::Instance()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+//
+//	// 生成したバッファにデータを書き込む。
+//	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Instance()->GetData(), sizeOfInstanceDescs);
+//
+//}
 
 void TLAS::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
 {
@@ -114,7 +128,7 @@ void TLAS::SettingAccelerationStructure()
 
 	// インスタンスの情報を記録したバッファを準備する。
 	size_t sizeOfInstanceDescs = PorygonInstanceRegister::Instance()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
-	ComPtr<ID3D12Resource> instanceDescBuffer = CreateBuffer(
+	instanceDescBuffer = CreateBuffer(
 		sizeOfInstanceDescs,
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,

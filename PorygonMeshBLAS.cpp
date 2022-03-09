@@ -1,5 +1,6 @@
 #include "PorygonMeshBLAS.h"
 #include "ModelDataManager.h"
+#include "DescriptorHeapMgr.h"
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -27,7 +28,7 @@ void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& mod
 	for (int index = 0; index < vertexCount; ++index) {
 
 		RayVertex buff{};
-		buff.color = { 1,1,1,1 };
+		buff.color = { 0.5f,0.5f,0.5f,1 };
 		buff.normal = dataBuff.vertex[index].normal;
 		buff.position = dataBuff.vertex[index].pos;
 
@@ -63,19 +64,13 @@ void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& mod
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
 	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
 
-	// ディスクリプタヒープを生成する。
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
-	descHeapDesc.NumDescriptors = 16;
-	// ディスクリプタヒープの生成。
-	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descHeap));
+	// 頂点インデックスデータでディスクリプタを生成。
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
+	DescriptorHeapMgr::Instance()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, descHeap, 0);
-
-	// 頂点インデックスデータでディスクリプタを生成。
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, descHeap, 1);
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
+	DescriptorHeapMgr::Instance()->IncrementHead();
 
 
 	/*-- BLASバッファを生成する --*/
@@ -103,7 +98,7 @@ void PorygonMeshBlas::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void
 	// マップ処理を行う。
 	void* mapped = nullptr;
 	D3D12_RANGE range{ 0, dataSize };
-	HRESULT hr = resource->Map(0, nullptr, (void**)&mapped);
+	HRESULT hr = resource->Map(0, &range, (void**)&mapped);
 
 	// マップが成功したら値を書き込む。
 	if (SUCCEEDED(hr)) {
@@ -182,10 +177,10 @@ D3D12_RAYTRACING_GEOMETRY_DESC PorygonMeshBlas::GetGeometryDesc()
 	triangles.VertexBuffer.StartAddress = vertexBuffer->GetGPUVirtualAddress();
 	triangles.VertexBuffer.StrideInBytes = vertexStride;
 	triangles.VertexCount = vertexCount;
-	//triangles.IndexBuffer = mesh.indexBuffer->GetGPUVirtualAddress();
-	//triangles.IndexCount = mesh.indexCount;
+	triangles.IndexBuffer = indexBuffer->GetGPUVirtualAddress();
+	triangles.IndexCount = indexCount;
 	triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
-	//triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
+	triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
 
 	return geometryDesc;
 

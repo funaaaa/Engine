@@ -93,6 +93,21 @@ ComPtr<ID3D12Resource> DynamicConstBuffer::CreateBuffer(size_t size, D3D12_RESOU
 		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
 	);
 
+	// 設定構造体
+	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
+	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
+	descHeapDesc.NumDescriptors = 32;										// CBV3つ
+	// ディスクリプタヒープの生成
+	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descHeap));
+
+	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		descHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+	cbvDesc.BufferLocation = resource->GetGPUVirtualAddress();
+	cbvDesc.SizeInBytes = (UINT)size;
+	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+
 	// 生成に失敗したら。
 	if (FAILED(hr)) {
 		OutputDebugStringA("CreateBuffer failed.\n");

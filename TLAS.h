@@ -8,10 +8,11 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	ComPtr<ID3D12Resource> tlasBuffer;		// TLAS用バッファ
-	ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
+	ComPtr<ID3D12Resource> tlasBuffer;			// TLAS用バッファ
+	ComPtr<ID3D12Resource> scratchBuffer;		// スクラッチバッファ
+	//ComPtr<ID3D12Resource> instanceDescBuffer;	// インスタンスバッファ
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
+	int descriptorHeapIndex;
 
 
 public:
@@ -19,11 +20,16 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// TLASの生成
-	void GenerateTLAS();
+	void GenerateTLAS(const wchar_t* name = nullptr);
 
 	// アクセッタ
 	ComPtr<ID3D12Resource> GetTLASBuffer() { return tlasBuffer; }
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& GetDescriptorHeap() { return descriptorHeap; }
+
+	// ディスクリプタヒープのインデックスのアクセッタ
+	inline const int& GetDescriptorHeapIndex() { return descriptorHeapIndex; }
+
+	// インスタンスを更新
+	//void UpdateInstanceData();
 
 
 private:

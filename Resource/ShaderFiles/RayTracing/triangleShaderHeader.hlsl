@@ -1,4 +1,6 @@
 
+//#pragma enable_d3d11_debug_symbols
+
 // 頂点情報
 struct Vertex
 {
@@ -53,6 +55,7 @@ Vertex GetHitVertex(MyAttribute attrib)
     Vertex v = (Vertex) 0;
     float3 barycentrics = CalcBarycentrics(attrib.barys);
     uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
+
     float weights[3] =
     {
         barycentrics.x, barycentrics.y, barycentrics.z
@@ -134,11 +137,12 @@ void mainMS(inout Payload payload)
 [shader("closesthit")]
 void mainCHS(inout Payload payload, MyAttribute attrib)
 {
-
     Vertex vtx = GetHitVertex(attrib);
     // Lambert ライティングを行う.
     float3 lightDir = -normalize(gSceneParam.lightDirection.xyz);
+
     float nl = saturate(dot(vtx.Normal, lightDir));
+
     float3 lightColor = gSceneParam.lightColor.xyz;
     float3 ambientColor = gSceneParam.ambientColor.xyz;
     float3 color = 0;

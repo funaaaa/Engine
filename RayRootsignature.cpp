@@ -24,11 +24,12 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shade
 	}
 	else if (type == D3D12_DESCRIPTOR_RANGE_TYPE_UAV) {
 
-		descRange[rootparamCount].Init(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, shaderRegister, 0, registerSpace);
-		rootparam[rootparamCount].InitAsDescriptorTable(shaderRegister, &descRange[rootparamCount]);
-		/*rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+		descRange[rootparamCount] = CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, shaderRegister, registerSpace);
+		rootparam[rootparamCount].InitAsDescriptorTable(1, &descRange[rootparamCount]);
+		//rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
 		rootparam[rootparamCount].Descriptor.ShaderRegister = shaderRegister;
-		rootparam[rootparamCount].Descriptor.RegisterSpace = registerSpace;*/
+		rootparam[rootparamCount].Descriptor.RegisterSpace = registerSpace;
+		rootparam[rootparamCount].DescriptorTable.NumDescriptorRanges = 1;
 
 	}
 

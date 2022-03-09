@@ -17,6 +17,7 @@
 #include "TLAS.h"
 #include "RayRootsignature.h"
 #include "DynamicConstBuffer.h"
+#include "DescriptorHeapMgr.h"
 
 #include <utilapiset.h>
 
@@ -198,7 +199,7 @@ namespace surarin {
 	UINT WriteGPUDescriptor(
 		void* dst, const D3D12_GPU_DESCRIPTOR_HANDLE* descriptor)
 	{
-		memcpy(dst, &descriptor, sizeof(descriptor));
+		memcpy(dst, descriptor, sizeof(descriptor));
 		return UINT(sizeof(descriptor));
 	}
 
@@ -242,9 +243,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	/*----------変数宣言----------*/
 	srand(time(NULL));
 
+
+	// ディスクリプタヒープを初期化。
+	DescriptorHeapMgr::Instance()->GenerateDescriptorHeap();
+
 	// コーンのBLASを生成。
-	//PorygonMeshBlas coneBlas;
-	//coneBlas.GenerateBLAS("Resource/", "cone.obj", hitGroupName);
+	PorygonMeshBlas coneBlas;
+	coneBlas.GenerateBLAS("Resource/", "cone.obj", hitGroupName);
 
 	// 猿のBLASを生成。
 	PorygonMeshBlas monkeyBlas;
@@ -253,31 +258,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 三角形のInstancecを生成。
 	vector<PorygonMeshInstance> triangleInstance;
-	triangleInstance.resize(3);
+	triangleInstance.resize(4);
 
 	// インスタンスを生成
 	triangleInstance[0].CreateInstance(monkeyBlas.GetBLASBuffer(), 0);
 	triangleInstance[1].CreateInstance(monkeyBlas.GetBLASBuffer(), 0);
 	triangleInstance[2].CreateInstance(monkeyBlas.GetBLASBuffer(), 0);
-	//triangleInstance[3].CreateInstance(monkeyBlas.GetBLASBuffer(), 0);
+	triangleInstance[3].CreateInstance(coneBlas.GetBLASBuffer(), 1);
 
 	triangleInstance[0].AddTrans(0, 0.5f, 0);
 	triangleInstance[1].AddTrans(0.5f, -0.5f, 0);
 	triangleInstance[2].AddTrans(-0.5f, -0.5f, 0);
-	//triangleInstance[3].AddTrans(0, -0.2f, 0);
+	triangleInstance[3].AddTrans(2.0, -0.2f, 0);
 
 
 	// TLASを生成。
 	TLAS tlas;
-	tlas.GenerateTLAS();
+	tlas.GenerateTLAS(L"TlasDescriptorHeap");
 
 
 	// グローバルルートシグネチャを設定。
 	RayRootsignature globalRootSig;
 	// パラメーターt0にTLAS(SRV)を設定。
 	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0);
-	// パラメーターu0に出力用バッファを設定。
+	// パラメーターb0にカメラ用バッファを設定。
 	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 0);
+	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
 	// ルートシグネチャを生成。
 	globalRootSig.Create(false, L"GlobalRootSig");
 
@@ -295,13 +301,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// RayGenerationシェーダー用ローカルルートシグネチャを生成。
 	RayRootsignature rayGenerationLocalRootSig;
 	// u0にレイトレーシング結果書き込み用バッファを設定。
-	rayGenerationLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1);
+	//rayGenerationLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
 	// ローカルルートシグネチャを生成。
 	rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
 
 
 	// シェーダーをコンパイルする。
-	ShaderStorage::Instance()->LoadShaderForDXC("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", "lib_6_3", "");
+	ShaderStorage::Instance()->LoadShaderForDXC("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", "lib_6_4", "");
 
 
 	/*==========  ステートオブジェクトの生成  ==========*/
@@ -333,19 +339,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
 	rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
 
-	// ローカルルートシグネチャの設定。ClosestHitシェーダー。
-	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-	chLocalRootSig->SetRootSignature(closestHitLocalRootSig.GetRootSig().Get());
-	auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-	chAssocModel->AddExport(hitGroupName);
-	chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
-
 	// ローカルルートシグネチャの設定。RayGenerationシェーダー。
 	auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
 	rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
 	auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
 	rgAssocModel->AddExport(L"mainRayGen");
 	rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
+
+	// ローカルルートシグネチャの設定。ClosestHitシェーダー。
+	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+	chLocalRootSig->SetRootSignature(closestHitLocalRootSig.GetRootSig().Get());
+	auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+	chAssocModel->AddExport(hitGroupName);
+	chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
 
 	// シェーダーの設定。
 	auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
@@ -362,9 +368,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateStateObject(
 		subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
 	);
+
+	stateObject->SetName(L"StateObject");
+
 	if (FAILED(resultBuff)) {
-        int a = 0;
-    }
+		int a = 0;
+	}
 
 
 	/*==========  UAV出力バッファの準備  ==========*/
@@ -377,19 +386,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		D3D12_HEAP_TYPE_DEFAULT
 	);
 
-	// ディスクリプタヒープの準備
-	D3D12_DESCRIPTOR_HEAP_DESC uavDescHeapDesc{};
-	uavDescHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	uavDescHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
-	uavDescHeapDesc.NumDescriptors = 32;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> uavDescriptor = {};
-	resultBuff = DirectXBase::Instance()->dev->CreateDescriptorHeap(&uavDescHeapDesc, IID_PPV_ARGS(&uavDescriptor));
+	// 先頭ハンドルを取得
+	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Instance()->GetHead(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	// ディスクリプタヒープにUAVを確保
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
 	DirectXBase::Instance()->dev->CreateUnorderedAccessView(
-		rayTracingOutput.Get(), nullptr, &uavDesc, uavDescriptor->GetCPUDescriptorHandleForHeapStart());
+		rayTracingOutput.Get(), nullptr, &uavDesc, basicHeapHandle);
+
+	// UAVのディスクリプタヒープのインデックスを取得
+	int uavDescriptorIndex = DescriptorHeapMgr::Instance()->GetHead();
+
+	// ディスクリプタヒープをインクリメント
+	DescriptorHeapMgr::Instance()->IncrementHead();
+
+	rayTracingOutput->SetName(L"RayTracingOutputUAV");
 
 
 
@@ -405,6 +418,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 	raygenRecordSize = surarin::RoundUp(raygenRecordSize, ShaderRecordAlignment);
 
+	// Missシェーダーではローカルルートシグネチャは未使用。
+	UINT missRecordSize = 0;
+	missRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	missRecordSize = surarin::RoundUp(missRecordSize, ShaderRecordAlignment);
+
 	// ヒットグループでは、ShaderIndentiferとローカルルートシグネチャによるVB/IB(SRV)を使用。
 	UINT hitgroupRecordSize = 0;
 	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
@@ -412,32 +430,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 	hitgroupRecordSize = surarin::RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
 
-	// Missシェーダーではローカルルートシグネチャは未使用。
-	UINT missRecordSize = 0;
-	missRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	missRecordSize = surarin::RoundUp(missRecordSize, ShaderRecordAlignment);
-
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = 1;
+	UINT hitgroupCount = 2;
 	UINT raygenSize = 1 * raygenRecordSize;
 	UINT missSize = 1 * missRecordSize;
 	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
 
 	// 各テーブルの開始位置にアライメント制約があるので調整する。
-	auto tableAlign = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
+	UINT tableAlign = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
 	UINT raygenRegion = surarin::RoundUp(raygenRecordSize, tableAlign);
-	auto missRegion = surarin::RoundUp(missSize, tableAlign);
-	auto hitgroupRegion = surarin::RoundUp(hitGroupSize, tableAlign);
+	UINT missRegion = surarin::RoundUp(missSize, tableAlign);
+	UINT hitgroupRegion = surarin::RoundUp(hitGroupSize, tableAlign);
 
 	// シェーダーテーブルのサイズ.
-	auto tableSize = raygenRegion + missRegion + hitgroupRegion;
+	UINT tableSize = raygenRegion + missRegion + hitgroupRegion;
 
 
 
 	/*========== シェーダーテーブルの構築 ==========*/
 
 	// シェーダーテーブル確保。
-	auto shaderTable = surarin::CreateBuffer(
+	ComPtr<ID3D12Resource> shaderTable = surarin::CreateBuffer(
 		tableSize, D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD,
@@ -452,18 +465,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	uint8_t* pStart = static_cast<uint8_t*>(mapped);
 
 	// RayGeneration 用のシェーダーレコードを書き込み。
-	auto rgsStart = pStart;
+	uint8_t* rgsStart = pStart;
 	{
 		uint8_t* p = rgsStart;
-		auto id = rtsoProps->GetShaderIdentifier(L"mainRayGen");
+		void* id = rtsoProps->GetShaderIdentifier(L"mainRayGen");
 		p += surarin::WriteShaderIdentifier(p, id);
 		// ローカルルートシグネチャで u0 (出力先) を設定しているため
 		// 対応するディスクリプタを書き込む。
-		p += surarin::WriteGPUDescriptor(p, &uavDescriptor->GetGPUDescriptorHandleForHeapStart());
+		//auto gpuHandle = uavDescriptor->GetGPUDescriptorHandleForHeapStart();
+		//p += surarin::WriteGPUDescriptor(p, &gpuHandle);
 	}
 
 	// Miss Shader 用のシェーダーレコードを書き込み。
-	auto missStart = pStart + raygenRegion;
+	uint8_t* missStart = pStart + raygenRegion;
 	{
 		uint8_t* p = missStart;
 		auto id = rtsoProps->GetShaderIdentifier(L"mainMS");
@@ -471,52 +485,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	// Hit Group 用のシェーダーレコードを書き込み。
-	auto hitgroupStart = pStart + raygenRegion + missRegion;
+	uint8_t* hitgroupStart = pStart + raygenRegion + missRegion;
 	{
 
 		uint8_t* pRecord = hitgroupStart;
 		// monekyに対応するシェーダーレコードを書き込む.
 		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject);
 		// cube に対応するシェーダーレコードを書き込む.
-		//pRecord = WriteShaderRecord(pRecord, m_meshCube, hitgroupRecordSize);
+		pRecord = surarin::WriteShaderRecord(pRecord, coneBlas, hitgroupRecordSize, stateObject);
 	}
 	shaderTable->Unmap(0, nullptr);
 
 
 	/*==========  D3D12_DISPATCH_RAYS_DESCの設定  ==========*/
-
-	{
-
-		//// レイトレーシングを開始する際に使用する構造体。
-		//D3D12_DISPATCH_RAYS_DESC dispatchRayDesc = {};
-
-		//// RayGenerationシェーダーのシェーダーレコードをセット。
-		//auto startAddress = shaderTable->GetGPUVirtualAddress();
-		//auto& shaderRecordRG = dispatchRayDesc.RayGenerationShaderRecord;
-		//shaderRecordRG.StartAddress = startAddress;
-		//shaderRecordRG.SizeInBytes = raygenSize;
-		//startAddress += raygenRegion;
-
-		//// Missシェーダーのシェーダーレコードをセット。
-		//auto& shaderRecordMS = dispatchRayDesc.MissShaderTable;
-		//shaderRecordMS.StartAddress = startAddress;
-		//shaderRecordMS.SizeInBytes = missSize;
-		//shaderRecordMS.StrideInBytes = recordSize;
-		//startAddress += missRegion;
-
-		//// ClosestHitシェーダーのシェーダーレコードをセット。
-		//auto& shaderRecordHG = dispatchRayDesc.HitGroupTable;
-		//shaderRecordHG.StartAddress = startAddress;
-		//shaderRecordHG.SizeInBytes = hitGroupSize;
-		//shaderRecordHG.StrideInBytes = recordSize;
-		//startAddress += hitgroupRegion;
-
-		//// レイトレースの大きさ情報をセット。
-		//dispatchRayDesc.Width = window_width;
-		//dispatchRayDesc.Height = window_height;
-		//dispatchRayDesc.Depth = 1;
-
-	}
 
 	D3D12_DISPATCH_RAYS_DESC dispatchRayDesc = {};
 
@@ -542,16 +523,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
-
 	// 仮の定数バッファを宣言
 	KariConstBufferData constBufferData;
 	constBufferData.ambientColor = { 1,1,1,1 };
 	constBufferData.lightColor = { 1,1,1,1 };
-	constBufferData.lightDirection = { 0,1,0,0 };
-	constBufferData.mtxProj = XMMatrixOrthographicOffCenterLH(0, window_width, window_height, 0, 0.01f, 100000.0f);
+	constBufferData.lightDirection = { 1,1,0,0 };
+	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
+		XMConvertToRadians(60.0f),				//画角(60度)
+		(float)window_width / window_height,	//アスペクト比
+		0.1f, 1000000.0f							//前端、奥端
+	);
 	constBufferData.mtxProjInv = XMMatrixInverse(nullptr, constBufferData.mtxProj);
 	XMFLOAT3 eye = { 0,0,-10 };
-	XMFLOAT3 target = { 0,0,10 };
+	XMFLOAT3 target = { 0,0,0 };
 	XMFLOAT3 up = { 0,1,0 };
 	constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
@@ -576,6 +560,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		//Camera::target = triangle.GetPos();
 
+		float speed = 0.1f;
+		if (Input::isKey(DIK_D)) eye.x += speed;
+		if (Input::isKey(DIK_A)) eye.x -= speed;
+		if (Input::isKey(DIK_W)) eye.y += speed;
+		if (Input::isKey(DIK_S)) eye.y -= speed;
+		if (Input::isKey(DIK_UP)) eye.z += speed;
+		if (Input::isKey(DIK_DOWN)) eye.z -= speed;
+
 
 		/*----- 描画処理 -----*/
 
@@ -583,15 +575,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Instance()->SetRenderTarget();
 
 		auto frameIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
-		// 定数バッファの中身を更新する.
+		constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+		// 定数バッファの中身を更新する。
 		constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
 		auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
-		// グローバルルートシグネチャで使うと宣言しているリソースらをセット.
-		ID3D12DescriptorHeap* descriptorHeaps[] = { tlas.GetDescriptorHeap().Get() };
+
+		// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
+		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get() };
 		DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 		DirectXBase::Instance()->cmdList->SetComputeRootSignature(globalRootSig.GetRootSig().Get());
-		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(0,tlas.GetDescriptorHeap()->GetGPUDescriptorHandleForHeapStart());
+		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 		DirectXBase::Instance()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
+		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(2, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(uavDescriptorIndex));
 
 
 		// レイトレーシング結果バッファをUAV状態へ
@@ -606,6 +602,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		DirectXBase::Instance()->cmdList->DispatchRays(&dispatchRayDesc);
 
+		// バックバッファのインデックスを取得する。
+		UINT backBufferIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
+
 		// バリアを設定し各リソースの状態を遷移させる.
 		D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
@@ -613,18 +612,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_COPY_SOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Instance()->backBuffers[DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex()].Get(),
+		DirectXBase::Instance()->backBuffers[backBufferIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_COPY_DEST),
 		};
 		DirectXBase::Instance()->cmdList->ResourceBarrier(_countof(barriers), barriers);
-		DirectXBase::Instance()->cmdList->CopyResource(DirectXBase::Instance()->backBuffers[DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex()].Get(), rayTracingOutput.Get());
+		DirectXBase::Instance()->cmdList->CopyResource(DirectXBase::Instance()->backBuffers[backBufferIndex].Get(), rayTracingOutput.Get());
 
 		// レンダーターゲットのリソースバリアをもとに戻す。
 		D3D12_RESOURCE_BARRIER endBarriers[] = {
 
 		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Instance()->backBuffers[DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex()].Get(),
+		DirectXBase::Instance()->backBuffers[backBufferIndex].Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST,
 		D3D12_RESOURCE_STATE_RENDER_TARGET)
 
@@ -667,6 +666,9 @@ void FPS()
 
 実装メモ
 
-・実行はできたが真っ暗なので、新しいGPUデバッガを使ってGPUの値を見る。
+・テクスチャを実装してみる。
+・ローカルルートシグネチャが必要かも。
+・頂点データのColorをuvにする。
+・サンプラーとかどうする？
 
 */

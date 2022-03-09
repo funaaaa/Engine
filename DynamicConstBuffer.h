@@ -9,6 +9,7 @@ private:
 	/*===== ƒƒ“ƒo•Ï” =====*/
 
 	vector<ComPtr<ID3D12Resource>> buffer;
+	ComPtr<ID3D12DescriptorHeap> descHeap;
 
 
 public:

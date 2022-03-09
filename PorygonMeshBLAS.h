@@ -29,8 +29,6 @@ private:
 	ComPtr<ID3D12Resource> blasBuffer;		// BLAS用バッファ
 	ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
 
-	ComPtr<ID3D12DescriptorHeap> descHeap;	// ディスクリプタヒープ 後々クラス化してまとめる。
-
 	UINT vertexCount;						// 頂点の数
 	UINT indexCount;						// 頂点インデックスの数
 	UINT vertexStride;						// 1頂点のデータサイズ
@@ -52,7 +50,8 @@ public:
 
 	// アクセッタ
 	ComPtr<ID3D12Resource> GetBLASBuffer() { return blasBuffer; }
-	ComPtr<ID3D12DescriptorHeap> GetDescHeap() { return descHeap; }
+	ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
+	ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer; }
 	wstring& GetHitGroupName() { return hitGroupName; }
 	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor; }
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
