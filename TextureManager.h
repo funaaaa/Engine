@@ -45,6 +45,8 @@ private:
 public:
 	//画像をロードして識別番号を返す関数、ロード済みだったら識別番号を返す。
 	int LoadTexture(LPCWSTR fileName);
+	//画像をロードして識別番号を返す関数、ロード済みだったら識別番号を返す。
+	int LoadTextureInDescriptorHeapMgr(LPCWSTR fileName);
 	//画像を生成して識別番号を返す関数
 	int CreateTexture(XMFLOAT4 color);
 	//レンダーターゲット用のテクスチャを生成して識別番号を返す関数

@@ -10,7 +10,7 @@ struct RayVertex {
 
 	XMFLOAT3 position;
 	XMFLOAT3 normal;
-	XMFLOAT4 color;
+	XMFLOAT2 uv;
 
 };
 

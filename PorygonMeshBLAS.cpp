@@ -28,9 +28,9 @@ void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& mod
 	for (int index = 0; index < vertexCount; ++index) {
 
 		RayVertex buff{};
-		buff.color = { 0.5f,0.5f,0.5f,1 };
 		buff.normal = dataBuff.vertex[index].normal;
 		buff.position = dataBuff.vertex[index].pos;
+		buff.uv = dataBuff.vertex[index].uv;
 
 		// データを保存。
 		vertex.push_back(buff);

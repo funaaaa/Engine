@@ -2,7 +2,7 @@
 #include "InstanceIDMgr.h"
 #include "PorygonInstanceRegister.h"
 
-void PorygonMeshInstance::CreateInstance(const ComPtr<ID3D12Resource>& blassBuffer, const UINT& hitGroupIndex)
+void PorygonMeshInstance::CreateInstance(const ComPtr<ID3D12Resource>& blassBuffer, const UINT& hitGroupIndex, const UINT& instanceID)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
@@ -11,7 +11,7 @@ void PorygonMeshInstance::CreateInstance(const ComPtr<ID3D12Resource>& blassBuff
 	transMat = XMMatrixIdentity();
 
 	// インスタンスIDを求める。
-	instanceID = InstanceIDMgr::Instance()->GetInstanceID();
+	//instanceID = InstanceIDMgr::Instance()->GetInstanceID();
 
 	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
 

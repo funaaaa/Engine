@@ -39,10 +39,10 @@ DirectXBase::DirectXBase() {
 void DirectXBase::Init() {
 #ifdef _DEBUG
 	//デバッグレイヤーの有効化
-	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
-	//{
-	//	debugController->EnableDebugLayer();
-	//}
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
+	{
+		debugController->EnableDebugLayer();
+	}
 #endif
 
 	//ウィンドウ初期化

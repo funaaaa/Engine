@@ -40,6 +40,22 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shade
 
 }
 
+void RayRootsignature::AddStaticSampler(const int& registerSpace) {
+
+	/*===== スタティックサンプラー追加処理 =====*/
+
+	CD3DX12_STATIC_SAMPLER_DESC buff;
+	buff.Init(0,
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR
+	);
+	buff.RegisterSpace = registerSpace;
+	buff.ShaderRegister = 0;
+	sampler[samplerCount] = buff;
+
+	++samplerCount;
+
+}
+
 void RayRootsignature::Create(const bool& isLocal, const wchar_t* name)
 {
 
@@ -49,6 +65,8 @@ void RayRootsignature::Create(const bool& isLocal, const wchar_t* name)
 	D3D12_ROOT_SIGNATURE_DESC rootSigDesc{};
 	rootSigDesc.NumParameters = rootparamCount;
 	rootSigDesc.pParameters = rootparam.data();
+	rootSigDesc.NumStaticSamplers = samplerCount;
+	rootSigDesc.pStaticSamplers = sampler.data();
 
 	// ローカルルートシグネチャのフラグが立っていたら、ローカルルートシグネチャのフラグを設定する。
 	if (isLocal) {

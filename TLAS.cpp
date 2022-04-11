@@ -43,6 +43,41 @@ void TLAS::GenerateTLAS(const wchar_t* name)
 //
 //}
 
+void TLAS::UpdateTLAS()
+{
+
+	/*===== TLASの更新処理 =====*/
+
+	//// 現在のInstanceの配列の情報を取得。
+	//UINT instanceDescSize = PorygonInstanceRegister::Instance()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+
+	//// 書き込む。
+	//WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Instance()->GetData(), instanceDescSize);
+
+	//// 更新のための値を設定。
+	//D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
+	//auto& inputs = asDesc.Inputs;
+	//inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
+	//inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+	//inputs.NumDescs = PorygonInstanceRegister::Instance()->GetRegisterSize();
+	//inputs.InstanceDescs = DirectXBase::Instance()->backBuffers[DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex()]->GetGPUVirtualAddress();
+
+	//// TLAS の更新処理を行うためのフラグを設定する.
+	//inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE | D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
+
+	//// インプレース更新を実行する.
+	//asDesc.SourceAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
+	//asDesc.DestAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
+	//// 更新用の作業バッファを設定する.
+	//asDesc.ScratchAccelerationStructureData = m_tlasUpdate->GetGPUVirtualAddress();
+	//// コマンドリストに積む.
+	//m_commandList->BuildRaytracingAccelerationStructure(&asDesc, 0,
+	//	, → nullptr);
+	//auto barrier = CD3DX12_RESOURCE_BARRIER::UAV(m_tlas.Get());
+	//m_commandList->ResourceBarrier(1, &barrier);
+
+}
+
 void TLAS::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
 {
 
@@ -142,7 +177,7 @@ void TLAS::SettingAccelerationStructure()
 	auto& inputs = buildASDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_NONE;
+	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 	inputs.NumDescs = PorygonInstanceRegister::Instance()->GetRegisterSize();
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 
@@ -151,7 +186,6 @@ void TLAS::SettingAccelerationStructure()
 	DirectXBase::Instance()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &tlasPrebuild
 	);
-
 
 	/*-- TLASバッファとスクラッチバッファを生成する --*/
 
@@ -171,6 +205,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_HEAP_TYPE_DEFAULT
 	);
 
+	tlasPrebuild.UpdateScratchDataSizeInBytes;
 
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 

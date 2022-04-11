@@ -203,7 +203,7 @@ namespace surarin {
 		return UINT(sizeof(descriptor));
 	}
 
-	uint8_t* WriteShaderRecord(uint8_t* dst, PorygonMeshBlas& mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject)
+	uint8_t* WriteShaderRecord(uint8_t* dst, PorygonMeshBlas& mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject, const int& textureHandle)
 	{
 		ComPtr<ID3D12StateObjectProperties> rtsoProps;
 		stateObject.As(&rtsoProps);
@@ -221,6 +221,7 @@ namespace surarin {
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 		dst += WriteGPUDescriptor(dst, &mesh.GetIndexDescriptor().GetGPUHandle());
 		dst += WriteGPUDescriptor(dst, &mesh.GetVertexDescriptor().GetGPUHandle());
+		dst += WriteGPUDescriptor(dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
 
 		dst = entryBegin + recordSize;
 		return dst;
@@ -255,22 +256,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	PorygonMeshBlas monkeyBlas;
 	monkeyBlas.GenerateBLAS("Resource/", "monkey.obj", hitGroupName);
 
+	// 天球のBLASを生成。
+	PorygonMeshBlas skydomeBlas;
+	skydomeBlas.GenerateBLAS("Resource/", "skydome.obj", hitGroupName);
+
+	// 球のBLASを生成。
+	PorygonMeshBlas sphereBlas;
+	sphereBlas.GenerateBLAS("Resource/", "sphere.obj", hitGroupName);
 
 	// 三角形のInstancecを生成。
 	vector<PorygonMeshInstance> triangleInstance;
-	triangleInstance.resize(4);
+	triangleInstance.resize(3);
 
 	// インスタンスを生成
-	triangleInstance[0].CreateInstance(monkeyBlas.GetBLASBuffer(), 0);
-	triangleInstance[1].CreateInstance(monkeyBlas.GetBLASBuffer(), 0);
-	triangleInstance[2].CreateInstance(monkeyBlas.GetBLASBuffer(), 0);
-	triangleInstance[3].CreateInstance(coneBlas.GetBLASBuffer(), 1);
+	triangleInstance[0].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 2);
+	triangleInstance[1].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 1);
+	triangleInstance[2].CreateInstance(skydomeBlas.GetBLASBuffer(), 2, 2);
 
-	triangleInstance[0].AddTrans(0, 0.5f, 0);
-	triangleInstance[1].AddTrans(0.5f, -0.5f, 0);
-	triangleInstance[2].AddTrans(-0.5f, -0.5f, 0);
-	triangleInstance[3].AddTrans(2.0, -0.2f, 0);
+	triangleInstance[0].AddTrans(-2.0f, 0.0f, 0);
+	triangleInstance[1].AddTrans(2.0f, 0.0f, 0);
+	triangleInstance[2].AddTrans(0.0f, 0.0f, 0);
 
+	// 背景テクスチャをロード
+	int monkeyHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/backGround.png");
+	int coneHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/cone.png");
+	int skyDomeHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/Fine_Basin.jpg");
 
 	// TLASを生成。
 	TLAS tlas;
@@ -283,7 +293,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0);
 	// パラメーターb0にカメラ用バッファを設定。
 	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 0);
+	// パラメーターu0に出力用バッファを設定。
 	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
+
 	// ルートシグネチャを生成。
 	globalRootSig.Create(false, L"GlobalRootSig");
 
@@ -294,6 +306,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0, 1);
 	// t1に頂点バッファ(SRV)を設定。
 	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+	// t2にテクスチャを設定。
+	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);
+	// サンプラーを追加。
+	closestHitLocalRootSig.AddStaticSampler(1);
 	// ローカルルートシグネチャを生成。
 	closestHitLocalRootSig.Create(true, L"ClosestHitLocalRootSig");
 
@@ -355,11 +371,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// シェーダーの設定。
 	auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-	shaderConfig->Config(sizeof(XMFLOAT3), sizeof(XMFLOAT2));
+	shaderConfig->Config(sizeof(XMFLOAT3) + sizeof(UINT), sizeof(XMFLOAT2));
 
 	// パイプラインの設定。
 	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-	pipelineConfig->Config(1);
+	pipelineConfig->Config(30);
 
 	// ステートオブジェクト
 	ComPtr<ID3D12StateObject> stateObject;
@@ -428,10 +444,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 	hitgroupRecordSize = surarin::RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
 
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = 2;
+	UINT hitgroupCount = 3;
 	UINT raygenSize = 1 * raygenRecordSize;
 	UINT missSize = 1 * missRecordSize;
 	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
@@ -489,10 +506,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	{
 
 		uint8_t* pRecord = hitgroupStart;
-		// monekyに対応するシェーダーレコードを書き込む.
-		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject);
-		// cube に対応するシェーダーレコードを書き込む.
-		pRecord = surarin::WriteShaderRecord(pRecord, coneBlas, hitgroupRecordSize, stateObject);
+		// monekyに対応するシェーダーレコードを書き込む
+		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+		// cube に対応するシェーダーレコードを書き込む
+		pRecord = surarin::WriteShaderRecord(pRecord, sphereBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+		// skydome に対応するシェーダーレコードを書き込む
+		pRecord = surarin::WriteShaderRecord(pRecord, skydomeBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
 	}
 	shaderTable->Unmap(0, nullptr);
 
@@ -666,9 +685,7 @@ void FPS()
 
 実装メモ
 
-・テクスチャを実装してみる。
-・ローカルルートシグネチャが必要かも。
-・頂点データのColorをuvにする。
-・サンプラーとかどうする？
+・クラス化を進める。
+・シェーダー周りやパイプライン、ディスパッチレイ辺りをクラスでまとめる。
 
 */
