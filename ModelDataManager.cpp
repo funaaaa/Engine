@@ -1,153 +1,155 @@
 #include "ModelDataManager.h"
+#include "Fbxsdk.h"
 #include <sstream>
 #include <fstream>
+#include <memory>
 
 vector<ModelData> ModelDataManager::modelData{};
 
-////void ModelDataManager::LoadFbx(const char* fbxFileName, Object3D& objectBuffer)
-////{
-//	////fbxファイルがロード済みかどうか
-//	//bool isLoad = false;
-//	////ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
-//	//int dataNumber = 0;
-//
-//	//for (int i = 0; i < ModelDataManager::modelData.size(); ++i) {
-//	//	if (modelData.at(i).modelName == fbxFileName) {
-//	//		isLoad = true;
-//	//		dataNumber = i;
-//	//		break;
-//	//	}
-//	//}
-//
-//	////fbxファイルが未ロードだったらロードする
-//	//if (isLoad == false) {
-//	//	ModelDataManager::modelData.push_back({});
-//	//	ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).modelName = fbxFileName;
-//
-//	//	//FbxManager作成			FbxImportやFbxSceneを作成するために必要な管理クラス
-//	//	FbxManager* fbx_manager = FbxManager::Create();
-//
-//	//	//FbxImporter作成		FbxファイルをImportするためのパーサークラス。このクラスでファイルの持つデータをメッシュやカメラなどの情報に分解してくれる。
-//	//	FbxImporter* fbx_importer = FbxImporter::Create(fbx_manager, "ImportTest");
-//
-//	//	//FbxScene作成			分解されたFbxのデータを保存するためのクラス
-//	//	FbxScene* fbx_scene = FbxScene::Create(fbx_manager, "SceneTest");
-//
-//	//	//ファイルを初期化する		ファイルをロード
-//	//	if (fbx_importer->Initialize(fbxFileName) == false)
-//	//	{
-//	//		fbx_importer->Destroy();
-//	//		fbx_scene->Destroy();
-//	//		fbx_manager->Destroy();
-//
-//	//		//初期化失敗
-//	//		return;
-//	//	}
-//
-//	//	//インポート				Importに入っている元データを分解したデータをsceneに入れる。分解処理をするので非常に処理が重い。
-//	//	if (fbx_importer->Import(fbx_scene) == false)
-//	//	{
-//	//		fbx_importer->Destroy();
-//	//		fbx_scene->Destroy();
-//	//		fbx_manager->Destroy();
-//
-//	//		//インポート失敗
-//	//		return;
-//	//	}
-//
-//	//	//ルートノードを取得		データを調べる時、ルートノードを取得すれば全てのデータにたどり着くことができる。
-//	//	FbxNode* root_node = fbx_scene->GetRootNode();
-//
-//	//	FbxGeometryConverter converter(fbx_manager);
-//	//	//ポリゴンを三角形にする		この処理は重い。
-//	//	converter.Triangulate(fbx_scene, true);
-//
-//	//	//全Mesh分割
-//	//	bool i = converter.SplitMeshesPerMaterial(fbx_scene, true);
-//
-//	//	//メッシュNodeを探す		頂点と法線のデータが含まれているeMeshを探す
-//	//	vector<pair<string, FbxMesh*>> meshList;
-//	//	CollectMeshNode(fbx_scene->GetRootNode(), meshList);
-//
-//	//	//頂点インデックスの設定		ポリゴンの数だけ連番として保存する
-//	//	int polygonCount = 0;	//まえまでのポリゴン数を保存する
-//	//	for (int i = 0; i < meshList.size(); ++i) {
-//	//		int* indices = meshList.at(i).second->GetPolygonVertices();
-//	//		int vertexCount = meshList.at(i).second->GetPolygonCount();
-//	//		for (int k = 0; k < vertexCount; k++)
-//	//		{
-//	//			//2 => 1 => 0にしてるのは左手系対策
-//	//			ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).index.push_back(k * 3 + 2);
-//	//			ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).index.push_back(k * 3 + 1);
-//	//			ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).index.push_back(k * 3);
-//
-//	//			//ついでにproSpriteにも値を入れる
-//	//			objectBuffer.index.push_back(k * 3 + 2);
-//	//			objectBuffer.index.push_back(k * 3 + 1);
-//	//			objectBuffer.index.push_back(k * 3);
-//	//		}
-//	//		polygonCount += vertexCount;
-//	//	}
-//
-//	//	//頂点の設定
-//	//	for (int i = 0; i < meshList.size(); ++i) {
-//	//		//頂点バッファを取得
-//	//		FbxVector4* vertices = meshList.at(i).second->GetControlPoints();
-//	//		//頂点座標の数の取得
-//	//		int polygon_vertex_count = meshList.at(i).second->GetPolygonVertexCount();
-//	//		//頂点インデックスバッファの取得
-//	//		int* indices = meshList.at(i).second->GetPolygonVertices();
-//	//		//uvsetの名前保存用
-//	//		FbxStringList uvset_names;
-//	//		//UVSetの名前リストを取得
-//	//		meshList.at(i).second->GetUVSetNames(uvset_names);
-//	//		FbxArray<FbxVector2> uv_buffer;
-//	//		//UVSetの名前からUVSetを取得する
-//	//		//今回はシングルなので最初の名前を使う
-//	//		meshList.at(i).second->GetPolygonVertexUVs(uvset_names.GetStringAt(0), uv_buffer);
-//	//		//法線リストの取得
-//	//		FbxArray<FbxVector4> normals;
-//	//		meshList.at(i).second->GetPolygonVertexNormals(normals);
-//
-//	//		for (int j = 0; j < polygon_vertex_count; j++)
-//	//		{
-//	//			int index = indices[j];
-//	//			Vertex vertex{};
-//	//			//頂点の設定
-//	//			XMFLOAT3 pos{};
-//	//			pos.x = (float)-vertices[index][0];
-//	//			pos.y = (float)vertices[index][1];
-//	//			pos.z = (float)vertices[index][2];
-//	//			XMVECTOR a = XMVector3Transform(XMLoadFloat3(&pos), XMMatrixRotationX(XM_PIDIV2));
-//	//			XMStoreFloat3(&vertex.pos, a);
-//	//			//vertex.pos = pos;
-//	//			//法線の設定
-//	//			XMFLOAT3 normal{};
-//	//			normal.x = -normals[j][0];
-//	//			normal.y = normals[j][1];
-//	//			normal.z = normals[j][2];
-//	//			vertex.normal = normal;
-//	//			//uvの設定
-//	//			XMFLOAT2 uv{};
-//	//			uv.x = uv_buffer[j][0];
-//	//			uv.y = -uv_buffer[j][1];
-//	//			vertex.uv = uv;
-//	//			ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).vertex.push_back(vertex);
-//	//			//ついでにproSpriteにも値を入れる
-//	//			objectBuffer.vertex.push_back(vertex);
-//	//		}
-//	//	}
-//	//	return;
-//	//}
-//
-//	////fbxのデータをproSpriteに入れる
-//	//for (int i = 0; i < modelData.at(dataNumber).index.size(); ++i) {
-//	//	objectBuffer.index.push_back(modelData.at(dataNumber).index.at(i));
-//	//}
-//	//for (int i = 0; i < modelData.at(dataNumber).vertex.size(); ++i) {
-//	//	objectBuffer.vertex.push_back(modelData.at(dataNumber).vertex.at(i));
-//	//}
-////}
+void ModelDataManager::LoadFbx(const char* fbxFileName, Object3DDeliveryData& objectBuffer)
+{
+	//fbxファイルがロード済みかどうか
+	bool isLoad = false;
+	//ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
+	int dataNumber = 0;
+
+	for (int i = 0; i < ModelDataManager::modelData.size(); ++i) {
+		if (modelData.at(i).modelName == fbxFileName) {
+			isLoad = true;
+			dataNumber = i;
+			break;
+		}
+	}
+
+	//fbxファイルが未ロードだったらロードする
+	if (isLoad == false) {
+		ModelDataManager::modelData.push_back({});
+		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).modelName = fbxFileName;
+
+		//FbxManager作成			FbxImportやFbxSceneを作成するために必要な管理クラス
+		FbxManager* fbx_manager = FbxManager::Create();
+
+		//FbxImporter作成		FbxファイルをImportするためのパーサークラス。このクラスでファイルの持つデータをメッシュやカメラなどの情報に分解してくれる。
+		FbxImporter* fbx_importer = FbxImporter::Create(fbx_manager, "ImportTest");
+
+		//FbxScene作成			分解されたFbxのデータを保存するためのクラス
+		FbxScene* fbx_scene = FbxScene::Create(fbx_manager, "SceneTest");
+
+		//ファイルを初期化する		ファイルをロード
+		if (fbx_importer->Initialize(fbxFileName) == false)
+		{
+			fbx_importer->Destroy();
+			fbx_scene->Destroy();
+			fbx_manager->Destroy();
+
+			//初期化失敗
+			return;
+		}
+
+		//インポート				Importに入っている元データを分解したデータをsceneに入れる。分解処理をするので非常に処理が重い。
+		if (fbx_importer->Import(fbx_scene) == false)
+		{
+			fbx_importer->Destroy();
+			fbx_scene->Destroy();
+			fbx_manager->Destroy();
+
+			//インポート失敗
+			return;
+		}
+
+		//ルートノードを取得		データを調べる時、ルートノードを取得すれば全てのデータにたどり着くことができる。
+		FbxNode* root_node = fbx_scene->GetRootNode();
+
+		FbxGeometryConverter converter(fbx_manager);
+		//ポリゴンを三角形にする		この処理は重い。
+		converter.Triangulate(fbx_scene, true);
+
+		//全Mesh分割
+		bool i = converter.SplitMeshesPerMaterial(fbx_scene, true);
+
+		//メッシュNodeを探す		頂点と法線のデータが含まれているeMeshを探す
+		vector<pair<string, FbxMesh*>> meshList;
+		CollectMeshNode(fbx_scene->GetRootNode(), meshList);
+
+		//頂点インデックスの設定		ポリゴンの数だけ連番として保存する
+		int polygonCount = 0;	//まえまでのポリゴン数を保存する
+		for (int i = 0; i < meshList.size(); ++i) {
+			int* indices = meshList.at(i).second->GetPolygonVertices();
+			int vertexCount = meshList.at(i).second->GetPolygonCount();
+			for (int k = 0; k < vertexCount; k++)
+			{
+				//2 => 1 => 0にしてるのは左手系対策
+				ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).index.push_back(k * 3 + 2);
+				ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).index.push_back(k * 3 + 1);
+				ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).index.push_back(k * 3);
+
+				//ついでにproSpriteにも値を入れる
+				objectBuffer.index.push_back(k * 3 + 2);
+				objectBuffer.index.push_back(k * 3 + 1);
+				objectBuffer.index.push_back(k * 3);
+			}
+			polygonCount += vertexCount;
+		}
+
+		//頂点の設定
+		for (int i = 0; i < meshList.size(); ++i) {
+			//頂点バッファを取得
+			FbxVector4* vertices = meshList.at(i).second->GetControlPoints();
+			//頂点座標の数の取得
+			int polygon_vertex_count = meshList.at(i).second->GetPolygonVertexCount();
+			//頂点インデックスバッファの取得
+			int* indices = meshList.at(i).second->GetPolygonVertices();
+			//uvsetの名前保存用
+			FbxStringList uvset_names;
+			//UVSetの名前リストを取得
+			meshList.at(i).second->GetUVSetNames(uvset_names);
+			FbxArray<FbxVector2> uv_buffer;
+			//UVSetの名前からUVSetを取得する
+			//今回はシングルなので最初の名前を使う
+			meshList.at(i).second->GetPolygonVertexUVs(uvset_names.GetStringAt(0), uv_buffer);
+			//法線リストの取得
+			FbxArray<FbxVector4> normals;
+			meshList.at(i).second->GetPolygonVertexNormals(normals);
+
+			for (int j = 0; j < polygon_vertex_count; j++)
+			{
+				int index = indices[j];
+				Vertex vertex{};
+				//頂点の設定
+				XMFLOAT3 pos{};
+				pos.x = (float)-vertices[index][0];
+				pos.y = (float)vertices[index][1];
+				pos.z = (float)vertices[index][2];
+				XMVECTOR a = XMVector3Transform(XMLoadFloat3(&pos), XMMatrixRotationX(XM_PIDIV2));
+				XMStoreFloat3(&vertex.pos, a);
+				//vertex.pos = pos;
+				//法線の設定
+				XMFLOAT3 normal{};
+				normal.x = -normals[j][0];
+				normal.y = normals[j][1];
+				normal.z = normals[j][2];
+				vertex.normal = normal;
+				//uvの設定
+				XMFLOAT2 uv{};
+				uv.x = uv_buffer[j][0];
+				uv.y = -uv_buffer[j][1];
+				vertex.uv = uv;
+				ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).vertex.push_back(vertex);
+				//ついでにproSpriteにも値を入れる
+				objectBuffer.vertex.push_back(vertex);
+			}
+		}
+		return;
+	}
+
+	//fbxのデータをproSpriteに入れる
+	for (int i = 0; i < modelData.at(dataNumber).index.size(); ++i) {
+		objectBuffer.index.push_back(modelData.at(dataNumber).index.at(i));
+	}
+	for (int i = 0; i < modelData.at(dataNumber).vertex.size(); ++i) {
+		objectBuffer.vertex.push_back(modelData.at(dataNumber).vertex.at(i));
+	}
+}
 
 void ModelDataManager::LoadObj(string directoryPath, string fileName, Object3DDeliveryData& objectBuffer, bool isSmoothing)
 {
@@ -431,29 +433,29 @@ void ModelDataManager::LoadObj(string directoryPath, string fileName, Object3DDe
 //	objectBuffer.constBuffDataB1.specular = modelData.at(dataNumber).material.specular;
 //}
 
-//void ModelDataManager::CollectMeshNode(FbxNode* node, vector<pair<string, FbxMesh*>>& list)
-//{
-//	for (int i = 0; i < node->GetNodeAttributeCount(); i++)
-//	{
-//		FbxNodeAttribute* attribute = node->GetNodeAttributeByIndex(i);
-//		int aaa = attribute->GetAttributeType();
-//
-//		// Attributeがメッシュなら追加
-//		if (attribute->GetAttributeType() == FbxNodeAttribute::EType::eMesh)
-//		{
-//			pair<string, FbxMesh*> pre;
-//			pre.first = node->GetName();
-//			pre.second = (FbxMesh*)attribute;
-//			int polygon_vertex_count = pre.second->GetPolygonVertexCount();
-//			list.push_back(pre);
-//		}
-//	}
-//
-//	for (int i = 0; i < node->GetChildCount(); i++)
-//	{
-//		CollectMeshNode(node->GetChild(i), list);
-//	}
-//}
+void ModelDataManager::CollectMeshNode(FbxNode* node, vector<pair<string, FbxMesh*>>& list)
+{
+	for (int i = 0; i < node->GetNodeAttributeCount(); i++)
+	{
+		FbxNodeAttribute* attribute = node->GetNodeAttributeByIndex(i);
+		int aaa = attribute->GetAttributeType();
+
+		// Attributeがメッシュなら追加
+		if (attribute->GetAttributeType() == FbxNodeAttribute::EType::eMesh)
+		{
+			pair<string, FbxMesh*> pre;
+			pre.first = node->GetName();
+			pre.second = (FbxMesh*)attribute;
+			int polygon_vertex_count = pre.second->GetPolygonVertexCount();
+			list.push_back(pre);
+		}
+	}
+
+	for (int i = 0; i < node->GetChildCount(); i++)
+	{
+		CollectMeshNode(node->GetChild(i), list);
+	}
+}
 
 void ModelDataManager::LoadObjMaterial(const string& materialFileName, ModelData& modelData, Object3DDeliveryData& objectBuffer)
 {

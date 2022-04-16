@@ -2,6 +2,7 @@
 #include "Struct.h"
 #include <string>
 #include <map>
+#include "Fbxsdk.h"
 
 class ModelDataManager {
 private:
@@ -9,13 +10,13 @@ private:
 
 public:
 	//fbxファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
-	//static void LoadFbx(const char* fileName, Object3D& objectBuffer);
+	static void LoadFbx(const char* fileName, Object3DDeliveryData& objectBuffer);
 
 	//objファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
 	static void LoadObj(string directoryPath, string fileName, Object3DDeliveryData& objectBuffer, bool isSmoothing);
 
 	//fbxファイルを読み込む際、すべてのノードにアクセスするための関数
-	//static void CollectMeshNode(FbxNode* node, vector<pair<string, FbxMesh*>>& list);
+	static void CollectMeshNode(FbxNode* node, vector<pair<string, FbxMesh*>>& list);
 
 	//objファイルの読み込み時にマテリアルをロードするための関数
 	static void LoadObjMaterial(const string& materialFileName, ModelData& modelData, Object3DDeliveryData& spriteData);

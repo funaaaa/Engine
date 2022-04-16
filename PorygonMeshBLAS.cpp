@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& modelName, const wstring& hitGroupName, const bool& isFbx)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -16,7 +16,14 @@ void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& mod
 	Object3DDeliveryData dataBuff;
 
 	// モデルをロード。
-	ModelDataManager::LoadObj(directryPath, modelName, dataBuff, false);
+	if (isFbx) {
+		string path = directryPath;
+		path += modelName;
+		ModelDataManager::LoadFbx(path.c_str(), dataBuff);
+	}
+	else {
+		ModelDataManager::LoadObj(directryPath, modelName, dataBuff, false);
+	}
 
 	// 頂点数を求める。
 	vertexCount = dataBuff.vertex.size();

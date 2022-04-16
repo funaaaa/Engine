@@ -46,7 +46,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// BLASの生成
-	void GenerateBLAS(const string& directryPath, const string& modelName, const wstring& hitGroupName);
+	void GenerateBLAS(const string& directryPath, const string& modelName, const wstring& hitGroupName, const bool& isFbx = false);
 
 	// アクセッタ
 	ComPtr<ID3D12Resource> GetBLASBuffer() { return blasBuffer; }

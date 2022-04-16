@@ -254,7 +254,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// ‰‚ÌBLAS‚ğ¶¬B
 	PorygonMeshBlas monkeyBlas;
-	monkeyBlas.GenerateBLAS("Resource/", "monkey.obj", hitGroupName);
+	monkeyBlas.GenerateBLAS("Resource/", "fbxMonkey.fbx", hitGroupName, true);
 
 	// “V‹…‚ÌBLAS‚ğ¶¬B
 	PorygonMeshBlas skydomeBlas;
