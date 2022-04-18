@@ -23,4 +23,8 @@ public:
 
 	//–@ü‚Ì•½‹Ï‚ğ‹‚ß‚éŠÖ”
 	static void CalculateSmoothedVertexNormals(map<unsigned short, vector<unsigned short>>& smoothData, Object3DDeliveryData& objectBuffer, ModelData& modelData);
+
+	static int GetModelCount() { return modelData.size(); }
+	static const ModelData& GetModelData(const int& index) { return modelData[index]; }
+
 };

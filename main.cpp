@@ -11,6 +11,7 @@
 #include "LightCamera.h"
 #include "Input.h"
 #include "TextureManager.h"
+#include "FbxLoader.h"
 
 #include "PorygonMeshBLAS.h"
 #include "PorygonInstance.h"
@@ -247,6 +248,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// ディスクリプタヒープを初期化。
 	DescriptorHeapMgr::Instance()->GenerateDescriptorHeap();
+
+	// FBXLoaderを初期化。
+	FbxLoader::Instance()->Init();
 
 	// コーンのBLASを生成。
 	PorygonMeshBlas coneBlas;
