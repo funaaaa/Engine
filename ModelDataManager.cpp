@@ -20,7 +20,7 @@ void ModelDataManager::LoadFbx(const char* fbxFileName, Object3DDeliveryData& ob
 			break;
 		}
 	}
-
+	
 	//fbxファイルが未ロードだったらロードする
 	if (isLoad == false) {
 		ModelDataManager::modelData.push_back({});

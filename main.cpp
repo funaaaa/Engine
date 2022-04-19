@@ -570,14 +570,76 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 #pragma endregion
 
+
+	/*===== 課題で使用する変数 =====*/
+
+	int timer = 0;						// 動き全般に使用する、始まってからどれくらいかタイマー。
+	float speedX = 0;					// X軸の移動速度。
+	float accelX = -0.8f;				// X軸の移動速度の加速度。
+	const float initialSpeedX = 50.0f;	// X軸の初速。
+	float gravity = 0;					// 重力。
+	const float GRAVITY_ACCEL = 2.0f;	// 重力加速度。
+
+	// 動かす対象の円スプライト。
+	Sprite blackCircle;
+	blackCircle.GenerateForTexture(XMFLOAT3(0, 0, 0.1f), XMFLOAT2(32.0f, 32.0f), PROJECTIONID_UI, PIPLINE_SPRITE_ALPHA, L"Resource/black.png");
+
+	static const int AFTER_IMAGE_COUNT = 30;
+	std::array<Sprite, AFTER_IMAGE_COUNT> afterImages;
+	int afterImageIndex = 0;
+	// 各スプライトを初期化
+	for (int index = 0; index < AFTER_IMAGE_COUNT; ++index) {
+		afterImages[index].GenerateForTexture(XMFLOAT3(0, 0, 0.1f), XMFLOAT2(32.0f, 32.0f), PROJECTIONID_UI, PIPLINE_SPRITE_ALPHA, L"Resource/wireBlack.png");
+		afterImages[index].SetColor({ 1.0f,1.0f,1.0f,0.9f });
+	}
+
+
 	/*----------ゲームループ----------*/
 	while (true) {
 		/*----------毎フレーム処理(描画前処理)----------*/
 		directXBase.processBeforeDrawing();
 
+		// レンダーターゲットをセット。
+		directXBase.SetRenderTarget();
 
 
 		/*----- 更新処理 -----*/
+
+		if (Input::isKeyTrigger(DIK_RETURN)) {
+
+			blackCircle.ChangePosition(0, 0, 0.1f);
+			timer = 0;
+		}
+
+		// タイマーを更新。
+		++timer;
+
+		// 移動速度を更新する。
+		speedX = initialSpeedX + accelX * timer;
+
+		// 移動速度が-にならないようにする。
+		if (speedX < 0) {
+
+			speedX = 0;
+
+		}
+
+		// 重力を求める。
+		gravity = GRAVITY_ACCEL * timer;
+
+		// 移動させる。
+		blackCircle.ChangePositionAdd(speedX, gravity, 0);
+
+		// 残像用のインデックスを更新。
+		if (afterImageIndex < AFTER_IMAGE_COUNT) {
+
+			// 残像用に座標を保存。
+			afterImages[afterImageIndex].ChangePosition(blackCircle.GetPos());
+
+			++afterImageIndex;
+
+		}
+
 
 		// ビュー行列を生成。
 		Camera::GenerateMatView();
@@ -659,6 +721,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//DirectXBase::Instance()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
 
 #pragma endregion
+
+		// 黒丸の残像を描画。
+		for (int index = 0; index < AFTER_IMAGE_COUNT; ++index) {
+			afterImages[index].Draw();
+		}
+
+		// 黒丸を描画。
+		blackCircle.Draw();
 
 		directXBase.processAfterDrawing();
 

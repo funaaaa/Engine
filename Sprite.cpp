@@ -56,7 +56,7 @@ void Sprite::CommonGenerate(XMFLOAT3 centerPos, XMFLOAT2 size, int projectionID,
 	);
 
 	//s—ñ‚ð‰Šú‰»
-	projectionID = projectionID;
+	this->projectionID = projectionID;
 	rotationMat = XMMatrixIdentity();
 	scaleMat = XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	positionMat = XMMatrixTranslation(centerPos.x, centerPos.y, centerPos.z);
