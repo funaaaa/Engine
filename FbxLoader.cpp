@@ -13,14 +13,14 @@ void FbxLoader::Init()
 	assert(fbxMgr == nullptr);
 
 	// Fbxマネージャーを生成。
-	fbxMgr = std::make_unique<FbxManager>((FbxManager::Create()));
+	fbxMgr = FbxManager::Create();
 
 	// Fbxマネージャーの入出力設定
-	std::unique_ptr<FbxIOSettings> ios = std::make_unique<FbxIOSettings>(FbxIOSettings::Create(fbxMgr.get(), IOSROOT));
-	fbxMgr->SetIOSettings(ios.get());
+	FbxIOSettings* ios = FbxIOSettings::Create(fbxMgr, IOSROOT);
+	fbxMgr->SetIOSettings(ios);
 
 	// Fbxインポータの生成
-	fbxImporter = std::make_unique<FbxImporter>(FbxImporter::Create(fbxMgr.get(), ""));
+	fbxImporter = FbxImporter::Create(fbxMgr, "");
 
 }
 
@@ -44,10 +44,10 @@ void FbxLoader::LoadModelFromFile(const string& directryPath, const string& mode
 	}
 
 	// シーンを生成。
-	std::shared_ptr<FbxScene> fbxScene = std::make_unique<FbxScene>(FbxScene::Create(fbxMgr.get(), "fbxScene"));
+	FbxScene* fbxScene = FbxScene::Create(fbxMgr, "fbxScene");
 
 	// ファイルからロードしたFBXの情報をシーンにインポート。
-	fbxImporter->Import(fbxScene.get());
+	fbxImporter->Import(fbxScene);
 
 	// モデルを生成。
 	FbxModel modelData;
@@ -116,7 +116,7 @@ void FbxLoader::ParseNodeRecursive(FbxModel& Model, FbxNode* InputFbxNode, Node*
 	}
 
 	// FBXノードのメッシュ情報を解析
-	std::unique_ptr<FbxNodeAttribute> fbxNodeAttribute = std::make_unique<FbxNodeAttribute>(InputFbxNode->GetNodeAttribute());
+	FbxNodeAttribute* fbxNodeAttribute = InputFbxNode->GetNodeAttribute();
 
 	if (fbxNodeAttribute) {
 
@@ -143,12 +143,12 @@ void FbxLoader::parseMesh(FbxModel& Model, FbxNode* InputFbxNode)
 	/*===== メッシュの読み取り =====*/
 
 	// ノードのメッシュを取得。
-	std::unique_ptr<FbxMesh> fbxMesh = std::make_unique<FbxMesh>(InputFbxNode->GetMesh());
+	FbxMesh* fbxMesh = InputFbxNode->GetMesh();
 
 	// 頂点情報読み取り。
-	ParseMeshVertices(Model, fbxMesh.get());
+	ParseMeshVertices(Model, fbxMesh);
 	// 面を構成するデータの読み取り。
-	ParseMeshFaces(Model, fbxMesh.get());
+	ParseMeshFaces(Model, fbxMesh);
 	// マテリアルの読み取り。
 	ParseMeshMaterial(Model, InputFbxNode);
 
@@ -172,7 +172,7 @@ void FbxLoader::ParseMeshVertices(FbxModel& Model, FbxMesh* InputFbxMesh)
 	FbxVector4* pCoord = InputFbxMesh->GetControlPoints();
 
 	// FBXメッシュの全頂点座標をモデル内の配列にコピーする。
-	for(int index = 0; index < controlPointsCount; ++index){
+	for (int index = 0; index < controlPointsCount; ++index) {
 
 		FbxModel::VertexPosNormalUv& vertex = vertices[index];
 

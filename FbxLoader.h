@@ -41,7 +41,7 @@ public:
 	};
 
 	// メッシュを持つノード
-	std::weak_ptr<Node> meshNode;
+	Node* meshNode;
 	// 頂点データ配列
 	std::vector<VertexPosNormalUv> vertices;
 	// 頂点インデックス配列
@@ -64,8 +64,8 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::unique_ptr<FbxManager> fbxMgr;
-	std::unique_ptr<FbxImporter> fbxImporter;
+	FbxManager* fbxMgr;
+	FbxImporter* fbxImporter;
 
 
 private:
