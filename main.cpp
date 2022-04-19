@@ -43,7 +43,7 @@ struct KariConstBufferData {
 
 };
 
-// スラリンラボから持ってきた関数
+// スラリンラボから持ってきた関数 組み込み予定
 namespace surarin {
 
 	void WriteToHostVisibleMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize) {
@@ -246,326 +246,329 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	srand(time(NULL));
 
 
-	// ディスクリプタヒープを初期化。
-	DescriptorHeapMgr::Instance()->GenerateDescriptorHeap();
-
-	// FBXLoaderを初期化。
-	FbxLoader::Instance()->Init();
-
-	// コーンのBLASを生成。
-	PorygonMeshBlas coneBlas;
-	coneBlas.GenerateBLAS("Resource/", "cone.obj", hitGroupName);
-
-	// 猿のBLASを生成。
-	PorygonMeshBlas monkeyBlas;
-	monkeyBlas.GenerateBLAS("Resource/", "fbxMonkey.fbx", hitGroupName, true);
-
-	// 天球のBLASを生成。
-	PorygonMeshBlas skydomeBlas;
-	skydomeBlas.GenerateBLAS("Resource/", "skydome.obj", hitGroupName);
-
-	// 球のBLASを生成。
-	PorygonMeshBlas sphereBlas;
-	sphereBlas.GenerateBLAS("Resource/", "sphere.obj", hitGroupName);
-
-	// 三角形のInstancecを生成。
-	vector<PorygonMeshInstance> triangleInstance;
-	triangleInstance.resize(3);
-
-	// インスタンスを生成
-	triangleInstance[0].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 2);
-	triangleInstance[1].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 1);
-	triangleInstance[2].CreateInstance(skydomeBlas.GetBLASBuffer(), 2, 2);
-
-	triangleInstance[0].AddTrans(-2.0f, 0.0f, 0);
-	triangleInstance[1].AddTrans(2.0f, 0.0f, 0);
-	triangleInstance[2].AddTrans(0.0f, 0.0f, 0);
-
-	// 背景テクスチャをロード
-	int monkeyHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/backGround.png");
-	int coneHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/cone.png");
-	int skyDomeHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/Fine_Basin.jpg");
-
-	// TLASを生成。
-	TLAS tlas;
-	tlas.GenerateTLAS(L"TlasDescriptorHeap");
-
-
-	// グローバルルートシグネチャを設定。
-	RayRootsignature globalRootSig;
-	// パラメーターt0にTLAS(SRV)を設定。
-	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0);
-	// パラメーターb0にカメラ用バッファを設定。
-	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 0);
-	// パラメーターu0に出力用バッファを設定。
-	globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
-
-	// ルートシグネチャを生成。
-	globalRootSig.Create(false, L"GlobalRootSig");
-
-
-	// ClosestHitシェーダー用のローカルルートシグネチャを生成。
-	RayRootsignature closestHitLocalRootSig;
-	// t0にインデックスバッファ(SRV)を設定。
-	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0, 1);
-	// t1に頂点バッファ(SRV)を設定。
-	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
-	// t2にテクスチャを設定。
-	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);
-	// サンプラーを追加。
-	closestHitLocalRootSig.AddStaticSampler(1);
-	// ローカルルートシグネチャを生成。
-	closestHitLocalRootSig.Create(true, L"ClosestHitLocalRootSig");
-
-
-	// RayGenerationシェーダー用ローカルルートシグネチャを生成。
-	RayRootsignature rayGenerationLocalRootSig;
-	// u0にレイトレーシング結果書き込み用バッファを設定。
-	//rayGenerationLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
-	// ローカルルートシグネチャを生成。
-	rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
-
-
-	// シェーダーをコンパイルする。
-	ShaderStorage::Instance()->LoadShaderForDXC("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", "lib_6_4", "");
+#pragma region comment out
+
+	//// ディスクリプタヒープを初期化。
+	//DescriptorHeapMgr::Instance()->GenerateDescriptorHeap();
+
+	//// FBXLoaderを初期化。
+	//FbxLoader::Instance()->Init();
+
+	//// コーンのBLASを生成。
+	//PorygonMeshBlas coneBlas;
+	//coneBlas.GenerateBLAS("Resource/", "cone.obj", hitGroupName);
+
+	//// 猿のBLASを生成。
+	//PorygonMeshBlas monkeyBlas;
+	//monkeyBlas.GenerateBLAS("Resource/", "fbxMonkey.fbx", hitGroupName, true);
+
+	//// 天球のBLASを生成。
+	//PorygonMeshBlas skydomeBlas;
+	//skydomeBlas.GenerateBLAS("Resource/", "skydome.obj", hitGroupName);
+
+	//// 球のBLASを生成。
+	//PorygonMeshBlas sphereBlas;
+	//sphereBlas.GenerateBLAS("Resource/", "sphere.obj", hitGroupName);
+
+	//// 三角形のInstancecを生成。
+	//vector<PorygonMeshInstance> triangleInstance;
+	//triangleInstance.resize(3);
+
+	//// インスタンスを生成
+	//triangleInstance[0].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 2);
+	//triangleInstance[1].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 1);
+	//triangleInstance[2].CreateInstance(skydomeBlas.GetBLASBuffer(), 2, 2);
+
+	//triangleInstance[0].AddTrans(-2.0f, 0.0f, 0);
+	//triangleInstance[1].AddTrans(2.0f, 0.0f, 0);
+	//triangleInstance[2].AddTrans(0.0f, 0.0f, 0);
+
+	//// 背景テクスチャをロード
+	//int monkeyHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/backGround.png");
+	//int coneHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/cone.png");
+	//int skyDomeHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/Fine_Basin.jpg");
+
+	//// TLASを生成。
+	//TLAS tlas;
+	//tlas.GenerateTLAS(L"TlasDescriptorHeap");
+
+
+	//// グローバルルートシグネチャを設定。
+	//RayRootsignature globalRootSig;
+	//// パラメーターt0にTLAS(SRV)を設定。
+	//globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0);
+	//// パラメーターb0にカメラ用バッファを設定。
+	//globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 0);
+	//// パラメーターu0に出力用バッファを設定。
+	//globalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
+
+	//// ルートシグネチャを生成。
+	//globalRootSig.Create(false, L"GlobalRootSig");
+
+
+	//// ClosestHitシェーダー用のローカルルートシグネチャを生成。
+	//RayRootsignature closestHitLocalRootSig;
+	//// t0にインデックスバッファ(SRV)を設定。
+	//closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0, 1);
+	//// t1に頂点バッファ(SRV)を設定。
+	//closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+	//// t2にテクスチャを設定。
+	//closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);
+	//// サンプラーを追加。
+	//closestHitLocalRootSig.AddStaticSampler(1);
+	//// ローカルルートシグネチャを生成。
+	//closestHitLocalRootSig.Create(true, L"ClosestHitLocalRootSig");
+
+
+	//// RayGenerationシェーダー用ローカルルートシグネチャを生成。
+	//RayRootsignature rayGenerationLocalRootSig;
+	//// u0にレイトレーシング結果書き込み用バッファを設定。
+	////rayGenerationLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
+	//// ローカルルートシグネチャを生成。
+	//rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
+
+
+	//// シェーダーをコンパイルする。
+	//ShaderStorage::Instance()->LoadShaderForDXC("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", "lib_6_4", "");
 
 
-	/*==========  ステートオブジェクトの生成  ==========*/
+	///*==========  ステートオブジェクトの生成  ==========*/
 
-	// ステートオブジェクトの設定を保存しておくようの構造体。
-	CD3DX12_STATE_OBJECT_DESC subobjects;
-	// ステートオブジェクトの状態を設定。
-	subobjects.SetStateObjectType(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
+	//// ステートオブジェクトの設定を保存しておくようの構造体。
+	//CD3DX12_STATE_OBJECT_DESC subobjects;
+	//// ステートオブジェクトの状態を設定。
+	//subobjects.SetStateObjectType(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
-	// シェーダーの情報を保存する用の変数。
-	D3D12_SHADER_BYTECODE shadercode = {};
-	shadercode.BytecodeLength = ShaderStorage::Instance()->GetShaderBin("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl").size();
-	shadercode.pShaderBytecode = ShaderStorage::Instance()->GetShaderBin("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl").data();
+	//// シェーダーの情報を保存する用の変数。
+	//D3D12_SHADER_BYTECODE shadercode = {};
+	//shadercode.BytecodeLength = ShaderStorage::Instance()->GetShaderBin("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl").size();
+	//shadercode.pShaderBytecode = ShaderStorage::Instance()->GetShaderBin("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl").data();
 
-	// シェーダーの各関数レコードの登録。
-	auto dxilLib = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
-	dxilLib->SetDXILLibrary(&shadercode);
-	dxilLib->DefineExport(L"mainRayGen");
-	dxilLib->DefineExport(L"mainMS");
-	dxilLib->DefineExport(L"mainCHS");
+	//// シェーダーの各関数レコードの登録。
+	//auto dxilLib = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
+	//dxilLib->SetDXILLibrary(&shadercode);
+	//dxilLib->DefineExport(L"mainRayGen");
+	//dxilLib->DefineExport(L"mainMS");
+	//dxilLib->DefineExport(L"mainCHS");
 
-	// ヒットグループの設定。
-	auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
-	hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
-	hitGroup->SetClosestHitShaderImport(L"mainCHS");
-	hitGroup->SetHitGroupExport(hitGroupName);
+	//// ヒットグループの設定。
+	//auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+	//hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
+	//hitGroup->SetClosestHitShaderImport(L"mainCHS");
+	//hitGroup->SetHitGroupExport(hitGroupName);
 
-	// グローバルルートシグネチャの設定。
-	auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
-	rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
+	//// グローバルルートシグネチャの設定。
+	//auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
+	//rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
 
-	// ローカルルートシグネチャの設定。RayGenerationシェーダー。
-	auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-	rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
-	auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-	rgAssocModel->AddExport(L"mainRayGen");
-	rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
+	//// ローカルルートシグネチャの設定。RayGenerationシェーダー。
+	//auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+	//rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
+	//auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+	//rgAssocModel->AddExport(L"mainRayGen");
+	//rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
+
+	//// ローカルルートシグネチャの設定。ClosestHitシェーダー。
+	//auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+	//chLocalRootSig->SetRootSignature(closestHitLocalRootSig.GetRootSig().Get());
+	//auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+	//chAssocModel->AddExport(hitGroupName);
+	//chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
 
-	// ローカルルートシグネチャの設定。ClosestHitシェーダー。
-	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-	chLocalRootSig->SetRootSignature(closestHitLocalRootSig.GetRootSig().Get());
-	auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-	chAssocModel->AddExport(hitGroupName);
-	chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
+	//// シェーダーの設定。
+	//auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
+	//shaderConfig->Config(sizeof(XMFLOAT3) + sizeof(UINT), sizeof(XMFLOAT2));
 
-	// シェーダーの設定。
-	auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-	shaderConfig->Config(sizeof(XMFLOAT3) + sizeof(UINT), sizeof(XMFLOAT2));
+	//// パイプラインの設定。
+	//auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
+	//pipelineConfig->Config(30);
 
-	// パイプラインの設定。
-	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-	pipelineConfig->Config(30);
+	//// ステートオブジェクト
+	//ComPtr<ID3D12StateObject> stateObject;
 
-	// ステートオブジェクト
-	ComPtr<ID3D12StateObject> stateObject;
+	//// 生成する。
+	//HRESULT resultBuff = DirectXBase::Instance()->dev->CreateStateObject(
+	//	subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
+	//);
 
-	// 生成する。
-	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateStateObject(
-		subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
-	);
+	//stateObject->SetName(L"StateObject");
 
-	stateObject->SetName(L"StateObject");
-
-	if (FAILED(resultBuff)) {
-		int a = 0;
-	}
-
-
-	/*==========  UAV出力バッファの準備  ==========*/
-
-	// UAVを設定
-	ComPtr<ID3D12Resource> rayTracingOutput = surarin::CreateTexture2D(
-		window_width, window_height, DXGI_FORMAT_R8G8B8A8_UNORM,
-		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE,
-		D3D12_HEAP_TYPE_DEFAULT
-	);
-
-	// 先頭ハンドルを取得
-	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Instance()->GetHead(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-
-	// ディスクリプタヒープにUAVを確保
-	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
-	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-	DirectXBase::Instance()->dev->CreateUnorderedAccessView(
-		rayTracingOutput.Get(), nullptr, &uavDesc, basicHeapHandle);
-
-	// UAVのディスクリプタヒープのインデックスを取得
-	int uavDescriptorIndex = DescriptorHeapMgr::Instance()->GetHead();
-
-	// ディスクリプタヒープをインクリメント
-	DescriptorHeapMgr::Instance()->IncrementHead();
-
-	rayTracingOutput->SetName(L"RayTracingOutputUAV");
-
-
-
-
-
-	/*==========  ShaderTableの生成  ==========*/
-
-	const auto ShaderRecordAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
-
-	// RayGenerationシェーダーでは、ShaderIndentiferとローカルルートシグネチャによるu0ディスクリプタを使用。
-	UINT raygenRecordSize = 0;
-	raygenRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
-	raygenRecordSize = surarin::RoundUp(raygenRecordSize, ShaderRecordAlignment);
-
-	// Missシェーダーではローカルルートシグネチャは未使用。
-	UINT missRecordSize = 0;
-	missRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	missRecordSize = surarin::RoundUp(missRecordSize, ShaderRecordAlignment);
-
-	// ヒットグループでは、ShaderIndentiferとローカルルートシグネチャによるVB/IB(SRV)を使用。
-	UINT hitgroupRecordSize = 0;
-	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
-	hitgroupRecordSize = surarin::RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
-
-	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = 3;
-	UINT raygenSize = 1 * raygenRecordSize;
-	UINT missSize = 1 * missRecordSize;
-	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
-
-	// 各テーブルの開始位置にアライメント制約があるので調整する。
-	UINT tableAlign = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-	UINT raygenRegion = surarin::RoundUp(raygenRecordSize, tableAlign);
-	UINT missRegion = surarin::RoundUp(missSize, tableAlign);
-	UINT hitgroupRegion = surarin::RoundUp(hitGroupSize, tableAlign);
-
-	// シェーダーテーブルのサイズ.
-	UINT tableSize = raygenRegion + missRegion + hitgroupRegion;
-
-
-
-	/*========== シェーダーテーブルの構築 ==========*/
-
-	// シェーダーテーブル確保。
-	ComPtr<ID3D12Resource> shaderTable = surarin::CreateBuffer(
-		tableSize, D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		D3D12_HEAP_TYPE_UPLOAD,
-		L"ShaderTable");
-
-	ComPtr<ID3D12StateObjectProperties> rtsoProps;
-	stateObject.As(&rtsoProps);
-
-	// 各シェーダーレコードを書き込んでいく。
-	void* mapped = nullptr;
-	shaderTable->Map(0, nullptr, &mapped);
-	uint8_t* pStart = static_cast<uint8_t*>(mapped);
-
-	// RayGeneration 用のシェーダーレコードを書き込み。
-	uint8_t* rgsStart = pStart;
-	{
-		uint8_t* p = rgsStart;
-		void* id = rtsoProps->GetShaderIdentifier(L"mainRayGen");
-		p += surarin::WriteShaderIdentifier(p, id);
-		// ローカルルートシグネチャで u0 (出力先) を設定しているため
-		// 対応するディスクリプタを書き込む。
-		//auto gpuHandle = uavDescriptor->GetGPUDescriptorHandleForHeapStart();
-		//p += surarin::WriteGPUDescriptor(p, &gpuHandle);
-	}
-
-	// Miss Shader 用のシェーダーレコードを書き込み。
-	uint8_t* missStart = pStart + raygenRegion;
-	{
-		uint8_t* p = missStart;
-		auto id = rtsoProps->GetShaderIdentifier(L"mainMS");
-		p += surarin::WriteShaderIdentifier(p, id);
-	}
-
-	// Hit Group 用のシェーダーレコードを書き込み。
-	uint8_t* hitgroupStart = pStart + raygenRegion + missRegion;
-	{
-
-		uint8_t* pRecord = hitgroupStart;
-		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject, monkeyHandle);
-		// cube に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, sphereBlas, hitgroupRecordSize, stateObject, monkeyHandle);
-		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, skydomeBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
-	}
-	shaderTable->Unmap(0, nullptr);
-
-
-	/*==========  D3D12_DISPATCH_RAYS_DESCの設定  ==========*/
-
-	D3D12_DISPATCH_RAYS_DESC dispatchRayDesc = {};
-
-	// DispatchRays のために情報をセットしておく.
-	auto startAddress = shaderTable->GetGPUVirtualAddress();
-	auto& shaderRecordRG = dispatchRayDesc.RayGenerationShaderRecord;
-	shaderRecordRG.StartAddress = startAddress;
-	shaderRecordRG.SizeInBytes = raygenSize;
-	startAddress += raygenRegion;
-	auto& shaderRecordMS = dispatchRayDesc.MissShaderTable;
-	shaderRecordMS.StartAddress = startAddress;
-	shaderRecordMS.SizeInBytes = missSize;
-	shaderRecordMS.StrideInBytes = missRecordSize;
-	startAddress += missRegion;
-	auto& shaderRecordHG = dispatchRayDesc.HitGroupTable;
-	shaderRecordHG.StartAddress = startAddress;
-	shaderRecordHG.SizeInBytes = hitGroupSize;
-	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
-	startAddress += hitgroupRegion;
-	dispatchRayDesc.Width = window_width;
-	dispatchRayDesc.Height = window_height;
-	dispatchRayDesc.Depth = 1;
-
-
-
-	// 仮の定数バッファを宣言
-	KariConstBufferData constBufferData;
-	constBufferData.ambientColor = { 1,1,1,1 };
-	constBufferData.lightColor = { 1,1,1,1 };
-	constBufferData.lightDirection = { 1,1,0,0 };
-	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
-		XMConvertToRadians(60.0f),				//画角(60度)
-		(float)window_width / window_height,	//アスペクト比
-		0.1f, 1000000.0f							//前端、奥端
-	);
-	constBufferData.mtxProjInv = XMMatrixInverse(nullptr, constBufferData.mtxProj);
-	XMFLOAT3 eye = { 0,0,-10 };
-	XMFLOAT3 target = { 0,0,0 };
-	XMFLOAT3 up = { 0,1,0 };
-	constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
-
-	DynamicConstBuffer constBuff;
-	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
-
+	//if (FAILED(resultBuff)) {
+	//	int a = 0;
+	//}
+
+
+	///*==========  UAV出力バッファの準備  ==========*/
+
+	//// UAVを設定
+	//ComPtr<ID3D12Resource> rayTracingOutput = surarin::CreateTexture2D(
+	//	window_width, window_height, DXGI_FORMAT_R8G8B8A8_UNORM,
+	//	D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
+	//	D3D12_RESOURCE_STATE_COPY_SOURCE,
+	//	D3D12_HEAP_TYPE_DEFAULT
+	//);
+
+	//// 先頭ハンドルを取得
+	//CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+	//	DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Instance()->GetHead(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+
+	//// ディスクリプタヒープにUAVを確保
+	//D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+	//uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+	//DirectXBase::Instance()->dev->CreateUnorderedAccessView(
+	//	rayTracingOutput.Get(), nullptr, &uavDesc, basicHeapHandle);
+
+	//// UAVのディスクリプタヒープのインデックスを取得
+	//int uavDescriptorIndex = DescriptorHeapMgr::Instance()->GetHead();
+
+	//// ディスクリプタヒープをインクリメント
+	//DescriptorHeapMgr::Instance()->IncrementHead();
+
+	//rayTracingOutput->SetName(L"RayTracingOutputUAV");
+
+
+
+
+
+	///*==========  ShaderTableの生成  ==========*/
+
+	//const auto ShaderRecordAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
+
+	//// RayGenerationシェーダーでは、ShaderIndentiferとローカルルートシグネチャによるu0ディスクリプタを使用。
+	//UINT raygenRecordSize = 0;
+	//raygenRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	//raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	//raygenRecordSize = surarin::RoundUp(raygenRecordSize, ShaderRecordAlignment);
+
+	//// Missシェーダーではローカルルートシグネチャは未使用。
+	//UINT missRecordSize = 0;
+	//missRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	//missRecordSize = surarin::RoundUp(missRecordSize, ShaderRecordAlignment);
+
+	//// ヒットグループでは、ShaderIndentiferとローカルルートシグネチャによるVB/IB(SRV)を使用。
+	//UINT hitgroupRecordSize = 0;
+	//hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	//hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	//hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	//hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	//hitgroupRecordSize = surarin::RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
+
+	//// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
+	//UINT hitgroupCount = 3;
+	//UINT raygenSize = 1 * raygenRecordSize;
+	//UINT missSize = 1 * missRecordSize;
+	//UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
+
+	//// 各テーブルの開始位置にアライメント制約があるので調整する。
+	//UINT tableAlign = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
+	//UINT raygenRegion = surarin::RoundUp(raygenRecordSize, tableAlign);
+	//UINT missRegion = surarin::RoundUp(missSize, tableAlign);
+	//UINT hitgroupRegion = surarin::RoundUp(hitGroupSize, tableAlign);
+
+	//// シェーダーテーブルのサイズ.
+	//UINT tableSize = raygenRegion + missRegion + hitgroupRegion;
+
+
+
+	///*========== シェーダーテーブルの構築 ==========*/
+
+	//// シェーダーテーブル確保。
+	//ComPtr<ID3D12Resource> shaderTable = surarin::CreateBuffer(
+	//	tableSize, D3D12_RESOURCE_FLAG_NONE,
+	//	D3D12_RESOURCE_STATE_GENERIC_READ,
+	//	D3D12_HEAP_TYPE_UPLOAD,
+	//	L"ShaderTable");
+
+	//ComPtr<ID3D12StateObjectProperties> rtsoProps;
+	//stateObject.As(&rtsoProps);
+
+	//// 各シェーダーレコードを書き込んでいく。
+	//void* mapped = nullptr;
+	//shaderTable->Map(0, nullptr, &mapped);
+	//uint8_t* pStart = static_cast<uint8_t*>(mapped);
+
+	//// RayGeneration 用のシェーダーレコードを書き込み。
+	//uint8_t* rgsStart = pStart;
+	//{
+	//	uint8_t* p = rgsStart;
+	//	void* id = rtsoProps->GetShaderIdentifier(L"mainRayGen");
+	//	p += surarin::WriteShaderIdentifier(p, id);
+	//	// ローカルルートシグネチャで u0 (出力先) を設定しているため
+	//	// 対応するディスクリプタを書き込む。
+	//	//auto gpuHandle = uavDescriptor->GetGPUDescriptorHandleForHeapStart();
+	//	//p += surarin::WriteGPUDescriptor(p, &gpuHandle);
+	//}
+
+	//// Miss Shader 用のシェーダーレコードを書き込み。
+	//uint8_t* missStart = pStart + raygenRegion;
+	//{
+	//	uint8_t* p = missStart;
+	//	auto id = rtsoProps->GetShaderIdentifier(L"mainMS");
+	//	p += surarin::WriteShaderIdentifier(p, id);
+	//}
+
+	//// Hit Group 用のシェーダーレコードを書き込み。
+	//uint8_t* hitgroupStart = pStart + raygenRegion + missRegion;
+	//{
+
+	//	uint8_t* pRecord = hitgroupStart;
+	//	// monekyに対応するシェーダーレコードを書き込む
+	//	pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+	//	// cube に対応するシェーダーレコードを書き込む
+	//	pRecord = surarin::WriteShaderRecord(pRecord, sphereBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+	//	// skydome に対応するシェーダーレコードを書き込む
+	//	pRecord = surarin::WriteShaderRecord(pRecord, skydomeBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
+	//}
+	//shaderTable->Unmap(0, nullptr);
+
+
+	///*==========  D3D12_DISPATCH_RAYS_DESCの設定  ==========*/
+
+	//D3D12_DISPATCH_RAYS_DESC dispatchRayDesc = {};
+
+	//// DispatchRays のために情報をセットしておく.
+	//auto startAddress = shaderTable->GetGPUVirtualAddress();
+	//auto& shaderRecordRG = dispatchRayDesc.RayGenerationShaderRecord;
+	//shaderRecordRG.StartAddress = startAddress;
+	//shaderRecordRG.SizeInBytes = raygenSize;
+	//startAddress += raygenRegion;
+	//auto& shaderRecordMS = dispatchRayDesc.MissShaderTable;
+	//shaderRecordMS.StartAddress = startAddress;
+	//shaderRecordMS.SizeInBytes = missSize;
+	//shaderRecordMS.StrideInBytes = missRecordSize;
+	//startAddress += missRegion;
+	//auto& shaderRecordHG = dispatchRayDesc.HitGroupTable;
+	//shaderRecordHG.StartAddress = startAddress;
+	//shaderRecordHG.SizeInBytes = hitGroupSize;
+	//shaderRecordHG.StrideInBytes = hitgroupRecordSize;
+	//startAddress += hitgroupRegion;
+	//dispatchRayDesc.Width = window_width;
+	//dispatchRayDesc.Height = window_height;
+	//dispatchRayDesc.Depth = 1;
+
+
+
+	//// 仮の定数バッファを宣言
+	//KariConstBufferData constBufferData;
+	//constBufferData.ambientColor = { 1,1,1,1 };
+	//constBufferData.lightColor = { 1,1,1,1 };
+	//constBufferData.lightDirection = { 1,1,0,0 };
+	//constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
+	//	XMConvertToRadians(60.0f),				//画角(60度)
+	//	(float)window_width / window_height,	//アスペクト比
+	//	0.1f, 1000000.0f							//前端、奥端
+	//);
+	//constBufferData.mtxProjInv = XMMatrixInverse(nullptr, constBufferData.mtxProj);
+	//XMFLOAT3 eye = { 0,0,-10 };
+	//XMFLOAT3 target = { 0,0,0 };
+	//XMFLOAT3 up = { 0,1,0 };
+	//constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+	//constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+
+	//DynamicConstBuffer constBuff;
+	//constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
+
+#pragma endregion
 
 	/*----------ゲームループ----------*/
 	while (true) {
@@ -579,79 +582,83 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// ビュー行列を生成。
 		Camera::GenerateMatView();
 
-		FPS();
+		//FPS();
 
 		//Camera::target = triangle.GetPos();
 
-		float speed = 0.1f;
-		if (Input::isKey(DIK_D)) eye.x += speed;
-		if (Input::isKey(DIK_A)) eye.x -= speed;
-		if (Input::isKey(DIK_W)) eye.y += speed;
-		if (Input::isKey(DIK_S)) eye.y -= speed;
-		if (Input::isKey(DIK_UP)) eye.z += speed;
-		if (Input::isKey(DIK_DOWN)) eye.z -= speed;
+#pragma region comment out
+
+		//float speed = 0.1f;
+		//if (Input::isKey(DIK_D)) eye.x += speed;
+		//if (Input::isKey(DIK_A)) eye.x -= speed;
+		//if (Input::isKey(DIK_W)) eye.y += speed;
+		//if (Input::isKey(DIK_S)) eye.y -= speed;
+		//if (Input::isKey(DIK_UP)) eye.z += speed;
+		//if (Input::isKey(DIK_DOWN)) eye.z -= speed;
 
 
-		/*----- 描画処理 -----*/
+		///*----- 描画処理 -----*/
 
-		// 画面に表示されるレンダーターゲットに戻す。
-		DirectXBase::Instance()->SetRenderTarget();
+		//// 画面に表示されるレンダーターゲットに戻す。
+		//DirectXBase::Instance()->SetRenderTarget();
 
-		auto frameIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
-		constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
-		constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
-		// 定数バッファの中身を更新する。
-		constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
-		auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
+		//auto frameIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
+		//constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		//constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+		//// 定数バッファの中身を更新する。
+		//constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
+		//auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
 
-		// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
-		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get() };
-		DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		DirectXBase::Instance()->cmdList->SetComputeRootSignature(globalRootSig.GetRootSig().Get());
-		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
-		DirectXBase::Instance()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
-		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(2, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(uavDescriptorIndex));
+		//// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
+		//ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get() };
+		//DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+		//DirectXBase::Instance()->cmdList->SetComputeRootSignature(globalRootSig.GetRootSig().Get());
+		//DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
+		//DirectXBase::Instance()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
+		//DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(2, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(uavDescriptorIndex));
 
 
-		// レイトレーシング結果バッファをUAV状態へ
-		auto barrierToUAV = CD3DX12_RESOURCE_BARRIER::Transition(
-			rayTracingOutput.Get(),
-			D3D12_RESOURCE_STATE_COPY_SOURCE,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-		);
-		DirectXBase::Instance()->cmdList->ResourceBarrier(1, &barrierToUAV);
+		//// レイトレーシング結果バッファをUAV状態へ
+		//auto barrierToUAV = CD3DX12_RESOURCE_BARRIER::Transition(
+		//	rayTracingOutput.Get(),
+		//	D3D12_RESOURCE_STATE_COPY_SOURCE,
+		//	D3D12_RESOURCE_STATE_UNORDERED_ACCESS
+		//);
+		//DirectXBase::Instance()->cmdList->ResourceBarrier(1, &barrierToUAV);
 
-		DirectXBase::Instance()->cmdList->SetPipelineState1(stateObject.Get());
+		//DirectXBase::Instance()->cmdList->SetPipelineState1(stateObject.Get());
 
-		DirectXBase::Instance()->cmdList->DispatchRays(&dispatchRayDesc);
+		//DirectXBase::Instance()->cmdList->DispatchRays(&dispatchRayDesc);
 
-		// バックバッファのインデックスを取得する。
-		UINT backBufferIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
+		//// バックバッファのインデックスを取得する。
+		//UINT backBufferIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
 
-		// バリアを設定し各リソースの状態を遷移させる.
-		D3D12_RESOURCE_BARRIER barriers[] = {
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		rayTracingOutput.Get(),
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Instance()->backBuffers[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_COPY_DEST),
-		};
-		DirectXBase::Instance()->cmdList->ResourceBarrier(_countof(barriers), barriers);
-		DirectXBase::Instance()->cmdList->CopyResource(DirectXBase::Instance()->backBuffers[backBufferIndex].Get(), rayTracingOutput.Get());
+		//// バリアを設定し各リソースの状態を遷移させる.
+		//D3D12_RESOURCE_BARRIER barriers[] = {
+		//CD3DX12_RESOURCE_BARRIER::Transition(
+		//rayTracingOutput.Get(),
+		//D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		//D3D12_RESOURCE_STATE_COPY_SOURCE),
+		//CD3DX12_RESOURCE_BARRIER::Transition(
+		//DirectXBase::Instance()->backBuffers[backBufferIndex].Get(),
+		//D3D12_RESOURCE_STATE_RENDER_TARGET,
+		//D3D12_RESOURCE_STATE_COPY_DEST),
+		//};
+		//DirectXBase::Instance()->cmdList->ResourceBarrier(_countof(barriers), barriers);
+		//DirectXBase::Instance()->cmdList->CopyResource(DirectXBase::Instance()->backBuffers[backBufferIndex].Get(), rayTracingOutput.Get());
 
-		// レンダーターゲットのリソースバリアをもとに戻す。
-		D3D12_RESOURCE_BARRIER endBarriers[] = {
+		//// レンダーターゲットのリソースバリアをもとに戻す。
+		//D3D12_RESOURCE_BARRIER endBarriers[] = {
 
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Instance()->backBuffers[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_RENDER_TARGET)
+		//CD3DX12_RESOURCE_BARRIER::Transition(
+		//DirectXBase::Instance()->backBuffers[backBufferIndex].Get(),
+		//D3D12_RESOURCE_STATE_COPY_DEST,
+		//D3D12_RESOURCE_STATE_RENDER_TARGET)
 
-		};
-		DirectXBase::Instance()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
+		//};
+		//DirectXBase::Instance()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
+
+#pragma endregion
 
 		directXBase.processAfterDrawing();
 
@@ -684,12 +691,3 @@ void FPS()
 		frame_count = 0;
 	}
 }
-
-/*
-
-実装メモ
-
-・クラス化を進める。
-・シェーダー周りやパイプライン、ディスパッチレイ辺りをクラスでまとめる。
-
-*/
