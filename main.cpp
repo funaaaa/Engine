@@ -254,19 +254,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// コーンのBLASを生成。
 	PorygonMeshBlas coneBlas;
-	coneBlas.GenerateBLAS("Resource/", "cone.obj", hitGroupName);
+	coneBlas.GenerateBLASObj("Resource/", "cone.obj", hitGroupName);
 
 	// 猿のBLASを生成。
 	PorygonMeshBlas monkeyBlas;
-	monkeyBlas.GenerateBLAS("Resource/", "fbxMonkey.fbx", hitGroupName, true);
+	monkeyBlas.GenerateBLASFbx("Resource/", "fbxMonkey.fbx", hitGroupName);
 
 	// 天球のBLASを生成。
 	PorygonMeshBlas skydomeBlas;
-	skydomeBlas.GenerateBLAS("Resource/", "skydome.obj", hitGroupName);
+	skydomeBlas.GenerateBLASObj("Resource/", "skydome.obj", hitGroupName);
 
 	// 球のBLASを生成。
 	PorygonMeshBlas sphereBlas;
-	sphereBlas.GenerateBLAS("Resource/", "sphere.obj", hitGroupName);
+	sphereBlas.GenerateBLASObj("Resource/", "sphere.obj", hitGroupName);
 
 	// 三角形のInstancecを生成。
 	vector<PorygonMeshInstance> triangleInstance;

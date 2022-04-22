@@ -1,10 +1,12 @@
 #pragma once
 #include "Singleton.h"
-#include "fbxsdk.h"
 #include <memory>
 #include <vector>
 #include <string>
 #include <DirectXMath.h>
+#include <DirectXTex/DirectXTex.h>
+#include "fbxsdk.h"
+#include "Struct.h"
 
 // ノード構造体
 struct Node {
@@ -40,6 +42,8 @@ public:
 		DirectX::XMFLOAT2 uv;		// UV
 	};
 
+	// モデル名
+	std::string modelName;
 	// メッシュを持つノード
 	Node* meshNode;
 	// 頂点データ配列
@@ -47,10 +51,16 @@ public:
 	// 頂点インデックス配列
 	std::vector<unsigned short> indices;
 
-private:
+public:
 
-	// モデル名
-	std::string name;
+	// アンビエント係数
+	DirectX::XMFLOAT3 ambient = { 1.0f,1.0f,1.0f };
+	// ディフーズ係数
+	DirectX::XMFLOAT3 diffuse = { 1.0f,1.0f,1.0f };
+	// テクスチャID
+	int textureID;
+
+private:
 
 	// ノード配列
 	std::vector<Node> nodes;
@@ -67,6 +77,10 @@ private:
 	FbxManager* fbxMgr;
 	FbxImporter* fbxImporter;
 
+	std::string directryPath;	// ディレクトリーパスを一次保存しておくための変数。
+
+	std::vector<FbxModel> fbxModelData;	// 生成されたモデルデータ
+
 
 private:
 
@@ -81,7 +95,10 @@ public:
 	void Init();
 
 	// ロード関数
-	void LoadModelFromFile(const string& directryPath, const string& modelName);
+	FbxModel LoadModelFromFile(const string& directryPath, const string& modelName);
+
+	// FbxModelをObject3DDeliveryDataに変換
+	Object3DDeliveryData ConvertObject3DDeliveryData(const FbxModel& modelData);
 
 
 private:
@@ -90,7 +107,7 @@ private:
 	void ParseNodeRecursive(FbxModel& Model, FbxNode* InputFbxNode, Node* parent = nullptr);
 
 	// メッシュの読み取り
-	void parseMesh(FbxModel& Model, FbxNode* InputFbxNode);
+	void ParseMesh(FbxModel& Model, FbxNode* InputFbxNode);
 
 	// 頂点座標読み取り
 	void ParseMeshVertices(FbxModel& Model, FbxMesh* InputFbxMesh);
@@ -100,5 +117,8 @@ private:
 	void ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode);
 	// テクスチャ情報読み取り
 	void ParseMeshTexture(FbxModel& Model, const std::string& filePath);
+
+	// ディレクトリを含んだファイルパスからファイル名を抽出する。
+	std::string ExtractFileName(const std::string& path);
 
 };

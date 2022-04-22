@@ -2,10 +2,11 @@
 #include "ModelDataManager.h"
 #include "DescriptorHeapMgr.h"
 #include <DirectXMath.h>
+#include "FbxLoader.h"
 
 using namespace DirectX;
 
-void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& modelName, const wstring& hitGroupName, const bool& isFbx)
+void PorygonMeshBlas::GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -16,14 +17,7 @@ void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& mod
 	Object3DDeliveryData dataBuff;
 
 	// モデルをロード。
-	if (isFbx) {
-		string path = directryPath;
-		path += modelName;
-		ModelDataManager::LoadFbx(path.c_str(), dataBuff);
-	}
-	else {
-		ModelDataManager::LoadObj(directryPath, modelName, dataBuff, false);
-	}
+	ModelDataManager::LoadObj(directryPath, modelName, dataBuff, false);
 
 	// 頂点数を求める。
 	vertexCount = dataBuff.vertex.size();
@@ -92,6 +86,92 @@ void PorygonMeshBlas::GenerateBLAS(const string& directryPath, const string& mod
 	// ヒットグループ名を保存する。
 	this->hitGroupName = hitGroupName;
 
+}
+
+void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+{
+
+	/*===== BLASを生成する処理 =====*/
+
+	/*-- 形状データを読み込む --*/
+
+	// 読み込んだデータを一時保存する用のバッファ。
+	Object3DDeliveryData dataBuff;
+
+	// モデルをロード。
+	FbxModel fbxModel = FbxLoader::Instance()->LoadModelFromFile(directryPath, modelName);
+
+	dataBuff = FbxLoader::Instance()->ConvertObject3DDeliveryData(fbxModel);
+
+	// 頂点数を求める。
+	vertexCount = dataBuff.vertex.size();
+
+	// 頂点インデックス数を求める。
+	indexCount = dataBuff.index.size();
+
+	Object3DDeliveryData fbxData;
+	ModelDataManager::LoadFbx((directryPath + modelName).c_str(), fbxData);
+
+	// 頂点データを変換。
+	for (int index = 0; index < vertexCount; ++index) {
+
+		RayVertex buff{};
+		buff.normal = dataBuff.vertex[index].normal;
+		buff.position = dataBuff.vertex[index].pos;
+		buff.uv = dataBuff.vertex[index].uv;
+
+		// データを保存。
+		vertex.push_back(buff);
+
+	}
+
+	// 頂点インデックスデータを保存。
+	vertIndex = dataBuff.index;
+
+	// 頂点サイズを求める。
+	vertexStride = sizeof(RayVertex);
+
+	// 頂点インデックスサイズを求める。
+	indexStride = sizeof(UINT);
+
+	// 頂点バッファを生成する。
+	vertexBuffer = CreateBuffer(
+		vertexStride * vertexCount,
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+
+	// 頂点インデックスバッファを生成する。
+	indexBuffer = CreateBuffer(
+		indexStride * indexCount,
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
+	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+
+	// 頂点インデックスデータでディスクリプタを生成。
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
+	DescriptorHeapMgr::Instance()->IncrementHead();
+
+	// 頂点データでディスクリプタを生成。
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
+	DescriptorHeapMgr::Instance()->IncrementHead();
+
+
+	/*-- BLASバッファを生成する --*/
+
+	// 形状を設定する用の構造体を設定。
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+
+	// BLASバッファを設定、構築する。
+	SettingAccelerationStructure(geomDesc);
+
+
+	// ヒットグループ名を保存する。
+	this->hitGroupName = hitGroupName;
 }
 
 void PorygonMeshBlas::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
