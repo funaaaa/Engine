@@ -24,4 +24,8 @@ void PorygonInstanceRegister::AddTrans(const XMMATRIX& transMat, const UINT& id)
 		reinterpret_cast<XMFLOAT3X4*>(&instanceDescRegister[id].Transform),
 		transMat);
 
+	//instanceDescRegister[id].Transform[0][3] = transMat.r[3].m128_f32[0];
+	//instanceDescRegister[id].Transform[1][3] = transMat.r[3].m128_f32[1];
+	//instanceDescRegister[id].Transform[2][3] = transMat.r[3].m128_f32[2];
+
 }

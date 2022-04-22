@@ -591,6 +591,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_UP)) eye.z += speed;
 		if (Input::isKey(DIK_DOWN)) eye.z -= speed;
 
+		if (Input::isKey(DIK_1)) triangleInstance[0].AddTrans(0.1f, 0.1f, 0.0f);
+
+		// TLAS‚ğXVB
+		tlas.Update();
+
 
 		/*----- •`‰æˆ— -----*/
 

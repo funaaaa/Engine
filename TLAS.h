@@ -11,6 +11,7 @@ private:
 	ComPtr<ID3D12Resource> tlasBuffer;			// TLAS用バッファ
 	ComPtr<ID3D12Resource> scratchBuffer;		// スクラッチバッファ
 	ComPtr<ID3D12Resource> instanceDescBuffer;	// インスタンスバッファ
+	ComPtr<ID3D12Resource> tlasUpdateBuffer;	// TLAS更新用バッファ
 
 	int descriptorHeapIndex;
 
@@ -29,7 +30,7 @@ public:
 	inline const int& GetDescriptorHeapIndex() { return descriptorHeapIndex; }
 
 	// インスタンスを更新
-	void UpdateTLAS();
+	void Update();
 
 
 private:
