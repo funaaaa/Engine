@@ -592,6 +592,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_DOWN)) eye.z -= speed;
 
 		if (Input::isKey(DIK_1)) triangleInstance[0].AddTrans(0.1f, 0.1f, 0.0f);
+		if (Input::isKey(DIK_2)) {
+
+			monkeyBlas.GetVertex()[0].position.x += 1.0f;
+			monkeyBlas.Update();
+
+		}
 
 		// TLASÇçXêVÅB
 		tlas.Update();

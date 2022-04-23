@@ -174,6 +174,43 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 	this->hitGroupName = hitGroupName;
 }
 
+void PorygonMeshBlas::Update()
+{
+
+	/*===== BLASの更新 =====*/
+
+	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
+	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+
+	// 更新のための値を設定。
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
+	auto& inputs = asDesc.Inputs;
+	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
+	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+	inputs.NumDescs = 1;
+	inputs.pGeometryDescs = &geomDesc;
+	// BLAS の更新処理を行うためのフラグを設定する。
+	inputs.Flags =
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE |
+		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
+
+
+	// インプレース更新を実行する。
+	asDesc.SourceAccelerationStructureData = blasBuffer->GetGPUVirtualAddress();
+	asDesc.DestAccelerationStructureData = blasBuffer->GetGPUVirtualAddress();
+	// 更新用の作業バッファを設定する。
+	asDesc.ScratchAccelerationStructureData = updateBuffer->GetGPUVirtualAddress();
+
+	// コマンドリストに積む。
+	DirectXBase::Instance()->cmdList->BuildRaytracingAccelerationStructure(
+		&asDesc, 0, nullptr
+	);
+
+	CreateAccelerationStructure();
+
+}
+
 void PorygonMeshBlas::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
 {
 
@@ -283,7 +320,7 @@ void PorygonMeshBlas::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMET
 	auto& inputs = buildASDesc.Inputs;	// D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_NONE;
+	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 	inputs.NumDescs = 1;
 	inputs.pGeometryDescs = &geomDesc;
 
@@ -309,15 +346,13 @@ void PorygonMeshBlas::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMET
 		D3D12_HEAP_TYPE_DEFAULT
 	);
 
-	// BLASを構築する。
-	CreateAccelerationStructure(buildASDesc);
-
-}
-
-void PorygonMeshBlas::CreateAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC& buildASDesc)
-{
-
-	/*===== BLAS構築処理 =====*/
+	// 更新用バッファを生成する。
+	updateBuffer = CreateBuffer(
+		blasPrebuild.UpdateScratchDataSizeInBytes,
+		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		D3D12_HEAP_TYPE_DEFAULT
+	);
 
 	// AccelerationStructureの構築。
 	buildASDesc.ScratchAccelerationStructureData = scratchBuffer->GetGPUVirtualAddress();
@@ -326,6 +361,16 @@ void PorygonMeshBlas::CreateAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELER
 	DirectXBase::Instance()->cmdList->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
+
+	// BLASを構築する。
+	CreateAccelerationStructure();
+
+}
+
+void PorygonMeshBlas::CreateAccelerationStructure()
+{
+
+	/*===== BLAS構築処理 =====*/
 
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier{};

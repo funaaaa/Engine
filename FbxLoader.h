@@ -3,10 +3,31 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <array>
 #include <DirectXMath.h>
 #include <DirectXTex/DirectXTex.h>
 #include "fbxsdk.h"
 #include "Struct.h"
+
+// ボーン番号とスキンウェイトのペア
+struct WeightSet {
+
+	UINT index;
+	float weight;
+
+};
+
+// ボーン構造体
+struct Bone {
+	// 名前
+	std::string name;
+	// 初期姿勢座標の逆行列
+	DirectX::XMMATRIX invInitialPose;
+	// クラスター(FBX側のボーン情報)
+	FbxCluster* fbxCluster;
+	// コンストラクタ
+	Bone(const std::string& Name) : name(Name) {};
+};
 
 // ノード構造体
 struct Node {
@@ -34,12 +55,17 @@ public:
 	// フレンドクラス
 	friend class FbxLoader;
 
+	// ボーンの最大数
+	static const int MAX_BONE_INDICES = 4;
+
 	// 頂点データ構造体
-	struct VertexPosNormalUv
+	struct VertexPosNormalUvSkin
 	{
 		DirectX::XMFLOAT3 pos;		// 座標
 		DirectX::XMFLOAT3 normal;	// 法線
 		DirectX::XMFLOAT2 uv;		// UV
+		std::array<UINT, MAX_BONE_INDICES> boneIndex;	// ボーンの番号
+		std::array<float, MAX_BONE_INDICES> boneWeight;	// ボーンの重み
 	};
 
 	// モデル名
@@ -47,9 +73,11 @@ public:
 	// メッシュを持つノード
 	Node* meshNode;
 	// 頂点データ配列
-	std::vector<VertexPosNormalUv> vertices;
+	std::vector<VertexPosNormalUvSkin> vertices;
 	// 頂点インデックス配列
 	std::vector<unsigned short> indices;
+	// ボーン配列
+	std::vector<Bone> bones;
 
 public:
 
@@ -76,6 +104,7 @@ private:
 
 	FbxManager* fbxMgr;
 	FbxImporter* fbxImporter;
+	FbxScene* fbxScene;
 
 	std::string directryPath;	// ディレクトリーパスを一次保存しておくための変数。
 
@@ -95,7 +124,10 @@ public:
 	void Init();
 
 	// ロード関数
-	FbxModel LoadModelFromFile(const string& directryPath, const string& modelName);
+	FbxModel LoadModelFromFile(const string& DirectryPath, const string& ModelName);
+
+	// FBXの行列をXMMATRIXに変換
+	void ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& Src);
 
 	// FbxModelをObject3DDeliveryDataに変換
 	Object3DDeliveryData ConvertObject3DDeliveryData(const FbxModel& modelData);
@@ -104,7 +136,7 @@ public:
 private:
 
 	// 再帰的にノード構成を解析。
-	void ParseNodeRecursive(FbxModel& Model, FbxNode* InputFbxNode, Node* parent = nullptr);
+	void ParseNodeRecursive(FbxModel& Model, FbxNode* InputFbxNode, Node* Parent = nullptr);
 
 	// メッシュの読み取り
 	void ParseMesh(FbxModel& Model, FbxNode* InputFbxNode);
@@ -116,7 +148,9 @@ private:
 	// マテリアル情報読み取り
 	void ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode);
 	// テクスチャ情報読み取り
-	void ParseMeshTexture(FbxModel& Model, const std::string& filePath);
+	void ParseMeshTexture(FbxModel& Model, const std::string& FilePath);
+	// スキニング情報読み取り
+	void ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh);
 
 	// ディレクトリを含んだファイルパスからファイル名を抽出する。
 	std::string ExtractFileName(const std::string& path);

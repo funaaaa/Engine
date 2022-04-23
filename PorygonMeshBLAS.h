@@ -28,6 +28,7 @@ private:
 
 	ComPtr<ID3D12Resource> blasBuffer;		// BLAS用バッファ
 	ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
+	ComPtr<ID3D12Resource> updateBuffer;	// 更新用バッファ
 
 	UINT vertexCount;						// 頂点の数
 	UINT indexCount;						// 頂点インデックスの数
@@ -49,6 +50,9 @@ public:
 	void GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName);
 	void GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName);
 
+	// BLASの更新
+	void Update();
+
 	// アクセッタ
 	ComPtr<ID3D12Resource> GetBLASBuffer() { return blasBuffer; }
 	ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
@@ -57,6 +61,8 @@ public:
 	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor; }
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
 
+	// デバッグ用
+	vector<RayVertex>& GetVertex() { return vertex; }
 
 private:
 
@@ -73,5 +79,5 @@ private:
 	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc);
 
 	// 加速構造体の構築用関数
-	void CreateAccelerationStructure(D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC& buildASDesc);
+	void CreateAccelerationStructure();
 };
