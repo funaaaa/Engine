@@ -130,16 +130,18 @@ Object3DDeliveryData FbxLoader::ConvertObject3DDeliveryData(const int& Index)
 	return returnData;
 }
 
-void FbxLoader::GetSkinMat(const int& Index, SkinData& Input)
+FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 {
 
 	/*===== スキニング行列を取得 =====*/
 
 	// 指定されたインデックスが範囲外だったら何も返さない。
-	if (fbxModelData.size() - 1 < Index || Index < 0) return;
+	if (fbxModelData.size() - 1 < Index || Index < 0) return {};
 
 	// ボーン配列
 	std::vector<Bone>& bones = fbxModelData[Index].bones;
+
+	SkinData returnData;
 
 	const int BONE_SIZE = bones.size();
 	for (int index = 0; index < BONE_SIZE; ++index) {
@@ -154,9 +156,11 @@ void FbxLoader::GetSkinMat(const int& Index, SkinData& Input)
 		ConvertMatrixFromFBX(matCurrentPose, fbxCurrentPose);
 
 		// 合成してスキニング行列にする。
-		Input.bones[index] = bones[index].invInitialPose * matCurrentPose;
+		returnData.bones[index] = bones[index].invInitialPose * matCurrentPose;
 
 	}
+
+	return returnData;
 
 }
 
@@ -169,13 +173,13 @@ void FbxLoader::GetSkinComputeInput(const int& Index, std::vector<SkinComputeInp
 	if (fbxModelData.size() - 1 < Index || Index < 0) return;
 
 	FbxModel indexModel = fbxModelData[Index];
-	GetSkinMat(Index, Input[0].skinData);
+	SkinData skinData = GetSkinMat(Index);
 
 	const int VERTEX_COUNT = indexModel.vertices.size();
 	for (int index = 0; index < VERTEX_COUNT; ++index) {
 
 		Input[index].vertex = indexModel.vertices[index];
-		Input[index].skinData = Input[0].skinData;
+		Input[index].skinData = skinData;
 
 	}
 
@@ -477,6 +481,9 @@ void FbxLoader::ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh)
 	if (fbxSkin == nullptr) {
 		return;
 	}
+
+	// アニメーションを持っているフラグを立てる。
+	Model.hasAnimation = true;
 
 	// ボーン配列の参照。
 	std::vector<Bone>& bones = Model.bones;

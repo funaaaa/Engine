@@ -174,16 +174,19 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 	// ヒットグループ名を保存する。
 	this->hitGroupName = hitGroupName;
 
-	FbxLoader::Instance()->GetFbxModel(modelIndex).PlayAnimation();
+	// モデルがアニメーションを持っていたら。
+	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
 
-	// 入力用構造体をリサイズ。
-	skinComputeInput.resize(vertex.size());
+		// 入力用構造体をリサイズ。
+		skinComputeInput.resize(vertex.size());
 
-	// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-	FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
+		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
+		FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
 
-	// スキニングアニメーションで使用するコンピュートシェーダーをロードしておく。
-	skinComput.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), skinComputeInput.size(), skinComputeInput.data(), sizeof(RayVertex), vertex.size(), vertex.data());
+		// スキニングアニメーションで使用するコンピュートシェーダーをロードしておく。
+		skinComput.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), skinComputeInput.size(), skinComputeInput.data(), sizeof(RayVertex), vertex.size(), vertex.data());
+
+	}
 
 }
 
@@ -192,23 +195,28 @@ void PorygonMeshBlas::Update()
 
 	/*===== BLASの更新 =====*/
 
-	// アニメーションの更新処理
-	auto& model = FbxLoader::Instance()->GetFbxModel(modelIndex);
-	if (model.isPlay) {
+	// モデルがアニメーションを持っていたら。
+	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
 
-		model.currentTime += model.frameTime;
+		// アニメーションの更新処理
+		auto& model = FbxLoader::Instance()->GetFbxModel(modelIndex);
+		if (model.isPlay) {
 
-		// 最後まで再生したら先頭に戻す。
-		if (model.endTime < model.currentTime) {
+			model.currentTime += model.frameTime;
 
-			model.currentTime = model.startTime;
+			// 最後まで再生したら先頭に戻す。
+			if (model.endTime < model.currentTime) {
+
+				model.currentTime = model.startTime;
+
+			}
+
+			// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
+			FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
 
 		}
 
-		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-		FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
-
-	}
+	};
 
 	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
 	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
@@ -247,14 +255,19 @@ void PorygonMeshBlas::ComputeSkin()
 
 	/*===== 頂点データをスキニング行列を元に書き換える処理 =====*/
 
-	// 入力構造体を更新。
-	skinComput.UpdateInputSB(skinComputeInput.data());
+	// モデルがアニメーションを持っていたら。
+	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
 
-	// 計算開始。
-	skinComput.Dispatch(1, 1, 1);
+		// 入力構造体を更新。
+		skinComput.UpdateInputSB(skinComputeInput.data());
 
-	// 結果を代入。
-	memcpy(vertex.data(), skinComput.outputSB->buffersOnCPU, sizeof(RayVertex) * vertex.size());
+		// 計算開始。
+		skinComput.Dispatch(1, 1, 1);
+
+		// 結果を代入。
+		memcpy(vertex.data(), skinComput.outputSB->buffersOnCPU, sizeof(RayVertex) * vertex.size());
+
+	}
 
 }
 
@@ -263,7 +276,12 @@ void PorygonMeshBlas::PlayAnimation()
 
 	/*===== アニメーションさせる =====*/
 
-	FbxLoader::Instance()->GetFbxModel(modelIndex).PlayAnimation();
+	// モデルがアニメーションを持っていたら。
+	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+
+		FbxLoader::Instance()->GetFbxModel(modelIndex).PlayAnimation();
+
+	}
 
 }
 

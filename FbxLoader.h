@@ -84,6 +84,7 @@ public:
 	FbxTime endTime;		// 終了時間
 	FbxTime currentTime;	// 現在の時間
 	bool isPlay = false;
+	bool hasAnimation = false;	// アニメーションを持っているか
 
 public:
 
@@ -163,7 +164,7 @@ public:
 	Object3DDeliveryData ConvertObject3DDeliveryData(const int& Index);
 
 	// スキニング行列を取得。
-	void GetSkinMat(const int& Index, SkinData& Input);
+	SkinData GetSkinMat(const int& Index);
 
 	// スキニングアニメーション用コンピュートシェーダーの入力構造体を取得。
 	void GetSkinComputeInput(const int& Index, std::vector<SkinComputeInput>& Input);
