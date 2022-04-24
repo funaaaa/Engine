@@ -258,7 +258,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 猿のBLASを生成。
 	PorygonMeshBlas monkeyBlas;
-	monkeyBlas.GenerateBLASFbx("Resource/", "fbxMonkey.fbx", hitGroupName);
+	monkeyBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
 
 	// 天球のBLASを生成。
 	PorygonMeshBlas skydomeBlas;
@@ -583,6 +583,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		//Camera::target = triangle.GetPos();
 
+		// スキニングアニメーションさせる。
+		monkeyBlas.ComputeSkin();
+
 		float speed = 0.1f;
 		if (Input::isKey(DIK_D)) eye.x += speed;
 		if (Input::isKey(DIK_A)) eye.x -= speed;
@@ -594,10 +597,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_1)) triangleInstance[0].AddTrans(0.1f, 0.1f, 0.0f);
 		if (Input::isKey(DIK_2)) {
 
-			monkeyBlas.GetVertex()[0].position.x += 1.0f;
-			monkeyBlas.Update();
+			monkeyBlas.PlayAnimation();
 
 		}
+
+		monkeyBlas.Update();
 
 		// TLASを更新。
 		tlas.Update();

@@ -3,6 +3,8 @@
 #include "DescriptorHeapMgr.h"
 #include <DirectXMath.h>
 #include "FbxLoader.h"
+#include "RWStructuredBuffer.h"
+#include "StructuredBuffer.h"
 
 using namespace DirectX;
 
@@ -99,9 +101,9 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 	Object3DDeliveryData dataBuff;
 
 	// モデルをロード。
-	FbxModel fbxModel = FbxLoader::Instance()->LoadModelFromFile(directryPath, modelName);
+	modelIndex = FbxLoader::Instance()->LoadModelFromFile(directryPath, modelName);
 
-	dataBuff = FbxLoader::Instance()->ConvertObject3DDeliveryData(fbxModel);
+	dataBuff = FbxLoader::Instance()->ConvertObject3DDeliveryData(modelIndex);
 
 	// 頂点数を求める。
 	vertexCount = dataBuff.vertex.size();
@@ -169,15 +171,44 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
 
-
 	// ヒットグループ名を保存する。
 	this->hitGroupName = hitGroupName;
+
+	FbxLoader::Instance()->GetFbxModel(modelIndex).PlayAnimation();
+
+	// 入力用構造体をリサイズ。
+	skinComputeInput.resize(vertex.size());
+
+	// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
+	FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
+
+	// スキニングアニメーションで使用するコンピュートシェーダーをロードしておく。
+	skinComput.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), skinComputeInput.size(), skinComputeInput.data(), sizeof(RayVertex), vertex.size(), vertex.data());
+
 }
 
 void PorygonMeshBlas::Update()
 {
 
 	/*===== BLASの更新 =====*/
+
+	// アニメーションの更新処理
+	auto& model = FbxLoader::Instance()->GetFbxModel(modelIndex);
+	if (model.isPlay) {
+
+		model.currentTime += model.frameTime;
+
+		// 最後まで再生したら先頭に戻す。
+		if (model.endTime < model.currentTime) {
+
+			model.currentTime = model.startTime;
+
+		}
+
+		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
+		FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
+
+	}
 
 	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
 	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
@@ -208,6 +239,31 @@ void PorygonMeshBlas::Update()
 	);
 
 	CreateAccelerationStructure();
+
+}
+
+void PorygonMeshBlas::ComputeSkin()
+{
+
+	/*===== 頂点データをスキニング行列を元に書き換える処理 =====*/
+
+	// 入力構造体を更新。
+	skinComput.UpdateInputSB(skinComputeInput.data());
+
+	// 計算開始。
+	skinComput.Dispatch(1, 1, 1);
+
+	// 結果を代入。
+	memcpy(vertex.data(), skinComput.outputSB->buffersOnCPU, sizeof(RayVertex) * vertex.size());
+
+}
+
+void PorygonMeshBlas::PlayAnimation()
+{
+
+	/*===== アニメーションさせる =====*/
+
+	FbxLoader::Instance()->GetFbxModel(modelIndex).PlayAnimation();
 
 }
 
@@ -401,3 +457,16 @@ void PorygonMeshBlas::CreateAccelerationStructure()
 	DirectXBase::Instance()->cmdList->Reset(DirectXBase::Instance()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }
+
+/*
+
+◯メモ
+・資料の実装を一通り終えた。
+・コンピュートシェーダーから値ちゃんと送られてるっぽい？
+・しかし形がおかしい。でも資料の最後の方に直し方があるから、ワンちゃんsoleで治るかも。
+ →FbxLoader.cppでsortで出てくる条件式を逆にすると形はそれっぽくなる。アニメーションは反映されない。
+・アニメーションが再生されない。
+　→タイマーは変わっているので、ウェイト等の変数も正しく変わっているかを調べる。
+　→形は後回し、まずはタイマーを反映させる。
+
+*/

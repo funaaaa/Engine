@@ -27,7 +27,7 @@ void FbxLoader::Init()
 
 }
 
-FbxModel FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& ModelName)
+int FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& ModelName)
 {
 
 	/*===== ロード関数 =====*/
@@ -40,7 +40,7 @@ FbxModel FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& 
 		if (fbxModelData[index].modelName == DirectryPath + ModelName) {
 
 			// そのデータを返す。
-			return fbxModelData[index];
+			return index;
 
 		}
 
@@ -69,7 +69,10 @@ FbxModel FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& 
 	// ルートノードから順に解析してモデルに流し込む。
 	ParseNodeRecursive(modelData, fbxScene->GetRootNode());
 
-	return modelData;
+	// データを保存。
+	fbxModelData.emplace_back(modelData);
+
+	return fbxModelData.size() - 1;
 
 }
 
@@ -92,33 +95,90 @@ void FbxLoader::ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& S
 
 }
 
-Object3DDeliveryData FbxLoader::ConvertObject3DDeliveryData(const FbxModel& ModelData)
+Object3DDeliveryData FbxLoader::ConvertObject3DDeliveryData(const int& Index)
 {
 	Object3DDeliveryData returnData;
 
+	// 指定されたインデックスが範囲外だったら何も返さない。
+	if (fbxModelData.size() - 1 < Index || Index < 0) return {};
+
+	// 指定されたインデックスを取得。
+	FbxModel modelData = fbxModelData[Index];
+
 	// 頂点データを変換。
-	const int VERTEX_COUNT = ModelData.vertices.size();
+	const int VERTEX_COUNT = modelData.vertices.size();
 	returnData.vertex.resize(VERTEX_COUNT);
 	for (int index = 0; index < VERTEX_COUNT; ++index) {
-		returnData.vertex[index].pos = ModelData.vertices[index].pos;
-		returnData.vertex[index].normal = ModelData.vertices[index].normal;
-		returnData.vertex[index].uv = ModelData.vertices[index].uv;
+		returnData.vertex[index].pos = modelData.vertices[index].pos;
+		returnData.vertex[index].normal = modelData.vertices[index].normal;
+		returnData.vertex[index].uv = modelData.vertices[index].uv;
 	}
 
 	// 頂点インデックスデータを変換。
-	const int INDEX_COUNT = ModelData.indices.size();
+	const int INDEX_COUNT = modelData.indices.size();
 	returnData.index.resize(INDEX_COUNT);
 	for (int index = 0; index < INDEX_COUNT; ++index) {
-		returnData.index[index] = ModelData.indices[index];
+		returnData.index[index] = modelData.indices[index];
 	}
 
 	// ライティング周りの定数バッファデータを変換。
 	returnData.constBufferDataB1.alpha = 1.0f;
-	returnData.constBufferDataB1.ambient = ModelData.ambient;
-	returnData.constBufferDataB1.diffuse = ModelData.diffuse;
+	returnData.constBufferDataB1.ambient = modelData.ambient;
+	returnData.constBufferDataB1.diffuse = modelData.diffuse;
 	returnData.constBufferDataB1.specular = {};
 
 	return returnData;
+}
+
+void FbxLoader::GetSkinMat(const int& Index, SkinData& Input)
+{
+
+	/*===== スキニング行列を取得 =====*/
+
+	// 指定されたインデックスが範囲外だったら何も返さない。
+	if (fbxModelData.size() - 1 < Index || Index < 0) return;
+
+	// ボーン配列
+	std::vector<Bone>& bones = fbxModelData[Index].bones;
+
+	const int BONE_SIZE = bones.size();
+	for (int index = 0; index < BONE_SIZE; ++index) {
+
+		// 今の姿勢行列
+		XMMATRIX matCurrentPose;
+
+		// 今の姿勢行列を取得。
+		FbxAMatrix fbxCurrentPose = bones[index].fbxCluster->GetLink()->EvaluateGlobalTransform(fbxModelData[Index].currentTime);
+
+		// XMMATRIXに変換。
+		ConvertMatrixFromFBX(matCurrentPose, fbxCurrentPose);
+
+		// 合成してスキニング行列にする。
+		Input.bones[index] = bones[index].invInitialPose * matCurrentPose;
+
+	}
+
+}
+
+void FbxLoader::GetSkinComputeInput(const int& Index, std::vector<SkinComputeInput>& Input)
+{
+
+	/*===== スキニングアニメーション用コンピュートシェーダーの入力構造体を取得 =====*/
+
+	// 指定されたインデックスが範囲外だったら何も返さない。
+	if (fbxModelData.size() - 1 < Index || Index < 0) return;
+
+	FbxModel indexModel = fbxModelData[Index];
+	GetSkinMat(Index, Input[0].skinData);
+
+	const int VERTEX_COUNT = indexModel.vertices.size();
+	for (int index = 0; index < VERTEX_COUNT; ++index) {
+
+		Input[index].vertex = indexModel.vertices[index];
+		Input[index].skinData = Input[0].skinData;
+
+	}
+
 }
 
 void FbxLoader::ParseNodeRecursive(FbxModel& Model, FbxNode* InputFbxNode, Node* Parent)
@@ -517,7 +577,7 @@ void FbxLoader::ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh)
 				float weight = 0.0f;
 
 				// 2番目以降のウェイトを合計。
-				for (int boneIndex = 0; boneIndex < FbxModel::MAX_BONE_INDICES; ++boneIndex) {
+				for (int boneIndex = 1; boneIndex < FbxModel::MAX_BONE_INDICES; ++boneIndex) {
 
 					weight += vertices[index].boneWeight[boneIndex];
 
@@ -555,4 +615,34 @@ std::string FbxLoader::ExtractFileName(const std::string& path)
 	}
 
 	return path;
+}
+
+void FbxModel::PlayAnimation()
+{
+
+	/*===== FBXアニメーションの再生 =====*/
+
+	FbxScene* fbxScene = FbxLoader::Instance()->GetFbxScene();
+
+	// 0番アニメーションの再生。
+	FbxAnimStack* animstack = fbxScene->GetSrcObject<FbxAnimStack>(0);
+
+	// アニメーションの名前取得。
+	const char* animstackName = animstack->GetName();
+
+	// アニメーションの時間情報。
+	FbxTakeInfo* takeInfo = fbxScene->GetTakeInfo(animstackName);
+
+	// 開始時間取得。
+	startTime = takeInfo->mLocalTimeSpan.GetStart();
+
+	// 終了時間取得。
+	endTime = takeInfo->mLocalTimeSpan.GetStop();
+
+	// 開始時間に合わせる。
+	currentTime = startTime;
+
+	// 再生中状態にする。
+	isPlay = true;
+
 }

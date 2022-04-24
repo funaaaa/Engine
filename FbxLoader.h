@@ -79,6 +79,12 @@ public:
 	// ボーン配列
 	std::vector<Bone> bones;
 
+	FbxTime frameTime;		// 1フレームの時間
+	FbxTime startTime;		// 開始時間
+	FbxTime endTime;		// 終了時間
+	FbxTime currentTime;	// 現在の時間
+	bool isPlay = false;
+
 public:
 
 	// アンビエント係数
@@ -92,6 +98,15 @@ private:
 
 	// ノード配列
 	std::vector<Node> nodes;
+
+
+public:
+
+	FbxModel() {
+		frameTime.SetTime(0, 0, 0, 1, 0, FbxTime::EMode::eFrames60);
+	}
+
+	void PlayAnimation();
 
 };
 
@@ -111,6 +126,21 @@ private:
 	std::vector<FbxModel> fbxModelData;	// 生成されたモデルデータ
 
 
+public:
+
+	// ボーンの最大数
+	static const int MAX_BONES = 16;
+	// スキニング用構造体(コンピュートシェーダーに送る用)
+	struct SkinData {
+		std::array<XMMATRIX, MAX_BONES> bones;
+	};
+	// スキニングアニメーションの行列計算に使用するコンピュートシェーダーの入力用構造体
+	struct SkinComputeInput {
+		FbxModel::VertexPosNormalUvSkin vertex;
+		FbxLoader::SkinData skinData;
+	};
+
+
 private:
 
 	using string = std::string;
@@ -124,13 +154,25 @@ public:
 	void Init();
 
 	// ロード関数
-	FbxModel LoadModelFromFile(const string& DirectryPath, const string& ModelName);
+	int LoadModelFromFile(const string& DirectryPath, const string& ModelName);
 
 	// FBXの行列をXMMATRIXに変換
 	void ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& Src);
 
 	// FbxModelをObject3DDeliveryDataに変換
-	Object3DDeliveryData ConvertObject3DDeliveryData(const FbxModel& modelData);
+	Object3DDeliveryData ConvertObject3DDeliveryData(const int& Index);
+
+	// スキニング行列を取得。
+	void GetSkinMat(const int& Index, SkinData& Input);
+
+	// スキニングアニメーション用コンピュートシェーダーの入力構造体を取得。
+	void GetSkinComputeInput(const int& Index, std::vector<SkinComputeInput>& Input);
+
+	// FBXシーンのゲッタ
+	FbxScene* GetFbxScene() { return fbxScene; }
+
+	// モデル情報のゲッタ
+	FbxModel& GetFbxModel(const int& Index) { return fbxModelData[Index]; }
 
 
 private:

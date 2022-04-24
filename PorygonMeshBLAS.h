@@ -2,6 +2,8 @@
 #include "DirectXBase.h"
 #include "RayDescriptor.h"
 #include <DirectXMath.h>
+#include "ComputeShader.h"
+#include "FbxLoader.h"
 
 using namespace DirectX;
 
@@ -37,9 +39,18 @@ private:
 
 	wstring hitGroupName;					// 使用するヒットグループの名前
 
+	int modelIndex;							// モデルのインデックス
+
+	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
+
 	// デバッグ用
 	vector<RayVertex> vertex;
 	vector<UINT> vertIndex;
+
+
+private:
+
+	std::vector<FbxLoader::SkinComputeInput> skinComputeInput;
 
 
 public:
@@ -52,6 +63,12 @@ public:
 
 	// BLASの更新
 	void Update();
+
+	// スキニングを計算
+	void ComputeSkin();
+
+	// アニメーションの有効化
+	void PlayAnimation();
 
 	// アクセッタ
 	ComPtr<ID3D12Resource> GetBLASBuffer() { return blasBuffer; }
