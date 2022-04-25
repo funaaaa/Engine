@@ -140,9 +140,10 @@ bool ShootShadowRay(float3 origin, float3 direction)
     rayDesc.TMax = 100000;
 
     ShadowPayload payload;
-    payload.shadowRate = 1.0f;
+    payload.isShadow = true;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
+    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
 
     // ライトは除外。
     uint rayMask = ~(0x08);
@@ -154,7 +155,7 @@ bool ShootShadowRay(float3 origin, float3 direction)
     1, // MISSシェーダーのインデックス
     rayDesc, payload);
 
-    return payload.shadowRate;
+    return payload.isShadow;
 }
 
 // RayGenerationシェーダー
@@ -215,7 +216,8 @@ void mainMS(inout Payload payload)
 {
 
     // 単色を返すようにする。
-    payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
+    //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
+    payload.color = float3(0, 0, 0);
 
 }
 
@@ -224,7 +226,7 @@ void mainMS(inout Payload payload)
 void shadowMS(inout ShadowPayload payload)
 {
     // 何にも当たっていないということなので、影は生成しない。
-    payload.shadowRate = 1.0f;
+    payload.isShadow = false;
 }
 
 // closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
@@ -267,14 +269,21 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         color += lightcolor * materialcolor.xyz * nl;
         color += ambientcolor * materialcolor.xyz;
 
+        // ライティングの結果の色を保存。
         payload.color = color;
 
         // シャドウレイを発射。
-        float shadowRate = 1.0f;
         float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-        shadowRate = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
+        float shadowRate = 1.0f;
+        //bool isShadow = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
+        bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 5, 0) - worldPosition));
 
         // 影なら暗くする。
+        if (isShadow)
+        {
+            shadowRate = 0.5f;
+        }
+
         payload.color.xyz *= shadowRate;
 
     }
@@ -287,14 +296,14 @@ void shadowCHS(inout ShadowPayload payload, MyAttribute attrib)
 {
     uint instanceID = InstanceID();
 
-    // 屈折のオブエジェクトに当たっていたら影を薄く生成する。
-    if (instanceID == 1)
-    {
-        payload.shadowRate = 0.8f;
-    }
-    else
-    {
-        // その他のオブジェクトに当たった場合は普通に影を生成する。
-        payload.shadowRate = 0.5f;
-    }
+    //// 屈折のオブエジェクトに当たっていたら影を薄く生成する。
+    //if (instanceID == 1)
+    //{
+    //    payload.shadowRate = 0.8f;
+    //}
+    //else
+    //{
+    //    // その他のオブジェクトに当たった場合は普通に影を生成する。
+    //    payload.shadowRate = 0.7f;
+    //}
 }

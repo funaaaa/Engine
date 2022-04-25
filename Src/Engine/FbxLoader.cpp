@@ -624,7 +624,7 @@ std::string FbxLoader::ExtractFileName(const std::string& path)
 	return path;
 }
 
-void FbxModel::PlayAnimation()
+void FbxModel::InitAnimation()
 {
 
 	/*===== FBXアニメーションの再生 =====*/
@@ -649,7 +649,52 @@ void FbxModel::PlayAnimation()
 	// 開始時間に合わせる。
 	currentTime = startTime;
 
+	isInit = true;
+
+}
+
+void FbxModel::PlayAnimation()
+{
+
+	/*===== FBXアニメーションの再生 =====*/
+
+	// 初期化されていたら初期化処理を呼ばない。
+	if (!isInit) {
+
+		FbxScene* fbxScene = FbxLoader::Instance()->GetFbxScene();
+
+		// 0番アニメーションの再生。
+		FbxAnimStack* animstack = fbxScene->GetSrcObject<FbxAnimStack>(0);
+
+		// アニメーションの名前取得。
+		const char* animstackName = animstack->GetName();
+
+		// アニメーションの時間情報。
+		FbxTakeInfo* takeInfo = fbxScene->GetTakeInfo(animstackName);
+
+		// 開始時間取得。
+		startTime = takeInfo->mLocalTimeSpan.GetStart();
+
+		// 終了時間取得。
+		endTime = takeInfo->mLocalTimeSpan.GetStop();
+
+		// 開始時間に合わせる。
+		currentTime = startTime;
+
+		isInit = true;
+
+	}
+
 	// 再生中状態にする。
 	isPlay = true;
+
+}
+
+void FbxModel::StopAnimation()
+{
+
+	/*===== FBXアニメーションの停止 =====*/
+
+	isPlay = false;
 
 }

@@ -271,6 +271,16 @@ void PorygonMeshBlas::ComputeSkin()
 
 }
 
+void PorygonMeshBlas::InitAnimation()
+{
+	// モデルがアニメーションを持っていたら。
+	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+
+		FbxLoader::Instance()->GetFbxModel(modelIndex).InitAnimation();
+
+	}
+}
+
 void PorygonMeshBlas::PlayAnimation()
 {
 
@@ -280,6 +290,20 @@ void PorygonMeshBlas::PlayAnimation()
 	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
 
 		FbxLoader::Instance()->GetFbxModel(modelIndex).PlayAnimation();
+
+	}
+
+}
+
+void PorygonMeshBlas::StopAnimation()
+{
+
+	/*===== アニメーションを停止させる =====*/
+
+	// モデルがアニメーションを持っていたら。
+	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+
+		FbxLoader::Instance()->GetFbxModel(modelIndex).StopAnimation();
 
 	}
 

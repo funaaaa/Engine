@@ -87,7 +87,9 @@ void Camera::Update()
 
 	// 正面ベクトルを求める。
 	//forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
-	forwardVec = eye.GetNormal();
+	forwardVec = eye;
+	forwardVec.y = 0;
+	forwardVec.Normalize();
 	forwardVec = forwardVec * -1.0f;
 
 	float angleXZ = atan2f(forwardVec.z, forwardVec.x);

@@ -34,13 +34,13 @@ void FPS();
 
 struct KariConstBufferData {
 
-	XMMATRIX mtxView;			// ビュー行列.
-	XMMATRIX mtxProj;			// プロジェクション行列.
-	XMMATRIX mtxViewInv;		// ビュー逆行列.
-	XMMATRIX mtxProjInv;		// プロジェクション逆行列.
-	XMFLOAT4 lightDirection;	// 平行光源の向き.
-	XMFLOAT4 lightColor;		// 平行光源色.
-	XMFLOAT4 ambientColor;		// 環境光.
+	XMMATRIX mtxView;			// ビュー行列。
+	XMMATRIX mtxProj;			// プロジェクション行列。
+	XMMATRIX mtxViewInv;		// ビュー逆行列。
+	XMMATRIX mtxProjInv;		// プロジェクション逆行列。
+	XMFLOAT4 lightDirection;	// 平行光源の向き。
+	XMFLOAT4 lightColor;		// 平行光源色。
+	XMFLOAT4 ambientColor;		// 環境光。
 
 };
 
@@ -534,20 +534,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// DispatchRays のために情報をセットしておく.
 	auto startAddress = shaderTable->GetGPUVirtualAddress();
+	// RayGenerationシェーダーの情報
 	auto& shaderRecordRG = dispatchRayDesc.RayGenerationShaderRecord;
 	shaderRecordRG.StartAddress = startAddress;
 	shaderRecordRG.SizeInBytes = raygenSize;
 	startAddress += raygenRegion;
+	// Missシェーダーの情報
 	auto& shaderRecordMS = dispatchRayDesc.MissShaderTable;
 	shaderRecordMS.StartAddress = startAddress;
 	shaderRecordMS.SizeInBytes = missSize;
 	shaderRecordMS.StrideInBytes = missRecordSize;
 	startAddress += missRegion;
+	// HitGroup(ClosestHitシェーダー?)の情報
 	auto& shaderRecordHG = dispatchRayDesc.HitGroupTable;
 	shaderRecordHG.StartAddress = startAddress;
 	shaderRecordHG.SizeInBytes = hitGroupSize;
 	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
 	startAddress += hitgroupRegion;
+	// レイの情報
 	dispatchRayDesc.Width = window_width;
 	dispatchRayDesc.Height = window_height;
 	dispatchRayDesc.Depth = 1;
@@ -606,10 +610,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_UP)) Camera::Instance()->eye.y += speed;
 		if (Input::isKey(DIK_DOWN)) Camera::Instance()->eye.y -= speed;
 
-		if (Input::isKey(DIK_1)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
+		if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
+		if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
+		if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
+		if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
+
+		if (Input::isKey(DIK_1)) {
+
+			boneBlas.InitAnimation();
+
+		}
 		if (Input::isKey(DIK_2)) {
 
 			boneBlas.PlayAnimation();
+
+		}
+		if (Input::isKey(DIK_3)) {
+
+			boneBlas.StopAnimation();
 
 		}
 

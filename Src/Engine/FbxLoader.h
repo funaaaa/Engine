@@ -84,6 +84,7 @@ public:
 	FbxTime endTime;		// 終了時間
 	FbxTime currentTime;	// 現在の時間
 	bool isPlay = false;
+	bool isInit = false;
 	bool hasAnimation = false;	// アニメーションを持っているか
 
 public:
@@ -107,7 +108,9 @@ public:
 		frameTime.SetTime(0, 0, 0, 1, 0, FbxTime::EMode::eFrames60);
 	}
 
+	void InitAnimation();
 	void PlayAnimation();
+	void StopAnimation();
 
 };
 

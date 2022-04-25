@@ -68,7 +68,9 @@ public:
 	void ComputeSkin();
 
 	// アニメーションの有効化
-	void PlayAnimation();
+	void InitAnimation();	// 初期化
+	void PlayAnimation();	// 再生
+	void StopAnimation();	// 停止
 
 	// アクセッタ
 	ComPtr<ID3D12Resource> GetBLASBuffer() { return blasBuffer; }
