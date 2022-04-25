@@ -73,7 +73,7 @@ void GSParticle::CommonGenerate(XMFLOAT3 centerPos, XMFLOAT2 size, int projectio
 	matWorld *= scaleMat;
 	matWorld *= rotationMat;
 	matWorld *= positionMat;
-	constMap->mat = matWorld * Camera::matView * Camera::matPerspective;	//ワールド変換 * ビュー変換 * 透視投影変換
+	constMap->mat = matWorld * Camera::Instance()->matView * Camera::Instance()->matPerspective;	//ワールド変換 * ビュー変換 * 透視投影変換
 	constBuffB0->Unmap(0, nullptr);
 
 }
@@ -119,7 +119,7 @@ void GSParticle::Draw()
 	matWorld *= scaleMat;
 	matWorld *= rotationMat;
 	matWorld *= positionMat;
-	constMap->mat = matWorld * Camera::matView * Camera::matPerspective;		//ワールド変換 * ビュー変換 * 透視投影変換
+	constMap->mat = matWorld * Camera::Instance()->matView * Camera::Instance()->matPerspective;		//ワールド変換 * ビュー変換 * 透視投影変換
 	constMap->color = constBufferDataB0.color;
 	constBuffB0->Unmap(0, nullptr);
 
@@ -159,7 +159,7 @@ void GSParticle::DrawInstance(vector<GSConstBufferDataB0> instanceData)
 		matWorld *= scaleMat;
 		matWorld *= rotationMat;
 		matWorld *= positionMat;
-		constMap[index].mat = instanceData[index].mat * Camera::matView * Camera::matPerspective;		//ワールド変換 * ビュー変換 * 透視投影変換
+		constMap[index].mat = instanceData[index].mat * Camera::Instance()->matView * Camera::Instance()->matPerspective;		//ワールド変換 * ビュー変換 * 透視投影変換
 		constMap[index].color = instanceData[index].color;
 
 	}

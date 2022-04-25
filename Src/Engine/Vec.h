@@ -24,6 +24,8 @@ public:
 	Vec3() :x(0), y(0), z(0) {};
 	Vec3(const float& X, const float& Y, const float& Z) : x(X), y(Y), z(Z) {};
 	Vec3(const float& X) :x(X), y(X), z(X) {};
+	Vec3(const XMFLOAT3& Rhs) :x(Rhs.x), y(Rhs.y), z(Rhs.z) {};
+	Vec3(const XMVECTOR& Rhs) :x(Rhs.m128_f32[0]), y(Rhs.m128_f32[1]), z(Rhs.m128_f32[2]) {};
 
 	// ì‡êœ
 	inline const float& Dot(const Vec3& Rhs) {
@@ -54,6 +56,14 @@ public:
 		buff.y /= length;
 		buff.z /= length;
 		return buff;
+	}
+	// XMFLOAT3Ç÷ïœä∑
+	inline XMFLOAT3 ConvertXMFLOAT3() {
+		return XMFLOAT3(x, y, z);
+	}
+	// XMVECTORÇ÷ïœä∑
+	inline XMVECTOR ConvertXMVECTOR() {
+		return {x,y,z};
 	}
 
 

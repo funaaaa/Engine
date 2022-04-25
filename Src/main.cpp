@@ -565,10 +565,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		0.1f, 1000000.0f							//前端、奥端
 	);
 	constBufferData.mtxProjInv = XMMatrixInverse(nullptr, constBufferData.mtxProj);
-	XMFLOAT3 eye = { 0,0,-10 };
-	XMFLOAT3 target = { 0,0,0 };
-	XMFLOAT3 up = { 0,1,0 };
-	constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+	Vec3 eye = { 0,0,-10 };
+	Vec3 target = { 0,0,0 };
+	Vec3 up = { 0,1,0 };
+	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 
 	DynamicConstBuffer constBuff;
@@ -588,7 +588,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		/*----- 更新処理 -----*/
 
 		// ビュー行列を生成。
-		Camera::GenerateMatView();
+		Camera::Instance()->GenerateMatView();
 
 		FPS();
 
@@ -632,7 +632,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Instance()->SetRenderTarget();
 
 		auto frameIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
-		constBufferData.mtxView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+		constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 		constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 		// 定数バッファの中身を更新する。
 		constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));

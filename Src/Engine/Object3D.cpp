@@ -181,7 +181,7 @@ void Object3D::Generate(XMFLOAT3 centerPos, int projectionID, int piplineID, str
 	// 定数バッファへのデータ転送(行列と視点座標関係)
 	ConstBufferDataB0* constMap = nullptr;
 	result = constBuffB0->Map(0, nullptr, (void**)&constMap);
-	constMap->eye = Camera::eye;
+	constMap->eye = Camera::Instance()->eye;
 	constBuffB0->Unmap(0, nullptr);
 
 	// ライティングをしていない状態だったらライティングを行わない

@@ -6,6 +6,7 @@
 #include <vector>
 #include "PiplineManager.h"
 #include "LightCamera.h"
+#include "Vec.h"
 
 using namespace std;
 using namespace DirectX;
@@ -106,7 +107,7 @@ protected:
 	struct ConstBufferDataB0 {
 		MatrixData mat;			// 行列
 		XMFLOAT4 color = { 1,1,1,1 };			// 色データ
-		XMFLOAT3 eye;			// カメラ座標
+		Vec3 eye;			// カメラ座標
 		float pad1;
 	};
 

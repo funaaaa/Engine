@@ -1,6 +1,7 @@
 #include "BaseDrawData.h"
 #include "Camera.h"
 #include "Enum.h"
+#include "Vec.h"
 
 void BaseDrawData::ChangeScale(XMFLOAT3 amount)
 {
@@ -122,19 +123,19 @@ void BaseDrawData::MapConstDataB0(ComPtr<ID3D12Resource> constBuffB0, const Cons
 	XMMATRIX matProjection;
 	XMMATRIX matPerspective;
 	XMMATRIX matView;
-	XMFLOAT3 eye;
-	XMFLOAT3 target;
-	XMFLOAT3 up;
+	Vec3 eye;
+	Vec3 target;
+	Vec3 up;
 
 	XMMATRIX matViewProjShadowMap;
 
 
-	matProjection = Camera::matProjection;
-	matPerspective = Camera::matPerspective;
-	matView = Camera::matView;
-	eye = Camera::eye;
-	target = Camera::target;
-	up = Camera::up;
+	matProjection = Camera::Instance()->matProjection;
+	matPerspective = Camera::Instance()->matPerspective;
+	matView = Camera::Instance()->matView;
+	eye = Camera::Instance()->Instance()->eye;
+	target = Camera::Instance()->Instance()->target;
+	up = Camera::Instance()->Instance()->up;
 
 
 
@@ -149,8 +150,8 @@ void BaseDrawData::MapConstDataB0(ComPtr<ID3D12Resource> constBuffB0, const Cons
 		matWorld *= rotationMat;
 		matWorld *= positionMat;
 		constMap->mat.world = matWorld;
-		constMap->mat.viewproj = Camera::matProjection;								//平行投影変換
-		constMap->eye = Camera::eye;
+		constMap->mat.viewproj = Camera::Instance()->matProjection;								//平行投影変換
+		constMap->eye = Camera::Instance()->eye;
 		constMap->color = constBufferDataB0.color;
 	}
 	//投影IDがobjectの場合はいろいろな変換を行う
@@ -168,11 +169,11 @@ void BaseDrawData::MapConstDataB0(ComPtr<ID3D12Resource> constBuffB0, const Cons
 	//ビルボードの場合
 	else if (projectionID == PROJECTIONID_BILLBOARD) {
 		//視点座標
-		XMVECTOR eyePosition = XMLoadFloat3(&eye);
+		XMVECTOR eyePosition = eye.ConvertXMVECTOR();
 		//注視点座標
-		XMVECTOR targetPosition = XMLoadFloat3(&target);
+		XMVECTOR targetPosition = target.ConvertXMVECTOR();
 		//(仮の)上方向
-		XMVECTOR upVector = XMLoadFloat3(&up);
+		XMVECTOR upVector = up.ConvertXMVECTOR();
 		//カメラZ軸
 		XMVECTOR cameraAxisZ = XMVectorSubtract(targetPosition, eyePosition);
 		//0ベクトルだと向きが定まらないので除外
