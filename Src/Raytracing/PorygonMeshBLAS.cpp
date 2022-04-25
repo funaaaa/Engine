@@ -392,7 +392,7 @@ D3D12_RAYTRACING_GEOMETRY_DESC PorygonMeshBlas::GetGeometryDesc()
 	// 形状データのフラグを設定。
 	auto geometryDesc = D3D12_RAYTRACING_GEOMETRY_DESC{};
 	geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-	geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+	geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NO_DUPLICATE_ANYHIT_INVOCATION;
 
 	// 形状データの細かい項目を設定。
 	auto& triangles = geometryDesc.Triangles;

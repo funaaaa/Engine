@@ -294,16 +294,17 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
 [shader("closesthit")]
 void shadowCHS(inout ShadowPayload payload, MyAttribute attrib)
 {
-    uint instanceID = InstanceID();
+}
 
-    //// 屈折のオブエジェクトに当たっていたら影を薄く生成する。
-    //if (instanceID == 1)
-    //{
-    //    payload.shadowRate = 0.8f;
-    //}
-    //else
-    //{
-    //    // その他のオブジェクトに当たった場合は普通に影を生成する。
-    //    payload.shadowRate = 0.7f;
-    //}
+// アルファ抜きAnyHitShader
+[shader("anyhit")]
+void mainAnyHit(inout Payload payload, MyAttribute attrib)
+{
+    Vertex vtx = GetHitVertex(attrib);
+    float4 diffuse = texture.SampleLevel(smp, vtx.uv, 0);
+    if (diffuse.w < 0.5f)
+    {
+        IgnoreHit();
+
+    }
 }

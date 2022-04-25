@@ -257,8 +257,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	boneBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
 
 	// 天球のBLASを生成。
-	PorygonMeshBlas skydomeBlas;
-	skydomeBlas.GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);
+	PorygonMeshBlas monkeyBlas;
+	monkeyBlas.GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);
 
 	// 床のBLASを生成。
 	PorygonMeshBlas groundBlas;
@@ -271,7 +271,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// インスタンスを生成
 	porygonInstance[0].CreateInstance(boneBlas.GetBLASBuffer(), 0, 2);
 	porygonInstance[1].CreateInstance(boneBlas.GetBLASBuffer(), 0, 1);
-	porygonInstance[2].CreateInstance(skydomeBlas.GetBLASBuffer(), 1, 2);
+	porygonInstance[2].CreateInstance(monkeyBlas.GetBLASBuffer(), 1, 2);
 	porygonInstance[3].CreateInstance(groundBlas.GetBLASBuffer(), 2, 2);
 
 	// 移動させる。
@@ -353,11 +353,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	dxilLib->DefineExport(L"shadowMS");
 	dxilLib->DefineExport(L"mainCHS");
 	dxilLib->DefineExport(L"shadowCHS");
+	dxilLib->DefineExport(L"mainAnyHit");
 
 	// ヒットグループの設定。
 	auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
 	hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
 	hitGroup->SetClosestHitShaderImport(L"mainCHS");
+	hitGroup->SetAnyHitShaderImport(L"mainAnyHit");
 	hitGroup->SetHitGroupExport(hitGroupName);
 
 	// グローバルルートシグネチャの設定。
@@ -457,7 +459,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	hitgroupRecordSize = surarin::RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
 
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = 3;
+	UINT hitgroupCount = 1;
 	UINT raygenSize = 1 * raygenRecordSize;
 	UINT missSize = 2 * missRecordSize;
 	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
@@ -521,7 +523,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// monekyに対応するシェーダーレコードを書き込む
 		pRecord = surarin::WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject, monkeyHandle);
 		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, skydomeBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject, monkeyHandle);
 		// ground に対応するシェーダーレコードを書き込む
 		pRecord = surarin::WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
 	}
