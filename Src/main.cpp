@@ -12,6 +12,7 @@
 #include "Input.h"
 #include "TextureManager.h"
 #include "FbxLoader.h"
+#include "Vec.h"
 
 #include "PorygonMeshBLAS.h"
 #include "PorygonInstance.h"
@@ -245,41 +246,43 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	/*----------変数宣言----------*/
 	srand(time(NULL));
 
-
 	// ディスクリプタヒープを初期化。
 	DescriptorHeapMgr::Instance()->GenerateDescriptorHeap();
 
 	// FBXLoaderを初期化。
 	FbxLoader::Instance()->Init();
 
-	// コーンのBLASを生成。
-	PorygonMeshBlas coneBlas;
-	coneBlas.GenerateBLASObj("Resource/", "cone.obj", hitGroupName);
-
 	// 猿のBLASを生成。
-	PorygonMeshBlas monkeyBlas;
-	monkeyBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
+	PorygonMeshBlas boneBlas;
+	boneBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
 
 	// 天球のBLASを生成。
 	PorygonMeshBlas skydomeBlas;
-	skydomeBlas.GenerateBLASObj("Resource/", "skydome.obj", hitGroupName);
+	skydomeBlas.GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);
 
-	// 球のBLASを生成。
-	PorygonMeshBlas sphereBlas;
-	sphereBlas.GenerateBLASObj("Resource/", "sphere.obj", hitGroupName);
+	// 床のBLASを生成。
+	PorygonMeshBlas groundBlas;
+	groundBlas.GenerateBLASObj("Resource/", "ground.obj", hitGroupName);
 
 	// 三角形のInstancecを生成。
-	vector<PorygonMeshInstance> triangleInstance;
-	triangleInstance.resize(3);
+	vector<PorygonMeshInstance> porygonInstance;
+	porygonInstance.resize(4);
 
 	// インスタンスを生成
-	triangleInstance[0].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 2);
-	triangleInstance[1].CreateInstance(monkeyBlas.GetBLASBuffer(), 0, 1);
-	triangleInstance[2].CreateInstance(skydomeBlas.GetBLASBuffer(), 2, 2);
+	porygonInstance[0].CreateInstance(boneBlas.GetBLASBuffer(), 0, 2);
+	porygonInstance[1].CreateInstance(boneBlas.GetBLASBuffer(), 0, 1);
+	porygonInstance[2].CreateInstance(skydomeBlas.GetBLASBuffer(), 1, 2);
+	porygonInstance[3].CreateInstance(groundBlas.GetBLASBuffer(), 2, 2);
 
-	triangleInstance[0].AddTrans(-2.0f, 0.0f, 0);
-	triangleInstance[1].AddTrans(2.0f, 0.0f, 0);
-	triangleInstance[2].AddTrans(0.0f, 0.0f, 0);
+	// 移動させる。
+	porygonInstance[0].AddTrans(-2.0f, 0.0f, 0);
+	porygonInstance[1].AddTrans(2.0f, 0.0f, 0);
+	porygonInstance[2].AddTrans(0.0f, 0.0f, 0);
+	porygonInstance[3].AddTrans(0.0f, -1.0f, 0);
+
+	// ある程度回転させる。
+	porygonInstance[0].AddRotate(0.0f, 0.1f, 0);
+	porygonInstance[1].AddRotate(0.0f, 0.1f, 0);
 
 	// 背景テクスチャをロード
 	int monkeyHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/backGround.png");
@@ -347,7 +350,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	dxilLib->SetDXILLibrary(&shadercode);
 	dxilLib->DefineExport(L"mainRayGen");
 	dxilLib->DefineExport(L"mainMS");
+	dxilLib->DefineExport(L"shadowMS");
 	dxilLib->DefineExport(L"mainCHS");
+	dxilLib->DefineExport(L"shadowCHS");
 
 	// ヒットグループの設定。
 	auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
@@ -454,7 +459,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
 	UINT hitgroupCount = 3;
 	UINT raygenSize = 1 * raygenRecordSize;
-	UINT missSize = 1 * missRecordSize;
+	UINT missSize = 2 * missRecordSize;
 	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
 
 	// 各テーブルの開始位置にアライメント制約があるので調整する。
@@ -503,6 +508,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		uint8_t* p = missStart;
 		auto id = rtsoProps->GetShaderIdentifier(L"mainMS");
 		p += surarin::WriteShaderIdentifier(p, id);
+		// Shadow Miss Shader 用のシェーダーレコードを書き込み。
+		id = rtsoProps->GetShaderIdentifier(L"shadowMS");
+		p += surarin::WriteShaderIdentifier(p, id);
 	}
 
 	// Hit Group 用のシェーダーレコードを書き込み。
@@ -511,11 +519,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		uint8_t* pRecord = hitgroupStart;
 		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject, monkeyHandle);
-		// cube に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, sphereBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject, monkeyHandle);
 		// skydome に対応するシェーダーレコードを書き込む
 		pRecord = surarin::WriteShaderRecord(pRecord, skydomeBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
+		// ground に対応するシェーダーレコードを書き込む
+		pRecord = surarin::WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
 	}
 	shaderTable->Unmap(0, nullptr);
 
@@ -566,6 +574,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
 
+	// カメラを初期化。
+	Camera::Instance()->Init();
+
 
 	/*----------ゲームループ----------*/
 	while (true) {
@@ -584,27 +595,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//Camera::target = triangle.GetPos();
 
 		// スキニングアニメーションさせる。
-		monkeyBlas.ComputeSkin();
+		boneBlas.ComputeSkin();
 
 		float speed = 0.1f;
-		if (Input::isKey(DIK_D)) eye.x += speed;
-		if (Input::isKey(DIK_A)) eye.x -= speed;
-		if (Input::isKey(DIK_W)) eye.y += speed;
-		if (Input::isKey(DIK_S)) eye.y -= speed;
-		if (Input::isKey(DIK_UP)) eye.z += speed;
-		if (Input::isKey(DIK_DOWN)) eye.z -= speed;
+		float rot = 0.05f;
+		if (Input::isKey(DIK_W)) Camera::Instance()->Move(speed);
+		if (Input::isKey(DIK_S)) Camera::Instance()->Move(-speed);
+		if (Input::isKey(DIK_A)) Camera::Instance()->MoveRight(speed);
+		if (Input::isKey(DIK_D)) Camera::Instance()->MoveRight(-speed);
+		if (Input::isKey(DIK_UP)) Camera::Instance()->eye.y += speed;
+		if (Input::isKey(DIK_DOWN)) Camera::Instance()->eye.y -= speed;
 
-		if (Input::isKey(DIK_1)) triangleInstance[0].AddTrans(0.1f, 0.1f, 0.0f);
+		if (Input::isKey(DIK_1)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
 		if (Input::isKey(DIK_2)) {
 
-			monkeyBlas.PlayAnimation();
+			boneBlas.PlayAnimation();
 
 		}
 
-		monkeyBlas.Update();
+		boneBlas.Update();
 
 		// TLASを更新。
 		tlas.Update();
+
+		eye = Camera::Instance()->eye;
+		target = Camera::Instance()->target;
+		up = Camera::Instance()->up;
+
+		// カメラを更新。
+		Camera::Instance()->Update();
 
 
 		/*----- 描画処理 -----*/
@@ -624,8 +643,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 		DirectXBase::Instance()->cmdList->SetComputeRootSignature(globalRootSig.GetRootSig().Get());
 		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
-		DirectXBase::Instance()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(2, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(uavDescriptorIndex));
+		DirectXBase::Instance()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
 		// レイトレーシング結果バッファをUAV状態へ
@@ -699,12 +718,3 @@ void FPS()
 		frame_count = 0;
 	}
 }
-
-/*
-
-実装メモ
-
-・クラス化を進める。
-・シェーダー周りやパイプライン、ディスパッチレイ辺りをクラスでまとめる。
-
-*/

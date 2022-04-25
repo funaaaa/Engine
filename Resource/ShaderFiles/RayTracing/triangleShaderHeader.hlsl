@@ -1,30 +1,11 @@
 
 //#pragma enable_d3d11_debug_symbols
 
-// 頂点情報
-struct Vertex
-{
-    float3 Position;
-    float3 Normal;
-    float2 uv;
-};
-
-// 環境情報
-struct SceneCB
-{
-    matrix mtxView; // ビュー行列.
-    matrix mtxProj; // プロジェクション行列.
-    matrix mtxViewInv; // ビュー逆行列.
-    matrix mtxProjInv; // プロジェクション逆行列.
-    float4 lightDirection; // 平行光源の向き.
-    float4 lightColor; // 平行光源色.
-    float4 ambientColor; // 環境光.
-};
+#include "RaytracingShaderHeader.hlsli"
 
 // グローバルルートシグネチャ
 RaytracingAccelerationStructure gRtScene : register(t0);
 ConstantBuffer<SceneCB> gSceneParam : register(b0);
-
 
 // ヒットグループのローカルルートシグネチャ
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
@@ -35,42 +16,6 @@ SamplerState smp : register(s0, space1);
 
 // RayGenerationシェーダーのローカルルートシグネチャ
 RWTexture2D<float4> gOutput : register(u0);
-
-// ペイロード 色情報を取得するための構造体
-struct Payload
-{
-    float3 color;
-    uint recursive;
-};
-// アトリビュート 当たった位置を取得するための構造体
-struct MyAttribute
-{
-    float2 barys;
-};
-
-// 当たった位置を計算する関数
-inline float3 CalcBarycentrics(float2 barys)
-{
-    return float3(1.0 - barys.x - barys.y, barys.x, barys.y);
-}
-
-// 当たった位置を特定
-inline float2 CalcHitAttribute2(float2 vertexAttribute[3], float2 barycentrics)
-{
-    float2 ret;
-    ret = vertexAttribute[0];
-    ret += barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]);
-    ret += barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-    return ret;
-}
-inline float3 CalcHitAttribute3(float3 vertexAttribute[3], float2 barycentrics)
-{
-    float3 ret;
-    ret = vertexAttribute[0];
-    ret += barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]);
-    ret += barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-    return ret;
-}
 
 // 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib)
@@ -185,17 +130,31 @@ float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
     }
 }
 
-
-// 制限以上トレースしないようにする
-inline bool checkRecursiveLimit(inout Payload payload)
+// シャドウレイ発射
+bool ShootShadowRay(float3 origin, float3 direction)
 {
-    payload.recursive++;
-    if (payload.recursive >= 29)
-    {
-        payload.color = float3(0, 0, 0);
-        return true;
-    }
-    return false;
+    RayDesc rayDesc;
+    rayDesc.Origin = origin;
+    rayDesc.Direction = direction;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = 100000;
+
+    ShadowPayload payload;
+    payload.shadowRate = 1.0f;
+
+    RAY_FLAG flags = RAY_FLAG_NONE;
+
+    // ライトは除外。
+    uint rayMask = ~(0x08);
+
+    TraceRay(
+    gRtScene, flags, rayMask,
+    0,
+    1,
+    1, // MISSシェーダーのインデックス
+    rayDesc, payload);
+
+    return payload.shadowRate;
 }
 
 // RayGenerationシェーダー
@@ -260,6 +219,14 @@ void mainMS(inout Payload payload)
 
 }
 
+// シャドウ用missシェーダー
+[shader("miss")]
+void shadowMS(inout ShadowPayload payload)
+{
+    // 何にも当たっていないということなので、影は生成しない。
+    payload.shadowRate = 1.0f;
+}
+
 // closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
 [shader("closesthit")]
 void mainCHS(inout Payload payload, MyAttribute attrib)
@@ -274,31 +241,60 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         return; // 呼び出し回数が越えたら即リターン.
     }
 
+    // 完全反射
     if (instanceID == 0)
     {
         float3 reflectionColor = Reflection(vtx.Position, vtx.Normal, payload.recursive);
         payload.color = reflectionColor;
     }
+    // 屈折
     if (instanceID == 1)
     {
         payload.color = Refraction(vtx.Position, vtx.Normal, payload.recursive);
     }
+    // 通常ライティング
     else
     {
-        // Lambert ライティングを行う.
-        float3 lightDir = -normalize(gSceneParam.lightDirection.xyz);
+        // lambert ライティングを行う.
+        float3 lightdir = -normalize(gSceneParam.lightDirection.xyz);
 
-        float nl = saturate(dot(vtx.Normal, lightDir));
+        float nl = saturate(dot(vtx.Normal, lightdir));
 
-        float3 lightColor = gSceneParam.lightColor.xyz;
-        float3 ambientColor = gSceneParam.ambientColor.xyz;
-        float4 materialColor = texture.SampleLevel(smp, vtx.uv, 0.0f);
+        float3 lightcolor = gSceneParam.lightColor.xyz;
+        float3 ambientcolor = gSceneParam.ambientColor.xyz;
+        float4 materialcolor = texture.SampleLevel(smp, vtx.uv, 0.0f);
         float3 color = 0;
-        color += lightColor * materialColor.xyz * nl;
-        color += ambientColor * materialColor.xyz;
+        color += lightcolor * materialcolor.xyz * nl;
+        color += ambientcolor * materialcolor.xyz;
 
         payload.color = color;
 
+        // シャドウレイを発射。
+        float shadowRate = 1.0f;
+        float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
+        shadowRate = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
+
+        // 影なら暗くする。
+        payload.color.xyz *= shadowRate;
+
     }
 
+}
+
+// closesthitシェーダー シャドウ用
+[shader("closesthit")]
+void shadowCHS(inout ShadowPayload payload, MyAttribute attrib)
+{
+    uint instanceID = InstanceID();
+
+    // 屈折のオブエジェクトに当たっていたら影を薄く生成する。
+    if (instanceID == 1)
+    {
+        payload.shadowRate = 0.8f;
+    }
+    else
+    {
+        // その他のオブジェクトに当たった場合は普通に影を生成する。
+        payload.shadowRate = 0.5f;
+    }
 }

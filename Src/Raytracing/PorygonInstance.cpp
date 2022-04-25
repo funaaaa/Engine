@@ -8,7 +8,7 @@ void PorygonMeshInstance::CreateInstance(const ComPtr<ID3D12Resource>& blassBuff
 	/*===== インスタンスを生成する処理 =====*/
 
 	// 移動行列を初期化。
-	transMat = XMMatrixIdentity();
+	worldMat = XMMatrixIdentity();
 
 	// インスタンスIDを求める。
 	//instanceID = InstanceIDMgr::Instance()->GetInstanceID();
@@ -18,7 +18,7 @@ void PorygonMeshInstance::CreateInstance(const ComPtr<ID3D12Resource>& blassBuff
 	// 行列を設定。
 	XMStoreFloat3x4(
 		reinterpret_cast<XMFLOAT3X4*>(&instanceDesc.Transform),
-		transMat);
+		worldMat);
 
 	// インスタンスの詳細を設定。
 	instanceDesc.InstanceID = instanceID;
@@ -38,10 +38,10 @@ void PorygonMeshInstance::AddTrans(const float& x, const float& y, const float z
 	/*===== 移動関数 =====*/
 
 	// 移動行列を更新。
-	transMat *= XMMatrixTranslation(x, y, z);
+	worldMat *= XMMatrixTranslation(x, y, z);
 
 	// レジスターの設定を更新する。
-	PorygonInstanceRegister::Instance()->AddTrans(transMat, registerID);
+	PorygonInstanceRegister::Instance()->AddTrans(worldMat, registerID);
 
 }
 
@@ -51,6 +51,30 @@ void PorygonMeshInstance::AddTrans(const XMFLOAT3& pos)
 	/*===== 移動関数 =====*/
 
 	AddTrans(pos.x, pos.y, pos.z);
+
+}
+
+void PorygonMeshInstance::AddRotate(const float& x, const float& y, const float z)
+{
+
+	/*===== 移動関数 =====*/
+
+	// 移動行列を更新。
+	worldMat *= XMMatrixRotationZ(z);
+	worldMat *= XMMatrixRotationX(x);
+	worldMat *= XMMatrixRotationY(y);
+
+	// レジスターの設定を更新する。
+	PorygonInstanceRegister::Instance()->AddTrans(worldMat, registerID);
+
+}
+
+void PorygonMeshInstance::AddRotate(const XMFLOAT3& pos)
+{
+
+	/*===== 移動関数 =====*/
+
+	AddRotate(pos.x, pos.y, pos.z);
 
 }
 

@@ -11,6 +11,8 @@ public:
 	static XMFLOAT3 target;			//ゲームワールド内でカメラが見ている座標
 	static XMFLOAT3 up;				//ゲームワールド内でカメラから見て上方向を指すベクトル
 
+	static XMFLOAT3 forwardVec;
+
 	static XMFLOAT3 honraiEye;		//本来あるべき視点座標
 	static XMFLOAT3 honraiTarget;	//本来あるべき注視点座標
 	static XMFLOAT3 honraiUp;		//本来あるべき上ベクトル
@@ -46,7 +48,15 @@ public:
 	static void GenerateMatViewSpeed(const float& nowSpeed, const float& maxSpeed);
 
 	//更新処理
-	void Update(const XMFLOAT3& playerPos, const XMFLOAT3& playerForwardVec, const XMFLOAT3& playerUpVec, const float& nowSpeed, const float& maxSpeed);
+	void UpdateRacingGame(const XMFLOAT3& playerPos, const XMFLOAT3& playerForwardVec, const XMFLOAT3& playerUpVec, const float& nowSpeed, const float& maxSpeed);
+	void Update();
+
+	// 回転
+	void AddRotation(const float& RotX, const float& RotY, const float& RotZ);
+
+	// 移動
+	void Move(const float& Speed);
+	void MoveRight(const float& Speed);
 
 	//アクセッタ
 	XMFLOAT3 GetEyeVector();

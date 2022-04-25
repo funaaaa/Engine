@@ -4,12 +4,13 @@
 #include "DirectXBase.h"
 #include <d3d12.h>
 
-XMFLOAT3 Camera::eye = XMFLOAT3(window_width / 2, window_height / 2, -10);
-XMFLOAT3 Camera::target = XMFLOAT3(window_width / 2, window_height / 2, 0);
+XMFLOAT3 Camera::eye = XMFLOAT3(0, 0, -10);
+XMFLOAT3 Camera::target = XMFLOAT3(0, 0, 0);
 XMFLOAT3 Camera::up = XMFLOAT3(0, 1, 0);
 XMFLOAT3 Camera::honraiEye = XMFLOAT3(window_width / 2, window_height / 2, -10);
 XMFLOAT3 Camera::honraiTarget = XMFLOAT3(window_width / 2, window_height / 2, 0);
 XMFLOAT3 Camera::honraiUp = XMFLOAT3(0, 1, 0);
+XMFLOAT3 Camera::forwardVec = { 0,0,1 };
 XMMATRIX Camera::rotationMat = XMMatrixIdentity();
 XMMATRIX Camera::upRotationMat = XMMatrixIdentity();
 XMMATRIX Camera::matView = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
@@ -58,8 +59,8 @@ void Camera::GenerateMatViewSpeed(const float& nowSpeed, const float& maxSpeed)
 
 void Camera::Init()
 {
-	eye = XMFLOAT3(window_width / 2, window_height / 2, 500);
-	target = XMFLOAT3(window_width / 2, window_height / 2, 0);
+	eye = XMFLOAT3(0, 0, 10);
+	target = XMFLOAT3(0, 0, 0);
 	up = XMFLOAT3(0, 1, 0);
 	rotationMat = XMMatrixIdentity();
 	upRotationMat = XMMatrixIdentity();
@@ -70,7 +71,7 @@ void Camera::Init()
 
 }
 
-void Camera::Update(const XMFLOAT3& playerPos, const XMFLOAT3& playerForwardVec, const XMFLOAT3& playerUpVec, const float& nowSpeed, const float& maxSpeed)
+void Camera::UpdateRacingGame(const XMFLOAT3& playerPos, const XMFLOAT3& playerForwardVec, const XMFLOAT3& playerUpVec, const float& nowSpeed, const float& maxSpeed)
 {
 	//本来あるべき視点座標を更新
 	honraiEye = { EYE_PLAYER_DISTANCE * (-playerForwardVec.x) + playerPos.x + (honraiUp.x * 50.0f),
@@ -94,8 +95,59 @@ void Camera::Update(const XMFLOAT3& playerPos, const XMFLOAT3& playerForwardVec,
 	GenerateMatViewSpeed(nowSpeed, maxSpeed);
 }
 
+void Camera::Update()
+{
+
+	// 正面ベクトルを求める。
+	//forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
+	forwardVec = FHelper::Normalize3D(eye);
+	forwardVec = FHelper::MulXMFLOAT3(forwardVec, XMFLOAT3(-1, -1, -1));
+
+	float angleXZ = atan2f(forwardVec.z, forwardVec.x);
+
+	// 回転行列を求める。
+	rotationMat = XMMatrixIdentity();
+	rotationMat *= XMMatrixRotationY(angleXZ);
+
+	// 視点座標から視点点座標を求める。
+	const float EYE_TARGET = 100.0f;
+	//target = FHelper::AddXMFLOAT3(eye, FHelper::MulXMFLOAT3(forwardVec, XMFLOAT3(EYE_TARGET, EYE_TARGET, EYE_TARGET)));
+	target = { 0,0,0 };
+
+	// 上ベクトルを求める。
+	up = FHelper::MulRotationMatNormal({ 0,1,0 }, rotationMat);
+
+}
+
+void Camera::AddRotation(const float& RotX, const float& RotY, const float& RotZ)
+{
+
+	// カメラの回転行列を回転させる。
+
+	rotationMat *= XMMatrixRotationZ(RotX);
+	rotationMat *= XMMatrixRotationX(RotX);
+	rotationMat *= XMMatrixRotationY(RotY);
+
+}
+
+void Camera::Move(const float& Speed)
+{
+
+	eye = FHelper::AddXMFLOAT3(eye, FHelper::MulXMFLOAT3(forwardVec, XMFLOAT3(Speed, Speed, Speed)));
+
+}
+
+void Camera::MoveRight(const float& Speed)
+{
+	XMMATRIX mat = FHelper::CalRotationMat(XMFLOAT3(0, -3.14f / 2.0f, 0));
+	XMFLOAT3 moveDir = FHelper::MulRotationMatNormal(forwardVec, mat);
+
+	eye = FHelper::AddXMFLOAT3(eye, FHelper::MulXMFLOAT3(moveDir, XMFLOAT3(Speed, Speed, Speed)));
+
+}
+
 XMFLOAT3 Camera::GetEyeVector()
 {
 	XMFLOAT3 returnBuff = FHelper::Normalize3D(XMFLOAT3(honraiTarget.x - honraiEye.x, honraiTarget.y - honraiEye.y, honraiTarget.z - honraiEye.z));
-		return returnBuff;
+	return returnBuff;
 }

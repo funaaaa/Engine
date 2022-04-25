@@ -14,7 +14,7 @@ private:
 	UINT instanceID;								// このインスタンスのID
 	UINT registerID;								// registerの何番目に格納されているかのID デバッグ用
 
-	XMMATRIX transMat;								// 移動行列
+	XMMATRIX worldMat;								// ワールド行列
 
 
 public:
@@ -27,6 +27,10 @@ public:
 	// 移動(引数を加算)関数
 	void AddTrans(const float& x, const float& y, const float z);
 	void AddTrans(const XMFLOAT3& pos);
+
+	// 回転(ラジアン、引数を加算)関数
+	void AddRotate(const float& x, const float& y, const float z);
+	void AddRotate(const XMFLOAT3& pos);
 
 
 private:
