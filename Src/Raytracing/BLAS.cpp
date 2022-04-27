@@ -1,17 +1,23 @@
-#include "PorygonMeshBLAS.h"
+#include "BLAS.h"
 #include "ModelDataManager.h"
 #include "DescriptorHeapMgr.h"
 #include <DirectXMath.h>
 #include "FbxLoader.h"
 #include "RWStructuredBuffer.h"
 #include "StructuredBuffer.h"
+#include "TextureManager.h"
 
 using namespace DirectX;
 
-void PorygonMeshBlas::GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
+
+	// テクスチャを読み込む。
+	wchar_t texturePathBuff[128];
+	MultiByteToWideChar(CP_ACP, 0, TexturePath.c_str(), -1, texturePathBuff, 128);
+	textureHandle = TextureManager::Instance()->LoadTexture(texturePathBuff);
 
 	/*-- 形状データを読み込む --*/
 
@@ -19,7 +25,7 @@ void PorygonMeshBlas::GenerateBLASObj(const string& directryPath, const string& 
 	Object3DDeliveryData dataBuff;
 
 	// モデルをロード。
-	ModelDataManager::LoadObj(directryPath, modelName, dataBuff, false);
+	ModelDataManager::LoadObj(DirectryPath, ModelName, dataBuff, false);
 
 	// 頂点数を求める。
 	vertexCount = dataBuff.vertex.size();
@@ -86,14 +92,19 @@ void PorygonMeshBlas::GenerateBLASObj(const string& directryPath, const string& 
 
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName = hitGroupName;
+	this->hitGroupName = HitGroupName;
 
 }
 
-void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
+
+	// テクスチャを読み込む。
+	wchar_t texturePathBuff[128];
+	MultiByteToWideChar(CP_ACP, 0, TexturePath.c_str(), -1, texturePathBuff, 128);
+	textureHandle = TextureManager::Instance()->LoadTexture(texturePathBuff);
 
 	/*-- 形状データを読み込む --*/
 
@@ -101,7 +112,7 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 	Object3DDeliveryData dataBuff;
 
 	// モデルをロード。
-	modelIndex = FbxLoader::Instance()->LoadModelFromFile(directryPath, modelName);
+	modelIndex = FbxLoader::Instance()->LoadModelFromFile(DirectryPath, ModelName);
 
 	dataBuff = FbxLoader::Instance()->ConvertObject3DDeliveryData(modelIndex);
 
@@ -112,7 +123,7 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 	indexCount = dataBuff.index.size();
 
 	Object3DDeliveryData fbxData;
-	ModelDataManager::LoadFbx((directryPath + modelName).c_str(), fbxData);
+	ModelDataManager::LoadFbx((DirectryPath + ModelName).c_str(), fbxData);
 
 	// 頂点データを変換。
 	for (int index = 0; index < vertexCount; ++index) {
@@ -172,7 +183,7 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 	SettingAccelerationStructure(geomDesc);
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName = hitGroupName;
+	this->hitGroupName = HitGroupName;
 
 	// モデルがアニメーションを持っていたら。
 	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
@@ -190,7 +201,7 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 
 }
 
-void PorygonMeshBlas::Update()
+void BLAS::Update()
 {
 
 	/*===== BLASの更新 =====*/
@@ -250,7 +261,7 @@ void PorygonMeshBlas::Update()
 
 }
 
-void PorygonMeshBlas::ComputeSkin()
+void BLAS::ComputeSkin()
 {
 
 	/*===== 頂点データをスキニング行列を元に書き換える処理 =====*/
@@ -271,7 +282,7 @@ void PorygonMeshBlas::ComputeSkin()
 
 }
 
-void PorygonMeshBlas::InitAnimation()
+void BLAS::InitAnimation()
 {
 	// モデルがアニメーションを持っていたら。
 	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
@@ -281,7 +292,7 @@ void PorygonMeshBlas::InitAnimation()
 	}
 }
 
-void PorygonMeshBlas::PlayAnimation()
+void BLAS::PlayAnimation()
 {
 
 	/*===== アニメーションさせる =====*/
@@ -295,7 +306,7 @@ void PorygonMeshBlas::PlayAnimation()
 
 }
 
-void PorygonMeshBlas::StopAnimation()
+void BLAS::StopAnimation()
 {
 
 	/*===== アニメーションを停止させる =====*/
@@ -309,42 +320,73 @@ void PorygonMeshBlas::StopAnimation()
 
 }
 
-void PorygonMeshBlas::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
+uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject)
+{
+
+	/*===== シェーダーレコードを書き込む =====*/
+
+	ComPtr<ID3D12StateObjectProperties> rtsoProps;
+	StateObject.As(&rtsoProps);
+	auto entryBegin = Dst;
+	auto shader = GetHitGroupName();
+	auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
+	if (id == nullptr) {
+		throw std::logic_error("Not found ShaderIdentifier");
+	}
+
+	// シェーダー識別子を書き込む。
+	memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+	// 今回のプログラムでは以下の順序でディスクリプタを記録。
+	// [0] : インデックスバッファ
+	// [1] : 頂点バッファ
+	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+	Dst += WriteGPUDescriptor(Dst, &GetIndexDescriptor().GetGPUHandle());
+	Dst += WriteGPUDescriptor(Dst, &GetVertexDescriptor().GetGPUHandle());
+	Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
+
+	Dst = entryBegin + recordSize;
+	return Dst;
+
+}
+
+void BLAS::WriteToMemory(ComPtr<ID3D12Resource>& Resource, const void* pData, size_t DataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
 
 	// nullチェック。
-	if (resource == nullptr) return;
+	if (Resource == nullptr) return;
 
 	// マップ処理を行う。
 	void* mapped = nullptr;
-	D3D12_RANGE range{ 0, dataSize };
-	HRESULT hr = resource->Map(0, &range, (void**)&mapped);
+	D3D12_RANGE range{ 0, DataSize };
+	HRESULT hr = Resource->Map(0, &range, (void**)&mapped);
 
 	// マップが成功したら値を書き込む。
 	if (SUCCEEDED(hr)) {
 
-		memcpy(mapped, pData, dataSize);
-		resource->Unmap(0, nullptr);
+		memcpy(mapped, pData, DataSize);
+		Resource->Unmap(0, nullptr);
 
 	}
 
 }
 
-ComPtr<ID3D12Resource> PorygonMeshBlas::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
 
 	// 引数から設定用構造体を設定する。
 	D3D12_HEAP_PROPERTIES heapProps{};
-	if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
+	if (HeapType == D3D12_HEAP_TYPE_DEFAULT) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
 	}
-	if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
+	if (HeapType == D3D12_HEAP_TYPE_UPLOAD) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
@@ -356,21 +398,21 @@ ComPtr<ID3D12Resource> PorygonMeshBlas::CreateBuffer(size_t size, D3D12_RESOURCE
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;
-	resDesc.Width = size;
+	resDesc.Width = Size;
 	resDesc.Height = 1;
 	resDesc.DepthOrArraySize = 1;
 	resDesc.MipLevels = 1;
 	resDesc.Format = DXGI_FORMAT_UNKNOWN;
 	resDesc.SampleDesc = { 1, 0 };
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	resDesc.Flags = flags;
+	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
 	hr = DirectXBase::Instance()->dev->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
-		initialState,
+		InitialState,
 		nullptr,
 		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
 	);
@@ -384,7 +426,7 @@ ComPtr<ID3D12Resource> PorygonMeshBlas::CreateBuffer(size_t size, D3D12_RESOURCE
 
 }
 
-D3D12_RAYTRACING_GEOMETRY_DESC PorygonMeshBlas::GetGeometryDesc()
+D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc()
 {
 
 	/*===== BLAS生成時に設定を取得する用関数 =====*/
@@ -408,7 +450,7 @@ D3D12_RAYTRACING_GEOMETRY_DESC PorygonMeshBlas::GetGeometryDesc()
 
 }
 
-void PorygonMeshBlas::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc)
+void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& GeomDesc)
 {
 
 	/*===== 加速構造体の設定用関数 =====*/
@@ -420,7 +462,7 @@ void PorygonMeshBlas::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMET
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
 	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 	inputs.NumDescs = 1;
-	inputs.pGeometryDescs = &geomDesc;
+	inputs.pGeometryDescs = &GeomDesc;
 
 	// 関数を使って必要なメモリ量を求める.
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
@@ -465,7 +507,7 @@ void PorygonMeshBlas::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMET
 
 }
 
-void PorygonMeshBlas::CreateAccelerationStructure()
+void BLAS::CreateAccelerationStructure()
 {
 
 	/*===== BLAS構築処理 =====*/

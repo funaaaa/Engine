@@ -14,7 +14,7 @@
 #include "FbxLoader.h"
 #include "Vec.h"
 
-#include "PorygonMeshBLAS.h"
+#include "BLASRegister.h"
 #include "PorygonInstance.h"
 #include "TLAS.h"
 #include "RayRootsignature.h"
@@ -205,32 +205,6 @@ namespace surarin {
 		return UINT(sizeof(descriptor));
 	}
 
-	uint8_t* WriteShaderRecord(uint8_t* dst, PorygonMeshBlas& mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject, const int& textureHandle)
-	{
-		ComPtr<ID3D12StateObjectProperties> rtsoProps;
-		stateObject.As(&rtsoProps);
-		auto entryBegin = dst;
-		auto shader = mesh.GetHitGroupName();
-		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
-		if (id == nullptr) {
-			throw std::logic_error("Not found ShaderIdentifier");
-		}
-
-		dst += WriteShaderIdentifier(dst, id);
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		dst += WriteGPUDescriptor(dst, &mesh.GetIndexDescriptor().GetGPUHandle());
-		dst += WriteGPUDescriptor(dst, &mesh.GetVertexDescriptor().GetGPUHandle());
-		dst += WriteGPUDescriptor(dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
-
-		dst = entryBegin + recordSize;
-		return dst;
-
-	}
-
-
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -253,26 +227,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	FbxLoader::Instance()->Init();
 
 	// 猿のBLASを生成。
-	PorygonMeshBlas boneBlas;
-	boneBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
+	int boneBlas = BLASRegister::Instance()->GenerateFbx("Resource/", "boneTest.fbx", hitGroupName, "Resource/backGround.png");
 
 	// 天球のBLASを生成。
-	PorygonMeshBlas monkeyBlas;
-	monkeyBlas.GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);
+	int monkeyBlas = BLASRegister::Instance()->GenerateObj("Resource/", "monkey.obj", hitGroupName, "Resource/backGround.png");
 
 	// 床のBLASを生成。
-	PorygonMeshBlas groundBlas;
-	groundBlas.GenerateBLASObj("Resource/", "ground.obj", hitGroupName);
+	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", hitGroupName, "Resource/Fine_Basin.jpg");
 
 	// 三角形のInstancecを生成。
 	vector<PorygonMeshInstance> porygonInstance;
 	porygonInstance.resize(4);
 
 	// インスタンスを生成
-	porygonInstance[0].CreateInstance(boneBlas.GetBLASBuffer(), 0, 2);
-	porygonInstance[1].CreateInstance(boneBlas.GetBLASBuffer(), 0, 1);
-	porygonInstance[2].CreateInstance(monkeyBlas.GetBLASBuffer(), 1, 2);
-	porygonInstance[3].CreateInstance(groundBlas.GetBLASBuffer(), 2, 2);
+	porygonInstance[0].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 2);
+	porygonInstance[1].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 1);
+	porygonInstance[2].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(monkeyBlas), 1, 2);
+	porygonInstance[3].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(groundBlas), 2, 2);
 
 	// 移動させる。
 	porygonInstance[0].AddTrans(-2.0f, 0.0f, 0);
@@ -283,11 +254,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ある程度回転させる。
 	porygonInstance[0].AddRotate(0.0f, 0.1f, 0);
 	porygonInstance[1].AddRotate(0.0f, 0.1f, 0);
-
-	// 背景テクスチャをロード
-	int monkeyHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/backGround.png");
-	int coneHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/cone.png");
-	int skyDomeHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(L"Resource/Fine_Basin.jpg");
 
 	// TLASを生成。
 	TLAS tlas;
@@ -322,11 +288,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 	// RayGenerationシェーダー用ローカルルートシグネチャを生成。
-	RayRootsignature rayGenerationLocalRootSig;
+	//RayRootsignature rayGenerationLocalRootSig;
 	// u0にレイトレーシング結果書き込み用バッファを設定。
 	//rayGenerationLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
 	// ローカルルートシグネチャを生成。
-	rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
+	//rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
 
 
 	// シェーダーをコンパイルする。
@@ -367,11 +333,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
 
 	// ローカルルートシグネチャの設定。RayGenerationシェーダー。
-	auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-	rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
-	auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-	rgAssocModel->AddExport(L"mainRayGen");
-	rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
+	//auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+	//rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
+	//auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+	//rgAssocModel->AddExport(L"mainRayGen");
+	//rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
 
 	// ローカルルートシグネチャの設定。ClosestHitシェーダー。
 	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
@@ -435,7 +401,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
-	/*==========  ShaderTableの生成  ==========*/
+	/*==========  ShaderTableの生成  ==========*/			// シェーダーテーブルでは使用するローカルルートシグネチャを元にサイズを決定する。
 
 	const auto ShaderRecordAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
 
@@ -453,13 +419,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ヒットグループでは、ShaderIndentiferとローカルルートシグネチャによるVB/IB(SRV)を使用。
 	UINT hitgroupRecordSize = 0;
 	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);	// 頂点バッファビュー
+	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);	// インデックスバッファビュー
+	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);	// テクスチャ
 	hitgroupRecordSize = surarin::RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
 
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = 1;
+	UINT hitgroupCount = 3;
 	UINT raygenSize = 1 * raygenRecordSize;
 	UINT missSize = 2 * missRecordSize;
 	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
@@ -521,11 +487,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		uint8_t* pRecord = hitgroupStart;
 		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject);
 		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject);
 		// ground に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
+		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject);
 	}
 	shaderTable->Unmap(0, nullptr);
 
@@ -547,7 +513,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	shaderRecordMS.SizeInBytes = missSize;
 	shaderRecordMS.StrideInBytes = missRecordSize;
 	startAddress += missRegion;
-	// HitGroup(ClosestHitシェーダー?)の情報
+	// HitGroupの情報
 	auto& shaderRecordHG = dispatchRayDesc.HitGroupTable;
 	shaderRecordHG.StartAddress = startAddress;
 	shaderRecordHG.SizeInBytes = hitGroupSize;
@@ -601,7 +567,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//Camera::target = triangle.GetPos();
 
 		// スキニングアニメーションさせる。
-		boneBlas.ComputeSkin();
+		BLASRegister::Instance()->ComputeSkin(boneBlas);
 
 		float speed = 0.1f;
 		float rot = 0.05f;
@@ -619,21 +585,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		if (Input::isKey(DIK_1)) {
 
-			boneBlas.InitAnimation();
+			BLASRegister::Instance()->InitAnimation(boneBlas);
 
 		}
 		if (Input::isKey(DIK_2)) {
 
-			boneBlas.PlayAnimation();
+			BLASRegister::Instance()->PlayAnimation(boneBlas);
 
 		}
 		if (Input::isKey(DIK_3)) {
 
-			boneBlas.StopAnimation();
+			BLASRegister::Instance()->StopAnimation(boneBlas);
 
 		}
 
-		boneBlas.Update();
+		BLASRegister::Instance()->Update(boneBlas);
 
 		// TLASを更新。
 		tlas.Update();

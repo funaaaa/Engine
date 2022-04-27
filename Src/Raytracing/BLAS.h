@@ -17,7 +17,7 @@ struct RayVertex {
 };
 
 // ポリゴン形状を保存してあるBLASクラス
-class PorygonMeshBlas {
+class BLAS {
 
 private:
 
@@ -41,6 +41,8 @@ private:
 
 	int modelIndex;							// モデルのインデックス
 
+	int textureHandle;						// 使用するテクスチャのハンドル
+
 	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
 
 	// デバッグ用
@@ -58,8 +60,8 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// BLASの生成
-	void GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName);
-	void GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName);
+	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath);
+	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath);
 
 	// BLASの更新
 	void Update();
@@ -72,8 +74,11 @@ public:
 	void PlayAnimation();	// 再生
 	void StopAnimation();	// 停止
 
+	// シェーダーレコードを書き込む。
+	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject);
+
 	// アクセッタ
-	ComPtr<ID3D12Resource> GetBLASBuffer() { return blasBuffer; }
+	ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }
 	ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
 	ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer; }
 	wstring& GetHitGroupName() { return hitGroupName; }
@@ -99,4 +104,11 @@ private:
 
 	// 加速構造体の構築用関数
 	void CreateAccelerationStructure();
+
+	// GPUディスクリプタを書き込む。
+	inline const UINT& WriteGPUDescriptor(void* Dst, const D3D12_GPU_DESCRIPTOR_HANDLE* Descriptor)
+	{
+		memcpy(Dst, Descriptor, sizeof(Descriptor));
+		return UINT(sizeof(Descriptor));
+	}
 };

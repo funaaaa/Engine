@@ -52,7 +52,7 @@ void TLAS::Update()
 	auto sizeOfInstanceDescs = PorygonInstanceRegister::Instance()->GetRegisterSize();
 	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
-	// CPU から書き込み可能な安全なバッファに書き込む。
+	// CPU から書き込み可能なバッファに書き込む。
 	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Instance()->GetData(), sizeOfInstanceDescs);
 
 	// 更新のための値を設定。
