@@ -442,7 +442,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// RayGenerationシェーダーでは、ShaderIndentiferとローカルルートシグネチャによるu0ディスクリプタを使用。
 	UINT raygenRecordSize = 0;
 	raygenRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	//raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 	raygenRecordSize = surarin::RoundUp(raygenRecordSize, ShaderRecordAlignment);
 
 	// Missシェーダーではローカルルートシグネチャは未使用。
@@ -651,7 +651,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		/*----- 描画処理 -----*/
 
 		// 画面に表示されるレンダーターゲットに戻す。
-		DirectXBase::Instance()->SetRenderTarget();
+		//DirectXBase::Instance()->SetRenderTarget();
 
 		auto frameIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
 		constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
