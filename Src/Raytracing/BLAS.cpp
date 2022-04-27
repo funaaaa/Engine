@@ -342,8 +342,8 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 	// [0] : インデックスバッファ
 	// [1] : 頂点バッファ
 	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-	Dst += WriteGPUDescriptor(Dst, &GetIndexDescriptor().GetGPUHandle());
-	Dst += WriteGPUDescriptor(Dst, &GetVertexDescriptor().GetGPUHandle());
+	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
 	Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
 
 	Dst = entryBegin + recordSize;

@@ -44,6 +44,7 @@ struct KariConstBufferData {
 
 };
 
+#include "BLAS.h"
 // スラリンラボから持ってきた関数
 namespace surarin {
 
@@ -204,6 +205,31 @@ namespace surarin {
 		memcpy(dst, descriptor, sizeof(descriptor));
 		return UINT(sizeof(descriptor));
 	}
+	uint8_t* WriteShaderRecord(uint8_t* dst, BLAS& mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject, const int& textureHandle)
+	{
+		ComPtr<ID3D12StateObjectProperties> rtsoProps;
+		stateObject.As(&rtsoProps);
+		auto entryBegin = dst;
+		auto shader = mesh.GetHitGroupName();
+		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
+		if (id == nullptr) {
+			throw std::logic_error("Not found ShaderIdentifier");
+		}
+
+		dst += WriteShaderIdentifier(dst, id);
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		dst += WriteGPUDescriptor(dst, &mesh.GetIndexDescriptor().GetGPUHandle());
+		dst += WriteGPUDescriptor(dst, &mesh.GetVertexDescriptor().GetGPUHandle());
+		dst += WriteGPUDescriptor(dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
+
+		dst = entryBegin + recordSize;
+		return dst;
+
+	}
+
 
 }
 
@@ -227,33 +253,41 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	FbxLoader::Instance()->Init();
 
 	// 猿のBLASを生成。
-	int boneBlas = BLASRegister::Instance()->GenerateFbx("Resource/", "boneTest.fbx", hitGroupName, "Resource/backGround.png");
+	//int boneBlas = BLASRegister::Instance()->GenerateFbx("Resource/", "boneTest.fbx", hitGroupName, "Resource/backGround.png");
 
-	// 天球のBLASを生成。
-	int monkeyBlas = BLASRegister::Instance()->GenerateObj("Resource/", "monkey.obj", hitGroupName, "Resource/backGround.png");
+	//// 天球のBLASを生成。
+	//int monkeyBlas = BLASRegister::Instance()->GenerateObj("Resource/", "monkey.obj", hitGroupName, "Resource/backGround.png");
 
-	// 床のBLASを生成。
-	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", hitGroupName, "Resource/Fine_Basin.jpg");
+	//// 床のBLASを生成。
+	//int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", hitGroupName, "Resource/Fine_Basin.jpg");
 
-	// 三角形のInstancecを生成。
+	//// 三角形のInstancecを生成。
+	//vector<PorygonMeshInstance> porygonInstance;
+	//porygonInstance.resize(4);
+
+	//// インスタンスを生成
+	//porygonInstance[0].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 2);
+	//porygonInstance[1].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 1);
+	//porygonInstance[2].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(monkeyBlas), 1, 2);
+	//porygonInstance[3].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(groundBlas), 2, 2);
+
+	//// 移動させる。
+	//porygonInstance[0].AddTrans(-2.0f, 0.0f, 0);
+	//porygonInstance[1].AddTrans(2.0f, 0.0f, 0);
+	//porygonInstance[2].AddTrans(0.0f, 0.0f, 0);
+	//porygonInstance[3].AddTrans(0.0f, -1.0f, 0);
+
+	//// ある程度回転させる。
+	//porygonInstance[0].AddRotate(0.0f, 0.1f, 0);
+	//porygonInstance[1].AddRotate(0.0f, 0.1f, 0);
+
+	BLAS a;
+	a.GenerateBLASObj("Resource/", "ground.obj", hitGroupName, "Resource/Fine_Basin.jpg");
 	vector<PorygonMeshInstance> porygonInstance;
-	porygonInstance.resize(4);
-
+	porygonInstance.resize(1);
 	// インスタンスを生成
-	porygonInstance[0].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 2);
-	porygonInstance[1].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 1);
-	porygonInstance[2].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(monkeyBlas), 1, 2);
-	porygonInstance[3].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(groundBlas), 2, 2);
-
-	// 移動させる。
-	porygonInstance[0].AddTrans(-2.0f, 0.0f, 0);
-	porygonInstance[1].AddTrans(2.0f, 0.0f, 0);
-	porygonInstance[2].AddTrans(0.0f, 0.0f, 0);
-	porygonInstance[3].AddTrans(0.0f, -1.0f, 0);
-
-	// ある程度回転させる。
-	porygonInstance[0].AddRotate(0.0f, 0.1f, 0);
-	porygonInstance[1].AddRotate(0.0f, 0.1f, 0);
+	porygonInstance[0].CreateInstance(a.GetBLASBuffer(), 0, 2);
+	int textureHandle = TextureManager::Instance()->LoadTexture(L"Resource/Fine_Basin.jpg");
 
 	// TLASを生成。
 	TLAS tlas;
@@ -487,11 +521,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		uint8_t* pRecord = hitgroupStart;
 		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject);
-		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject);
-		// ground に対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject);
+		//pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject);
+		//// skydome に対応するシェーダーレコードを書き込む
+		//pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject);
+		//// ground に対応するシェーダーレコードを書き込む
+		//pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject);
+
+		pRecord = surarin::WriteShaderRecord(pRecord, a, hitgroupRecordSize, stateObject, textureHandle);
 	}
 	shaderTable->Unmap(0, nullptr);
 
@@ -567,7 +603,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//Camera::target = triangle.GetPos();
 
 		// スキニングアニメーションさせる。
-		BLASRegister::Instance()->ComputeSkin(boneBlas);
+		//BLASRegister::Instance()->ComputeSkin(boneBlas);
 
 		float speed = 0.1f;
 		float rot = 0.05f;
@@ -578,12 +614,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_UP)) Camera::Instance()->eye.y += speed;
 		if (Input::isKey(DIK_DOWN)) Camera::Instance()->eye.y -= speed;
 
-		if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
+		/*if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
 		if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
 		if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
-		if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
+		if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);*/
 
-		if (Input::isKey(DIK_1)) {
+		/*if (Input::isKey(DIK_1)) {
 
 			BLASRegister::Instance()->InitAnimation(boneBlas);
 
@@ -599,7 +635,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		}
 
-		BLASRegister::Instance()->Update(boneBlas);
+		BLASRegister::Instance()->Update(boneBlas);*/
 
 		// TLASを更新。
 		tlas.Update();
