@@ -17,7 +17,7 @@ struct RayVertex {
 };
 
 // ポリゴン形状を保存してあるBLASクラス
-class PorygonMeshBlas {
+class BLAS {
 
 private:
 

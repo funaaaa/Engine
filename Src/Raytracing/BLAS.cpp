@@ -1,4 +1,4 @@
-#include "PorygonMeshBLAS.h"
+#include "BLAS.h"
 #include "ModelDataManager.h"
 #include "DescriptorHeapMgr.h"
 #include <DirectXMath.h>
@@ -8,7 +8,7 @@
 
 using namespace DirectX;
 
-void PorygonMeshBlas::GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+void BLAS::GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -90,7 +90,7 @@ void PorygonMeshBlas::GenerateBLASObj(const string& directryPath, const string& 
 
 }
 
-void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+void BLAS::GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -190,7 +190,7 @@ void PorygonMeshBlas::GenerateBLASFbx(const string& directryPath, const string& 
 
 }
 
-void PorygonMeshBlas::Update()
+void BLAS::Update()
 {
 
 	/*===== BLASの更新 =====*/
@@ -250,7 +250,7 @@ void PorygonMeshBlas::Update()
 
 }
 
-void PorygonMeshBlas::ComputeSkin()
+void BLAS::ComputeSkin()
 {
 
 	/*===== 頂点データをスキニング行列を元に書き換える処理 =====*/
@@ -271,7 +271,7 @@ void PorygonMeshBlas::ComputeSkin()
 
 }
 
-void PorygonMeshBlas::InitAnimation()
+void BLAS::InitAnimation()
 {
 	// モデルがアニメーションを持っていたら。
 	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
@@ -281,7 +281,7 @@ void PorygonMeshBlas::InitAnimation()
 	}
 }
 
-void PorygonMeshBlas::PlayAnimation()
+void BLAS::PlayAnimation()
 {
 
 	/*===== アニメーションさせる =====*/
@@ -295,7 +295,7 @@ void PorygonMeshBlas::PlayAnimation()
 
 }
 
-void PorygonMeshBlas::StopAnimation()
+void BLAS::StopAnimation()
 {
 
 	/*===== アニメーションを停止させる =====*/
@@ -309,7 +309,7 @@ void PorygonMeshBlas::StopAnimation()
 
 }
 
-void PorygonMeshBlas::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
+void BLAS::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
@@ -332,7 +332,7 @@ void PorygonMeshBlas::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void
 
 }
 
-ComPtr<ID3D12Resource> PorygonMeshBlas::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
@@ -384,7 +384,7 @@ ComPtr<ID3D12Resource> PorygonMeshBlas::CreateBuffer(size_t size, D3D12_RESOURCE
 
 }
 
-D3D12_RAYTRACING_GEOMETRY_DESC PorygonMeshBlas::GetGeometryDesc()
+D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc()
 {
 
 	/*===== BLAS生成時に設定を取得する用関数 =====*/
@@ -408,7 +408,7 @@ D3D12_RAYTRACING_GEOMETRY_DESC PorygonMeshBlas::GetGeometryDesc()
 
 }
 
-void PorygonMeshBlas::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc)
+void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc)
 {
 
 	/*===== 加速構造体の設定用関数 =====*/
@@ -465,7 +465,7 @@ void PorygonMeshBlas::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMET
 
 }
 
-void PorygonMeshBlas::CreateAccelerationStructure()
+void BLAS::CreateAccelerationStructure()
 {
 
 	/*===== BLAS構築処理 =====*/
