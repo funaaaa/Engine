@@ -17,7 +17,7 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	// テクスチャを読み込む。
 	wchar_t texturePathBuff[128];
 	MultiByteToWideChar(CP_ACP, 0, TexturePath.c_str(), -1, texturePathBuff, 128);
-	textureHandle = TextureManager::Instance()->LoadTexture(texturePathBuff);
+	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(texturePathBuff);
 
 	/*-- 形状データを読み込む --*/
 
@@ -104,7 +104,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	// テクスチャを読み込む。
 	wchar_t texturePathBuff[128];
 	MultiByteToWideChar(CP_ACP, 0, TexturePath.c_str(), -1, texturePathBuff, 128);
-	textureHandle = TextureManager::Instance()->LoadTexture(texturePathBuff);
+	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(texturePathBuff);
 
 	/*-- 形状データを読み込む --*/
 
