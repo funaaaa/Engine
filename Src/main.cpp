@@ -14,7 +14,8 @@
 #include "FbxLoader.h"
 #include "Vec.h"
 
-#include "PorygonMeshBLAS.h"
+#include "BLAS.h"
+#include "BLASRegister.h"
 #include "PorygonInstance.h"
 #include "TLAS.h"
 #include "RayRootsignature.h"
@@ -205,12 +206,12 @@ namespace surarin {
 		return UINT(sizeof(descriptor));
 	}
 
-	uint8_t* WriteShaderRecord(uint8_t* dst, PorygonMeshBlas& mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject, const int& textureHandle)
+	uint8_t* WriteShaderRecord(uint8_t* dst, shared_ptr<BLAS> mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject, const int& textureHandle)
 	{
 		ComPtr<ID3D12StateObjectProperties> rtsoProps;
 		stateObject.As(&rtsoProps);
 		auto entryBegin = dst;
-		auto shader = mesh.GetHitGroupName();
+		auto shader = mesh->GetHitGroupName();
 		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
 		if (id == nullptr) {
 			throw std::logic_error("Not found ShaderIdentifier");
@@ -221,8 +222,8 @@ namespace surarin {
 		// [0] : インデックスバッファ
 		// [1] : 頂点バッファ
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		dst += WriteGPUDescriptor(dst, &mesh.GetIndexDescriptor().GetGPUHandle());
-		dst += WriteGPUDescriptor(dst, &mesh.GetVertexDescriptor().GetGPUHandle());
+		dst += WriteGPUDescriptor(dst, &mesh->GetIndexDescriptor().GetGPUHandle());
+		dst += WriteGPUDescriptor(dst, &mesh->GetVertexDescriptor().GetGPUHandle());
 		dst += WriteGPUDescriptor(dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
 
 		dst = entryBegin + recordSize;
@@ -253,26 +254,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	FbxLoader::Instance()->Init();
 
 	// 猿のBLASを生成。
-	PorygonMeshBlas boneBlas;
-	boneBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
+	/*BLAS boneBlas;
+	boneBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);*/
+	int boneBlas = BLASRegister::Instance()->GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
 
 	// 天球のBLASを生成。
-	PorygonMeshBlas monkeyBlas;
-	monkeyBlas.GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);
+	/*BLAS monkeyBlas;
+	monkeyBlas.GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);*/
+	int monkeyBlas = BLASRegister::Instance()->GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);
 
 	// 床のBLASを生成。
-	PorygonMeshBlas groundBlas;
-	groundBlas.GenerateBLASObj("Resource/", "ground.obj", hitGroupName);
+	//BLAS groundBlas;
+	//groundBlas.GenerateBLASObj("Resource/", "ground.obj", hitGroupName);
+	int groundBlas = BLASRegister::Instance()->GenerateBLASObj("Resource/", "ground.obj", hitGroupName);
 
 	// 三角形のInstancecを生成。
 	vector<PorygonMeshInstance> porygonInstance;
 	porygonInstance.resize(4);
 
 	// インスタンスを生成
-	porygonInstance[0].CreateInstance(boneBlas.GetBLASBuffer(), 0, 2);
-	porygonInstance[1].CreateInstance(boneBlas.GetBLASBuffer(), 0, 1);
-	porygonInstance[2].CreateInstance(monkeyBlas.GetBLASBuffer(), 1, 2);
-	porygonInstance[3].CreateInstance(groundBlas.GetBLASBuffer(), 2, 2);
+	porygonInstance[0].CreateInstance(BLASRegister::Instance()->GetBlas(boneBlas)->GetBLASBuffer(), 0, 2);
+	porygonInstance[1].CreateInstance(BLASRegister::Instance()->GetBlas(boneBlas)->GetBLASBuffer(), 0, 1);
+	porygonInstance[2].CreateInstance(BLASRegister::Instance()->GetBlas(monkeyBlas)->GetBLASBuffer(), 1, 2);
+	porygonInstance[3].CreateInstance(BLASRegister::Instance()->GetBlas(groundBlas)->GetBLASBuffer(), 2, 2);
 
 	// 移動させる。
 	porygonInstance[0].AddTrans(-2.0f, 0.0f, 0);
@@ -320,15 +324,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ローカルルートシグネチャを生成。
 	closestHitLocalRootSig.Create(true, L"ClosestHitLocalRootSig");
 
-
-	// RayGenerationシェーダー用ローカルルートシグネチャを生成。
-	//RayRootsignature rayGenerationLocalRootSig;
-	// u0にレイトレーシング結果書き込み用バッファを設定。
-	//rayGenerationLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
-	// ローカルルートシグネチャを生成。
-	//rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
-
-
 	// シェーダーをコンパイルする。
 	ShaderStorage::Instance()->LoadShaderForDXC("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", "lib_6_4", "");
 
@@ -365,13 +360,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// グローバルルートシグネチャの設定。
 	auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
 	rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
-
-	// ローカルルートシグネチャの設定。RayGenerationシェーダー。
-	//auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-	//rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
-	//auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-	//rgAssocModel->AddExport(L"mainRayGen");
-	//rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
 
 	// ローカルルートシグネチャの設定。ClosestHitシェーダー。
 	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
@@ -439,18 +427,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	const auto ShaderRecordAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
 
-	// RayGenerationシェーダーでは、ShaderIndentiferとローカルルートシグネチャによるu0ディスクリプタを使用。
+	// RayGenerationシェーダーではローカルルートシグネチャ未使用。
 	UINT raygenRecordSize = 0;
 	raygenRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	//raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 	raygenRecordSize = surarin::RoundUp(raygenRecordSize, ShaderRecordAlignment);
 
-	// Missシェーダーではローカルルートシグネチャは未使用。
+	// Missシェーダーではローカルルートシグネチャ未使用。
 	UINT missRecordSize = 0;
 	missRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 	missRecordSize = surarin::RoundUp(missRecordSize, ShaderRecordAlignment);
 
-	// ヒットグループでは、ShaderIndentiferとローカルルートシグネチャによるVB/IB(SRV)を使用。
+	// ヒットグループでは、ShaderIndentiferとローカルルートシグネチャによるVB/IB(SRV)及びテクスチャを使用。
 	UINT hitgroupRecordSize = 0;
 	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
@@ -498,10 +485,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		uint8_t* p = rgsStart;
 		void* id = rtsoProps->GetShaderIdentifier(L"mainRayGen");
 		p += surarin::WriteShaderIdentifier(p, id);
-		// ローカルルートシグネチャで u0 (出力先) を設定しているため
-		// 対応するディスクリプタを書き込む。
-		//auto gpuHandle = uavDescriptor->GetGPUDescriptorHandleForHeapStart();
-		//p += surarin::WriteGPUDescriptor(p, &gpuHandle);
 	}
 
 	// Miss Shader 用のシェーダーレコードを書き込み。
@@ -521,11 +504,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		uint8_t* pRecord = hitgroupStart;
 		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(boneBlas), hitgroupRecordSize, stateObject, monkeyHandle);
 		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject, monkeyHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(monkeyBlas), hitgroupRecordSize, stateObject, monkeyHandle);
 		// ground に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject, skyDomeHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(groundBlas), hitgroupRecordSize, stateObject, skyDomeHandle);
 	}
 	shaderTable->Unmap(0, nullptr);
 
@@ -601,7 +584,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//Camera::target = triangle.GetPos();
 
 		// スキニングアニメーションさせる。
-		boneBlas.ComputeSkin();
+		//boneBlas.ComputeSkin();
 
 		float speed = 0.1f;
 		float rot = 0.05f;
@@ -617,7 +600,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
 		if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
 
-		if (Input::isKey(DIK_1)) {
+		/*if (Input::isKey(DIK_1)) {
 
 			boneBlas.InitAnimation();
 
@@ -633,7 +616,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		}
 
-		boneBlas.Update();
+		boneBlas.Update();*/
 
 		// TLASを更新。
 		tlas.Update();
