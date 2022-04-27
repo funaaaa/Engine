@@ -206,7 +206,7 @@ namespace surarin {
 		return UINT(sizeof(descriptor));
 	}
 
-	uint8_t* WriteShaderRecord(uint8_t* dst, shared_ptr<BLAS> mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject, const int& textureHandle)
+	uint8_t* WriteShaderRecord(uint8_t* dst, shared_ptr<BLAS> mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject)
 	{
 		ComPtr<ID3D12StateObjectProperties> rtsoProps;
 		stateObject.As(&rtsoProps);
@@ -224,7 +224,7 @@ namespace surarin {
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 		dst += WriteGPUDescriptor(dst, &mesh->GetIndexDescriptor().GetGPUHandle());
 		dst += WriteGPUDescriptor(dst, &mesh->GetVertexDescriptor().GetGPUHandle());
-		dst += WriteGPUDescriptor(dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
+		dst += WriteGPUDescriptor(dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(mesh->GetTextureHandle()));
 
 		dst = entryBegin + recordSize;
 		return dst;
@@ -256,17 +256,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 猿のBLASを生成。
 	/*BLAS boneBlas;
 	boneBlas.GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);*/
-	int boneBlas = BLASRegister::Instance()->GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName);
+	int boneBlas = BLASRegister::Instance()->GenerateBLASFbx("Resource/", "boneTest.fbx", hitGroupName, L"Resource/backGround.png");
 
 	// 天球のBLASを生成。
 	/*BLAS monkeyBlas;
 	monkeyBlas.GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);*/
-	int monkeyBlas = BLASRegister::Instance()->GenerateBLASObj("Resource/", "monkey.obj", hitGroupName);
+	int monkeyBlas = BLASRegister::Instance()->GenerateBLASObj("Resource/", "monkey.obj", hitGroupName, L"Resource/backGround.png");
 
 	// 床のBLASを生成。
 	//BLAS groundBlas;
 	//groundBlas.GenerateBLASObj("Resource/", "ground.obj", hitGroupName);
-	int groundBlas = BLASRegister::Instance()->GenerateBLASObj("Resource/", "ground.obj", hitGroupName);
+	int groundBlas = BLASRegister::Instance()->GenerateBLASObj("Resource/", "ground.obj", hitGroupName, L"Resource/Fine_Basin.jpg");
 
 	// 三角形のInstancecを生成。
 	vector<PorygonMeshInstance> porygonInstance;
@@ -504,11 +504,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		uint8_t* pRecord = hitgroupStart;
 		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(boneBlas), hitgroupRecordSize, stateObject, monkeyHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(boneBlas), hitgroupRecordSize, stateObject);
 		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(monkeyBlas), hitgroupRecordSize, stateObject, monkeyHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(monkeyBlas), hitgroupRecordSize, stateObject);
 		// ground に対応するシェーダーレコードを書き込む
-		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(groundBlas), hitgroupRecordSize, stateObject, skyDomeHandle);
+		pRecord = surarin::WriteShaderRecord(pRecord, BLASRegister::Instance()->GetBlas(groundBlas), hitgroupRecordSize, stateObject);
 	}
 	shaderTable->Unmap(0, nullptr);
 
@@ -584,7 +584,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//Camera::target = triangle.GetPos();
 
 		// スキニングアニメーションさせる。
-		//boneBlas.ComputeSkin();
+		BLASRegister::Instance()->ComputeSkin(boneBlas);
 
 		float speed = 0.1f;
 		float rot = 0.05f;
@@ -600,23 +600,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
 		if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
 
-		/*if (Input::isKey(DIK_1)) {
+		if (Input::isKey(DIK_1)) {
 
-			boneBlas.InitAnimation();
+			BLASRegister::Instance()->InitAnimation(boneBlas);
 
 		}
 		if (Input::isKey(DIK_2)) {
 
-			boneBlas.PlayAnimation();
+			BLASRegister::Instance()->PlayAnimation(boneBlas);
 
 		}
 		if (Input::isKey(DIK_3)) {
 
-			boneBlas.StopAnimation();
+			BLASRegister::Instance()->StopAnimation(boneBlas);
 
 		}
 
-		boneBlas.Update();*/
+		BLASRegister::Instance()->Update(boneBlas);
 
 		// TLASを更新。
 		tlas.Update();

@@ -1,7 +1,7 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 
-int BLASRegister::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName)
+int BLASRegister::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLAS‚ð¶¬ =====*/
@@ -13,13 +13,13 @@ int BLASRegister::GenerateBLASObj(const std::string& DirectryPath, const std::st
 	int index = blas.size() - 1;
 
 	// BLAS‚ð¶¬B
-	blas[index]->GenerateBLASObj(DirectryPath, ModelName, HitGroupName);
+	blas[index]->GenerateBLASObj(DirectryPath, ModelName, HitGroupName, TexturePath);
 
 	return index;
 
 }
 
-int BLASRegister::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName)
+int BLASRegister::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLAS‚ð¶¬ =====*/
@@ -31,7 +31,7 @@ int BLASRegister::GenerateBLASFbx(const std::string& DirectryPath, const std::st
 	int index = blas.size() - 1;
 
 	// BLAS‚ð¶¬B
-	blas[index]->GenerateBLASFbx(DirectryPath, ModelName, HitGroupName);
+	blas[index]->GenerateBLASFbx(DirectryPath, ModelName, HitGroupName, TexturePath);
 
 	return index;
 

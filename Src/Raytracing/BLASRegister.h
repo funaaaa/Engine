@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "Singleton.h"
+#include "TextureManager.h"
 
 class BLAS;
 
@@ -20,8 +21,8 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// BLASの生成
-	int GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName);
-	int GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName);
+	int GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
+	int GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
 
 	// BLASの更新
 	void Update(const int& Index);
@@ -33,6 +34,9 @@ public:
 	void InitAnimation(const int& Index);	// 初期化
 	void PlayAnimation(const int& Index);	// 再生
 	void StopAnimation(const int& Index);	// 停止
+
+	// シェーダーレコードを書き込む。
+
 
 	// デバッグ用　すぐ消す
 	std::shared_ptr<BLAS> GetBlas(const int& Index) { return blas[Index]; }

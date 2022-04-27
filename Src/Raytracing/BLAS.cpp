@@ -5,15 +5,20 @@
 #include "FbxLoader.h"
 #include "RWStructuredBuffer.h"
 #include "StructuredBuffer.h"
+#include "FString.h"
+#include "TextureManager.h"
 
 using namespace DirectX;
 
-void BLAS::GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+void BLAS::GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	/*-- 形状データを読み込む --*/
+
+	// テクスチャを読み込む。
+	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(TexturePath);
 
 	// 読み込んだデータを一時保存する用のバッファ。
 	Object3DDeliveryData dataBuff;
@@ -90,12 +95,15 @@ void BLAS::GenerateBLASObj(const string& directryPath, const string& modelName, 
 
 }
 
-void BLAS::GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName)
+void BLAS::GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	/*-- 形状データを読み込む --*/
+
+	// テクスチャを読み込む。
+	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(TexturePath);
 
 	// 読み込んだデータを一時保存する用のバッファ。
 	Object3DDeliveryData dataBuff;

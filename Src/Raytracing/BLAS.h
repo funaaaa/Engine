@@ -41,6 +41,8 @@ private:
 
 	int modelIndex;							// モデルのインデックス
 
+	int textureHandle;						// テクスチャのハンドル
+
 	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
 
 	// デバッグ用
@@ -58,8 +60,8 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// BLASの生成
-	void GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName);
-	void GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName);
+	void GenerateBLASObj(const string& directryPath, const string& modelName, const wstring& hitGroupName, const LPCWSTR& TexturePath);
+	void GenerateBLASFbx(const string& directryPath, const string& modelName, const wstring& hitGroupName, const LPCWSTR& TexturePath);
 
 	// BLASの更新
 	void Update();
@@ -82,6 +84,7 @@ public:
 
 	// デバッグ用
 	vector<RayVertex>& GetVertex() { return vertex; }
+	int GetTextureHandle() { return textureHandle; }
 
 private:
 
