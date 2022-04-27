@@ -322,11 +322,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 	// RayGenerationシェーダー用ローカルルートシグネチャを生成。
-	RayRootsignature rayGenerationLocalRootSig;
+	//RayRootsignature rayGenerationLocalRootSig;
 	// u0にレイトレーシング結果書き込み用バッファを設定。
 	//rayGenerationLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
 	// ローカルルートシグネチャを生成。
-	rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
+	//rayGenerationLocalRootSig.Create(true, L"RayGenerationLocalRootSig");
 
 
 	// シェーダーをコンパイルする。
@@ -367,11 +367,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
 
 	// ローカルルートシグネチャの設定。RayGenerationシェーダー。
-	auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-	rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
-	auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-	rgAssocModel->AddExport(L"mainRayGen");
-	rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
+	//auto rgLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+	//rgLocalRootSig->SetRootSignature(rayGenerationLocalRootSig.GetRootSig().Get());
+	//auto rgAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+	//rgAssocModel->AddExport(L"mainRayGen");
+	//rgAssocModel->SetSubobjectToAssociate(*rgLocalRootSig);
 
 	// ローカルルートシグネチャの設定。ClosestHitシェーダー。
 	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
@@ -442,7 +442,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// RayGenerationシェーダーでは、ShaderIndentiferとローカルルートシグネチャによるu0ディスクリプタを使用。
 	UINT raygenRecordSize = 0;
 	raygenRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+	//raygenRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 	raygenRecordSize = surarin::RoundUp(raygenRecordSize, ShaderRecordAlignment);
 
 	// Missシェーダーではローカルルートシグネチャは未使用。
