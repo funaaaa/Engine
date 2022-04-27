@@ -205,31 +205,6 @@ namespace surarin {
 		memcpy(dst, descriptor, sizeof(descriptor));
 		return UINT(sizeof(descriptor));
 	}
-	uint8_t* WriteShaderRecord(uint8_t* dst, BLAS& mesh, UINT recordSize, ComPtr<ID3D12StateObject>& stateObject, const int& textureHandle)
-	{
-		ComPtr<ID3D12StateObjectProperties> rtsoProps;
-		stateObject.As(&rtsoProps);
-		auto entryBegin = dst;
-		auto shader = mesh.GetHitGroupName();
-		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
-		if (id == nullptr) {
-			throw std::logic_error("Not found ShaderIdentifier");
-		}
-
-		dst += WriteShaderIdentifier(dst, id);
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		dst += WriteGPUDescriptor(dst, &mesh.GetIndexDescriptor().GetGPUHandle());
-		dst += WriteGPUDescriptor(dst, &mesh.GetVertexDescriptor().GetGPUHandle());
-		dst += WriteGPUDescriptor(dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
-
-		dst = entryBegin + recordSize;
-		return dst;
-
-	}
-
 
 }
 

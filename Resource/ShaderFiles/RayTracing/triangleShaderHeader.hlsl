@@ -233,7 +233,9 @@ void shadowMS(inout ShadowPayload payload)
 [shader("closesthit")]
 void mainCHS(inout Payload payload, MyAttribute attrib)
 {
-
+    payload.color = 1;
+    return;
+    
     Vertex vtx = GetHitVertex(attrib);
     uint instanceID = InstanceID();
 
@@ -304,7 +306,7 @@ void mainAnyHit(inout Payload payload, MyAttribute attrib)
     float4 diffuse = texture.SampleLevel(smp, vtx.uv, 0);
     if (diffuse.w < 0.5f)
     {
-        IgnoreHit();
+        //IgnoreHit();
 
     }
 }
