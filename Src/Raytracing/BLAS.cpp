@@ -9,15 +9,13 @@
 
 using namespace DirectX;
 
-void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath)
+void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	wchar_t texturePathBuff[128];
-	MultiByteToWideChar(CP_ACP, 0, TexturePath.c_str(), -1, texturePathBuff, 128);
-	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(texturePathBuff);
+	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(TexturePath);
 
 	/*-- 形状データを読み込む --*/
 
@@ -96,15 +94,13 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath)
+void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	wchar_t texturePathBuff[128];
-	MultiByteToWideChar(CP_ACP, 0, TexturePath.c_str(), -1, texturePathBuff, 128);
-	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(texturePathBuff);
+	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(TexturePath);
 
 	/*-- 形状データを読み込む --*/
 

@@ -1,7 +1,7 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 
-const int& BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const std::string& TexturePath)
+const int& BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
@@ -13,7 +13,7 @@ const int& BLASRegister::GenerateObj(const std::string& DirectryPath, const std:
 
 }
 
-const int& BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const std::string& TexturePath)
+const int& BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/

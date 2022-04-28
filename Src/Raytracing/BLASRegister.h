@@ -22,8 +22,8 @@ public:
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
 	// ¶¬ˆ—
-	const int& GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const std::string& TexturePath);
-	const int& GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const std::string& TexturePath);
+	const int& GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
+	const int& GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
 
 	// BLAS‚ÌXV
 	void Update(const int& Index);

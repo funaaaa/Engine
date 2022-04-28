@@ -228,13 +228,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	FbxLoader::Instance()->Init();
 
 	// 猿のBLASを生成。
-	int boneBlas = BLASRegister::Instance()->GenerateFbx("Resource/", "boneTest.fbx", hitGroupName, "Resource/backGround.png");
+	int boneBlas = BLASRegister::Instance()->GenerateFbx("Resource/", "boneTest.fbx", hitGroupName, L"Resource/backGround.png");
 
-	// 天球のBLASを生成。
-	int monkeyBlas = BLASRegister::Instance()->GenerateObj("Resource/", "monkey.obj", hitGroupName, "Resource/backGround.png");
+	// 猿のBLASを生成。
+	int monkeyBlas = BLASRegister::Instance()->GenerateObj("Resource/", "monkey.obj", hitGroupName, L"Resource/backGround.png");
 
 	// 床のBLASを生成。
-	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", hitGroupName, "Resource/Fine_Basin.jpg");
+	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", hitGroupName, L"Resource/Fine_Basin.jpg");
+
+	wchar_t texturePathBuff[128];
+	MultiByteToWideChar(CP_ACP, 0, "Resource/backGround.png", -1, texturePathBuff, 128);
+	int backGroundHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(texturePathBuff);
+	wchar_t texturePathBuff2[128];
+	MultiByteToWideChar(CP_ACP, 0, "Resource/Fine_Basin.jpg", -1, texturePathBuff2, 128);
+	int groundHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(texturePathBuff2);
 
 	// 三角形のInstancecを生成。
 	vector<PorygonMeshInstance> porygonInstance;

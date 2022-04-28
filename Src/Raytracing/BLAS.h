@@ -60,8 +60,8 @@ public:
 	/*===== ÉÅÉìÉoä÷êî =====*/
 
 	// BLASÇÃê∂ê¨
-	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath);
-	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const string& TexturePath);
+	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath);
+	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath);
 
 	// BLASÇÃçXêV
 	void Update();

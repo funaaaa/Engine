@@ -100,6 +100,9 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 		}
 	}
 
+	// テクスチャデータを保存
+	Texture proTexture{};
+	proTexture.fileName = fileName;
 
 	//ロードしていなかったらロードする
 	TexMetadata metadata;
@@ -138,8 +141,6 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 	);
 
 	//テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
-	Texture proTexture{};
-	proTexture.fileName = fileName;
 	proTexture.IDNum = texture.size();
 	proTexture.metadata = metadata;
 	proTexture.scratchImg = &scratchImg;
