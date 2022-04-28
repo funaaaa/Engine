@@ -1,31 +1,47 @@
 #include "PorygonInstanceRegister.h"
+#include "PorygonInstance.h"
 #include <assert.h>
 
-UINT PorygonInstanceRegister::SetRegister(D3D12_RAYTRACING_INSTANCE_DESC instanceDesc)
+int PorygonInstanceRegister::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID)
 {
 
-	/*===== InstanceDescを保存する処理 =====*/
+	/*===== インスタンスを生成する =====*/
 
-	// InstanceDescを追加する。
-	instanceDescRegister.push_back(instanceDesc);
+	// 最後尾にプッシュ。
+	instance.emplace_back(std::make_shared<PorygonMeshInstance>());
 
-	// 最後尾を返す。
-	return instanceDescRegister.size() - 1;
+	// 最後尾のやつを生成する。
+	D3D12_RAYTRACING_INSTANCE_DESC buff = instance[instance.size() - 1]->CreateInstance(BlassBuffer, HitGroupIndex, InstanceID);
+
+	// InstanceDescを保持。
+	instanceDesc.emplace_back(buff);
+
+	return instance.size() - 1;
 
 }
 
-void PorygonInstanceRegister::AddTrans(const XMMATRIX& transMat, const UINT& id)
-{
+// 移動(引数を加算)関数
+void PorygonInstanceRegister::AddTrans(const int& Index, const float& X, const float& Y, const float Z) {
 
-	/*===== 移動処理 =====*/
+	instance[Index]->AddTrans(instanceDesc[Index],Vec3(X, Y, Z));
 
-	// 設定の移動行列を更新する。
-	XMStoreFloat3x4(
-		reinterpret_cast<XMFLOAT3X4*>(&instanceDescRegister[id].Transform),
-		transMat);
+}
 
-	//instanceDescRegister[id].Transform[0][3] = transMat.r[3].m128_f32[0];
-	//instanceDescRegister[id].Transform[1][3] = transMat.r[3].m128_f32[1];
-	//instanceDescRegister[id].Transform[2][3] = transMat.r[3].m128_f32[2];
+void PorygonInstanceRegister::AddTrans(const int& Index, const Vec3& Pos) {
+
+	instance[Index]->AddTrans(instanceDesc[Index],Pos);
+
+}
+
+// 回転(ラジアン、引数を加算)関数
+void PorygonInstanceRegister::AddRotate(const int& Index, const float& X, const float& Y, const float Z) {
+
+	instance[Index]->AddRotate(instanceDesc[Index],Vec3(X, Y, Z));
+
+}
+
+void PorygonInstanceRegister::AddRotate(const int& Index, const Vec3& Pos) {
+
+	instance[Index]->AddRotate(instanceDesc[Index],Pos);
 
 }

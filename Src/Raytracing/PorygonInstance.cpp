@@ -1,22 +1,19 @@
 #include "PorygonInstance.h"
-#include "PorygonInstanceRegister.h"
+#include "DirectXBase.h"
 
-void PorygonMeshInstance::CreateInstance(const ComPtr<ID3D12Resource>& blassBuffer, const UINT& hitGroupIndex, const UINT& instanceID)
+D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& blassBuffer, const UINT& hitGroupIndex, const UINT& instanceID)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
 
+	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc;
+
 	// 移動行列を初期化。
-	worldMat = XMMatrixIdentity();
-
-	// インスタンスIDを求める。
-	//instanceID = InstanceIDMgr::Instance()->GetInstanceID();
-
-	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc = {};
+	worldMat = DirectX::XMMatrixIdentity();
 
 	// 行列を設定。
 	XMStoreFloat3x4(
-		reinterpret_cast<XMFLOAT3X4*>(&instanceDesc.Transform),
+		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc.Transform),
 		worldMat);
 
 	// インスタンスの詳細を設定。
@@ -26,58 +23,41 @@ void PorygonMeshInstance::CreateInstance(const ComPtr<ID3D12Resource>& blassBuff
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
 	instanceDesc.AccelerationStructure = blassBuffer->GetGPUVirtualAddress();
 
-	// レジスターに格納する。
-	registerID = PorygonInstanceRegister::Instance()->SetRegister(instanceDesc);
+	return instanceDesc;
 
 }
 
-void PorygonMeshInstance::AddTrans(const float& x, const float& y, const float z)
+void PorygonMeshInstance::AddTrans(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& pos)
 {
 
 	/*===== 移動関数 =====*/
 
-	// 移動行列を更新。
-	worldMat *= XMMatrixTranslation(x, y, z);
+	worldMat *= DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
-	// レジスターの設定を更新する。
-	PorygonInstanceRegister::Instance()->AddTrans(worldMat, registerID);
+	// 設定の移動行列を更新する。
+	DirectX::XMStoreFloat3x4(
+		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
+		worldMat);
 
 }
 
-void PorygonMeshInstance::AddTrans(const XMFLOAT3& pos)
+void PorygonMeshInstance::AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Pos)
 {
 
 	/*===== 移動関数 =====*/
 
-	AddTrans(pos.x, pos.y, pos.z);
+	worldMat *= DirectX::XMMatrixRotationZ(Pos.z);
+	worldMat *= DirectX::XMMatrixRotationX(Pos.x);
+	worldMat *= DirectX::XMMatrixRotationY(Pos.y);
+
+	// 設定の移動行列を更新する。
+	DirectX::XMStoreFloat3x4(
+		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
+		worldMat);
 
 }
 
-void PorygonMeshInstance::AddRotate(const float& x, const float& y, const float z)
-{
-
-	/*===== 移動関数 =====*/
-
-	// 移動行列を更新。
-	worldMat *= XMMatrixRotationZ(z);
-	worldMat *= XMMatrixRotationX(x);
-	worldMat *= XMMatrixRotationY(y);
-
-	// レジスターの設定を更新する。
-	PorygonInstanceRegister::Instance()->AddTrans(worldMat, registerID);
-
-}
-
-void PorygonMeshInstance::AddRotate(const XMFLOAT3& pos)
-{
-
-	/*===== 移動関数 =====*/
-
-	AddRotate(pos.x, pos.y, pos.z);
-
-}
-
-void PorygonMeshInstance::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
+void PorygonMeshInstance::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
@@ -100,7 +80,7 @@ void PorygonMeshInstance::WriteToMemory(ComPtr<ID3D12Resource>& resource, const 
 
 }
 
-ComPtr<ID3D12Resource> PorygonMeshInstance::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> PorygonMeshInstance::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
@@ -120,7 +100,7 @@ ComPtr<ID3D12Resource> PorygonMeshInstance::CreateBuffer(size_t size, D3D12_RESO
 
 	// 実際にバッファを生成する。
 	HRESULT hr;
-	ComPtr<ID3D12Resource> resource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;

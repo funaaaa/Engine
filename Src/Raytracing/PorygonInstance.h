@@ -1,8 +1,9 @@
 #pragma once
-#include "DirectXBase.h"
+#include <d3d12.h>
 #include <DirectXMath.h>
-
-using namespace DirectX;
+#include <wrl.h>
+#include <memory>
+#include "Vec.h"
 
 // TLASに登録するインスタンスクラス
 class PorygonMeshInstance {
@@ -12,9 +13,8 @@ private:
 	/*===== メンバ変数 =====*/
 
 	UINT instanceID;								// このインスタンスのID
-	UINT registerID;								// registerの何番目に格納されているかのID デバッグ用
 
-	XMMATRIX worldMat;								// ワールド行列
+	DirectX::XMMATRIX worldMat;						// ワールド行列
 
 
 public:
@@ -22,23 +22,21 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// Instance生成関数
-	void CreateInstance(const ComPtr<ID3D12Resource>& blassBuffer, const UINT& hitGroupIndex, const UINT& instanceID);
+	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID);
 
 	// 移動(引数を加算)関数
-	void AddTrans(const float& x, const float& y, const float z);
-	void AddTrans(const XMFLOAT3& pos);
+	void AddTrans(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Pos);
 
 	// 回転(ラジアン、引数を加算)関数
-	void AddRotate(const float& x, const float& y, const float z);
-	void AddRotate(const XMFLOAT3& pos);
+	void AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Pos);
 
 
 private:
 
 	// アドレスに情報を書き込む処理
-	void WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
+	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize);
 
 	// バッファ全般を生成する処理
-	ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType);
 
 };

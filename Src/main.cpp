@@ -13,6 +13,7 @@
 #include "TextureManager.h"
 #include "FbxLoader.h"
 #include "Vec.h"
+#include "PorygonInstanceRegister.h"
 
 #include "BLASRegister.h"
 #include "PorygonInstance.h"
@@ -236,25 +237,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 床のBLASを生成。
 	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", hitGroupName, L"Resource/Fine_Basin.jpg");
 
-	// 三角形のInstancecを生成。
-	vector<PorygonMeshInstance> porygonInstance;
-	porygonInstance.resize(4);
-
 	// インスタンスを生成
-	porygonInstance[0].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 2);
-	porygonInstance[1].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 1);
-	porygonInstance[2].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(monkeyBlas), 1, 2);
-	porygonInstance[3].CreateInstance(BLASRegister::Instance()->GetBLASBuffer(groundBlas), 2, 2);
+	int boneA = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 2);
+	int boneB = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 1);
+	int monkey = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(monkeyBlas), 1, 2);
+	int ground = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(groundBlas), 2, 2);
 
 	// 移動させる。
-	porygonInstance[0].AddTrans(-2.0f, 0.0f, 0);
-	porygonInstance[1].AddTrans(2.0f, 0.0f, 0);
-	porygonInstance[2].AddTrans(0.0f, 0.0f, 0);
-	porygonInstance[3].AddTrans(0.0f, -1.0f, 0);
+	PorygonInstanceRegister::Instance()->AddTrans(boneA, -2.0f, 0.0f, 0);
+	PorygonInstanceRegister::Instance()->AddTrans(boneB, 2.0f, 0.0f, 0);
+	PorygonInstanceRegister::Instance()->AddTrans(monkey, 0.0f, 0.0f, 0);
+	PorygonInstanceRegister::Instance()->AddTrans(ground, 0.0f, -1.0f, 0);
 
 	// ある程度回転させる。
-	porygonInstance[0].AddRotate(0.0f, 0.1f, 0);
-	porygonInstance[1].AddRotate(0.0f, 0.1f, 0);
+	PorygonInstanceRegister::Instance()->AddRotate(boneA, 0.0f, -0.1f, 0);
+	PorygonInstanceRegister::Instance()->AddRotate(boneB, 0.0f, -0.1f, 0);
 
 	// TLASを生成。
 	TLAS tlas;
@@ -560,10 +557,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_UP)) Camera::Instance()->eye.y += speed;
 		if (Input::isKey(DIK_DOWN)) Camera::Instance()->eye.y -= speed;
 
-		if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
-		if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
-		if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
-		if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
+		//if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
+		//if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
+		//if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
+		//if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
 
 		if (Input::isKey(DIK_1)) {
 
