@@ -1,19 +1,10 @@
 #include "SoundManager.h"
-#include "LightManager.h"
 #include "PiplineManager.h"
 #include "RenderTarget.h"
-#include "Sprite.h"
-#include "FHelper.h"
-#include "Enum.h"
-#include "Object3D.h"
-#include "MultiPathFunction.h"
 #include "Camera.h"
-#include "LightCamera.h"
 #include "Input.h"
 #include "TextureManager.h"
 #include "FbxLoader.h"
-#include "Vec.h"
-#include "PorygonInstanceRegister.h"
 
 #include "BLASRegister.h"
 #include "PorygonInstance.h"
@@ -21,6 +12,9 @@
 #include "RayRootsignature.h"
 #include "DynamicConstBuffer.h"
 #include "DescriptorHeapMgr.h"
+#include "Vec.h"
+#include "PorygonInstanceRegister.h"
+#include "HitGroupMgr.h"
 
 #include <utilapiset.h>
 
@@ -307,7 +301,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	dxilLib->DefineExport(L"mainMS");
 	dxilLib->DefineExport(L"shadowMS");
 	dxilLib->DefineExport(L"mainCHS");
-	dxilLib->DefineExport(L"shadowCHS");
+	//dxilLib->DefineExport(L"shadowCHS");
 	dxilLib->DefineExport(L"mainAnyHit");
 
 	// ヒットグループの設定。

@@ -1,4 +1,5 @@
 #include "RayRootsignature.h"
+#include "DirectXBase.h"
 
 void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shaderRegister, UINT registerSpace)
 {
@@ -76,10 +77,10 @@ void RayRootsignature::Create(const bool& isLocal, const wchar_t* name)
 	}
 
 	// ルートシグネチャ生成。
-	ComPtr<ID3DBlob> blob, errBlob;
+	Microsoft::WRL::ComPtr<ID3DBlob> blob, errBlob;
 	D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &blob, &errBlob);
 	if (errBlob.Get() != nullptr) {
-		string a = static_cast<char*>(errBlob->GetBufferPointer());
+		std::string a = static_cast<char*>(errBlob->GetBufferPointer());
 		_RPTF0(_CRT_WARN, a.c_str());
 		int b = 0;
 	}

@@ -1,8 +1,7 @@
 #pragma once
-#include "DirectXBase.h"
+#include <DirectXTex/d3dx12.h>
 #include <array>
-
-using namespace std;
+#include <wrl.h>
 
 // レイトレーシングで使用するグローバルルートシグネチャ、ローカルルートシグネチャクラス
 class RayRootsignature {
@@ -19,12 +18,12 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	array<CD3DX12_ROOT_PARAMETER, MAX_ROOTPARAM> rootparam;		// ルートパラメーター
-	array<CD3DX12_DESCRIPTOR_RANGE, MAX_ROOTPARAM> descRange;	// ディスクリプタテーブル
-	ComPtr<ID3D12RootSignature> rootsignature;					// ルートシグネチャ
-	array<CD3DX12_STATIC_SAMPLER_DESC, MAX_SAMPLER> sampler;	// スタティックサンプラー
-	UINT rootparamCount;										// ルートパラメーター数
-	UINT samplerCount;											// サンプラーの数
+	std::array<CD3DX12_ROOT_PARAMETER, MAX_ROOTPARAM> rootparam;	// ルートパラメーター
+	std::array<CD3DX12_DESCRIPTOR_RANGE, MAX_ROOTPARAM> descRange;	// ディスクリプタテーブル
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootsignature;		// ルートシグネチャ
+	std::array<CD3DX12_STATIC_SAMPLER_DESC, MAX_SAMPLER> sampler;	// スタティックサンプラー
+	UINT rootparamCount;											// ルートパラメーター数
+	UINT samplerCount;												// サンプラーの数
 
 
 public:
@@ -47,6 +46,6 @@ public:
 	void Create(const bool& isLocal, const wchar_t* name = nullptr);
 
 	// アクセッタ
-	inline ComPtr<ID3D12RootSignature>& GetRootSig() { return rootsignature; }
+	inline Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSig() { return rootsignature; }
 
 };
