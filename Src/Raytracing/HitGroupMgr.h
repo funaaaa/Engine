@@ -10,7 +10,7 @@ class HitGroup;
 
 class HitGroupMgr : public Singleton<HitGroupMgr> {
 
-private:
+public:
 
 	/*===== ƒƒ“ƒo•Ï” =====*/
 

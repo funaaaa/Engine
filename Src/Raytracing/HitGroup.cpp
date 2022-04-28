@@ -21,7 +21,7 @@ void HitGroup::Generate(const HitGroupInitData& InputData, const int& RegisterSp
 	hitGroupName = HitGroupName;
 
 	// ローカルルートシグネチャを生成する。
-	localRootSig = std::make_unique<RayRootsignature>();
+	localRootSig = std::make_shared<RayRootsignature>();
 
 	// SRVについて追加。
 	for (int index = 0; index < SRVcount; ++index) {

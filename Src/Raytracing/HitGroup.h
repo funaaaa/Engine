@@ -20,7 +20,7 @@ struct HitGroupInitData {
 // ヒットグループクラス
 class HitGroup {
 
-private:
+public:
 
 	/*===== メンバ変数 =====*/
 
@@ -35,7 +35,7 @@ private:
 
 	LPCWSTR hitGroupName;	// このヒットグループの名前
 
-	std::unique_ptr<RayRootsignature> localRootSig;	// このヒットグループで使用するローカルルートシグネチャ
+	std::shared_ptr<RayRootsignature> localRootSig;	// このヒットグループで使用するローカルルートシグネチャ
 
 
 public:
