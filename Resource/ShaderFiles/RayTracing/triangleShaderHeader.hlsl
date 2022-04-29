@@ -276,7 +276,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
         float shadowRate = 1.0f;
         //bool isShadow = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
-        bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 5, 0) - worldPosition));
+        bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 7, 0) - worldPosition));
 
         // âeÇ»ÇÁà√Ç≠Ç∑ÇÈÅB
         if (isShadow)

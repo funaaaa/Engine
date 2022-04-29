@@ -3,7 +3,6 @@
 #include "RenderTarget.h"
 #include "Camera.h"
 #include "Input.h"
-#include "TextureManager.h"
 #include "FbxLoader.h"
 
 #include "BLASRegister.h"
@@ -82,20 +81,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Instance()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
 
 	// インスタンスを生成
-	int boneA = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 2);
-	int boneB = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 1);
-	int monkey = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(monkeyBlas), 1, 2);
-	int ground = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(groundBlas), 2, 2);
+	int boneA = PorygonInstanceRegister::Instance()->CreateInstance(boneBlas, 2);
+	int boneB = PorygonInstanceRegister::Instance()->CreateInstance(boneBlas, 1);
+	int boneC = PorygonInstanceRegister::Instance()->CreateInstance(boneBlas, 1);
+	int boneD = PorygonInstanceRegister::Instance()->CreateInstance(boneBlas, 1);
+	int monkey = PorygonInstanceRegister::Instance()->CreateInstance(monkeyBlas, 2);
+	int ground = PorygonInstanceRegister::Instance()->CreateInstance(groundBlas, 2);
 
 	// 移動させる。
 	PorygonInstanceRegister::Instance()->AddTrans(boneA, -2.0f, 0.0f, 0);
 	PorygonInstanceRegister::Instance()->AddTrans(boneB, 2.0f, 0.0f, 0);
+	PorygonInstanceRegister::Instance()->AddTrans(boneC, 0.0f, 0.0f, 2.0f);
+	PorygonInstanceRegister::Instance()->AddTrans(boneD, 0.0f, 0.0f, -2.0f);
 	PorygonInstanceRegister::Instance()->AddTrans(monkey, 0.0f, 0.0f, 0);
 	PorygonInstanceRegister::Instance()->AddTrans(ground, 0.0f, -1.0f, 0);
 
 	// ある程度回転させる。
 	PorygonInstanceRegister::Instance()->AddRotate(boneA, 0.0f, -0.1f, 0);
 	PorygonInstanceRegister::Instance()->AddRotate(boneB, 0.0f, -0.1f, 0);
+	PorygonInstanceRegister::Instance()->AddRotate(boneC, 0.0f, -0.1f, 0);
+	PorygonInstanceRegister::Instance()->AddRotate(boneD, 0.0f, -0.1f, 0);
 
 	// TLASを生成。
 	TLAS tlas;

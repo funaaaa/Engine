@@ -29,7 +29,7 @@ public:
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
 	// Instance‚ğ¶¬‚·‚éB
-	int CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& blassBuffer, const UINT& hitGroupIndex, const UINT& instanceID);
+	int CreateInstance(const int& BlasIndex, const UINT& instanceID);
 
 	// ˆÚ“®(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);
