@@ -58,6 +58,9 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 		shaderCode.emplace_back();
 
+		// シェーダーをコンパイルする。
+		ShaderStorage::Instance()->LoadShaderForDXC(shaderData[index].shaderPath, "lib_6_4", "");
+
 		// シェーダーを読み込む。
 		shaderCode[index].BytecodeLength = ShaderStorage::Instance()->GetShaderBin(shaderData[index].shaderPath).size();
 		shaderCode[index].pShaderBytecode = ShaderStorage::Instance()->GetShaderBin(shaderData[index].shaderPath).data();
@@ -124,14 +127,11 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
 	pipelineConfig->Config(30);
 
-	// ステートオブジェクト
-	ComPtr<ID3D12StateObject> stateObject;
-
 	// 生成する。
 	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateStateObject(
 		subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
 	);
 
-	stateObject->SetName(L"StateObject");
+ 	stateObject->SetName(L"StateObject");
 
 }
