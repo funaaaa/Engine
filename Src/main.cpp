@@ -158,13 +158,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		BLASRegister::Instance()->ComputeSkin(boneBlas);
 
 		float speed = 0.1f;
-		float rot = 0.05f;
+		float rot = 0.03f;
 		if (Input::isKey(DIK_W)) Camera::Instance()->Move(speed);
 		if (Input::isKey(DIK_S)) Camera::Instance()->Move(-speed);
 		if (Input::isKey(DIK_A)) Camera::Instance()->MoveRight(speed);
 		if (Input::isKey(DIK_D)) Camera::Instance()->MoveRight(-speed);
 		if (Input::isKey(DIK_UP)) Camera::Instance()->eye.y += speed;
 		if (Input::isKey(DIK_DOWN)) Camera::Instance()->eye.y -= speed;
+		if (Input::isKey(DIK_LEFT)) Camera::Instance()->AddRotation(0,-rot,0);
+		if (Input::isKey(DIK_RIGHT)) Camera::Instance()->AddRotation(0,rot,0);
 
 		//if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
 		//if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);

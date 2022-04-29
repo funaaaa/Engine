@@ -86,22 +86,11 @@ void Camera::Update()
 {
 
 	// 正面ベクトルを求める。
-	//forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
-	forwardVec = eye;
-	forwardVec.y = 0;
-	forwardVec.Normalize();
-	forwardVec = forwardVec * -1.0f;
-
-	float angleXZ = atan2f(forwardVec.z, forwardVec.x);
-
-	// 回転行列を求める。
-	rotationMat = XMMatrixIdentity();
-	rotationMat *= XMMatrixRotationY(angleXZ);
+	forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
 
 	// 視点座標から視点点座標を求める。
 	const float EYE_TARGET = 100.0f;
-	//target = FHelper::AddXMFLOAT3(eye, FHelper::MulXMFLOAT3(forwardVec, XMFLOAT3(EYE_TARGET, EYE_TARGET, EYE_TARGET)));
-	target = 0;
+	target = eye + forwardVec * EYE_TARGET;
 
 	// 上ベクトルを求める。
 	up = FHelper::MulRotationMatNormal({ 0,1,0 }, rotationMat);
