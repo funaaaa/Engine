@@ -5,13 +5,13 @@ Gaussian MultiPathFunction::gaussian = {};
 
 void MultiPathFunction::ResourceBarrierBefore(RenderTarget renderTarget)
 {
-	DirectXBase::Instance()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTarget.renderTargetTexture.Get(),
+	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTarget.renderTargetTexture.Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 }
 
 void MultiPathFunction::ResourceBarrierAfter(RenderTarget renderTarget)
 {
-	DirectXBase::Instance()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTarget.renderTargetTexture.Get(),
+	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTarget.renderTargetTexture.Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 }
 
@@ -25,11 +25,11 @@ void MultiPathFunction::ResourceBarriersAfter(UINT num, RenderTarget* renderTarg
 void MultiPathFunction::ClearRtvDsv(RenderTarget renderTarget)
 {
 	//レンダーターゲットをクリア
-	DirectXBase::Instance()->cmdList->ClearRenderTargetView(renderTarget.rtvHeap.Get()->GetCPUDescriptorHandleForHeapStart(), renderTarget.rtvClearColor, 0, nullptr);
+	DirectXBase::Ins()->cmdList->ClearRenderTargetView(renderTarget.rtvHeap.Get()->GetCPUDescriptorHandleForHeapStart(), renderTarget.rtvClearColor, 0, nullptr);
 
 	if (renderTarget.HasDepthStencil()) {
 		//深度をクリア
-		DirectXBase::Instance()->cmdList->ClearDepthStencilView(renderTarget.dsvHeap.Get()->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, renderTarget.dsvClearColor,
+		DirectXBase::Ins()->cmdList->ClearDepthStencilView(renderTarget.dsvHeap.Get()->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, renderTarget.dsvClearColor,
 			0, 0, nullptr);
 	}
 }
@@ -39,7 +39,7 @@ void MultiPathFunction::SetRenderTargetAndClear(RenderTarget renderTarget)
 	//リソースバリア
 	ResourceBarrierBefore(renderTarget);
 	//レンダーターゲットをセッティング
-	DirectXBase::Instance()->cmdList->OMSetRenderTargets(1, &renderTarget.rtvHeap.Get()->GetCPUDescriptorHandleForHeapStart(),
+	DirectXBase::Ins()->cmdList->OMSetRenderTargets(1, &renderTarget.rtvHeap.Get()->GetCPUDescriptorHandleForHeapStart(),
 		FALSE, &renderTarget.dsvHeap.Get()->GetCPUDescriptorHandleForHeapStart());
 	//クリア
 	ClearRtvDsv(renderTarget);
@@ -50,7 +50,7 @@ void MultiPathFunction::SetRenderTarget(RenderTarget renderTarget)
 	//リソースバリア
 	ResourceBarrierBefore(renderTarget);
 	//レンダーターゲットをセッティング
-	DirectXBase::Instance()->cmdList->OMSetRenderTargets(1, &renderTarget.rtvHeap.Get()->GetCPUDescriptorHandleForHeapStart(),
+	DirectXBase::Ins()->cmdList->OMSetRenderTargets(1, &renderTarget.rtvHeap.Get()->GetCPUDescriptorHandleForHeapStart(),
 		FALSE, &renderTarget.dsvHeap.Get()->GetCPUDescriptorHandleForHeapStart());
 }
 
@@ -70,11 +70,11 @@ void MultiPathFunction::SetRenderTargetsAndClear(UINT num, RenderTarget* renderT
 	if (renderTargets[0]->HasDepthStencil()) {
 		//深度バッファがある。
 		D3D12_CPU_DESCRIPTOR_HANDLE dsDS = renderTargets[0]->dsvHeap.Get()->GetCPUDescriptorHandleForHeapStart();
-		DirectXBase::Instance()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, &dsDS);
+		DirectXBase::Ins()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, &dsDS);
 	}
 	else {
 		//深度バッファがない。
-		DirectXBase::Instance()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, nullptr);
+		DirectXBase::Ins()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, nullptr);
 	}
 
 	//クリア
@@ -99,11 +99,11 @@ void MultiPathFunction::SetRenderTargets(UINT num, RenderTarget* renderTargets[]
 	if (renderTargets[0]->HasDepthStencil()) {
 		//深度バッファがある。
 		D3D12_CPU_DESCRIPTOR_HANDLE dsDS = renderTargets[0]->dsvHeap.Get()->GetCPUDescriptorHandleForHeapStart();
-		DirectXBase::Instance()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, &dsDS);
+		DirectXBase::Ins()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, &dsDS);
 	}
 	else {
 		//深度バッファがない。
-		DirectXBase::Instance()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, nullptr);
+		DirectXBase::Ins()->cmdList->OMSetRenderTargets(num, rtDSHandleTbl, FALSE, nullptr);
 	}
 
 }
@@ -111,18 +111,18 @@ void MultiPathFunction::SetRenderTargets(UINT num, RenderTarget* renderTargets[]
 //void MultiPathFunction::GaussianBlur(SpriteMultiPath xBlur, RenderTarget xBlurTarget, SpriteMultiPath yBlur, RenderTarget yBlurTarget)
 //{
 //	//レンダーターゲットを横ブラーに設定
-//	MultiPathFunction::Instance()->SetRenderTargetAndClear(xBlurTarget);
+//	MultiPathFunction::Ins()->SetRenderTargetAndClear(xBlurTarget);
 //	//レンダーターゲットに描画
-//	ObjectManager::Instance()->DrawSpriteMultiPath(xBlur);
+//	ObjectManager::Ins()->DrawSpriteMultiPath(xBlur);
 //	//レンダーターゲットへの書き込み完了待ち
-//	MultiPathFunction::Instance()->ResourceBarrierAfter(xBlurTarget);
+//	MultiPathFunction::Ins()->ResourceBarrierAfter(xBlurTarget);
 //
 //	//レンダーターゲットを縦ブラーに設定
-//	MultiPathFunction::Instance()->SetRenderTargetAndClear(yBlurTarget);
+//	MultiPathFunction::Ins()->SetRenderTargetAndClear(yBlurTarget);
 //	//レンダーターゲットに描画
-//	ObjectManager::Instance()->DrawSpriteMultiPath(yBlur);
+//	ObjectManager::Ins()->DrawSpriteMultiPath(yBlur);
 //	//レンダーターゲットへの書き込み完了待ち
-//	MultiPathFunction::Instance()->ResourceBarrierAfter(yBlurTarget);
+//	MultiPathFunction::Ins()->ResourceBarrierAfter(yBlurTarget);
 //}
 
 void MultiPathFunction::GaussianBlur(XMFLOAT2 textureSize, float blurAmount, int blurCount, int targetTextureID, RenderTarget& exportTarget)
@@ -136,21 +136,21 @@ void MultiPathFunction::GaussianBlur(XMFLOAT2 textureSize, float blurAmount, int
 
 	/*-----一回目のぼかしをかける-----*/
 	//レンダーターゲットを横ブラーに設定
-	MultiPathFunction::Instance()->SetRenderTargetAndClear(gaussian.gaussX);
+	MultiPathFunction::Ins()->SetRenderTargetAndClear(gaussian.gaussX);
 	//レンダーターゲットに描画
 	gaussian.gaussXSprite.ChangePosition(XMFLOAT3(textureSize.x / 2.0f, textureSize.y / 2.0f, 10));
-	//ObjectManager::Instance()->ChangeScale(gaussian.gaussXSprite.scaleMat, XMFLOAT3(1,1, 1));
+	//ObjectManager::Ins()->ChangeScale(gaussian.gaussXSprite.scaleMat, XMFLOAT3(1,1, 1));
 	gaussian.gaussXSprite.Draw();
 	//レンダーターゲットへの書き込み完了待ち
-	MultiPathFunction::Instance()->ResourceBarrierAfter(gaussian.gaussX);
+	MultiPathFunction::Ins()->ResourceBarrierAfter(gaussian.gaussX);
 	//レンダーターゲットを縦ブラーに設定
 	gaussian.gaussYSprite.ChangePosition(XMFLOAT3(textureSize.x / 2.0f, textureSize.y / 2.0f, 10));
-	//ObjectManager::Instance()->ChangeScale(gaussian.gaussYSprite.scaleMat, XMFLOAT3(1,1, 1));
-	MultiPathFunction::Instance()->SetRenderTargetAndClear(gaussian.gaussY);
+	//ObjectManager::Ins()->ChangeScale(gaussian.gaussYSprite.scaleMat, XMFLOAT3(1,1, 1));
+	MultiPathFunction::Ins()->SetRenderTargetAndClear(gaussian.gaussY);
 	//レンダーターゲットに描画
 	gaussian.gaussYSprite.Draw();
 	//レンダーターゲットへの書き込み完了待ち
-	MultiPathFunction::Instance()->ResourceBarrierAfter(gaussian.gaussY);
+	MultiPathFunction::Ins()->ResourceBarrierAfter(gaussian.gaussY);
 
 	/*-----横ブラーの描画テクスチャを再設定-----*/
 	gaussian.gaussXSprite.ChangeTextureID(gaussian.gaussY.textureID, 0);
@@ -158,33 +158,33 @@ void MultiPathFunction::GaussianBlur(XMFLOAT2 textureSize, float blurAmount, int
 	/*-----指定回数-1回分ループしてぼかしをかける-----*/
 	//for (int i = 0; i < blurCount - 1; ++i) {
 	//	//レンダーターゲットを横ブラーに設定
-	//	MultiPathFunction::Instance()->SetRenderTargetAndClear(gaussian.gaussX);
+	//	MultiPathFunction::Ins()->SetRenderTargetAndClear(gaussian.gaussX);
 	//	//レンダーターゲットに描画
-	//	ObjectManager::Instance()->DrawSpriteMultiPath(gaussian.gaussXSprite);
+	//	ObjectManager::Ins()->DrawSpriteMultiPath(gaussian.gaussXSprite);
 	//	//レンダーターゲットへの書き込み完了待ち
-	//	MultiPathFunction::Instance()->ResourceBarrierAfter(gaussian.gaussX);
+	//	MultiPathFunction::Ins()->ResourceBarrierAfter(gaussian.gaussX);
 	//	//レンダーターゲットを縦ブラーに設定
-	//	MultiPathFunction::Instance()->SetRenderTargetAndClear(gaussian.gaussY);
+	//	MultiPathFunction::Ins()->SetRenderTargetAndClear(gaussian.gaussY);
 	//	//レンダーターゲットに描画
-	//	ObjectManager::Instance()->DrawSpriteMultiPath(gaussian.gaussYSprite);
+	//	ObjectManager::Ins()->DrawSpriteMultiPath(gaussian.gaussYSprite);
 	//	//レンダーターゲットへの書き込み完了待ち
-	//	MultiPathFunction::Instance()->ResourceBarrierAfter(gaussian.gaussY);
+	//	MultiPathFunction::Ins()->ResourceBarrierAfter(gaussian.gaussY);
 	//}
 
 	/*-----最終的にボケた画像をエクスポートターゲットに描画-----*/
 	//レンダーターゲットをエクスポートターゲットに設定
-	MultiPathFunction::Instance()->SetRenderTargetAndClear(exportTarget);
+	MultiPathFunction::Ins()->SetRenderTargetAndClear(exportTarget);
 	//大きさを設定
 	gaussian.gaussXSprite.ChangePosition(XMFLOAT3(textureSize.x / 2.0f, textureSize.y / 2.0f, 10));
-	//ObjectManager::Instance()->ChangeScale(gaussian.gaussXSprite.scaleMat, XMFLOAT3(1,1, 1));
+	//ObjectManager::Ins()->ChangeScale(gaussian.gaussXSprite.scaleMat, XMFLOAT3(1,1, 1));
 	//レンダーターゲットに描画
 	gaussian.gaussXSprite.ChangeTextureID(gaussian.gaussY.textureID, 0);
 	gaussian.gaussXSprite.Draw();
 	//大きさを再設定
 	gaussian.gaussXSprite.ChangePosition(XMFLOAT3(window_width / 2.0f, window_height / 2.0f, 10));
-	//ObjectManager::Instance()->ChangeScale(gaussian.gaussXSprite.scaleMat, XMFLOAT3(1,1, 1));
+	//ObjectManager::Ins()->ChangeScale(gaussian.gaussXSprite.scaleMat, XMFLOAT3(1,1, 1));
 	//レンダーターゲットへの書き込み完了待ち
-	MultiPathFunction::Instance()->ResourceBarrierAfter(exportTarget);
+	MultiPathFunction::Ins()->ResourceBarrierAfter(exportTarget);
 }
 
 void MultiPathFunction::SetGaussianAmount(SpriteGaussian& xBlur, SpriteGaussian& yBlur, float amount)

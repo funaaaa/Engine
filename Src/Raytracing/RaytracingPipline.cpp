@@ -74,11 +74,11 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 		shaderCode.emplace_back();
 
 		// シェーダーをコンパイルする。
-		ShaderStorage::Instance()->LoadShaderForDXC(shaderData[index].shaderPath, "lib_6_4", "");
+		ShaderStorage::Ins()->LoadShaderForDXC(shaderData[index].shaderPath, "lib_6_4", "");
 
 		// シェーダーを読み込む。
-		shaderCode[index].BytecodeLength = ShaderStorage::Instance()->GetShaderBin(shaderData[index].shaderPath).size();
-		shaderCode[index].pShaderBytecode = ShaderStorage::Instance()->GetShaderBin(shaderData[index].shaderPath).data();
+		shaderCode[index].BytecodeLength = ShaderStorage::Ins()->GetShaderBin(shaderData[index].shaderPath).size();
+		shaderCode[index].pShaderBytecode = ShaderStorage::Ins()->GetShaderBin(shaderData[index].shaderPath).data();
 
 		// シェーダーの各関数レコードの登録。
 		auto dxilLib = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
@@ -110,7 +110,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	}
 
 	// ヒットグループを設定。
-	const int HIT_GROUP_COUNT = HitGroupMgr::Instance()->GetHitGroupCount();
+	const int HIT_GROUP_COUNT = HitGroupMgr::Ins()->GetHitGroupCount();
 	for (int index = 0; index < HIT_GROUP_COUNT; ++index) {
 
 		// ヒットグループの設定。
@@ -118,19 +118,19 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 		hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
 
 		// ClosestHitShaderをエントリポイントを保存。
-		if (HitGroupMgr::Instance()->GetCHFlag(index)) {
-			hitGroup->SetClosestHitShaderImport(HitGroupMgr::Instance()->GetCH(index));
+		if (HitGroupMgr::Ins()->GetCHFlag(index)) {
+			hitGroup->SetClosestHitShaderImport(HitGroupMgr::Ins()->GetCH(index));
 		}
 		// AnyHitShaderのエントリポイントを保存。
-		if (HitGroupMgr::Instance()->GetAHFlag(index)) {
-			hitGroup->SetAnyHitShaderImport(HitGroupMgr::Instance()->GetAH(index));
+		if (HitGroupMgr::Ins()->GetAHFlag(index)) {
+			hitGroup->SetAnyHitShaderImport(HitGroupMgr::Ins()->GetAH(index));
 		}
 		// IntersectShaderのエントリポイントを保存。
-		if (HitGroupMgr::Instance()->GetISFlag(index)) {
-			hitGroup->SetIntersectionShaderImport(HitGroupMgr::Instance()->GetIS(index));
+		if (HitGroupMgr::Ins()->GetISFlag(index)) {
+			hitGroup->SetIntersectionShaderImport(HitGroupMgr::Ins()->GetIS(index));
 		}
 		// ヒットグループ名を保存。
-		hitGroup->SetHitGroupExport(HitGroupMgr::Instance()->hitGroupNames[index]);
+		hitGroup->SetHitGroupExport(HitGroupMgr::Ins()->hitGroupNames[index]);
 
 	}
 
@@ -142,9 +142,9 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	for (int index = 0; index < HIT_GROUP_COUNT; ++index) {
 
 		auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-		chLocalRootSig->SetRootSignature(HitGroupMgr::Instance()->GetLocalRootSig(index)->GetRootSig().Get());
+		chLocalRootSig->SetRootSignature(HitGroupMgr::Ins()->GetLocalRootSig(index)->GetRootSig().Get());
 		auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-		chAssocModel->AddExport(HitGroupMgr::Instance()->hitGroupNames[index]);
+		chAssocModel->AddExport(HitGroupMgr::Ins()->hitGroupNames[index]);
 		chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
 
 	}
@@ -158,7 +158,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	pipelineConfig->Config(30);
 
 	// 生成する。
-	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateStateObject(
+	HRESULT resultBuff = DirectXBase::Ins()->dev->CreateStateObject(
 		subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
 	);
 
@@ -191,7 +191,7 @@ void RaytracingPipline::ConstructionShaderTable()
 	hitgroupRecordSize = RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
 
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = HitGroupMgr::Instance()->GetHitGroupCount();
+	UINT hitgroupCount = HitGroupMgr::Ins()->GetHitGroupCount();
 	UINT raygenSize = GetRayGenerationCount() * raygenRecordSize;
 	UINT missSize = GetMissCount() * missRecordSize;
 	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
@@ -268,10 +268,10 @@ void RaytracingPipline::ConstructionShaderTable()
 		uint8_t* pRecord = hitgroupStart;
 
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		const int BLAS_COUNT = BLASRegister::Instance()->GetBLASCount();
+		const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
 		for (int index = 0; index < BLAS_COUNT; ++index) {
 
-			pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject);
+			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject);
 
 		}
 
@@ -313,15 +313,15 @@ UINT RaytracingPipline::GetLargestDataSizeInHitGroup()
 
 	UINT largestDataSize = 0;
 
-	const int HIT_GROUP_COUNT = HitGroupMgr::Instance()->GetHitGroupCount();
+	const int HIT_GROUP_COUNT = HitGroupMgr::Ins()->GetHitGroupCount();
 	for (int index = 0; index < HIT_GROUP_COUNT; ++index) {
 
 		// データサイズを取得。
 		UINT dataSize = 0;
 		const UINT CONST_DATA_SIZE = 4;
-		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Instance()->GetSRVCount(index);
-		dataSize += CONST_DATA_SIZE * HitGroupMgr::Instance()->GetCBVCount(index);
-		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Instance()->GetUAVCount(index);
+		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetSRVCount(index);
+		dataSize += CONST_DATA_SIZE * HitGroupMgr::Ins()->GetCBVCount(index);
+		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetUAVCount(index);
 
 		// 取得したデータサイズが保存されているデータサイズより小さかったら処理を飛ばす。
 		if (dataSize < largestDataSize) continue;
@@ -362,7 +362,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t si
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resDesc.Flags = flags;
 
-	hr = DirectXBase::Instance()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

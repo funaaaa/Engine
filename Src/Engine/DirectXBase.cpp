@@ -331,21 +331,21 @@ void DirectXBase::processAfterDrawing() {
 void DirectXBase::SetRenderTarget()
 {
 	//レンダーターゲットのリソースバリア変更
-	UINT bbIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
-	DirectXBase::Instance()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DirectXBase::Instance()->backBuffers[bbIndex].Get(),
+	UINT bbIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DirectXBase::Ins()->backBuffers[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-	DirectXBase::Instance()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DirectXBase::Instance()->backBuffers[bbIndex].Get(),
+	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(DirectXBase::Ins()->backBuffers[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 	//レンダーターゲットの設定
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DirectXBase::Instance()->rtvHeaps->GetCPUDescriptorHandleForHeapStart(), bbIndex, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(DirectXBase::Instance()->heapDesc.Type));
-	DirectXBase::Instance()->cmdList->OMSetRenderTargets(1, &CD3DX12_CPU_DESCRIPTOR_HANDLE(DirectXBase::Instance()->rtvHeaps->GetCPUDescriptorHandleForHeapStart(),
-		DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(DirectXBase::Instance()->heapDesc.Type)), false, &DirectXBase::Instance()->dsvHeap->GetCPUDescriptorHandleForHeapStart());
+		DirectXBase::Ins()->rtvHeaps->GetCPUDescriptorHandleForHeapStart(), bbIndex, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(DirectXBase::Ins()->heapDesc.Type));
+	DirectXBase::Ins()->cmdList->OMSetRenderTargets(1, &CD3DX12_CPU_DESCRIPTOR_HANDLE(DirectXBase::Ins()->rtvHeaps->GetCPUDescriptorHandleForHeapStart(),
+		DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(DirectXBase::Ins()->heapDesc.Type)), false, &DirectXBase::Ins()->dsvHeap->GetCPUDescriptorHandleForHeapStart());
 	//レンダーターゲットのクリア
 	float clearColor[] = { 0.5f,0.5f,0.5f,0.0f };
-	DirectXBase::Instance()->cmdList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
+	DirectXBase::Ins()->cmdList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
 	//深度バッファのクリアコマンド
-	DirectXBase::Instance()->cmdList->ClearDepthStencilView(DirectXBase::Instance()->dsvHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	DirectXBase::Ins()->cmdList->ClearDepthStencilView(DirectXBase::Ins()->dsvHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void DirectXBase::ResourceBarrierAfter()

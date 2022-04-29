@@ -445,7 +445,7 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 					MultiByteToWideChar(CP_ACP, 0, fullPath.c_str(), -1, wFilePath, _countof(wFilePath));
 
 					// テクスチャ読み込み。
-					Model.textureID = TextureManager::Instance()->LoadTexture(wFilePath);
+					Model.textureID = TextureManager::Ins()->LoadTexture(wFilePath);
 
 					textureLoaded = true;
 
@@ -458,7 +458,7 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 		// テクスチャがない場合は白テクスチャを貼る。
 		if (!textureLoaded) {
 
-			Model.textureID = TextureManager::Instance()->CreateTexture({ 1.0f,1.0f,1.0f,1.0f });
+			Model.textureID = TextureManager::Ins()->CreateTexture({ 1.0f,1.0f,1.0f,1.0f });
 
 		}
 
@@ -629,7 +629,7 @@ void FbxModel::InitAnimation()
 
 	/*===== FBXアニメーションの再生 =====*/
 
-	FbxScene* fbxScene = FbxLoader::Instance()->GetFbxScene();
+	FbxScene* fbxScene = FbxLoader::Ins()->GetFbxScene();
 
 	// 0番アニメーションの再生。
 	FbxAnimStack* animstack = fbxScene->GetSrcObject<FbxAnimStack>(0);
@@ -661,7 +661,7 @@ void FbxModel::PlayAnimation()
 	// 初期化されていたら初期化処理を呼ばない。
 	if (!isInit) {
 
-		FbxScene* fbxScene = FbxLoader::Instance()->GetFbxScene();
+		FbxScene* fbxScene = FbxLoader::Ins()->GetFbxScene();
 
 		// 0番アニメーションの再生。
 		FbxAnimStack* animstack = fbxScene->GetSrcObject<FbxAnimStack>(0);

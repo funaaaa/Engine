@@ -130,12 +130,12 @@ void BaseDrawData::MapConstDataB0(ComPtr<ID3D12Resource> constBuffB0, const Cons
 	XMMATRIX matViewProjShadowMap;
 
 
-	matProjection = Camera::Instance()->matProjection;
-	matPerspective = Camera::Instance()->matPerspective;
-	matView = Camera::Instance()->matView;
-	eye = Camera::Instance()->Instance()->eye;
-	target = Camera::Instance()->Instance()->target;
-	up = Camera::Instance()->Instance()->up;
+	matProjection = Camera::Ins()->matProjection;
+	matPerspective = Camera::Ins()->matPerspective;
+	matView = Camera::Ins()->matView;
+	eye = Camera::Ins()->Ins()->eye;
+	target = Camera::Ins()->Ins()->target;
+	up = Camera::Ins()->Ins()->up;
 
 
 
@@ -150,8 +150,8 @@ void BaseDrawData::MapConstDataB0(ComPtr<ID3D12Resource> constBuffB0, const Cons
 		matWorld *= rotationMat;
 		matWorld *= positionMat;
 		constMap->mat.world = matWorld;
-		constMap->mat.viewproj = Camera::Instance()->matProjection;								//•½s“Š‰e•ÏŠ·
-		constMap->eye = Camera::Instance()->eye;
+		constMap->mat.viewproj = Camera::Ins()->matProjection;								//•½s“Š‰e•ÏŠ·
+		constMap->eye = Camera::Ins()->eye;
 		constMap->color = constBufferDataB0.color;
 	}
 	//“Š‰eID‚ªobject‚Ìê‡‚Í‚¢‚ë‚¢‚ë‚È•ÏŠ·‚ğs‚¤

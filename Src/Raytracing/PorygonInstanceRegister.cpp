@@ -12,7 +12,7 @@ int PorygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 	instance.emplace_back(std::make_shared<PorygonMeshInstance>());
 
 	// ÅŒã”ö‚Ì‚â‚Â‚ğ¶¬‚·‚éB
-	D3D12_RAYTRACING_INSTANCE_DESC buff = instance[instance.size() - 1]->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(BlasIndex), BlasIndex, InstanceID);
+	D3D12_RAYTRACING_INSTANCE_DESC buff = instance[instance.size() - 1]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, InstanceID);
 
 	// InstanceDesc‚ğ•ÛB
 	instanceDesc.emplace_back(buff);

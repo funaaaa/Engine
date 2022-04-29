@@ -28,7 +28,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	// Instance‚ğ¶¬‚·‚éB
+	// Ins‚ğ¶¬‚·‚éB
 	int CreateInstance(const int& BlasIndex, const UINT& instanceID);
 
 	// ˆÚ“®(ˆø”‚ğ‰ÁZ)ŠÖ”

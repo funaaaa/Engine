@@ -15,10 +15,10 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&lineBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&lineBuffer.constDescHeap));
 //
 //	//テクスチャをロード
-//	lineBuffer.basicdata.textureID.push_back(TextureManager::Instance()->CreateTexture(color));
+//	lineBuffer.basicdata.textureID.push_back(TextureManager::Ins()->CreateTexture(color));
 //
 //	//頂点バッファの生成
 //	Vertex vertex;
@@ -30,7 +30,7 @@
 //	lineBuffer.vertex.push_back(vertex);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(lineBuffer.vertex.size() * sizeof(Vertex)),
@@ -45,7 +45,7 @@
 //	lineBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -76,11 +76,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		lineBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		lineBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = lineBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)lineBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -105,14 +105,14 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName != 0) {
-//		spriteBuffer.basicdata.textureID.push_back(TextureManager::Instance()->LoadTexture(fileName));
+//		spriteBuffer.basicdata.textureID.push_back(TextureManager::Ins()->LoadTexture(fileName));
 //	}
 //	else {
-//		spriteBuffer.basicdata.textureID.push_back(TextureManager::Instance()->CreateTexture(color));
+//		spriteBuffer.basicdata.textureID.push_back(TextureManager::Ins()->CreateTexture(color));
 //	}
 //
 //	//頂点バッファの生成
@@ -131,7 +131,7 @@
 //	spriteBuffer.vertex.push_back(vertex);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(spriteBuffer.vertex.size() * sizeof(Vertex)),
@@ -146,7 +146,7 @@
 //	spriteBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -176,11 +176,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = spriteBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)spriteBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -205,7 +205,7 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
 //
 //	//テクスチャをロード
 //	spriteBuffer.basicdata.textureID.push_back(textureID);
@@ -226,7 +226,7 @@
 //	spriteBuffer.vertex.push_back(vertex);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(spriteBuffer.vertex.size() * sizeof(Vertex)),
@@ -241,7 +241,7 @@
 //	spriteBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -271,11 +271,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = spriteBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)spriteBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -301,13 +301,13 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName != nullptr) {
 //		spriteBuffer.textureID.resize(fileName->size());
 //		for (int i = 0; i < fileName->size(); ++i) {
-//			spriteBuffer.textureID.at(i) = TextureManager::Instance()->LoadTexture(fileName->at(i));
+//			spriteBuffer.textureID.at(i) = TextureManager::Ins()->LoadTexture(fileName->at(i));
 //		}
 //	}
 //
@@ -327,7 +327,7 @@
 //	spriteBuffer.vertex.push_back(vertex);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(spriteBuffer.vertex.size() * sizeof(Vertex)),
@@ -342,7 +342,7 @@
 //	spriteBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -372,11 +372,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = spriteBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)spriteBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -402,7 +402,7 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&spriteBuffer.constDescHeap));
 //
 //	//テクスチャをロード
 //	spriteBuffer.basicdata.textureID.push_back(textureID);
@@ -423,7 +423,7 @@
 //	spriteBuffer.vertex.push_back(vertex);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(spriteBuffer.vertex.size() * sizeof(Vertex)),
@@ -438,7 +438,7 @@
 //	spriteBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -446,7 +446,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&spriteBuffer.constBuffB0)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataMultiPath) + 0xff) & ~0xff),
@@ -476,17 +476,17 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = spriteBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)spriteBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //	//2つ目を生成
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		spriteBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = spriteBuffer.constBuffB1->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)spriteBuffer.constBuffB1->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -519,16 +519,16 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 3;										//CBV3つ
 //	//ディスクリプタヒープの生成
-//	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&objectBuffer.constDescHeap));
+//	HRESULT resultBuff = DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&objectBuffer.constDescHeap));
 //
 //	//テクスチャをロード
-//	objectBuffer.basicdata.textureID.push_back(TextureManager::Instance()->LoadTexture(textureFileName));
+//	objectBuffer.basicdata.textureID.push_back(TextureManager::Ins()->LoadTexture(textureFileName));
 //
 //	//objファイルをロード
 //	ModelDataManager::LoadObj(directoryPath, modelFileName, objectBuffer, isSmoothing);
 //
 //	//頂点バッファの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(objectBuffer.vertex.size() * sizeof(Vertex)),
@@ -542,7 +542,7 @@
 //	objectBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(objectBuffer.index.size() * sizeof(unsigned short)),
@@ -557,7 +557,7 @@
 //	objectBuffer.ibView.SizeInBytes = objectBuffer.index.size() * sizeof(unsigned short);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -565,7 +565,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&objectBuffer.constBuffB0)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB1) + 0xff) & ~0xff),
@@ -573,7 +573,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&objectBuffer.constBuffB1)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB2) + 0xff) & ~0xff),
@@ -613,23 +613,23 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB1->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB1->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB2->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB2->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送(行列と視点座標関係)
 //	ConstBufferDataB0* constMap = nullptr;
@@ -650,13 +650,13 @@
 //	ConstBufferDataB2* constMap2 = nullptr;
 //	result = objectBuffer.constBuffB2->Map(0, nullptr, (void**)&constMap2);
 //	for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-//		constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+//		constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 //	}
 //	for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-//		constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+//		constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 //	}
 //	for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-//		constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+//		constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 //	}
 //	objectBuffer.constBuffB2->Unmap(0, nullptr);
 //
@@ -677,16 +677,16 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 3;										//CBV3つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&objectBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&objectBuffer.constDescHeap));
 //
 //	//テクスチャをロード
-//	objectBuffer.basicdata.textureID.push_back(TextureManager::Instance()->LoadTexture(textureFileName));
+//	objectBuffer.basicdata.textureID.push_back(TextureManager::Ins()->LoadTexture(textureFileName));
 //
 //	//objファイルをロード
 //	ModelDataManager::LoadObj(directoryPath, modelFileName, objectBuffer, isSmoothing);
 //
 //	//頂点バッファの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(objectBuffer.vertex.size() * sizeof(Vertex)),
@@ -700,7 +700,7 @@
 //	objectBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(objectBuffer.index.size() * sizeof(unsigned short)),
@@ -715,7 +715,7 @@
 //	objectBuffer.ibView.SizeInBytes = objectBuffer.index.size() * sizeof(unsigned short);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -723,7 +723,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&objectBuffer.constBuffB0)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB1) + 0xff) & ~0xff),
@@ -731,7 +731,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&objectBuffer.constBuffB1)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB2Shadow) + 0xff) & ~0xff),
@@ -771,23 +771,23 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB1->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB1->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB2->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB2->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送(行列と視点座標関係)
 //	ConstBufferDataB0* constMap = nullptr;
@@ -808,16 +808,16 @@
 //	ConstBufferDataB2Shadow* constMap2 = nullptr;
 //	result = objectBuffer.constBuffB2->Map(0, nullptr, (void**)&constMap2);
 //	for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-//		constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+//		constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 //	}
 //	for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-//		constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+//		constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 //	}
 //	for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-//		constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+//		constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 //	}
 //	for (int i = 0; i < CIRCLESHADOW_NUM; ++i) {
-//		constMap2->circleShadowData[i] = LightManager::Instance()->circleShadows[i];
+//		constMap2->circleShadowData[i] = LightManager::Ins()->circleShadows[i];
 //	}
 //	objectBuffer.constBuffB2->Unmap(0, nullptr);
 //
@@ -838,16 +838,16 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 3;										//CBV3つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&objectBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&objectBuffer.constDescHeap));
 //
 //	//テクスチャをロード
-//	objectBuffer.basicdata.textureID.push_back(TextureManager::Instance()->LoadTexture(textureFileName));
+//	objectBuffer.basicdata.textureID.push_back(TextureManager::Ins()->LoadTexture(textureFileName));
 //
 //	//objファイルをロード
 //	ModelDataManager::LoadObj(directoryPath, modelFileName, objectBuffer, isSmoothing);
 //
 //	//頂点バッファの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(objectBuffer.vertex.size() * sizeof(Vertex)),
@@ -861,7 +861,7 @@
 //	objectBuffer.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(objectBuffer.index.size() * sizeof(unsigned short)),
@@ -876,7 +876,7 @@
 //	objectBuffer.ibView.SizeInBytes = objectBuffer.index.size() * sizeof(unsigned short);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(((sizeof(ConstBufferDataB0) * INSTANCE_COUNT) + 0xff) & ~0xff),
@@ -884,7 +884,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&objectBuffer.constBuffB0)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB1) + 0xff) & ~0xff),
@@ -892,7 +892,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&objectBuffer.constBuffB1)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB2) + 0xff) & ~0xff),
@@ -932,23 +932,23 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB1->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB1->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		objectBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = objectBuffer.constBuffB2->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)objectBuffer.constBuffB2->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送(行列と視点座標関係)
 //	ConstBufferDataB0* constMap = nullptr;
@@ -969,13 +969,13 @@
 //	ConstBufferDataB2* constMap2 = nullptr;
 //	result = objectBuffer.constBuffB2->Map(0, nullptr, (void**)&constMap2);
 //	for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-//		constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+//		constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 //	}
 //	for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-//		constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+//		constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 //	}
 //	for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-//		//constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+//		//constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 //	}
 //	objectBuffer.constBuffB2->Unmap(0, nullptr);
 //
@@ -995,21 +995,21 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 1;										//CBV1つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&particleBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&particleBuffer.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName == 0) {
-//		particleBuffer.textureID = TextureManager::Instance()->CreateTexture(color);
+//		particleBuffer.textureID = TextureManager::Ins()->CreateTexture(color);
 //	}
 //	else {
-//		particleBuffer.textureID = TextureManager::Instance()->LoadTexture(fileName);
+//		particleBuffer.textureID = TextureManager::Ins()->LoadTexture(fileName);
 //	}
 //
 //	//頂点バッファの生成
 //	particleBuffer.vertex = {};
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(XMFLOAT3)),
@@ -1024,7 +1024,7 @@
 //	particleBuffer.vbView.StrideInBytes = sizeof(XMFLOAT3);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -1048,11 +1048,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		particleBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		particleBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = particleBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)particleBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -1082,21 +1082,21 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 1;										//CBV1つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&particleBuffer.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&particleBuffer.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName == 0) {
-//		particleBuffer.textureID = TextureManager::Instance()->CreateTexture(color);
+//		particleBuffer.textureID = TextureManager::Ins()->CreateTexture(color);
 //	}
 //	else {
-//		particleBuffer.textureID = TextureManager::Instance()->LoadTexture(fileName);
+//		particleBuffer.textureID = TextureManager::Ins()->LoadTexture(fileName);
 //	}
 //
 //	//頂点バッファの生成
 //	particleBuffer.vertex = {};
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(XMFLOAT3)),
@@ -1111,7 +1111,7 @@
 //	particleBuffer.vbView.StrideInBytes = sizeof(XMFLOAT3);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(((sizeof(GSConstBufferDataB0) * INSTANCE_COUNT) + 0xff) & ~0xff),
@@ -1135,11 +1135,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		particleBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		particleBuffer.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = particleBuffer.constBuffB0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)particleBuffer.constBuffB0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	GSConstBufferDataB0* constMap = nullptr;
@@ -1161,7 +1161,7 @@
 //	if (data.basicdata.isDisplay == false) return;
 //
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(data.basicdata.piplineID);
+//	PiplineManager::Ins()->SetPipline(data.basicdata.piplineID);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -1259,22 +1259,22 @@
 //	data.constBuffB0->Unmap(0, nullptr);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
 //
 //	//ディスクリプタヒープ設定コマンド
-//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //	//シェーダーリソースビュー設定コマンド
 //	for (int i = 0; i < data.basicdata.textureID.size(); ++i) {
-//		DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(i + 1, TextureManager::Instance()->GetSRV(data.basicdata.textureID[0]));
+//		DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(i + 1, TextureManager::Ins()->GetSRV(data.basicdata.textureID[0]));
 //	}
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 //
 //	//描画コマンド
 //	//DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//	DirectXBase::Instance()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
+//	DirectXBase::Ins()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
 //}
 
 //void ObjectManager::DrawSprite(Sprite& data)
@@ -1283,7 +1283,7 @@
 //	if (data.basicdata.isDisplay == false) return;
 //
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(data.basicdata.piplineID);
+//	PiplineManager::Ins()->SetPipline(data.basicdata.piplineID);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -1384,22 +1384,22 @@
 //	data.pos = XMFLOAT3(data.positionMat.r[3].m128_f32[0], data.positionMat.r[3].m128_f32[1], data.positionMat.r[3].m128_f32[2]);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
 //
 //	//ディスクリプタヒープ設定コマンド
-//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //	//シェーダーリソースビュー設定コマンド
 //	for (int i = 0; i < data.basicdata.textureID.size(); ++i) {
-//		DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(i + 1, TextureManager::Instance()->GetSRV(data.basicdata.textureID[0]));
+//		DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(i + 1, TextureManager::Ins()->GetSRV(data.basicdata.textureID[0]));
 //	}
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 //
 //	//描画コマンド
 //	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//	DirectXBase::Instance()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
+//	DirectXBase::Ins()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
 //}
 
 //void ObjectManager::DrawSpriteMultiPath(SpriteMultiPath& data)
@@ -1408,7 +1408,7 @@
 //	if (data.basicdata.isDisplay == false) return;
 //
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(data.basicdata.piplineID);
+//	PiplineManager::Ins()->SetPipline(data.basicdata.piplineID);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -1516,23 +1516,23 @@
 //	data.pos = XMFLOAT3(data.positionMat.r[3].m128_f32[0], data.positionMat.r[3].m128_f32[1], data.positionMat.r[3].m128_f32[2]);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(1, data.constBuffB1->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(1, data.constBuffB1->GetGPUVirtualAddress());
 //
 //	//ディスクリプタヒープ設定コマンド
-//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //	//シェーダーリソースビュー設定コマンド
 //	for (int i = 0; i < data.basicdata.textureID.size(); ++i) {
-//		DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(i + 2, TextureManager::Instance()->GetSRV(data.basicdata.textureID[0]));
+//		DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(i + 2, TextureManager::Ins()->GetSRV(data.basicdata.textureID[0]));
 //	}
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 //
 //	//描画コマンド
 //	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//	DirectXBase::Instance()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
+//	DirectXBase::Ins()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
 //}
 //
 //void ObjectManager::DrawSpriteMultiTexture(SpriteMultiTexture& data)
@@ -1541,7 +1541,7 @@
 //	if (data.isDisplay == false) return;
 //
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(data.piplineID);
+//	PiplineManager::Ins()->SetPipline(data.piplineID);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -1642,22 +1642,22 @@
 //	data.pos = XMFLOAT3(data.positionMat.r[3].m128_f32[0], data.positionMat.r[3].m128_f32[1], data.positionMat.r[3].m128_f32[2]);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
 //
 //	//ディスクリプタヒープ設定コマンド
-//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //	//シェーダーリソースビュー設定コマンド
 //	for (int i = 0; i < data.textureID.size(); ++i) {
-//		DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(i + 1, TextureManager::Instance()->GetSRV(data.textureID.at(i)));
+//		DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(i + 1, TextureManager::Ins()->GetSRV(data.textureID.at(i)));
 //	}
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 //
 //	//描画コマンド
 //	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//	DirectXBase::Instance()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
+//	DirectXBase::Ins()->cmdList->DrawInstanced(data.vertex.size(), 1, 0, 0);
 //}
 //
 ////void ObjectManager::DrawObject(Object3D& data)
@@ -1666,7 +1666,7 @@
 ////	if (data.basicdata.isDisplay == false) return;
 ////
 ////	//パイプラインとルートシグネチャの設定
-////	PiplineManager::Instance()->SetPipline(data.basicdata.piplineID);
+////	PiplineManager::Ins()->SetPipline(data.basicdata.piplineID);
 ////
 ////	//定数バッファへのデータ転送
 ////	ConstBufferDataB0* constMap = nullptr;
@@ -1775,13 +1775,13 @@
 ////	ConstBufferDataB2* constMap2 = nullptr;
 ////	result = data.constBuffB2->Map(0, nullptr, (void**)&constMap2);
 ////	for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-////		constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+////		constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 ////	}
 ////	for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-////		constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+////		constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 ////	}
 ////	for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-////		constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+////		constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 ////	}
 ////
 ////	data.constBuffB2->Unmap(0, nullptr);
@@ -1790,26 +1790,26 @@
 ////	data.pos = XMFLOAT3(data.positionMat.r[3].m128_f32[0], data.positionMat.r[3].m128_f32[1], data.positionMat.r[3].m128_f32[2]);
 ////
 ////	//定数バッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(1, data.constBuffB1->GetGPUVirtualAddress());
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(2, data.constBuffB2->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(1, data.constBuffB1->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(2, data.constBuffB2->GetGPUVirtualAddress());
 ////
 ////	//ディスクリプタヒープ設定コマンド
-////	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-////	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+////	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+////	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 ////	//シェーダーリソースビュー設定コマンド
 ////	for (int i = 0; i < data.basicdata.textureID.size(); ++i) {
-////		DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(i + 3, TextureManager::Instance()->GetSRV(data.basicdata.textureID[i]));
+////		DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(i + 3, TextureManager::Ins()->GetSRV(data.basicdata.textureID[i]));
 ////	}
 ////
 ////	//頂点バッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+////	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 ////
 ////	//頂点インデックスバッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->IASetIndexBuffer(&data.ibView);
+////	DirectXBase::Ins()->cmdList->IASetIndexBuffer(&data.ibView);
 ////
 ////	//描画コマンド
-////	DirectXBase::Instance()->cmdList->DrawIndexedInstanced(data.index.size(), 1, 0, 0, 0);
+////	DirectXBase::Ins()->cmdList->DrawIndexedInstanced(data.index.size(), 1, 0, 0, 0);
 ////}
 ////
 ////void ObjectManager::DrawObject(Object3DShadow& data)
@@ -1818,7 +1818,7 @@
 ////	if (data.basicdata.isDisplay == false) return;
 ////
 ////	//パイプラインとルートシグネチャの設定
-////	PiplineManager::Instance()->SetPipline(data.basicdata.piplineID);
+////	PiplineManager::Ins()->SetPipline(data.basicdata.piplineID);
 ////
 ////	//定数バッファへのデータ転送
 ////	ConstBufferDataB0* constMap = nullptr;
@@ -1927,16 +1927,16 @@
 ////	ConstBufferDataB2Shadow* constMap2 = nullptr;
 ////	result = data.constBuffB2->Map(0, nullptr, (void**)&constMap2);
 ////	for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-////		constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+////		constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 ////	}
 ////	for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-////		constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+////		constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 ////	}
 ////	for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-////		constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+////		constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 ////	}
 ////	for (int i = 0; i < CIRCLESHADOW_NUM; ++i) {
-////		constMap2->circleShadowData[i] = LightManager::Instance()->circleShadows[i];
+////		constMap2->circleShadowData[i] = LightManager::Ins()->circleShadows[i];
 ////	}
 ////
 ////	data.constBuffB2->Unmap(0, nullptr);
@@ -1945,26 +1945,26 @@
 ////	data.pos = XMFLOAT3(data.positionMat.r[3].m128_f32[0], data.positionMat.r[3].m128_f32[1], data.positionMat.r[3].m128_f32[2]);
 ////
 ////	//定数バッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(1, data.constBuffB1->GetGPUVirtualAddress());
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(2, data.constBuffB2->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(1, data.constBuffB1->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(2, data.constBuffB2->GetGPUVirtualAddress());
 ////
 ////	//ディスクリプタヒープ設定コマンド
-////	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-////	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+////	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+////	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 ////	//シェーダーリソースビュー設定コマンド
 ////	for (int i = 0; i < data.basicdata.textureID.size(); ++i) {
-////		DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(i + 3, TextureManager::Instance()->GetSRV(data.basicdata.textureID[0]));
+////		DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(i + 3, TextureManager::Ins()->GetSRV(data.basicdata.textureID[0]));
 ////	}
 ////
 ////	//頂点バッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+////	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 ////
 ////	//頂点インデックスバッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->IASetIndexBuffer(&data.ibView);
+////	DirectXBase::Ins()->cmdList->IASetIndexBuffer(&data.ibView);
 ////
 ////	//描画コマンド
-////	DirectXBase::Instance()->cmdList->DrawIndexedInstanced(data.index.size(), 1, 0, 0, 0);
+////	DirectXBase::Ins()->cmdList->DrawIndexedInstanced(data.index.size(), 1, 0, 0, 0);
 ////}
 ////
 ////void ObjectManager::DrawObjectInstance(const Object3D& instanceData, const vector<Object3D>& data, const int& piplineID)
@@ -1973,7 +1973,7 @@
 ////	int instanceCount = data.size();
 ////
 ////	//パイプラインとルートシグネチャの設定
-////	PiplineManager::Instance()->SetPipline(piplineID);
+////	PiplineManager::Ins()->SetPipline(piplineID);
 ////
 ////	//定数バッファへのデータ転送
 ////	ConstBufferDataB0* constMap = nullptr;
@@ -2086,47 +2086,47 @@
 ////	ConstBufferDataB2Shadow* constMap2 = nullptr;
 ////	result = instanceData.constBuffB2->Map(0, nullptr, (void**)&constMap2);
 ////	for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-////		constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+////		constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 ////	}
 ////	for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-////		constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+////		constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 ////	}
 ////	for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-////		constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+////		constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 ////	}
 ////	/*for (int i = 0; i < CIRCLESHADOW_NUM; ++i) {
-////		constMap2->circleShadowData[i] = LightManager::Instance()->circleShadows[i];
+////		constMap2->circleShadowData[i] = LightManager::Ins()->circleShadows[i];
 ////	}*/
 ////
 ////	instanceData.constBuffB2->Unmap(0, nullptr);
 ////
 ////	//定数バッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, instanceData.constBuffB0->GetGPUVirtualAddress());
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(1, instanceData.constBuffB1->GetGPUVirtualAddress());
-////	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(2, instanceData.constBuffB2->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, instanceData.constBuffB0->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(1, instanceData.constBuffB1->GetGPUVirtualAddress());
+////	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(2, instanceData.constBuffB2->GetGPUVirtualAddress());
 ////
 ////	//ディスクリプタヒープ設定コマンド
-////	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-////	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+////	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+////	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 ////	//シェーダーリソースビュー設定コマンド
 ////	for (int i = 0; i < instanceData.basicdata.textureID.size(); ++i) {
-////		DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(i + 3, TextureManager::Instance()->GetSRV(instanceData.basicdata.textureID[0]));
+////		DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(i + 3, TextureManager::Ins()->GetSRV(instanceData.basicdata.textureID[0]));
 ////	}
 ////
 ////	//頂点バッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &instanceData.vbView);
+////	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &instanceData.vbView);
 ////
 ////	//頂点インデックスバッファビュー設定コマンド
-////	DirectXBase::Instance()->cmdList->IASetIndexBuffer(&instanceData.ibView);
+////	DirectXBase::Ins()->cmdList->IASetIndexBuffer(&instanceData.ibView);
 ////
 ////	//描画コマンド
-////	DirectXBase::Instance()->cmdList->DrawIndexedInstanced(instanceData.index.size(), instanceCount, 0, 0, 0);
+////	DirectXBase::Ins()->cmdList->DrawIndexedInstanced(instanceData.index.size(), instanceCount, 0, 0, 0);
 ////}
 //
 //void ObjectManager::DrawGSParticle(GSParticleData& data)
 //{
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(data.piplineID);
+//	PiplineManager::Ins()->SetPipline(data.piplineID);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -2143,26 +2143,26 @@
 //	data.constBuffB0->Unmap(0, nullptr);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuffB0->GetGPUVirtualAddress());
 //
 //	//ディスクリプタヒープ設定コマンド		スプライトがテクスチャのデータを持っていた場合のみ設定コマンドを実行する
-//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //	//シェーダーリソースビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Instance()->GetSRV(data.textureID));
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Ins()->GetSRV(data.textureID));
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 //
 //	//描画コマンド
 //	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//	DirectXBase::Instance()->cmdList->DrawInstanced(1, 1, 0, 0);
+//	DirectXBase::Ins()->cmdList->DrawInstanced(1, 1, 0, 0);
 //}
 //
 //void ObjectManager::DrawGSParticleInstance(const GSParticleData& instanceData, vector<ParticleData*>& data, const int& piplinID) {
 //
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(piplinID);
+//	PiplineManager::Ins()->SetPipline(piplinID);
 //
 //	int instanceCount = data.size();
 //
@@ -2190,20 +2190,20 @@
 //	instanceData.constBuffB0->Unmap(0, nullptr);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, instanceData.constBuffB0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, instanceData.constBuffB0->GetGPUVirtualAddress());
 //
 //	//ディスクリプタヒープ設定コマンド		スプライトがテクスチャのデータを持っていた場合のみ設定コマンドを実行する
-//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //	//シェーダーリソースビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Instance()->GetSRV(instanceData.textureID));
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Ins()->GetSRV(instanceData.textureID));
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &instanceData.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &instanceData.vbView);
 //
 //	//描画コマンド
 //	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//	DirectXBase::Instance()->cmdList->DrawInstanced(1, instanceCount, 0, 0);
+//	DirectXBase::Ins()->cmdList->DrawInstanced(1, instanceCount, 0, 0);
 //}
 //
 //void ObjectManager::ChangeScale(XMMATRIX& scaleMat, XMFLOAT3 amount)
@@ -2277,10 +2277,10 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
-//	proSprite.textureIDNum = TextureManager::Instance()->CreateTexture(color);
+//	proSprite.textureIDNum = TextureManager::Ins()->CreateTexture(color);
 //	proSprite.hasTexture = true;
 //
 //	//頂点バッファの生成
@@ -2293,7 +2293,7 @@
 //	proSprite.vertex.push_back(vertex);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size() * sizeof(Vertex)),
@@ -2312,7 +2312,7 @@
 //	proSprite.index.push_back(1);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size() * sizeof(unsigned short)),
@@ -2328,7 +2328,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -2374,11 +2374,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -2403,10 +2403,10 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
-//	proSprite.textureIDNum = TextureManager::Instance()->CreateTexture(color);
+//	proSprite.textureIDNum = TextureManager::Ins()->CreateTexture(color);
 //	proSprite.hasTexture = true;
 //
 //	//頂点バッファの生成
@@ -2422,7 +2422,7 @@
 //	}
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size()),
@@ -2442,7 +2442,7 @@
 //	}
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size()),
@@ -2458,7 +2458,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -2504,11 +2504,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -2533,10 +2533,10 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
-//	proSprite.textureIDNum = TextureManager::Instance()->CreateTexture(color);
+//	proSprite.textureIDNum = TextureManager::Ins()->CreateTexture(color);
 //	proSprite.hasTexture = true;
 //
 //	Vertex vertex;
@@ -2659,7 +2659,7 @@
 //	}
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size() * sizeof(Vertex)),
@@ -2679,7 +2679,7 @@
 //	}
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size() * sizeof(unsigned short)),
@@ -2695,7 +2695,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -2741,11 +2741,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -2769,12 +2769,12 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName != 0) {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->LoadTexture(fileName);
+//		proSprite.textureIDNum = TextureManager::Ins()->LoadTexture(fileName);
 //	}
 //	else {
 //		proSprite.hasTexture = false;
@@ -2805,7 +2805,7 @@
 //	}
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size() * sizeof(Vertex)),
@@ -2847,7 +2847,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -2888,11 +2888,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -2917,16 +2917,16 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName != 0) {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->LoadTexture(fileName);
+//		proSprite.textureIDNum = TextureManager::Ins()->LoadTexture(fileName);
 //	}
 //	else {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->CreateTexture(color);
+//		proSprite.textureIDNum = TextureManager::Ins()->CreateTexture(color);
 //	}
 //
 //	//頂点バッファの生成
@@ -3037,7 +3037,7 @@
 //#pragma endregion
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size()),
@@ -3087,7 +3087,7 @@
 //	}
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size()),
@@ -3103,7 +3103,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -3150,11 +3150,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -3179,23 +3179,23 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName != 0) {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->LoadTexture(fileName);
+//		proSprite.textureIDNum = TextureManager::Ins()->LoadTexture(fileName);
 //	}
 //	else {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->CreateTexture(color);
+//		proSprite.textureIDNum = TextureManager::Ins()->CreateTexture(color);
 //	}
 //
 //	//図形をロード
-//	ShapeManager::Instance()->LoadShape(ShapeDataCone, proSprite);
+//	ShapeManager::Ins()->LoadShape(ShapeDataCone, proSprite);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size()),
@@ -3209,7 +3209,7 @@
 //	proSprite.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size()),
@@ -3225,7 +3225,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -3266,11 +3266,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -3295,23 +3295,23 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName != 0) {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->LoadTexture(fileName);
+//		proSprite.textureIDNum = TextureManager::Ins()->LoadTexture(fileName);
 //	}
 //	else {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->CreateTexture(color);
+//		proSprite.textureIDNum = TextureManager::Ins()->CreateTexture(color);
 //	}
 //
 //	//図形をロード
-//	ShapeManager::Instance()->LoadShape(ShapeDataCylinder, proSprite);
+//	ShapeManager::Ins()->LoadShape(ShapeDataCylinder, proSprite);
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size()),
@@ -3325,7 +3325,7 @@
 //	proSprite.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size()),
@@ -3341,7 +3341,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -3382,11 +3382,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -3411,26 +3411,26 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (fileName != 0) {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->LoadTexture(fileName);
+//		proSprite.textureIDNum = TextureManager::Ins()->LoadTexture(fileName);
 //	}
 //	else {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->CreateTexture(color);
+//		proSprite.textureIDNum = TextureManager::Ins()->CreateTexture(color);
 //	}
 //
 //	//図形をロード
-//	ShapeManager::Instance()->LoadShape(ShapeDataSphere, proSprite);
+//	ShapeManager::Ins()->LoadShape(ShapeDataSphere, proSprite);
 //
 //	//半径を保存
 //	proSprite.radius = radius;
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size() * sizeof(Vertex)),
@@ -3444,7 +3444,7 @@
 //	proSprite.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size() * sizeof(unsigned short)),
@@ -3460,7 +3460,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -3501,11 +3501,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -3530,12 +3530,12 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 2;										//CBV2つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (textureFileName != 0) {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->LoadTexture(textureFileName);
+//		proSprite.textureIDNum = TextureManager::Ins()->LoadTexture(textureFileName);
 //	}
 //	else {
 //		proSprite.hasTexture = false;
@@ -3545,7 +3545,7 @@
 //	ModelDataManager::LoadFbx(modelFileName, proSprite);
 //
 //	//頂点バッファの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size() * sizeof(Vertex)),
@@ -3559,7 +3559,7 @@
 //	proSprite.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size() * sizeof(unsigned short)),
@@ -3575,7 +3575,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 1;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -3616,14 +3616,14 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	CD3DX12_GPU_DESCRIPTOR_HANDLE basicHandle = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetGPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetGPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //
 //
 //	//定数バッファへのデータ転送
@@ -3649,12 +3649,12 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 3;										//CBV3つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&proSprite.constDescHeap));
 //
 //	//テクスチャをロード
 //	if (textureFileName != 0) {
 //		proSprite.hasTexture = true;
-//		proSprite.textureIDNum = TextureManager::Instance()->LoadTexture(textureFileName);
+//		proSprite.textureIDNum = TextureManager::Ins()->LoadTexture(textureFileName);
 //	}
 //	else {
 //		proSprite.hasTexture = false;
@@ -3664,7 +3664,7 @@
 //	ModelDataManager::LoadObj(modelFileName, proSprite, isSmoothing);
 //
 //	//頂点バッファの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.vertex.size() * sizeof(Vertex)),
@@ -3678,7 +3678,7 @@
 //	proSprite.vbView.StrideInBytes = sizeof(Vertex);
 //
 //	/*-----頂点インデックスバッファの設定-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(proSprite.index.size() * sizeof(unsigned short)),
@@ -3694,7 +3694,7 @@
 //
 //	/*-----定数バッファの生成-----*/
 //	proSprite.constBuffCount = 3;
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -3702,7 +3702,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&proSprite.constBuff0)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB1) + 0xff) & ~0xff),
@@ -3710,7 +3710,7 @@
 //		nullptr,
 //		IID_PPV_ARGS(&proSprite.constBuff1)
 //	);
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB2) + 0xff) & ~0xff),
@@ -3750,28 +3750,28 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = proSprite.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = proSprite.constBuff1->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff1->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		proSprite.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 2, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	cbvDesc.BufferLocation = proSprite.constBuff2->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)proSprite.constBuff2->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//丸影の生成
 //	proSprite.circleShadowNum = -1;
 //	if (isCircleShadow == true) {
-//		proSprite.circleShadowNum = LightManager::Instance()->GenerateCircleShadow(XMFLOAT3(0, 1, 0), proSprite.pos, 100.0f, XMFLOAT3(0.5f, 0.6f, 0.0f), XMFLOAT2(10.0f, 20.0f), 1);
+//		proSprite.circleShadowNum = LightManager::Ins()->GenerateCircleShadow(XMFLOAT3(0, 1, 0), proSprite.pos, 100.0f, XMFLOAT3(0.5f, 0.6f, 0.0f), XMFLOAT2(10.0f, 20.0f), 1);
 //	}
 //
 //	//定数バッファへのデータ転送(行列と視点座標関係)
@@ -3793,20 +3793,20 @@
 //	ConstBufferDataB2* constMap2 = nullptr;
 //	result = proSprite.constBuff2->Map(0, nullptr, (void**)&constMap2);
 //	for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-//		constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+//		constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 //	}
 //	for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-//		constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+//		constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 //	}
 //	for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-//		constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+//		constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 //	}
 //	for (int i = 0; i < CIRCLESHADOW_NUM; ++i) {
 //		if (proSprite.circleShadowNum != -1) {
 //			//影のキャストを更新
-//			LightManager::Instance()->circleShadows[proSprite.circleShadowNum].centerpos = XMFLOAT3(proSprite.pos.x, proSprite.pos.y + 280, proSprite.pos.z);
+//			LightManager::Ins()->circleShadows[proSprite.circleShadowNum].centerpos = XMFLOAT3(proSprite.pos.x, proSprite.pos.y + 280, proSprite.pos.z);
 //		}
-//		constMap2->circleShadowData[i] = LightManager::Instance()->circleShadows[i];
+//		constMap2->circleShadowData[i] = LightManager::Ins()->circleShadows[i];
 //	}
 //	proSprite.constBuff2->Unmap(0, nullptr);
 //
@@ -3819,7 +3819,7 @@
 //	if (sprite.isDisplay == false) return;
 //
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(sprite.piplineName);
+//	PiplineManager::Ins()->SetPipline(sprite.piplineName);
 //
 //	//定数バッファへのデータ転送	値が変更されていた時のみデータ転送を行う
 //	//if (sprite.isDirty == true) {
@@ -3928,20 +3928,20 @@
 //		ConstBufferDataB2* constMap2 = nullptr;
 //		result = sprite.constBuff2->Map(0, nullptr, (void**)&constMap2);
 //		for (int i = 0; i < DIRLIGHT_NUM; ++i) {
-//			constMap2->dirlights[i] = LightManager::Instance()->dirlights[i];
+//			constMap2->dirlights[i] = LightManager::Ins()->dirlights[i];
 //		}
 //		for (int i = 0; i < POINTLIGHT_NUM; ++i) {
-//			constMap2->pointlights[i] = LightManager::Instance()->pointlights[i];
+//			constMap2->pointlights[i] = LightManager::Ins()->pointlights[i];
 //		}
 //		for (int i = 0; i < SPOTLIGHT_NUM; ++i) {
-//			constMap2->spotlights[i] = LightManager::Instance()->spotlights[i];
+//			constMap2->spotlights[i] = LightManager::Ins()->spotlights[i];
 //		}
 //		for (int i = 0; i < CIRCLESHADOW_NUM; ++i) {
 //			if (sprite.circleShadowNum != -1) {
 //				//影のキャストを更新
-//				LightManager::Instance()->circleShadows[sprite.circleShadowNum].centerpos = XMFLOAT3(sprite.pos.x, sprite.pos.y + 280, sprite.pos.z);
+//				LightManager::Ins()->circleShadows[sprite.circleShadowNum].centerpos = XMFLOAT3(sprite.pos.x, sprite.pos.y + 280, sprite.pos.z);
 //			}
-//			constMap2->circleShadowData[i] = LightManager::Instance()->circleShadows[i];
+//			constMap2->circleShadowData[i] = LightManager::Ins()->circleShadows[i];
 //		}
 //		sprite.constBuff2->Unmap(0, nullptr);
 //	}
@@ -3954,45 +3954,45 @@
 //	sprite.pos = XMFLOAT3(sprite.positionMat.r[3].m128_f32[0], sprite.positionMat.r[3].m128_f32[1], sprite.positionMat.r[3].m128_f32[2]);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, sprite.constBuff0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, sprite.constBuff0->GetGPUVirtualAddress());
 //	if (sprite.constBuffCount >= 2) {
-//		DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(1, sprite.constBuff1->GetGPUVirtualAddress());
+//		DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(1, sprite.constBuff1->GetGPUVirtualAddress());
 //	}
 //	if (sprite.constBuffCount >= 3) {
-//		DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(2, sprite.constBuff2->GetGPUVirtualAddress());
+//		DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(2, sprite.constBuff2->GetGPUVirtualAddress());
 //	}
 //
 //	//ディスクリプタヒープ設定コマンド		スプライトがテクスチャのデータを持っていた場合のみ設定コマンドを実行する
 //	if (sprite.hasTexture == true) {
-//		ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//		DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//		ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//		DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //		//シェーダーリソースビュー設定コマンド
 //		if (sprite.constBuffCount >= 3) {
-//			DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(3, TextureManager::Instance()->GetSRV(sprite.textureIDNum));
+//			DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(3, TextureManager::Ins()->GetSRV(sprite.textureIDNum));
 //		}
 //		else if (sprite.constBuffCount >= 2) {
-//			DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(2, TextureManager::Instance()->GetSRV(sprite.textureIDNum));
+//			DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(2, TextureManager::Ins()->GetSRV(sprite.textureIDNum));
 //		}
 //		else if (sprite.constBuffCount == 1) {
-//			DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Instance()->GetSRV(sprite.textureIDNum));
+//			DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Ins()->GetSRV(sprite.textureIDNum));
 //		}
 //	}
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &sprite.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &sprite.vbView);
 //
 //	//3Dで頂点インデックスがあるなら頂点インデックスバッファビュー設定コマンドを実行する
 //	if (sprite.index.size() > 0) {
-//		DirectXBase::Instance()->cmdList->IASetIndexBuffer(&sprite.ibView);
+//		DirectXBase::Ins()->cmdList->IASetIndexBuffer(&sprite.ibView);
 //	}
 //
 //	//描画コマンド
 //	if (sprite.index.size() > 0) {
-//		DirectXBase::Instance()->cmdList->DrawIndexedInstanced(sprite.index.size(), 1, 0, 0, 0);
+//		DirectXBase::Ins()->cmdList->DrawIndexedInstanced(sprite.index.size(), 1, 0, 0, 0);
 //	}
 //	else {
 //		DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//		DirectXBase::Instance()->cmdList->DrawInstanced(sprite.vertex.size(), 1, 0, 0);
+//		DirectXBase::Ins()->cmdList->DrawInstanced(sprite.vertex.size(), 1, 0, 0);
 //	}
 //}
 //
@@ -4041,16 +4041,16 @@
 //	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
 //	descHeapDesc.NumDescriptors = 1;										//CBV1つ
 //	//ディスクリプタヒープの生成
-//	DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&data.constDescHeap));
+//	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&data.constDescHeap));
 //
 //	//テクスチャをロード
-//	data.textureIDNum = TextureManager::Instance()->LoadTexture(fileName);
+//	data.textureIDNum = TextureManager::Ins()->LoadTexture(fileName);
 //
 //	//頂点バッファの生成
 //	data.vertex = {};
 //
 //	//頂点バッファビューの生成
-//	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer(sizeof(XMFLOAT3)),
@@ -4065,7 +4065,7 @@
 //	data.vbView.StrideInBytes = sizeof(XMFLOAT3);
 //
 //	/*-----定数バッファの生成-----*/
-//	result = DirectXBase::Instance()->dev->CreateCommittedResource(
+//	result = DirectXBase::Ins()->dev->CreateCommittedResource(
 //		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 //		D3D12_HEAP_FLAG_NONE,
 //		&CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff),
@@ -4089,11 +4089,11 @@
 //	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 //	//CBVディスクリプタヒープの先頭アドレスを取得
 //	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-//		data.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+//		data.constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 //	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 //	cbvDesc.BufferLocation = data.constBuff0->GetGPUVirtualAddress();
 //	cbvDesc.SizeInBytes = (UINT)data.constBuff0->GetDesc().Width;
-//	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+//	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -4113,7 +4113,7 @@
 //void SpriteManager::DrawGSParticle(GSParticleData data)
 //{
 //	//パイプラインとルートシグネチャの設定
-//	PiplineManager::Instance()->SetPipline(data.piplineName);
+//	PiplineManager::Ins()->SetPipline(data.piplineName);
 //
 //	//定数バッファへのデータ転送
 //	ConstBufferDataB0* constMap = nullptr;
@@ -4129,20 +4129,20 @@
 //	data.constBuff0->Unmap(0, nullptr);
 //
 //	//定数バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuff0->GetGPUVirtualAddress());
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, data.constBuff0->GetGPUVirtualAddress());
 //
 //	//ディスクリプタヒープ設定コマンド		スプライトがテクスチャのデータを持っていた場合のみ設定コマンドを実行する
-//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Instance()->GetDescHeap().Get() };
-//	DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+//	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+//	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 //	//シェーダーリソースビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Instance()->GetSRV(data.textureIDNum));
+//	DirectXBase::Ins()->cmdList->SetGraphicsRootDescriptorTable(1, TextureManager::Ins()->GetSRV(data.textureIDNum));
 //
 //	//頂点バッファビュー設定コマンド
-//	DirectXBase::Instance()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
+//	DirectXBase::Ins()->cmdList->IASetVertexBuffers(0, 1, &data.vbView);
 //
 //	//描画コマンド
 //	DirectXBase::cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-//	DirectXBase::Instance()->cmdList->DrawInstanced(1, 1, 0, 0);
+//	DirectXBase::Ins()->cmdList->DrawInstanced(1, 1, 0, 0);
 //}
 
 #pragma endregion

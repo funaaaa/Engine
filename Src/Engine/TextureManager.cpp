@@ -9,7 +9,7 @@ TextureManager::TextureManager() {
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;		//シェーダーから見える
 	descHeapDesc.NumDescriptors = 512;									//SRV256個
 	//ディスクリプタヒープの生成
-	HRESULT result = DirectXBase::Instance()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescHeap));
+	HRESULT result = DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescHeap));
 }
 
 int TextureManager::LoadTexture(LPCWSTR fileName) {
@@ -44,7 +44,7 @@ int TextureManager::LoadTexture(LPCWSTR fileName) {
 
 	//テクスチャバッファの生成
 	ComPtr<ID3D12Resource> texbuff = nullptr;
-	result = DirectXBase::Instance()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
+	result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -71,7 +71,7 @@ int TextureManager::LoadTexture(LPCWSTR fileName) {
 
 	//ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		srvDescHeap->GetCPUDescriptorHandleForHeapStart(), texture.size() - 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		srvDescHeap->GetCPUDescriptorHandleForHeapStart(), texture.size() - 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	//シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = metadata.format;
@@ -79,7 +79,7 @@ int TextureManager::LoadTexture(LPCWSTR fileName) {
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	//ヒープにシェーダーリソースビュー生成
-	DirectXBase::Instance()->dev->CreateShaderResourceView(
+	DirectXBase::Ins()->dev->CreateShaderResourceView(
 		texbuff.Get(),
 		&srvDesc,
 		basicHeapHandle
@@ -124,7 +124,7 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 
 	//テクスチャバッファの生成
 	ComPtr<ID3D12Resource> texbuff = nullptr;
-	result = DirectXBase::Instance()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
+	result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -149,7 +149,7 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 
 	//ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Instance()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Instance()->GetHead(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	//シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = metadata.format;
@@ -157,16 +157,16 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	//ヒープにシェーダーリソースビュー生成
-	DirectXBase::Instance()->dev->CreateShaderResourceView(
+	DirectXBase::Ins()->dev->CreateShaderResourceView(
 		texbuff.Get(),
 		&srvDesc,
 		basicHeapHandle
 	);
 
 	// ディスクリプタヒープをインクリメント
-	DescriptorHeapMgr::Instance()->IncrementHead();
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
-	return DescriptorHeapMgr::Instance()->GetHead() - 1;
+	return DescriptorHeapMgr::Ins()->GetHead() - 1;
 }
 
 int TextureManager::CreateTexture(XMFLOAT4 color)
@@ -204,7 +204,7 @@ int TextureManager::CreateTexture(XMFLOAT4 color)
 
 	//テクスチャバッファの生成
 	ComPtr<ID3D12Resource> texbuff = nullptr;
-	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
+	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -232,7 +232,7 @@ int TextureManager::CreateTexture(XMFLOAT4 color)
 
 	//ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		srvDescHeap->GetCPUDescriptorHandleForHeapStart(), texture.size() - 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		srvDescHeap->GetCPUDescriptorHandleForHeapStart(), texture.size() - 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	//シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -240,7 +240,7 @@ int TextureManager::CreateTexture(XMFLOAT4 color)
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	//ヒープにシェーダーリソースビュー生成
-	DirectXBase::Instance()->dev->CreateShaderResourceView(
+	DirectXBase::Ins()->dev->CreateShaderResourceView(
 		texbuff.Get(),
 		&srvDesc,
 		basicHeapHandle
@@ -308,7 +308,7 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 	//テクスチャバッファの生成
 	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	ComPtr<ID3D12Resource> texbuff = nullptr;
-	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&prop,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
@@ -338,7 +338,7 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 
 	//ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		srvDescHeap->GetCPUDescriptorHandleForHeapStart(), texture.size() - 1, DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		srvDescHeap->GetCPUDescriptorHandleForHeapStart(), texture.size() - 1, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	//シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = format;
@@ -346,7 +346,7 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = mipLevel;
 	//ヒープにシェーダーリソースビュー生成
-	DirectXBase::Instance()->dev->CreateShaderResourceView(
+	DirectXBase::Ins()->dev->CreateShaderResourceView(
 		texbuff.Get(),
 		&srvDesc,
 		basicHeapHandle
@@ -361,7 +361,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSRV(int IDNum) {
 	D3D12_GPU_DESCRIPTOR_HANDLE basicHeapHandle = srvDescHeap->GetGPUDescriptorHandleForHeapStart();
 	//消費した分だけアドレスをずらす
 	for (int i = 0; i < IDNum; ++i) {
-		basicHeapHandle.ptr += DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		basicHeapHandle.ptr += DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	}
 	return basicHeapHandle;
 }

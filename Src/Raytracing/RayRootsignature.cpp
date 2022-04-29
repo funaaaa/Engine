@@ -84,7 +84,7 @@ void RayRootsignature::Create(const bool& isLocal, const wchar_t* name)
 		_RPTF0(_CRT_WARN, a.c_str());
 		int b = 0;
 	}
-	HRESULT result = DirectXBase::Instance()->dev->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
+	HRESULT result = DirectXBase::Ins()->dev->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
 		IID_PPV_ARGS(&rootsignature));
 
 	// –¼‘O‚ğİ’è

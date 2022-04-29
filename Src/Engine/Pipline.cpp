@@ -27,10 +27,10 @@ Pipline::Pipline(
 	ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	//頂点シェーダの読み込みとコンパイル
 	//vsBlob = LoadShader(VSname, "main", "vs_5_0", vsBlob.Get(), errorBlob.Get());
-	vsBlob = ShaderStorage::Instance()->LoadShader(VSname, "vs_5_0", "main");
+	vsBlob = ShaderStorage::Ins()->LoadShader(VSname, "vs_5_0", "main");
 	//ピクセルシェーダの読み込みとコンパイル
 	//psBlob = LoadShader(PSname, "main", "ps_5_0", psBlob.Get(), errorBlob.Get());
-	psBlob = ShaderStorage::Instance()->LoadShader(PSname, "ps_5_0", "main");
+	psBlob = ShaderStorage::Ins()->LoadShader(PSname, "ps_5_0", "main");
 
 	//グラフィックスパイプライン生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline{};
@@ -38,7 +38,7 @@ Pipline::Pipline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat);
 
-	HRESULT result = DirectXBase::Instance()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
+	HRESULT result = DirectXBase::Ins()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
 }
 
 Pipline::Pipline(
@@ -65,10 +65,10 @@ Pipline::Pipline(
 	ComPtr<ID3DBlob> psBlob = nullptr;		//ピクセルシェーダオブジェクト
 	ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	//vsBlob = LoadShader(VSname, "main", "vs_5_0", vsBlob.Get(), errorBlob.Get());
-	vsBlob = ShaderStorage::Instance()->LoadShader(VSname, "vs_5_0", "main");
+	vsBlob = ShaderStorage::Ins()->LoadShader(VSname, "vs_5_0", "main");
 	//ピクセルシェーダの読み込みとコンパイル
 	//psBlob = LoadShader(PSname, "main", "ps_5_0", psBlob.Get(), errorBlob.Get());
-	psBlob = ShaderStorage::Instance()->LoadShader(PSname, "ps_5_0", "main");
+	psBlob = ShaderStorage::Ins()->LoadShader(PSname, "ps_5_0", "main");
 
 	//グラフィックスパイプライン生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline{};
@@ -76,7 +76,7 @@ Pipline::Pipline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDescDepth(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat, dxgiFormat2);
 
-	HRESULT result = DirectXBase::Instance()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
+	HRESULT result = DirectXBase::Ins()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
 }
 
 Pipline::Pipline(
@@ -104,13 +104,13 @@ Pipline::Pipline(
 	ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	//頂点シェーダの読み込みとコンパイル
 	//vsBlob = LoadShader(VSname, "main", "vs_5_0", vsBlob.Get(), errorBlob.Get());
-	vsBlob = ShaderStorage::Instance()->LoadShader(VSname, "vs_5_0", "main");
+	vsBlob = ShaderStorage::Ins()->LoadShader(VSname, "vs_5_0", "main");
 	//ピクセルシェーダの読み込みとコンパイル
 	//psBlob = LoadShader(PSname, "main", "ps_5_0", psBlob.Get(), errorBlob.Get());
-	psBlob = ShaderStorage::Instance()->LoadShader(PSname, "ps_5_0", "main");
+	psBlob = ShaderStorage::Ins()->LoadShader(PSname, "ps_5_0", "main");
 	//ジオメトリシェーダの読み込みとコンパイル
 	//gsBlob = LoadShader(GSname, "main", "gs_5_0", gsBlob.Get(), errorBlob.Get());
-	gsBlob = ShaderStorage::Instance()->LoadShader(GSname, "gs_5_0", "main");
+	gsBlob = ShaderStorage::Ins()->LoadShader(GSname, "gs_5_0", "main");
 
 	//グラフィックスパイプライン生成
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline{};
@@ -120,26 +120,26 @@ Pipline::Pipline(
 
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat);
 
-	HRESULT result = DirectXBase::Instance()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
+	HRESULT result = DirectXBase::Ins()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
 }
 
 void Pipline::SetPipline()
 {
 	//パイプラインステート設定コマンド
-	DirectXBase::Instance()->cmdList->SetPipelineState(pipelinestate.Get());
+	DirectXBase::Ins()->cmdList->SetPipelineState(pipelinestate.Get());
 
 	//ルートシグネチャ設定コマンド
-	DirectXBase::Instance()->cmdList->SetGraphicsRootSignature(rootsignature.Get());
+	DirectXBase::Ins()->cmdList->SetGraphicsRootSignature(rootsignature.Get());
 
 	//プリミティブ形状設定コマンド
 	if (primitive == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) {
-		DirectXBase::Instance()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		DirectXBase::Ins()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 	else if (primitive == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) {
-		DirectXBase::Instance()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		DirectXBase::Ins()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 	}
 	else if (primitive == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) {
-		DirectXBase::Instance()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		DirectXBase::Ins()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	}
 }
 
@@ -201,7 +201,7 @@ void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, 
 	ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = DirectXBase::Instance()->dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
+	result = DirectXBase::Ins()->dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
 
 	//パイプラインにルートシグネチャをセット
 	gpipelineDesc.pRootSignature = rootsignature.Get();
@@ -266,7 +266,7 @@ void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineD
 	ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = DirectXBase::Instance()->dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
+	result = DirectXBase::Ins()->dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
 
 	//パイプラインにルートシグネチャをセット
 	gpipelineDesc.pRootSignature = rootsignature.Get();

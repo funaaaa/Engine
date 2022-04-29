@@ -26,7 +26,7 @@ short BaseObject3D::AddConstBuffer(const int& dataSize, const string& structName
 	constBufferDataName.push_back(structName);
 
 	// 最後尾に追加されたデータに値を入れる。
-	HRESULT result = DirectXBase::Instance()->dev->CreateCommittedResource(
+	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
 		&CD3DX12_RESOURCE_DESC::Buffer((dataSize + 0xff) & ~0xff),
@@ -38,11 +38,11 @@ short BaseObject3D::AddConstBuffer(const int& dataSize, const string& structName
 	int offset = isLighting ? 2 : 0;
 	// 定数バッファビューにセット
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		constDescHeap->GetCPUDescriptorHandleForHeapStart(), offset + constBufferData.size(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		constDescHeap->GetCPUDescriptorHandleForHeapStart(), offset + constBufferData.size(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 	cbvDesc.BufferLocation = constBufferData[constBufferData.size() - 1]->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = (UINT)constBufferData[constBufferData.size() - 1]->GetDesc().Width;
-	DirectXBase::Instance()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 
 	return constBufferData.size() - 1;
 }

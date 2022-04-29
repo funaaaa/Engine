@@ -38,33 +38,33 @@ bool RenderTarget::CreateDescriptorHeap()
 	desc.NumDescriptors = 1;					//MiniEngineだとよくわからない値を入れていたので、とりあえず1を入れる。バグったら要確認 https://github.com/shoeisha-books/hlsl-grimoire-sample/blob/main/MiniEngine/RenderTarget.cpp
 	desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	DirectXBase::Instance()->dev->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvHeap));
+	DirectXBase::Ins()->dev->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&rtvHeap));
 	if (rtvHeap == nullptr) {
 		//RTV用のディスクリプタヒープの作成に失敗した。
 		return false;
 	}
 	//ディスクリプタのサイズを取得。
-	rtvDescriptorSize = DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	rtvDescriptorSize = DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 	if (depthStencilTexture) {
 		//DSV用のディスクリプタヒープを作成する。
 		desc.NumDescriptors = 1;
 		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-		DirectXBase::Instance()->dev->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&dsvHeap));
+		DirectXBase::Ins()->dev->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&dsvHeap));
 		if (dsvHeap == nullptr) {
 			//DSV用のディスクリプタヒープの作成に失敗した。
 			return false;
 		}
 		//ディスクリプタのサイズを取得。
-		dsvDescriptorSize = DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		dsvDescriptorSize = DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 	}
 	return true;
 }
 
 bool RenderTarget::CreateRenderTargetTexture(int w, int h, int mipLevel, int arraySize, DXGI_FORMAT format, float clearColor[4])
 {
-	textureID = TextureManager::Instance()->CreateRenderTargetTexture(w,h,mipLevel,arraySize,format,clearColor);
-	renderTargetTexture = TextureManager::Instance()->GetTexture(textureID).texBuff;
+	textureID = TextureManager::Ins()->CreateRenderTargetTexture(w,h,mipLevel,arraySize,format,clearColor);
+	renderTargetTexture = TextureManager::Ins()->GetTexture(textureID).texBuff;
 
 	return true;
 }
@@ -90,7 +90,7 @@ bool RenderTarget::CreateDepthStencilTexture(int w, int h, DXGI_FORMAT format)
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL | D3D12_RESOURCE_FLAG_DENY_SHADER_RESOURCE);
 
 	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	auto hr = DirectXBase::Instance()->dev->CreateCommittedResource(
+	auto hr = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&prop,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,
@@ -109,10 +109,10 @@ void RenderTarget::CreateDescriptor()
 {
 	//カラーテクスチャのディスクリプタを作成。
 	auto rtvHandle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
-	DirectXBase::Instance()->dev->CreateRenderTargetView(TextureManager::Instance()->GetTexture(textureID).texBuff.Get(), nullptr, rtvHandle);
+	DirectXBase::Ins()->dev->CreateRenderTargetView(TextureManager::Ins()->GetTexture(textureID).texBuff.Get(), nullptr, rtvHandle);
 	if (depthStencilTexture) {
 		//深度テクスチャのディスクリプタを作成
 		auto dsvHandle = dsvHeap->GetCPUDescriptorHandleForHeapStart();
-		DirectXBase::Instance()->dev->CreateDepthStencilView(depthStencilTexture.Get(), nullptr, dsvHandle);
+		DirectXBase::Ins()->dev->CreateDepthStencilView(depthStencilTexture.Get(), nullptr, dsvHandle);
 	}
 }

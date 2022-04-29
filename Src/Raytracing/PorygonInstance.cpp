@@ -114,7 +114,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> PorygonMeshInstance::CreateBuffer(size_t 
 	resDesc.Flags = flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Instance()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

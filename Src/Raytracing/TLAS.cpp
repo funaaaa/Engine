@@ -15,7 +15,7 @@ void TLAS::GenerateTLAS(const wchar_t* name)
 	/*-- TLAS用のディスクリプタを生成する --*/
 
 	// ディスクリプタヒープのインデックスを取得
-	descriptorHeapIndex = DescriptorHeapMgr::Instance()->GetHead();
+	descriptorHeapIndex = DescriptorHeapMgr::Ins()->GetHead();
 
 	// ディスクリプタヒープにSRVを確保
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -23,12 +23,12 @@ void TLAS::GenerateTLAS(const wchar_t* name)
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.RaytracingAccelerationStructure.Location = tlasBuffer->GetGPUVirtualAddress();
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Instance()->GetHead(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-	DirectXBase::Instance()->dev->CreateShaderResourceView(nullptr, &srvDesc,
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	DirectXBase::Ins()->dev->CreateShaderResourceView(nullptr, &srvDesc,
 		basicHeapHandle);
 
 	// ディスクリプタヒープをインクリメント
-	DescriptorHeapMgr::Instance()->IncrementHead();
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
 }
 
@@ -48,19 +48,19 @@ void TLAS::Update()
 
 	/*===== TLASの更新処理 =====*/
 
-	// Instanceのサイズを取得。
-	auto sizeOfInstanceDescs = PorygonInstanceRegister::Instance()->GetRegisterSize();
+	// Insのサイズを取得。
+	auto sizeOfInstanceDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
 	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
 	// CPU から書き込み可能なバッファに書き込む。
-	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Instance()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// 更新のための値を設定。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PorygonInstanceRegister::Instance()->GetRegisterSize();
+	inputs.NumDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	// TLAS の更新処理を行うためのフラグを設定する。
 	inputs.Flags =
@@ -75,7 +75,7 @@ void TLAS::Update()
 	asDesc.ScratchAccelerationStructureData = tlasUpdateBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	DirectXBase::Instance()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -141,7 +141,7 @@ ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flag
 	resDesc.Flags = flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Instance()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -168,7 +168,7 @@ void TLAS::SettingAccelerationStructure()
 	/*-- TLASの生成に必要なメモリ量を求める --*/
 
 	// インスタンスの情報を記録したバッファを準備する。
-	size_t sizeOfInstanceDescs = PorygonInstanceRegister::Instance()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	size_t sizeOfInstanceDescs = PorygonInstanceRegister::Ins()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 	instanceDescBuffer = CreateBuffer(
 		sizeOfInstanceDescs,
 		D3D12_RESOURCE_FLAG_NONE,
@@ -176,20 +176,20 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_HEAP_TYPE_UPLOAD);
 
 	// 生成したバッファにデータを書き込む。
-	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Instance()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// メモリ量を求めるための設定を行う。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};
 	auto& inputs = buildASDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PorygonInstanceRegister::Instance()->GetRegisterSize();
+	inputs.NumDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 
 	// メモリ量を求める関数を実行する。
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO tlasPrebuild{};
-	DirectXBase::Instance()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
+	DirectXBase::Ins()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &tlasPrebuild
 	);
 
@@ -226,7 +226,7 @@ void TLAS::SettingAccelerationStructure()
 	buildASDesc.DestAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積んで実行する。
-	DirectXBase::Instance()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr
 	);
 
@@ -244,32 +244,32 @@ void TLAS::CreateAccelerationStructure()
 
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer.Get());
-	DirectXBase::Instance()->cmdList->ResourceBarrier(1, &uavBarrier);
-	DirectXBase::Instance()->cmdList->Close();
+	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &uavBarrier);
+	DirectXBase::Ins()->cmdList->Close();
 
 	// TLASを構築。
-	ID3D12CommandList* pCmdList[] = { DirectXBase::Instance()->cmdList.Get() };
+	ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
 
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { DirectXBase::Instance()->cmdList.Get() };
-	DirectXBase::Instance()->cmdQueue->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };
+	DirectXBase::Ins()->cmdQueue->ExecuteCommandLists(1, commandLists);
 
 
 	/*-- リソースバリアを設定して書き込めないようにする --*/
 
 	//グラフィックコマンドリストの完了待ち
-	DirectXBase::Instance()->cmdQueue->Signal(DirectXBase::Instance()->fence.Get(), ++DirectXBase::Instance()->fenceVal);
-	if (DirectXBase::Instance()->fence->GetCompletedValue() != DirectXBase::Instance()->fenceVal) {
+	DirectXBase::Ins()->cmdQueue->Signal(DirectXBase::Ins()->fence.Get(), ++DirectXBase::Ins()->fenceVal);
+	if (DirectXBase::Ins()->fence->GetCompletedValue() != DirectXBase::Ins()->fenceVal) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		DirectXBase::Instance()->fence->SetEventOnCompletion(DirectXBase::Instance()->fenceVal, event);
+		DirectXBase::Ins()->fence->SetEventOnCompletion(DirectXBase::Ins()->fenceVal, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	//コマンドアロケータのリセット
-	DirectXBase::Instance()->cmdAllocator->Reset();						//キューをクリア
+	DirectXBase::Ins()->cmdAllocator->Reset();						//キューをクリア
 
 	//コマンドリストのリセット
-	DirectXBase::Instance()->cmdList->Reset(DirectXBase::Instance()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
+	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }

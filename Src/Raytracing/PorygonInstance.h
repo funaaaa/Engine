@@ -21,7 +21,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	// Instance¶¬ŠÖ”
+	// Ins¶¬ŠÖ”
 	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID);
 
 	// ˆÚ“®(ˆø”‚ğ‰ÁZ)ŠÖ”

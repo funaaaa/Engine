@@ -25,7 +25,7 @@ void Joycon::LoadJoycon()
 	HidD_GetHidGuid(&guid);
 
 	//HIDデバイスのリストを取得するために、HIDドライバに問い合わせる
-	deviceInfo = SetupDiGetClassDevs(&guid, NULL, DirectXBase::Instance()->windowsAPI.hwnd, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
+	deviceInfo = SetupDiGetClassDevs(&guid, NULL, DirectXBase::Ins()->windowsAPI.hwnd, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
 
 	//インターフェースを示す構造体を構築する
 	deviceInfoData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);

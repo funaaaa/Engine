@@ -15,7 +15,7 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(TexturePath);
+	textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath);
 
 	/*-- 形状データを読み込む --*/
 
@@ -72,12 +72,12 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
 
 	// 頂点インデックスデータでディスクリプタを生成。
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
-	DescriptorHeapMgr::Instance()->IncrementHead();
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
-	DescriptorHeapMgr::Instance()->IncrementHead();
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
 	/*-- BLASバッファを生成する --*/
@@ -100,7 +100,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	textureHandle = TextureManager::Instance()->LoadTextureInDescriptorHeapMgr(TexturePath);
+	textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath);
 
 	/*-- 形状データを読み込む --*/
 
@@ -108,9 +108,9 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	Object3DDeliveryData dataBuff;
 
 	// モデルをロード。
-	modelIndex = FbxLoader::Instance()->LoadModelFromFile(DirectryPath, ModelName);
+	modelIndex = FbxLoader::Ins()->LoadModelFromFile(DirectryPath, ModelName);
 
-	dataBuff = FbxLoader::Instance()->ConvertObject3DDeliveryData(modelIndex);
+	dataBuff = FbxLoader::Ins()->ConvertObject3DDeliveryData(modelIndex);
 
 	// 頂点数を求める。
 	vertexCount = dataBuff.vertex.size();
@@ -162,12 +162,12 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
 
 	// 頂点インデックスデータでディスクリプタを生成。
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
-	DescriptorHeapMgr::Instance()->IncrementHead();
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Instance()->GetDescriptorHeap(), DescriptorHeapMgr::Instance()->GetHead());
-	DescriptorHeapMgr::Instance()->IncrementHead();
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
 	/*-- BLASバッファを生成する --*/
@@ -182,13 +182,13 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	this->hitGroupName = HitGroupName;
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
 
 		// 入力用構造体をリサイズ。
 		skinComputeInput.resize(vertex.size());
 
 		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-		FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
+		FbxLoader::Ins()->GetSkinComputeInput(modelIndex, skinComputeInput);
 
 		// スキニングアニメーションで使用するコンピュートシェーダーをロードしておく。
 		skinComput.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), skinComputeInput.size(), skinComputeInput.data(), sizeof(RayVertex), vertex.size(), vertex.data());
@@ -203,10 +203,10 @@ void BLAS::Update()
 	/*===== BLASの更新 =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
 
 		// アニメーションの更新処理
-		auto& model = FbxLoader::Instance()->GetFbxModel(modelIndex);
+		auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex);
 		if (model.isPlay) {
 
 			model.currentTime += model.frameTime;
@@ -219,7 +219,7 @@ void BLAS::Update()
 			}
 
 			// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-			FbxLoader::Instance()->GetSkinComputeInput(modelIndex, skinComputeInput);
+			FbxLoader::Ins()->GetSkinComputeInput(modelIndex, skinComputeInput);
 
 		}
 
@@ -249,7 +249,7 @@ void BLAS::Update()
 	asDesc.ScratchAccelerationStructureData = updateBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	DirectXBase::Instance()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -263,7 +263,7 @@ void BLAS::ComputeSkin()
 	/*===== 頂点データをスキニング行列を元に書き換える処理 =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
 
 		// 入力構造体を更新。
 		skinComput.UpdateInputSB(skinComputeInput.data());
@@ -281,9 +281,9 @@ void BLAS::ComputeSkin()
 void BLAS::InitAnimation()
 {
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
 
-		FbxLoader::Instance()->GetFbxModel(modelIndex).InitAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelIndex).InitAnimation();
 
 	}
 }
@@ -294,9 +294,9 @@ void BLAS::PlayAnimation()
 	/*===== アニメーションさせる =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
 
-		FbxLoader::Instance()->GetFbxModel(modelIndex).PlayAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelIndex).PlayAnimation();
 
 	}
 
@@ -308,9 +308,9 @@ void BLAS::StopAnimation()
 	/*===== アニメーションを停止させる =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Instance()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
 
-		FbxLoader::Instance()->GetFbxModel(modelIndex).StopAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelIndex).StopAnimation();
 
 	}
 
@@ -340,7 +340,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-	Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(textureHandle));
+	Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle));
 
 	Dst = entryBegin + recordSize;
 	return Dst;
@@ -404,7 +404,7 @@ ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flag
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Instance()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -462,7 +462,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 
 	// 関数を使って必要なメモリ量を求める.
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
-	DirectXBase::Instance()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
+	DirectXBase::Ins()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &blasPrebuild
 	);
 
@@ -494,7 +494,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	buildASDesc.ScratchAccelerationStructureData = scratchBuffer->GetGPUVirtualAddress();
 	buildASDesc.DestAccelerationStructureData = blasBuffer->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
-	DirectXBase::Instance()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
 
@@ -512,29 +512,29 @@ void BLAS::CreateAccelerationStructure()
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 	uavBarrier.UAV.pResource = blasBuffer.Get();
-	DirectXBase::Instance()->cmdList->ResourceBarrier(1, &uavBarrier);
-	DirectXBase::Instance()->cmdList->Close();
+	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &uavBarrier);
+	DirectXBase::Ins()->cmdList->Close();
 
 	// BLASを構築。
-	ID3D12CommandList* pCmdList[] = { DirectXBase::Instance()->cmdList.Get() };
+	ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { DirectXBase::Instance()->cmdList.Get() };
-	DirectXBase::Instance()->cmdQueue->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };
+	DirectXBase::Ins()->cmdQueue->ExecuteCommandLists(1, commandLists);
 
 	//グラフィックコマンドリストの完了待ち
-	DirectXBase::Instance()->cmdQueue->Signal(DirectXBase::Instance()->fence.Get(), ++DirectXBase::Instance()->fenceVal);
-	if (DirectXBase::Instance()->fence->GetCompletedValue() != DirectXBase::Instance()->fenceVal) {
+	DirectXBase::Ins()->cmdQueue->Signal(DirectXBase::Ins()->fence.Get(), ++DirectXBase::Ins()->fenceVal);
+	if (DirectXBase::Ins()->fence->GetCompletedValue() != DirectXBase::Ins()->fenceVal) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		DirectXBase::Instance()->fence->SetEventOnCompletion(DirectXBase::Instance()->fenceVal, event);
+		DirectXBase::Ins()->fence->SetEventOnCompletion(DirectXBase::Ins()->fenceVal, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	//コマンドアロケータのリセット
-	DirectXBase::Instance()->cmdAllocator->Reset();						//キューをクリア
+	DirectXBase::Ins()->cmdAllocator->Reset();						//キューをクリア
 
 	//コマンドリストのリセット
-	DirectXBase::Instance()->cmdList->Reset(DirectXBase::Instance()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
+	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }
 

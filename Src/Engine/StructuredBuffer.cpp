@@ -7,7 +7,7 @@ void StructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
 {
 	this->sizeOfElement = sizeOfElement;
 	this->numElement = numElement;
-	auto device = DirectXBase::Instance()->dev;
+	auto device = DirectXBase::Ins()->dev;
 
 	int bufferNo = 0;
 	auto heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
@@ -44,7 +44,7 @@ void StructuredBuffer::Update(void* data)
 }
 ID3D12Resource* StructuredBuffer::GetD3DResoruce()
 {
-	auto backBufferIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();
+	auto backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 	return buffersOnGPU;
 }
 void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, int bufferNo)
@@ -52,7 +52,7 @@ void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE desc
 	if (!isInited) {
 		return;
 	}
-	auto device = DirectXBase::Instance()->dev;
+	auto device = DirectXBase::Ins()->dev;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));
