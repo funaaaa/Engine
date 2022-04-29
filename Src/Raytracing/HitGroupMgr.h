@@ -50,6 +50,10 @@ public:
 	// ISのゲッタ
 	const LPCWSTR& GetIS(const int& Index);
 	const bool& GetISFlag(const int& Index);
+	// 各種要素数のゲッタ
+	const int& GetSRVCount(const int& Index);
+	const int& GetCBVCount(const int& Index);
+	const int& GetUAVCount(const int& Index);
 	// ローカルルートシグネチャのゲッタ
 	const std::shared_ptr<RayRootsignature> GetLocalRootSig(const int& Index);
 

@@ -29,6 +29,21 @@ const bool& HitGroupMgr::GetISFlag(const int& Index)
 	return hitGroup[Index]->GetISFlag();
 }
 
+const int& HitGroupMgr::GetSRVCount(const int& Index)
+{
+	return hitGroup[Index]->GetSRVCount();
+}
+
+const int& HitGroupMgr::GetCBVCount(const int& Index)
+{
+	return hitGroup[Index]->GetCBVCount();
+}
+
+const int& HitGroupMgr::GetUAVCount(const int& Index)
+{
+	return hitGroup[Index]->GetUAVCount();
+}
+
 const std::shared_ptr<RayRootsignature> HitGroupMgr::GetLocalRootSig(const int& Index)
 {
 	return hitGroup[Index]->GetLoacalRootSig();

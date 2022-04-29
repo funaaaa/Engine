@@ -61,6 +61,9 @@ public:
 	const bool& GetCHFlag() { return CH.isActive; }
 	const bool& GetAHFlag() { return AH.isActive; }
 	const bool& GetISFlag() { return IS.isActive; }
+	const int& GetSRVCount() { return SRVcount; }
+	const int& GetCBVCount() { return CBVcount; }
+	const int& GetUAVCount() { return UAVcount; }
 	const std::shared_ptr<RayRootsignature> GetLoacalRootSig() { return localRootSig; };
 
 };

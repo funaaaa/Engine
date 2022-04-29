@@ -230,8 +230,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 使用するシェーダーを列挙。
 	vector<RayPiplineShaderData> useShaders;
-
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", {L"mainRayGen", L"mainMS", L"shadowMS", L"mainCHS", L"mainAnyHit"} });
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 
 	// レイトレパイプラインを設定。
 	RaytracingPipline pipline;
@@ -295,129 +294,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	rayTracingOutput->SetName(L"RayTracingOutputUAV");
 
 
-
-
-
-	/*==========  ShaderTableの生成  ==========*/			// シェーダーテーブルでは使用するローカルルートシグネチャを元にサイズを決定する。
-
-	const auto ShaderRecordAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
-
-	// RayGenerationシェーダーではローカルルートシグネチャ未使用。
-	UINT raygenRecordSize = 0;
-	raygenRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	raygenRecordSize = surarin::RoundUp(raygenRecordSize, ShaderRecordAlignment);
-
-	// Missシェーダーではローカルルートシグネチャ未使用。
-	UINT missRecordSize = 0;
-	missRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	missRecordSize = surarin::RoundUp(missRecordSize, ShaderRecordAlignment);
-
-	// ヒットグループでは、ShaderIndentiferとローカルルートシグネチャによるVB/IB(SRV)を使用。
-	UINT hitgroupRecordSize = 0;
-	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);	// 頂点バッファビュー
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);	// インデックスバッファビュー
-	hitgroupRecordSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);	// テクスチャ
-	hitgroupRecordSize = surarin::RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
-
-	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = 1;
-	UINT raygenSize = 1 * raygenRecordSize;
-	UINT missSize = 2 * missRecordSize;
-	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
-
-	// 各テーブルの開始位置にアライメント制約があるので調整する。
-	UINT tableAlign = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-	UINT raygenRegion = surarin::RoundUp(raygenRecordSize, tableAlign);
-	UINT missRegion = surarin::RoundUp(missSize, tableAlign);
-	UINT hitgroupRegion = surarin::RoundUp(hitGroupSize, tableAlign);
-
-	// シェーダーテーブルのサイズ.
-	UINT tableSize = raygenRegion + missRegion + hitgroupRegion;
-
-
-
-	/*========== シェーダーテーブルの構築 ==========*/
-
-	// シェーダーテーブル確保。
-	ComPtr<ID3D12Resource> shaderTable = surarin::CreateBuffer(
-		tableSize, D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
-		D3D12_HEAP_TYPE_UPLOAD,
-		L"ShaderTable");
-
-	ComPtr<ID3D12StateObjectProperties> rtsoProps;
-	pipline.GetStateObject().As(&rtsoProps);
-
-	// 各シェーダーレコードを書き込んでいく。
-	void* mapped = nullptr;
-	shaderTable->Map(0, nullptr, &mapped);
-	uint8_t* pStart = static_cast<uint8_t*>(mapped);
-
-	// RayGeneration 用のシェーダーレコードを書き込み。
-	uint8_t* rgsStart = pStart;
-	{
-		uint8_t* p = rgsStart;
-		void* id = rtsoProps->GetShaderIdentifier(L"mainRayGen");
-		p += surarin::WriteShaderIdentifier(p, id);
-
-	}
-
-	// Miss Shader 用のシェーダーレコードを書き込み。
-	uint8_t* missStart = pStart + raygenRegion;
-	{
-		uint8_t* p = missStart;
-		auto id = rtsoProps->GetShaderIdentifier(L"mainMS");
-		p += surarin::WriteShaderIdentifier(p, id);
-		// Shadow Miss Shader 用のシェーダーレコードを書き込み。
-		id = rtsoProps->GetShaderIdentifier(L"shadowMS");
-		p += surarin::WriteShaderIdentifier(p, id);
-	}
-
-	// Hit Group 用のシェーダーレコードを書き込み。
-	uint8_t* hitgroupStart = pStart + raygenRegion + missRegion;
-	{
-
-		uint8_t* pRecord = hitgroupStart;
-		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, pipline.GetStateObject());
-		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, pipline.GetStateObject());
-		// ground に対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, pipline.GetStateObject());
-
-	}
-	shaderTable->Unmap(0, nullptr);
-
-
-	/*==========  D3D12_DISPATCH_RAYS_DESCの設定  ==========*/
-
-	D3D12_DISPATCH_RAYS_DESC dispatchRayDesc = {};
-
-	// DispatchRays のために情報をセットしておく.
-	auto startAddress = shaderTable->GetGPUVirtualAddress();
-	// RayGenerationシェーダーの情報
-	auto& shaderRecordRG = dispatchRayDesc.RayGenerationShaderRecord;
-	shaderRecordRG.StartAddress = startAddress;
-	shaderRecordRG.SizeInBytes = raygenSize;
-	startAddress += raygenRegion;
-	// Missシェーダーの情報
-	auto& shaderRecordMS = dispatchRayDesc.MissShaderTable;
-	shaderRecordMS.StartAddress = startAddress;
-	shaderRecordMS.SizeInBytes = missSize;
-	shaderRecordMS.StrideInBytes = missRecordSize;
-	startAddress += missRegion;
-	// HitGroupの情報
-	auto& shaderRecordHG = dispatchRayDesc.HitGroupTable;
-	shaderRecordHG.StartAddress = startAddress;
-	shaderRecordHG.SizeInBytes = hitGroupSize;
-	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
-	startAddress += hitgroupRegion;
-	// レイの情報
-	dispatchRayDesc.Width = window_width;
-	dispatchRayDesc.Height = window_height;
-	dispatchRayDesc.Depth = 1;
-
+	// シェーダーテーブルを生成。
+	pipline.ConstructionShaderTable();
 
 
 	// 仮の定数バッファを宣言
@@ -521,7 +399,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get() };
 		DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		DirectXBase::Instance()->cmdList->SetComputeRootSignature(globalRootSig.GetRootSig().Get());
+		DirectXBase::Instance()->cmdList->SetComputeRootSignature(pipline.GetGlobalRootSig()->GetRootSig().Get());
 		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(2, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(uavDescriptorIndex));
 		DirectXBase::Instance()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
@@ -537,7 +415,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		DirectXBase::Instance()->cmdList->SetPipelineState1(pipline.GetStateObject().Get());
 
-		DirectXBase::Instance()->cmdList->DispatchRays(&dispatchRayDesc);
+		DirectXBase::Instance()->cmdList->DispatchRays(&pipline.GetDispatchRayDesc());
 
 		// バックバッファのインデックスを取得する。
 		UINT backBufferIndex = DirectXBase::Instance()->swapchain->GetCurrentBackBufferIndex();

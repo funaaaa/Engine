@@ -42,4 +42,7 @@ public:
 	// バッファを取得。
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(const int& Index);
 
+	// BLASの数を取得。
+	const int& GetBLASCount() { return blas.size(); }
+
 };
