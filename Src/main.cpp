@@ -15,6 +15,9 @@
 #include "Vec.h"
 #include "PorygonInstanceRegister.h"
 #include "HitGroupMgr.h"
+#include "RaytracingPipline.h"
+
+#include "HitGroup.h"
 
 #include <utilapiset.h>
 
@@ -222,14 +225,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// FBXLoaderを初期化。
 	FbxLoader::Instance()->Init();
 
-	// 猿のBLASを生成。
-	int boneBlas = BLASRegister::Instance()->GenerateFbx("Resource/", "boneTest.fbx", hitGroupName, L"Resource/backGround.png");
+	// ヒットグループを設定。
+	HitGroupMgr::Instance()->Setting();
+
+	// 使用するシェーダーを列挙。
+	vector<RayPiplineShaderData> useShaders;
+
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", {L"mainRayGen", L"mainMS", L"shadowMS", L"mainCHS", L"mainAnyHit"} });
+
+	// レイトレパイプラインを設定。
+	RaytracingPipline pipline;
+	pipline.Setting(useShaders);
 
 	// 猿のBLASを生成。
-	int monkeyBlas = BLASRegister::Instance()->GenerateObj("Resource/", "monkey.obj", hitGroupName, L"Resource/backGround.png");
+	int boneBlas = BLASRegister::Instance()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Instance()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
+
+	// 猿のBLASを生成。
+	int monkeyBlas = BLASRegister::Instance()->GenerateObj("Resource/", "monkey.obj", HitGroupMgr::Instance()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
 
 	// 床のBLASを生成。
-	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", hitGroupName, L"Resource/Fine_Basin.jpg");
+	int groundBlas = BLASRegister::Instance()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Instance()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
 
 	// インスタンスを生成
 	int boneA = PorygonInstanceRegister::Instance()->CreateInstance(BLASRegister::Instance()->GetBLASBuffer(boneBlas), 0, 2);
@@ -265,84 +280,84 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	globalRootSig.Create(false, L"GlobalRootSig");
 
 
-	// ClosestHitシェーダー用のローカルルートシグネチャを生成。
-	RayRootsignature closestHitLocalRootSig;
-	// t0にインデックスバッファ(SRV)を設定。
-	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0, 1);
-	// t1に頂点バッファ(SRV)を設定。
-	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
-	// t2にテクスチャを設定。
-	closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);
-	// サンプラーを追加。
-	closestHitLocalRootSig.AddStaticSampler(1);
-	// ローカルルートシグネチャを生成。
-	closestHitLocalRootSig.Create(true, L"ClosestHitLocalRootSig");
+	//// ClosestHitシェーダー用のローカルルートシグネチャを生成。
+	//RayRootsignature closestHitLocalRootSig;
+	//// t0にインデックスバッファ(SRV)を設定。
+	//closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0, 1);
+	//// t1に頂点バッファ(SRV)を設定。
+	//closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
+	//// t2にテクスチャを設定。
+	//closestHitLocalRootSig.AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 1);
+	//// サンプラーを追加。
+	//closestHitLocalRootSig.AddStaticSampler(1);
+	//// ローカルルートシグネチャを生成。
+	//closestHitLocalRootSig.Create(true, L"ClosestHitLocalRootSig");
 
 	// シェーダーをコンパイルする。
-	ShaderStorage::Instance()->LoadShaderForDXC("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", "lib_6_4", "");
+	//ShaderStorage::Instance()->LoadShaderForDXC("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", "lib_6_4", "");
 
 
 	/*==========  ステートオブジェクトの生成  ==========*/
 
 	// ステートオブジェクトの設定を保存しておくようの構造体。
 	CD3DX12_STATE_OBJECT_DESC subobjects;
-	// ステートオブジェクトの状態を設定。
-	subobjects.SetStateObjectType(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
+	//// ステートオブジェクトの状態を設定。
+	//subobjects.SetStateObjectType(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
-	// シェーダーの情報を保存する用の変数。
+	//// シェーダーの情報を保存する用の変数。
 	D3D12_SHADER_BYTECODE shadercode = {};
 	shadercode.BytecodeLength = ShaderStorage::Instance()->GetShaderBin("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl").size();
 	shadercode.pShaderBytecode = ShaderStorage::Instance()->GetShaderBin("Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl").data();
 
-	// シェーダーの各関数レコードの登録。
-	auto dxilLib = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
-	dxilLib->SetDXILLibrary(&shadercode);
-	dxilLib->DefineExport(L"mainRayGen");
-	dxilLib->DefineExport(L"mainMS");
-	dxilLib->DefineExport(L"shadowMS");
-	dxilLib->DefineExport(L"mainCHS");
+	//// シェーダーの各関数レコードの登録。
+	//auto dxilLib = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
+	//dxilLib->SetDXILLibrary(&shadercode);
+	//dxilLib->DefineExport(L"mainRayGen");
+	//dxilLib->DefineExport(L"mainMS");
+	//dxilLib->DefineExport(L"shadowMS");
+	//dxilLib->DefineExport(L"mainCHS");
 	//dxilLib->DefineExport(L"shadowCHS");
-	dxilLib->DefineExport(L"mainAnyHit");
+	//dxilLib->DefineExport(L"mainAnyHit");
 
-	// ヒットグループの設定。
-	auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
-	hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
-	hitGroup->SetClosestHitShaderImport(L"mainCHS");
-	hitGroup->SetAnyHitShaderImport(L"mainAnyHit");
-	hitGroup->SetHitGroupExport(hitGroupName);
+	//// ヒットグループの設定。
+	//auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+	//hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
+	//hitGroup->SetClosestHitShaderImport(L"mainCHS");
+	//hitGroup->SetAnyHitShaderImport(L"mainAnyHit");
+	//hitGroup->SetHitGroupExport(HitGroupMgr::Instance()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
-	// グローバルルートシグネチャの設定。
-	auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
-	rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
+	//// グローバルルートシグネチャの設定。
+	//auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
+	//rootSig->SetRootSignature(globalRootSig.GetRootSig().Get());
 
-	// ローカルルートシグネチャの設定。ClosestHitシェーダー。
-	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-	chLocalRootSig->SetRootSignature(closestHitLocalRootSig.GetRootSig().Get());
-	auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-	chAssocModel->AddExport(hitGroupName);
-	chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
+	//// ローカルルートシグネチャの設定。ClosestHitシェーダー。
+	//auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+	//chLocalRootSig->SetRootSignature(HitGroupMgr::Instance()->hitGroup[0]->localRootSig->GetRootSig().Get());
+	//auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+	//chAssocModel->AddExport(HitGroupMgr::Instance()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	//chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
 
-	// シェーダーの設定。
-	auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-	shaderConfig->Config(sizeof(XMFLOAT3) + sizeof(UINT), sizeof(XMFLOAT2));
+	//// シェーダーの設定。
+	//auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
+	//shaderConfig->Config(sizeof(XMFLOAT3) + sizeof(UINT), sizeof(XMFLOAT2));
 
-	// パイプラインの設定。
-	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-	pipelineConfig->Config(30);
+	//// パイプラインの設定。
+	//auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
+	//pipelineConfig->Config(30);
 
-	// ステートオブジェクト
-	ComPtr<ID3D12StateObject> stateObject;
+	//// ステートオブジェクト
+	//ComPtr<ID3D12StateObject> stateObject;
 
-	// 生成する。
-	HRESULT resultBuff = DirectXBase::Instance()->dev->CreateStateObject(
-		subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
-	);
+	//// 生成する。
+	//HRESULT resultBuff = DirectXBase::Instance()->dev->CreateStateObject(
+	//	subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
+	//);
 
-	stateObject->SetName(L"StateObject");
+	//stateObject->SetName(L"StateObject");
 
-	if (FAILED(resultBuff)) {
-		int a = 0;
-	}
+	//if (FAILED(resultBuff)) {
+	//	int a = 0;
+	//}
 
 
 	/*==========  UAV出力バッファの準備  ==========*/
@@ -426,7 +441,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		L"ShaderTable");
 
 	ComPtr<ID3D12StateObjectProperties> rtsoProps;
-	stateObject.As(&rtsoProps);
+	pipline.GetStateObject().As(&rtsoProps);
 
 	// 各シェーダーレコードを書き込んでいく。
 	void* mapped = nullptr;
@@ -459,11 +474,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		uint8_t* pRecord = hitgroupStart;
 		// monekyに対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, stateObject);
+		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, boneBlas, hitgroupRecordSize, pipline.GetStateObject());
 		// skydome に対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, stateObject);
+		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, monkeyBlas, hitgroupRecordSize, pipline.GetStateObject());
 		// ground に対応するシェーダーレコードを書き込む
-		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, stateObject);
+		pRecord = BLASRegister::Instance()->WriteShaderRecord(pRecord, groundBlas, hitgroupRecordSize, pipline.GetStateObject());
 
 	}
 	shaderTable->Unmap(0, nullptr);
@@ -614,7 +629,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		);
 		DirectXBase::Instance()->cmdList->ResourceBarrier(1, &barrierToUAV);
 
-		DirectXBase::Instance()->cmdList->SetPipelineState1(stateObject.Get());
+		DirectXBase::Instance()->cmdList->SetPipelineState1(pipline.GetStateObject().Get());
 
 		DirectXBase::Instance()->cmdList->DispatchRays(&dispatchRayDesc);
 

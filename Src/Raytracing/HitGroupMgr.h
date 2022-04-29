@@ -7,10 +7,11 @@
 #include "Singleton.h"
 
 class HitGroup;
+class RayRootsignature;
 
 class HitGroupMgr : public Singleton<HitGroupMgr> {
 
-public:
+private:
 
 	/*===== メンバ変数 =====*/
 
@@ -23,6 +24,7 @@ public:
 	enum HITGROUP_ID {
 
 		DEF_HIT_GROUP,
+		MAX_HIT_GROUP,
 
 	};
 
@@ -37,5 +39,18 @@ public:
 	// セッティング処理
 	void Setting();
 
+	// 配列数のゲッタ
+	const int& GetHitGroupCount() { return hitGroup.size(); }
+	// CHのゲッタ
+	const LPCWSTR& GetCH(const int& Index);
+	const bool& GetCHFlag(const int& Index);
+	// AHのゲッタ
+	const LPCWSTR& GetAH(const int& Index);
+	const bool& GetAHFlag(const int& Index);
+	// ISのゲッタ
+	const LPCWSTR& GetIS(const int& Index);
+	const bool& GetISFlag(const int& Index);
+	// ローカルルートシグネチャのゲッタ
+	const std::shared_ptr<RayRootsignature> GetLocalRootSig(const int& Index);
 
 };

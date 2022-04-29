@@ -1,6 +1,39 @@
 #include "HitGroupMgr.h"
 #include "HitGroup.h"
 
+const LPCWSTR& HitGroupMgr::GetCH(const int& Index)
+{
+	return hitGroup[Index]->GetCH();
+}
+
+const LPCWSTR& HitGroupMgr::GetAH(const int& Index)
+{
+	return hitGroup[Index]->GetAH();
+}
+
+const LPCWSTR& HitGroupMgr::GetIS(const int& Index)
+{
+	return hitGroup[Index]->GetIS();
+}
+const bool& HitGroupMgr::GetCHFlag(const int& Index)
+{
+	return hitGroup[Index]->GetCHFlag();
+}
+const bool& HitGroupMgr::GetAHFlag(const int& Index)
+{
+	return hitGroup[Index]->GetAHFlag();
+}
+
+const bool& HitGroupMgr::GetISFlag(const int& Index)
+{
+	return hitGroup[Index]->GetISFlag();
+}
+
+const std::shared_ptr<RayRootsignature> HitGroupMgr::GetLocalRootSig(const int& Index)
+{
+	return hitGroup[Index]->GetLoacalRootSig();
+}
+
 void HitGroupMgr::Setting()
 {
 
@@ -13,8 +46,9 @@ void HitGroupMgr::Setting()
 	HitGroupInitData initData;
 
 	// ‘æˆê—v‘f
-	initData.CH = L"mainCHS";
-	initData.AH = L"mainAnyHit";
+	initData.CH = { L"mainCHS",true };
+	initData.AH = { L"mainAnyHit",true };
+	initData.IS = { L"",false };
 	initData.SRVcount = 3;
 	initData.CBVcount = 0;
 	initData.UAVcount = 0;
