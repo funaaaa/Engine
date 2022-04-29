@@ -16,6 +16,7 @@
 #include "PorygonInstanceRegister.h"
 #include "HitGroupMgr.h"
 #include "RaytracingPipline.h"
+#include "RaytracingOutput.h"
 
 #include "HitGroup.h"
 
@@ -24,8 +25,6 @@
 #define COLORHEX(hex) hex / 255.0f
 
 #define SCREEN_VIRTUAL_WIDTH 300
-
-static const wchar_t* hitGroupName = L"hitGroupName";
 
 // fps更新
 void FPS();
@@ -42,169 +41,6 @@ struct KariConstBufferData {
 
 };
 
-#include "BLAS.h"
-// スラリンラボから持ってきた関数
-namespace surarin {
-
-	void WriteToHostVisibleMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize) {
-		if (resource == nullptr) {
-			return;
-		}
-		void* mapped = nullptr;
-		HRESULT hr = resource->Map(0, nullptr, (void**)&mapped);
-		if (SUCCEEDED(hr)) {
-			memcpy(mapped, pData, dataSize);
-			resource->Unmap(0, nullptr);
-		}
-	}
-
-	ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType, const wchar_t* name = nullptr) {
-		D3D12_HEAP_PROPERTIES heapProps{};
-		if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
-			heapProps = D3D12_HEAP_PROPERTIES{
-			D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-			};
-		}
-		if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
-			heapProps = D3D12_HEAP_PROPERTIES{
-			D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-			};
-		}
-		HRESULT hr;
-		ComPtr<ID3D12Resource> resource;
-		D3D12_RESOURCE_DESC resDesc{};
-		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		resDesc.Alignment = 0;
-		resDesc.Width = size;
-		resDesc.Height = 1;
-		resDesc.DepthOrArraySize = 1;
-		resDesc.MipLevels = 1;
-		resDesc.Format = DXGI_FORMAT_UNKNOWN;
-		resDesc.SampleDesc = { 1, 0 };
-		resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		resDesc.Flags = flags;
-
-		hr = DirectXBase::Instance()->dev->CreateCommittedResource(
-			&heapProps,
-			D3D12_HEAP_FLAG_NONE,
-			&resDesc,
-			initialState,
-			nullptr,
-			IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
-		);
-		if (FAILED(hr)) {
-			OutputDebugStringA("CreateBuffer failed.\n");
-		}
-		if (resource != nullptr && name != nullptr) {
-			resource->SetName(name);
-		}
-		return resource;
-	}
-
-	ComPtr<ID3D12Resource> CreateDataBuffer(
-		size_t requestSize,
-		const void* initData,
-		D3D12_HEAP_TYPE heapType,
-		D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE
-	) {
-
-		auto initialState = D3D12_RESOURCE_STATE_COPY_DEST;
-		if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
-			initialState = D3D12_RESOURCE_STATE_GENERIC_READ;
-		}
-
-		auto resource = CreateBuffer(requestSize, flags, initialState, heapType);
-
-		if (initData != nullptr) {
-			if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
-				WriteToHostVisibleMemory(resource, initData, requestSize);
-			}
-			if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
-				WriteToHostVisibleMemory(resource, initData, requestSize);
-			}
-		}
-		return resource;
-
-	}
-
-	void ExecuteCommandList(ComPtr<ID3D12GraphicsCommandList4> command)
-	{
-		ID3D12CommandList* commandLists[] = {
-			command.Get(),
-		};
-		DirectXBase::Instance()->cmdQueue->ExecuteCommandLists(1, commandLists);
-	}
-
-	void WaitForIdleGpu() {
-		if (DirectXBase::Instance()->cmdQueue) {
-			auto commandList = DirectXBase::Instance()->cmdList;
-			auto waitFence = DirectXBase::Instance()->fence;
-			UINT64 fenceValue = 1;
-			auto event = CreateEvent(nullptr, false, false, nullptr);
-			waitFence->SetEventOnCompletion(fenceValue, event);
-			DirectXBase::Instance()->cmdQueue->Signal(waitFence.Get(), fenceValue);
-			WaitForSingleObject(event, INFINITE);
-		}
-	}
-
-	ComPtr<ID3D12Resource> CreateTexture2D(UINT width, UINT height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType) {
-		D3D12_HEAP_PROPERTIES heapProps{};
-		if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
-			heapProps = D3D12_HEAP_PROPERTIES{
-			D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-			};
-		}
-		if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
-			heapProps = D3D12_HEAP_PROPERTIES{
-			D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-			};
-		}
-		HRESULT hr;
-		ComPtr<ID3D12Resource> resource;
-		D3D12_RESOURCE_DESC resDesc{};
-		resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		resDesc.Alignment = 0;
-		resDesc.Width = width;
-		resDesc.Height = height;
-		resDesc.DepthOrArraySize = 1;
-		resDesc.MipLevels = 1;
-		resDesc.Format = format;
-		resDesc.SampleDesc = { 1, 0 };
-		resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		resDesc.Flags = flags;
-
-		hr = DirectXBase::Instance()->dev->CreateCommittedResource(
-			&heapProps,
-			D3D12_HEAP_FLAG_NONE,
-			&resDesc,
-			initialState,
-			nullptr,
-			IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
-		);
-		if (FAILED(hr)) {
-			OutputDebugStringA("CreateTexture2D failed.\n");
-		}
-		return resource;
-	}
-
-	UINT RoundUp(size_t size, UINT align) {
-		return UINT(size + align - 1) & ~(align - 1);
-	}
-
-	UINT WriteShaderIdentifier(void* dst, const void* shaderId)
-	{
-		memcpy(dst, shaderId, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		return D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	}
-
-	UINT WriteGPUDescriptor(
-		void* dst, const D3D12_GPU_DESCRIPTOR_HANDLE* descriptor)
-	{
-		memcpy(dst, descriptor, sizeof(descriptor));
-		return UINT(sizeof(descriptor));
-	}
-
-}
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -265,34 +101,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	TLAS tlas;
 	tlas.GenerateTLAS(L"TlasDescriptorHeap");
 
-	/*==========  UAV出力バッファの準備  ==========*/
-
-	// UAVを設定
-	ComPtr<ID3D12Resource> rayTracingOutput = surarin::CreateTexture2D(
-		window_width, window_height, DXGI_FORMAT_R8G8B8A8_UNORM,
-		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE,
-		D3D12_HEAP_TYPE_DEFAULT
-	);
-
-	// 先頭ハンドルを取得
-	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Instance()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Instance()->GetHead(), DirectXBase::Instance()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-
-	// ディスクリプタヒープにUAVを確保
-	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
-	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-	DirectXBase::Instance()->dev->CreateUnorderedAccessView(
-		rayTracingOutput.Get(), nullptr, &uavDesc, basicHeapHandle);
-
-	// UAVのディスクリプタヒープのインデックスを取得
-	int uavDescriptorIndex = DescriptorHeapMgr::Instance()->GetHead();
-
-	// ディスクリプタヒープをインクリメント
-	DescriptorHeapMgr::Instance()->IncrementHead();
-
-	rayTracingOutput->SetName(L"RayTracingOutputUAV");
-
+	// レイトレ出力用クラスをセット。
+	RaytracingOutput raytracingOutput;
+	raytracingOutput.Setting();
 
 	// シェーダーテーブルを生成。
 	pipline.ConstructionShaderTable();
@@ -401,13 +212,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Instance()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 		DirectXBase::Instance()->cmdList->SetComputeRootSignature(pipline.GetGlobalRootSig()->GetRootSig().Get());
 		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
-		DirectXBase::Instance()->cmdList->SetComputeRootDescriptorTable(2, DescriptorHeapMgr::Instance()->GetGPUHandleIncrement(uavDescriptorIndex));
+		raytracingOutput.SetComputeRootDescriptorTalbe(2);
 		DirectXBase::Instance()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
 		// レイトレーシング結果バッファをUAV状態へ
 		auto barrierToUAV = CD3DX12_RESOURCE_BARRIER::Transition(
-			rayTracingOutput.Get(),
+			raytracingOutput.GetRaytracingOutput().Get(),
 			D3D12_RESOURCE_STATE_COPY_SOURCE,
 			D3D12_RESOURCE_STATE_UNORDERED_ACCESS
 		);
@@ -423,7 +234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// バリアを設定し各リソースの状態を遷移させる.
 		D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
-		rayTracingOutput.Get(),
+		raytracingOutput.GetRaytracingOutput().Get(),
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_COPY_SOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(
@@ -432,7 +243,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		D3D12_RESOURCE_STATE_COPY_DEST),
 		};
 		DirectXBase::Instance()->cmdList->ResourceBarrier(_countof(barriers), barriers);
-		DirectXBase::Instance()->cmdList->CopyResource(DirectXBase::Instance()->backBuffers[backBufferIndex].Get(), rayTracingOutput.Get());
+		DirectXBase::Instance()->cmdList->CopyResource(DirectXBase::Instance()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
 
 		// レンダーターゲットのリソースバリアをもとに戻す。
 		D3D12_RESOURCE_BARRIER endBarriers[] = {
