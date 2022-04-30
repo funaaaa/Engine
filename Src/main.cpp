@@ -85,7 +85,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//int groundBlas = BLASRegister::Ins()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
 
 	// インスタンスを生成
-	//int boneA = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 2);
+	//int boneA = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
 	//int boneB = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
 	//int boneC = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
 	//int boneD = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
@@ -93,18 +93,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//int ground = PorygonInstanceRegister::Ins()->CreateInstance(groundBlas, 2);
 
 	// 移動させる。
-	//PorygonInstanceRegister::Ins()->AddTrans(boneA, -2.0f, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneB, 2.0f, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneC, 0.0f, 0.0f, 2.0f);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneD, 0.0f, 0.0f, -2.0f);
+	float addTrans = 200.0f;
+	//PorygonInstanceRegister::Ins()->AddTrans(boneA, -addTrans, 0.0f, 0);
+	//PorygonInstanceRegister::Ins()->AddTrans(boneB, addTrans, 0.0f, 0);
+	//PorygonInstanceRegister::Ins()->AddTrans(boneC, 0.0f, 0.0f, addTrans);
+	//PorygonInstanceRegister::Ins()->AddTrans(boneD, 0.0f, 0.0f, -addTrans);
 	//PorygonInstanceRegister::Ins()->AddTrans(monkey, 0.0f, 0.0f, 0);
 	//PorygonInstanceRegister::Ins()->AddTrans(ground, 0.0f, -1.0f, 0);
 
 	// ある程度回転させる。
-	//PorygonInstanceRegister::Ins()->AddRotate(boneA, 0.0f, -0.1f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneB, 0.0f, -0.1f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneC, 0.0f, -0.1f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneD, 0.0f, -0.1f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneA, 0.0f, -0.5f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneB, 0.0f, -0.5f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneC, 0.0f, -0.5f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneD, 0.0f, -0.5f, 0);
+
+	// 拡大させる。
+	//PorygonInstanceRegister::Ins()->AddScale(boneA, Vec3(70));
+	//PorygonInstanceRegister::Ins()->AddScale(boneB, Vec3(70));
+	//PorygonInstanceRegister::Ins()->AddScale(boneC, Vec3(70));
+	//PorygonInstanceRegister::Ins()->AddScale(boneD, Vec3(70));
 
 	// TLASを生成。
 	TLAS tlas;
@@ -167,10 +174,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_S)) Camera::Ins()->Move(-speed);
 		if (Input::isKey(DIK_A)) Camera::Ins()->MoveRight(speed);
 		if (Input::isKey(DIK_D)) Camera::Ins()->MoveRight(-speed);
-		if (Input::isKey(DIK_UP)) Camera::Ins()->forwardVec.y += 0.05f;
-		if (Input::isKey(DIK_DOWN)) Camera::Ins()->forwardVec.y -= 0.05f;
-		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotationXZ(0.05f);
-		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotationXZ(-0.05f);
+		if (Input::isKey(DIK_UP)) Camera::Ins()->forwardVec.y += rot;
+		if (Input::isKey(DIK_DOWN)) Camera::Ins()->forwardVec.y -= rot;
+		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotationXZ(rot);
+		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotationXZ(-rot);
 		if (Input::isKey(DIK_LSHIFT)) Camera::Ins()->eye.y -= 10.0f;
 		if (Input::isKey(DIK_SPACE)) Camera::Ins()->eye.y += 10.0f;
 

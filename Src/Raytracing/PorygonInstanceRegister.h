@@ -37,7 +37,11 @@ public:
 
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
-	void AddRotate(const int& Index, const Vec3& Pos);
+	void AddRotate(const int& Index, const Vec3& Rot);
+
+	// 拡縮(引数を加算)関数
+	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
+	void AddScale(const int& Index, const Vec3& Scale);
 
 	// レジスターのDataを取得する関数。
 	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc.data(); };

@@ -28,7 +28,10 @@ public:
 	void AddTrans(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Pos);
 
 	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‰ÁZ)ŠÖ”
-	void AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Pos);
+	void AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Rot);
+
+	// Šg‘å(ˆø”‚ğ‰ÁZ)ŠÖ”
+	void AddScale(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Scale);
 
 
 private:

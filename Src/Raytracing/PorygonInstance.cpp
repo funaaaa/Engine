@@ -41,14 +41,36 @@ void PorygonMeshInstance::AddTrans(D3D12_RAYTRACING_INSTANCE_DESC& Input, const 
 
 }
 
-void PorygonMeshInstance::AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Pos)
+void PorygonMeshInstance::AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Rot)
 {
 
-	/*===== 移動関数 =====*/
+	/*===== 回転関数 =====*/
 
-	worldMat *= DirectX::XMMatrixRotationZ(Pos.z);
-	worldMat *= DirectX::XMMatrixRotationX(Pos.x);
-	worldMat *= DirectX::XMMatrixRotationY(Pos.y);
+	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
+
+	buff *= DirectX::XMMatrixRotationZ(Rot.z);
+	buff *= DirectX::XMMatrixRotationX(Rot.x);
+	buff *= DirectX::XMMatrixRotationY(Rot.y);
+
+	worldMat = buff * worldMat;
+
+	// 設定の移動行列を更新する。
+	DirectX::XMStoreFloat3x4(
+		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
+		worldMat);
+
+}
+
+void PorygonMeshInstance::AddScale(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Scale)
+{
+
+	/*===== 拡縮関数 =====*/
+
+	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
+
+	buff *= DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
+
+	worldMat = buff * worldMat;
 
 	// 設定の移動行列を更新する。
 	DirectX::XMStoreFloat3x4(
