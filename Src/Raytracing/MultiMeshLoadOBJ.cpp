@@ -168,60 +168,16 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiLeshLoadOBJ(const string& DirectryPat
 			}
 			else {
 
-				//// 既に生成済みかをチェックする。
-				//const int TEX_COUNT = blasID.size();
-				//bool isLoad = false;
-				//for (int index = 0; index < TEX_COUNT; ++index) {
+				// BLASを生成する。
+				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
+				std::pair<int, int> buff = { textureHandle,blasIDBuff };
+				blasID.emplace_back(buff);
 
-				//	// 同じ名前のテクスチャを使用していたら、既に読み込んでいる判定にする。
-				//	Vec3 pos1 = blasData.vertex[0].pos;
-				//	Vec3 pos2 = blasData.vertex[1].pos;
-				//	float vertLengt = (pos1 - pos2).Length();
-				//	if (textureHandle == blasID[index].first && std::fabs(vertLengt - vertexFirstLength[index]) < 10.0f) {
-
-				//		isLoad = true;
-
-				//		// 保存されているBLASIDでインスタンスを生成する。
-				//		int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasID[index].second, 2);
-				//		InstanceID.emplace_back(idBuff);
-
-				//		// この場合だと同じモデルでも座標が移動している場合に対応できない。
-				//		// なので、今のデータの頂点データの先頭と保存されているBLASの頂点データの先頭の差分を動かす。
-				//		Vec3 buff = blasData.vertex[0].pos;
-				//		Vec3 sub = buff - vertexData[index];
-
-				//		PorygonInstanceRegister::Ins()->AddTrans(idBuff, sub);
-
-				//		break;
-
-				//	}
-
-				//}
-
-				//if (!isLoad) {
-
-					// BLASを生成する。
-					int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
-					std::pair<int, int> buff = { textureHandle,blasIDBuff };
-					blasID.emplace_back(buff);
-					vertexData.emplace_back(blasData.vertex[0].pos);
-
-					// 第一要素と第二要素の頂点距離を求める。
-					Vec3 pos1 = blasData.vertex[0].pos;
-					Vec3 pos2 = blasData.vertex[1].pos;
-					vertexFirstLength.emplace_back((pos1 - pos2).Length());
-
-					// 保存されているBLASIDでインスタンスを生成する。
-					int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 2);
-					InstanceID.emplace_back(idBuff);
-
-
-				//}
+				// 保存されているBLASIDでインスタンスを生成する。
+				int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 2);
+				InstanceID.emplace_back(idBuff);
 
 				// その他データを初期化する。
-				/*position.clear();
-				uv.clear();
-				normal.clear();*/
 				blasData.index.clear();
 				blasData.vertex.clear();
 				isLoadTexture = false;
@@ -243,6 +199,15 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiLeshLoadOBJ(const string& DirectryPat
 		}
 
 	}
+
+	// 一番最後のBLASを生成。
+	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
+	std::pair<int, int> buff = { textureHandle,blasIDBuff };
+	blasID.emplace_back(buff);
+
+	// 保存されているBLASIDでインスタンスを生成する。
+	int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 2);
+	InstanceID.emplace_back(idBuff);
 
 	// ファイルを閉じる。
 	file.close();

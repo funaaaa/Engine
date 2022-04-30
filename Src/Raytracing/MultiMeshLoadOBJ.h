@@ -16,8 +16,6 @@ private:
 	std::vector<std::wstring> texturePath;
 
 	std::vector<std::pair<int, int>> blasID;	// テクスチャのハンドルと、それを使用したBLASのIDを保存するコンテナ
-	std::vector<Vec3> vertexData;			// BLASの先頭要素を保存。
-	std::vector<float> vertexFirstLength;	// BLASの第一要素と第二要素の頂点距離
 
 	using string = std::string;
 

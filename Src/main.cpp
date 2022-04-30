@@ -78,8 +78,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 猿のBLASを生成。
 	//int boneBlas = BLASRegister::Ins()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
 
-	//// 猿のBLASを生成。
-	int monkeyBlas = BLASRegister::Ins()->GenerateObj("Resource/", "monkey.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
+	// 猿のBLASを生成。
+	//int monkeyBlas = BLASRegister::Ins()->GenerateObj("Resource/", "monkey.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
 
 	// 床のBLASを生成。
 	//int groundBlas = BLASRegister::Ins()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
