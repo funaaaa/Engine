@@ -67,7 +67,8 @@ int TextureManager::LoadTexture(LPCWSTR fileName) {
 	proTexture.metadata = metadata;
 	proTexture.scratchImg = &scratchImg;
 	proTexture.texBuff = texbuff;
-	texture.push_back(proTexture);
+	texture.emplace_back(proTexture);
+	descriptorHeadMgrIndex.emplace_back(-1);
 
 	//ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
@@ -95,7 +96,7 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 		for (int i = 0; i < texture.size(); ++i) {
 			//ロードしてあったら識別番号を返す
 			if (texture.at(i).fileName == fileName) {
-				return texture.at(i).IDNum;
+				return descriptorHeadMgrIndex[i];
 			}
 		}
 	}
@@ -145,7 +146,8 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 	proTexture.metadata = metadata;
 	proTexture.scratchImg = &scratchImg;
 	proTexture.texBuff = texbuff;
-	texture.push_back(proTexture);
+	texture.emplace_back(proTexture);
+	descriptorHeadMgrIndex.emplace_back(DescriptorHeapMgr::Ins()->GetHead());
 
 	//ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(

@@ -275,8 +275,8 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // シャドウレイを発射。
         float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
         float shadowRate = 1.0f;
-        //bool isShadow = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
-        bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 7, 0) - worldPosition));
+        bool isShadow = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
+        //bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 7, 0) - worldPosition));
 
         // 影なら暗くする。
         if (isShadow)

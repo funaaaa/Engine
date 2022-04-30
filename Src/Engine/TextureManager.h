@@ -38,6 +38,7 @@ private:
 
 	ComPtr<ID3D12DescriptorHeap> srvDescHeap;
 	vector<Texture> texture;
+	vector<int> descriptorHeadMgrIndex;		// DescriptorHeapMgr上での保存先インデックス。
 	//コンストラクタ
 	friend Singleton<TextureManager>;
 	TextureManager();

@@ -62,7 +62,7 @@ void HitGroupMgr::Setting()
 
 	// ‘æˆê—v‘f
 	initData.CH = { L"mainCHS",true };
-	initData.AH = { L"mainAnyHit",true };
+	initData.AH = { L"",false };
 	initData.IS = { L"",false };
 	initData.SRVcount = 3;
 	initData.CBVcount = 0;

@@ -1,0 +1,377 @@
+#include "MultiMeshLoadOBJ.h"
+#include "BLAS.h"
+#include "Struct.h"
+#include "Vec.h"
+#include "BLASRegister.h"
+#include "TextureManager.h"
+#include "PorygonInstanceRegister.h"
+#include <DirectXMath.h>
+#include <fstream>
+#include <sstream>
+#include <cassert>
+#include <memory>
+
+std::vector<int> MultiMeshLoadOBJ::RayMultiLeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName)
+{
+
+	/*===== レイトレ用OBJ複数メッシュ読み込み関数 =====*/
+
+	std::vector<int> InstanceID;
+
+	// フィルストリーム
+	std::ifstream file;
+
+	// OBJファイルを開く
+	file.open(DirectryPath + FilePath);
+
+	// ファイルオープン失敗をチェック。
+	if (file.fail()) {
+		assert(0);
+	}
+
+	// BLASを生成する際に値として渡すデータ。
+	Object3DDeliveryData blasData;
+
+	// 一行ずつ読み込む。
+	string line;
+
+	// データを一次保存しておくためのコンテナ達。
+	std::vector<Vec3> position;
+	std::vector<DirectX::XMFLOAT2> uv;
+	std::vector<Vec3> normal;
+	int textureHandle = 0;
+
+	// 使用するマテリアル名とマテリアルファイル名の両方を取得したらマテリアルファイルを読み込むようにするために変数。
+	bool isLoadMaterialFile = false;
+	bool isLoadMaterialName = false;
+	bool isLoadTexture = false;
+
+	// マテリアルの情報。
+	string materialName;
+	string materialFile;
+
+	// 最初の"o"を無効化するためのフラグ。
+	bool isFirst = true;
+
+	while (std::getline(file, line)) {
+
+		// 1行分の文字列をストリームに変換して解析しやすくする。
+		std::istringstream lineStream(line);
+
+		// 半角スペース区切りで行の先頭文字を取得。
+		string key;
+		std::getline(lineStream, key, ' ');
+
+		// 先頭文字がvなら頂点座標。
+		if (key == "v") {
+
+			// X,Y,Z座標読み込み。
+			Vec3 pos{};
+			lineStream >> pos.x;
+			lineStream >> pos.y;
+			lineStream >> pos.z;
+
+			// 座標を一旦保存。
+			position.emplace_back(pos);
+
+		}
+		// 先頭文字がvtならテクスチャ。
+		if (key == "vt") {
+
+			// UV成分読み込み。
+			DirectX::XMFLOAT2 texcoord{};
+			lineStream >> texcoord.x;
+			lineStream >> texcoord.y;
+
+			// V方向反転。
+			texcoord.y = 1.0f - texcoord.y;
+
+			// テクスチャ座標データに追加。
+			uv.emplace_back(texcoord);
+
+		}
+		// 先頭文字がvnなら法線ベクトル。
+		if (key == "vn") {
+
+			// X,Y,Z成分読み込み。
+			Vec3 norm{};
+			lineStream >> norm.x;
+			lineStream >> norm.y;
+			lineStream >> norm.z;
+
+			// 法線ベクトルデータに追加。
+			normal.emplace_back(norm);
+
+		}
+		// 先頭文字がfならポリゴン(三角形)。
+		if (key == "f") {
+
+			// 半角スペース区切りで行の続きを読み込む。
+			string indexString;
+
+			unsigned short indexPosition;		// 受け皿
+			unsigned short indexNormal;			// 受け皿
+			unsigned short indexTexcoord;		// 受け皿
+
+			while (getline(lineStream, indexString, ' ')) {
+
+				// 頂点インデックス一個分の文字列をストリームに変換して解析しやすくする。
+				std::istringstream indexStream(indexString);
+
+				indexStream >> indexPosition;
+				indexStream.seekg(1, ios_base::cur);	// スラッシュを飛ばす。
+				indexStream >> indexTexcoord;
+				indexStream.seekg(1, ios_base::cur);	// スラッシュを飛ばす。
+				indexStream >> indexNormal;
+
+				// 頂点データの追加。
+				Vertex vert{};
+				vert.pos = position[indexPosition - 1].ConvertXMFLOAT3();
+				vert.normal = normal[indexNormal - 1].ConvertXMFLOAT3();
+				vert.uv = uv[indexTexcoord - 1];
+
+				// BLASのデータに追加。
+				blasData.vertex.emplace_back(vert);
+				blasData.index.emplace_back(blasData.index.size());
+
+			}
+		}
+
+		// 先頭文字列がmtllibならマテリアルファイル。
+		if (key == "mtllib") {
+
+			// マテリアルのファイル名読み込み。
+			lineStream >> materialFile;
+
+			isLoadMaterialFile = true;
+
+		}
+
+		// 先頭文字列がusemtlならマテリアル。
+		if (key == "usemtl") {
+
+			// マテリアル名読み込み。
+			lineStream >> materialName;
+
+			isLoadMaterialName = true;
+
+		}
+
+		// 先頭文字列がoだったらBLASを生成する。
+		if (key == "o") {
+
+			// 最初の一回は無視する。
+			if (isFirst) {
+
+				isFirst = false;
+
+			}
+			else {
+
+				//// 既に生成済みかをチェックする。
+				//const int TEX_COUNT = blasID.size();
+				//bool isLoad = false;
+				//for (int index = 0; index < TEX_COUNT; ++index) {
+
+				//	// 同じ名前のテクスチャを使用していたら、既に読み込んでいる判定にする。
+				//	Vec3 pos1 = blasData.vertex[0].pos;
+				//	Vec3 pos2 = blasData.vertex[1].pos;
+				//	float vertLengt = (pos1 - pos2).Length();
+				//	if (textureHandle == blasID[index].first && std::fabs(vertLengt - vertexFirstLength[index]) < 10.0f) {
+
+				//		isLoad = true;
+
+				//		// 保存されているBLASIDでインスタンスを生成する。
+				//		int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasID[index].second, 2);
+				//		InstanceID.emplace_back(idBuff);
+
+				//		// この場合だと同じモデルでも座標が移動している場合に対応できない。
+				//		// なので、今のデータの頂点データの先頭と保存されているBLASの頂点データの先頭の差分を動かす。
+				//		Vec3 buff = blasData.vertex[0].pos;
+				//		Vec3 sub = buff - vertexData[index];
+
+				//		PorygonInstanceRegister::Ins()->AddTrans(idBuff, sub);
+
+				//		break;
+
+				//	}
+
+				//}
+
+				//if (!isLoad) {
+
+					// BLASを生成する。
+					int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
+					std::pair<int, int> buff = { textureHandle,blasIDBuff };
+					blasID.emplace_back(buff);
+					vertexData.emplace_back(blasData.vertex[0].pos);
+
+					// 第一要素と第二要素の頂点距離を求める。
+					Vec3 pos1 = blasData.vertex[0].pos;
+					Vec3 pos2 = blasData.vertex[1].pos;
+					vertexFirstLength.emplace_back((pos1 - pos2).Length());
+
+					// 保存されているBLASIDでインスタンスを生成する。
+					int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 2);
+					InstanceID.emplace_back(idBuff);
+
+
+				//}
+
+				// その他データを初期化する。
+				/*position.clear();
+				uv.clear();
+				normal.clear();*/
+				blasData.index.clear();
+				blasData.vertex.clear();
+				isLoadTexture = false;
+				isLoadMaterialName = false;
+
+			}
+
+		}
+
+		// マテリアルファイル名とマテリアル名のどちらとも取得できたら、テクスチャをロードする。
+		if ((!isLoadTexture) && isLoadMaterialFile && isLoadMaterialName) {
+
+			// テクスチャを読み込む。
+			textureHandle = LoadMaterial(DirectryPath, materialFile, materialName);
+
+			// テクスチャをロード済みにする。
+			isLoadTexture = true;
+
+		}
+
+	}
+
+	// ファイルを閉じる。
+	file.close();
+
+	return InstanceID;
+
+}
+
+int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& MaterialFileName, const string& MaterialName)
+{
+
+	// ファイルストリーム。
+	ifstream file;
+
+	// マテリアルファイルを開く。
+	file.open(DirectryPath + MaterialFileName);
+
+	// ファイルオープン失敗をチェック。
+	if (file.fail()) {
+
+		assert(0);
+
+	}
+
+	// 一行ずつ読み込む。
+	string line;
+
+	// 使用するマテリアルのところに達したか。
+	bool isLoadTexture = false;
+
+	// 読み込んだテクスチャのハンドル。
+	int textureHandle = 0;
+
+	while (getline(file, line)) {
+
+		// 位置行分の文字列をストリームに変換。
+		istringstream lineStream(line);
+
+		// 半角スペース区切りで行の先頭文字列を取得。
+		string key;
+		getline(lineStream, key, ' ');
+
+		// 先頭のタブ文字は無視する。
+		if (key[0] == '\t') {
+
+			key.erase(key.begin());	//先頭の文字を削除
+
+		}
+
+		// 先頭文字列がnewmtlならマテリアル名。
+		if (key == "newmtl") {
+
+			// マテリアル名の読み込み。
+			string materialNameBuff;
+			lineStream >> materialNameBuff;
+
+			// 現在のマテリアル名と引数のマテリアル名が同じだったら。
+			if (MaterialName == materialNameBuff) {
+
+				isLoadTexture = true;
+
+			}
+
+		}
+
+		// 使用するテクスチャのところに達していたら。
+		if (isLoadTexture) {
+
+			// 先頭文字列がmap_Kdならマテリアル名。
+			if (key == "map_Kd") {
+
+				// テクスチャ名を保存。
+				string textureNameBuff;
+				lineStream >> textureNameBuff;
+
+				// テクスチャ名を変換。
+				wstring buff = StringToWString(DirectryPath + textureNameBuff);
+
+				// 既に生成済みかをチェックする。
+				const int TEXPATH_COUNT = texturePath.size();
+				bool isLoad = false;
+				for (int index = 0; index < TEXPATH_COUNT; ++index) {
+
+					if (buff == texturePath[index]) {
+
+						isLoad = true;
+
+						// テクスチャを読み込む。
+						return textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str());
+
+
+					}
+
+				}
+
+				// ロードしていなかったら。
+				if (!isLoad) {
+
+					texturePath.emplace_back();
+					texturePath[texturePath.size() - 1] = buff;
+
+					// テクスチャを読み込む。
+					return textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str());
+
+				}
+
+			}
+
+		}
+
+	}
+
+	return textureHandle;
+
+}
+
+std::wstring MultiMeshLoadOBJ::StringToWString(std::string oString)
+{
+	auto num1 = MultiByteToWideChar(
+		CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
+		oString.c_str(), -1, nullptr, 0);
+
+	std::wstring wstr;
+	wstr.resize(num1);
+
+	auto num2 = MultiByteToWideChar(
+		CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
+		oString.c_str(), -1, &wstr[0], num1);
+
+	// 変換結果を返す
+	return(wstr);
+}

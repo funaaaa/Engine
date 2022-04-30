@@ -16,6 +16,7 @@
 #include "HitGroupMgr.h"
 #include "RaytracingPipline.h"
 #include "RaytracingOutput.h"
+#include "MultiMeshLoadOBJ.h"
 
 #include "HitGroup.h"
 
@@ -65,42 +66,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 使用するシェーダーを列挙。
 	vector<RayPiplineShaderData> useShaders;
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
 
 	// レイトレパイプラインを設定。
 	RaytracingPipline pipline;
 	pipline.Setting(useShaders);
 
-	// 猿のBLASを生成。
-	int boneBlas = BLASRegister::Ins()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
+	// SPONZAを読み込む。
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// 猿のBLASを生成。
+	//int boneBlas = BLASRegister::Ins()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
+
+	//// 猿のBLASを生成。
 	int monkeyBlas = BLASRegister::Ins()->GenerateObj("Resource/", "monkey.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
 
 	// 床のBLASを生成。
-	int groundBlas = BLASRegister::Ins()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
+	//int groundBlas = BLASRegister::Ins()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
 
 	// インスタンスを生成
-	int boneA = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 2);
-	int boneB = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	int boneC = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	int boneD = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	int monkey = PorygonInstanceRegister::Ins()->CreateInstance(monkeyBlas, 2);
-	int ground = PorygonInstanceRegister::Ins()->CreateInstance(groundBlas, 2);
+	//int boneA = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 2);
+	//int boneB = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
+	//int boneC = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
+	//int boneD = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
+	//int monkey = PorygonInstanceRegister::Ins()->CreateInstance(monkeyBlas, 2);
+	//int ground = PorygonInstanceRegister::Ins()->CreateInstance(groundBlas, 2);
 
 	// 移動させる。
-	PorygonInstanceRegister::Ins()->AddTrans(boneA, -2.0f, 0.0f, 0);
-	PorygonInstanceRegister::Ins()->AddTrans(boneB, 2.0f, 0.0f, 0);
-	PorygonInstanceRegister::Ins()->AddTrans(boneC, 0.0f, 0.0f, 2.0f);
-	PorygonInstanceRegister::Ins()->AddTrans(boneD, 0.0f, 0.0f, -2.0f);
-	PorygonInstanceRegister::Ins()->AddTrans(monkey, 0.0f, 0.0f, 0);
-	PorygonInstanceRegister::Ins()->AddTrans(ground, 0.0f, -1.0f, 0);
+	//PorygonInstanceRegister::Ins()->AddTrans(boneA, -2.0f, 0.0f, 0);
+	//PorygonInstanceRegister::Ins()->AddTrans(boneB, 2.0f, 0.0f, 0);
+	//PorygonInstanceRegister::Ins()->AddTrans(boneC, 0.0f, 0.0f, 2.0f);
+	//PorygonInstanceRegister::Ins()->AddTrans(boneD, 0.0f, 0.0f, -2.0f);
+	//PorygonInstanceRegister::Ins()->AddTrans(monkey, 0.0f, 0.0f, 0);
+	//PorygonInstanceRegister::Ins()->AddTrans(ground, 0.0f, -1.0f, 0);
 
 	// ある程度回転させる。
-	PorygonInstanceRegister::Ins()->AddRotate(boneA, 0.0f, -0.1f, 0);
-	PorygonInstanceRegister::Ins()->AddRotate(boneB, 0.0f, -0.1f, 0);
-	PorygonInstanceRegister::Ins()->AddRotate(boneC, 0.0f, -0.1f, 0);
-	PorygonInstanceRegister::Ins()->AddRotate(boneD, 0.0f, -0.1f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneA, 0.0f, -0.1f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneB, 0.0f, -0.1f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneC, 0.0f, -0.1f, 0);
+	//PorygonInstanceRegister::Ins()->AddRotate(boneD, 0.0f, -0.1f, 0);
 
 	// TLASを生成。
 	TLAS tlas;
@@ -118,7 +122,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	KariConstBufferData constBufferData;
 	constBufferData.ambientColor = { 1,1,1,1 };
 	constBufferData.lightColor = { 1,1,1,1 };
-	constBufferData.lightDirection = { 1,1,0,0 };
+	constBufferData.lightDirection = { 0,1,0,0 };
 	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(60.0f),				//画角(60度)
 		(float)window_width / window_height,	//アスペクト比
@@ -155,9 +159,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//Camera::target = triangle.GetPos();
 
 		// スキニングアニメーションさせる。
-		BLASRegister::Ins()->ComputeSkin(boneBlas);
+		//BLASRegister::Ins()->ComputeSkin(boneBlas);
 
-		float speed = 0.1f;
+		float speed = 5.0f;
 		float rot = 0.03f;
 		if (Input::isKey(DIK_W)) Camera::Ins()->Move(speed);
 		if (Input::isKey(DIK_S)) Camera::Ins()->Move(-speed);
@@ -165,8 +169,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_D)) Camera::Ins()->MoveRight(-speed);
 		if (Input::isKey(DIK_UP)) Camera::Ins()->eye.y += speed;
 		if (Input::isKey(DIK_DOWN)) Camera::Ins()->eye.y -= speed;
-		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotation(0,-rot,0);
-		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotation(0,rot,0);
+		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotation(0, -rot, 0);
+		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotation(0, rot, 0);
 
 		//if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
 		//if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
@@ -175,31 +179,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		if (Input::isKey(DIK_1)) {
 
-			BLASRegister::Ins()->InitAnimation(boneBlas);
+			//BLASRegister::Ins()->InitAnimation(boneBlas);
 
 		}
 		if (Input::isKey(DIK_2)) {
 
-			BLASRegister::Ins()->PlayAnimation(boneBlas);
+			//BLASRegister::Ins()->PlayAnimation(boneBlas);
 
 		}
 		if (Input::isKey(DIK_3)) {
 
-			BLASRegister::Ins()->StopAnimation(boneBlas);
+			//BLASRegister::Ins()->StopAnimation(boneBlas);
 
 		}
 
-		BLASRegister::Ins()->Update(boneBlas);
+		//BLASRegister::Ins()->Update(boneBlas);
 
 		// TLASを更新。
-		tlas.Update();
+		//tlas.Update();
+
+		// カメラを更新。
+		Camera::Ins()->Update();
 
 		eye = Camera::Ins()->eye;
 		target = Camera::Ins()->target;
 		up = Camera::Ins()->up;
-
-		// カメラを更新。
-		Camera::Ins()->Update();
 
 
 		/*----- 描画処理 -----*/

@@ -1,17 +1,18 @@
 #pragma once
 #include "DirectXBase.h"
 #include "RayDescriptor.h"
-#include <DirectXMath.h>
 #include "ComputeShader.h"
 #include "FbxLoader.h"
+#include "Vec.h"
+#include <DirectXMath.h>
 
 using namespace DirectX;
 
 // レイトレ用頂点構造体
 struct RayVertex {
 
-	XMFLOAT3 position;
-	XMFLOAT3 normal;
+	Vec3 position;
+	Vec3 normal;
 	XMFLOAT2 uv;
 
 };
@@ -62,6 +63,7 @@ public:
 	// BLASの生成
 	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath);
 	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath);
+	void GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureHandle);
 
 	// BLASの更新
 	void Update();

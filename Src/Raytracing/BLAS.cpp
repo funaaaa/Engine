@@ -197,6 +197,85 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 
 }
 
+void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureHandle)
+{
+
+	/*===== BLASを生成する処理 =====*/
+
+	// テクスチャを読み込む。
+	textureHandle = TextureHandle;
+
+	/*-- 形状データを読み込む --*/
+
+	// 頂点数を求める。
+	vertexCount = Data.vertex.size();
+
+	// 頂点インデックス数を求める。
+	indexCount = Data.index.size();
+
+	// 頂点データを変換。
+	for (int index = 0; index < vertexCount; ++index) {
+
+		RayVertex buff{};
+		buff.normal = Data.vertex[index].normal;
+		buff.position = Data.vertex[index].pos;
+		buff.uv = Data.vertex[index].uv;
+
+		// データを保存。
+		vertex.push_back(buff);
+
+	}
+
+	// 頂点インデックスデータを保存。
+	vertIndex = Data.index;
+
+	// 頂点サイズを求める。
+	vertexStride = sizeof(RayVertex);
+
+	// 頂点インデックスサイズを求める。
+	indexStride = sizeof(UINT);
+
+	// 頂点バッファを生成する。
+	vertexBuffer = CreateBuffer(
+		vertexStride * vertexCount,
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+
+	// 頂点インデックスバッファを生成する。
+	indexBuffer = CreateBuffer(
+		indexStride * indexCount,
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
+	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+
+	// 頂点インデックスデータでディスクリプタを生成。
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
+	// 頂点データでディスクリプタを生成。
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
+
+	/*-- BLASバッファを生成する --*/
+
+	// 形状を設定する用の構造体を設定。
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+
+	// BLASバッファを設定、構築する。
+	SettingAccelerationStructure(geomDesc);
+
+
+	// ヒットグループ名を保存する。
+	this->hitGroupName = HitGroupName;
+
+}
+
 void BLAS::Update()
 {
 

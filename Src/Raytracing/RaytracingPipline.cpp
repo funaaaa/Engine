@@ -202,8 +202,11 @@ void RaytracingPipline::ConstructionShaderTable()
 	UINT missRegion = RoundUp(missSize, tableAlign);
 	UINT hitgroupRegion = RoundUp(hitGroupSize, tableAlign);
 
-	// シェーダーテーブルのサイズ.
-	UINT tableSize = raygenRegion + missRegion + hitgroupRegion;
+	// 生成されたBLASの数。
+	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
+
+	// シェーダーテーブルのサイズ。
+	UINT tableSize = raygenRegion + missRegion + hitgroupRegion * BLAS_COUNT;
 
 	/*========== シェーダーテーブルの構築 ==========*/
 
@@ -268,7 +271,6 @@ void RaytracingPipline::ConstructionShaderTable()
 		uint8_t* pRecord = hitgroupStart;
 
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
 		for (int index = 0; index < BLAS_COUNT; ++index) {
 
 			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject);
