@@ -217,7 +217,7 @@ void mainMS(inout Payload payload)
 
     // ’PF‚ğ•Ô‚·‚æ‚¤‚É‚·‚éB
     //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
-    payload.color = float3(0, 0, 0);
+    payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
 
 }
 

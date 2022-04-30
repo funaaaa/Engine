@@ -35,9 +35,9 @@ struct KariConstBufferData {
 	XMMATRIX mtxProj;			// プロジェクション行列。
 	XMMATRIX mtxViewInv;		// ビュー逆行列。
 	XMMATRIX mtxProjInv;		// プロジェクション逆行列。
-	XMFLOAT4 lightDirection;	// 平行光源の向き。
-	XMFLOAT4 lightColor;		// 平行光源色。
-	XMFLOAT4 ambientColor;		// 環境光。
+	XMVECTOR lightDirection;	// 平行光源の向き。
+	XMVECTOR lightColor;		// 平行光源色。
+	XMVECTOR ambientColor;		// 環境光。
 
 };
 
@@ -129,7 +129,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	KariConstBufferData constBufferData;
 	constBufferData.ambientColor = { 1,1,1,1 };
 	constBufferData.lightColor = { 1,1,1,1 };
-	constBufferData.lightDirection = { 0,1,0,0 };
+	constBufferData.lightDirection = { 0,1,-0.27f,0 };
+	constBufferData.lightDirection = XMVector4Normalize(constBufferData.lightDirection);
 	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(60.0f),				//画角(60度)
 		(float)window_width / window_height,	//アスペクト比
