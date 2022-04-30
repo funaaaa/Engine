@@ -167,10 +167,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		if (Input::isKey(DIK_S)) Camera::Ins()->Move(-speed);
 		if (Input::isKey(DIK_A)) Camera::Ins()->MoveRight(speed);
 		if (Input::isKey(DIK_D)) Camera::Ins()->MoveRight(-speed);
-		if (Input::isKey(DIK_UP)) Camera::Ins()->eye.y += speed;
-		if (Input::isKey(DIK_DOWN)) Camera::Ins()->eye.y -= speed;
-		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotation(0, -rot, 0);
-		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotation(0, rot, 0);
+		if (Input::isKey(DIK_UP)) Camera::Ins()->forwardVec.y += 0.05f;
+		if (Input::isKey(DIK_DOWN)) Camera::Ins()->forwardVec.y -= 0.05f;
+		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotationXZ(0.05f);
+		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotationXZ(-0.05f);
+		if (Input::isKey(DIK_LSHIFT)) Camera::Ins()->eye.y -= 10.0f;
+		if (Input::isKey(DIK_SPACE)) Camera::Ins()->eye.y += 10.0f;
 
 		//if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
 		//if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);

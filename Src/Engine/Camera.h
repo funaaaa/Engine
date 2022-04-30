@@ -26,6 +26,8 @@ public:
 
 	float angleOfView;		//画角
 
+	float angleXZ;		// XZ平面での角度
+
 private:
 
 	const float EYE_PLAYER_DISTANCE = 100;			//プレイヤーと視点の距離
@@ -54,6 +56,7 @@ public:
 
 	// 回転
 	void AddRotation(const float& RotX, const float& RotY, const float& RotZ);
+	void AddRotationXZ(const float& Rot);
 
 	// 移動
 	void Move(const float& Speed);

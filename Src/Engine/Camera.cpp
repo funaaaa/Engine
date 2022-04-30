@@ -46,7 +46,7 @@ void Camera::GenerateMatViewSpeed(const float& nowSpeed, const float& maxSpeed)
 
 void Camera::Init()
 {
-	eye = Vec3(0, 0, 10);
+	eye = Vec3(0, 150, 10);
 	target = Vec3(0, 0, 0);
 	up = Vec3(0, 1, 0);
 	rotationMat = XMMatrixIdentity();
@@ -55,6 +55,8 @@ void Camera::Init()
 	matPerspective = {};
 	matProjection = {};
 	Camera::angleOfView = 60;
+	angleXZ = 0;
+	forwardVec = Vec3{ 0,0,1 };
 
 }
 
@@ -86,14 +88,23 @@ void Camera::Update()
 {
 
 	// 正面ベクトルを求める。
-	forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
+	//forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
+	//forwardVec.Normalize();
+	forwardVec.x = cosf(angleXZ);
+	forwardVec.z = sinf(angleXZ);
+
+	//forwardVec.Normalize();
+
+	// 視点が限界を超えないようにする。
+	if(1.0f < forwardVec.y) forwardVec.y = 1.0f;
+	if(forwardVec.y < -1.0f) forwardVec.y = -1.0f;
 
 	// 視点座標から視点点座標を求める。
 	const float EYE_TARGET = 100.0f;
 	target = eye + forwardVec * EYE_TARGET;
 
 	// 上ベクトルを求める。
-	up = FHelper::MulRotationMatNormal({ 0,1,0 }, rotationMat);
+	//up = FHelper::MulRotationMatNormal({ 0,1,0 }, rotationMat);
 
 }
 
@@ -101,24 +112,36 @@ void Camera::AddRotation(const float& RotX, const float& RotY, const float& RotZ
 {
 
 	// カメラの回転行列を回転させる。
+	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
+	buff *= XMMatrixRotationZ(RotZ);
+	buff *= XMMatrixRotationX(RotX);
+	buff *= XMMatrixRotationY(RotY);
 
-	rotationMat *= XMMatrixRotationZ(RotX);
-	rotationMat *= XMMatrixRotationX(RotX);
-	rotationMat *= XMMatrixRotationY(RotY);
+	rotationMat = buff * rotationMat;
+
+}
+
+void Camera::AddRotationXZ(const float& Rot)
+{
+
+	angleXZ += Rot;
 
 }
 
 void Camera::Move(const float& Speed)
 {
-
-	eye += forwardVec * Speed;
+	Vec3 forwardVecBuff = forwardVec;
+	forwardVecBuff.y = 0;
+	eye += forwardVecBuff * Speed;
 
 }
 
 void Camera::MoveRight(const float& Speed)
 {
 	XMMATRIX mat = FHelper::CalRotationMat(XMFLOAT3(0, -3.14f / 2.0f, 0));
-	Vec3 moveDir = FHelper::MulRotationMatNormal(forwardVec.ConvertXMFLOAT3(), mat);
+	Vec3 forwardVecBuff = forwardVec;
+	forwardVecBuff.y = 0;
+	Vec3 moveDir = FHelper::MulRotationMatNormal(forwardVecBuff.ConvertXMFLOAT3(), mat);
 
 	eye += moveDir * Speed;
 
