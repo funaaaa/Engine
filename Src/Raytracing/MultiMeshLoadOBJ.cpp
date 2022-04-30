@@ -232,10 +232,6 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 
 	}
 
-	if(MaterialName == "Material__57"){
-		int a = 0;
-	}
-
 	// 一行ずつ読み込む。
 	string line;
 
@@ -289,10 +285,6 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 
 				// テクスチャ名を変換。
 				wstring buff = StringToWString(DirectryPath + textureNameBuff);
-
-				if(buff == L"Resource/sponzaTextures/vase_plant.png"){
-					int a = 0;
-				}
 
 				// 既に生成済みかをチェックする。
 				const int TEXPATH_COUNT = texturePath.size();
