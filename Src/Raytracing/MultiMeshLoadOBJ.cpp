@@ -109,14 +109,14 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiLeshLoadOBJ(const string& DirectryPat
 			// 半角スペース区切りで行の続きを読み込む。
 			string indexString;
 
-			unsigned short indexPosition;		// 受け皿
-			unsigned short indexNormal;			// 受け皿
-			unsigned short indexTexcoord;		// 受け皿
-
 			while (getline(lineStream, indexString, ' ')) {
 
 				// 頂点インデックス一個分の文字列をストリームに変換して解析しやすくする。
 				std::istringstream indexStream(indexString);
+
+				unsigned int indexPosition = 0;		// 受け皿
+				unsigned int indexNormal = 0;		// 受け皿
+				unsigned int indexTexcoord = 0;		// 受け皿
 
 				indexStream >> indexPosition;
 				indexStream.seekg(1, ios_base::cur);	// スラッシュを飛ばす。
@@ -232,6 +232,10 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 
 	}
 
+	if(MaterialName == "Material__57"){
+		int a = 0;
+	}
+
 	// 一行ずつ読み込む。
 	string line;
 
@@ -285,6 +289,10 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 
 				// テクスチャ名を変換。
 				wstring buff = StringToWString(DirectryPath + textureNameBuff);
+
+				if(buff == L"Resource/sponzaTextures/vase_plant.png"){
+					int a = 0;
+				}
 
 				// 既に生成済みかをチェックする。
 				const int TEXPATH_COUNT = texturePath.size();
