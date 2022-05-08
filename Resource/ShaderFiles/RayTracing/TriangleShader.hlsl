@@ -49,8 +49,7 @@ float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
     float3 worldNormal = mul(vertexNormal, (float3x3) ObjectToWorld4x3());
     float3 worldRayDir = WorldRayDirection();
     float3 reflectDir = reflect(worldRayDir, worldNormal);
-
-    RAY_FLAG flags = RAY_FLAG_NONE;
+    
     uint rayMask = 0xFF;
 
     RayDesc rayDesc;
@@ -64,7 +63,7 @@ float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
     reflectPayload.recursive = recursive;
     TraceRay(
         gRtScene,
-        flags,
+        0,
         rayMask,
         0, // ray index
         1, // MultiplierForGeometryContrib
@@ -105,7 +104,6 @@ float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
     }
     else
     {
-        RAY_FLAG flags = RAY_FLAG_NONE;
         uint rayMask = 0xFF;
 
         RayDesc rayDesc;
@@ -119,7 +117,7 @@ float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
         refractPayload.recursive = recursive;
         TraceRay(
             gRtScene,
-            flags,
+            0,
             rayMask,
             0, // ray index
             1, // MultiplierForGeometryContrib
@@ -194,7 +192,7 @@ void mainRayGen()
     // レイを発射
     TraceRay(
     gRtScene, // TLAS
-    RAY_FLAG_NONE, // 衝突判定制御をするフラグ
+    0, // 衝突判定制御をするフラグ
     rayMask, // 衝突判定対象のマスク値
     0, // ray index
     1, // MultiplierForGeometryContrib
