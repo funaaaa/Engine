@@ -142,7 +142,7 @@ void mainAOCHS(inout AOPayload payload, MyAttribute attrib)
 {
 
     // ƒŒƒC‚Ì”½Ë”
-    const int RECURSICE_RAY_COUNT = 3;
+    const int RECURSICE_RAY_COUNT = 2;
 
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
