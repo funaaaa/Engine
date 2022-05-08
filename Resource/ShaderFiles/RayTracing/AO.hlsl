@@ -5,7 +5,7 @@
 
 // グローバルルートシグネチャ
 RaytracingAccelerationStructure gRtScene : register(t0);
-ConstantBuffer<SceneCB> gSceneParam : register(b0);
+ConstantBuffer<SceneAOCB> gSceneParam : register(b0);
 
 // ヒットグループのローカルルートシグネチャ
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
@@ -17,13 +17,37 @@ SamplerState smp : register(s0, space1);
 // RayGenerationシェーダーのローカルルートシグネチャ
 RWTexture2D<float4> gOutput : register(u0);
 
-// 反射レイトレーシング
-float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
+struct AOPayload
 {
-    float3 worldPos = mul(float4(vertexPosition, 1), ObjectToWorld4x3());
-    float3 worldNormal = mul(vertexNormal, (float3x3) ObjectToWorld4x3());
+    float3 color;
+    float3 light;
+    uint recursive;
+};
+
+float GetRandomNumber(float2 texCoord, int Seed)
+{
+    return frac(sin(dot(texCoord.xy, float2(12.9898, 78.233)) + Seed) * 43758.5453);
+}
+
+// 反射
+void Reflection(inout AOPayload payload, Vertex vtx)
+{
+    // ベクトルをランダムで求めて反射させる。
+    float3 random = float3(GetRandomNumber(float2(vtx.Position.x, vtx.Position.y), int(gSceneParam.seed.x + gSceneParam.seed.y)) * 2.0f - 1.0f,
+    GetRandomNumber(float2(vtx.Position.x, vtx.Position.y), int(gSceneParam.seed.x + gSceneParam.seed.y)) * 2.0f - 1.0f,
+    GetRandomNumber(float2(vtx.Position.x, vtx.Position.y), int(gSceneParam.seed.x + gSceneParam.seed.y)) * 2.0f - 1.0f);
+    
+    // -1 ~ 1 の乱数が求められたので、値を小さくする。
+    random /= 10.0f;
+    
     float3 worldRayDir = WorldRayDirection();
+    float3 worldNormal = mul(vtx.Normal, (float3x3) ObjectToWorld4x3());
     float3 reflectDir = reflect(worldRayDir, worldNormal);
+    reflectDir += random;
+    reflectDir = normalize(reflectDir);
+    
+    // レイを発射。
+    float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     
     uint rayMask = 0xFF;
 
@@ -33,9 +57,6 @@ float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
     rayDesc.TMin = 0.01;
     rayDesc.TMax = 100000;
 
-    Payload reflectPayload;
-    reflectPayload.color = float3(0, 0, 0);
-    reflectPayload.recursive = recursive;
     TraceRay(
         gRtScene,
         0,
@@ -44,91 +65,7 @@ float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
         1, // MultiplierForGeometryContrib
         0, // miss index
         rayDesc,
-        reflectPayload);
-    return reflectPayload.color;
-}
-
-// 屈折レイトレーシング
-float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
-{
-    float4x3 mtx = ObjectToWorld4x3();
-    float3 worldPos = mul(float4(vertexPosition, 1), mtx);
-    float3 worldNormal = mul(vertexNormal, (float3x3) mtx);
-    float3 worldRayDir = normalize(WorldRayDirection());
-    worldNormal = normalize(worldNormal);
-
-    const float refractVal = 1.4;
-    float nr = dot(worldNormal, worldRayDir);
-    float3 refracted;
-    if (nr < 0)
-    {
-        // 表面. 空気中 -> 屈折媒質.
-        float eta = 1.0 / refractVal;
-        refracted = refract(worldRayDir, worldNormal, eta);
-    }
-    else
-    {
-        // 裏面. 屈折媒質 -> 空気中.
-        float eta = refractVal / 1.0;
-        refracted = refract(worldRayDir, -worldNormal, eta);
-    }
-
-    if (length(refracted) < 0.01)
-    {
-        return Reflection(vertexPosition, vertexNormal, recursive);
-    }
-    else
-    {
-        uint rayMask = 0xFF;
-
-        RayDesc rayDesc;
-        rayDesc.Origin = worldPos;
-        rayDesc.Direction = refracted;
-        rayDesc.TMin = 0.001;
-        rayDesc.TMax = 100000;
-
-        Payload refractPayload;
-        refractPayload.color = float3(0, 1, 0);
-        refractPayload.recursive = recursive;
-        TraceRay(
-            gRtScene,
-            0,
-            rayMask,
-            0, // ray index
-            1, // MultiplierForGeometryContrib
-            0, // miss index
-            rayDesc,
-            refractPayload);
-        return refractPayload.color;
-    }
-}
-
-// シャドウレイ発射
-bool ShootShadowRay(float3 origin, float3 direction)
-{
-    RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
-    rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 100000;
-
-    ShadowPayload payload;
-    payload.isShadow = true;
-
-    RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-
-    // ライトは除外。
-    uint rayMask = ~(0x08);
-
-    TraceRay(
-    gRtScene, flags, rayMask,
-    0,
-    1,
-    1, // MISSシェーダーのインデックス
-    rayDesc, payload);
-
-    return payload.isShadow;
+        payload);
 }
 
 // RayGenerationシェーダー
@@ -157,8 +94,9 @@ void mainAORayGen()
     rayDesc.TMax = 100000;
 
     // ペイロードの設定
-    Payload payload;
+    AOPayload payload;
     payload.color = float3(0, 0, 0);
+    payload.light = float3(0, 0, 0);
     payload.recursive = 0;
 
     // TransRayに必要な設定を作成
@@ -174,6 +112,9 @@ void mainAORayGen()
     0, // miss index
     rayDesc,
     payload);
+    
+    // 取得した色を試行回数で割る。
+    payload.color /= payload.recursive;
 
     // レイを発射した結果の色を取得
     float3 col = payload.color;
@@ -185,99 +126,72 @@ void mainAORayGen()
 
 // missシェーダー レイがヒットしなかった時に呼ばれるシェーダー
 [shader("miss")]
-void mainAOMS(inout Payload payload)
+void mainAOMS(inout AOPayload payload)
 {
 
     // 単色を返すようにする。
     //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
-    payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
+    //payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f); // 空の色
+    //payload.color = float3(0x01 / 255.0f, 0x01 / 255.0f, 0x01 / 255.0f);
 
-}
-
-// シャドウ用missシェーダー
-[shader("miss")]
-void shadowAOMS(inout ShadowPayload payload)
-{
-    // 何にも当たっていないということなので、影は生成しない。
-    payload.isShadow = false;
 }
 
 // closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
 [shader("closesthit")]
-void mainAOCHS(inout Payload payload, MyAttribute attrib)
+void mainAOCHS(inout AOPayload payload, MyAttribute attrib)
 {
-    
+
+    // レイの反射数
+    const int RECURSICE_RAY_COUNT = 3;
+
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
 
     // 呼び出し回数が制限を超えないようにする。
-    if (checkRecursiveLimit(payload))
+    if (RECURSICE_RAY_COUNT < payload.recursive)
     {
         return; // 呼び出し回数が越えたら即リターン.
     }
-
-    // 完全反射
+    
+    // 当たったのが0(ライトだったら)
     if (instanceID == 0)
     {
-        float3 reflectionColor = Reflection(vtx.Position, vtx.Normal, payload.recursive);
-        payload.color = reflectionColor;
+        payload.light = 1.0f;
+        return;
     }
-    // 屈折
-    if (instanceID == 1)
+    
+    // レイの開始地点
+    float3 rayStart = WorldRayOrigin() + (WorldRayDirection() * RayTMin());
+    // レイの終了地点
+    float3 rayEnd = WorldRayOrigin() + (WorldRayDirection() * RayTCurrent());
+    // 距離
+    float rayLength = length(rayStart - rayEnd);
+    // レイの長さの既定値
+    const float RAY_LENGTH = 1000;
+    // レイの長さが規定値以下だったらリターン
+    if (rayLength < RAY_LENGTH)
     {
-        payload.color = Refraction(vtx.Position, vtx.Normal, payload.recursive);
+       // return;
     }
-    // 通常ライティング
-    else
-    {
-        // lambert ライティングを行う.
-        float3 lightdir = -normalize(gSceneParam.lightDirection.xyz);
+    
+    // 呼び出し回数を更新。
+    ++payload.recursive;
 
-        float nl = saturate(dot(vtx.Normal, lightdir));
+    // lambert ライティングを行う.
+    float3 lightdir = -normalize(gSceneParam.lightDirection.xyz);
 
-        float3 lightcolor = gSceneParam.lightColor.xyz;
-        float3 ambientcolor = gSceneParam.ambientColor.xyz;
-        float4 materialcolor = texture.SampleLevel(smp, vtx.uv, 0.0f);
-        float3 color = 0;
-        color += lightcolor * materialcolor.xyz * nl;
-        color += ambientcolor * materialcolor.xyz;
+    float nl = saturate(dot(vtx.Normal, lightdir));
 
-        // ライティングの結果の色を保存。
-        payload.color = color;
+    float3 lightcolor = gSceneParam.lightColor.xyz;
+    float3 ambientcolor = gSceneParam.ambientColor.xyz;
+    float4 materialcolor = texture.SampleLevel(smp, vtx.uv, 0.0f);
+    float3 color = 0;
+    color += lightcolor * materialcolor.xyz * nl;
+    color += ambientcolor * materialcolor.xyz;
+    
+    // ライティングの結果の色を保存。
+    payload.color += color;
+    
+    Reflection(payload, vtx);
 
-        // シャドウレイを発射。
-        float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-        float shadowRate = 1.0f;
-        bool isShadow = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
-        //bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 7, 0) - worldPosition));
-
-        // 影なら暗くする。
-        if (isShadow)
-        {
-            shadowRate = 0.5f;
-        }
-
-        payload.color.xyz *= shadowRate;
-
-    }
-
-}
-
-// closesthitシェーダー シャドウ用
-[shader("closesthit")]
-void shadowCHS(inout ShadowPayload payload, MyAttribute attrib)
-{
-}
-
-// アルファ抜きAnyHitShader
-[shader("anyhit")]
-void mainAnyHit(inout Payload payload, MyAttribute attrib)
-{
-    Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
-    float4 diffuse = texture.SampleLevel(smp, vtx.uv, 0);
-    if (diffuse.w < 0.5f)
-    {
-        IgnoreHit();
-
-    }
 }

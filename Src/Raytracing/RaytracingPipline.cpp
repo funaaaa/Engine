@@ -151,7 +151,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 	// シェーダーの設定。
 	auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-	shaderConfig->Config(sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	shaderConfig->Config(sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// パイプラインの設定。
 	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();

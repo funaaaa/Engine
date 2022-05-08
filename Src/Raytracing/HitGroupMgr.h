@@ -23,7 +23,7 @@ public:
 	// ヒットグループ識別ID
 	enum HITGROUP_ID {
 
-		DEF_HIT_GROUP,
+		//DEF_HIT_GROUP,
 		AO_HIT_GROUP,
 		MAX_HIT_GROUP,
 

@@ -18,6 +18,17 @@ struct SceneCB
     float4 lightColor; // 平行光源色.
     float4 ambientColor; // 環境光.
 };
+struct SceneAOCB
+{
+    matrix mtxView; // ビュー行列.
+    matrix mtxProj; // プロジェクション行列.
+    matrix mtxViewInv; // ビュー逆行列.
+    matrix mtxProjInv; // プロジェクション逆行列.
+    float4 lightDirection; // 平行光源の向き.
+    float4 lightColor; // 平行光源色.
+    float4 ambientColor; // 環境光.
+    float2 seed; // 乱数の種.
+};
 
 
 // ペイロード 色情報を取得するための構造体

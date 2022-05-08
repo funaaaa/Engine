@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "FbxLoader.h"
+#include "FHelper.h"
 
 #include "BLASRegister.h"
 #include "PorygonInstance.h"
@@ -38,6 +39,7 @@ struct KariConstBufferData {
 	XMVECTOR lightDirection;	// 平行光源の向き。
 	XMVECTOR lightColor;		// 平行光源色。
 	XMVECTOR ambientColor;		// 環境光。
+	XMFLOAT2 seed;
 
 };
 
@@ -66,8 +68,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 使用するシェーダーを列挙。
 	vector<RayPiplineShaderData> useShaders;
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AO.hlsl", {L"mainAORayGen"}, {L"mainAOMS", L"shadowAOMS"}, {L"mainAOCHS"} });
+	//useShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AO.hlsl", {L"mainAORayGen"}, {L"mainAOMS"}, {L"mainAOCHS"} });
 
 	// レイトレパイプラインを設定。
 	RaytracingPipline pipline;
@@ -143,6 +145,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Vec3 up = { 0,1,0 };
 	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+	constBufferData.seed = XMFLOAT2(FHelper::GetRand(-10000, 10000), FHelper::GetRand(-10000, 10000));
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
@@ -164,6 +167,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Camera::Ins()->GenerateMatView();
 
 		FPS();
+
+		// 乱数の種を更新。
+		constBufferData.seed = XMFLOAT2(FHelper::GetRand(-100, 100), FHelper::GetRand(-100, 100));
 
 		//Camera::target = triangle.GetPos();
 
