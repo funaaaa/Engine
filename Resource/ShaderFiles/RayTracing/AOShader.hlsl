@@ -188,7 +188,7 @@ void mainRayGen()
     else if (gSceneParam.counter < 128)
     {
         gOutputBuff[launchIndex.xy] += float4(col, 1);
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / gSceneParam.counter;
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter + 1);
     }
     else
     {
@@ -262,7 +262,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         uint2 pixldx = DispatchRaysIndex().xy;
         uint2 numPix = DispatchRaysDimensions().xy;
         // ランダムなシードを計算。
-        uint randSeed = (frac(sin(dot(vtx.Position.xy, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+        uint randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
         // 隠蔽度合い
         float visibility = 0.0f;
         
@@ -284,31 +284,17 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             
         }
         
-        //float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-        //float smpleVisiblity = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz), 10000);
-        //// 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
-        //float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightDirection.xyz)));
-        //float pdf = 1.0 / (2.0 * 3.14f);
-        //visibility += smpleVisiblity * nol / pdf;
-        
         // 平均を取る。
         visibility = (1.0f / 3.14f) * (1.0f / float(aoRayCount)) * visibility;
         
+        float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
+        float smpleVisiblity = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz), 10000);
+        // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
+        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightDirection.xyz)));
+        float pdf = 1.0 / (2.0 * 3.14f);
+        visibility += smpleVisiblity * nol / pdf;
+        
         payload.color.xyz *= visibility;
-
-        //// シャドウレイを発射。
-        //float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-        //float shadowRate = 1.0f;
-        //bool isShadow = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz));
-        ////bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 7, 0) - worldPosition));
-
-        //// 影なら暗くする。
-        //if (isShadow)
-        //{
-        //    shadowRate = 0.5f;
-        //}
-
-        //payload.color.xyz *= shadowRate;
 
     }
 
