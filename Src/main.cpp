@@ -67,13 +67,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 使用するシェーダーを列挙。
 	vector<RayPiplineShaderData> useShaders;
 	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AO.hlsl", {L"mainAORayGen"}, {L"mainAOMS", L"shadowAOMS"}, {L"mainAOCHS"} });
 
 	// レイトレパイプラインを設定。
 	RaytracingPipline pipline;
 	pipline.Setting(useShaders);
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP]);
 
 	// 猿のBLASを生成。
 	//int boneBlas = BLASRegister::Ins()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");

@@ -133,7 +133,7 @@ bool ShootShadowRay(float3 origin, float3 direction)
 
 // RayGenerationシェーダー
 [shader("raygeneration")]
-void mainRayGen()
+void mainAORayGen()
 {
 
     uint2 launchIndex = DispatchRaysIndex().xy;
@@ -185,7 +185,7 @@ void mainRayGen()
 
 // missシェーダー レイがヒットしなかった時に呼ばれるシェーダー
 [shader("miss")]
-void mainMS(inout Payload payload)
+void mainAOMS(inout Payload payload)
 {
 
     // 単色を返すようにする。
@@ -196,7 +196,7 @@ void mainMS(inout Payload payload)
 
 // シャドウ用missシェーダー
 [shader("miss")]
-void shadowMS(inout ShadowPayload payload)
+void shadowAOMS(inout ShadowPayload payload)
 {
     // 何にも当たっていないということなので、影は生成しない。
     payload.isShadow = false;
@@ -204,7 +204,7 @@ void shadowMS(inout ShadowPayload payload)
 
 // closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
 [shader("closesthit")]
-void mainCHS(inout Payload payload, MyAttribute attrib)
+void mainAOCHS(inout Payload payload, MyAttribute attrib)
 {
     
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
