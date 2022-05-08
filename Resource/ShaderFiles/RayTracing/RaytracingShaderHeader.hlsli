@@ -17,6 +17,7 @@ struct SceneCB
     float4 lightDirection; // 平行光源の向き.
     float4 lightColor; // 平行光源色.
     float4 ambientColor; // 環境光.
+    int seed;
 };
 
 
@@ -146,4 +147,51 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
     v.Normal = normalize(v.Normal);
 
     return v;
+}
+
+float3 GetPerpendicularVector(float3 u)
+{
+    float3 a = abs(u);
+    uint xm = ((a.x - a.y) < 0 && (a.x - a.z) < 0) ? 1 : 0;
+    uint ym = (a.y - a.z) < 0 ? (1 ^ xm) : 0;
+    uint zm = 1 ^ (xm | ym);
+    return cross(u, float3(xm, ym, zm));
+}
+
+// 法線基準で半球状のランダムなベクトルを生成。
+float3 GetCosHemisphereSample(uint randSeed, float3 hitNorm)
+{
+    // 2つのランダムな数値を取得
+    float2 randVal = float2(nextRand(randSeed), nextRand(randSeed));
+    // 法線に垂直なベクトルを取る（最後に利用する）
+    float3 bitangent = GetPerpendicularVector(hitNorm);
+    float3 tangent = cross(bitangent, hitNorm);
+    // ディスク上に一様にサンプリング
+    float r = sqrt(randVal.x);
+    float phi = 2.0f * 3.14f * randVal.y;
+    // 半球に射影する
+    float x = r * cos(phi);
+    float z = r * sin(phi);
+    float y = sqrt(1.0 - randVal.x); // 1- r2
+    // 法線ベクトルの座標系に射影
+    return x * tangent + y * hitNorm.xyz + z * bitangent;
+}
+
+float3 GetUniformHemisphereSample(uint randSeed, float3 hitNorm)
+{
+    // 2つのランダムな数値を取得
+    float2 randVal = float2(nextRand(randSeed), nextRand(randSeed));
+    // 法線に垂直なベクトルを取る（最後に利用する）
+    float3 bitangent = GetPerpendicularVector(hitNorm);
+    float3 tangent = cross(bitangent, hitNorm);
+    // θ、Φを決める
+    float cosTheta = randVal.x;
+    float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
+    float phi = 2.0f * 3.14f * randVal.y;
+    // 半球に射影する
+    float x = sinTheta * cos(phi);
+    float z = sinTheta * sin(phi);
+    float y = cosTheta;
+    // 法線ベクトルの座標系に射影
+    return x * tangent + y * hitNorm.xyz + z * bitangent;
 }

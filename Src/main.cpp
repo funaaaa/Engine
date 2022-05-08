@@ -22,6 +22,8 @@
 
 #include <utilapiset.h>
 
+#include "FHelper.h"
+
 #define COLORHEX(hex) hex / 255.0f
 
 #define SCREEN_VIRTUAL_WIDTH 300
@@ -38,6 +40,7 @@ struct KariConstBufferData {
 	XMVECTOR lightDirection;	// 平行光源の向き。
 	XMVECTOR lightColor;		// 平行光源色。
 	XMVECTOR ambientColor;		// 環境光。
+	int seed;
 
 };
 
@@ -66,14 +69,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 使用するシェーダーを列挙。
 	vector<RayPiplineShaderData> useShaders;
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
+	//useShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
 
 	// レイトレパイプラインを設定。
 	RaytracingPipline pipline;
 	pipline.Setting(useShaders);
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP]);
 
 	// 猿のBLASを生成。
 	//int boneBlas = BLASRegister::Ins()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
@@ -165,6 +169,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		FPS();
 
 		//Camera::target = triangle.GetPos();
+
+		constBufferData.seed = FHelper::GetRand(0, 1000);
 
 		// スキニングアニメーションさせる。
 		//BLASRegister::Ins()->ComputeSkin(boneBlas);
