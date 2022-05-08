@@ -18,6 +18,7 @@ struct SceneCB
     float4 lightColor; // •½sŒõŒ¹F.
     float4 ambientColor; // ŠÂ‹«Œõ.
     int seed;
+    int counter;
 };
 
 

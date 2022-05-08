@@ -16,6 +16,7 @@ SamplerState smp : register(s0, space1);
 
 // RayGenerationシェーダーのローカルルートシグネチャ
 RWTexture2D<float4> gOutput : register(u0);
+RWTexture2D<float4> gOutputBuff : register(u1);
 
 // 反射レイトレーシング
 float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
@@ -104,13 +105,13 @@ float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
 }
 
 // シャドウレイ発射
-bool ShootShadowRay(float3 origin, float3 direction)
+bool ShootShadowRay(float3 origin, float3 direction, float tMax)
 {
     RayDesc rayDesc;
     rayDesc.Origin = origin;
     rayDesc.Direction = direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 100;
+    rayDesc.TMax = tMax;
 
     ShadowPayload payload;
     payload.isShadow = false;
@@ -179,7 +180,20 @@ void mainRayGen()
     float3 col = payload.color;
 
     // 結果格納
-    gOutput[launchIndex.xy] = float4(col, 1);
+    if (gSceneParam.counter == 0)
+    {
+        gOutput[launchIndex.xy] = float4(col, 1);
+        gOutputBuff[launchIndex.xy] = float4(col, 1);
+    }
+    else if (gSceneParam.counter < 128)
+    {
+        gOutputBuff[launchIndex.xy] += float4(col, 1);
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / gSceneParam.counter;
+    }
+    else
+    {
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / 128.0f;
+    }
 
 }
 
@@ -253,7 +267,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         float visibility = 0.0f;
         
         // 飛ばすレイの回数
-        const int aoRayCount = 4;
+        const int aoRayCount = 1;
         for (int index = 0; index < aoRayCount; ++index)
         {
             
@@ -261,7 +275,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             float3 sampleDir = GetUniformHemisphereSample(randSeed, vtx.Normal);
             
             // シャドウレイを飛ばす。
-            float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir);
+            float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir, 200);
             
             // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
             float nol = saturate(dot(vtx.Normal, sampleDir));
@@ -270,10 +284,17 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             
         }
         
+        //float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
+        //float smpleVisiblity = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz), 10000);
+        //// 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
+        //float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightDirection.xyz)));
+        //float pdf = 1.0 / (2.0 * 3.14f);
+        //visibility += smpleVisiblity * nol / pdf;
+        
         // 平均を取る。
         visibility = (1.0f / 3.14f) * (1.0f / float(aoRayCount)) * visibility;
         
-        payload.color *= float3(visibility, visibility, visibility);
+        payload.color.xyz *= visibility;
 
         //// シャドウレイを発射。
         //float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());

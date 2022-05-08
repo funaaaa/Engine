@@ -41,6 +41,7 @@ struct KariConstBufferData {
 	XMVECTOR lightColor;		// 平行光源色。
 	XMVECTOR ambientColor;		// 環境光。
 	int seed;
+	int counter;
 
 };
 
@@ -79,51 +80,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// SPONZAを読み込む。
 	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP]);
 
-	// 猿のBLASを生成。
-	//int boneBlas = BLASRegister::Ins()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
-
-	// 猿のBLASを生成。
-	//int monkeyBlas = BLASRegister::Ins()->GenerateObj("Resource/", "monkey.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
-
-	// 床のBLASを生成。
-	//int groundBlas = BLASRegister::Ins()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
-
-	// インスタンスを生成
-	//int boneA = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int boneB = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int boneC = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int boneD = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int monkey = PorygonInstanceRegister::Ins()->CreateInstance(monkeyBlas, 2);
-	//int ground = PorygonInstanceRegister::Ins()->CreateInstance(groundBlas, 2);
-
-	// 移動させる。
-	float addTrans = 200.0f;
-	//PorygonInstanceRegister::Ins()->AddTrans(boneA, -addTrans, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneB, addTrans, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneC, 0.0f, 0.0f, addTrans);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneD, 0.0f, 0.0f, -addTrans);
-	//PorygonInstanceRegister::Ins()->AddTrans(monkey, 0.0f, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(ground, 0.0f, -1.0f, 0);
-
-	// ある程度回転させる。
-	//PorygonInstanceRegister::Ins()->AddRotate(boneA, 0.0f, -0.5f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneB, 0.0f, -0.5f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneC, 0.0f, -0.5f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneD, 0.0f, -0.5f, 0);
-
-	// 拡大させる。
-	//PorygonInstanceRegister::Ins()->AddScale(boneA, Vec3(70));
-	//PorygonInstanceRegister::Ins()->AddScale(boneB, Vec3(70));
-	//PorygonInstanceRegister::Ins()->AddScale(boneC, Vec3(70));
-	//PorygonInstanceRegister::Ins()->AddScale(boneD, Vec3(70));
-
 	// TLASを生成。
 	TLAS tlas;
 	tlas.GenerateTLAS(L"TlasDescriptorHeap");
 
 	// レイトレ出力用クラスをセット。
 	RaytracingOutput raytracingOutput;
-	raytracingOutput.Setting();
+	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	RaytracingOutput raytracingOutputBuff;
+	raytracingOutputBuff.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 	// シェーダーテーブルを生成。
 	pipline.ConstructionShaderTable();
@@ -146,6 +112,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Vec3 up = { 0,1,0 };
 	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+	constBufferData.counter = 0;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
@@ -168,51 +135,59 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		FPS();
 
-		//Camera::target = triangle.GetPos();
-
+		// 乱数の種を更新。
 		constBufferData.seed = FHelper::GetRand(0, 1000);
-
-		// スキニングアニメーションさせる。
-		//BLASRegister::Ins()->ComputeSkin(boneBlas);
+		bool isMove = false;
 
 		float speed = 5.0f;
 		float rot = 0.03f;
-		if (Input::isKey(DIK_W)) Camera::Ins()->Move(speed);
-		if (Input::isKey(DIK_S)) Camera::Ins()->Move(-speed);
-		if (Input::isKey(DIK_A)) Camera::Ins()->MoveRight(speed);
-		if (Input::isKey(DIK_D)) Camera::Ins()->MoveRight(-speed);
-		if (Input::isKey(DIK_UP)) Camera::Ins()->forwardVec.y += rot;
-		if (Input::isKey(DIK_DOWN)) Camera::Ins()->forwardVec.y -= rot;
-		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotationXZ(rot);
-		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotationXZ(-rot);
-		if (Input::isKey(DIK_LSHIFT)) Camera::Ins()->eye.y -= 10.0f;
-		if (Input::isKey(DIK_SPACE)) Camera::Ins()->eye.y += 10.0f;
-
-		//if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
-		//if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
-		//if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
-		//if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
-
-		if (Input::isKey(DIK_1)) {
-
-			//BLASRegister::Ins()->InitAnimation(boneBlas);
-
+		if (Input::isKey(DIK_W)) {
+			Camera::Ins()->Move(speed);
+			isMove = true;
 		}
-		if (Input::isKey(DIK_2)) {
-
-			//BLASRegister::Ins()->PlayAnimation(boneBlas);
-
+		if (Input::isKey(DIK_S)) {
+			Camera::Ins()->Move(-speed);
+			isMove = true;
 		}
-		if (Input::isKey(DIK_3)) {
-
-			//BLASRegister::Ins()->StopAnimation(boneBlas);
-
+		if (Input::isKey(DIK_A)) {
+			Camera::Ins()->MoveRight(speed);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_D)) {
+			Camera::Ins()->MoveRight(-speed);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_UP)) {
+			Camera::Ins()->forwardVec.y += rot;
+			isMove = true;
+		}
+		if (Input::isKey(DIK_DOWN)) {
+			Camera::Ins()->forwardVec.y -= rot;
+			isMove = true;
+		}
+		if (Input::isKey(DIK_LEFT)) {
+			Camera::Ins()->AddRotationXZ(rot);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_RIGHT)) {
+			Camera::Ins()->AddRotationXZ(-rot);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_LSHIFT)) {
+			Camera::Ins()->eye.y -= 10.0f;
+			isMove = true;
+		}
+		if (Input::isKey(DIK_SPACE)) {
+			Camera::Ins()->eye.y += 10.0f;
+			isMove = true;
 		}
 
-		//BLASRegister::Ins()->Update(boneBlas);
-
-		// TLASを更新。
-		//tlas.Update();
+		if (isMove) {
+			constBufferData.counter = 0;
+		}
+		else {
+			++constBufferData.counter;
+		}
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -240,16 +215,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->SetComputeRootSignature(pipline.GetGlobalRootSig()->GetRootSig().Get());
 		DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 		raytracingOutput.SetComputeRootDescriptorTalbe(2);
+		raytracingOutputBuff.SetComputeRootDescriptorTalbe(3);
 		DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
 		// レイトレーシング結果バッファをUAV状態へ
-		auto barrierToUAV = CD3DX12_RESOURCE_BARRIER::Transition(
+		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::Transition(
 			raytracingOutput.GetRaytracingOutput().Get(),
 			D3D12_RESOURCE_STATE_COPY_SOURCE,
+			D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
+			CD3DX12_RESOURCE_BARRIER::Transition(
+			raytracingOutputBuff.GetRaytracingOutput().Get(),
+			D3D12_RESOURCE_STATE_COPY_SOURCE,
 			D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-		);
-		DirectXBase::Ins()->cmdList->ResourceBarrier(1, &barrierToUAV);
+		)
+		};
+		DirectXBase::Ins()->cmdList->ResourceBarrier(2, barrierToUAV);
 
 		DirectXBase::Ins()->cmdList->SetPipelineState1(pipline.GetStateObject().Get());
 
@@ -262,6 +243,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
 		raytracingOutput.GetRaytracingOutput().Get(),
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		D3D12_RESOURCE_STATE_COPY_SOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(
+		raytracingOutputBuff.GetRaytracingOutput().Get(),
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_COPY_SOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(

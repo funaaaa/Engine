@@ -19,7 +19,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// セッティング
-	void Setting();
+	void Setting(DXGI_FORMAT Format);
 
 	// ディスクリプタをセット。
 	void SetComputeRootDescriptorTalbe(const int& RootParamIndex);
