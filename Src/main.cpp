@@ -45,6 +45,8 @@ struct KariConstBufferData {
 
 };
 
+// 入力操作
+void Input(KariConstBufferData& constBufferData);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -137,57 +139,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// 乱数の種を更新。
 		constBufferData.seed = FHelper::GetRand(0, 1000);
-		bool isMove = false;
 
-		float speed = 5.0f;
-		float rot = 0.03f;
-		if (Input::isKey(DIK_W)) {
-			Camera::Ins()->Move(speed);
-			isMove = true;
-		}
-		if (Input::isKey(DIK_S)) {
-			Camera::Ins()->Move(-speed);
-			isMove = true;
-		}
-		if (Input::isKey(DIK_A)) {
-			Camera::Ins()->MoveRight(speed);
-			isMove = true;
-		}
-		if (Input::isKey(DIK_D)) {
-			Camera::Ins()->MoveRight(-speed);
-			isMove = true;
-		}
-		if (Input::isKey(DIK_UP)) {
-			Camera::Ins()->forwardVec.y += rot;
-			isMove = true;
-		}
-		if (Input::isKey(DIK_DOWN)) {
-			Camera::Ins()->forwardVec.y -= rot;
-			isMove = true;
-		}
-		if (Input::isKey(DIK_LEFT)) {
-			Camera::Ins()->AddRotationXZ(rot);
-			isMove = true;
-		}
-		if (Input::isKey(DIK_RIGHT)) {
-			Camera::Ins()->AddRotationXZ(-rot);
-			isMove = true;
-		}
-		if (Input::isKey(DIK_LSHIFT)) {
-			Camera::Ins()->eye.y -= 10.0f;
-			isMove = true;
-		}
-		if (Input::isKey(DIK_SPACE)) {
-			Camera::Ins()->eye.y += 10.0f;
-			isMove = true;
-		}
-
-		if (isMove) {
-			constBufferData.counter = 0;
-		}
-		else {
-			++constBufferData.counter;
-		}
+		Input(constBufferData);
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -298,4 +251,75 @@ void FPS()
 		prev_time = now_time;
 		frame_count = 0;
 	}
+}
+
+void Input(KariConstBufferData& constBufferData) {
+
+	bool isMove = false;
+
+	float speed = 5.0f;
+	float rot = 0.03f;
+	if (Input::isKey(DIK_W)) {
+		Camera::Ins()->Move(speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_S)) {
+		Camera::Ins()->Move(-speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_A)) {
+		Camera::Ins()->MoveRight(speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_D)) {
+		Camera::Ins()->MoveRight(-speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_UP)) {
+		Camera::Ins()->forwardVec.y += rot;
+		isMove = true;
+	}
+	if (Input::isKey(DIK_DOWN)) {
+		Camera::Ins()->forwardVec.y -= rot;
+		isMove = true;
+	}
+	if (Input::isKey(DIK_LEFT)) {
+		Camera::Ins()->AddRotationXZ(rot);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_RIGHT)) {
+		Camera::Ins()->AddRotationXZ(-rot);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_LSHIFT)) {
+		Camera::Ins()->eye.y -= 10.0f;
+		isMove = true;
+	}
+	if (Input::isKey(DIK_SPACE)) {
+		Camera::Ins()->eye.y += 10.0f;
+		isMove = true;
+	}
+
+	// DirLightについて
+
+	// 値を保存する。
+	float dirX = constBufferData.lightDirection.m128_f32[0];
+	float dirZ = constBufferData.lightDirection.m128_f32[2];
+	ImGui::SliderFloat("DirLightX", &constBufferData.lightDirection.m128_f32[0], -1.0f, 1.0f);
+	ImGui::SliderFloat("DirLightZ", &constBufferData.lightDirection.m128_f32[2], -1.0f, 1.0f);
+
+	// 変わっていたら
+	if (dirX != constBufferData.lightDirection.m128_f32[0] || dirZ != constBufferData.lightDirection.m128_f32[2]) {
+
+		isMove = true;
+
+	}
+
+	if (isMove) {
+		constBufferData.counter = 0;
+	}
+	else {
+		++constBufferData.counter;
+	}
+
 }
