@@ -188,7 +188,7 @@ void mainRayGen()
     else if (gSceneParam.counter < 128)
     {
         gOutputBuff[launchIndex.xy] += float4(col, 1);
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter + 1);
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter + 2);
     }
     else
     {
@@ -275,7 +275,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             float3 sampleDir = GetUniformHemisphereSample(randSeed, vtx.Normal);
             
             // シャドウレイを飛ばす。
-            float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir, 200);
+            float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir, 500);
             
             // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
             float nol = saturate(dot(vtx.Normal, sampleDir));
@@ -287,12 +287,15 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // 平均を取る。
         visibility = (1.0f / 3.14f) * (1.0f / float(aoRayCount)) * visibility;
         
+        // 光源へシャドウレイを飛ばす。
         float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
         float smpleVisiblity = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz), 10000);
         // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
         float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightDirection.xyz)));
         float pdf = 1.0 / (2.0 * 3.14f);
         visibility += smpleVisiblity * nol / pdf;
+        
+        visibility = saturate(visibility);
         
         payload.color.xyz *= visibility;
 
