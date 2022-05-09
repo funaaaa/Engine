@@ -282,21 +282,21 @@ void DirectXBase::processBeforeDrawing() {
 	cmdList->RSSetScissorRects(1, &CD3DX12_RECT(0, 0, window_width, window_height));
 
 	////imgui描画前処理
-	//ImGui_ImplDX12_NewFrame();
-	//ImGui_ImplWin32_NewFrame();
-	//ImGui::NewFrame();
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
 
 	////ウィンドウ設定
-	//ImGui::Begin("Light Menu");
-	//ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+	ImGui::Begin("Light Menu");
+	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
 }
 
 void DirectXBase::processAfterDrawing() {
-	//ImGui::End();
-	//ImGui::Render();
+	ImGui::End();
+	ImGui::Render();
 	////コマンドリストに追加
-	//cmdList->SetDescriptorHeaps(1, heapForImgui.GetAddressOf());
-	//ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList.Get());
+	cmdList->SetDescriptorHeaps(1, heapForImgui.GetAddressOf());
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList.Get());
 
 	//レンダーターゲットのリソースバリア変更
 	cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backBuffers[swapchain->GetCurrentBackBufferIndex()].Get(),

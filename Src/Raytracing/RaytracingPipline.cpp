@@ -58,6 +58,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 0);
 	// パラメーターu0に出力用バッファを設定。
 	globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
+	globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1);
 
 	// ルートシグネチャを生成。
 	globalRootSig->Create(false, L"GlobalRootSig");
