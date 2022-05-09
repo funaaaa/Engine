@@ -104,6 +104,34 @@ float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
     }
 }
 
+// 反射レイを射出
+void ShootReflectionRay(inout Payload payload, float3 vertexPosition, float3 vertexNormal)
+{
+    float3 worldPos = mul(float4(vertexPosition, 1), ObjectToWorld4x3());
+    float3 worldNormal = mul(vertexNormal, (float3x3) ObjectToWorld4x3());
+    float3 worldRayDir = WorldRayDirection();
+    float3 reflectDir = reflect(worldRayDir, worldNormal);
+    
+    uint rayMask = 0xFF;
+
+    RayDesc rayDesc;
+    rayDesc.Origin = worldPos;
+    rayDesc.Direction = reflectDir;
+    rayDesc.TMin = 0.01;
+    rayDesc.TMax = 1000;
+    
+    TraceRay(
+        gRtScene,
+        0,
+        rayMask,
+        0, // ray index
+        1, // MultiplierForGeometryContrib
+        0, // miss index
+        rayDesc,
+        payload);
+    
+}
+
 // シャドウレイ発射
 bool ShootShadowRay(float3 origin, float3 direction, float tMax)
 {
@@ -117,10 +145,10 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     payload.isShadow = false;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     
     // ライトは除外。
-    uint rayMask = ~(0x08);
+    uint rayMask = 0xFF;
 
     TraceRay(
     gRtScene, flags, rayMask,
@@ -175,20 +203,23 @@ void mainRayGen()
     0, // miss index
     rayDesc,
     payload);
-
+    
+    
     // レイを発射した結果の色を取得
-    float3 col = payload.color;
+    float3 col = payload.color / (payload.recursive + 1.0f);
 
     // 結果格納
     if (gSceneParam.counter == 0)
     {
-        gOutput[launchIndex.xy] = float4(col, 1);
+        
         gOutputBuff[launchIndex.xy] = float4(col, 1);
+        gOutput[launchIndex.xy] = float4(col, 1);
+
     }
     else if (gSceneParam.counter < 128)
     {
         gOutputBuff[launchIndex.xy] += float4(col, 1);
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter + 2);
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter + 1);
     }
     else
     {
@@ -204,7 +235,7 @@ void mainMS(inout Payload payload)
 
     // 単色を返すようにする。
     //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
-    payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
+    //payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
 
 }
 
