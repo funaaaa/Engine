@@ -17,6 +17,8 @@ struct SceneCB
     float4 lightDirection; // 平行光源の向き.
     float4 lightColor; // 平行光源色.
     float4 ambientColor; // 環境光.
+    float3 lightPos;
+    float lightSize;
     int seed;
     int counter;
     int isDefaultScene;
@@ -107,22 +109,27 @@ float3x3 angleAxis3x3(float angle, float3 axis)
 }
 
 // ソフトシャドウ用に臨時で持ってきた処理。
-float3 getConeSample(inout uint randSeed, float3 direction, float coneAngle)
+float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
 {
     float cosAngle = cos(coneAngle);
     const float PI = 3.1415926535;
+
     // Generate points on the spherical cap around the north pole [1].
     // [1] See https://math.stackexchange.com/a/205589/81266
     float z = nextRand(randSeed) * (1.0f - cosAngle) + cosAngle;
     float phi = nextRand(randSeed) * 2.0f * PI;
+
     float x = sqrt(1.0f - z * z) * cos(phi);
     float y = sqrt(1.0f - z * z) * sin(phi);
     float3 north = float3(0.f, 0.f, 1.f);
+
     // Find the rotation axis `u` and rotation angle `rot` [1]
     float3 axis = normalize(cross(north, normalize(direction)));
     float angle = acos(dot(normalize(direction), north));
+
     // Convert rotation axis and angle to 3x3 rotation matrix [2]
     float3x3 R = angleAxis3x3(angle, axis);
+
     return mul(R, float3(x, y, z));
 }
 

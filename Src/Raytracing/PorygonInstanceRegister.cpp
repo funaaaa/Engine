@@ -24,39 +24,65 @@ int PorygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 // ˆÚ“®(ˆø”‚ð‰ÁŽZ)ŠÖ”
 void PorygonInstanceRegister::AddTrans(const int& Index, const float& X, const float& Y, const float Z) {
 
-	instance[Index]->AddTrans(instanceDesc[Index], Vec3(X, Y, Z));
+	instance[Index]->AddTrans(Vec3(X, Y, Z));
 
 }
 
 void PorygonInstanceRegister::AddTrans(const int& Index, const Vec3& Pos) {
 
-	instance[Index]->AddTrans(instanceDesc[Index], Pos);
+	instance[Index]->AddTrans(Pos);
+
+}
+
+void PorygonInstanceRegister::ChangeTrans(const int& Index, const float& X, const float& Y, const float Z)
+{
+
+	instance[Index]->ChangeTrans(Vec3(X, Y, Z));
+
+}
+
+void PorygonInstanceRegister::ChangeTrans(const int& Index, const Vec3& Pos)
+{
+
+	instance[Index]->ChangeTrans(Pos);
 
 }
 
 // ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ð‰ÁŽZ)ŠÖ”
 void PorygonInstanceRegister::AddRotate(const int& Index, const float& X, const float& Y, const float Z) {
 
-	instance[Index]->AddRotate(instanceDesc[Index], Vec3(X, Y, Z));
+	instance[Index]->AddRotate(Vec3(X, Y, Z));
 
 }
 
 void PorygonInstanceRegister::AddRotate(const int& Index, const Vec3& Rot) {
 
-	instance[Index]->AddRotate(instanceDesc[Index], Rot);
+	instance[Index]->AddRotate(Rot);
 
 }
 
 void PorygonInstanceRegister::AddScale(const int& Index, const float& X, const float& Y, const float Z)
 {
 
-	instance[Index]->AddScale(instanceDesc[Index], Vec3(X, Y, Z));
+	instance[Index]->AddScale(Vec3(X, Y, Z));
 
 }
 
 void PorygonInstanceRegister::AddScale(const int& Index, const Vec3& Scale)
 {
-	
-	instance[Index]->AddScale(instanceDesc[Index], Scale);
+
+	instance[Index]->AddScale(Scale);
+
+}
+
+void PorygonInstanceRegister::CalWorldMat()
+{
+
+	const int INSTANCE_SIZE = instance.size();
+	for (int index = 0; index < INSTANCE_SIZE; ++index) {
+
+		instance[index]->CalWorldMat(instanceDesc[index]);
+
+	}
 
 }

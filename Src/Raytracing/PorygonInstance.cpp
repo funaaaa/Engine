@@ -10,6 +10,9 @@ D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microso
 
 	// 移動行列を初期化。
 	worldMat = DirectX::XMMatrixIdentity();
+	transMat = DirectX::XMMatrixIdentity();
+	scaleMat = DirectX::XMMatrixIdentity();
+	rotMat = DirectX::XMMatrixIdentity();
 
 	// 行列を設定。
 	XMStoreFloat3x4(
@@ -27,21 +30,25 @@ D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microso
 
 }
 
-void PorygonMeshInstance::AddTrans(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& pos)
+void PorygonMeshInstance::AddTrans(const Vec3& pos)
 {
 
 	/*===== 移動関数 =====*/
 
-	worldMat *= DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
-
-	// 設定の移動行列を更新する。
-	DirectX::XMStoreFloat3x4(
-		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
-		worldMat);
+	transMat *= DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
 
 }
 
-void PorygonMeshInstance::AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Rot)
+void PorygonMeshInstance::ChangeTrans(const Vec3& Pos)
+{
+
+	/*===== 移動関数 =====*/
+
+	transMat = DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
+
+}
+
+void PorygonMeshInstance::AddRotate(const Vec3& Rot)
 {
 
 	/*===== 回転関数 =====*/
@@ -52,16 +59,11 @@ void PorygonMeshInstance::AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const
 	buff *= DirectX::XMMatrixRotationX(Rot.x);
 	buff *= DirectX::XMMatrixRotationY(Rot.y);
 
-	worldMat = buff * worldMat;
-
-	// 設定の移動行列を更新する。
-	DirectX::XMStoreFloat3x4(
-		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
-		worldMat);
+	rotMat = buff * worldMat;
 
 }
 
-void PorygonMeshInstance::AddScale(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Scale)
+void PorygonMeshInstance::AddScale(const Vec3& Scale)
 {
 
 	/*===== 拡縮関数 =====*/
@@ -70,9 +72,22 @@ void PorygonMeshInstance::AddScale(D3D12_RAYTRACING_INSTANCE_DESC& Input, const 
 
 	buff *= DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
 
-	worldMat = buff * worldMat;
+	scaleMat = buff * worldMat;
 
-	// 設定の移動行列を更新する。
+}
+
+void PorygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
+{
+
+	/*===== ワールド行列を計算 =====*/
+
+	worldMat = DirectX::XMMatrixIdentity();
+
+	worldMat *= scaleMat;
+	worldMat *= transMat;
+	worldMat *= rotMat;
+
+	// 設定の行列を更新する。
 	DirectX::XMStoreFloat3x4(
 		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
 		worldMat);

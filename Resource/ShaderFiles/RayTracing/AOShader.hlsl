@@ -146,7 +146,7 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     payload.isShadow = false;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     
     // ライトは除外。
     uint rayMask = 0xFF;
@@ -162,6 +162,58 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     payload);
 
     return payload.isShadow;
+}
+
+// ソフトシャドウ射出関数
+float SoftShadow(Vertex vtx)
+{
+    float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
+    
+    // 光源への中心ベクトル
+    float3 pointLightPosition = gSceneParam.lightPos;
+    float3 lightDir = normalize(pointLightPosition - worldPosition);
+    
+    // ライトベクトルと垂直なベクトルを求める。
+    float3 perpL = cross(lightDir, float3(0, 1, 0));
+    if (all(perpL == 0.0f))
+    {
+        perpL.x = 1.0f;
+    }
+    
+    // 光源の端を求める。
+    float3 toLightEdge = (pointLightPosition + perpL * gSceneParam.lightSize) - worldPosition;
+    toLightEdge = normalize(toLightEdge);
+    
+    // 角度を求める。
+    float coneAngle = acos(dot(lightDir, toLightEdge)) * 2.0f;
+    
+    // 乱数の種を求める。
+    uint2 pixldx = DispatchRaysIndex().xy;
+    uint2 numPix = DispatchRaysDimensions().xy;
+    int randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+    
+    float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
+    
+    
+    
+    //float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
+    
+    //// 光源への中心ベクトル
+    //float3 pointLightPosition = gSceneParam.lightPos;
+    //float3 lightDir = pointLightPosition - worldPosition;
+    
+    //// 乱数の種を求める。
+    //uint2 pixldx = DispatchRaysIndex().xy;
+    //uint2 numPix = DispatchRaysDimensions().xy;
+    //float randSeed = frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453);
+    
+    //// 光源から光源の半径方向に伸びるベクトルを求める。
+    //float3 lightScaleVec = float3(randSeed * gSceneParam.lightSize, randSeed * gSceneParam.lightSize, randSeed * gSceneParam.lightSize);
+    
+    //// 光源ベクトルと半径ベクトルを足して正規化した値をシャドウレイとする。
+    //float3 shadowRayDir = normalize(lightDir + lightScaleVec);
+    
+    return ShootShadowRay(worldPosition, shadowRayDir, length(vtx.Position - gSceneParam.lightPos));
 }
 
 // RayGenerationシェーダー
@@ -283,10 +335,10 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         payload.color = Refraction(vtx.Position, vtx.Normal, payload.recursive);
     }
     // 通常ライティング
-    else
+    else if (instanceID == 2)
     {
         // lambert ライティングを行う.
-        float3 lightdir = -normalize(gSceneParam.lightDirection.xyz);
+        float3 lightdir = -normalize(gSceneParam.lightPos.xyz);
 
         float nl = saturate(dot(vtx.Normal, lightdir));
 
@@ -329,10 +381,10 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         visibility = (1.0f / 3.14f) * (1.0f / float(aoRayCount)) * visibility;
         
         // 光源へシャドウレイを飛ばす。
-        float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-        float smpleVisiblity = ShootShadowRay(worldPosition, normalize(gSceneParam.lightDirection.xyz), 10000);
+        float smpleVisiblity = SoftShadow(vtx);
+        
         // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
-        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightDirection.xyz)));
+        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightPos.xyz)));
         float pdf = 1.0 / (2.0 * 3.14f);
         visibility += smpleVisiblity * nol / pdf;
         
@@ -344,6 +396,10 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         
         //ShootReflectionRay(payload, vtx.Position, vtx.Normal);
 
+    }
+    else if (instanceID == 3)
+    {
+        payload.color = float3(1, 1, 1);
     }
 
 }
@@ -365,4 +421,14 @@ void mainAnyHit(inout Payload payload, MyAttribute attrib)
         IgnoreHit();
 
     }
+    
+    int instanceID = InstanceID();
+    
+    // インスタンスIDが3(ライト)なら当たり判定を棄却する。
+    if (instanceID == 3)
+    {
+        IgnoreHit();
+
+    }
+    
 }

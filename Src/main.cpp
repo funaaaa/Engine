@@ -40,6 +40,8 @@ struct KariConstBufferData {
 	XMVECTOR lightDirection;	// 平行光源の向き。
 	XMVECTOR lightColor;		// 平行光源色。
 	XMVECTOR ambientColor;		// 環境光。
+	Vec3 lightPos;
+	float lightSize;
 	int seed;
 	int counter;
 	int isDefaultScene;
@@ -83,6 +85,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// SPONZAを読み込む。
 	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP]);
 
+	//// ライト用のスフィアを読み込む。
+	//int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], L"Resource/white.png");
+	//int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
+	//PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(50, 50, 50));
+	//PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
+
+	//PorygonInstanceRegister::Ins()->CalWorldMat();
+
 	// TLASを生成。
 	TLAS tlas;
 	tlas.GenerateTLAS(L"TlasDescriptorHeap");
@@ -117,6 +127,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 	constBufferData.counter = 0;
 	constBufferData.isDefaultScene = false;
+	constBufferData.lightPos = Vec3(0, 300, 0);
+	constBufferData.lightSize = 30.0f;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
@@ -308,13 +320,18 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise) {
 	// DirLightについて
 
 	// 値を保存する。
-	float dirX = constBufferData.lightDirection.m128_f32[0];
-	float dirZ = constBufferData.lightDirection.m128_f32[2];
-	ImGui::SliderFloat("DirLightX", &constBufferData.lightDirection.m128_f32[0], -1.0f, 1.0f);
-	ImGui::SliderFloat("DirLightZ", &constBufferData.lightDirection.m128_f32[2], -1.0f, 1.0f);
+	float dirX = constBufferData.lightPos.x;
+	float dirY = constBufferData.lightPos.y;
+	float dirZ = constBufferData.lightPos.z;
+	float lightSize = constBufferData.lightSize;
+	float MOVE_LENGTH = 1000.0f;
+	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
+	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 500.0f);
+	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
+	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 0, 50.0f);
 
 	// 変わっていたら
-	if (dirX != constBufferData.lightDirection.m128_f32[0] || dirZ != constBufferData.lightDirection.m128_f32[2]) {
+	if (dirX != constBufferData.lightPos.x || dirY != constBufferData.lightPos.y || dirZ != constBufferData.lightPos.z || lightSize != constBufferData.lightSize) {
 
 		isMove = true;
 
