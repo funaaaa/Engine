@@ -42,11 +42,12 @@ struct KariConstBufferData {
 	XMVECTOR ambientColor;		// 環境光。
 	int seed;
 	int counter;
+	int isDefaultScene;
 
 };
 
 // 入力操作
-void Input(KariConstBufferData& constBufferData);
+void Input(KariConstBufferData& constBufferData, bool& isNoise);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -115,9 +116,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 	constBufferData.counter = 0;
+	constBufferData.isDefaultScene = false;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
+
+	// デバッグ用でノイズ画面を出すフラグ。
+	bool isNoiseBuff = false;
 
 	// カメラを初期化。
 	Camera::Ins()->Init();
@@ -140,7 +145,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// 乱数の種を更新。
 		constBufferData.seed = FHelper::GetRand(0, 1000);
 
-		Input(constBufferData);
+		Input(constBufferData, isNoiseBuff);
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -253,7 +258,7 @@ void FPS()
 	}
 }
 
-void Input(KariConstBufferData& constBufferData) {
+void Input(KariConstBufferData& constBufferData, bool& isNoise) {
 
 	bool isMove = false;
 
@@ -314,6 +319,10 @@ void Input(KariConstBufferData& constBufferData) {
 		isMove = true;
 
 	}
+
+	// デバッグ用でノイズ画面を出すためのフラグをセット。
+	ImGui::Checkbox("Noise Scene", &isNoise);
+	constBufferData.isDefaultScene = isNoise;
 
 	if (isMove) {
 		constBufferData.counter = 0;

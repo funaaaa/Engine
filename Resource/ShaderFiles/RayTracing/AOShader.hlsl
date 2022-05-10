@@ -229,6 +229,12 @@ void mainRayGen()
     {
         gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / 128.0f;
     }
+    
+    // デバッグ用でノイズ画面を出すフラグが立っていたら。
+    if (gSceneParam.isDefaultScene)
+    {
+        gOutput[launchIndex.xy] = float4(col, 1);
+    }
 
 }
 
