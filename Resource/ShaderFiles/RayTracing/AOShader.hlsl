@@ -107,6 +107,7 @@ float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
 // 反射レイを射出
 void ShootReflectionRay(inout Payload payload, float3 vertexPosition, float3 vertexNormal)
 {
+    
     float3 worldPos = mul(float4(vertexPosition, 1), ObjectToWorld4x3());
     float3 worldNormal = mul(vertexNormal, (float3x3) ObjectToWorld4x3());
     float3 worldRayDir = WorldRayDirection();
@@ -117,8 +118,8 @@ void ShootReflectionRay(inout Payload payload, float3 vertexPosition, float3 ver
     RayDesc rayDesc;
     rayDesc.Origin = worldPos;
     rayDesc.Direction = reflectDir;
-    rayDesc.TMin = 0.01;
-    rayDesc.TMax = 1000;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = 100000;
     
     TraceRay(
         gRtScene,
@@ -151,11 +152,14 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     uint rayMask = 0xFF;
 
     TraceRay(
-    gRtScene, flags, rayMask,
+    gRtScene,
+    flags,
+    rayMask,
     0,
     1,
     1, // MISSシェーダーのインデックス
-    rayDesc, payload);
+    rayDesc,
+    payload);
 
     return payload.isShadow;
 }
@@ -206,7 +210,7 @@ void mainRayGen()
     
     
     // レイを発射した結果の色を取得
-    float3 col = payload.color / (payload.recursive + 1.0f);
+    float3 col = payload.color;
 
     // 結果格納
     if (gSceneParam.counter == 0)
@@ -218,8 +222,8 @@ void mainRayGen()
     }
     else if (gSceneParam.counter < 128)
     {
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter);
         gOutputBuff[launchIndex.xy] += float4(col, 1);
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter + 1);
     }
     else
     {
@@ -288,7 +292,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         color += ambientcolor * materialcolor.xyz;
 
         // ライティングの結果の色を保存。
-        payload.color = color;
+        float3 resultColor = color;
         
         uint2 pixldx = DispatchRaysIndex().xy;
         uint2 numPix = DispatchRaysDimensions().xy;
@@ -306,7 +310,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             float3 sampleDir = GetUniformHemisphereSample(randSeed, vtx.Normal);
             
             // シャドウレイを飛ばす。
-            float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir, 500);
+            float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir, 300);
             
             // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
             float nol = saturate(dot(vtx.Normal, sampleDir));
@@ -328,7 +332,11 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         
         visibility = saturate(visibility);
         
-        payload.color.xyz *= visibility;
+        resultColor *= visibility;
+        
+        payload.color.xyz += resultColor;
+        
+        //ShootReflectionRay(payload, vtx.Position, vtx.Normal);
 
     }
 
