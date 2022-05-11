@@ -25,7 +25,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// レイトレ用OBJ複数メッシュ読み込み関数 BLASのアドレスを返す。
-	std::vector<int> RayMultiLeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName);
+	std::vector<int> RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName);
 
 private:
 

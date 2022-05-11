@@ -7,10 +7,13 @@
 #include "BLASRegister.h"
 #include <DirectXMath.h>
 
-void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputData)
+void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize)
 {
 
 	/*===== セッティング処理 =====*/
+
+	// ヒットグループ名を保存。
+	hitGroupName = HitGroupMgr::Ins()->hitGroupNames[UseHitGroup];
 
 	// 入力されたデータを保存する。
 	const int INPUT_COUNT = InputData.size();
@@ -37,12 +40,11 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 			buff.missEntryPoint.push_back(InputData[index].missEntryPoint[entryPointIndex]);
 
 		}
-		const int HG_ENTRY_COUNT = InputData[index].hitgroupEntryPoint.size();
-		for (int entryPointIndex = 0; entryPointIndex < HG_ENTRY_COUNT; ++entryPointIndex) {
 
-			// 保存する。
+		// 保存する。
+		const int HS_ENTRY_COUNT = InputData[index].hitgroupEntryPoint.size();
+		for (int entryPointIndex = 0; entryPointIndex < HS_ENTRY_COUNT; ++entryPointIndex) {
 			buff.hitgroupEntryPoint.push_back(InputData[index].hitgroupEntryPoint[entryPointIndex]);
-
 		}
 
 		// 保存する。
@@ -53,12 +55,11 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	// グローバルルートシグネチャを設定。
 	globalRootSig = std::make_shared<RayRootsignature>();
 	// パラメーターt0にTLAS(SRV)を設定。
-	globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 0);
+	for (int index = 0; index < SRVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index);
 	// パラメーターb0にカメラ用バッファを設定。
-	globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 0);
+	for (int index = 0; index < CBVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
 	// パラメーターu0に出力用バッファを設定。
-	globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 0);
-	globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1);
+	for (int index = 0; index < UAVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index);
 
 	// ルートシグネチャを生成。
 	globalRootSig->Create(false, L"GlobalRootSig");
@@ -110,49 +111,39 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 	}
 
-	// ヒットグループを設定。
-	const int HIT_GROUP_COUNT = HitGroupMgr::Ins()->GetHitGroupCount();
-	for (int index = 0; index < HIT_GROUP_COUNT; ++index) {
+	// ヒットグループの設定。
+	auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+	hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
 
-		// ヒットグループの設定。
-		auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
-		hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
-
-		// ClosestHitShaderをエントリポイントを保存。
-		if (HitGroupMgr::Ins()->GetCHFlag(index)) {
-			hitGroup->SetClosestHitShaderImport(HitGroupMgr::Ins()->GetCH(index));
-		}
-		// AnyHitShaderのエントリポイントを保存。
-		if (HitGroupMgr::Ins()->GetAHFlag(index)) {
-			hitGroup->SetAnyHitShaderImport(HitGroupMgr::Ins()->GetAH(index));
-		}
-		// IntersectShaderのエントリポイントを保存。
-		if (HitGroupMgr::Ins()->GetISFlag(index)) {
-			hitGroup->SetIntersectionShaderImport(HitGroupMgr::Ins()->GetIS(index));
-		}
-		// ヒットグループ名を保存。
-		hitGroup->SetHitGroupExport(HitGroupMgr::Ins()->hitGroupNames[index]);
-
+	// ClosestHitShaderをエントリポイントを保存。
+	if (HitGroupMgr::Ins()->GetCHFlag(UseHitGroup)) {
+		hitGroup->SetClosestHitShaderImport(HitGroupMgr::Ins()->GetCH(UseHitGroup));
 	}
+	// AnyHitShaderのエントリポイントを保存。
+	if (HitGroupMgr::Ins()->GetAHFlag(UseHitGroup)) {
+		hitGroup->SetAnyHitShaderImport(HitGroupMgr::Ins()->GetAH(UseHitGroup));
+	}
+	// IntersectShaderのエントリポイントを保存。
+	if (HitGroupMgr::Ins()->GetISFlag(UseHitGroup)) {
+		hitGroup->SetIntersectionShaderImport(HitGroupMgr::Ins()->GetIS(UseHitGroup));
+	}
+	// ヒットグループ名を保存。
+	hitGroup->SetHitGroupExport(HitGroupMgr::Ins()->hitGroupNames[UseHitGroup]);
 
 	// グローバルルートシグネチャの設定。
 	auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
 	rootSig->SetRootSignature(globalRootSig->GetRootSig().Get());
 
 	// HitGroupのローカルルートシグネチャを設定。
-	for (int index = 0; index < HIT_GROUP_COUNT; ++index) {
-
-		auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-		chLocalRootSig->SetRootSignature(HitGroupMgr::Ins()->GetLocalRootSig(index)->GetRootSig().Get());
-		auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-		chAssocModel->AddExport(HitGroupMgr::Ins()->hitGroupNames[index]);
-		chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
-
-	}
+	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
+	chLocalRootSig->SetRootSignature(HitGroupMgr::Ins()->GetLocalRootSig(UseHitGroup)->GetRootSig().Get());
+	auto chAssocModel = subobjects.CreateSubobject<CD3DX12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
+	chAssocModel->AddExport(HitGroupMgr::Ins()->hitGroupNames[UseHitGroup]);
+	chAssocModel->SetSubobjectToAssociate(*chLocalRootSig);
 
 	// シェーダーの設定。
 	auto shaderConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-	shaderConfig->Config(sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	shaderConfig->Config(PayloadSize, AttribSize);
 
 	// パイプラインの設定。
 	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
@@ -274,7 +265,7 @@ void RaytracingPipline::ConstructionShaderTable()
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
 		for (int index = 0; index < BLAS_COUNT; ++index) {
 
-			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject);
+			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject, hitGroupName);
 
 		}
 

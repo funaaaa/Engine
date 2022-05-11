@@ -58,6 +58,6 @@ public:
 	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc.data(); };
 
 	// レジスターのサイズを取得する関数。
-	inline const UINT& GetRegisterSize() { return UINT(instance.size()); }
+	UINT GetRegisterSize() { return UINT(instance.size()); }
 
 };

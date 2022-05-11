@@ -395,7 +395,7 @@ void BLAS::StopAnimation()
 
 }
 
-uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject)
+uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
 	/*===== シェーダーレコードを書き込む =====*/
@@ -405,24 +405,49 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 	auto entryBegin = Dst;
 	auto shader = GetHitGroupName();
 	auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
-	if (id == nullptr) {
-		throw std::logic_error("Not found ShaderIdentifier");
+
+	// 保存されているヒットグループ名と違っていたら書き込まない。
+	if (HitGroupName == shader) {
+
+		if (id == nullptr) {
+			throw std::logic_error("Not found ShaderIdentifier");
+		}
+
+		// シェーダー識別子を書き込む。
+		memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle));
+
+		Dst = entryBegin + recordSize;
+		return Dst;
+
 	}
+	else {
 
-	// シェーダー識別子を書き込む。
-	memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+		// シェーダー識別子を書き込む。
+		auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
+		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
-	// 今回のプログラムでは以下の順序でディスクリプタを記録。
-	// [0] : インデックスバッファ
-	// [1] : 頂点バッファ
-	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-	Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle));
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle));
 
-	Dst = entryBegin + recordSize;
-	return Dst;
+		Dst = entryBegin + recordSize;
+		return Dst;
+
+	}
 
 }
 

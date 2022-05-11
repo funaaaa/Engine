@@ -23,9 +23,9 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 生成処理
-	const int& GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
-	const int& GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
-	const int& GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureHandle);
+	int GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
+	int GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath);
+	int GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureHandle);
 
 	// BLASの更新
 	void Update(const int& Index);
@@ -39,12 +39,12 @@ public:
 	void StopAnimation(const int& Index);	// 停止
 
 	// シェーダーレコードを書き込む。
-	uint8_t* WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject);
+	uint8_t* WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
 
 	// バッファを取得。
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(const int& Index);
 
 	// BLASの数を取得。
-	const int& GetBLASCount() { return blas.size(); }
+	int GetBLASCount() { return blas.size(); }
 
 };

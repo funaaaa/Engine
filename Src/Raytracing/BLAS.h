@@ -77,7 +77,7 @@ public:
 	void StopAnimation();	// 停止
 
 	// シェーダーレコードを書き込む。
-	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject);
+	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
 
 	// アクセッタ
 	ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }

@@ -64,6 +64,6 @@ public:
 	const int& GetSRVCount() { return SRVcount; }
 	const int& GetCBVCount() { return CBVcount; }
 	const int& GetUAVCount() { return UAVcount; }
-	const std::shared_ptr<RayRootsignature> GetLoacalRootSig() { return localRootSig; };
+	const std::shared_ptr<RayRootsignature> GetLoacalRootSig() {return localRootSig; };
 
 };

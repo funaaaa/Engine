@@ -147,7 +147,7 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE;
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE;     // AnyHitShaderスキップ
     
     // ライトは除外。
     uint rayMask = 0xFF;

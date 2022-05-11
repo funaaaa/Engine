@@ -1,7 +1,7 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 
-const int& BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath)
+int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath)
 {
 
 	/*===== BLASを生成 =====*/
@@ -13,7 +13,7 @@ const int& BLASRegister::GenerateObj(const std::string& DirectryPath, const std:
 
 }
 
-const int& BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TextureHandle)
+int BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TextureHandle)
 {
 
 	/*===== BLASを生成 =====*/
@@ -25,7 +25,7 @@ const int& BLASRegister::GenerateFbx(const std::string& DirectryPath, const std:
 
 }
 
-const int& BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureID)
+int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureID)
 {
 
 	/*===== BLASを生成 =====*/
@@ -82,12 +82,12 @@ void BLASRegister::StopAnimation(const int& Index)
 
 }
 
-uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject)
+uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
 	/*===== シェーダーレコードを書き込む =====*/
 
-	return blas[Index]->WriteShaderRecord(Dst, RecordSize, StateObject);
+	return blas[Index]->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName);
 
 }
 

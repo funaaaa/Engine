@@ -11,7 +11,7 @@
 #include <cassert>
 #include <memory>
 
-std::vector<int> MultiMeshLoadOBJ::RayMultiLeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName)
+std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName)
 {
 
 	/*===== レイトレ用OBJ複数メッシュ読み込み関数 =====*/

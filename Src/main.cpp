@@ -49,7 +49,7 @@ struct KariConstBufferData {
 };
 
 // 入力操作
-void Input(KariConstBufferData& constBufferData, bool& isNoise);
+void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -73,17 +73,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ヒットグループを設定。
 	HitGroupMgr::Ins()->Setting();
 
-	// 使用するシェーダーを列挙。
+	// AO用のパイプラインを設定。
 	vector<RayPiplineShaderData> useShaders;
-	//useShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
 	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
+	RaytracingPipline aoPipline;
+	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
-	// レイトレパイプラインを設定。
-	RaytracingPipline pipline;
-	pipline.Setting(useShaders);
+	// デフォルトのシェーダーを設定。
+	vector<RayPiplineShaderData> defShaders;
+	defShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
+	RaytracingPipline defPipline;
+	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP]);
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], L"Resource/white.png");
@@ -105,7 +108,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	raytracingOutputBuff.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 	// シェーダーテーブルを生成。
-	pipline.ConstructionShaderTable();
+	aoPipline.ConstructionShaderTable();
+	defPipline.ConstructionShaderTable();
 
 
 	// 仮の定数バッファを宣言
@@ -157,7 +161,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// 乱数の種を更新。
 		constBufferData.seed = FHelper::GetRand(0, 1000);
 
-		Input(constBufferData, isNoiseBuff);
+		// ライトが動いたか
+		bool isMoveLight = false;
+
+		Input(constBufferData, isNoiseBuff, isMoveLight);
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -166,15 +173,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		target = Camera::Ins()->target;
 		up = Camera::Ins()->up;
 
-		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.lightPos);
-		PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.lightSize);
+		// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
+		if (isMoveLight) {
 
-		tlas.Update();
+			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.lightPos);
+			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.lightSize);
+
+			tlas.Update();
+
+		}
 
 		/*----- 描画処理 -----*/
 
 		// 画面に表示されるレンダーターゲットに戻す。
 		//DirectXBase::Ins()->SetRenderTarget();
+
+		RaytracingPipline setPipline = {};
+
+		// デフォルトではAO用パイプラインをセットする。
+		setPipline = aoPipline;
+
+		if (Input::isKey(DIK_0)) {
+
+			constBufferData.counter = 0;
+			setPipline = defPipline;
+
+		}
 
 		auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 		constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
@@ -186,7 +210,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
 		DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		DirectXBase::Ins()->cmdList->SetComputeRootSignature(pipline.GetGlobalRootSig()->GetRootSig().Get());
+		DirectXBase::Ins()->cmdList->SetComputeRootSignature(setPipline.GetGlobalRootSig()->GetRootSig().Get());
 		DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 		raytracingOutput.SetComputeRootDescriptorTalbe(2);
 		raytracingOutputBuff.SetComputeRootDescriptorTalbe(3);
@@ -206,9 +230,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		};
 		DirectXBase::Ins()->cmdList->ResourceBarrier(2, barrierToUAV);
 
-		DirectXBase::Ins()->cmdList->SetPipelineState1(pipline.GetStateObject().Get());
+		DirectXBase::Ins()->cmdList->SetPipelineState1(setPipline.GetStateObject().Get());
 
-		DirectXBase::Ins()->cmdList->DispatchRays(&pipline.GetDispatchRayDesc());
+		DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
 
 		// バックバッファのインデックスを取得する。
 		UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
@@ -274,7 +298,7 @@ void FPS()
 	}
 }
 
-void Input(KariConstBufferData& constBufferData, bool& isNoise) {
+void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight) {
 
 	bool isMove = false;
 
@@ -330,7 +354,7 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise) {
 	float lightSize = constBufferData.lightSize;
 	float MOVE_LENGTH = 1000.0f;
 	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 500.0f);
+	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 1000.0f);
 	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
 	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 1.0f, 50.0f);
 
@@ -338,6 +362,7 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise) {
 	if (dirX != constBufferData.lightPos.x || dirY != constBufferData.lightPos.y || dirZ != constBufferData.lightPos.z || lightSize != constBufferData.lightSize) {
 
 		isMove = true;
+		isMoveLight = true;
 
 	}
 

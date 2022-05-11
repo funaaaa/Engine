@@ -34,6 +34,7 @@ private:
 	D3D12_DISPATCH_RAYS_DESC dispatchRayDesc;				// レイ発射時の設定
 	Microsoft::WRL::ComPtr<ID3D12Resource> shaderTable;		// シェーダーテーブル
 	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps;
+	LPCWSTR hitGroupName;
 
 
 public:
@@ -41,7 +42,7 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// セッティング処理
-	void Setting(const std::vector<RayPiplineShaderData>& InputData);
+	void Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize);
 
 	// シェーダーテーブルを構築
 	void ConstructionShaderTable();
