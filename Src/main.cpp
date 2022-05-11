@@ -46,6 +46,7 @@ struct KariConstBufferData {
 	int counter;
 	int isNoiseScene;
 	int isLightHitScene;
+	int isNormalScene;
 
 };
 
@@ -141,6 +142,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.lightPos = Vec3(0, 300, 0);
 	constBufferData.lightSize = 30.0f;
 	constBufferData.isLightHitScene = false;
+	constBufferData.isNormalScene = false;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
@@ -394,6 +396,16 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 		constBufferData.counter = 0;
 	}
 
+	// 法線を表示する。
+	bool isNormal = constBufferData.isNormalScene;
+	bool prevIsNormal = isNormal;
+	ImGui::Checkbox("Normal Scene", &isNormal);
+	constBufferData.isNormalScene = isNormal;
+	// 値が書き換えられていたら、サンプリングを初期化する。
+	if (isNormal != prevIsNormal) {
+		constBufferData.counter = 0;
+	}
+
 	// パイプラインを選択。
 	int debugPiplineBuff = debugPiplineID;
 	ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
@@ -417,10 +429,11 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 /*
 
 ◯　やりたいこと・やらなければいけないこと
-・ソフトシャドウのデバッグ情報をわかりやすくする。
-　→光源の位置の表示非表示をわかりやすくする。
-　→光源によって照らされた位置のみを表示できるようにする。
-・そのためにはパイプラインをきちんと複数作れるようにする必要がある？
+//・ソフトシャドウのデバッグ情報をわかりやすくする。
+//　→光源の位置の表示非表示をわかりやすくする。
+//　→光源によって照らされた位置のみを表示できるようにする。
+//・そのためにはパイプラインをきちんと複数作れるようにする必要がある？
+・AOのバグを修正。明るさが場所によって違う？
 ・上が終わったら、正規化ランバートについて学ぶ。
 　→どうして正規化ランバートを使うのかまできちんと理解する。
 ・リアルタイムデノイズを実装する。

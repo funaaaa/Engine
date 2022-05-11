@@ -321,6 +321,13 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
+    
+    // 法線を描画するフラグが立っていたら。
+    if (gSceneParam.isNormalScene)
+    {
+        payload.color = vtx.Normal;
+        return;
+    }
 
     // 呼び出し回数が制限を超えないようにする。
     if (checkRecursiveLimit(payload))

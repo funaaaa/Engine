@@ -23,6 +23,7 @@ struct SceneCB
     int counter;
     int isNoiseScene;
     int isLightHitScene;
+    int isNormalScene;
 };
 
 
