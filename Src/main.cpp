@@ -44,7 +44,8 @@ struct KariConstBufferData {
 	float lightSize;
 	int seed;
 	int counter;
-	int isDefaultScene;
+	int isNoiseScene;
+	int isLightHitScene;
 
 };
 
@@ -55,7 +56,7 @@ enum DEGU_PIPLINE_ID {
 };
 
 // 入力操作
-void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
+void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -136,15 +137,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 	constBufferData.counter = 0;
-	constBufferData.isDefaultScene = false;
+	constBufferData.isNoiseScene = false;
 	constBufferData.lightPos = Vec3(0, 300, 0);
 	constBufferData.lightSize = 30.0f;
+	constBufferData.isLightHitScene = false;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
 
 	// デバッグ用でノイズ画面を出すフラグ。
-	bool isNoiseBuff = false;
 	DEGU_PIPLINE_ID debugPiplineID = AO_PIPLINE;
 
 	// カメラを初期化。
@@ -171,7 +172,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// ライトが動いたか
 		bool isMoveLight = false;
 
-		Input(constBufferData, isNoiseBuff, isMoveLight, debugPiplineID);
+		Input(constBufferData, isMoveLight, debugPiplineID);
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -308,7 +309,7 @@ void FPS()
 	}
 }
 
-void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
+void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
 
 	bool isMove = false;
 
@@ -383,6 +384,16 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLigh
 		++constBufferData.counter;
 	}
 
+	// ライトがあたった面だけ表示するフラグを更新。
+	bool isLightHit = constBufferData.isLightHitScene;
+	bool prevIsLightHit = isLightHit;
+	ImGui::Checkbox("LightHit Scene", &isLightHit);
+	constBufferData.isLightHitScene = isLightHit;
+	// 値が書き換えられていたら、サンプリングを初期化する。
+	if (isLightHit != prevIsLightHit) {
+		constBufferData.counter = 0;
+	}
+
 	// パイプラインを選択。
 	int debugPiplineBuff = debugPiplineID;
 	ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
@@ -394,8 +405,9 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLigh
 	if (debugPiplineID == AO_PIPLINE) {
 
 		// デバッグ用でノイズ画面を出すためのフラグをセット。
+		bool isNoise = constBufferData.isNoiseScene;
 		ImGui::Checkbox("Noise Scene", &isNoise);
-		constBufferData.isDefaultScene = isNoise;
+		constBufferData.isNoiseScene = isNoise;
 
 	}
 

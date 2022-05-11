@@ -147,7 +147,7 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE;     // AnyHitShaderスキップ
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderスキップ
     
     // ライトは除外。
     uint rayMask = 0xFF;
@@ -277,18 +277,18 @@ void mainRayGen()
         gOutput[launchIndex.xy] = float4(col, 1);
 
     }
-    else if (gSceneParam.counter < 128)
+    else if (gSceneParam.counter < 256)
     {
         gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter);
         gOutputBuff[launchIndex.xy] += float4(col, 1);
     }
     else
     {
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / 128.0f;
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / 256.0f;
     }
     
     // デバッグ用でノイズ画面を出すフラグが立っていたら。
-    if (gSceneParam.isDefaultScene)
+    if (gSceneParam.isNoiseScene)
     {
         gOutput[launchIndex.xy] = float4(col, 1);
     }
@@ -391,13 +391,34 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
         float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightPos.xyz)));
         float pdf = 1.0 / (2.0 * 3.14f);
-        visibility += smpleVisiblity * nol / pdf;
+        float lightVisibility = 0;
+        lightVisibility += smpleVisiblity * nol / pdf;
+        visibility += lightVisibility;
         
         visibility = saturate(visibility);
         
         resultColor *= visibility;
         
         payload.color.xyz += resultColor;
+        
+        // ライトに当たった面だけ表示するフラグが立っていたら。
+        if (gSceneParam.isLightHitScene)
+        {
+            
+            // 光にあたっていたら。
+            if (0.0f < lightVisibility)
+            {
+                payload.color = float3(1, 1, 1);
+            }
+            else
+            {
+                payload.color = float3(0, 0, 0);
+            }
+            
+            // AOは行わない。
+            return;
+            
+        }
         
         //ShootReflectionRay(payload, vtx.Position, vtx.Normal);
 

@@ -21,7 +21,8 @@ struct SceneCB
     float lightSize;
     int seed;
     int counter;
-    int isDefaultScene;
+    int isNoiseScene;
+    int isLightHitScene;
 };
 
 
