@@ -40,6 +40,9 @@ public:
 	// 拡大(引数を加算)関数
 	void AddScale(const Vec3& Scale);
 
+	// 拡大(引数を代入)関数
+	void ChangeScale(const Vec3& Scale);
+
 	// ワールド行列を加算。
 	void CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input);
 

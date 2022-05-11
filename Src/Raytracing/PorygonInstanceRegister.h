@@ -47,6 +47,10 @@ public:
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
 	void AddScale(const int& Index, const Vec3& Scale);
 
+	// 拡縮(引数を代入)関数
+	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
+	void ChangeScale(const int& Index, const Vec3& Scale);
+
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
 

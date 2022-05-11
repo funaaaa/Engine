@@ -83,7 +83,7 @@ void TLAS::Update()
 	);
 
 	// Às‚·‚éB
-	CreateAccelerationStructure();
+	/*CreateAccelerationStructure();*/
 
 }
 

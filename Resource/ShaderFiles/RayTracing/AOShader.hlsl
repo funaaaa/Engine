@@ -146,7 +146,8 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     payload.isShadow = false;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE;
     
     // ライトは除外。
     uint rayMask = 0xFF;
@@ -248,11 +249,15 @@ void mainRayGen()
 
     // TransRayに必要な設定を作成
     uint rayMask = 0xFF;
+    
+    RAY_FLAG flag = RAY_FLAG_NONE;
+    flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flag |= RAY_FLAG_FORCE_OPAQUE;
 
     // レイを発射
     TraceRay(
     gRtScene, // TLAS
-    0, // 衝突判定制御をするフラグ
+    flag, // 衝突判定制御をするフラグ
     rayMask, // 衝突判定対象のマスク値
     0, // ray index
     1, // MultiplierForGeometryContrib

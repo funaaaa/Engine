@@ -59,7 +59,7 @@ void PorygonMeshInstance::AddRotate(const Vec3& Rot)
 	buff *= DirectX::XMMatrixRotationX(Rot.x);
 	buff *= DirectX::XMMatrixRotationY(Rot.y);
 
-	rotMat = buff * worldMat;
+	rotMat = buff * rotMat;
 
 }
 
@@ -70,9 +70,22 @@ void PorygonMeshInstance::AddScale(const Vec3& Scale)
 
 	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
 
-	buff *= DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
+	buff = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
 
-	scaleMat = buff * worldMat;
+	scaleMat *= buff;
+
+}
+
+void PorygonMeshInstance::ChangeScale(const Vec3& Scale)
+{
+
+	/*===== ägèkä÷êî =====*/
+
+	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
+
+	buff = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
+
+	scaleMat = buff;
 
 }
 

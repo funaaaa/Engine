@@ -76,7 +76,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 使用するシェーダーを列挙。
 	vector<RayPiplineShaderData> useShaders;
 	//useShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 
 	// レイトレパイプラインを設定。
 	RaytracingPipline pipline;
@@ -85,13 +85,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// SPONZAを読み込む。
 	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP]);
 
-	//// ライト用のスフィアを読み込む。
-	//int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], L"Resource/white.png");
-	//int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
-	//PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(50, 50, 50));
-	//PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
+	// ライト用のスフィアを読み込む。
+	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], L"Resource/white.png");
+	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
+	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
-	//PorygonInstanceRegister::Ins()->CalWorldMat();
+	PorygonInstanceRegister::Ins()->CalWorldMat();
 
 	// TLASを生成。
 	TLAS tlas;
@@ -166,6 +166,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		target = Camera::Ins()->target;
 		up = Camera::Ins()->up;
 
+		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.lightPos);
+		PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.lightSize);
+
+		tlas.Update();
 
 		/*----- 描画処理 -----*/
 
@@ -328,7 +332,7 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise) {
 	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
 	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 500.0f);
 	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 0, 50.0f);
+	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 1.0f, 50.0f);
 
 	// 変わっていたら
 	if (dirX != constBufferData.lightPos.x || dirY != constBufferData.lightPos.y || dirZ != constBufferData.lightPos.z || lightSize != constBufferData.lightSize) {
@@ -349,3 +353,21 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise) {
 	}
 
 }
+
+
+/*
+
+◯　やりたいこと・やらなければいけないこと
+・ソフトシャドウのデバッグ情報をわかりやすくする。
+　→光源の位置の表示非表示をわかりやすくする。
+　→光源によって照らされた位置のみを表示できるようにする。
+・そのためにはパイプラインをきちんと複数作れるようにする必要がある？
+・上が終わったら、正規化ランバートについて学ぶ。
+　→どうして正規化ランバートを使うのかまできちんと理解する。
+・リアルタイムデノイズを実装する。
+　→以前見た輝度に重みをおいたブラーでは実装できないかも。
+　→ノイズが01なので、逆に輝度が大きすぎる…
+　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！
+・以上のことを今週までに実装する。
+
+*/

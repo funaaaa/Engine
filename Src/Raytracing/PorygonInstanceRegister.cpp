@@ -75,6 +75,20 @@ void PorygonInstanceRegister::AddScale(const int& Index, const Vec3& Scale)
 
 }
 
+void PorygonInstanceRegister::ChangeScale(const int& Index, const float& X, const float& Y, const float Z)
+{
+
+	instance[Index]->ChangeScale(Vec3(X, Y, Z));
+
+}
+
+void PorygonInstanceRegister::ChangeScale(const int& Index, const Vec3& Scale)
+{
+
+	instance[Index]->ChangeScale(Scale);
+
+}
+
 void PorygonInstanceRegister::CalWorldMat()
 {
 
