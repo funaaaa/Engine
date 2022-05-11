@@ -6,7 +6,7 @@
 
 Camera::Camera() {
 	eye = XMFLOAT3(window_width / 2, window_height / 2, 500);		//視点座標		ゲームワールド内でのカメラ座標
-	target = XMFLOAT3(window_width / 2, window_height / 2, 0);		//注視点座標		ゲームワールド内でカメラが見ている座標
+	target = XMFLOAT3(window_width / 2 + 1, window_height / 2, 0);		//注視点座標		ゲームワールド内でカメラが見ている座標
 	up = XMFLOAT3(0, 1, 0);											//上方向ベクトル	ゲームワールド内でカメラから見て上方向を指すベクトル
 	matView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	//XMStoreFloat3(&(forwardVec), XMVector3Normalize(XMLoadFloat3(&forwardVec)));
@@ -47,7 +47,7 @@ void Camera::GenerateMatViewSpeed(const float& nowSpeed, const float& maxSpeed)
 void Camera::Init()
 {
 	eye = Vec3(0, 150, 10);
-	target = Vec3(0, 0, 0);
+	target = Vec3(1, 0, 0);
 	up = Vec3(0, 1, 0);
 	rotationMat = XMMatrixIdentity();
 	upRotationMat = XMMatrixIdentity();

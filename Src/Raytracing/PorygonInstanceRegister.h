@@ -35,6 +35,10 @@ public:
 	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);
 	void AddTrans(const int& Index, const Vec3& Pos);
 
+	// 移動(引数に移動)関数
+	void ChangeTrans(const int& Index, const float& X, const float& Y, const float Z);
+	void ChangeTrans(const int& Index, const Vec3& Pos);
+
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void AddRotate(const int& Index, const Vec3& Rot);
@@ -42,6 +46,13 @@ public:
 	// 拡縮(引数を加算)関数
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
 	void AddScale(const int& Index, const Vec3& Scale);
+
+	// 拡縮(引数を代入)関数
+	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
+	void ChangeScale(const int& Index, const Vec3& Scale);
+
+	// インスタンスのワールド行列を求める。
+	void CalWorldMat();
 
 	// レジスターのDataを取得する関数。
 	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc.data(); };

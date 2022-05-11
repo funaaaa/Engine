@@ -2,14 +2,14 @@
 #include "DescriptorHeapMgr.h"
 #include "DirectXBase.h"
 
-void RaytracingOutput::Setting()
+void RaytracingOutput::Setting(DXGI_FORMAT Format)
 {
 
 	/*===== ê›íË =====*/
 
 	// UAVÇê›íË
 	rayTracingOutput = CreateTexture2D(
-		window_width, window_height, DXGI_FORMAT_R8G8B8A8_UNORM,
+		window_width, window_height, Format,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_COPY_SOURCE,
 		D3D12_HEAP_TYPE_DEFAULT

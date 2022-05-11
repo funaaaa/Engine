@@ -22,6 +22,8 @@
 
 #include <utilapiset.h>
 
+#include "FHelper.h"
+
 #define COLORHEX(hex) hex / 255.0f
 
 #define SCREEN_VIRTUAL_WIDTH 300
@@ -38,9 +40,16 @@ struct KariConstBufferData {
 	XMVECTOR lightDirection;	// 平行光源の向き。
 	XMVECTOR lightColor;		// 平行光源色。
 	XMVECTOR ambientColor;		// 環境光。
+	Vec3 lightPos;
+	float lightSize;
+	int seed;
+	int counter;
+	int isDefaultScene;
 
 };
 
+// 入力操作
+void Input(KariConstBufferData& constBufferData, bool& isNoise);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -66,52 +75,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// 使用するシェーダーを列挙。
 	vector<RayPiplineShaderData> useShaders;
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/triangleShaderHeader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
+	//useShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS"} });
+	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 
 	// レイトレパイプラインを設定。
 	RaytracingPipline pipline;
 	pipline.Setting(useShaders);
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiLeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP]);
 
-	// 猿のBLASを生成。
-	//int boneBlas = BLASRegister::Ins()->GenerateFbx("Resource/", "boneTest.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
+	// ライト用のスフィアを読み込む。
+	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], L"Resource/white.png");
+	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
+	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
-	// 猿のBLASを生成。
-	//int monkeyBlas = BLASRegister::Ins()->GenerateObj("Resource/", "monkey.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/backGround.png");
-
-	// 床のBLASを生成。
-	//int groundBlas = BLASRegister::Ins()->GenerateObj("Resource/", "ground.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP], L"Resource/Fine_Basin.jpg");
-
-	// インスタンスを生成
-	//int boneA = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int boneB = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int boneC = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int boneD = PorygonInstanceRegister::Ins()->CreateInstance(boneBlas, 1);
-	//int monkey = PorygonInstanceRegister::Ins()->CreateInstance(monkeyBlas, 2);
-	//int ground = PorygonInstanceRegister::Ins()->CreateInstance(groundBlas, 2);
-
-	// 移動させる。
-	float addTrans = 200.0f;
-	//PorygonInstanceRegister::Ins()->AddTrans(boneA, -addTrans, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneB, addTrans, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneC, 0.0f, 0.0f, addTrans);
-	//PorygonInstanceRegister::Ins()->AddTrans(boneD, 0.0f, 0.0f, -addTrans);
-	//PorygonInstanceRegister::Ins()->AddTrans(monkey, 0.0f, 0.0f, 0);
-	//PorygonInstanceRegister::Ins()->AddTrans(ground, 0.0f, -1.0f, 0);
-
-	// ある程度回転させる。
-	//PorygonInstanceRegister::Ins()->AddRotate(boneA, 0.0f, -0.5f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneB, 0.0f, -0.5f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneC, 0.0f, -0.5f, 0);
-	//PorygonInstanceRegister::Ins()->AddRotate(boneD, 0.0f, -0.5f, 0);
-
-	// 拡大させる。
-	//PorygonInstanceRegister::Ins()->AddScale(boneA, Vec3(70));
-	//PorygonInstanceRegister::Ins()->AddScale(boneB, Vec3(70));
-	//PorygonInstanceRegister::Ins()->AddScale(boneC, Vec3(70));
-	//PorygonInstanceRegister::Ins()->AddScale(boneD, Vec3(70));
+	PorygonInstanceRegister::Ins()->CalWorldMat();
 
 	// TLASを生成。
 	TLAS tlas;
@@ -119,7 +99,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// レイトレ出力用クラスをセット。
 	RaytracingOutput raytracingOutput;
-	raytracingOutput.Setting();
+	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	RaytracingOutput raytracingOutputBuff;
+	raytracingOutputBuff.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 	// シェーダーテーブルを生成。
 	pipline.ConstructionShaderTable();
@@ -142,9 +125,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	Vec3 up = { 0,1,0 };
 	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+	constBufferData.counter = 0;
+	constBufferData.isDefaultScene = false;
+	constBufferData.lightPos = Vec3(0, 300, 0);
+	constBufferData.lightSize = 30.0f;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
+
+	// デバッグ用でノイズ画面を出すフラグ。
+	bool isNoiseBuff = false;
 
 	// カメラを初期化。
 	Camera::Ins()->Init();
@@ -164,49 +154,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		FPS();
 
-		//Camera::target = triangle.GetPos();
+		// 乱数の種を更新。
+		constBufferData.seed = FHelper::GetRand(0, 1000);
 
-		// スキニングアニメーションさせる。
-		//BLASRegister::Ins()->ComputeSkin(boneBlas);
-
-		float speed = 5.0f;
-		float rot = 0.03f;
-		if (Input::isKey(DIK_W)) Camera::Ins()->Move(speed);
-		if (Input::isKey(DIK_S)) Camera::Ins()->Move(-speed);
-		if (Input::isKey(DIK_A)) Camera::Ins()->MoveRight(speed);
-		if (Input::isKey(DIK_D)) Camera::Ins()->MoveRight(-speed);
-		if (Input::isKey(DIK_UP)) Camera::Ins()->forwardVec.y += rot;
-		if (Input::isKey(DIK_DOWN)) Camera::Ins()->forwardVec.y -= rot;
-		if (Input::isKey(DIK_LEFT)) Camera::Ins()->AddRotationXZ(rot);
-		if (Input::isKey(DIK_RIGHT)) Camera::Ins()->AddRotationXZ(-rot);
-		if (Input::isKey(DIK_LSHIFT)) Camera::Ins()->eye.y -= 10.0f;
-		if (Input::isKey(DIK_SPACE)) Camera::Ins()->eye.y += 10.0f;
-
-		//if (Input::isKey(DIK_I)) porygonInstance[0].AddTrans(0.0f, 0.0f, -0.1f);
-		//if (Input::isKey(DIK_K)) porygonInstance[0].AddTrans(0.0f, 0.0f, 0.1f);
-		//if (Input::isKey(DIK_J)) porygonInstance[0].AddTrans(0.1f, 0.0f, 0.0f);
-		//if (Input::isKey(DIK_L)) porygonInstance[0].AddTrans(-0.1f, 0.0f, 0.0f);
-
-		if (Input::isKey(DIK_1)) {
-
-			//BLASRegister::Ins()->InitAnimation(boneBlas);
-
-		}
-		if (Input::isKey(DIK_2)) {
-
-			//BLASRegister::Ins()->PlayAnimation(boneBlas);
-
-		}
-		if (Input::isKey(DIK_3)) {
-
-			//BLASRegister::Ins()->StopAnimation(boneBlas);
-
-		}
-
-		//BLASRegister::Ins()->Update(boneBlas);
-
-		// TLASを更新。
-		//tlas.Update();
+		Input(constBufferData, isNoiseBuff);
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -215,6 +166,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		target = Camera::Ins()->target;
 		up = Camera::Ins()->up;
 
+		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.lightPos);
+		PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.lightSize);
+
+		tlas.Update();
 
 		/*----- 描画処理 -----*/
 
@@ -234,16 +189,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->SetComputeRootSignature(pipline.GetGlobalRootSig()->GetRootSig().Get());
 		DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 		raytracingOutput.SetComputeRootDescriptorTalbe(2);
+		raytracingOutputBuff.SetComputeRootDescriptorTalbe(3);
 		DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
 		// レイトレーシング結果バッファをUAV状態へ
-		auto barrierToUAV = CD3DX12_RESOURCE_BARRIER::Transition(
+		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::Transition(
 			raytracingOutput.GetRaytracingOutput().Get(),
 			D3D12_RESOURCE_STATE_COPY_SOURCE,
+			D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
+			CD3DX12_RESOURCE_BARRIER::Transition(
+			raytracingOutputBuff.GetRaytracingOutput().Get(),
+			D3D12_RESOURCE_STATE_COPY_SOURCE,
 			D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-		);
-		DirectXBase::Ins()->cmdList->ResourceBarrier(1, &barrierToUAV);
+		)
+		};
+		DirectXBase::Ins()->cmdList->ResourceBarrier(2, barrierToUAV);
 
 		DirectXBase::Ins()->cmdList->SetPipelineState1(pipline.GetStateObject().Get());
 
@@ -256,6 +217,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
 		raytracingOutput.GetRaytracingOutput().Get(),
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		D3D12_RESOURCE_STATE_COPY_SOURCE),
+		CD3DX12_RESOURCE_BARRIER::Transition(
+		raytracingOutputBuff.GetRaytracingOutput().Get(),
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_COPY_SOURCE),
 		CD3DX12_RESOURCE_BARRIER::Transition(
@@ -308,3 +273,101 @@ void FPS()
 		frame_count = 0;
 	}
 }
+
+void Input(KariConstBufferData& constBufferData, bool& isNoise) {
+
+	bool isMove = false;
+
+	float speed = 5.0f;
+	float rot = 0.03f;
+	if (Input::isKey(DIK_W)) {
+		Camera::Ins()->Move(speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_S)) {
+		Camera::Ins()->Move(-speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_A)) {
+		Camera::Ins()->MoveRight(speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_D)) {
+		Camera::Ins()->MoveRight(-speed);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_UP)) {
+		Camera::Ins()->forwardVec.y += rot;
+		isMove = true;
+	}
+	if (Input::isKey(DIK_DOWN)) {
+		Camera::Ins()->forwardVec.y -= rot;
+		isMove = true;
+	}
+	if (Input::isKey(DIK_LEFT)) {
+		Camera::Ins()->AddRotationXZ(rot);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_RIGHT)) {
+		Camera::Ins()->AddRotationXZ(-rot);
+		isMove = true;
+	}
+	if (Input::isKey(DIK_LSHIFT)) {
+		Camera::Ins()->eye.y -= 10.0f;
+		isMove = true;
+	}
+	if (Input::isKey(DIK_SPACE)) {
+		Camera::Ins()->eye.y += 10.0f;
+		isMove = true;
+	}
+
+	// DirLightについて
+
+	// 値を保存する。
+	float dirX = constBufferData.lightPos.x;
+	float dirY = constBufferData.lightPos.y;
+	float dirZ = constBufferData.lightPos.z;
+	float lightSize = constBufferData.lightSize;
+	float MOVE_LENGTH = 1000.0f;
+	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
+	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 500.0f);
+	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
+	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 1.0f, 50.0f);
+
+	// 変わっていたら
+	if (dirX != constBufferData.lightPos.x || dirY != constBufferData.lightPos.y || dirZ != constBufferData.lightPos.z || lightSize != constBufferData.lightSize) {
+
+		isMove = true;
+
+	}
+
+	// デバッグ用でノイズ画面を出すためのフラグをセット。
+	ImGui::Checkbox("Noise Scene", &isNoise);
+	constBufferData.isDefaultScene = isNoise;
+
+	if (isMove) {
+		constBufferData.counter = 0;
+	}
+	else {
+		++constBufferData.counter;
+	}
+
+}
+
+
+/*
+
+◯　やりたいこと・やらなければいけないこと
+・ソフトシャドウのデバッグ情報をわかりやすくする。
+　→光源の位置の表示非表示をわかりやすくする。
+　→光源によって照らされた位置のみを表示できるようにする。
+・そのためにはパイプラインをきちんと複数作れるようにする必要がある？
+・上が終わったら、正規化ランバートについて学ぶ。
+　→どうして正規化ランバートを使うのかまできちんと理解する。
+・リアルタイムデノイズを実装する。
+　→以前見た輝度に重みをおいたブラーでは実装できないかも。
+　→ノイズが01なので、逆に輝度が大きすぎる…
+　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！
+・以上のことを今週までに実装する。
+
+*/

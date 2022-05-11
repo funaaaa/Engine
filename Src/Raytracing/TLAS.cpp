@@ -48,7 +48,10 @@ void TLAS::Update()
 
 	/*===== TLASの更新処理 =====*/
 
-	// Insのサイズを取得。
+	// インスタンスの行列を計算。
+	PorygonInstanceRegister::Ins()->CalWorldMat();
+
+	// Instanceのサイズを取得。
 	auto sizeOfInstanceDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
 	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
@@ -80,7 +83,7 @@ void TLAS::Update()
 	);
 
 	// 実行する。
-	CreateAccelerationStructure();
+	/*CreateAccelerationStructure();*/
 
 }
 

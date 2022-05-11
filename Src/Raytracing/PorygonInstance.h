@@ -16,6 +16,10 @@ private:
 
 	DirectX::XMMATRIX worldMat;						// ワールド行列
 
+	DirectX::XMMATRIX transMat;
+	DirectX::XMMATRIX rotMat;
+	DirectX::XMMATRIX scaleMat;
+
 
 public:
 
@@ -25,13 +29,22 @@ public:
 	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID);
 
 	// 移動(引数を加算)関数
-	void AddTrans(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Pos);
+	void AddTrans(const Vec3& Pos);
+
+	// 移動(引数に移動)関数
+	void ChangeTrans(const Vec3& Pos);
 
 	// 回転(ラジアン、引数を加算)関数
-	void AddRotate(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Rot);
+	void AddRotate(const Vec3& Rot);
 
 	// 拡大(引数を加算)関数
-	void AddScale(D3D12_RAYTRACING_INSTANCE_DESC& Input, const Vec3& Scale);
+	void AddScale(const Vec3& Scale);
+
+	// 拡大(引数を代入)関数
+	void ChangeScale(const Vec3& Scale);
+
+	// ワールド行列を加算。
+	void CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input);
 
 
 private:
