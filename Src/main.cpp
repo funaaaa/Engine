@@ -48,8 +48,14 @@ struct KariConstBufferData {
 
 };
 
+// デバッグ用のパイプラインを切り替えるやつ。
+enum DEGU_PIPLINE_ID {
+	DEF_PIPLINE,
+	AO_PIPLINE,
+};
+
 // 入力操作
-void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight);
+void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -139,6 +145,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// デバッグ用でノイズ画面を出すフラグ。
 	bool isNoiseBuff = false;
+	DEGU_PIPLINE_ID debugPiplineID = AO_PIPLINE;
 
 	// カメラを初期化。
 	Camera::Ins()->Init();
@@ -164,7 +171,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// ライトが動いたか
 		bool isMoveLight = false;
 
-		Input(constBufferData, isNoiseBuff, isMoveLight);
+		Input(constBufferData, isNoiseBuff, isMoveLight, debugPiplineID);
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -190,13 +197,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		RaytracingPipline setPipline = {};
 
-		// デフォルトではAO用パイプラインをセットする。
-		setPipline = aoPipline;
-
-		if (Input::isKey(DIK_0)) {
+		// デバッグ用のパイプラインIDに応じたパイプラインをセットする。
+		if (debugPiplineID == DEF_PIPLINE) {
 
 			constBufferData.counter = 0;
 			setPipline = defPipline;
+
+		}
+		else if (debugPiplineID == AO_PIPLINE) {
+
+			setPipline = aoPipline;
 
 		}
 
@@ -298,7 +308,7 @@ void FPS()
 	}
 }
 
-void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight) {
+void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
 
 	bool isMove = false;
 
@@ -366,15 +376,27 @@ void Input(KariConstBufferData& constBufferData, bool& isNoise, bool& isMoveLigh
 
 	}
 
-	// デバッグ用でノイズ画面を出すためのフラグをセット。
-	ImGui::Checkbox("Noise Scene", &isNoise);
-	constBufferData.isDefaultScene = isNoise;
-
 	if (isMove) {
 		constBufferData.counter = 0;
 	}
 	else {
 		++constBufferData.counter;
+	}
+
+	// パイプラインを選択。
+	int debugPiplineBuff = debugPiplineID;
+	ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
+	ImGui::SameLine();
+	ImGui::RadioButton("AO PIPLINE", &debugPiplineBuff, 1);
+	debugPiplineID = (DEGU_PIPLINE_ID)debugPiplineBuff;
+
+	// AOのパイプラインを選択されていたときのみ、ノイズを出すかのフラグを表示する。
+	if (debugPiplineID == AO_PIPLINE) {
+
+		// デバッグ用でノイズ画面を出すためのフラグをセット。
+		ImGui::Checkbox("Noise Scene", &isNoise);
+		constBufferData.isDefaultScene = isNoise;
+
 	}
 
 }
