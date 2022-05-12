@@ -11,6 +11,7 @@ ConstantBuffer<SceneCB> gSceneParam : register(b0);
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 Texture2D<float4> texture : register(t2, space1);
+Texture2D<float4> normalMap : register(t3, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 
@@ -321,7 +322,9 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
-   
+    
+    // 法線マップから法線情報を抽出。
+    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
     
     if (gSceneParam.isMeshScene)
     {

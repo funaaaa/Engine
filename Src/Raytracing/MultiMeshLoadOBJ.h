@@ -15,7 +15,7 @@ private:
 
 	std::vector<std::wstring> texturePath;
 
-	std::vector<std::pair<int, int>> blasID;	// テクスチャのハンドルと、それを使用したBLASのIDを保存するコンテナ
+	std::vector<std::pair<std::vector<int>, int>> blasID;	// テクスチャのハンドルと、それを使用したBLASのIDを保存するコンテナ
 
 	using string = std::string;
 
@@ -30,7 +30,7 @@ public:
 private:
 
 	// マテリアルファイルからテクスチャ情報を抜き出す。
-	int LoadMaterial(const string& DirectryPath, const string& MaterialFileName, const string& MaterialName);
+	void LoadMaterial(const string& DirectryPath, const string& MaterialFileName, const string& MaterialName, std::vector<int>& TextureHandle);
 
 	// stringをwstringに変換。
 	std::wstring StringToWString(std::string oString);

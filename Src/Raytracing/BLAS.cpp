@@ -434,6 +434,9 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+
+		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
+		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
 		const int TEXTURE_COUNT = textureHandle.size();
 		for (int index = 0; index < textureHandle.size(); ++index) {
 			Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));

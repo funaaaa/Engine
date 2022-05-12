@@ -39,7 +39,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	std::vector<Vec3> position;
 	std::vector<DirectX::XMFLOAT2> uv;
 	std::vector<Vec3> normal;
-	int textureHandle = 0;
+	std::vector<int> textureHandle;
 
 	// 使用するマテリアル名とマテリアルファイル名の両方を取得したらマテリアルファイルを読み込むようにするために変数。
 	bool isLoadMaterialFile = false;
@@ -169,8 +169,8 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 			else {
 
 				// BLASを生成する。
-				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, { textureHandle });
-				std::pair<int, int> buff = { textureHandle,blasIDBuff };
+				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
+				std::pair<std::vector<int>, int> buff = { textureHandle,blasIDBuff };
 				blasID.emplace_back(buff);
 
 				// 保存されているBLASIDでインスタンスを生成する。
@@ -182,6 +182,8 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				blasData.vertex.clear();
 				isLoadTexture = false;
 				isLoadMaterialName = false;
+				textureHandle.clear();
+				textureHandle.shrink_to_fit();
 
 			}
 
@@ -191,7 +193,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 		if ((!isLoadTexture) && isLoadMaterialFile && isLoadMaterialName) {
 
 			// テクスチャを読み込む。
-			textureHandle = LoadMaterial(DirectryPath, materialFile, materialName);
+			LoadMaterial(DirectryPath, materialFile, materialName, textureHandle);
 
 			// テクスチャをロード済みにする。
 			isLoadTexture = true;
@@ -201,8 +203,8 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	}
 
 	// 一番最後のBLASを生成。
-	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, { textureHandle });
-	std::pair<int, int> buff = { textureHandle,blasIDBuff };
+	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
+	std::pair<std::vector<int>, int> buff = { textureHandle,blasIDBuff };
 	blasID.emplace_back(buff);
 
 	// 保存されているBLASIDでインスタンスを生成する。
@@ -216,7 +218,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 }
 
-int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& MaterialFileName, const string& MaterialName)
+void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& MaterialFileName, const string& MaterialName, std::vector<int>& TextureHandle)
 {
 
 	// ファイルストリーム。
@@ -238,8 +240,8 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 	// 使用するマテリアルのところに達したか。
 	bool isLoadTexture = false;
 
-	// 読み込んだテクスチャのハンドル。
-	int textureHandle = 0;
+	// 目的のマテリアルにたどり着いた際に、もう一度"newmtl"にたどり着いたら処理を終えるためのフラグ。
+	bool isEnd = false;
 
 	while (getline(file, line)) {
 
@@ -260,6 +262,13 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 		// 先頭文字列がnewmtlならマテリアル名。
 		if (key == "newmtl") {
 
+			// 既にマテリアル名を読み込み済みだったら処理を終える。
+			if (isEnd) {
+
+				break;
+
+			}
+
 			// マテリアル名の読み込み。
 			string materialNameBuff;
 			lineStream >> materialNameBuff;
@@ -269,6 +278,9 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 
 				isLoadTexture = true;
 
+				// 次にマテリアル名を読み込んだら処理を終えるようにする。
+				isEnd = true;
+
 			}
 
 		}
@@ -276,7 +288,7 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 		// 使用するテクスチャのところに達していたら。
 		if (isLoadTexture) {
 
-			// 先頭文字列がmap_Kdならマテリアル名。
+			// 先頭文字列がmap_Kdならテクスチャ名。
 			if (key == "map_Kd") {
 
 				// テクスチャ名を保存。
@@ -296,7 +308,7 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 						isLoad = true;
 
 						// テクスチャを読み込む。
-						return textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str());
+						TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str()));
 
 
 					}
@@ -310,7 +322,47 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 					texturePath[texturePath.size() - 1] = buff;
 
 					// テクスチャを読み込む。
-					return textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str());
+					TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
+
+				}
+
+			}
+
+			// 先頭文字列がmap_Dispなら法線マップ。
+			if (key == "map_Disp") {
+
+				// 法線テクスチャ名を保存。
+				string textureNameBuff;
+				lineStream >> textureNameBuff;
+
+				// 法線テクスチャ名を変換。
+				wstring buff = StringToWString(DirectryPath + textureNameBuff);
+
+				// 既に生成済みかをチェックする。
+				const int TEXPATH_COUNT = texturePath.size();
+				bool isLoad = false;
+				for (int index = 0; index < TEXPATH_COUNT; ++index) {
+
+					if (buff == texturePath[index]) {
+
+						isLoad = true;
+
+						// テクスチャを読み込む。
+						TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str()));
+
+
+					}
+
+				}
+
+				// ロードしていなかったら。
+				if (!isLoad) {
+
+					texturePath.emplace_back();
+					texturePath[texturePath.size() - 1] = buff;
+
+					// テクスチャを読み込む。
+					TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
 
 				}
 
@@ -319,8 +371,6 @@ int MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Mat
 		}
 
 	}
-
-	return textureHandle;
 
 }
 

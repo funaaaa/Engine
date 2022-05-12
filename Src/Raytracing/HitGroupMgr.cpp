@@ -65,7 +65,7 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 3;
+	initData.SRVcount = 4;
 	initData.CBVcount = 0;
 	initData.UAVcount = 0;
 	hitGroup.push_back(std::make_shared<HitGroup>());	// ここでsize()をそのまま渡しているのは、0番目にはグローバルルートシグネチャが入るのでインクリメントする必要があるから。
@@ -75,7 +75,7 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 3;
+	initData.SRVcount = 4;
 	initData.CBVcount = 0;
 	initData.UAVcount = 0;
 	hitGroup.push_back(std::make_shared<HitGroup>());	// ここでsize()をそのまま渡しているのは、0番目にはグローバルルートシグネチャが入るのでインクリメントする必要があるから。
