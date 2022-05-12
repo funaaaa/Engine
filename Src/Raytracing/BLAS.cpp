@@ -9,13 +9,19 @@
 
 using namespace DirectX;
 
-void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath)
+void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath);
+	const int TEXTURE_PATH_COUNT = TexturePath.size();
+	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
+
+		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
+
+	}
+
 
 	/*-- 形状データを読み込む --*/
 
@@ -94,13 +100,18 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath)
+void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	textureHandle = TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath);
+	const int TEXTURE_PATH_COUNT = TexturePath.size();
+	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
+
+		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
+
+	}
 
 	/*-- 形状データを読み込む --*/
 
@@ -197,7 +208,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureHandle)
+void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -423,7 +434,10 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle));
+		const int TEXTURE_COUNT = textureHandle.size();
+		for (int index = 0; index < textureHandle.size(); ++index) {
+			Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+		}
 
 		Dst = entryBegin + recordSize;
 		return Dst;
@@ -442,7 +456,10 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle));
+		const int TEXTURE_COUNT = textureHandle.size();
+		for (int index = 0; index < textureHandle.size(); ++index) {
+			Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+		}
 
 		Dst = entryBegin + recordSize;
 		return Dst;

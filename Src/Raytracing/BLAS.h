@@ -42,7 +42,7 @@ private:
 
 	int modelIndex;							// モデルのインデックス
 
-	int textureHandle;						// 使用するテクスチャのハンドル
+	std::vector<int> textureHandle;			// 使用するテクスチャのハンドル
 
 	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
 
@@ -61,9 +61,9 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// BLASの生成
-	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath);
-	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, const LPCWSTR& TexturePath);
-	void GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureHandle);
+	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
+	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
+	void GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle);
 
 	// BLASの更新
 	void Update();

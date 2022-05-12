@@ -146,7 +146,7 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     payload.isShadow = false;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderスキップ
     
     // ライトは除外。
@@ -321,10 +321,11 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
+   
     
     if (gSceneParam.isMeshScene)
     {
-        payload.color.xy = attrib.barys;
+        payload.color = CalcBarycentrics(attrib.barys);
         return;
     }
     

@@ -169,7 +169,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 			else {
 
 				// BLAS‚ð¶¬‚·‚éB
-				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
+				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, { textureHandle });
 				std::pair<int, int> buff = { textureHandle,blasIDBuff };
 				blasID.emplace_back(buff);
 
@@ -201,7 +201,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	}
 
 	// ˆê”ÔÅŒã‚ÌBLAS‚ð¶¬B
-	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle);
+	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, { textureHandle });
 	std::pair<int, int> buff = { textureHandle,blasIDBuff };
 	blasID.emplace_back(buff);
 

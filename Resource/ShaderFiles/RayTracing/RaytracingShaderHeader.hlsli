@@ -1,4 +1,7 @@
 
+// ‰~ü—¦
+static const float PI = 3.141592653589f;
+
 // ’¸“_î•ñ
 struct Vertex
 {

@@ -98,7 +98,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
-	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], L"Resource/white.png");
+	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
 	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
@@ -448,6 +448,8 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 //・AOのバグを修正。明るさが場所によって違う？
 ・上が終わったら、正規化ランバートについて学ぶ。
 　→どうして正規化ランバートを使うのかまできちんと理解する。
+・リニアワークフローを実装する。
+　→ガンマ値補正？
 ・リアルタイムデノイズを実装する。
 　→以前見た輝度に重みをおいたブラーでは実装できないかも。
 　→ノイズが01なので、逆に輝度が大きすぎる…

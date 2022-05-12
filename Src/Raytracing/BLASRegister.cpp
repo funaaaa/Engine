@@ -1,7 +1,7 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 
-int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TexturePath)
+int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
@@ -13,25 +13,25 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 
 }
 
-int BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const LPCWSTR& TextureHandle)
+int BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
 
 	blas.push_back(std::make_shared<BLAS>());
-	blas.back()->GenerateBLASFbx(DirectryPath, ModelName, HitGroupName, TextureHandle);
+	blas.back()->GenerateBLASFbx(DirectryPath, ModelName, HitGroupName, TexturePath);
 
 	return blas.size() - 1;
 
 }
 
-int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, const int& TextureID)
+int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
 
 	blas.push_back(std::make_shared<BLAS>());
-	blas.back()->GenerateBLASData(Data, HitGroupName, TextureID);
+	blas.back()->GenerateBLASData(Data, HitGroupName, TextureHandle);
 
 	return blas.size() - 1;
 
