@@ -188,6 +188,8 @@ void mainRayGen()
     // Œ‹‰ÊŠi”[
     gOutput[launchIndex.xy] = float4(col, 1);
     gOutputBuff[launchIndex.xy] = float4(col, 1);
+    
+    gOutput[launchIndex.xy] = pow(gOutput[launchIndex.xy], 1 / 1.4);
 
 }
 
