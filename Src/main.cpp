@@ -47,6 +47,7 @@ struct KariConstBufferData {
 	int isNoiseScene;
 	int isLightHitScene;
 	int isNormalScene;
+	int isMeshScene;
 
 };
 
@@ -143,6 +144,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.lightSize = 30.0f;
 	constBufferData.isLightHitScene = false;
 	constBufferData.isNormalScene = false;
+	constBufferData.isMeshScene = false;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
@@ -365,7 +367,7 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 	float dirY = constBufferData.lightPos.y;
 	float dirZ = constBufferData.lightPos.z;
 	float lightSize = constBufferData.lightSize;
-	float MOVE_LENGTH = 1000.0f;
+	float MOVE_LENGTH = 1500.0f;
 	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
 	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 1000.0f);
 	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
@@ -386,13 +388,13 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 		++constBufferData.counter;
 	}
 
-	// ライトがあたった面だけ表示するフラグを更新。
-	bool isLightHit = constBufferData.isLightHitScene;
-	bool prevIsLightHit = isLightHit;
-	ImGui::Checkbox("LightHit Scene", &isLightHit);
-	constBufferData.isLightHitScene = isLightHit;
+	// メッシュを表示する。
+	bool isMesh = constBufferData.isMeshScene;
+	bool prevIsMesh = isMesh;
+	ImGui::Checkbox("Mesh Scene", &isMesh);
+	constBufferData.isMeshScene = isMesh;
 	// 値が書き換えられていたら、サンプリングを初期化する。
-	if (isLightHit != prevIsLightHit) {
+	if (isMesh != prevIsMesh) {
 		constBufferData.counter = 0;
 	}
 
@@ -403,6 +405,16 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 	constBufferData.isNormalScene = isNormal;
 	// 値が書き換えられていたら、サンプリングを初期化する。
 	if (isNormal != prevIsNormal) {
+		constBufferData.counter = 0;
+	}
+
+	// ライトがあたった面だけ表示するフラグを更新。
+	bool isLightHit = constBufferData.isLightHitScene;
+	bool prevIsLightHit = isLightHit;
+	ImGui::Checkbox("LightHit Scene", &isLightHit);
+	constBufferData.isLightHitScene = isLightHit;
+	// 値が書き換えられていたら、サンプリングを初期化する。
+	if (isLightHit != prevIsLightHit) {
 		constBufferData.counter = 0;
 	}
 
@@ -433,7 +445,7 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 //　→光源の位置の表示非表示をわかりやすくする。
 //　→光源によって照らされた位置のみを表示できるようにする。
 //・そのためにはパイプラインをきちんと複数作れるようにする必要がある？
-・AOのバグを修正。明るさが場所によって違う？
+//・AOのバグを修正。明るさが場所によって違う？
 ・上が終わったら、正規化ランバートについて学ぶ。
 　→どうして正規化ランバートを使うのかまできちんと理解する。
 ・リアルタイムデノイズを実装する。

@@ -24,6 +24,7 @@ struct SceneCB
     int isNoiseScene;
     int isLightHitScene;
     int isNormalScene;
+    int isMeshScene;
 };
 
 
@@ -188,7 +189,7 @@ float3 GetCosHemisphereSample(uint randSeed, float3 hitNorm)
     return x * tangent + y * hitNorm.xyz + z * bitangent;
 }
 
-float3 GetUniformHemisphereSample(uint randSeed, float3 hitNorm)
+float3 GetUniformHemisphereSample(inout uint randSeed, float3 hitNorm)
 {
     // 2‚Â‚Ìƒ‰ƒ“ƒ_ƒ€‚È”’l‚ğæ“¾
     float2 randVal = float2(nextRand(randSeed), nextRand(randSeed));

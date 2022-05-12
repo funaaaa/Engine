@@ -322,6 +322,12 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
     
+    if (gSceneParam.isMeshScene)
+    {
+        payload.color.xy = attrib.barys;
+        return;
+    }
+    
     // 法線を描画するフラグが立っていたら。
     if (gSceneParam.isNormalScene)
     {
@@ -367,7 +373,13 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         uint2 pixldx = DispatchRaysIndex().xy;
         uint2 numPix = DispatchRaysDimensions().xy;
         // ランダムなシードを計算。
-        uint randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+        //uint randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+        float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453));
+        float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx + numPix, float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453));
+        float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx + numPix, float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453));
+        randSeedX = randSeedX * 2.0f - 1.0f;
+        randSeedY = randSeedY * 2.0f - 1.0f;
+        randSeedZ = randSeedZ * 2.0f - 1.0f;
         // 隠蔽度合い
         float visibility = 0.0f;
         
@@ -377,12 +389,13 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         {
             
             // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
-            float3 sampleDir = GetUniformHemisphereSample(randSeed, vtx.Normal);
+            //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
+            float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
             // シャドウレイを飛ばす。
             float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir, 300);
             
-            // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
+            // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
             float nol = saturate(dot(vtx.Normal, sampleDir));
             float pdf = 1.0 / (2.0 * 3.14f);
             visibility += smpleVisiblity * nol / pdf;
@@ -402,10 +415,13 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         lightVisibility += smpleVisiblity * nol / pdf;
         visibility += lightVisibility;
         
+        // 隠蔽度合いが限界を超えないようにする。
         visibility = saturate(visibility);
         
+        // テクスチャとライティングの色に隠蔽率をかける。
         resultColor *= visibility;
         
+        // 最終結果の色を保存。
         payload.color.xyz += resultColor;
         
         // ライトに当たった面だけ表示するフラグが立っていたら。
@@ -422,7 +438,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
                 payload.color = float3(0, 0, 0);
             }
             
-            // AOは行わない。
             return;
             
         }
