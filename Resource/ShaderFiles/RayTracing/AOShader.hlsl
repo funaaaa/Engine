@@ -284,8 +284,8 @@ void mainRayGen()
     uint rayMask = 0xFF;
     
     RAY_FLAG flag = RAY_FLAG_NONE;
-        flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-        flag |= RAY_FLAG_FORCE_OPAQUE;  // AnyHitShaderを無視。
+    flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
 
     // レイを発射
     TraceRay(
@@ -425,33 +425,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // 隠蔽度合い
         float visibility = 0.0f;
         
-        // 飛ばすレイの回数
-        const int aoRayCount = 1;
-        for (int index = 0; index < aoRayCount; ++index)
-        {
-            // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
-            if (gSceneParam.isNoAO)
-            {
-                break;
-            }
-            
-            // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
-            //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
-            float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
-            
-            // シャドウレイを飛ばす。
-            float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 100);
-            
-            // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
-            float nol = saturate(dot(vtx.Normal, sampleDir));
-            float pdf = 1.0 / (2.0 * PI);
-            visibility += smpleVisiblity * nol / pdf;
-            
-        }
-        
-        // 平均を取る。
-        visibility = (1.0f / PI) * (1.0f / float(aoRayCount)) * visibility;
-        
         // 光源へシャドウレイを飛ばす。
         float smpleVisiblity = SoftShadow(vtx);
         
@@ -460,6 +433,41 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         float pdf = 1.0 / (2.0 * 3.14f);
         float lightVisibility = 0;
         lightVisibility += smpleVisiblity;
+            
+        // ライティングの結果明るかったら処理を飛ばす。
+        if (lightVisibility != 1.0f)
+        {
+            
+            // 飛ばすレイの回数
+            const int aoRayCount = 1;
+            for (int index = 0; index < aoRayCount; ++index)
+            {
+            // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
+                if (gSceneParam.isNoAO)
+                {
+                    break;
+                }
+            
+                // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
+                //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
+                float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
+            
+                // シャドウレイを飛ばす。
+                float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 100);
+            
+                // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
+                float nol = saturate(dot(vtx.Normal, sampleDir));
+                float pdf = 1.0 / (2.0 * PI);
+                visibility += smpleVisiblity * nol / pdf;
+            
+            }
+            // 平均を取る。
+            visibility = (1.0f / PI) * (1.0f / float(aoRayCount)) * visibility;
+            
+        }
+        
+        
+        // 光源へのライティングを加算する。
         visibility += lightVisibility;
         
         // 隠蔽度合いが限界を超えないようにする。
