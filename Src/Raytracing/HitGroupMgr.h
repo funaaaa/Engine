@@ -57,5 +57,10 @@ public:
 	const int& GetUAVCount(const int& Index);
 	// ローカルルートシグネチャのゲッタ
 	const std::shared_ptr<RayRootsignature> GetLocalRootSig(const int& Index);
+	// ヒットグループ名からヒットグループIDを取得する。
+	int GetHitGroupID(const LPCWSTR& HitGroupName);
+
+	// ヒットグループのSRVの数を取得する。
+	int GetHitGroupSRVCount(const int& HitGroupID);
 
 };

@@ -151,7 +151,7 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderスキップ
     
     // ライトは除外。
-    uint rayMask = 0xFF;
+    uint rayMask = ~(0x08);
 
     TraceRay(
     gRtScene,
@@ -325,9 +325,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
     
-    // 法線マップから法線情報を抽出。
-    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
-    
+    // ポリゴンの描画するフラグが立っていたら。
     if (gSceneParam.isMeshScene)
     {
         payload.color = CalcBarycentrics(attrib.barys);
@@ -341,6 +339,9 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         return;
     }
 
+    // 法線マップが存在していたら法線マップから法線情報を抽出。
+    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
+    
     // 呼び出し回数が制限を超えないようにする。
     if (checkRecursiveLimit(payload))
     {
@@ -396,6 +397,9 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         const int aoRayCount = 1;
         for (int index = 0; index < aoRayCount; ++index)
         {
+            // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
+            if (gSceneParam.isNoAO)
+                break;
             
             // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
             //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
@@ -421,7 +425,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightPos.xyz)));
         float pdf = 1.0 / (2.0 * 3.14f);
         float lightVisibility = 0;
-        lightVisibility += smpleVisiblity * nol / pdf;
+        lightVisibility += smpleVisiblity;
         visibility += lightVisibility;
         
         // 隠蔽度合いが限界を超えないようにする。

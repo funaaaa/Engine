@@ -405,7 +405,8 @@ void BLAS::StopAnimation()
 	}
 
 }
-
+#include "HitGroupMgr.h"
+#include <assert.h>
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
@@ -435,11 +436,27 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
 
+		// ヒットグループ名からヒットグループ名IDを取得する。
+		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+
+		// ヒットグループIDからSRVの数を取得。
+		int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
+
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-		const int TEXTURE_COUNT = textureHandle.size();
-		for (int index = 0; index < textureHandle.size(); ++index) {
-			Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+		for (int index = 0; index < srvCount; ++index) {
+
+			// このインデックスのテクスチャが存在していなかったら
+			if (textureHandle.size() <= index) {
+
+				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+
+			}
+			else {
+
+				Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+
+			}
 		}
 
 		Dst = entryBegin + recordSize;

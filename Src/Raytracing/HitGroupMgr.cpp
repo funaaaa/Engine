@@ -1,5 +1,6 @@
 #include "HitGroupMgr.h"
 #include "HitGroup.h"
+#include <assert.h>
 
 const LPCWSTR& HitGroupMgr::GetCH(const int& Index)
 {
@@ -47,6 +48,43 @@ const int& HitGroupMgr::GetUAVCount(const int& Index)
 const std::shared_ptr<RayRootsignature> HitGroupMgr::GetLocalRootSig(const int& Index)
 {
 	return hitGroup[Index]->GetLoacalRootSig();
+}
+
+int HitGroupMgr::GetHitGroupID(const LPCWSTR& HitGroupName)
+{
+
+	/*===== ヒットグループ名からヒットグループIDを取得する。 =====*/
+
+	int hitGroupID = -1;
+
+	for (int index = 0; index < MAX_HIT_GROUP; ++index) {
+
+		// 同じ名前だったら。
+		if (HitGroupName != hitGroupNames[index]) continue;
+
+		// IDを保存。
+		hitGroupID = index;
+
+	}
+
+	// -1だったら名前の存在しないヒットグループをセットしようとしているのでアサートを出す。
+	if (hitGroupID == -1) {
+
+		// 存在しないヒットグループをセットしようとしている。
+		assert(0);
+
+	}
+
+	return hitGroupID;
+}
+
+int HitGroupMgr::GetHitGroupSRVCount(const int& HitGroupID)
+{
+
+	/*===== ヒットグループのSRVの数を取得 =====*/
+
+	return hitGroup[HitGroupID]->GetSRVCount();
+
 }
 
 void HitGroupMgr::Setting()

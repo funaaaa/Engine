@@ -220,21 +220,22 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
     
-    // 法線マップから法線情報を抽出。
-    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
-    
+    // ポリゴンの描画するフラグが立っていたら。
     if (gSceneParam.isMeshScene)
     {
         payload.color.xy = attrib.barys;
         return;
     }
-        
+     
     // 法線を描画するフラグが立っていたら。
     if (gSceneParam.isNormalScene)
     {
         payload.color = vtx.Normal;
         return;
     }
+       
+    // 法線マップから法線情報を抽出。
+    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
 
     // 呼び出し回数が制限を超えないようにする。
     if (checkRecursiveLimit(payload))

@@ -24,10 +24,11 @@ struct SceneCB
     float lightSize;
     int seed;
     int counter;
-    int isNoiseScene;
-    int isLightHitScene;
-    int isNormalScene;
-    int isMeshScene;
+    int isNoiseScene; // ノイズを描画するフラグ
+    int isLightHitScene; // ライトにあたった面だけ描画するフラグ
+    int isNormalScene; // 法線情報を描画するフラグ
+    int isMeshScene; // ポリゴン情報を描画するフラグ
+    int isNoAO; // アンビエントオクリュージョンを行わないフラグ
 };
 
 

@@ -48,6 +48,7 @@ struct KariConstBufferData {
 	int isLightHitScene;
 	int isNormalScene;
 	int isMeshScene;
+	int isNoAO;
 
 };
 
@@ -145,6 +146,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.isLightHitScene = false;
 	constBufferData.isNormalScene = false;
 	constBufferData.isMeshScene = false;
+	constBufferData.isNoAO = false;
 
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
@@ -433,6 +435,15 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 		ImGui::Checkbox("Noise Scene", &isNoise);
 		constBufferData.isNoiseScene = isNoise;
 
+		// アンビエントオクリュージョンを行うかのフラグをセット。
+		bool isNoAO = constBufferData.isNoAO;
+		ImGui::Checkbox("NoAO Scene", &isNoAO);
+		// フラグが書き換わっていたらデノイズカウンターを初期化する。
+		if (isNoAO != constBufferData.isNoAO) {
+			constBufferData.counter = 0;
+		}
+		constBufferData.isNoAO = isNoAO;
+
 	}
 
 }
@@ -450,6 +461,7 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 //　→どうして正規化ランバートを使うのかまできちんと理解する。
 //・リニアワークフローを実装する。
 //　→ガンマ値補正？
+//・ライティングのバグを修正する。
 ・軽量化の処理を入れる。
 ・リアルタイムデノイズを実装する。
 　→以前見た輝度に重みをおいたブラーでは実装できないかも。
