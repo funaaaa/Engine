@@ -439,10 +439,9 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         {
             
             // 飛ばすレイの回数
-            const int aoRayCount = 1;
-            for (int index = 0; index < aoRayCount; ++index)
+            for (int index = 0; index < gSceneParam.aoSampleCount; ++index)
             {
-            // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
+                // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
                 if (gSceneParam.isNoAO)
                 {
                     break;
@@ -453,16 +452,16 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
                 float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
                 // シャドウレイを飛ばす。
-                float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 100);
+                float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 300);
             
                 // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
                 float nol = saturate(dot(vtx.Normal, sampleDir));
                 float pdf = 1.0 / (2.0 * PI);
                 visibility += smpleVisiblity * nol / pdf;
-            
+               
             }
             // 平均を取る。
-            visibility = (1.0f / PI) * (1.0f / float(aoRayCount)) * visibility;
+            visibility = (1.0f / PI) * (1.0f / float(gSceneParam.aoSampleCount)) * visibility;
             
         }
         
@@ -472,6 +471,14 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         
         // 隠蔽度合いが限界を超えないようにする。
         visibility = saturate(visibility);
+        
+        // ノイズのみを描画するフラグが立っていたら。
+        if (gSceneParam.isNoiseOnlyScene)
+        {
+            payload.color = float3(visibility, visibility, visibility);
+            return;
+
+        }
         
         // テクスチャとライティングの色に隠蔽率をかける。
         resultColor *= visibility;

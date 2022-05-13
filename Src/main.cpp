@@ -44,7 +44,9 @@ struct KariConstBufferData {
 	float lightSize;
 	int seed;
 	int counter;
+	int aoSampleCount;
 	int isNoiseScene;
+	int isNoiseOnlyScene;
 	int isLightHitScene;
 	int isNormalScene;
 	int isMeshScene;
@@ -141,8 +143,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 	constBufferData.counter = 0;
 	constBufferData.isNoiseScene = false;
+	constBufferData.isNoiseOnlyScene = false;
 	constBufferData.lightPos = Vec3(0, 300, 0);
 	constBufferData.lightSize = 30.0f;
+	constBufferData.aoSampleCount = 1;
 	constBufferData.isLightHitScene = false;
 	constBufferData.isNormalScene = false;
 	constBufferData.isMeshScene = false;
@@ -369,11 +373,14 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 	float dirY = constBufferData.lightPos.y;
 	float dirZ = constBufferData.lightPos.z;
 	float lightSize = constBufferData.lightSize;
+	float aoSampleCount = constBufferData.aoSampleCount;
 	float MOVE_LENGTH = 1500.0f;
 	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
 	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 1000.0f);
 	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
 	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 1.0f, 50.0f);
+	ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
+	constBufferData.aoSampleCount = aoSampleCount;
 
 	// 変わっていたら
 	if (dirX != constBufferData.lightPos.x || dirY != constBufferData.lightPos.y || dirZ != constBufferData.lightPos.z || lightSize != constBufferData.lightSize) {
@@ -435,6 +442,15 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 		ImGui::Checkbox("Noise Scene", &isNoise);
 		constBufferData.isNoiseScene = isNoise;
 
+		// デバッグ用でノイズ画面のみを出すためのフラグをセット。
+		bool isNoiseOnly = constBufferData.isNoiseOnlyScene;
+		ImGui::Checkbox("NoiseOnly Scene", &isNoiseOnly);
+		// フラグが書き換わっていたらデノイズカウンターを初期化する。
+		if (isNoiseOnly != constBufferData.isNoiseOnlyScene) {
+			constBufferData.counter = 0;
+		}
+		constBufferData.isNoiseOnlyScene = isNoiseOnly;
+
 		// アンビエントオクリュージョンを行うかのフラグをセット。
 		bool isNoAO = constBufferData.isNoAO;
 		ImGui::Checkbox("NoAO Scene", &isNoAO);
@@ -464,6 +480,7 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 //・ライティングのバグを修正する。
 //・軽量化の処理を入れる。
 ・リアルタイムデノイズを実装する。
+　→なぜサンプル数を増やして平均しても色が変わらないのか。そもそも変わっているのか？
 　→以前見た輝度に重みをおいたブラーでは実装できないかも。
 　→ノイズが01なので、逆に輝度が大きすぎる…
 　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！
