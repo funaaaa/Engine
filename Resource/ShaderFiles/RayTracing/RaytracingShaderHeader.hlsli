@@ -78,7 +78,7 @@ inline float3 CalcHitAttribute3(float3 vertexAttribute[3], float2 barycentrics)
 inline bool checkRecursiveLimit(inout Payload payload)
 {
     ++payload.recursive;
-    if (3 < payload.recursive)
+    if (1 < payload.recursive)
     {
         //payload.color = float3(0, 0, 0);
         return true;

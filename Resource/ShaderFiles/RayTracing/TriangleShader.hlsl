@@ -119,7 +119,7 @@ bool ShootShadowRay(Vertex vtx, float3 origin, float3 direction)
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderをスキップ。
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE;
 
     // ライトは除外。
     uint rayMask = ~(0x08);
@@ -313,12 +313,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         payload.color = float3(1, 1, 1);
     }
 
-}
-
-// closesthitシェーダー シャドウ用
-[shader("closesthit")]
-void shadowCHS(inout ShadowPayload payload, MyAttribute attrib)
-{
 }
 
 // アルファ抜きAnyHitShader

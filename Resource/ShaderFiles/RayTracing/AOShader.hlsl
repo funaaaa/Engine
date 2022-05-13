@@ -166,6 +166,38 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax)
     return payload.isShadow;
 }
 
+// シャドウレイ発射
+bool ShootAOShadowRay(float3 origin, float3 direction, float tMax)
+{
+    RayDesc rayDesc;
+    rayDesc.Origin = origin;
+    rayDesc.Direction = direction;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = tMax;
+
+    ShadowPayload payload;
+    payload.isShadow = false;
+
+    RAY_FLAG flags = RAY_FLAG_NONE;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
+    
+    // ライトは除外。
+    uint rayMask = ~(0x08);
+
+    TraceRay(
+    gRtScene,
+    flags,
+    rayMask,
+    0,
+    1,
+    1, // MISSシェーダーのインデックス
+    rayDesc,
+    payload);
+
+    return payload.isShadow;
+}
+
 // ソフトシャドウ射出関数
 float SoftShadow(Vertex vtx)
 {
@@ -252,8 +284,8 @@ void mainRayGen()
     uint rayMask = 0xFF;
     
     RAY_FLAG flag = RAY_FLAG_NONE;
-    flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flag |= RAY_FLAG_FORCE_OPAQUE;
+        flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+        flag |= RAY_FLAG_FORCE_OPAQUE;  // AnyHitShaderを無視。
 
     // レイを発射
     TraceRay(
@@ -399,24 +431,26 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         {
             // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
             if (gSceneParam.isNoAO)
+            {
                 break;
+            }
             
             // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
             //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
             float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
             // シャドウレイを飛ばす。
-            float smpleVisiblity = ShootShadowRay(vtx.Position, sampleDir, 300);
+            float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 100);
             
             // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
             float nol = saturate(dot(vtx.Normal, sampleDir));
-            float pdf = 1.0 / (2.0 * 3.14f);
+            float pdf = 1.0 / (2.0 * PI);
             visibility += smpleVisiblity * nol / pdf;
             
         }
         
         // 平均を取る。
-        visibility = (1.0f / 3.14f) * (1.0f / float(aoRayCount)) * visibility;
+        visibility = (1.0f / PI) * (1.0f / float(aoRayCount)) * visibility;
         
         // 光源へシャドウレイを飛ばす。
         float smpleVisiblity = SoftShadow(vtx);
