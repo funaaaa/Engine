@@ -416,11 +416,11 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 	StateObject.As(&rtsoProps);
 	auto entryBegin = Dst;
 	auto shader = GetHitGroupName();
-	auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
 
 	// 保存されているヒットグループ名と違っていたら書き込まない。
 	if (HitGroupName == shader) {
 
+		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
 		if (id == nullptr) {
 			throw std::logic_error("Not found ShaderIdentifier");
 		}
