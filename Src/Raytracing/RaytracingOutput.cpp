@@ -41,6 +41,21 @@ void RaytracingOutput::SetComputeRootDescriptorTalbe(const int& RootParamIndex)
 
 }
 
+void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src)
+{
+
+	/*===== リソースバリアを遷移 =====*/
+
+	D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::Transition(
+			GetRaytracingOutput().Get(),
+			Dst,
+			Src)
+	};
+
+	DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+
+}
+
 Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT width, UINT height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
 {
 	D3D12_HEAP_PROPERTIES heapProps{};

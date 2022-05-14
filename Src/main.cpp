@@ -116,8 +116,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	RaytracingOutput raytracingOutput;
 	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	RaytracingOutput raytracingOutputBuff;
-	raytracingOutputBuff.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
+	RaytracingOutput raytracingOutputData;
+	raytracingOutputData.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
 
 	// シェーダーテーブルを生成。
 	aoPipline.ConstructionShaderTable();
@@ -234,22 +234,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->SetComputeRootSignature(setPipline.GetGlobalRootSig()->GetRootSig().Get());
 		DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 		raytracingOutput.SetComputeRootDescriptorTalbe(2);
-		raytracingOutputBuff.SetComputeRootDescriptorTalbe(3);
+		raytracingOutputData.SetComputeRootDescriptorTalbe(3);
 		DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
 		// レイトレーシング結果バッファをUAV状態へ
-		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::Transition(
-			raytracingOutput.GetRaytracingOutput().Get(),
-			D3D12_RESOURCE_STATE_COPY_SOURCE,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
-			CD3DX12_RESOURCE_BARRIER::Transition(
-			raytracingOutputBuff.GetRaytracingOutput().Get(),
-			D3D12_RESOURCE_STATE_COPY_SOURCE,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-		)
-		};
-		DirectXBase::Ins()->cmdList->ResourceBarrier(2, barrierToUAV);
+		raytracingOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		raytracingOutputData.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 		DirectXBase::Ins()->cmdList->SetPipelineState1(setPipline.GetStateObject().Get());
 
@@ -259,19 +250,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 
 		// バリアを設定し各リソースの状態を遷移させる.
+		raytracingOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		raytracingOutputData.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		D3D12_RESOURCE_BARRIER barriers[] = {
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		raytracingOutput.GetRaytracingOutput().Get(),
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		raytracingOutputBuff.GetRaytracingOutput().Get(),
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_COPY_DEST),
+			CD3DX12_RESOURCE_BARRIER::Transition(
+			DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_COPY_DEST),
 		};
 		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
@@ -480,7 +465,7 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 //・ライティングのバグを修正する。
 //・軽量化の処理を入れる。
 ・リアルタイムデノイズを実装する。
-　→なぜサンプル数を増やして平均しても色が変わらないのか。そもそも変わっているのか？
+//　→なぜサンプル数を増やして平均しても色が変わらないのか。そもそも変わっているのか？ → 乱数の種が変わってなかったから。
 　→以前見た輝度に重みをおいたブラーでは実装できないかも。
 　→ノイズが01なので、逆に輝度が大きすぎる…
 　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！

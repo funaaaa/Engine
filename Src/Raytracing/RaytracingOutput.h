@@ -24,6 +24,9 @@ public:
 	// ディスクリプタをセット。
 	void SetComputeRootDescriptorTalbe(const int& RootParamIndex);
 
+	// リソースバリア
+	void SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src);
+
 	// ゲッタ
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput; }
 
