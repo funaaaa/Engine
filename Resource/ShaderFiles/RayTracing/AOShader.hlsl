@@ -180,6 +180,7 @@ bool ShootAOShadowRay(float3 origin, float3 direction, float tMax)
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
     
     // ライトは除外。
@@ -312,7 +313,7 @@ void mainRayGen()
     }
     else if (gSceneParam.counter < 256)
     {
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / (gSceneParam.counter);
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / float(gSceneParam.counter);
         gOutputBuff[launchIndex.xy] += float4(col, 1);
     }
     else
@@ -416,12 +417,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         uint2 numPix = DispatchRaysDimensions().xy;
         // ランダムなシードを計算。
         //uint randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
-        float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453));
-        float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx + numPix, float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453));
-        float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx + numPix, float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453));
-        randSeedX = randSeedX * 2.0f - 1.0f;
-        randSeedY = randSeedY * 2.0f - 1.0f;
-        randSeedZ = randSeedZ * 2.0f - 1.0f;
+        
         // 隠蔽度合い
         float visibility = 0.0f;
         
@@ -449,6 +445,14 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             
                 // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
                 //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
+                
+                // 乱数を生成してレイを飛ばす方向を決める。
+                float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+                float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+                float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+                randSeedX = randSeedX * 2.0f - 1.0f;
+                randSeedY = randSeedY * 2.0f - 1.0f;
+                randSeedZ = randSeedZ * 2.0f - 1.0f;
                 float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
                 // シャドウレイを飛ばす。
