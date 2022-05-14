@@ -25,6 +25,7 @@ public:
 
 		DEF_HIT_GROUP,
 		AO_HIT_GROUP,
+		//DENOISE_AO_HIT_GROUP,
 		MAX_HIT_GROUP,
 
 	};

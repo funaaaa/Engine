@@ -16,8 +16,15 @@ Texture2D<float4> normalMap : register(t3, space1);
 SamplerState smp : register(s0, space1);
 
 // RayGenerationシェーダーのローカルルートシグネチャ
-RWTexture2D<float4> gOutput : register(u0);
-RWTexture2D<float4> gOutputBuff : register(u1);
+RWTexture2D<float4> outputColor : register(u0);
+RWTexture2D<float4> outputLuminance : register(u1);
+
+struct DenoisePayload
+{
+    float3 color;
+    float3 luminance;
+    uint recursive;
+};
 
 // 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
@@ -42,121 +49,6 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
     v.Normal = normalize(v.Normal);
 
     return v;
-}
-
-// 反射レイトレーシング
-float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
-{
-    float3 worldPos = mul(float4(vertexPosition, 1), ObjectToWorld4x3());
-    float3 worldNormal = mul(vertexNormal, (float3x3) ObjectToWorld4x3());
-    float3 worldRayDir = WorldRayDirection();
-    float3 reflectDir = reflect(worldRayDir, worldNormal);
-    
-    uint rayMask = 0xFF;
-
-    RayDesc rayDesc;
-    rayDesc.Origin = worldPos;
-    rayDesc.Direction = reflectDir;
-    rayDesc.TMin = 0.01;
-    rayDesc.TMax = 100000;
-
-    Payload reflectPayload;
-    reflectPayload.color = float3(0, 0, 0);
-    reflectPayload.recursive = recursive;
-    TraceRay(
-        gRtScene,
-        0,
-        rayMask,
-        0, // ray index
-        1, // MultiplierForGeometryContrib
-        0, // miss index
-        rayDesc,
-        reflectPayload);
-    return reflectPayload.color;
-}
-
-// 屈折レイトレーシング
-float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
-{
-    float4x3 mtx = ObjectToWorld4x3();
-    float3 worldPos = mul(float4(vertexPosition, 1), mtx);
-    float3 worldNormal = mul(vertexNormal, (float3x3) mtx);
-    float3 worldRayDir = normalize(WorldRayDirection());
-    worldNormal = normalize(worldNormal);
-
-    const float refractVal = 1.4;
-    float nr = dot(worldNormal, worldRayDir);
-    float3 refracted;
-    if (nr < 0)
-    {
-        // 表面. 空気中 -> 屈折媒質.
-        float eta = 1.0 / refractVal;
-        refracted = refract(worldRayDir, worldNormal, eta);
-    }
-    else
-    {
-        // 裏面. 屈折媒質 -> 空気中.
-        float eta = refractVal / 1.0;
-        refracted = refract(worldRayDir, -worldNormal, eta);
-    }
-
-    if (length(refracted) < 0.01)
-    {
-        return Reflection(vertexPosition, vertexNormal, recursive);
-    }
-    else
-    {
-        uint rayMask = 0xFF;
-
-        RayDesc rayDesc;
-        rayDesc.Origin = worldPos;
-        rayDesc.Direction = refracted;
-        rayDesc.TMin = 0.001;
-        rayDesc.TMax = 100000;
-
-        Payload refractPayload;
-        refractPayload.color = float3(0, 1, 0);
-        refractPayload.recursive = recursive;
-        TraceRay(
-            gRtScene,
-            0,
-            rayMask,
-            0, // ray index
-            1, // MultiplierForGeometryContrib
-            0, // miss index
-            rayDesc,
-            refractPayload);
-        return refractPayload.color;
-    }
-}
-
-// 反射レイを射出
-void ShootReflectionRay(inout Payload payload, float3 vertexPosition, float3 vertexNormal)
-{
-    
-    float3 worldPos = mul(float4(vertexPosition, 1), ObjectToWorld4x3());
-    float3 worldNormal = mul(vertexNormal, (float3x3) ObjectToWorld4x3());
-    float3 worldRayDir = WorldRayDirection();
-    float3 reflectDir = reflect(worldRayDir, worldNormal);
-    
-    uint rayMask = 0xFF;
-
-    RayDesc rayDesc;
-    rayDesc.Origin = worldPos;
-    rayDesc.Direction = reflectDir;
-    rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 100000;
-    
-    TraceRay(
-        gRtScene,
-        0,
-        rayMask,
-        0, // ray index
-        1, // MultiplierForGeometryContrib
-        0, // miss index
-        rayDesc,
-        payload);
-    
 }
 
 // シャドウレイ発射
@@ -253,26 +145,7 @@ float SoftShadow(Vertex vtx)
     int randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
     
     float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
-    
-    
-    
-    //float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-    
-    //// 光源への中心ベクトル
-    //float3 pointLightPosition = gSceneParam.lightPos;
-    //float3 lightDir = pointLightPosition - worldPosition;
-    
-    //// 乱数の種を求める。
-    //uint2 pixldx = DispatchRaysIndex().xy;
-    //uint2 numPix = DispatchRaysDimensions().xy;
-    //float randSeed = frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453);
-    
-    //// 光源から光源の半径方向に伸びるベクトルを求める。
-    //float3 lightScaleVec = float3(randSeed * gSceneParam.lightSize, randSeed * gSceneParam.lightSize, randSeed * gSceneParam.lightSize);
-    
-    //// 光源ベクトルと半径ベクトルを足して正規化した値をシャドウレイとする。
-    //float3 shadowRayDir = normalize(lightDir + lightScaleVec);
-    
+
     return ShootShadowRay(worldPosition, shadowRayDir, length(vtx.Position - gSceneParam.lightPos));
 }
 
@@ -302,8 +175,9 @@ void mainRayGen()
     rayDesc.TMax = 100000;
 
     // ペイロードの設定
-    Payload payload;
+    DenoisePayload payload;
     payload.color = float3(0, 0, 0);
+    payload.luminance = float3(0, 0, 0);
     payload.recursive = 0;
 
     // TransRayに必要な設定を作成
@@ -325,40 +199,15 @@ void mainRayGen()
     payload);
     
     
-    // レイを発射した結果の色を取得
-    float3 col = payload.color;
-
-    // 結果格納
-    if (gSceneParam.counter == 0)
-    {
-        
-        gOutputBuff[launchIndex.xy] = float4(col, 1);
-        gOutput[launchIndex.xy] = float4(col, 1);
-
-    }
-    else if (gSceneParam.counter < 256)
-    {
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / float(gSceneParam.counter);
-        gOutputBuff[launchIndex.xy] += float4(col, 1);
-    }
-    else
-    {
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / 256.0f;
-    }
-    
-    // デバッグ用でノイズ画面を出すフラグが立っていたら。
-    if (gSceneParam.isNoiseScene)
-    {
-        gOutput[launchIndex.xy] = float4(col, 1);
-    }
-    
-    gOutput[launchIndex.xy] = pow(gOutput[launchIndex.xy], 1 / 1.4);
+   // 色情報と明るさ情報を保存。
+    outputColor[launchIndex.xy] = float4(payload.color, 1.0f);
+    outputLuminance[launchIndex.xy] = float4(payload.luminance, 1.0f);
 
 }
 
 // missシェーダー レイがヒットしなかった時に呼ばれるシェーダー
 [shader("miss")]
-void mainMS(inout Payload payload)
+void mainMS(inout DenoisePayload payload)
 {
 
     // 単色を返すようにする。
@@ -377,7 +226,7 @@ void shadowMS(inout ShadowPayload payload)
 
 // closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
 [shader("closesthit")]
-void mainCHS(inout Payload payload, MyAttribute attrib)
+void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 {
     
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
@@ -401,24 +250,14 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 呼び出し回数が制限を超えないようにする。
-    if (checkRecursiveLimit(payload))
+    ++payload.recursive;
+    if (2 <= payload.recursive)
     {
-        return; // 呼び出し回数が越えたら即リターン.
+        return;
     }
 
-    // 完全反射
-    if (instanceID == 0)
-    {
-        float3 reflectionColor = Reflection(vtx.Position, vtx.Normal, payload.recursive);
-        payload.color = reflectionColor;
-    }
-    // 屈折
-    if (instanceID == 1)
-    {
-        payload.color = Refraction(vtx.Position, vtx.Normal, payload.recursive);
-    }
     // 通常ライティング
-    else if (instanceID == 2)
+    if (instanceID == 2)
     {
         // lambert ライティングを行う.
         float3 lightdir = -normalize(gSceneParam.lightPos.xyz);
@@ -440,8 +279,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         
         uint2 pixldx = DispatchRaysIndex().xy;
         uint2 numPix = DispatchRaysDimensions().xy;
-        // ランダムなシードを計算。
-        //uint randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
         
         // 隠蔽度合い
         float visibility = 0.0f;
@@ -467,9 +304,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
                 {
                     break;
                 }
-            
-                // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
-                //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
                 
                 // 乱数を生成してレイを飛ばす方向を決める。
                 float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
@@ -504,16 +338,16 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // ノイズのみを描画するフラグが立っていたら。
         if (gSceneParam.isNoiseOnlyScene)
         {
-            payload.color = float3(visibility, visibility, visibility);
+            payload.luminance = float3(visibility, visibility, visibility);
             return;
 
         }
         
-        // テクスチャとライティングの色に隠蔽率をかける。
-        resultColor *= visibility;
-        
         // 最終結果の色を保存。
-        payload.color.xyz += resultColor;
+        payload.color.xyz = resultColor;
+        
+        // 明るさ情報を保存。
+        payload.luminance = visibility;
         
         // ライトに当たった面だけ表示するフラグが立っていたら。
         if (gSceneParam.isLightHitScene)
@@ -522,11 +356,11 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             // 光にあたっていたら。
             if (0.0f < lightVisibility)
             {
-                payload.color = float3(1, 1, 1);
+                payload.luminance = float3(1, 1, 1);
             }
             else
             {
-                payload.color = float3(0, 0, 0);
+                payload.luminance = float3(0, 0, 0);
             }
             
             return;
@@ -551,7 +385,7 @@ void shadowCHS(inout ShadowPayload payload, MyAttribute attrib)
 
 // アルファ抜きAnyHitShader
 [shader("anyhit")]
-void mainAnyHit(inout Payload payload, MyAttribute attrib)
+void mainAnyHit(inout DenoisePayload payload, MyAttribute attrib)
 {
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     float4 diffuse = texture.SampleLevel(smp, vtx.uv, 0);

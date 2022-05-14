@@ -142,31 +142,6 @@ float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
     return mul(R, float3(x, y, z));
 }
 
-// “–‚½‚Á‚½ˆÊ’u‚Ìî•ñ‚ğæ“¾‚·‚éŠÖ”
-Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
-{
-    Vertex v = (Vertex) 0;
-    float3 barycentrics = CalcBarycentrics(attrib.barys);
-    uint vertexId = PrimitiveIndex() * 3; // Triangle List ‚Ì‚½‚ß.
-
-    float weights[3] =
-    {
-        barycentrics.x, barycentrics.y, barycentrics.z
-    };
-
-    for (int i = 0; i < 3; ++i)
-    {
-        uint index = indexBuffer[vertexId + i];
-        float w = weights[i];
-        v.Position += vertexBuffer[index].Position * w;
-        v.Normal += vertexBuffer[index].Normal * w;
-        v.uv += vertexBuffer[index].uv * w;
-    }
-    v.Normal = normalize(v.Normal);
-
-    return v;
-}
-
 float3 GetPerpendicularVector(float3 u)
 {
     float3 a = abs(u);

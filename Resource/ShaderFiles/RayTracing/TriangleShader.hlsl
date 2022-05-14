@@ -19,6 +19,31 @@ SamplerState smp : register(s0, space1);
 RWTexture2D<float4> gOutput : register(u0);
 RWTexture2D<float4> gOutputBuff : register(u1);
 
+// 当たった位置の情報を取得する関数
+Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
+{
+    Vertex v = (Vertex) 0;
+    float3 barycentrics = CalcBarycentrics(attrib.barys);
+    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
+
+    float weights[3] =
+    {
+        barycentrics.x, barycentrics.y, barycentrics.z
+    };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        uint index = indexBuffer[vertexId + i];
+        float w = weights[i];
+        v.Position += vertexBuffer[index].Position * w;
+        v.Normal += vertexBuffer[index].Normal * w;
+        v.uv += vertexBuffer[index].uv * w;
+    }
+    v.Normal = normalize(v.Normal);
+
+    return v;
+}
+
 // 反射レイトレーシング
 float3 Reflection(float3 vertexPosition, float3 vertexNormal, int recursive)
 {
