@@ -10,6 +10,19 @@ struct Vertex
     float2 uv;
 };
 
+// 点光源の情報
+struct PointLightData
+{
+    float3 lightPos;
+    float pad1;
+    float3 lightColor;
+    float pad2;
+    float lightSize;
+    float lightPower;
+    int isActive;
+    float pad3;
+};
+
 // 環境情報
 struct SceneCB
 {
@@ -20,8 +33,7 @@ struct SceneCB
     float4 lightDirection; // 平行光源の向き.
     float4 lightColor; // 平行光源色.
     float4 ambientColor; // 環境光.
-    float3 lightPos;
-    float lightSize;
+    PointLightData pointLight;
     int seed;
     int counter;
     int aoSampleCount;

@@ -137,7 +137,7 @@ bool ShootShadowRay(Vertex vtx, float3 origin, float3 direction)
     rayDesc.Origin = origin;
     rayDesc.Direction = direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = length(vtx.Position - gSceneParam.lightPos);
+    rayDesc.TMax = length(vtx.Position - gSceneParam.pointLight.lightPos);
 
     ShadowPayload payload;
     payload.isShadow = true;
@@ -283,7 +283,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     else if (instanceID == 2)
     {
         // lambert ライティングを行う.
-        float3 lightdir = -normalize(gSceneParam.lightPos.xyz);
+        float3 lightdir = -normalize(gSceneParam.pointLight.lightPos.xyz);
 
         float nl = saturate(dot(vtx.Normal, lightdir));
         
@@ -303,7 +303,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // シャドウレイを発射。
         float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
         float shadowRate = 1.0f;
-        bool isShadow = ShootShadowRay(vtx, worldPosition, normalize(gSceneParam.lightPos - worldPosition));
+        bool isShadow = ShootShadowRay(vtx, worldPosition, normalize(gSceneParam.pointLight.lightPos - worldPosition));
         //bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 7, 0) - worldPosition));
 
         // 影なら暗くする。

@@ -230,7 +230,7 @@ float SoftShadow(Vertex vtx)
     float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     
     // 光源への中心ベクトル
-    float3 pointLightPosition = gSceneParam.lightPos;
+    float3 pointLightPosition = gSceneParam.pointLight.lightPos;
     float3 lightDir = normalize(pointLightPosition - worldPosition);
     
     // ライトベクトルと垂直なベクトルを求める。
@@ -241,7 +241,7 @@ float SoftShadow(Vertex vtx)
     }
     
     // 光源の端を求める。
-    float3 toLightEdge = (pointLightPosition + perpL * gSceneParam.lightSize) - worldPosition;
+    float3 toLightEdge = (pointLightPosition + perpL * gSceneParam.pointLight.lightSize) - worldPosition;
     toLightEdge = normalize(toLightEdge);
     
     // 角度を求める。
@@ -254,26 +254,7 @@ float SoftShadow(Vertex vtx)
     
     float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
     
-    
-    
-    //float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-    
-    //// 光源への中心ベクトル
-    //float3 pointLightPosition = gSceneParam.lightPos;
-    //float3 lightDir = pointLightPosition - worldPosition;
-    
-    //// 乱数の種を求める。
-    //uint2 pixldx = DispatchRaysIndex().xy;
-    //uint2 numPix = DispatchRaysDimensions().xy;
-    //float randSeed = frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453);
-    
-    //// 光源から光源の半径方向に伸びるベクトルを求める。
-    //float3 lightScaleVec = float3(randSeed * gSceneParam.lightSize, randSeed * gSceneParam.lightSize, randSeed * gSceneParam.lightSize);
-    
-    //// 光源ベクトルと半径ベクトルを足して正規化した値をシャドウレイとする。
-    //float3 shadowRayDir = normalize(lightDir + lightScaleVec);
-    
-    return ShootShadowRay(worldPosition, shadowRayDir, length(vtx.Position - gSceneParam.lightPos));
+    return ShootShadowRay(worldPosition, shadowRayDir, length(vtx.Position - gSceneParam.pointLight.lightPos));
 }
 
 // RayGenerationシェーダー
@@ -421,7 +402,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     else if (instanceID == 2)
     {
         // lambert ライティングを行う.
-        float3 lightdir = -normalize(gSceneParam.lightPos.xyz);
+        float3 lightdir = -normalize(gSceneParam.pointLight.lightPos.xyz);
 
         float nl = saturate(dot(vtx.Normal, lightdir));
         
@@ -446,17 +427,35 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // 隠蔽度合い
         float visibility = 0.0f;
         
+        // ライトまでの距離
+        float lightLength = length(gSceneParam.pointLight.lightPos - vtx.Position);
+        
         // 光源へシャドウレイを飛ばす。
-        float smpleVisiblity = SoftShadow(vtx);
+        float smpleVisiblity = 0;
+        if (lightLength < gSceneParam.pointLight.lightPower)
+        {
+            smpleVisiblity = SoftShadow(vtx);
+            
+            // 影だったら
+            if (0 <= smpleVisiblity)
+            {
+                
+                // 距離に応じて明るさを変える。
+                float rate = lightLength / gSceneParam.pointLight.lightPower;
+                rate = 1.0f - rate;
+                smpleVisiblity *= rate;
+                
+            }
+        }
         
         // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
-        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightPos.xyz)));
+        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.pointLight.lightPos.xyz)));
         float pdf = 1.0 / (2.0 * 3.14f);
         float lightVisibility = 0;
         lightVisibility += smpleVisiblity;
             
         // ライティングの結果明るかったら処理を飛ばす。
-        if (lightVisibility != 1.0f)
+        if (lightVisibility <= 1.0f)
         {
             
             // 飛ばすレイの回数

@@ -115,7 +115,7 @@ float SoftShadow(Vertex vtx)
     float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     
     // 光源への中心ベクトル
-    float3 pointLightPosition = gSceneParam.lightPos;
+    float3 pointLightPosition = gSceneParam.pointLight.lightPos;
     float3 lightDir = normalize(pointLightPosition - worldPosition);
     
     // ライトベクトルと垂直なベクトルを求める。
@@ -126,7 +126,7 @@ float SoftShadow(Vertex vtx)
     }
     
     // 光源の端を求める。
-    float3 toLightEdge = (pointLightPosition + perpL * gSceneParam.lightSize) - worldPosition;
+    float3 toLightEdge = (pointLightPosition + perpL * gSceneParam.pointLight.lightSize) - worldPosition;
     toLightEdge = normalize(toLightEdge);
     
     // 角度を求める。
@@ -139,7 +139,7 @@ float SoftShadow(Vertex vtx)
     
     float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
 
-    return ShootShadowRay(worldPosition, shadowRayDir, length(vtx.Position - gSceneParam.lightPos));
+    return ShootShadowRay(worldPosition, shadowRayDir, length(vtx.Position - gSceneParam.pointLight.lightPos));
 }
 
 // RayGenerationシェーダー
@@ -252,7 +252,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     if (instanceID == 2)
     {
         // lambert ライティングを行う.
-        float3 lightdir = -normalize(gSceneParam.lightPos.xyz);
+        float3 lightdir = -normalize(gSceneParam.pointLight.lightPos.xyz);
 
         float nl = saturate(dot(vtx.Normal, lightdir));
         
@@ -279,7 +279,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         float smpleVisiblity = SoftShadow(vtx);
         
         // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
-        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.lightPos.xyz)));
+        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.pointLight.lightPos.xyz)));
         float pdf = 1.0 / (2.0 * 3.14f);
         float lightVisibility = 0;
         lightVisibility += smpleVisiblity;

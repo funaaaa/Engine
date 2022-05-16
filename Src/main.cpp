@@ -32,6 +32,19 @@
 // fps更新
 void FPS();
 
+struct RayPointLightData {
+
+	Vec3 lightPos;
+	float pad1;
+	Vec3 lightColor;
+	float pad2;
+	float lightSize;
+	float lightPower;
+	int isActive;
+	float pad3;
+
+};
+
 struct KariConstBufferData {
 
 	XMMATRIX mtxView;			// ビュー行列。
@@ -41,8 +54,7 @@ struct KariConstBufferData {
 	XMVECTOR lightDirection;	// 平行光源の向き。
 	XMVECTOR lightColor;		// 平行光源色。
 	XMVECTOR ambientColor;		// 環境光。
-	Vec3 lightPos;
-	float lightSize;
+	RayPointLightData pointLight;
 	int seed;
 	int counter;
 	int aoSampleCount;
@@ -156,8 +168,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.counter = 0;
 	constBufferData.isNoiseScene = false;
 	constBufferData.isNoiseOnlyScene = false;
-	constBufferData.lightPos = Vec3(0, 300, 0);
-	constBufferData.lightSize = 30.0f;
+	constBufferData.pointLight.lightPos = Vec3(0, 300, 0);
+	constBufferData.pointLight.lightSize = 30.0f;
+	constBufferData.pointLight.lightPower = 300.0f;
 	constBufferData.aoSampleCount = 1;
 	constBufferData.isLightHitScene = false;
 	constBufferData.isNormalScene = false;
@@ -203,8 +216,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
 		if (isMoveLight) {
 
-			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.lightPos);
-			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.lightSize);
+			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
+			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
 
 			tlas.Update();
 
@@ -261,10 +274,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
 
 		// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
-		if(debugPiplineID == DENOISE_AO_PIPLINE){
-		
-		
-		
+		if (debugPiplineID == DENOISE_AO_PIPLINE) {
+
+
+
 		}
 
 		// バックバッファのインデックスを取得する。
@@ -375,21 +388,23 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 	// DirLightについて
 
 	// 値を保存する。
-	float dirX = constBufferData.lightPos.x;
-	float dirY = constBufferData.lightPos.y;
-	float dirZ = constBufferData.lightPos.z;
-	float lightSize = constBufferData.lightSize;
+	float dirX = constBufferData.pointLight.lightPos.x;
+	float dirY = constBufferData.pointLight.lightPos.y;
+	float dirZ = constBufferData.pointLight.lightPos.z;
+	float lightSize = constBufferData.pointLight.lightSize;
 	float aoSampleCount = constBufferData.aoSampleCount;
+	float pointLightPower = constBufferData.pointLight.lightPower;
 	float MOVE_LENGTH = 1500.0f;
-	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 1000.0f);
-	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 1.0f, 50.0f);
+	ImGui::SliderFloat("PointLightX", &constBufferData.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
+	ImGui::SliderFloat("PointLightY", &constBufferData.pointLight.lightPos.y, 0.0f, 1000.0f);
+	ImGui::SliderFloat("PointLightZ", &constBufferData.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
+	ImGui::SliderFloat("PointLightRadius", &constBufferData.pointLight.lightSize, 1.0f, 50.0f);
+	ImGui::SliderFloat("PointLightPower", &constBufferData.pointLight.lightPower, 300.0f, 1000.0f);
 	ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
 	constBufferData.aoSampleCount = aoSampleCount;
 
 	// 変わっていたら
-	if (dirX != constBufferData.lightPos.x || dirY != constBufferData.lightPos.y || dirZ != constBufferData.lightPos.z || lightSize != constBufferData.lightSize) {
+	if (dirX != constBufferData.pointLight.lightPos.x || dirY != constBufferData.pointLight.lightPos.y || dirZ != constBufferData.pointLight.lightPos.z || lightSize != constBufferData.pointLight.lightSize || pointLightPower != constBufferData.pointLight.lightPower) {
 
 		isMove = true;
 		isMoveLight = true;
