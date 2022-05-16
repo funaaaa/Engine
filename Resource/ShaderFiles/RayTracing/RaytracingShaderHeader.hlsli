@@ -40,6 +40,13 @@ struct Payload
     float3 color;
     uint recursive;
 };
+// ペイロード AOデノイザ用
+struct DenoisePayload
+{
+    float3 color;
+    float3 luminance;
+    uint recursive;
+};
 // ペイロード 影情報を取得するための構造体
 struct ShadowPayload
 {
@@ -78,6 +85,16 @@ inline float3 CalcHitAttribute3(float3 vertexAttribute[3], float2 barycentrics)
 
 // 制限以上トレースしないようにする
 inline bool checkRecursiveLimit(inout Payload payload)
+{
+    ++payload.recursive;
+    if (1 < payload.recursive)
+    {
+        //payload.color = float3(0, 0, 0);
+        return true;
+    }
+    return false;
+}
+inline bool checkRecursiveLimitDenoiseAO(inout DenoisePayload payload)
 {
     ++payload.recursive;
     if (1 < payload.recursive)

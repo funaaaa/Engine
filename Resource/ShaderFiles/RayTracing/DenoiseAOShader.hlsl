@@ -19,13 +19,6 @@ SamplerState smp : register(s0, space1);
 RWTexture2D<float4> outputColor : register(u0);
 RWTexture2D<float4> outputLuminance : register(u1);
 
-struct DenoisePayload
-{
-    float3 color;
-    float3 luminance;
-    uint recursive;
-};
-
 // 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
 {
@@ -229,6 +222,12 @@ void shadowMS(inout ShadowPayload payload)
 void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 {
     
+    // 呼び出し回数が制限を超えないようにする。
+    if (checkRecursiveLimitDenoiseAO(payload))
+    {
+        return;
+    }
+    
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
     
@@ -248,13 +247,6 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 
     // 法線マップが存在していたら法線マップから法線情報を抽出。
     vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
-    
-    // 呼び出し回数が制限を超えないようにする。
-    ++payload.recursive;
-    if (2 <= payload.recursive)
-    {
-        return;
-    }
 
     // 通常ライティング
     if (instanceID == 2)

@@ -389,6 +389,9 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         payload.color = CalcBarycentrics(attrib.barys);
         return;
     }
+
+    // 法線マップが存在していたら法線マップから法線情報を抽出。
+    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 法線を描画するフラグが立っていたら。
     if (gSceneParam.isNormalScene)
@@ -396,9 +399,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         payload.color = vtx.Normal;
         return;
     }
-
-    // 法線マップが存在していたら法線マップから法線情報を抽出。
-    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 呼び出し回数が制限を超えないようにする。
     if (checkRecursiveLimit(payload))

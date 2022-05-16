@@ -17,6 +17,7 @@
 #include "RaytracingPipline.h"
 #include "RaytracingOutput.h"
 #include "MultiMeshLoadOBJ.h"
+#include "ComputeShader.h"
 
 #include "HitGroup.h"
 
@@ -58,6 +59,7 @@ struct KariConstBufferData {
 enum DEGU_PIPLINE_ID {
 	DEF_PIPLINE,
 	AO_PIPLINE,
+	DENOISE_AO_PIPLINE,
 };
 
 // 入力操作
@@ -92,10 +94,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// デノイズAO用のパイプラインを設定。
-	//vector<RayPiplineShaderData> dAOuseShaders;
-	//dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	//RaytracingPipline deAOPipline;
-	//deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	vector<RayPiplineShaderData> dAOuseShaders;
+	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
+	RaytracingPipline deAOPipline;
+	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// デフォルトのシェーダーを設定。
 	vector<RayPiplineShaderData> defShaders;
@@ -127,9 +129,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// シェーダーテーブルを生成。
 	aoPipline.ConstructionShaderTable();
-	//deAOPipline.ConstructionShaderTable();
+	deAOPipline.ConstructionShaderTable();
 	defPipline.ConstructionShaderTable();
 
+	// デノイズ用のガウシアンブラーコンピュートシェーダーをセット。
+	//ComputeShader blurX;
+	//blurX.Init(L"Resource/hlsl/Raytracing/GaussianBlur.hlsl",)
 
 	// 仮の定数バッファを宣言
 	KariConstBufferData constBufferData;
@@ -168,13 +173,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
-
 	/*----------ゲームループ----------*/
 	while (true) {
 		/*----------毎フレーム処理(描画前処理)----------*/
 		directXBase.processBeforeDrawing();
-
-
 
 		/*----- 更新処理 -----*/
 
@@ -227,6 +229,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			setPipline = aoPipline;
 
 		}
+		else if (debugPiplineID == DENOISE_AO_PIPLINE) {
+
+			setPipline = deAOPipline;
+
+		}
 
 		auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 		constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
@@ -252,6 +259,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->SetPipelineState1(setPipline.GetStateObject().Get());
 
 		DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
+
+		// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
+		if(debugPiplineID == DENOISE_AO_PIPLINE){
+		
+		
+		
+		}
 
 		// バックバッファのインデックスを取得する。
 		UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
@@ -424,6 +438,8 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 	ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
 	ImGui::SameLine();
 	ImGui::RadioButton("AO PIPLINE", &debugPiplineBuff, 1);
+	ImGui::SameLine();
+	ImGui::RadioButton("DENOISE AO PIPLINE", &debugPiplineBuff, 2);
 	debugPiplineID = (DEGU_PIPLINE_ID)debugPiplineBuff;
 
 	// AOのパイプラインを選択されていたときのみ、ノイズを出すかのフラグを表示する。
@@ -477,5 +493,12 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 　→ノイズが01なので、逆に輝度が大きすぎる…
 　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！
 ・以上のことを今週までに実装する。
+
+
+・デバッグ用の切り替えIDに新しいやつを追加する。
+・IF分で新しいやつのときはコンピュートシェーダーで加工する処理を挟む。
+・魔導書かなんかからガウシアンブラーのコードを持ってきて(既存コードからいけるならそれで)コンピュートシェーダーに書く。
+・加工！合成！
+
 
 */
