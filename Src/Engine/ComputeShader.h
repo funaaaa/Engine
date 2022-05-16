@@ -50,13 +50,20 @@ public:
 	void Dispatch(UINT threadGroupCountX, UINT threadGroupCountY, UINT threadGroupCountZ);
 
 
+	/*-- 機能関数 --*/
+
+	//入力用構造化バッファを更新
+	void UpdateInputSB(void* updateSB);
+
+
+private:
+
 	/*-- シェーダー読み込み関係 --*/
 
 	//シェーダー読み込み
 	LPD3DBLOB LoadShader(LPCWSTR shaderFileName, const char entryPointName[], const char shaderModel[], ID3DBlob* shaderBlob, ID3DBlob* errorBlob);
 	//シェーダーのロードエラーをチェック
 	void CheckRoadShaderError(HRESULT result, ID3DBlob* errorBlob);
-
 
 	/*-- ルートシグネチャ --*/
 
@@ -82,11 +89,5 @@ public:
 
 	//ディスクリプタヒープに各ディスクリプタをセットする
 	void CommitDescHeap();
-
-
-	/*-- 機能関数 --*/
-
-	//入力用構造化バッファを更新
-	void UpdateInputSB(void* updateSB);
 
 };

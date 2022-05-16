@@ -147,7 +147,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 	// パイプラインの設定。
 	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-	pipelineConfig->Config(30);
+	pipelineConfig->Config(4);
 
 	// 生成する。
 	HRESULT resultBuff = DirectXBase::Ins()->dev->CreateStateObject(

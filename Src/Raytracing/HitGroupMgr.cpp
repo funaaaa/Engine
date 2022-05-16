@@ -95,7 +95,7 @@ void HitGroupMgr::Setting()
 	// ヒットグループ名のコンテナを設定。
 	hitGroupNames.emplace_back(L"DEF_HIT_GROUP");
 	hitGroupNames.emplace_back(L"AO_HIT_GROUP");
-	//hitGroupNames.emplace_back(L"DENOISE_AO_HIT_GROUP");
+	hitGroupNames.emplace_back(L"DENOISE_AO_HIT_GROUP");
 
 	// ヒットグループを生成。
 	HitGroupInitData initData;
@@ -127,8 +127,8 @@ void HitGroupMgr::Setting()
 	initData.SRVcount = 4;
 	initData.CBVcount = 0;
 	initData.UAVcount = 0;
-	//hitGroup.push_back(std::make_shared<HitGroup>());	// ここでsize()をそのまま渡しているのは、0番目にはグローバルルートシグネチャが入るのでインクリメントする必要があるから。
-	//hitGroup[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
+	hitGroup.push_back(std::make_shared<HitGroup>());	// ここでsize()をそのまま渡しているのは、0番目にはグローバルルートシグネチャが入るのでインクリメントする必要があるから。
+	hitGroup[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
 
 
 }
