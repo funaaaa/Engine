@@ -442,6 +442,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
                 
                 // 距離に応じて明るさを変える。
                 float rate = lightLength / gSceneParam.pointLight.lightPower;
+                rate = pow(rate, 5);
                 rate = 1.0f - rate;
                 smpleVisiblity *= rate;
                 
@@ -512,7 +513,9 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         resultColor *= visibility;
         
         // 最終結果の色を保存。
-        payload.color.xyz += resultColor;
+        payload.color.xyz += resultColor + (gSceneParam.pointLight.lightColor * smpleVisiblity) / PI;
+        
+        payload.color.xyz = saturate(payload.color.xyz);
         
         // ライトに当たった面だけ表示するフラグが立っていたら。
         if (gSceneParam.isLightHitScene)

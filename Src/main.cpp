@@ -411,6 +411,17 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 
 	}
 
+	// ライトの色を設定。
+	array<float, 3> lightColor = { constBufferData.pointLight.lightColor.x,constBufferData.pointLight.lightColor.y,constBufferData.pointLight.lightColor.z };
+	ImGui::ColorPicker3("LightColor", lightColor.data());
+	// 色が変わっていたら。
+	if (lightColor[0] != constBufferData.pointLight.lightColor.x || lightColor[1] != constBufferData.pointLight.lightColor.y || lightColor[2] != constBufferData.pointLight.lightColor.z) {
+		isMove = true;
+	}
+	constBufferData.pointLight.lightColor.x = lightColor[0];
+	constBufferData.pointLight.lightColor.y = lightColor[1];
+	constBufferData.pointLight.lightColor.z = lightColor[2];
+
 	if (isMove) {
 		constBufferData.counter = 0;
 	}
