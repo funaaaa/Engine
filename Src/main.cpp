@@ -32,6 +32,23 @@
 // fps更新
 void FPS();
 
+XMFLOAT2 CalRepulsionRatio(const float& v1, const float& m1, const float& v2, const float& m2)
+{
+	XMFLOAT2 honraiVel = { 0,0 };
+
+	//反発係数
+	float e = 1.0f;
+
+	float honraiV1 = ((m1 - m2) * v1 + (2 * m2 * v2)) / (m1 + m2);
+	float honraiV2 = ((m2 - m1) * v2 + (2 * m1 * v1)) / (m1 + m2);
+
+
+	honraiVel.x = honraiV1;
+	honraiVel.y = honraiV2;
+
+	return honraiVel;
+}
+
 struct RayPointLightData {
 
 	Vec3 lightPos;
@@ -116,13 +133,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
 	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
-	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
+	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(15, 15, 15));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 100));
+
+	int sphereIns2 = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
+	PorygonInstanceRegister::Ins()->AddScale(sphereIns2, Vec3(10, 10, 10));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns2, Vec3(0, 300, 0));
+
+
+
+
+	float vel1 = 0.5f;
+	float m1 = 10.0f;
+	Vec3 forwardVec1 = Vec3(0, 0, 1);
+	Vec3 pos1 = Vec3(0, 0, -400);
+
+	float vel2 = 1.0f;
+	float m2 = 3.0f;
+	Vec3 forwardVec2 = Vec3(0, 0, -1);
+	Vec3 pos2 = Vec3(0, 0, 400);
+
+
+
+
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -164,7 +202,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 	constBufferData.counter = 0;
-	constBufferData.isNoiseScene = false;
+	constBufferData.isNoiseScene = true;
 	constBufferData.isNoiseOnlyScene = false;
 	constBufferData.pointLight.lightPos = Vec3(0, 300, 0);
 	constBufferData.pointLight.lightSize = 30.0f;
@@ -184,6 +222,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
+	bool isHit = false;
+
 	/*----------ゲームループ----------*/
 	while (true) {
 		/*----------毎フレーム処理(描画前処理)----------*/
@@ -196,11 +236,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		FPS();
 
+
+
+
+
+		// 球を移動させる。
+		pos1 += forwardVec1 * vel1;
+		pos2 += forwardVec2 * vel2;
+
+		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, pos1);
+		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns2, pos2);
+
+
+		vel1 -= 0.0001f;
+		vel2 -= 0.0001f;
+
+		// もしも衝突したら。
+		if (!isHit && Vec3(pos1 - pos2).Length() < 25.0f) {
+
+			XMFLOAT2 vel = CalRepulsionRatio(vel1, m1, vel2, m2);
+
+			vel2 = vel.x;
+			vel1 = vel.y;
+
+			forwardVec1.z *= -1;
+			forwardVec2.z *= -1;
+
+			isHit = true;
+
+		}
+
+
+
+
 		// 乱数の種を更新。
 		constBufferData.seed = FHelper::GetRand(0, 1000);
 
 		// ライトが動いたか
 		bool isMoveLight = false;
+		constBufferData.counter = 0;
 
 		Input(constBufferData, isMoveLight, debugPiplineID);
 
@@ -212,14 +286,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		up = Camera::Ins()->up;
 
 		// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
-		if (isMoveLight) {
+		//if (isMoveLight) {
 
-			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
-			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
+			//PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
+			//PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
+			//PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns2, constBufferData.pointLight.lightPos);
+			//PorygonInstanceRegister::Ins()->ChangeScale(sphereIns2, constBufferData.pointLight.lightSize);
 
-			tlas.Update();
+		tlas.Update();
 
-		}
+		//}
 
 		/*----- 描画処理 -----*/
 
@@ -502,37 +578,3 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 	}
 
 }
-
-
-/*
-
-◯　やりたいこと・やらなければいけないこと
-//・ソフトシャドウのデバッグ情報をわかりやすくする。
-//　→光源の位置の表示非表示をわかりやすくする。
-//　→光源によって照らされた位置のみを表示できるようにする。
-//・そのためにはパイプラインをきちんと複数作れるようにする必要がある？
-//・AOのバグを修正。明るさが場所によって違う？
-//・上が終わったら、正規化ランバートについて学ぶ。
-//　→どうして正規化ランバートを使うのかまできちんと理解する。
-//・リニアワークフローを実装する。
-//　→ガンマ値補正？
-//・ライティングのバグを修正する。
-//・軽量化の処理を入れる。
-・リアルタイムデノイズを実装する。
-//　→なぜサンプル数を増やして平均しても色が変わらないのか。そもそも変わっているのか？ → 乱数の種が変わってなかったから。
-　→以前見た輝度に重みをおいたブラーでは実装できないかも。
-　→ノイズが01なので、逆に輝度が大きすぎる…
-　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！
-・以上のことを今週までに実装する。
-
-
-・デバッグ用の切り替えIDに新しいやつを追加する。
-・IF分で新しいやつのときはコンピュートシェーダーで加工する処理を挟む。
-・魔導書かなんかからガウシアンブラーのコードを持ってきて(既存コードからいけるならそれで)コンピュートシェーダーに書く。
-・加工！合成！
-
-
-・ライティングの処理を、ライトにあたっている面だけ行うようにする。
-
-
-*/

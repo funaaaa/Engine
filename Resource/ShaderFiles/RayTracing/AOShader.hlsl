@@ -361,6 +361,9 @@ void shadowMS(inout ShadowPayload payload)
 void mainCHS(inout Payload payload, MyAttribute attrib)
 {
     
+    payload.color = float3(1, 1, 1);
+    return;
+    
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
     
