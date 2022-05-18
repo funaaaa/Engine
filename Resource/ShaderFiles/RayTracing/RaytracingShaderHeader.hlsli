@@ -21,6 +21,15 @@ struct PointLightData
     float3 pad;
 };
 
+// 並行光源の情報
+struct DirLightData
+{
+    float3 lightDir;
+    int isActive;
+    float3 lightColor;
+    float pad;
+};
+
 // 環境情報
 struct SceneCB
 {
@@ -28,9 +37,8 @@ struct SceneCB
     matrix mtxProj; // プロジェクション行列.
     matrix mtxViewInv; // ビュー逆行列.
     matrix mtxProjInv; // プロジェクション逆行列.
-    float4 lightDirection; // 平行光源の向き.
-    float4 lightColor; // 平行光源色.
     float4 ambientColor; // 環境光.
+    DirLightData dirLight;
     PointLightData pointLight;
     int seed;
     int counter;

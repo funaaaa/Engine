@@ -251,113 +251,113 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // 通常ライティング
     if (instanceID == 2)
     {
-        // lambert ライティングを行う.
-        float3 lightdir = -normalize(gSceneParam.pointLight.lightPos.xyz);
+        //// lambert ライティングを行う.
+        //float3 lightdir = -normalize(gSceneParam.pointLight.lightPos.xyz);
 
-        float nl = saturate(dot(vtx.Normal, lightdir));
+        //float nl = saturate(dot(vtx.Normal, lightdir));
         
-        // 正規化ランバート？
-        nl /= PI;
+        //// 正規化ランバート？
+        //nl /= PI;
 
-        float3 lightcolor = gSceneParam.lightColor.xyz;
-        float3 ambientcolor = gSceneParam.ambientColor.xyz;
-        float4 materialcolor = texture.SampleLevel(smp, vtx.uv, 0.0f);
-        float3 color = 0;
-        color += lightcolor * materialcolor.xyz * nl;
-        color += ambientcolor * materialcolor.xyz;
+        //float3 lightcolor = gSceneParam.lightColor.xyz;
+        //float3 ambientcolor = gSceneParam.ambientColor.xyz;
+        //float4 materialcolor = texture.SampleLevel(smp, vtx.uv, 0.0f);
+        //float3 color = 0;
+        //color += lightcolor * materialcolor.xyz * nl;
+        //color += ambientcolor * materialcolor.xyz;
 
-        // ライティングの結果の色を保存。
-        float3 resultColor = color;
+        //// ライティングの結果の色を保存。
+        //float3 resultColor = color;
         
-        uint2 pixldx = DispatchRaysIndex().xy;
-        uint2 numPix = DispatchRaysDimensions().xy;
+        //uint2 pixldx = DispatchRaysIndex().xy;
+        //uint2 numPix = DispatchRaysDimensions().xy;
         
-        // 隠蔽度合い
-        float visibility = 0.0f;
+        //// 隠蔽度合い
+        //float visibility = 0.0f;
         
-        // 光源へシャドウレイを飛ばす。
-        float smpleVisiblity = SoftShadow(vtx);
+        //// 光源へシャドウレイを飛ばす。
+        //float smpleVisiblity = SoftShadow(vtx);
         
-        // 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
-        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.pointLight.lightPos.xyz)));
-        float pdf = 1.0 / (2.0 * 3.14f);
-        float lightVisibility = 0;
-        lightVisibility += smpleVisiblity;
+        //// 隠蔽度合い += サンプリングした値 * コサイン項 * 確率密度関数
+        //float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.pointLight.lightPos.xyz)));
+        //float pdf = 1.0 / (2.0 * 3.14f);
+        //float lightVisibility = 0;
+        //lightVisibility += smpleVisiblity;
             
-        // ライティングの結果明るかったら処理を飛ばす。
-        if (lightVisibility != 1.0f)
-        {
+        //// ライティングの結果明るかったら処理を飛ばす。
+        //if (lightVisibility != 1.0f)
+        //{
             
-            // 飛ばすレイの回数
-            for (int index = 0; index < gSceneParam.aoSampleCount; ++index)
-            {
-                // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
-                if (gSceneParam.isNoAO)
-                {
-                    break;
-                }
+        //    // 飛ばすレイの回数
+        //    for (int index = 0; index < gSceneParam.aoSampleCount; ++index)
+        //    {
+        //        // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
+        //        if (gSceneParam.isNoAO)
+        //        {
+        //            break;
+        //        }
                 
-                // 乱数を生成してレイを飛ばす方向を決める。
-                float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                randSeedX = randSeedX * 2.0f - 1.0f;
-                randSeedY = randSeedY * 2.0f - 1.0f;
-                randSeedZ = randSeedZ * 2.0f - 1.0f;
-                float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
+        //        // 乱数を生成してレイを飛ばす方向を決める。
+        //        float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+        //        float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+        //        float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+        //        randSeedX = randSeedX * 2.0f - 1.0f;
+        //        randSeedY = randSeedY * 2.0f - 1.0f;
+        //        randSeedZ = randSeedZ * 2.0f - 1.0f;
+        //        float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
-                // シャドウレイを飛ばす。
-                float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 300);
+        //        // シャドウレイを飛ばす。
+        //        float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 300);
             
-                // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
-                float nol = saturate(dot(vtx.Normal, sampleDir));
-                float pdf = 1.0 / (2.0 * PI);
-                visibility += smpleVisiblity * nol / pdf;
+        //        // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
+        //        float nol = saturate(dot(vtx.Normal, sampleDir));
+        //        float pdf = 1.0 / (2.0 * PI);
+        //        visibility += smpleVisiblity * nol / pdf;
                
-            }
-            // 平均を取る。
-            visibility = (1.0f / PI) * (1.0f / float(gSceneParam.aoSampleCount)) * visibility;
+        //    }
+        //    // 平均を取る。
+        //    visibility = (1.0f / PI) * (1.0f / float(gSceneParam.aoSampleCount)) * visibility;
             
-        }
+        //}
         
         
-        // 光源へのライティングを加算する。
-        visibility += lightVisibility;
+        //// 光源へのライティングを加算する。
+        //visibility += lightVisibility;
         
-        // 隠蔽度合いが限界を超えないようにする。
-        visibility = saturate(visibility);
+        //// 隠蔽度合いが限界を超えないようにする。
+        //visibility = saturate(visibility);
         
-        // ノイズのみを描画するフラグが立っていたら。
-        if (gSceneParam.isNoiseOnlyScene)
-        {
-            payload.luminance = float3(visibility, visibility, visibility);
-            return;
+        //// ノイズのみを描画するフラグが立っていたら。
+        //if (gSceneParam.isNoiseOnlyScene)
+        //{
+        //    payload.luminance = float3(visibility, visibility, visibility);
+        //    return;
 
-        }
+        //}
         
-        // 最終結果の色を保存。
-        payload.color.xyz = resultColor;
+        //// 最終結果の色を保存。
+        //payload.color.xyz = resultColor;
         
-        // 明るさ情報を保存。
-        payload.luminance = visibility;
+        //// 明るさ情報を保存。
+        //payload.luminance = visibility;
         
-        // ライトに当たった面だけ表示するフラグが立っていたら。
-        if (gSceneParam.isLightHitScene)
-        {
+        //// ライトに当たった面だけ表示するフラグが立っていたら。
+        //if (gSceneParam.isLightHitScene)
+        //{
             
-            // 光にあたっていたら。
-            if (0.0f < lightVisibility)
-            {
-                payload.luminance = float3(1, 1, 1);
-            }
-            else
-            {
-                payload.luminance = float3(0, 0, 0);
-            }
+        //    // 光にあたっていたら。
+        //    if (0.0f < lightVisibility)
+        //    {
+        //        payload.luminance = float3(1, 1, 1);
+        //    }
+        //    else
+        //    {
+        //        payload.luminance = float3(0, 0, 0);
+        //    }
             
-            return;
+        //    return;
             
-        }
+        //}
         
         //ShootReflectionRay(payload, vtx.Position, vtx.Normal);
 

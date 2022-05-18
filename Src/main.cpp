@@ -43,15 +43,23 @@ struct RayPointLightData {
 
 };
 
+struct RayDirLightData {
+
+	Vec3 lihgtDir;
+	int isActive;
+	Vec3 lightColor;
+	float pad;
+
+};
+
 struct KariConstBufferData {
 
 	XMMATRIX mtxView;			// ビュー行列。
 	XMMATRIX mtxProj;			// プロジェクション行列。
 	XMMATRIX mtxViewInv;		// ビュー逆行列。
 	XMMATRIX mtxProjInv;		// プロジェクション逆行列。
-	XMVECTOR lightDirection;	// 平行光源の向き。
-	XMVECTOR lightColor;		// 平行光源色。
 	XMVECTOR ambientColor;		// 環境光。
+	RayDirLightData dirLight;
 	RayPointLightData pointLight;
 	int seed;
 	int counter;
@@ -74,6 +82,7 @@ enum DEGU_PIPLINE_ID {
 
 // 入力操作
 void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
+void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID, bool& isMove);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -149,9 +158,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 仮の定数バッファを宣言
 	KariConstBufferData constBufferData;
 	constBufferData.ambientColor = { 1,1,1,1 };
-	constBufferData.lightColor = { 1,1,1,1 };
-	constBufferData.lightDirection = { 0,1,-0.27f,0 };
-	constBufferData.lightDirection = XMVector4Normalize(constBufferData.lightDirection);
 	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
 		XMConvertToRadians(60.0f),				//画角(60度)
 		(float)window_width / window_height,	//アスペクト比
@@ -169,6 +175,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.pointLight.lightPos = Vec3(0, 300, 0);
 	constBufferData.pointLight.lightSize = 30.0f;
 	constBufferData.pointLight.lightPower = 300.0f;
+	constBufferData.dirLight.isActive = false;
+	constBufferData.dirLight.lightColor = Vec3{ 0,0,0 };
+	constBufferData.dirLight.lihgtDir = Vec3{ 0,-1,0 };
 	constBufferData.aoSampleCount = 1;
 	constBufferData.isLightHitScene = false;
 	constBufferData.isNormalScene = false;
@@ -383,10 +392,62 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 		isMove = true;
 	}
 
-	// DirLightについて
+	InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
 
-	// 階層構造にする。
-	if (ImGui::TreeNode("Lighting")) {
+}
+
+void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID, bool& isMove)
+{
+
+	// DirLightについて
+	if (ImGui::TreeNode("DirLight")) {
+
+		// ライトを表示するかどうかのフラグを更新。
+		bool isActive = static_cast<bool>(constBufferData.dirLight.isActive);
+		ImGui::Checkbox("IsActive", &isActive);
+		if (isActive != constBufferData.dirLight.isActive) isMove = true;
+		constBufferData.dirLight.isActive = static_cast<int>(isActive);
+
+		// 値を保存する。
+		float dirX = constBufferData.dirLight.lihgtDir.x;
+		float dirZ = constBufferData.dirLight.lihgtDir.z;
+		ImGui::SliderFloat("DirLightX", &constBufferData.dirLight.lihgtDir.x, -1.0f, 1.0f);
+		ImGui::SliderFloat("DirLightZ", &constBufferData.dirLight.lihgtDir.z, -1.0f, 1.0f);
+
+		// 変わっていたら
+		if (dirX != constBufferData.dirLight.lihgtDir.x || dirZ != constBufferData.dirLight.lihgtDir.z) {
+
+			isMove = true;
+			isMoveLight = true;
+
+		}
+
+		// 正規化する。
+		constBufferData.dirLight.lihgtDir.Normalize();
+
+		// ライトの色を設定。
+		array<float, 3> lightColor = { constBufferData.dirLight.lightColor.x,constBufferData.dirLight.lightColor.y,constBufferData.dirLight.lightColor.z };
+		ImGui::ColorPicker3("LightColor", lightColor.data());
+		// 色が変わっていたら。
+		if (lightColor[0] != constBufferData.dirLight.lightColor.x || lightColor[1] != constBufferData.dirLight.lightColor.y || lightColor[2] != constBufferData.dirLight.lightColor.z) {
+			isMove = true;
+		}
+		constBufferData.dirLight.lightColor.x = lightColor[0];
+		constBufferData.dirLight.lightColor.y = lightColor[1];
+		constBufferData.dirLight.lightColor.z = lightColor[2];
+
+		ImGui::TreePop();
+
+	}
+
+	// PointLightについて
+	if (ImGui::TreeNode("PointLight")) {
+
+		// ライトを表示するかどうかのフラグを更新。
+		bool isActive = static_cast<bool>(constBufferData.pointLight.isActive);
+		ImGui::Checkbox("IsActive", &isActive);
+		if (isActive != constBufferData.pointLight.isActive) isMove = true;
+		constBufferData.pointLight.isActive = static_cast<int>(isActive);
 
 		// 値を保存する。
 		float dirX = constBufferData.pointLight.lightPos.x;
@@ -434,70 +495,77 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 		++constBufferData.counter;
 	}
 
-	// メッシュを表示する。
-	bool isMesh = constBufferData.isMeshScene;
-	bool prevIsMesh = isMesh;
-	ImGui::Checkbox("Mesh Scene", &isMesh);
-	constBufferData.isMeshScene = isMesh;
-	// 値が書き換えられていたら、サンプリングを初期化する。
-	if (isMesh != prevIsMesh) {
-		constBufferData.counter = 0;
-	}
+	// 階層構造にする。
+	if (ImGui::TreeNode("Debug")) {
 
-	// 法線を表示する。
-	bool isNormal = constBufferData.isNormalScene;
-	bool prevIsNormal = isNormal;
-	ImGui::Checkbox("Normal Scene", &isNormal);
-	constBufferData.isNormalScene = isNormal;
-	// 値が書き換えられていたら、サンプリングを初期化する。
-	if (isNormal != prevIsNormal) {
-		constBufferData.counter = 0;
-	}
-
-	// ライトがあたった面だけ表示するフラグを更新。
-	bool isLightHit = constBufferData.isLightHitScene;
-	bool prevIsLightHit = isLightHit;
-	ImGui::Checkbox("LightHit Scene", &isLightHit);
-	constBufferData.isLightHitScene = isLightHit;
-	// 値が書き換えられていたら、サンプリングを初期化する。
-	if (isLightHit != prevIsLightHit) {
-		constBufferData.counter = 0;
-	}
-
-	// パイプラインを選択。
-	int debugPiplineBuff = debugPiplineID;
-	ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
-	ImGui::SameLine();
-	ImGui::RadioButton("AO PIPLINE", &debugPiplineBuff, 1);
-	ImGui::SameLine();
-	ImGui::RadioButton("DENOISE AO PIPLINE", &debugPiplineBuff, 2);
-	debugPiplineID = (DEGU_PIPLINE_ID)debugPiplineBuff;
-
-	// AOのパイプラインを選択されていたときのみ、ノイズを出すかのフラグを表示する。
-	if (debugPiplineID == AO_PIPLINE) {
-
-		// デバッグ用でノイズ画面を出すためのフラグをセット。
-		bool isNoise = constBufferData.isNoiseScene;
-		ImGui::Checkbox("Noise Scene", &isNoise);
-		constBufferData.isNoiseScene = isNoise;
-
-		// デバッグ用でノイズ画面のみを出すためのフラグをセット。
-		bool isNoiseOnly = constBufferData.isNoiseOnlyScene;
-		ImGui::Checkbox("NoiseOnly Scene", &isNoiseOnly);
-		// フラグが書き換わっていたらデノイズカウンターを初期化する。
-		if (isNoiseOnly != constBufferData.isNoiseOnlyScene) {
+		// メッシュを表示する。
+		bool isMesh = constBufferData.isMeshScene;
+		bool prevIsMesh = isMesh;
+		ImGui::Checkbox("Mesh Scene", &isMesh);
+		constBufferData.isMeshScene = isMesh;
+		// 値が書き換えられていたら、サンプリングを初期化する。
+		if (isMesh != prevIsMesh) {
 			constBufferData.counter = 0;
 		}
-		constBufferData.isNoiseOnlyScene = isNoiseOnly;
 
-		// アンビエントオクリュージョンを行うかのフラグをセット。
-		bool isNoAO = constBufferData.isNoAO;
-		ImGui::Checkbox("NoAO Scene", &isNoAO);
-		// フラグが書き換わっていたらデノイズカウンターを初期化する。
-		if (isNoAO != constBufferData.isNoAO) {
+		// 法線を表示する。
+		bool isNormal = constBufferData.isNormalScene;
+		bool prevIsNormal = isNormal;
+		ImGui::Checkbox("Normal Scene", &isNormal);
+		constBufferData.isNormalScene = isNormal;
+		// 値が書き換えられていたら、サンプリングを初期化する。
+		if (isNormal != prevIsNormal) {
 			constBufferData.counter = 0;
 		}
-		constBufferData.isNoAO = isNoAO;
+
+		// ライトがあたった面だけ表示するフラグを更新。
+		bool isLightHit = constBufferData.isLightHitScene;
+		bool prevIsLightHit = isLightHit;
+		ImGui::Checkbox("LightHit Scene", &isLightHit);
+		constBufferData.isLightHitScene = isLightHit;
+		// 値が書き換えられていたら、サンプリングを初期化する。
+		if (isLightHit != prevIsLightHit) {
+			constBufferData.counter = 0;
+		}
+
+		// パイプラインを選択。
+		int debugPiplineBuff = debugPiplineID;
+		ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
+		ImGui::SameLine();
+		ImGui::RadioButton("AO PIPLINE", &debugPiplineBuff, 1);
+		ImGui::SameLine();
+		ImGui::RadioButton("DENOISE AO PIPLINE", &debugPiplineBuff, 2);
+		debugPiplineID = (DEGU_PIPLINE_ID)debugPiplineBuff;
+
+		// AOのパイプラインを選択されていたときのみ、ノイズを出すかのフラグを表示する。
+		if (debugPiplineID == AO_PIPLINE) {
+
+			// デバッグ用でノイズ画面を出すためのフラグをセット。
+			bool isNoise = constBufferData.isNoiseScene;
+			ImGui::Checkbox("Noise Scene", &isNoise);
+			constBufferData.isNoiseScene = isNoise;
+
+			// デバッグ用でノイズ画面のみを出すためのフラグをセット。
+			bool isNoiseOnly = constBufferData.isNoiseOnlyScene;
+			ImGui::Checkbox("NoiseOnly Scene", &isNoiseOnly);
+			// フラグが書き換わっていたらデノイズカウンターを初期化する。
+			if (isNoiseOnly != constBufferData.isNoiseOnlyScene) {
+				constBufferData.counter = 0;
+			}
+			constBufferData.isNoiseOnlyScene = isNoiseOnly;
+
+			// アンビエントオクリュージョンを行うかのフラグをセット。
+			bool isNoAO = constBufferData.isNoAO;
+			ImGui::Checkbox("NoAO Scene", &isNoAO);
+			// フラグが書き換わっていたらデノイズカウンターを初期化する。
+			if (isNoAO != constBufferData.isNoAO) {
+				constBufferData.counter = 0;
+			}
+			constBufferData.isNoAO = isNoAO;
+
+		}
+
+		ImGui::TreePop();
 
 	}
 
