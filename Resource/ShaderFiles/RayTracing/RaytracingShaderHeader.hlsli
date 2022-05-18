@@ -14,13 +14,11 @@ struct Vertex
 struct PointLightData
 {
     float3 lightPos;
-    float pad1;
-    float3 lightColor;
-    float pad2;
     float lightSize;
+    float3 lightColor;
     float lightPower;
     int isActive;
-    float pad3;
+    float3 pad;
 };
 
 // ŠÂ‹«î•ñ

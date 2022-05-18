@@ -35,13 +35,11 @@ void FPS();
 struct RayPointLightData {
 
 	Vec3 lightPos;
-	float pad1;
-	Vec3 lightColor;
-	float pad2;
 	float lightSize;
+	Vec3 lightColor;
 	float lightPower;
 	int isActive;
-	float pad3;
+	Vec3 pad;
 
 };
 
@@ -387,40 +385,47 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 
 	// DirLightについて
 
-	// 値を保存する。
-	float dirX = constBufferData.pointLight.lightPos.x;
-	float dirY = constBufferData.pointLight.lightPos.y;
-	float dirZ = constBufferData.pointLight.lightPos.z;
-	float lightSize = constBufferData.pointLight.lightSize;
-	float aoSampleCount = constBufferData.aoSampleCount;
-	float pointLightPower = constBufferData.pointLight.lightPower;
-	float MOVE_LENGTH = 1500.0f;
-	ImGui::SliderFloat("PointLightX", &constBufferData.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightY", &constBufferData.pointLight.lightPos.y, 0.0f, 1000.0f);
-	ImGui::SliderFloat("PointLightZ", &constBufferData.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightRadius", &constBufferData.pointLight.lightSize, 1.0f, 50.0f);
-	ImGui::SliderFloat("PointLightPower", &constBufferData.pointLight.lightPower, 300.0f, 1000.0f);
-	ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
-	constBufferData.aoSampleCount = aoSampleCount;
+	// 階層構造にする。
+	if (ImGui::TreeNode("Lighting")) {
 
-	// 変わっていたら
-	if (dirX != constBufferData.pointLight.lightPos.x || dirY != constBufferData.pointLight.lightPos.y || dirZ != constBufferData.pointLight.lightPos.z || lightSize != constBufferData.pointLight.lightSize || pointLightPower != constBufferData.pointLight.lightPower) {
+		// 値を保存する。
+		float dirX = constBufferData.pointLight.lightPos.x;
+		float dirY = constBufferData.pointLight.lightPos.y;
+		float dirZ = constBufferData.pointLight.lightPos.z;
+		float lightSize = constBufferData.pointLight.lightSize;
+		float aoSampleCount = constBufferData.aoSampleCount;
+		float pointLightPower = constBufferData.pointLight.lightPower;
+		float MOVE_LENGTH = 1500.0f;
+		ImGui::SliderFloat("PointLightX", &constBufferData.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
+		ImGui::SliderFloat("PointLightY", &constBufferData.pointLight.lightPos.y, 0.0f, 1000.0f);
+		ImGui::SliderFloat("PointLightZ", &constBufferData.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
+		ImGui::SliderFloat("PointLightRadius", &constBufferData.pointLight.lightSize, 1.0f, 50.0f);
+		ImGui::SliderFloat("PointLightPower", &constBufferData.pointLight.lightPower, 300.0f, 1000.0f);
+		ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
+		constBufferData.aoSampleCount = aoSampleCount;
 
-		isMove = true;
-		isMoveLight = true;
+		// 変わっていたら
+		if (dirX != constBufferData.pointLight.lightPos.x || dirY != constBufferData.pointLight.lightPos.y || dirZ != constBufferData.pointLight.lightPos.z || lightSize != constBufferData.pointLight.lightSize || pointLightPower != constBufferData.pointLight.lightPower) {
+
+			isMove = true;
+			isMoveLight = true;
+
+		}
+
+		// ライトの色を設定。
+		array<float, 3> lightColor = { constBufferData.pointLight.lightColor.x,constBufferData.pointLight.lightColor.y,constBufferData.pointLight.lightColor.z };
+		ImGui::ColorPicker3("LightColor", lightColor.data());
+		// 色が変わっていたら。
+		if (lightColor[0] != constBufferData.pointLight.lightColor.x || lightColor[1] != constBufferData.pointLight.lightColor.y || lightColor[2] != constBufferData.pointLight.lightColor.z) {
+			isMove = true;
+		}
+		constBufferData.pointLight.lightColor.x = lightColor[0];
+		constBufferData.pointLight.lightColor.y = lightColor[1];
+		constBufferData.pointLight.lightColor.z = lightColor[2];
+
+		ImGui::TreePop();
 
 	}
-
-	// ライトの色を設定。
-	array<float, 3> lightColor = { constBufferData.pointLight.lightColor.x,constBufferData.pointLight.lightColor.y,constBufferData.pointLight.lightColor.z };
-	ImGui::ColorPicker3("LightColor", lightColor.data());
-	// 色が変わっていたら。
-	if (lightColor[0] != constBufferData.pointLight.lightColor.x || lightColor[1] != constBufferData.pointLight.lightColor.y || lightColor[2] != constBufferData.pointLight.lightColor.z) {
-		isMove = true;
-	}
-	constBufferData.pointLight.lightColor.x = lightColor[0];
-	constBufferData.pointLight.lightColor.y = lightColor[1];
-	constBufferData.pointLight.lightColor.z = lightColor[2];
 
 	if (isMove) {
 		constBufferData.counter = 0;
@@ -525,6 +530,9 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 ・IF分で新しいやつのときはコンピュートシェーダーで加工する処理を挟む。
 ・魔導書かなんかからガウシアンブラーのコードを持ってきて(既存コードからいけるならそれで)コンピュートシェーダーに書く。
 ・加工！合成！
+
+
+・ライティングの処理を、ライトにあたっている面だけ行うようにする。
 
 
 */
