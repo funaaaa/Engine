@@ -87,8 +87,8 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
-	DirectXBase directXBase;							// DirectX基盤部分
-	directXBase.Init();									// DirectX基盤の初期化
+	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
+	ImGuiWindow::Ins()->Init();
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
 	/*----------パイプライン生成----------*/
@@ -125,7 +125,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
@@ -143,8 +143,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	RaytracingOutput raytracingOutput;
 	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
+	// 累積デノイズ用での保存用クラス。
 	RaytracingOutput raytracingOutputData;
 	raytracingOutputData.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
+
+	// ガウシアンブラーに使用するやつ。
+	RaytracingOutput xBlurOutput;
+	xBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	RaytracingOutput yBlurOutput;
+	yBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	RaytracingOutput mixBlurOutput;
+	mixBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// シェーダーテーブルを生成。
 	aoPipline.ConstructionShaderTable();
@@ -152,8 +161,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.ConstructionShaderTable();
 
 	// デノイズ用のガウシアンブラーコンピュートシェーダーをセット。
+	//const int MAX_PIX = 1280 * 720;
 	//ComputeShader blurX;
-	//blurX.Init(L"Resource/hlsl/Raytracing/GaussianBlur.hlsl",)
+	//blurX.Init(L"Resource/ShaderFiles/Raytracing/GaussianBlurX.hlsl", sizeof(XMFLOAT4), MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
+	//	MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get());
+	//ComputeShader blurY;
+	//blurY.Init(L"Resource/hlsl/Raytracing/GaussianBlurY.hlsl", sizeof(XMFLOAT4), MAX_PIX / 2.0f, xBlurOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
+	//	MAX_PIX / 4.0f, yBlurOutput.GetRaytracingOutput().Get());
+	//ComputeShader mixShader;
+	//mixShader.Init(L"Resource/hlsl/Raytracing/MixShader.hlsl", sizeof(XMFLOAT4), MAX_PIX / 4.0f, yBlurOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
+	//	MAX_PIX, mixBlurOutput.GetRaytracingOutput().Get());
+
 
 	// 仮の定数バッファを宣言
 	KariConstBufferData constBufferData;
@@ -193,10 +211,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
+	// ライトが動いたか
+	bool isMoveLight = false;
+
 	/*----------ゲームループ----------*/
 	while (true) {
 		/*----------毎フレーム処理(描画前処理)----------*/
-		directXBase.processBeforeDrawing();
+		DirectXBase::Ins()->processBeforeDrawing();
+
 
 		/*----- 更新処理 -----*/
 
@@ -207,11 +229,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// 乱数の種を更新。
 		constBufferData.seed = FHelper::GetRand(0, 1000);
-
-		// ライトが動いたか
-		bool isMoveLight = false;
-
-		Input(constBufferData, isMoveLight, debugPiplineID);
 
 		// カメラを更新。
 		Camera::Ins()->Update();
@@ -283,7 +300,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
 		if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-
+			//blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
+			//blurX.Dispatch((1280 * 720) / 4, 1, 1);
+			//memcpy()
 
 		}
 
@@ -313,7 +332,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		};
 		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
 
-		directXBase.processAfterDrawing();
+		DirectXBase::Ins()->processAfterDrawing();
+
+
+		ImGuiWindow::Ins()->processBeforeDrawing();
+
+
+		isMoveLight = false;
+		Input(constBufferData, isMoveLight, debugPiplineID);
+
+		ImGuiWindow::Ins()->processAfterDrawing();
 
 	}
 

@@ -166,14 +166,14 @@ void mainRayGen()
         gOutput[launchIndex.xy] = float4(col, 1);
 
     }
-    else if (gSceneParam.counter < 256)
+    else if (gSceneParam.counter < 512)
     {
         gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / float(gSceneParam.counter);
         gOutputBuff[launchIndex.xy] += float4(col, 1);
     }
     else
     {
-        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / 256.0f;
+        gOutput[launchIndex.xy] = gOutputBuff[launchIndex.xy] / 512.0f;
     }
     
     // デバッグ用でノイズ画面を出すフラグが立っていたら。
@@ -366,7 +366,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         visibility += lightVisibility;
         
         // 隠蔽度合いが限界を超えないようにする。
-        visibility = saturate(visibility);
+        //visibility = saturate(visibility);
         
         // ノイズのみを描画するフラグが立っていたら。
         if (gSceneParam.isNoiseOnlyScene)
