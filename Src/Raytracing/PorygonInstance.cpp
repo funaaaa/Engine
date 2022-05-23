@@ -63,6 +63,19 @@ void PorygonMeshInstance::AddRotate(const Vec3& Rot)
 
 }
 
+void PorygonMeshInstance::ChangeRotate(const Vec3& Rot)
+{
+
+	/*===== 回転関数 =====*/
+
+	rotMat = DirectX::XMMatrixIdentity();
+
+	rotMat *= DirectX::XMMatrixRotationZ(Rot.z);
+	rotMat *= DirectX::XMMatrixRotationX(Rot.x);
+	rotMat *= DirectX::XMMatrixRotationY(Rot.y);
+
+}
+
 void PorygonMeshInstance::AddScale(const Vec3& Scale)
 {
 
@@ -97,8 +110,8 @@ void PorygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 	worldMat = DirectX::XMMatrixIdentity();
 
 	worldMat *= scaleMat;
-	worldMat *= transMat;
 	worldMat *= rotMat;
+	worldMat *= transMat;
 
 	// 設定の行列を更新する。
 	DirectX::XMStoreFloat3x4(

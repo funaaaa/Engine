@@ -52,6 +52,17 @@ struct RayDirLightData {
 
 };
 
+struct RaySpotLightData {
+
+	Vec3 pos;
+	float angle;
+	Vec3 dir;
+	float power;
+	Vec3 color;
+	int isActive;
+
+};
+
 struct KariConstBufferData {
 
 	XMMATRIX mtxView;			// ビュー行列。
@@ -61,6 +72,7 @@ struct KariConstBufferData {
 	XMVECTOR ambientColor;		// 環境光。
 	RayDirLightData dirLight;
 	RayPointLightData pointLight;
+	RaySpotLightData spotLight;
 	int seed;
 	int counter;
 	int aoSampleCount;
@@ -87,8 +99,8 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
-	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
 	ImGuiWindow::Ins()->Init();
+	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
 	/*----------パイプライン生成----------*/
@@ -125,13 +137,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
 	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
+	//int coneBlas = BLASRegister::Ins()->GenerateObj("Resource/", "cone.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
+	//int coneIns = PorygonInstanceRegister::Ins()->CreateInstance(coneBlas, 3);
+	//PorygonInstanceRegister::Ins()->ChangeTrans(coneIns, Vec3(0, 300, 0));
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -190,12 +205,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.counter = 0;
 	constBufferData.isNoiseScene = false;
 	constBufferData.isNoiseOnlyScene = false;
+
+	// 点光源をセッティング
 	constBufferData.pointLight.lightPos = Vec3(0, 300, 0);
 	constBufferData.pointLight.lightSize = 30.0f;
 	constBufferData.pointLight.lightPower = 300.0f;
+
+	// 並行光源をセッティング
 	constBufferData.dirLight.isActive = false;
 	constBufferData.dirLight.lightColor = Vec3{ 0,0,0 };
 	constBufferData.dirLight.lihgtDir = Vec3{ 0,-1,0 };
+
+	// スポットライトをセッティング
+	constBufferData.spotLight.isActive = false;
+	constBufferData.spotLight.dir = Vec3{ 0,-1,0 };
+	constBufferData.spotLight.pos = Vec3{ 0,300,0 };
+	constBufferData.spotLight.power = 300.0f;
+	constBufferData.spotLight.angle = DirectX::XM_PI;
+
+	// その他のデバッグ情報をセッティング
 	constBufferData.aoSampleCount = 1;
 	constBufferData.isLightHitScene = false;
 	constBufferData.isNormalScene = false;
@@ -216,9 +244,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	/*----------ゲームループ----------*/
 	while (true) {
+
+		// IMGUI系
+		ImGuiWindow::Ins()->processBeforeDrawing();
+
+		// ウィンドウの名前を再設定。
+		SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
+
+		isMoveLight = false;
+		Input(constBufferData, isMoveLight, debugPiplineID);
+
+		ImGuiWindow::Ins()->processAfterDrawing();
+
+
 		/*----------毎フレーム処理(描画前処理)----------*/
 		DirectXBase::Ins()->processBeforeDrawing();
-
 
 		/*----- 更新処理 -----*/
 
@@ -240,8 +280,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
 		if (isMoveLight) {
 
+			// 点光源の位置を更新。
 			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
 			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
+
+			// スポットライトの位置を更新。
+			//PorygonInstanceRegister::Ins()->ChangeTrans(coneIns, constBufferData.spotLight.pos);
+			//PorygonInstanceRegister::Ins()->ChangeScale(coneIns, constBufferData.spotLight.power / 50.0f);
+
+			// スポットライトの角度を更新。
+			//PorygonInstanceRegister::Ins()->ChangeRotate(coneIns, Vec3(atan2f(constBufferData.spotLight.dir.z, constBufferData.spotLight.dir.y),
+			//	atan2f(constBufferData.spotLight.dir.x, constBufferData.spotLight.dir.z),
+			//	atan2f(constBufferData.spotLight.dir.y, constBufferData.spotLight.dir.x)));
 
 			tlas.Update();
 
@@ -333,15 +383,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
 
 		DirectXBase::Ins()->processAfterDrawing();
-
-
-		ImGuiWindow::Ins()->processBeforeDrawing();
-
-
-		isMoveLight = false;
-		Input(constBufferData, isMoveLight, debugPiplineID);
-
-		ImGuiWindow::Ins()->processAfterDrawing();
 
 	}
 
@@ -511,6 +552,60 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 		constBufferData.pointLight.lightColor.x = lightColor[0];
 		constBufferData.pointLight.lightColor.y = lightColor[1];
 		constBufferData.pointLight.lightColor.z = lightColor[2];
+
+		ImGui::TreePop();
+
+	}
+
+	// SpotLightについて
+	if (ImGui::TreeNode("SpotLight")) {
+
+		// ライトを表示するかどうかのフラグを更新。
+		bool isActive = static_cast<bool>(constBufferData.spotLight.isActive);
+		ImGui::Checkbox("IsActive", &isActive);
+		if (isActive != constBufferData.spotLight.isActive) isMove = true;
+		constBufferData.spotLight.isActive = static_cast<int>(isActive);
+
+		// 値を保存する。
+		float posX = constBufferData.spotLight.pos.x;
+		float posY = constBufferData.spotLight.pos.y;
+		float posZ = constBufferData.spotLight.pos.z;
+		float dirX = constBufferData.spotLight.dir.x;
+		float dirY = constBufferData.spotLight.dir.y;
+		float dirZ = constBufferData.spotLight.dir.z;
+		float angle = constBufferData.spotLight.angle;
+		float power = constBufferData.spotLight.power;
+		float MOVE_LENGTH = 1500.0f;
+		ImGui::SliderFloat("SpotLightX", &constBufferData.spotLight.pos.x, -MOVE_LENGTH, MOVE_LENGTH);
+		ImGui::SliderFloat("SpotLightY", &constBufferData.spotLight.pos.y, 0.0f, 1000.0f);
+		ImGui::SliderFloat("SpotLightZ", &constBufferData.spotLight.pos.z, -MOVE_LENGTH, MOVE_LENGTH);
+		ImGui::SliderFloat("SpotLightDirX", &constBufferData.spotLight.dir.x, -1.0f, 1.0f);
+		ImGui::SliderFloat("SpotLightDirY", &constBufferData.spotLight.dir.y, -1.0f, 1.0f);
+		ImGui::SliderFloat("SpotLightDirZ", &constBufferData.spotLight.dir.z, -1.0f, 1.0f);
+		ImGui::SliderFloat("SpotLightAngle", &constBufferData.spotLight.angle, 0.001f, DirectX::XM_PI * 2.0f);
+		ImGui::SliderFloat("SpotLightPower", &constBufferData.spotLight.power, 300.0f, 1000.0f);
+
+		// 変わっていたら
+		if (posX != constBufferData.spotLight.pos.x || posY != constBufferData.spotLight.pos.y || posZ != constBufferData.spotLight.pos.z ||
+			power != constBufferData.spotLight.power || angle != constBufferData.spotLight.angle ||
+			dirX != constBufferData.spotLight.dir.x || dirY != constBufferData.spotLight.dir.y || dirZ != constBufferData.spotLight.dir.z) {
+
+			isMove = true;
+			isMoveLight = true;
+			constBufferData.spotLight.dir.Normalize();
+
+		}
+
+		// ライトの色を設定。
+		array<float, 3> lightColor = { constBufferData.spotLight.color.x,constBufferData.spotLight.color.y,constBufferData.spotLight.color.z };
+		ImGui::ColorPicker3("LightColor", lightColor.data());
+		// 色が変わっていたら。
+		if (lightColor[0] != constBufferData.spotLight.color.x || lightColor[1] != constBufferData.spotLight.color.y || lightColor[2] != constBufferData.spotLight.color.z) {
+			isMove = true;
+		}
+		constBufferData.spotLight.color.x = lightColor[0];
+		constBufferData.spotLight.color.y = lightColor[1];
+		constBufferData.spotLight.color.z = lightColor[2];
 
 		ImGui::TreePop();
 

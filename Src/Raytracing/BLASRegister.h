@@ -25,7 +25,7 @@ public:
 	// ¶¬ˆ—
 	int GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
 	int GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	int GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle);
+	int GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLAS‚ÌXV
 	void Update(const int& Index);

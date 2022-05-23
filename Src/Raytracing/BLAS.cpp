@@ -89,7 +89,8 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
+	isOpaque = true;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -184,7 +185,8 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
+	isOpaque = true;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -208,7 +210,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle)
+void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -276,7 +278,8 @@ void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupNa
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	isOpaque = IsOpaque;
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque);
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -319,7 +322,7 @@ void BLAS::Update()
 	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
 
 	// 更新のための値を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque);
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
@@ -582,7 +585,7 @@ ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flag
 
 }
 
-D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc()
+D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(const bool& IsOpaque)
 {
 
 	/*===== BLAS生成時に設定を取得する用関数 =====*/
@@ -590,7 +593,12 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc()
 	// 形状データのフラグを設定。
 	auto geometryDesc = D3D12_RAYTRACING_GEOMETRY_DESC{};
 	geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-	geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NO_DUPLICATE_ANYHIT_INVOCATION;
+	if (IsOpaque) {
+		geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+	}
+	else {
+		geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NO_DUPLICATE_ANYHIT_INVOCATION;
+	}
 
 	// 形状データの細かい項目を設定。
 	auto& triangles = geometryDesc.Triangles;

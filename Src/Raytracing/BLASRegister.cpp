@@ -25,13 +25,13 @@ int BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string
 
 }
 
-int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle)
+int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
 
 	blas.push_back(std::make_shared<BLAS>());
-	blas.back()->GenerateBLASData(Data, HitGroupName, TextureHandle);
+	blas.back()->GenerateBLASData(Data, HitGroupName, TextureHandle, IsOpaque);
 
 	return blas.size() - 1;
 

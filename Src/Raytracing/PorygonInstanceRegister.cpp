@@ -61,6 +61,16 @@ void PorygonInstanceRegister::AddRotate(const int& Index, const Vec3& Rot) {
 
 }
 
+void PorygonInstanceRegister::ChangeRotate(const int& Index, const float& X, const float& Y, const float Z)
+{
+	instance[Index]->ChangeRotate(Vec3(X, Y, Z));
+}
+
+void PorygonInstanceRegister::ChangeRotate(const int& Index, const Vec3& Rot)
+{
+	instance[Index]->ChangeRotate(Rot);
+}
+
 void PorygonInstanceRegister::AddScale(const int& Index, const float& X, const float& Y, const float Z)
 {
 

@@ -30,6 +30,17 @@ struct DirLightData
     float pad;
 };
 
+// スポットライトの情報
+struct SpotLightData
+{
+    float3 pos;
+    float angle;
+    float3 dir;
+    float power;
+    float3 color;
+    int isActive;
+};
+
 // 環境情報
 struct SceneCB
 {
@@ -40,6 +51,7 @@ struct SceneCB
     float4 ambientColor; // 環境光.
     DirLightData dirLight;
     PointLightData pointLight;
+    SpotLightData spotLight;
     int seed;
     int counter;
     int aoSampleCount;

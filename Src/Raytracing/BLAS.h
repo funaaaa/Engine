@@ -42,6 +42,8 @@ private:
 
 	int modelIndex;							// モデルのインデックス
 
+	bool isOpaque;							// 不透明フラグ
+
 	std::vector<int> textureHandle;			// 使用するテクスチャのハンドル
 
 	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
@@ -63,7 +65,7 @@ public:
 	// BLASの生成
 	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
 	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	void GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle);
+	void GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASの更新
 	void Update();
@@ -99,7 +101,7 @@ private:
 	ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
 
 	// BLAS生成時に設定を取得する関数
-	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc();
+	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(const bool& IsOpaque);
 
 	// 加速構造体の設定用関数
 	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc);

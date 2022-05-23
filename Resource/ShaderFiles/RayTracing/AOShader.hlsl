@@ -141,7 +141,7 @@ void mainRayGen()
     
     RAY_FLAG flag = RAY_FLAG_NONE;
     flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
+    //flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
 
     // レイを発射
     TraceRay(
@@ -221,7 +221,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     }
 
     // 法線マップが存在していたら法線マップから法線情報を抽出。
-    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
+    //vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 法線を描画するフラグが立っていたら。
     if (gSceneParam.isNormalScene)
@@ -260,7 +260,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         
         // 点光源と並行光源のどちらにレイを飛ばすかを調べる。
         int lightingRandom = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
-        lightingRandom = lightingRandom % 3;
+        lightingRandom = lightingRandom % 4;
         
         // どのライティングをするかによって処理を変える。
         switch (lightingRandom)
@@ -304,16 +304,16 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             case 1:
             {
             
-                float dirLightVisibility = 0;
+                    float dirLightVisibility = 0;
         
-                // 並行光源にシャドウレイを飛ばす。
-                if (gSceneParam.dirLight.isActive)
-                {
+                    // 並行光源にシャドウレイを飛ばす。
+                    if (gSceneParam.dirLight.isActive)
+                    {
             
-                    dirLightVisibility = ShootDirShadow(vtx, 3000.0f);
-                    lightVisibility += dirLightVisibility;
+                        dirLightVisibility = ShootDirShadow(vtx, 3000.0f);
+                        lightVisibility += dirLightVisibility;
             
-                    dirLightColor = gSceneParam.dirLight.lightColor * dirLightVisibility;
+                        dirLightColor = gSceneParam.dirLight.lightColor * dirLightVisibility;
             
                     }
                 }
@@ -322,39 +322,73 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             
             case 2:
             {
+                
+                    // ライトまでの距離
+                    float lightLength = length(gSceneParam.spotLight.pos - vtx.Position);
+            
+                    // 点光源へシャドウレイを飛ばす。
+                    if (lightLength < gSceneParam.spotLight.power && gSceneParam.spotLight.isActive)
+                    {
+            
+                        lightVisibility = SoftShadow(vtx, 10., length(gSceneParam.spotLight.pos - vtx.Position));
+            
+                        // 影だったら
+                        if (0 <= lightVisibility)
+                        {
+             
+                            // 明るさを減衰させる。
+                            float rate = lightLength / gSceneParam.spotLight.power;
+                            rate = pow(rate, 5);
+                            rate = 1.0f - rate;
+                 
+                            // ランバートの反射率と明るさをかける。
+                            lightVisibility *= rate;
+                 
+                            pointLightColor += gSceneParam.spotLight.color * lightVisibility;
+                 
+             
+                        }
+            
+                    }
+             
+             
+                }
+            
+            case 3:
+            {
             
                 // 飛ばすレイの回数
-                for (int index = 0; index < gSceneParam.aoSampleCount; ++index)
-                {
-                    // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
-                    if (gSceneParam.isNoAO)
+                    for (int index = 0; index < gSceneParam.aoSampleCount; ++index)
                     {
-                        break;
-                    }
+                    // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
+                        if (gSceneParam.isNoAO)
+                        {
+                            break;
+                        }
             
                     // 法線を中心とした半球状のランダムなベクトルのサンプリング(コサイン重み分布付き)
                     //float3 sampleDir = GetCosHemisphereSample(randSeed, vtx.Normal);
                 
                     // 乱数を生成してレイを飛ばす方向を決める。
-                    float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                    float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                    float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                    randSeedX = randSeedX * 2.0f - 1.0f;
-                    randSeedY = randSeedY * 2.0f - 1.0f;
-                    randSeedZ = randSeedZ * 2.0f - 1.0f;
-                    float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
+                        float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+                        float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+                        float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+                        randSeedX = randSeedX * 2.0f - 1.0f;
+                        randSeedY = randSeedY * 2.0f - 1.0f;
+                        randSeedZ = randSeedZ * 2.0f - 1.0f;
+                        float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
                     // シャドウレイを飛ばす。
-                    float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 300, gRtScene);
+                        float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 500, gRtScene);
             
                     // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
-                    float nol = saturate(dot(vtx.Normal, sampleDir));
-                    float pdf = 1.0 / (2.0 * PI);
-                    visibility += smpleVisiblity * nol / pdf;
+                        float nol = saturate(dot(vtx.Normal, sampleDir));
+                        float pdf = 1.0 / (2.0 * PI);
+                        visibility += smpleVisiblity * nol / pdf;
                 
-                }
+                    }
                 // 平均を取る。
-                visibility = (1.0f / PI) * (1.0f / float(gSceneParam.aoSampleCount)) * visibility;
+                    visibility = (1.0f / PI) * (1.0f / float(gSceneParam.aoSampleCount)) * visibility;
             
                 }
             
