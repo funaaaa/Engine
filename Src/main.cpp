@@ -137,7 +137,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
@@ -176,10 +176,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.ConstructionShaderTable();
 
 	// デノイズ用のガウシアンブラーコンピュートシェーダーをセット。
-	//const int MAX_PIX = 1280 * 720;
-	//ComputeShader blurX;
-	//blurX.Init(L"Resource/ShaderFiles/Raytracing/GaussianBlurX.hlsl", sizeof(XMFLOAT4), MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
-	//	MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get());
+	const int MAX_PIX = 1280 * 720;
+	ComputeShader blurX;
+	blurX.Init(L"Resource/ShaderFiles/Raytracing/GaussianBlurX.hlsl", sizeof(XMFLOAT4), MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
+		MAX_PIX / 20, xBlurOutput.GetRaytracingOutput().Get());
 	//ComputeShader blurY;
 	//blurY.Init(L"Resource/hlsl/Raytracing/GaussianBlurY.hlsl", sizeof(XMFLOAT4), MAX_PIX / 2.0f, xBlurOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
 	//	MAX_PIX / 4.0f, yBlurOutput.GetRaytracingOutput().Get());
@@ -350,8 +350,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
 		if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-			//blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
-			//blurX.Dispatch((1280 * 720) / 4, 1, 1);
+			blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
+			blurX.Dispatch((MAX_PIX) / 4, 1, 1);
 			//memcpy()
 
 		}
@@ -723,7 +723,7 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 ・加工！合成！
 
 
-・ライティングの処理を、ライトにあたっている面だけ行うようにする。
+・コンピュートシェーダーにテクスチャを渡して、値をそのまま返してそれを描画できるかをちぇっくする。
 
 
 */
