@@ -139,11 +139,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
 	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(15, 15, 15));
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 100));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 350, 100));
 
 	int sphereIns2 = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns2, Vec3(10, 10, 10));
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns2, Vec3(0, 300, 0));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns2, Vec3(0, 250, 0));
 
 
 
@@ -151,12 +151,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	float vel1 = 0.5f;
 	float m1 = 10.0f;
 	Vec3 forwardVec1 = Vec3(0, 0, 1);
-	Vec3 pos1 = Vec3(0, 0, -400);
+	Vec3 pos1 = Vec3(0, 10, -400);
 
 	float vel2 = 1.0f;
 	float m2 = 3.0f;
 	Vec3 forwardVec2 = Vec3(0, 0, -1);
-	Vec3 pos2 = Vec3(0, 0, 400);
+	Vec3 pos2 = Vec3(0, -10, 400);
 
 
 
@@ -261,6 +261,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			forwardVec1.z *= -1;
 			forwardVec2.z *= -1;
+			
+			forwardVec1.y = 0.5f;
+			forwardVec2.y = -0.5f;
 
 			isHit = true;
 
