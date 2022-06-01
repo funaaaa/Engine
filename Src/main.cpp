@@ -1,4 +1,4 @@
-#include "SoundManager.h"
+ï»¿#include "SoundManager.h"
 #include "PiplineManager.h"
 #include "RenderTarget.h"
 #include "Camera.h"
@@ -29,7 +29,7 @@
 
 #define SCREEN_VIRTUAL_WIDTH 300
 
-// fpsXV
+// fpsæ›´æ–°
 void FPS();
 
 struct RayPointLightData {
@@ -65,11 +65,11 @@ struct RaySpotLightData {
 
 struct KariConstBufferData {
 
-	XMMATRIX mtxView;			// ƒrƒ…[s—ñB
-	XMMATRIX mtxProj;			// ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñB
-	XMMATRIX mtxViewInv;		// ƒrƒ…[‹ts—ñB
-	XMMATRIX mtxProjInv;		// ƒvƒƒWƒFƒNƒVƒ‡ƒ“‹ts—ñB
-	XMVECTOR ambientColor;		// ŠÂ‹«ŒõB
+	XMMATRIX mtxView;			// ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã€‚
+	XMMATRIX mtxProj;			// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—ã€‚
+	XMMATRIX mtxViewInv;		// ãƒ“ãƒ¥ãƒ¼é€†è¡Œåˆ—ã€‚
+	XMMATRIX mtxProjInv;		// ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³é€†è¡Œåˆ—ã€‚
+	XMVECTOR ambientColor;		// ç’°å¢ƒå…‰ã€‚
 	RayDirLightData dirLight;
 	RayPointLightData pointLight;
 	RaySpotLightData spotLight;
@@ -85,61 +85,61 @@ struct KariConstBufferData {
 
 };
 
-// ƒfƒoƒbƒO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğØ‚è‘Ö‚¦‚é‚â‚ÂB
+// ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹ã‚„ã¤ã€‚
 enum DEGU_PIPLINE_ID {
 	DEF_PIPLINE,
 	AO_PIPLINE,
 	DENOISE_AO_PIPLINE,
 };
 
-// “ü—Í‘€ì
+// å…¥åŠ›æ“ä½œ
 void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
 void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID, bool& isMove);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	/*----------DirectX‰Šú‰»ˆ—----------*/
+	/*----------DirectXåˆæœŸåŒ–å‡¦ç†----------*/
 	ImGuiWindow::Ins()->Init();
-	DirectXBase::Ins()->Init();									// DirectXŠî”Õ‚Ì‰Šú‰»
-	SoundManager::Ins()->SettingSoundManager();	// ƒTƒEƒ“ƒhƒ}ƒl[ƒWƒƒ[‚ğƒZƒbƒg‚·‚é
+	DirectXBase::Ins()->Init();									// DirectXåŸºç›¤ã®åˆæœŸåŒ–
+	SoundManager::Ins()->SettingSoundManager();	// ã‚µã‚¦ãƒ³ãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
 
-	/*----------ƒpƒCƒvƒ‰ƒCƒ“¶¬----------*/
+	/*----------ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ç”Ÿæˆ----------*/
 	PiplineManager::Ins()->Init();
 
-	/*----------•Ï”éŒ¾----------*/
+	/*----------å¤‰æ•°å®£è¨€----------*/
 	srand(time(NULL));
 
-	// ƒfƒBƒXƒNƒŠƒvƒ^ƒq[ƒv‚ğ‰Šú‰»B
+	// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ’ãƒ¼ãƒ—ã‚’åˆæœŸåŒ–ã€‚
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();
 
-	// FBXLoader‚ğ‰Šú‰»B
+	// FBXLoaderã‚’åˆæœŸåŒ–ã€‚
 	FbxLoader::Ins()->Init();
 
-	// ƒqƒbƒgƒOƒ‹[ƒv‚ğİ’èB
+	// ãƒ’ãƒƒãƒˆã‚°ãƒ«ãƒ¼ãƒ—ã‚’è¨­å®šã€‚
 	HitGroupMgr::Ins()->Setting();
 
-	// AO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğİ’èB
+	// AOç”¨ã®ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚’è¨­å®šã€‚
 	vector<RayPiplineShaderData> useShaders;
 	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	RaytracingPipline aoPipline;
 	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
-	// ƒfƒmƒCƒYAO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğİ’èB
+	// ãƒ‡ãƒã‚¤ã‚ºAOç”¨ã®ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚’è¨­å®šã€‚
 	vector<RayPiplineShaderData> dAOuseShaders;
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	RaytracingPipline deAOPipline;
 	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
-	// ƒfƒtƒHƒ‹ƒg‚ÌƒVƒF[ƒ_[‚ğİ’èB
+	// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’è¨­å®šã€‚
 	vector<RayPiplineShaderData> defShaders;
 	defShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	RaytracingPipline defPipline;
 	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
-	// SPONZA‚ğ“Ç‚İ‚ŞB
-	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	// SPONZAã‚’èª­ã¿è¾¼ã‚€ã€‚
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
-	// ƒ‰ƒCƒg—p‚ÌƒXƒtƒBƒA‚ğ“Ç‚İ‚ŞB
+	// ãƒ©ã‚¤ãƒˆç”¨ã®ã‚¹ãƒ•ã‚£ã‚¢ã‚’èª­ã¿è¾¼ã‚€ã€‚
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
 	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
@@ -150,19 +150,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
-	// TLAS‚ğ¶¬B
+	// TLASã‚’ç”Ÿæˆã€‚
 	TLAS tlas;
 	tlas.GenerateTLAS(L"TlasDescriptorHeap");
 
-	// ƒŒƒCƒgƒŒo—Í—pƒNƒ‰ƒX‚ğƒZƒbƒgB
+	// ãƒ¬ã‚¤ãƒˆãƒ¬å‡ºåŠ›ç”¨ã‚¯ãƒ©ã‚¹ã‚’ã‚»ãƒƒãƒˆã€‚
 	RaytracingOutput raytracingOutput;
 	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	// —İÏƒfƒmƒCƒY—p‚Å‚Ì•Û‘¶—pƒNƒ‰ƒXB
+	// ç´¯ç©ãƒ‡ãƒã‚¤ã‚ºç”¨ã§ã®ä¿å­˜ç”¨ã‚¯ãƒ©ã‚¹ã€‚
 	RaytracingOutput raytracingOutputData;
 	raytracingOutputData.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
 
-	// ƒKƒEƒVƒAƒ“ƒuƒ‰[‚Ég—p‚·‚é‚â‚ÂB
+	// ã‚¬ã‚¦ã‚·ã‚¢ãƒ³ãƒ–ãƒ©ãƒ¼ã«ä½¿ç”¨ã™ã‚‹ã‚„ã¤ã€‚
 	RaytracingOutput xBlurOutput;
 	xBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 	RaytracingOutput yBlurOutput;
@@ -170,16 +170,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	RaytracingOutput mixBlurOutput;
 	mixBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	// ƒVƒF[ƒ_[ƒe[ƒuƒ‹‚ğ¶¬B
+	// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ãƒ†ãƒ¼ãƒ–ãƒ«ã‚’ç”Ÿæˆã€‚
 	aoPipline.ConstructionShaderTable();
 	deAOPipline.ConstructionShaderTable();
 	defPipline.ConstructionShaderTable();
 
-	// ƒfƒmƒCƒY—p‚ÌƒKƒEƒVƒAƒ“ƒuƒ‰[ƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[‚ğƒZƒbƒgB
+	// ãƒ‡ãƒã‚¤ã‚ºç”¨ã®ã‚¬ã‚¦ã‚·ã‚¢ãƒ³ãƒ–ãƒ©ãƒ¼ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ã‚»ãƒƒãƒˆã€‚
 	const int MAX_PIX = 1280 * 720;
-	ComputeShader blurX;
-	blurX.Init(L"Resource/ShaderFiles/Raytracing/GaussianBlurX.hlsl", sizeof(XMFLOAT4), MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
-		MAX_PIX / 20, xBlurOutput.GetRaytracingOutput().Get());
+	//ComputeShader blurX;
+	//blurX.Init(L"Resource/ShaderFiles/Raytracing/GaussianBlurX.hlsl", sizeof(XMFLOAT4), MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
+	//	MAX_PIX / 20, xBlurOutput.GetRaytracingOutput().Get());
 	//ComputeShader blurY;
 	//blurY.Init(L"Resource/hlsl/Raytracing/GaussianBlurY.hlsl", sizeof(XMFLOAT4), MAX_PIX / 2.0f, xBlurOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
 	//	MAX_PIX / 4.0f, yBlurOutput.GetRaytracingOutput().Get());
@@ -188,13 +188,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	//	MAX_PIX, mixBlurOutput.GetRaytracingOutput().Get());
 
 
-	// ‰¼‚Ì’è”ƒoƒbƒtƒ@‚ğéŒ¾
+	// ä»®ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡ã‚’å®£è¨€
 	KariConstBufferData constBufferData;
 	constBufferData.ambientColor = { 1,1,1,1 };
 	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
-		XMConvertToRadians(60.0f),				//‰æŠp(60“x)
-		(float)window_width / window_height,	//ƒAƒXƒyƒNƒg”ä
-		0.1f, 1000000.0f							//‘O’[A‰œ’[
+		XMConvertToRadians(60.0f),				//ç”»è§’(60åº¦)
+		(float)window_width / window_height,	//ã‚¢ã‚¹ãƒšã‚¯ãƒˆæ¯”
+		0.1f, 1000000.0f							//å‰ç«¯ã€å¥¥ç«¯
 	);
 	constBufferData.mtxProjInv = XMMatrixInverse(nullptr, constBufferData.mtxProj);
 	Vec3 eye = { 0,0,-10 };
@@ -206,24 +206,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.isNoiseScene = false;
 	constBufferData.isNoiseOnlyScene = false;
 
-	// “_ŒõŒ¹‚ğƒZƒbƒeƒBƒ“ƒO
+	// ç‚¹å…‰æºã‚’ã‚»ãƒƒãƒ†ã‚£ãƒ³ã‚°
 	constBufferData.pointLight.lightPos = Vec3(0, 300, 0);
 	constBufferData.pointLight.lightSize = 30.0f;
 	constBufferData.pointLight.lightPower = 300.0f;
 
-	// •ÀsŒõŒ¹‚ğƒZƒbƒeƒBƒ“ƒO
+	// ä¸¦è¡Œå…‰æºã‚’ã‚»ãƒƒãƒ†ã‚£ãƒ³ã‚°
 	constBufferData.dirLight.isActive = false;
 	constBufferData.dirLight.lightColor = Vec3{ 0,0,0 };
 	constBufferData.dirLight.lihgtDir = Vec3{ 0,-1,0 };
 
-	// ƒXƒ|ƒbƒgƒ‰ƒCƒg‚ğƒZƒbƒeƒBƒ“ƒO
+	// ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã‚’ã‚»ãƒƒãƒ†ã‚£ãƒ³ã‚°
 	constBufferData.spotLight.isActive = false;
 	constBufferData.spotLight.dir = Vec3{ 0,-1,0 };
 	constBufferData.spotLight.pos = Vec3{ 0,300,0 };
 	constBufferData.spotLight.power = 300.0f;
 	constBufferData.spotLight.angle = DirectX::XM_PI;
 
-	// ‚»‚Ì‘¼‚ÌƒfƒoƒbƒOî•ñ‚ğƒZƒbƒeƒBƒ“ƒO
+	// ãã®ä»–ã®ãƒ‡ãƒãƒƒã‚°æƒ…å ±ã‚’ã‚»ãƒƒãƒ†ã‚£ãƒ³ã‚°
 	constBufferData.aoSampleCount = 1;
 	constBufferData.isLightHitScene = false;
 	constBufferData.isNormalScene = false;
@@ -233,22 +233,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	DynamicConstBuffer constBuff;
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
 
-	// ƒfƒoƒbƒO—p‚ÅƒmƒCƒY‰æ–Ê‚ğo‚·ƒtƒ‰ƒOB
+	// ãƒ‡ãƒãƒƒã‚°ç”¨ã§ãƒã‚¤ã‚ºç”»é¢ã‚’å‡ºã™ãƒ•ãƒ©ã‚°ã€‚
 	DEGU_PIPLINE_ID debugPiplineID = AO_PIPLINE;
 
-	// ƒJƒƒ‰‚ğ‰Šú‰»B
+	// ã‚«ãƒ¡ãƒ©ã‚’åˆæœŸåŒ–ã€‚
 	Camera::Ins()->Init();
 
-	// ƒ‰ƒCƒg‚ª“®‚¢‚½‚©
+	// ãƒ©ã‚¤ãƒˆãŒå‹•ã„ãŸã‹
 	bool isMoveLight = false;
 
-	/*----------ƒQ[ƒ€ƒ‹[ƒv----------*/
+	/*----------ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—----------*/
 	while (true) {
 
-		// IMGUIŒn
+		// IMGUIç³»
 		ImGuiWindow::Ins()->processBeforeDrawing();
 
-		// ƒEƒBƒ“ƒhƒE‚Ì–¼‘O‚ğÄİ’èB
+		// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®åå‰ã‚’å†è¨­å®šã€‚
 		SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
 
 		isMoveLight = false;
@@ -257,38 +257,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		ImGuiWindow::Ins()->processAfterDrawing();
 
 
-		/*----------–ˆƒtƒŒ[ƒ€ˆ—(•`‰æ‘Oˆ—)----------*/
+		/*----------æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‡¦ç†(æç”»å‰å‡¦ç†)----------*/
 		DirectXBase::Ins()->processBeforeDrawing();
 
-		/*----- XVˆ— -----*/
+		/*----- æ›´æ–°å‡¦ç† -----*/
 
-		// ƒrƒ…[s—ñ‚ğ¶¬B
+		// ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—ã‚’ç”Ÿæˆã€‚
 		Camera::Ins()->GenerateMatView();
 
 		FPS();
 
-		// —”‚Ìí‚ğXVB
+		// ä¹±æ•°ã®ç¨®ã‚’æ›´æ–°ã€‚
 		constBufferData.seed = FHelper::GetRand(0, 1000);
 
-		// ƒJƒƒ‰‚ğXVB
+		// ã‚«ãƒ¡ãƒ©ã‚’æ›´æ–°ã€‚
 		Camera::Ins()->Update();
 
 		eye = Camera::Ins()->eye;
 		target = Camera::Ins()->target;
 		up = Camera::Ins()->up;
 
-		// ƒ‰ƒCƒg‚ª“®‚¢‚½‚Æ‚«‚Ì‚İAƒ[ƒ‹ƒhs—ñ‚ğÄŒvZ‚µ‚ÄTLAS‚ğXV‚·‚éB
+		// ãƒ©ã‚¤ãƒˆãŒå‹•ã„ãŸã¨ãã®ã¿ã€ãƒ¯ãƒ¼ãƒ«ãƒ‰è¡Œåˆ—ã‚’å†è¨ˆç®—ã—ã¦TLASã‚’æ›´æ–°ã™ã‚‹ã€‚
 		if (isMoveLight) {
 
-			// “_ŒõŒ¹‚ÌˆÊ’u‚ğXVB
+			// ç‚¹å…‰æºã®ä½ç½®ã‚’æ›´æ–°ã€‚
 			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
 			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
 
-			// ƒXƒ|ƒbƒgƒ‰ƒCƒg‚ÌˆÊ’u‚ğXVB
+			// ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®ä½ç½®ã‚’æ›´æ–°ã€‚
 			//PorygonInstanceRegister::Ins()->ChangeTrans(coneIns, constBufferData.spotLight.pos);
 			//PorygonInstanceRegister::Ins()->ChangeScale(coneIns, constBufferData.spotLight.power / 50.0f);
 
-			// ƒXƒ|ƒbƒgƒ‰ƒCƒg‚ÌŠp“x‚ğXVB
+			// ã‚¹ãƒãƒƒãƒˆãƒ©ã‚¤ãƒˆã®è§’åº¦ã‚’æ›´æ–°ã€‚
 			//PorygonInstanceRegister::Ins()->ChangeRotate(coneIns, Vec3(atan2f(constBufferData.spotLight.dir.z, constBufferData.spotLight.dir.y),
 			//	atan2f(constBufferData.spotLight.dir.x, constBufferData.spotLight.dir.z),
 			//	atan2f(constBufferData.spotLight.dir.y, constBufferData.spotLight.dir.x)));
@@ -297,14 +297,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		}
 
-		/*----- •`‰æˆ— -----*/
+		/*----- æç”»å‡¦ç† -----*/
 
-		// ‰æ–Ê‚É•\¦‚³‚ê‚éƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚É–ß‚·B
+		// ç”»é¢ã«è¡¨ç¤ºã•ã‚Œã‚‹ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã«æˆ»ã™ã€‚
 		//DirectXBase::Ins()->SetRenderTarget();
 
 		RaytracingPipline setPipline = {};
 
-		// ƒfƒoƒbƒO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“ID‚É‰‚¶‚½ƒpƒCƒvƒ‰ƒCƒ“‚ğƒZƒbƒg‚·‚éB
+		// ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³IDã«å¿œã˜ãŸãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚’ã‚»ãƒƒãƒˆã™ã‚‹ã€‚
 		if (debugPiplineID == DEF_PIPLINE) {
 
 			constBufferData.counter = 0;
@@ -325,11 +325,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 		constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 		constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
-		// ’è”ƒoƒbƒtƒ@‚Ì’†g‚ğXV‚·‚éB
+		// å®šæ•°ãƒãƒƒãƒ•ã‚¡ã®ä¸­èº«ã‚’æ›´æ–°ã™ã‚‹ã€‚
 		constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
 		auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
 
-		// ƒOƒ[ƒoƒ‹ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ‚Åg‚¤‚ÆéŒ¾‚µ‚Ä‚¢‚éƒŠƒ\[ƒX‚ç‚ğƒZƒbƒgB
+		// ã‚°ãƒ­ãƒ¼ãƒãƒ«ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã§ä½¿ã†ã¨å®£è¨€ã—ã¦ã„ã‚‹ãƒªã‚½ãƒ¼ã‚¹ã‚‰ã‚’ã‚»ãƒƒãƒˆã€‚
 		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
 		DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 		DirectXBase::Ins()->cmdList->SetComputeRootSignature(setPipline.GetGlobalRootSig()->GetRootSig().Get());
@@ -339,7 +339,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
-		// ƒŒƒCƒgƒŒ[ƒVƒ“ƒOŒ‹‰Êƒoƒbƒtƒ@‚ğUAVó‘Ô‚Ö
+		// ãƒ¬ã‚¤ãƒˆãƒ¬ãƒ¼ã‚·ãƒ³ã‚°çµæœãƒãƒƒãƒ•ã‚¡ã‚’UAVçŠ¶æ…‹ã¸
 		raytracingOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		raytracingOutputData.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
@@ -347,19 +347,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
 
-		// ƒfƒoƒbƒO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ªƒfƒmƒCƒY—pƒpƒCƒvƒ‰ƒCƒ“‚¾‚Á‚½‚çAƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[‚ğg‚Á‚ÄƒfƒmƒCƒY‚ğ‚©‚¯‚éB
+		// ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ãŒãƒ‡ãƒã‚¤ã‚ºç”¨ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã ã£ãŸã‚‰ã€ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚’ä½¿ã£ã¦ãƒ‡ãƒã‚¤ã‚ºã‚’ã‹ã‘ã‚‹ã€‚
 		if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-			blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
-			blurX.Dispatch((MAX_PIX) / 4, 1, 1);
+			//blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
+			//blurX.Dispatch((MAX_PIX) / 4, 1, 1);
 			//memcpy()
 
 		}
 
-		// ƒoƒbƒNƒoƒbƒtƒ@‚ÌƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚éB
+		// ãƒãƒƒã‚¯ãƒãƒƒãƒ•ã‚¡ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’å–å¾—ã™ã‚‹ã€‚
 		UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 
-		// ƒoƒŠƒA‚ğİ’è‚µŠeƒŠƒ\[ƒX‚Ìó‘Ô‚ğ‘JˆÚ‚³‚¹‚é.
+		// ãƒãƒªã‚¢ã‚’è¨­å®šã—å„ãƒªã‚½ãƒ¼ã‚¹ã®çŠ¶æ…‹ã‚’é·ç§»ã•ã›ã‚‹.
 		raytracingOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		raytracingOutputData.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		D3D12_RESOURCE_BARRIER barriers[] = {
@@ -371,7 +371,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
 
-		// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚ÌƒŠƒ\[ƒXƒoƒŠƒA‚ğ‚à‚Æ‚É–ß‚·B
+		// ãƒ¬ãƒ³ãƒ€ãƒ¼ã‚¿ãƒ¼ã‚²ãƒƒãƒˆã®ãƒªã‚½ãƒ¼ã‚¹ãƒãƒªã‚¢ã‚’ã‚‚ã¨ã«æˆ»ã™ã€‚
 		D3D12_RESOURCE_BARRIER endBarriers[] = {
 
 		CD3DX12_RESOURCE_BARRIER::Transition(
@@ -390,16 +390,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 }
 
 
-// ƒ^ƒCƒgƒ‹ƒo[‚ÌFPS‚ÌXV
+// ã‚¿ã‚¤ãƒˆãƒ«ãƒãƒ¼ã®FPSã®æ›´æ–°
 void FPS()
 {
-	static DWORD prev_time = timeGetTime();	// ‘O‰ñ‚ÌŠÔ
-	static int frame_count = 0;		// ƒtƒŒ[ƒ€ƒJƒEƒ“ƒg
-	DWORD now_time = timeGetTime();		// ¡‰ñ‚ÌƒtƒŒ[ƒ€‚ÌŠÔ
+	static DWORD prev_time = timeGetTime();	// å‰å›ã®æ™‚é–“
+	static int frame_count = 0;		// ãƒ•ãƒ¬ãƒ¼ãƒ ã‚«ã‚¦ãƒ³ãƒˆ
+	DWORD now_time = timeGetTime();		// ä»Šå›ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ™‚é–“
 
-	frame_count++;	// ƒtƒŒ[ƒ€”‚ğƒJƒEƒ“ƒg‚·‚é
+	frame_count++;	// ãƒ•ãƒ¬ãƒ¼ãƒ æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆã™ã‚‹
 
-	// Œo‰ßŠÔ‚ª‚P•b‚ğ’´‚¦‚½‚çƒJƒEƒ“ƒg‚ÆŠÔ‚ğƒŠƒZƒbƒg
+	// çµŒéæ™‚é–“ãŒï¼‘ç§’ã‚’è¶…ãˆãŸã‚‰ã‚«ã‚¦ãƒ³ãƒˆã¨æ™‚é–“ã‚’ãƒªã‚»ãƒƒãƒˆ
 	if (now_time - prev_time >= 1000)
 	{
 		wchar_t fps[1000];
@@ -468,22 +468,22 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID, bool& isMove)
 {
 
-	// DirLight‚É‚Â‚¢‚Ä
+	// DirLightã«ã¤ã„ã¦
 	if (ImGui::TreeNode("DirLight")) {
 
-		// ƒ‰ƒCƒg‚ğ•\¦‚·‚é‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO‚ğXVB
+		// ãƒ©ã‚¤ãƒˆã‚’è¡¨ç¤ºã™ã‚‹ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã€‚
 		bool isActive = static_cast<bool>(constBufferData.dirLight.isActive);
 		ImGui::Checkbox("IsActive", &isActive);
 		if (isActive != constBufferData.dirLight.isActive) isMove = true;
 		constBufferData.dirLight.isActive = static_cast<int>(isActive);
 
-		// ’l‚ğ•Û‘¶‚·‚éB
+		// å€¤ã‚’ä¿å­˜ã™ã‚‹ã€‚
 		float dirX = constBufferData.dirLight.lihgtDir.x;
 		float dirZ = constBufferData.dirLight.lihgtDir.z;
 		ImGui::SliderFloat("DirLightX", &constBufferData.dirLight.lihgtDir.x, -1.0f, 1.0f);
 		ImGui::SliderFloat("DirLightZ", &constBufferData.dirLight.lihgtDir.z, -1.0f, 1.0f);
 
-		// •Ï‚í‚Á‚Ä‚¢‚½‚ç
+		// å¤‰ã‚ã£ã¦ã„ãŸã‚‰
 		if (dirX != constBufferData.dirLight.lihgtDir.x || dirZ != constBufferData.dirLight.lihgtDir.z) {
 
 			isMove = true;
@@ -491,13 +491,13 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 
 		}
 
-		// ³‹K‰»‚·‚éB
+		// æ­£è¦åŒ–ã™ã‚‹ã€‚
 		constBufferData.dirLight.lihgtDir.Normalize();
 
-		// ƒ‰ƒCƒg‚ÌF‚ğİ’èB
+		// ãƒ©ã‚¤ãƒˆã®è‰²ã‚’è¨­å®šã€‚
 		array<float, 3> lightColor = { constBufferData.dirLight.lightColor.x,constBufferData.dirLight.lightColor.y,constBufferData.dirLight.lightColor.z };
 		ImGui::ColorPicker3("LightColor", lightColor.data());
-		// F‚ª•Ï‚í‚Á‚Ä‚¢‚½‚çB
+		// è‰²ãŒå¤‰ã‚ã£ã¦ã„ãŸã‚‰ã€‚
 		if (lightColor[0] != constBufferData.dirLight.lightColor.x || lightColor[1] != constBufferData.dirLight.lightColor.y || lightColor[2] != constBufferData.dirLight.lightColor.z) {
 			isMove = true;
 		}
@@ -509,16 +509,16 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 
 	}
 
-	// PointLight‚É‚Â‚¢‚Ä
+	// PointLightã«ã¤ã„ã¦
 	if (ImGui::TreeNode("PointLight")) {
 
-		// ƒ‰ƒCƒg‚ğ•\¦‚·‚é‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO‚ğXVB
+		// ãƒ©ã‚¤ãƒˆã‚’è¡¨ç¤ºã™ã‚‹ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã€‚
 		bool isActive = static_cast<bool>(constBufferData.pointLight.isActive);
 		ImGui::Checkbox("IsActive", &isActive);
 		if (isActive != constBufferData.pointLight.isActive) isMove = true;
 		constBufferData.pointLight.isActive = static_cast<int>(isActive);
 
-		// ’l‚ğ•Û‘¶‚·‚éB
+		// å€¤ã‚’ä¿å­˜ã™ã‚‹ã€‚
 		float dirX = constBufferData.pointLight.lightPos.x;
 		float dirY = constBufferData.pointLight.lightPos.y;
 		float dirZ = constBufferData.pointLight.lightPos.z;
@@ -534,7 +534,7 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 		ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
 		constBufferData.aoSampleCount = aoSampleCount;
 
-		// •Ï‚í‚Á‚Ä‚¢‚½‚ç
+		// å¤‰ã‚ã£ã¦ã„ãŸã‚‰
 		if (dirX != constBufferData.pointLight.lightPos.x || dirY != constBufferData.pointLight.lightPos.y || dirZ != constBufferData.pointLight.lightPos.z || lightSize != constBufferData.pointLight.lightSize || pointLightPower != constBufferData.pointLight.lightPower) {
 
 			isMove = true;
@@ -542,10 +542,10 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 
 		}
 
-		// ƒ‰ƒCƒg‚ÌF‚ğİ’èB
+		// ãƒ©ã‚¤ãƒˆã®è‰²ã‚’è¨­å®šã€‚
 		array<float, 3> lightColor = { constBufferData.pointLight.lightColor.x,constBufferData.pointLight.lightColor.y,constBufferData.pointLight.lightColor.z };
 		ImGui::ColorPicker3("LightColor", lightColor.data());
-		// F‚ª•Ï‚í‚Á‚Ä‚¢‚½‚çB
+		// è‰²ãŒå¤‰ã‚ã£ã¦ã„ãŸã‚‰ã€‚
 		if (lightColor[0] != constBufferData.pointLight.lightColor.x || lightColor[1] != constBufferData.pointLight.lightColor.y || lightColor[2] != constBufferData.pointLight.lightColor.z) {
 			isMove = true;
 		}
@@ -557,16 +557,16 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 
 	}
 
-	// SpotLight‚É‚Â‚¢‚Ä
+	// SpotLightã«ã¤ã„ã¦
 	if (ImGui::TreeNode("SpotLight")) {
 
-		// ƒ‰ƒCƒg‚ğ•\¦‚·‚é‚©‚Ç‚¤‚©‚Ìƒtƒ‰ƒO‚ğXVB
+		// ãƒ©ã‚¤ãƒˆã‚’è¡¨ç¤ºã™ã‚‹ã‹ã©ã†ã‹ã®ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã€‚
 		bool isActive = static_cast<bool>(constBufferData.spotLight.isActive);
 		ImGui::Checkbox("IsActive", &isActive);
 		if (isActive != constBufferData.spotLight.isActive) isMove = true;
 		constBufferData.spotLight.isActive = static_cast<int>(isActive);
 
-		// ’l‚ğ•Û‘¶‚·‚éB
+		// å€¤ã‚’ä¿å­˜ã™ã‚‹ã€‚
 		float posX = constBufferData.spotLight.pos.x;
 		float posY = constBufferData.spotLight.pos.y;
 		float posZ = constBufferData.spotLight.pos.z;
@@ -585,7 +585,7 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 		ImGui::SliderFloat("SpotLightAngle", &constBufferData.spotLight.angle, 0.001f, DirectX::XM_PI * 2.0f);
 		ImGui::SliderFloat("SpotLightPower", &constBufferData.spotLight.power, 300.0f, 1000.0f);
 
-		// •Ï‚í‚Á‚Ä‚¢‚½‚ç
+		// å¤‰ã‚ã£ã¦ã„ãŸã‚‰
 		if (posX != constBufferData.spotLight.pos.x || posY != constBufferData.spotLight.pos.y || posZ != constBufferData.spotLight.pos.z ||
 			power != constBufferData.spotLight.power || angle != constBufferData.spotLight.angle ||
 			dirX != constBufferData.spotLight.dir.x || dirY != constBufferData.spotLight.dir.y || dirZ != constBufferData.spotLight.dir.z) {
@@ -596,10 +596,10 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 
 		}
 
-		// ƒ‰ƒCƒg‚ÌF‚ğİ’èB
+		// ãƒ©ã‚¤ãƒˆã®è‰²ã‚’è¨­å®šã€‚
 		array<float, 3> lightColor = { constBufferData.spotLight.color.x,constBufferData.spotLight.color.y,constBufferData.spotLight.color.z };
 		ImGui::ColorPicker3("LightColor", lightColor.data());
-		// F‚ª•Ï‚í‚Á‚Ä‚¢‚½‚çB
+		// è‰²ãŒå¤‰ã‚ã£ã¦ã„ãŸã‚‰ã€‚
 		if (lightColor[0] != constBufferData.spotLight.color.x || lightColor[1] != constBufferData.spotLight.color.y || lightColor[2] != constBufferData.spotLight.color.z) {
 			isMove = true;
 		}
@@ -618,40 +618,40 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 		++constBufferData.counter;
 	}
 
-	// ŠK‘w\‘¢‚É‚·‚éB
+	// éšå±¤æ§‹é€ ã«ã™ã‚‹ã€‚
 	if (ImGui::TreeNode("Debug")) {
 
-		// ƒƒbƒVƒ…‚ğ•\¦‚·‚éB
+		// ãƒ¡ãƒƒã‚·ãƒ¥ã‚’è¡¨ç¤ºã™ã‚‹ã€‚
 		bool isMesh = constBufferData.isMeshScene;
 		bool prevIsMesh = isMesh;
 		ImGui::Checkbox("Mesh Scene", &isMesh);
 		constBufferData.isMeshScene = isMesh;
-		// ’l‚ª‘‚«Š·‚¦‚ç‚ê‚Ä‚¢‚½‚çAƒTƒ“ƒvƒŠƒ“ƒO‚ğ‰Šú‰»‚·‚éB
+		// å€¤ãŒæ›¸ãæ›ãˆã‚‰ã‚Œã¦ã„ãŸã‚‰ã€ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
 		if (isMesh != prevIsMesh) {
 			constBufferData.counter = 0;
 		}
 
-		// –@ü‚ğ•\¦‚·‚éB
+		// æ³•ç·šã‚’è¡¨ç¤ºã™ã‚‹ã€‚
 		bool isNormal = constBufferData.isNormalScene;
 		bool prevIsNormal = isNormal;
 		ImGui::Checkbox("Normal Scene", &isNormal);
 		constBufferData.isNormalScene = isNormal;
-		// ’l‚ª‘‚«Š·‚¦‚ç‚ê‚Ä‚¢‚½‚çAƒTƒ“ƒvƒŠƒ“ƒO‚ğ‰Šú‰»‚·‚éB
+		// å€¤ãŒæ›¸ãæ›ãˆã‚‰ã‚Œã¦ã„ãŸã‚‰ã€ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
 		if (isNormal != prevIsNormal) {
 			constBufferData.counter = 0;
 		}
 
-		// ƒ‰ƒCƒg‚ª‚ ‚½‚Á‚½–Ê‚¾‚¯•\¦‚·‚éƒtƒ‰ƒO‚ğXVB
+		// ãƒ©ã‚¤ãƒˆãŒã‚ãŸã£ãŸé¢ã ã‘è¡¨ç¤ºã™ã‚‹ãƒ•ãƒ©ã‚°ã‚’æ›´æ–°ã€‚
 		bool isLightHit = constBufferData.isLightHitScene;
 		bool prevIsLightHit = isLightHit;
 		ImGui::Checkbox("LightHit Scene", &isLightHit);
 		constBufferData.isLightHitScene = isLightHit;
-		// ’l‚ª‘‚«Š·‚¦‚ç‚ê‚Ä‚¢‚½‚çAƒTƒ“ƒvƒŠƒ“ƒO‚ğ‰Šú‰»‚·‚éB
+		// å€¤ãŒæ›¸ãæ›ãˆã‚‰ã‚Œã¦ã„ãŸã‚‰ã€ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
 		if (isLightHit != prevIsLightHit) {
 			constBufferData.counter = 0;
 		}
 
-		// ƒpƒCƒvƒ‰ƒCƒ“‚ğ‘I‘ğB
+		// ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚’é¸æŠã€‚
 		int debugPiplineBuff = debugPiplineID;
 		ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
 		ImGui::SameLine();
@@ -660,27 +660,27 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 		ImGui::RadioButton("DENOISE AO PIPLINE", &debugPiplineBuff, 2);
 		debugPiplineID = (DEGU_PIPLINE_ID)debugPiplineBuff;
 
-		// AO‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğ‘I‘ğ‚³‚ê‚Ä‚¢‚½‚Æ‚«‚Ì‚İAƒmƒCƒY‚ğo‚·‚©‚Ìƒtƒ‰ƒO‚ğ•\¦‚·‚éB
+		// AOã®ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚’é¸æŠã•ã‚Œã¦ã„ãŸã¨ãã®ã¿ã€ãƒã‚¤ã‚ºã‚’å‡ºã™ã‹ã®ãƒ•ãƒ©ã‚°ã‚’è¡¨ç¤ºã™ã‚‹ã€‚
 		if (debugPiplineID == AO_PIPLINE) {
 
-			// ƒfƒoƒbƒO—p‚ÅƒmƒCƒY‰æ–Ê‚ğo‚·‚½‚ß‚Ìƒtƒ‰ƒO‚ğƒZƒbƒgB
+			// ãƒ‡ãƒãƒƒã‚°ç”¨ã§ãƒã‚¤ã‚ºç”»é¢ã‚’å‡ºã™ãŸã‚ã®ãƒ•ãƒ©ã‚°ã‚’ã‚»ãƒƒãƒˆã€‚
 			bool isNoise = constBufferData.isNoiseScene;
 			ImGui::Checkbox("Noise Scene", &isNoise);
 			constBufferData.isNoiseScene = isNoise;
 
-			// ƒfƒoƒbƒO—p‚ÅƒmƒCƒY‰æ–Ê‚Ì‚İ‚ğo‚·‚½‚ß‚Ìƒtƒ‰ƒO‚ğƒZƒbƒgB
+			// ãƒ‡ãƒãƒƒã‚°ç”¨ã§ãƒã‚¤ã‚ºç”»é¢ã®ã¿ã‚’å‡ºã™ãŸã‚ã®ãƒ•ãƒ©ã‚°ã‚’ã‚»ãƒƒãƒˆã€‚
 			bool isNoiseOnly = constBufferData.isNoiseOnlyScene;
 			ImGui::Checkbox("NoiseOnly Scene", &isNoiseOnly);
-			// ƒtƒ‰ƒO‚ª‘‚«Š·‚í‚Á‚Ä‚¢‚½‚çƒfƒmƒCƒYƒJƒEƒ“ƒ^[‚ğ‰Šú‰»‚·‚éB
+			// ãƒ•ãƒ©ã‚°ãŒæ›¸ãæ›ã‚ã£ã¦ã„ãŸã‚‰ãƒ‡ãƒã‚¤ã‚ºã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
 			if (isNoiseOnly != constBufferData.isNoiseOnlyScene) {
 				constBufferData.counter = 0;
 			}
 			constBufferData.isNoiseOnlyScene = isNoiseOnly;
 
-			// ƒAƒ“ƒrƒGƒ“ƒgƒIƒNƒŠƒ…[ƒWƒ‡ƒ“‚ğs‚¤‚©‚Ìƒtƒ‰ƒO‚ğƒZƒbƒgB
+			// ã‚¢ãƒ³ãƒ“ã‚¨ãƒ³ãƒˆã‚ªã‚¯ãƒªãƒ¥ãƒ¼ã‚¸ãƒ§ãƒ³ã‚’è¡Œã†ã‹ã®ãƒ•ãƒ©ã‚°ã‚’ã‚»ãƒƒãƒˆã€‚
 			bool isNoAO = constBufferData.isNoAO;
 			ImGui::Checkbox("NoAO Scene", &isNoAO);
-			// ƒtƒ‰ƒO‚ª‘‚«Š·‚í‚Á‚Ä‚¢‚½‚çƒfƒmƒCƒYƒJƒEƒ“ƒ^[‚ğ‰Šú‰»‚·‚éB
+			// ãƒ•ãƒ©ã‚°ãŒæ›¸ãæ›ã‚ã£ã¦ã„ãŸã‚‰ãƒ‡ãƒã‚¤ã‚ºã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ã‚’åˆæœŸåŒ–ã™ã‚‹ã€‚
 			if (isNoAO != constBufferData.isNoAO) {
 				constBufferData.counter = 0;
 			}
@@ -697,33 +697,38 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 
 /*
 
-ü@‚â‚è‚½‚¢‚±‚ÆE‚â‚ç‚È‚¯‚ê‚Î‚¢‚¯‚È‚¢‚±‚Æ
-//Eƒ\ƒtƒgƒVƒƒƒhƒE‚ÌƒfƒoƒbƒOî•ñ‚ğ‚í‚©‚è‚â‚·‚­‚·‚éB
-//@¨ŒõŒ¹‚ÌˆÊ’u‚Ì•\¦”ñ•\¦‚ğ‚í‚©‚è‚â‚·‚­‚·‚éB
-//@¨ŒõŒ¹‚É‚æ‚Á‚ÄÆ‚ç‚³‚ê‚½ˆÊ’u‚Ì‚İ‚ğ•\¦‚Å‚«‚é‚æ‚¤‚É‚·‚éB
-//E‚»‚Ì‚½‚ß‚É‚ÍƒpƒCƒvƒ‰ƒCƒ“‚ğ‚«‚¿‚ñ‚Æ•¡”ì‚ê‚é‚æ‚¤‚É‚·‚é•K—v‚ª‚ ‚éH
-//EAO‚ÌƒoƒO‚ğC³B–¾‚é‚³‚ªêŠ‚É‚æ‚Á‚Äˆá‚¤H
-//Eã‚ªI‚í‚Á‚½‚çA³‹K‰»ƒ‰ƒ“ƒo[ƒg‚É‚Â‚¢‚ÄŠw‚ÔB
-//@¨‚Ç‚¤‚µ‚Ä³‹K‰»ƒ‰ƒ“ƒo[ƒg‚ğg‚¤‚Ì‚©‚Ü‚Å‚«‚¿‚ñ‚Æ—‰ğ‚·‚éB
-//EƒŠƒjƒAƒ[ƒNƒtƒ[‚ğÀ‘•‚·‚éB
-//@¨ƒKƒ“ƒ}’l•â³H
-//Eƒ‰ƒCƒeƒBƒ“ƒO‚ÌƒoƒO‚ğC³‚·‚éB
-//EŒy—Ê‰»‚Ìˆ—‚ğ“ü‚ê‚éB
-EƒŠƒAƒ‹ƒ^ƒCƒ€ƒfƒmƒCƒY‚ğÀ‘•‚·‚éB
-//@¨‚È‚ºƒTƒ“ƒvƒ‹”‚ğ‘‚â‚µ‚Ä•½‹Ï‚µ‚Ä‚àF‚ª•Ï‚í‚ç‚È‚¢‚Ì‚©B‚»‚à‚»‚à•Ï‚í‚Á‚Ä‚¢‚é‚Ì‚©H ¨ —”‚Ìí‚ª•Ï‚í‚Á‚Ä‚È‚©‚Á‚½‚©‚çB
-@¨ˆÈ‘OŒ©‚½‹P“x‚Éd‚İ‚ğ‚¨‚¢‚½ƒuƒ‰[‚Å‚ÍÀ‘•‚Å‚«‚È‚¢‚©‚àB
-@¨ƒmƒCƒY‚ª01‚È‚Ì‚ÅA‹t‚É‹P“x‚ª‘å‚«‚·‚¬‚éc
-@¨‹t‚ÉŒ¾‚¦‚ÎA01‚Ì‹P“x‚Ì·‚ª‚ ‚é‚Æ‚±‚ë‚È‚ñ‚ÄƒmƒCƒY‚µ‚©‚ ‚è‚¦‚È‚¢H‚â‚Á‚Ä‚İ‚æ‚¤I
-EˆÈã‚Ì‚±‚Æ‚ğ¡T‚Ü‚Å‚ÉÀ‘•‚·‚éB
+â—¯ã€€ã‚„ã‚ŠãŸã„ã“ã¨ãƒ»ã‚„ã‚‰ãªã‘ã‚Œã°ã„ã‘ãªã„ã“ã¨
+//ãƒ»ã‚½ãƒ•ãƒˆã‚·ãƒ£ãƒ‰ã‚¦ã®ãƒ‡ãƒãƒƒã‚°æƒ…å ±ã‚’ã‚ã‹ã‚Šã‚„ã™ãã™ã‚‹ã€‚
+//ã€€â†’å…‰æºã®ä½ç½®ã®è¡¨ç¤ºéè¡¨ç¤ºã‚’ã‚ã‹ã‚Šã‚„ã™ãã™ã‚‹ã€‚
+//ã€€â†’å…‰æºã«ã‚ˆã£ã¦ç…§ã‚‰ã•ã‚ŒãŸä½ç½®ã®ã¿ã‚’è¡¨ç¤ºã§ãã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
+//ãƒ»ãã®ãŸã‚ã«ã¯ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚’ãã¡ã‚“ã¨è¤‡æ•°ä½œã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ï¼Ÿ
+//ãƒ»AOã®ãƒã‚°ã‚’ä¿®æ­£ã€‚æ˜ã‚‹ã•ãŒå ´æ‰€ã«ã‚ˆã£ã¦é•ã†ï¼Ÿ
+//ãƒ»ä¸ŠãŒçµ‚ã‚ã£ãŸã‚‰ã€æ­£è¦åŒ–ãƒ©ãƒ³ãƒãƒ¼ãƒˆã«ã¤ã„ã¦å­¦ã¶ã€‚
+//ã€€â†’ã©ã†ã—ã¦æ­£è¦åŒ–ãƒ©ãƒ³ãƒãƒ¼ãƒˆã‚’ä½¿ã†ã®ã‹ã¾ã§ãã¡ã‚“ã¨ç†è§£ã™ã‚‹ã€‚
+//ãƒ»ãƒªãƒ‹ã‚¢ãƒ¯ãƒ¼ã‚¯ãƒ•ãƒ­ãƒ¼ã‚’å®Ÿè£…ã™ã‚‹ã€‚
+//ã€€â†’ã‚¬ãƒ³ãƒå€¤è£œæ­£ï¼Ÿ
+//ãƒ»ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã®ãƒã‚°ã‚’ä¿®æ­£ã™ã‚‹ã€‚
+//ãƒ»è»½é‡åŒ–ã®å‡¦ç†ã‚’å…¥ã‚Œã‚‹ã€‚
+ãƒ»ãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ãƒ‡ãƒã‚¤ã‚ºã‚’å®Ÿè£…ã™ã‚‹ã€‚
+//ã€€â†’ãªãœã‚µãƒ³ãƒ—ãƒ«æ•°ã‚’å¢—ã‚„ã—ã¦å¹³å‡ã—ã¦ã‚‚è‰²ãŒå¤‰ã‚ã‚‰ãªã„ã®ã‹ã€‚ãã‚‚ãã‚‚å¤‰ã‚ã£ã¦ã„ã‚‹ã®ã‹ï¼Ÿ â†’ ä¹±æ•°ã®ç¨®ãŒå¤‰ã‚ã£ã¦ãªã‹ã£ãŸã‹ã‚‰ã€‚
+ã€€â†’ä»¥å‰è¦‹ãŸè¼åº¦ã«é‡ã¿ã‚’ãŠã„ãŸãƒ–ãƒ©ãƒ¼ã§ã¯å®Ÿè£…ã§ããªã„ã‹ã‚‚ã€‚
+ã€€â†’ãƒã‚¤ã‚ºãŒ01ãªã®ã§ã€é€†ã«è¼åº¦ãŒå¤§ãã™ãã‚‹â€¦
+ã€€â†’é€†ã«è¨€ãˆã°ã€01ã®è¼åº¦ã®å·®ãŒã‚ã‚‹ã¨ã“ã‚ãªã‚“ã¦ãƒã‚¤ã‚ºã—ã‹ã‚ã‚Šãˆãªã„ï¼Ÿã‚„ã£ã¦ã¿ã‚ˆã†ï¼
+ãƒ»ä»¥ä¸Šã®ã“ã¨ã‚’ä»Šé€±ã¾ã§ã«å®Ÿè£…ã™ã‚‹ã€‚
 
 
-EƒfƒoƒbƒO—p‚ÌØ‚è‘Ö‚¦ID‚ÉV‚µ‚¢‚â‚Â‚ğ’Ç‰Á‚·‚éB
-EIF•ª‚ÅV‚µ‚¢‚â‚Â‚Ì‚Æ‚«‚ÍƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[‚Å‰ÁH‚·‚éˆ—‚ğ‹²‚ŞB
-E–‚“±‘‚©‚È‚ñ‚©‚©‚çƒKƒEƒVƒAƒ“ƒuƒ‰[‚ÌƒR[ƒh‚ğ‚Á‚Ä‚«‚Ä(Šù‘¶ƒR[ƒh‚©‚ç‚¢‚¯‚é‚È‚ç‚»‚ê‚Å)ƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[‚É‘‚­B
-E‰ÁHI‡¬I
+ãƒ»ãƒ‡ãƒãƒƒã‚°ç”¨ã®åˆ‡ã‚Šæ›¿ãˆIDã«æ–°ã—ã„ã‚„ã¤ã‚’è¿½åŠ ã™ã‚‹ã€‚
+ãƒ»IFåˆ†ã§æ–°ã—ã„ã‚„ã¤ã®ã¨ãã¯ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã§åŠ å·¥ã™ã‚‹å‡¦ç†ã‚’æŒŸã‚€ã€‚
+ãƒ»é­”å°æ›¸ã‹ãªã‚“ã‹ã‹ã‚‰ã‚¬ã‚¦ã‚·ã‚¢ãƒ³ãƒ–ãƒ©ãƒ¼ã®ã‚³ãƒ¼ãƒ‰ã‚’æŒã£ã¦ãã¦(æ—¢å­˜ã‚³ãƒ¼ãƒ‰ã‹ã‚‰ã„ã‘ã‚‹ãªã‚‰ãã‚Œã§)ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«æ›¸ãã€‚
+ãƒ»åŠ å·¥ï¼åˆæˆï¼
 
 
-EƒRƒ“ƒsƒ…[ƒgƒVƒF[ƒ_[‚ÉƒeƒNƒXƒ`ƒƒ‚ğ“n‚µ‚ÄA’l‚ğ‚»‚Ì‚Ü‚Ü•Ô‚µ‚Ä‚»‚ê‚ğ•`‰æ‚Å‚«‚é‚©‚ğ‚¿‚¥‚Á‚­‚·‚éB
+ãƒ»ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«ãƒ†ã‚¯ã‚¹ãƒãƒ£ã‚’æ¸¡ã—ã¦ã€å€¤ã‚’ãã®ã¾ã¾è¿”ã—ã¦ãã‚Œã‚’æç”»ã§ãã‚‹ã‹ã‚’ã¡ã‡ã£ãã™ã‚‹ã€‚
+
+ãƒ»â‡¡ã‚’ã™ã‚‹å‰ã«ã‚³ãƒ³ãƒ”ãƒ¥ãƒ¼ãƒˆã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«æ–°ãŸãªæ©Ÿèƒ½ã‚’è¿½åŠ ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ã€‚
+ãƒ»Inputã‚„Outputã¯RaytracingOutputã‚¯ãƒ©ã‚¹(å¤šåˆ†ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ã«ç™»éŒ²æ¸ˆã¿)ã‚’ç›´æ¥æ¸¡ã™ã€‚
+ãƒ»ãã®éš›ã«ãã‚Œã«å¯¾å¿œã—ãŸãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã‚„ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã‚’ä½œã‚Œã‚‹ã‚ˆã†ã«ã™ã‚‹ã€‚
+ãƒ»ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ã¨ãƒ«ãƒ¼ãƒˆã‚·ã‚°ãƒãƒãƒ£ã‚’ã†ã¾ãã‚»ãƒƒãƒˆã—ã¦ã€å¾Œã¯RaytracingOutputã‚’ã‚»ãƒƒãƒˆã™ã‚Œã°ã†ã¾ãèµ·å‹•ã™ã‚‹ã‹ã‚‚ï¼ï¼Ÿ
 
 
 */
