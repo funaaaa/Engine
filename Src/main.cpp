@@ -145,20 +145,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns2, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns2, Vec3(0, 250, 0));
 
+	int sphereIns3 = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
+	PorygonInstanceRegister::Ins()->AddScale(sphereIns3, Vec3(12, 12, 12));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns3, Vec3(0, 350, 100));
 
 
 
-	float vel1 = 0.5f;
-	float m1 = 10.0f;
-	Vec3 forwardVec1 = Vec3(0, 0, 1);
-	Vec3 pos1 = Vec3(0, 10, -400);
 
-	float vel2 = 1.0f;
-	float m2 = 3.0f;
-	Vec3 forwardVec2 = Vec3(0, 0, -1);
-	Vec3 pos2 = Vec3(0, -10, 400);
+	Vec3 pos1 = Vec3(0, 10, -60);
 
+	Vec3 pos2 = Vec3(0, -10, 60);
 
+	Vec3 pos3 = Vec3(0, -10, 60);
+
+	float angle = 0;
+	float radius = 100;
 
 
 
@@ -239,37 +240,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 
-
-		// 球を移動させる。
-		pos1 += forwardVec1 * vel1;
-		pos2 += forwardVec2 * vel2;
-
+		// 大きい方
 		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, pos1);
+		// 小さい方
 		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns2, pos2);
+		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns3, pos3);
 
+		// 小さい方を回転させる。
+		angle += 0.1f;
 
-		vel1 -= 0.0001f;
-		vel2 -= 0.0001f;
+		radius += 0.1f;
 
-		// もしも衝突したら。
-		if (!isHit && Vec3(pos1 - pos2).Length() < 25.0f) {
-
-			XMFLOAT2 vel = CalRepulsionRatio(vel1, m1, vel2, m2);
-
-			vel2 = vel.x;
-			vel1 = vel.y;
-
-			forwardVec1.z *= -1;
-			forwardVec2.z *= -1;
-			
-			forwardVec1.y = 0.5f;
-			forwardVec2.y = -0.5f;
-
-			isHit = true;
-
-		}
-
-
+		pos2 = pos1 + Vec3(cosf(angle), 0, sinf(angle)) * radius;
+		pos3 = pos1 + Vec3(cosf(angle), 0, sinf(angle)) * (radius * 2.0f);
 
 
 		// 乱数の種を更新。
