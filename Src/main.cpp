@@ -5,6 +5,8 @@
 #include "Input.h"
 #include "FbxLoader.h"
 
+#include "RayDenoiser.h"
+
 #include "BLASRegister.h"
 #include "PorygonInstance.h"
 #include "TLAS.h"
@@ -85,6 +87,26 @@ struct KariConstBufferData {
 
 };
 
+void CalcWeightsTableFromGaussian(vector<float>& WeightsTbl, int SizeOfWeightsTbl, float Sigma)
+{
+	// 重みの合計を記録する変数を定義する
+	float total = 0;
+
+	// ここからガウス関数を用いて重みを計算している
+	// ループ変数のxが基準テクセルからの距離
+	for (int x = 0; x < SizeOfWeightsTbl; x++)
+	{
+		WeightsTbl.at(x) = expf(-0.5f * (float)(x * x) / Sigma);
+		total += 2.0f * WeightsTbl.at(x);
+	}
+
+	// 重みの合計で除算することで、重みの合計を1にしている
+	for (int i = 0; i < SizeOfWeightsTbl; i++)
+	{
+		WeightsTbl.at(i) /= total;
+	}
+}
+
 // デバッグ用のパイプラインを切り替えるやつ。
 enum DEGU_PIPLINE_ID {
 	DEF_PIPLINE,
@@ -118,6 +140,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ヒットグループを設定。
 	HitGroupMgr::Ins()->Setting();
 
+	// デノイズ用のクラスを初期化。
+	Denoiser::Ins()->Setting();
+
 	// AO用のパイプラインを設定。
 	vector<RayPiplineShaderData> useShaders;
 	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
@@ -144,9 +169,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
-	//int coneBlas = BLASRegister::Ins()->GenerateObj("Resource/", "cone.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
-	//int coneIns = PorygonInstanceRegister::Ins()->CreateInstance(coneBlas, 3);
-	//PorygonInstanceRegister::Ins()->ChangeTrans(coneIns, Vec3(0, 300, 0));
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -162,30 +184,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	RaytracingOutput raytracingOutputData;
 	raytracingOutputData.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
 
-	// ガウシアンブラーに使用するやつ。
-	RaytracingOutput xBlurOutput;
-	xBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	RaytracingOutput yBlurOutput;
-	yBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	RaytracingOutput mixBlurOutput;
-	mixBlurOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-
 	// シェーダーテーブルを生成。
 	aoPipline.ConstructionShaderTable();
 	deAOPipline.ConstructionShaderTable();
 	defPipline.ConstructionShaderTable();
 
-	// デノイズ用のガウシアンブラーコンピュートシェーダーをセット。
-	const int MAX_PIX = 1280 * 720;
-	//ComputeShader blurX;
-	//blurX.Init(L"Resource/ShaderFiles/Raytracing/GaussianBlurX.hlsl", sizeof(XMFLOAT4), MAX_PIX / 20, raytracingOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
-	//	MAX_PIX / 20, xBlurOutput.GetRaytracingOutput().Get());
-	//ComputeShader blurY;
-	//blurY.Init(L"Resource/hlsl/Raytracing/GaussianBlurY.hlsl", sizeof(XMFLOAT4), MAX_PIX / 2.0f, xBlurOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
-	//	MAX_PIX / 4.0f, yBlurOutput.GetRaytracingOutput().Get());
-	//ComputeShader mixShader;
-	//mixShader.Init(L"Resource/hlsl/Raytracing/MixShader.hlsl", sizeof(XMFLOAT4), MAX_PIX / 4.0f, yBlurOutput.GetRaytracingOutput().Get(), sizeof(XMFLOAT4),
-	//	MAX_PIX, mixBlurOutput.GetRaytracingOutput().Get());
+	// デノイザー受け取り用
+	RaytracingOutput denoiseOutput;
+	denoiseOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 
 	// 仮の定数バッファを宣言
@@ -248,7 +254,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// IMGUI系
 		ImGuiWindow::Ins()->processBeforeDrawing();
 
-		// ウィンドウの名前を再設定。
+		//// ウィンドウの名前を再設定。
 		SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
 
 		isMoveLight = false;
@@ -283,15 +289,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			// 点光源の位置を更新。
 			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
 			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
-
-			// スポットライトの位置を更新。
-			//PorygonInstanceRegister::Ins()->ChangeTrans(coneIns, constBufferData.spotLight.pos);
-			//PorygonInstanceRegister::Ins()->ChangeScale(coneIns, constBufferData.spotLight.power / 50.0f);
-
-			// スポットライトの角度を更新。
-			//PorygonInstanceRegister::Ins()->ChangeRotate(coneIns, Vec3(atan2f(constBufferData.spotLight.dir.z, constBufferData.spotLight.dir.y),
-			//	atan2f(constBufferData.spotLight.dir.x, constBufferData.spotLight.dir.z),
-			//	atan2f(constBufferData.spotLight.dir.y, constBufferData.spotLight.dir.x)));
 
 			tlas.Update();
 
@@ -348,13 +345,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
 
 		// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
-		if (debugPiplineID == DENOISE_AO_PIPLINE) {
+		//if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-			//blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
-			//blurX.Dispatch((MAX_PIX) / 4, 1, 1);
-			//memcpy()
+		//	//blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
+		//	//blurX.Dispatch((MAX_PIX) / 4, 1, 1);
+		//	//memcpy()
 
-		}
+		//}
+
+		// デノイズをかける。
+		Denoiser::Ins()->ApplyDenoise(raytracingOutput.GetUAVIndex(), denoiseOutput.GetUAVIndex());
+
 
 		// バックバッファのインデックスを取得する。
 		UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
@@ -369,7 +370,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			D3D12_RESOURCE_STATE_COPY_DEST),
 		};
 		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseOutput.GetRaytracingOutput().Get());
 
 		// レンダーターゲットのリソースバリアをもとに戻す。
 		D3D12_RESOURCE_BARRIER endBarriers[] = {

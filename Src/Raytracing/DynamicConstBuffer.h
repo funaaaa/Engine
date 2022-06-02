@@ -1,5 +1,6 @@
 #pragma once
 #include "DirectXBase.h"
+#include "DescriptorHeapMgr.h"
 
 // 動的な定数バッファクラス
 class DynamicConstBuffer {
@@ -9,7 +10,7 @@ private:
 	/*===== メンバ変数 =====*/
 
 	vector<ComPtr<ID3D12Resource>> buffer;
-	ComPtr<ID3D12DescriptorHeap> descHeap;
+	int descHeapIndex;
 
 
 public:

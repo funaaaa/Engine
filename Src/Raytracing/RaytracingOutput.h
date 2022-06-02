@@ -29,6 +29,7 @@ public:
 
 	// ƒQƒbƒ^
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput; }
+	const int& GetUAVIndex() { return uavDescriptorIndex; }
 
 private:
 
