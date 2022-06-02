@@ -1,9 +1,15 @@
 
 // 入力情報
-RWTexture2D<float4> InputImg : register(u0);
+RWTexture2D<float4> InputImg : register(u1);
 
 // 出力先UAV  
-RWTexture2D<float4> OutputImg : register(u1);
+RWTexture2D<float4> OutputImg : register(u2);
+
+// 重みテーブル
+cbuffer GaussianWeight : register(b0)
+{
+    float4 weights[2];
+};
 
 float4 GetPixelColor(int x, int y, int2 texSize)
 {
@@ -20,16 +26,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint2 basepos = uint2(DTid.x, DTid.y * 2);
     
     float4 color;
-    
-    float4 weights[2];
-    weights[0].r = 0.1f;
-    weights[0].g = 0.1f;
-    weights[0].b = 0.1f;
-    weights[0].a = 0.1f;
-    weights[1].r = 0.1f;
-    weights[1].g = 0.1f;
-    weights[1].b = 0.1f;
-    weights[1].a = 0.1f;
     
     ////基準テクセルからプラス方向に8テクセル、重み付きでサンプリング
     //color = gaussianWeight[0].r * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y, 0, 720))];

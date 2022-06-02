@@ -87,26 +87,6 @@ struct KariConstBufferData {
 
 };
 
-void CalcWeightsTableFromGaussian(vector<float>& WeightsTbl, int SizeOfWeightsTbl, float Sigma)
-{
-	// 重みの合計を記録する変数を定義する
-	float total = 0;
-
-	// ここからガウス関数を用いて重みを計算している
-	// ループ変数のxが基準テクセルからの距離
-	for (int x = 0; x < SizeOfWeightsTbl; x++)
-	{
-		WeightsTbl.at(x) = expf(-0.5f * (float)(x * x) / Sigma);
-		total += 2.0f * WeightsTbl.at(x);
-	}
-
-	// 重みの合計で除算することで、重みの合計を1にしている
-	for (int i = 0; i < SizeOfWeightsTbl; i++)
-	{
-		WeightsTbl.at(i) /= total;
-	}
-}
-
 // デバッグ用のパイプラインを切り替えるやつ。
 enum DEGU_PIPLINE_ID {
 	DEF_PIPLINE,
@@ -254,7 +234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// IMGUI系
 		ImGuiWindow::Ins()->processBeforeDrawing();
 
-		//// ウィンドウの名前を再設定。
+		// ウィンドウの名前を再設定。
 		SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
 
 		isMoveLight = false;
@@ -354,7 +334,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//}
 
 		// デノイズをかける。
-		Denoiser::Ins()->ApplyDenoise(raytracingOutput.GetUAVIndex(), denoiseOutput.GetUAVIndex());
+		Denoiser::Ins()->ApplyDenoise(raytracingOutput.GetUAVIndex(), denoiseOutput.GetUAVIndex(), 10);
 
 
 		// バックバッファのインデックスを取得する。

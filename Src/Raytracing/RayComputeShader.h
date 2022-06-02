@@ -3,17 +3,17 @@
 #include <DirectXTex/d3dx12.h>
 #include <memory>
 #include <vector>
-#include "RayRootsignature.h"
-#include "DynamicConstBuffer.h"
 
-// 新しく作ったコンピュートシェーダー
+class RayRootsignature;
+
+// 新しくレイトレ用に作ったコンピュートシェーダー
 class RayComputeShader {
 
 private:
 
 	/*===== メンバ変数 =====*/
 
-	RayRootsignature rootSignature;		// ルートシグネチャ
+	std::shared_ptr<RayRootsignature> rootSignature;			// ルートシグネチャ
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipline;		// パイプライン
 	int inputCBVCount;					// 入力するCBVの数
 	int inputSRVCount;					// 入力するSRVの数
@@ -30,7 +30,7 @@ public:
 	void Setting(LPCWSTR CsPath, const int& SRVCount, const int& CVBCount, const int& UAVCount, std::vector<int> SRVIndex);
 
 	// 実行！
-	void Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<DynamicConstBuffer> InputCBV);
+	void Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV);
 
 	// 入力用UAVを変更。
 	void ChangeInputUAVIndex(const std::vector<int>& NewInputUAV) { inputUAVIndex = NewInputUAV; }
