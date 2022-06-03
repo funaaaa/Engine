@@ -1,7 +1,9 @@
 #pragma once
 #include "Singleton.h"
+#include "TLAS.h"
 #include <vector>
 #include <memory>
+#include <wrl/client.h>
 
 class RaytracingOutput;
 class RayPiplineBakeAO;
@@ -24,7 +26,7 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// ベイクを実行。
-	void ExecutionBake(const int& TexCount);
+	void ExecutionBake(const int& TexCount, TLAS& Tlas, Microsoft::WRL::ComPtr<ID3D12Resource>& ConstBuff, RaytracingOutput& DebugTex);
 
 	// ベイク結果のテクスチャを取得。
 	std::vector<std::shared_ptr<RaytracingOutput>>& GetBakeTex() { return bakeTex; }

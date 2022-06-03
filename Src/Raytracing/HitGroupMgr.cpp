@@ -87,6 +87,15 @@ int HitGroupMgr::GetHitGroupSRVCount(const int& HitGroupID)
 
 }
 
+int HitGroupMgr::GetHitGroupUAVCount(const int& HitGroupID)
+{
+
+	/*===== ヒットグループのSRVの数を取得 =====*/
+
+	return hitGroup[HitGroupID]->GetUAVCount();
+
+}
+
 void HitGroupMgr::Setting()
 {
 
@@ -107,7 +116,7 @@ void HitGroupMgr::Setting()
 	initData.IS = { L"",false };
 	initData.SRVcount = 4;
 	initData.CBVcount = 0;
-	initData.UAVcount = 0;
+	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());
 	hitGroup[DEF_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DEF_HIT_GROUP]);
 
@@ -117,7 +126,7 @@ void HitGroupMgr::Setting()
 	initData.IS = { L"",false };
 	initData.SRVcount = 4;
 	initData.CBVcount = 0;
-	initData.UAVcount = 0;
+	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());
 	hitGroup[AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[AO_HIT_GROUP]);
 
@@ -127,7 +136,7 @@ void HitGroupMgr::Setting()
 	initData.IS = { L"",false };
 	initData.SRVcount = 4;
 	initData.CBVcount = 0;
-	initData.UAVcount = 0;
+	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());
 	hitGroup[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
 

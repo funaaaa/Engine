@@ -12,6 +12,7 @@ StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 Texture2D<float4> texture : register(t2, space1);
 Texture2D<float4> normalMap : register(t3, space1);
+RWTexture2D<float4> aoBakeTex : register(u0, space1);
 // ƒTƒ“ƒvƒ‰[
 SamplerState smp : register(s0, space1);
 

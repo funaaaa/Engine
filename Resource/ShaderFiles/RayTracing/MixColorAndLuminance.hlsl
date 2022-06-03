@@ -14,6 +14,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     float4 color = InputColor[DTid.xy];
     
-    OutputImg[DTid.xy] = luminance * 3.0f * color;
+    OutputImg[DTid.xy] = luminance;
     
 }

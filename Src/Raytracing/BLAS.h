@@ -78,6 +78,9 @@ public:
 	void PlayAnimation();	// 再生
 	void StopAnimation();	// 停止
 
+	// テクスチャを追加。
+	inline void AddTex(const int& Index) { textureHandle.emplace_back(Index); }
+
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
 	uint8_t* WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex);

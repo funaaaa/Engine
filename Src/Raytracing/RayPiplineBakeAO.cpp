@@ -25,7 +25,7 @@ void RayPiplineBakeAO::ConstructionShaderTableBakeAO(std::vector<std::shared_ptr
 	// ヒットグループでは、保存されているヒットグループの中から最大のサイズのものでデータを確保する。。
 	UINT hitgroupRecordSize = 0;
 	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	hitgroupRecordSize += GetLargestDataSizeInHitGroup();
+	hitgroupRecordSize += 24;
 	hitgroupRecordSize = RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
 
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。

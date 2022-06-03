@@ -12,6 +12,7 @@ StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 Texture2D<float4> texture : register(t2, space1);
 Texture2D<float4> normalMap : register(t3, space1);
+RWTexture2D<float4> aoBakeTex : register(u0, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 
@@ -330,6 +331,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         // 最終結果の色を保存。
         payload.color.xyz = texColor;
         payload.luminance = visibility + (pointLightColor + dirLightColor) / PI;
+        payload.luminance = aoBakeTex[vtx.uv];
         
         // ライトに当たった面だけ表示するフラグが立っていたら。
         if (gSceneParam.isLightHitScene)

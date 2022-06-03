@@ -6,6 +6,7 @@
 #include "FbxLoader.h"
 
 #include "RayDenoiser.h"
+#include "BakeAO.h"
 
 #include "BLASRegister.h"
 #include "PorygonInstance.h"
@@ -20,10 +21,13 @@
 #include "RaytracingOutput.h"
 #include "MultiMeshLoadOBJ.h"
 #include "ComputeShader.h"
+#include "BLAS.h"
 
 #include "HitGroup.h"
 
 #include <utilapiset.h>
+
+#include "KariConstBuffer.h"
 
 #include "FHelper.h"
 
@@ -33,59 +37,6 @@
 
 // fps更新
 void FPS();
-
-struct RayPointLightData {
-
-	Vec3 lightPos;
-	float lightSize;
-	Vec3 lightColor;
-	float lightPower;
-	int isActive;
-	Vec3 pad;
-
-};
-
-struct RayDirLightData {
-
-	Vec3 lihgtDir;
-	int isActive;
-	Vec3 lightColor;
-	float pad;
-
-};
-
-struct RaySpotLightData {
-
-	Vec3 pos;
-	float angle;
-	Vec3 dir;
-	float power;
-	Vec3 color;
-	int isActive;
-
-};
-
-struct KariConstBufferData {
-
-	XMMATRIX mtxView;			// ビュー行列。
-	XMMATRIX mtxProj;			// プロジェクション行列。
-	XMMATRIX mtxViewInv;		// ビュー逆行列。
-	XMMATRIX mtxProjInv;		// プロジェクション逆行列。
-	XMVECTOR ambientColor;		// 環境光。
-	RayDirLightData dirLight;
-	RayPointLightData pointLight;
-	RaySpotLightData spotLight;
-	int seed;
-	int counter;
-	int aoSampleCount;
-	int isNoiseScene;
-	int isNoiseOnlyScene;
-	int isLightHitScene;
-	int isNormalScene;
-	int isMeshScene;
-	int isNoAO;
-
-};
 
 // デバッグ用のパイプラインを切り替えるやつ。
 enum DEGU_PIPLINE_ID {
@@ -101,7 +52,7 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
-	ImGuiWindow::Ins()->Init();
+	//ImGuiWindow::Ins()->Init();
 	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
@@ -123,6 +74,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// デノイズ用のクラスを初期化。
 	Denoiser::Ins()->Setting();
 
+	// カメラを初期化。
+	Camera::Ins()->Init();
+
+	// 仮の定数バッファを宣言
+	KariConstBufferData constBufferData;
+	constBufferData.Init();
+
 	// AO用のパイプラインを設定。
 	vector<RayPiplineShaderData> useShaders;
 	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
@@ -142,7 +100,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
@@ -155,6 +113,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// TLASを生成。
 	TLAS tlas;
 	tlas.GenerateTLAS(L"TlasDescriptorHeap");
+
+	// AOをベイク。
+	RaytracingOutput bakeTex;
+	bakeTex.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	BakeAO::Ins()->ExecutionBake(BLASRegister::Ins()->GetBLASCount(), tlas, constBufferData.constBuff.GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex()), bakeTex);
+
+	// ベイクした結果のUAVをBLASに追加。
+	int counter = 0;
+	std::vector<std::shared_ptr<BLAS>>& blasBuff = BLASRegister::Ins()->GetBLAS();
+	for (auto& index : blasBuff) {
+		//BakeAO::Ins()->GetBakeTex()[counter]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		index->AddTex(BakeAO::Ins()->GetBakeTex()[counter]->GetUAVIndex());
+		++counter;
+	}
 
 	// レイトレ出力用クラスをセット。
 	RaytracingOutput raytracingOutput;
@@ -186,57 +158,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	denoiseOutput2.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 
-	// 仮の定数バッファを宣言
-	KariConstBufferData constBufferData;
-	constBufferData.ambientColor = { 1,1,1,1 };
-	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
-		XMConvertToRadians(60.0f),				//画角(60度)
-		(float)window_width / window_height,	//アスペクト比
-		0.1f, 1000000.0f							//前端、奥端
-	);
-	constBufferData.mtxProjInv = XMMatrixInverse(nullptr, constBufferData.mtxProj);
-	Vec3 eye = { 0,0,-10 };
-	Vec3 target = { 0,0,0 };
-	Vec3 up = { 0,1,0 };
-	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
-	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
-	constBufferData.counter = 0;
-	constBufferData.isNoiseScene = false;
-	constBufferData.isNoiseOnlyScene = false;
-
-	// 点光源をセッティング
-	constBufferData.pointLight.lightPos = Vec3(0, 300, 0);
-	constBufferData.pointLight.lightSize = 30.0f;
-	constBufferData.pointLight.lightPower = 300.0f;
-	constBufferData.pointLight.isActive = true;
-
-	// 並行光源をセッティング
-	constBufferData.dirLight.isActive = false;
-	constBufferData.dirLight.lightColor = Vec3{ 0,0,0 };
-	constBufferData.dirLight.lihgtDir = Vec3{ 0,-1,0 };
-
-	// スポットライトをセッティング
-	constBufferData.spotLight.isActive = false;
-	constBufferData.spotLight.dir = Vec3{ 0,-1,0 };
-	constBufferData.spotLight.pos = Vec3{ 0,300,0 };
-	constBufferData.spotLight.power = 300.0f;
-	constBufferData.spotLight.angle = DirectX::XM_PI;
-
-	// その他のデバッグ情報をセッティング
-	constBufferData.aoSampleCount = 1;
-	constBufferData.isLightHitScene = false;
-	constBufferData.isNormalScene = false;
-	constBufferData.isMeshScene = false;
-	constBufferData.isNoAO = false;
-
-	DynamicConstBuffer constBuff;
-	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
-
 	// デバッグ用でノイズ画面を出すフラグ。
 	DEGU_PIPLINE_ID debugPiplineID = DENOISE_AO_PIPLINE;
-
-	// カメラを初期化。
-	Camera::Ins()->Init();
 
 	// ライトが動いたか
 	bool isMoveLight = false;
@@ -251,15 +174,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	while (true) {
 
 		// IMGUI系
-		ImGuiWindow::Ins()->processBeforeDrawing();
+		//ImGuiWindow::Ins()->processBeforeDrawing();
 
 		// ウィンドウの名前を再設定。
-		SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
+		//SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
 
-		isMoveLight = false;
-		Input(constBufferData, isMoveLight, debugPiplineID);
+		//isMoveLight = false;
+		//Input(constBufferData, isMoveLight, debugPiplineID);
 
-		ImGuiWindow::Ins()->processAfterDrawing();
+		//ImGuiWindow::Ins()->processAfterDrawing();
 
 
 		/*----------毎フレーム処理(描画前処理)----------*/
@@ -278,9 +201,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		// カメラを更新。
 		Camera::Ins()->Update();
 
-		eye = Camera::Ins()->eye;
-		target = Camera::Ins()->target;
-		up = Camera::Ins()->up;
+		constBufferData.eye = Camera::Ins()->eye;
+		constBufferData.target = Camera::Ins()->target;
+		constBufferData.up = Camera::Ins()->up;
 
 		// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
 		if (isMoveLight) {
@@ -319,11 +242,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 		auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
-		constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
+		constBufferData.mtxView = XMMatrixLookAtLH(constBufferData.eye.ConvertXMVECTOR(), constBufferData.target.ConvertXMVECTOR(), constBufferData.up.ConvertXMVECTOR());
 		constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 		// 定数バッファの中身を更新する。
-		constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
-		auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
+		constBufferData.constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
+		auto sceneConstantBuffer = constBufferData.constBuff.GetBuffer(frameIndex);
 
 		// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
@@ -359,7 +282,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			// デノイズをかけたライティング情報と色情報を混ぜる。
 			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-			Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), raytracingOutput.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
+			Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), bakeTex.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
 			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 		}
@@ -477,7 +400,7 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 		isMove = true;
 	}
 
-	InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
+	//InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
 
 }
 
@@ -731,5 +654,10 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 　→ノイズが01なので、逆に輝度が大きすぎる…
 　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！
 ・以上のことを今週までに実装する。
+
+
+
+・UAVを書き込む位置？
+・まずはUAVにしてPIXでみる。
 
 */

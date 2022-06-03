@@ -48,4 +48,7 @@ public:
 	// BLAS‚Ì”‚ğæ“¾B
 	int GetBLASCount() { return blas.size(); }
 
+	// BLAS‚ğæ“¾B
+	std::vector<std::shared_ptr<BLAS>>& GetBLAS() { return blas; }
+
 };

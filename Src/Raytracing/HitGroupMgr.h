@@ -64,5 +64,7 @@ public:
 
 	// ヒットグループのSRVの数を取得する。
 	int GetHitGroupSRVCount(const int& HitGroupID);
+	// ヒットグループのUAVの数を取得する。
+	int GetHitGroupUAVCount(const int& HitGroupID);
 
 };
