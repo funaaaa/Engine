@@ -18,8 +18,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
 {
     
     // バイリニアフィルタをかける
-    uint2 basepos = uint2(DTid.x / 2, DTid.y / 2);
-    float2 texSize = float2(1280 / 2.0f, 720 / 2.0f);
+    uint2 basepos = uint2(DTid.x / 1, DTid.y / 1);
+    float2 texSize = float2(1280 / 1.0f, 720 / 1.0f);
     float offset = 1;
     float4 color = GetPixelColor(basepos.x, basepos.y, texSize);
     color += GetPixelColor(basepos.x, basepos.y + offset, texSize);

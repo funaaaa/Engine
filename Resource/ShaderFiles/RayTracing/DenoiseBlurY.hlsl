@@ -23,7 +23,7 @@ float4 GetPixelColor(int x, int y, int2 texSize)
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
-    uint2 basepos = uint2(DTid.x, DTid.y * 2);
+    uint2 basepos = uint2(DTid.x, DTid.y * 1);
     
     float4 color;
     
@@ -47,22 +47,22 @@ void main(uint3 DTid : SV_DispatchThreadID)
     //color += gaussianWeight[1].b * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 6, 0, 720))];
     //color += gaussianWeight[1].a * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 7, 0, 720))];
     
-    color = GetPixelColor(basepos.x, basepos.y, float2(1280 / 2.0f, 720)) * weights[0].x;
-    color += GetPixelColor(basepos.x, basepos.y + 1, float2(1280 / 2.0f, 720)) * weights[0].y;
-    color += GetPixelColor(basepos.x, basepos.y + 2, float2(1280 / 2.0f, 720)) * weights[0].z;
-    color += GetPixelColor(basepos.x, basepos.y + 3, float2(1280 / 2.0f, 720)) * weights[0].w;
-    color += GetPixelColor(basepos.x, basepos.y + 4, float2(1280 / 2.0f, 720)) * weights[1].x;
-    color += GetPixelColor(basepos.x, basepos.y + 5, float2(1280 / 2.0f, 720)) * weights[1].y;
-    color += GetPixelColor(basepos.x, basepos.y + 6, float2(1280 / 2.0f, 720)) * weights[1].z;
-    color += GetPixelColor(basepos.x, basepos.y + 7, float2(1280 / 2.0f, 720)) * weights[1].w;
+    color = GetPixelColor(basepos.x, basepos.y, float2(1280 / 1.0f, 720)) * weights[0].x;
+    color += GetPixelColor(basepos.x, basepos.y + 1, float2(1280 / 1.0f, 720)) * weights[0].y;
+    color += GetPixelColor(basepos.x, basepos.y + 2, float2(1280 / 1.0f, 720)) * weights[0].z;
+    color += GetPixelColor(basepos.x, basepos.y + 3, float2(1280 / 1.0f, 720)) * weights[0].w;
+    color += GetPixelColor(basepos.x, basepos.y + 4, float2(1280 / 1.0f, 720)) * weights[1].x;
+    color += GetPixelColor(basepos.x, basepos.y + 5, float2(1280 / 1.0f, 720)) * weights[1].y;
+    color += GetPixelColor(basepos.x, basepos.y + 6, float2(1280 / 1.0f, 720)) * weights[1].z;
+    color += GetPixelColor(basepos.x, basepos.y + 7, float2(1280 / 1.0f, 720)) * weights[1].w;
 
-    color += GetPixelColor(basepos.x, basepos.y - 1, float2(1280 / 2.0f, 720)) * weights[0].y;
-    color += GetPixelColor(basepos.x, basepos.y - 2, float2(1280 / 2.0f, 720)) * weights[0].z;
-    color += GetPixelColor(basepos.x, basepos.y - 3, float2(1280 / 2.0f, 720)) * weights[0].w;
-    color += GetPixelColor(basepos.x, basepos.y - 4, float2(1280 / 2.0f, 720)) * weights[1].x;
-    color += GetPixelColor(basepos.x, basepos.y - 5, float2(1280 / 2.0f, 720)) * weights[1].y;
-    color += GetPixelColor(basepos.x, basepos.y - 6, float2(1280 / 2.0f, 720)) * weights[1].z;
-    color += GetPixelColor(basepos.x, basepos.y - 7, float2(1280 / 2.0f, 720)) * weights[1].w;
+    color += GetPixelColor(basepos.x, basepos.y - 1, float2(1280 / 1.0f, 720)) * weights[0].y;
+    color += GetPixelColor(basepos.x, basepos.y - 2, float2(1280 / 1.0f, 720)) * weights[0].z;
+    color += GetPixelColor(basepos.x, basepos.y - 3, float2(1280 / 1.0f, 720)) * weights[0].w;
+    color += GetPixelColor(basepos.x, basepos.y - 4, float2(1280 / 1.0f, 720)) * weights[1].x;
+    color += GetPixelColor(basepos.x, basepos.y - 5, float2(1280 / 1.0f, 720)) * weights[1].y;
+    color += GetPixelColor(basepos.x, basepos.y - 6, float2(1280 / 1.0f, 720)) * weights[1].z;
+    color += GetPixelColor(basepos.x, basepos.y - 7, float2(1280 / 1.0f, 720)) * weights[1].w;
     
     
     color = saturate(color);

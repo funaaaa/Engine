@@ -133,7 +133,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	vector<RayPiplineShaderData> dAOuseShaders;
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	RaytracingPipline deAOPipline;
-	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// デフォルトのシェーダーを設定。
 	vector<RayPiplineShaderData> defShaders;
@@ -160,6 +160,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	RaytracingOutput raytracingOutput;
 	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
+	// レイトレ出力用クラスをセット。
+	RaytracingOutput colorOutput;
+	colorOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	// デノイズの結果出力用クラスをセット。
+	RaytracingOutput denoiseResultOutput;
+	denoiseResultOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
 	// 累積デノイズ用での保存用クラス。
 	RaytracingOutput raytracingOutputData;
 	raytracingOutputData.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
@@ -172,6 +180,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// デノイザー受け取り用
 	RaytracingOutput denoiseOutput;
 	denoiseOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	RaytracingOutput denoiseOutput1;
+	denoiseOutput1.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	RaytracingOutput denoiseOutput2;
+	denoiseOutput2.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 
 	// 仮の定数バッファを宣言
@@ -196,6 +208,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBufferData.pointLight.lightPos = Vec3(0, 300, 0);
 	constBufferData.pointLight.lightSize = 30.0f;
 	constBufferData.pointLight.lightPower = 300.0f;
+	constBufferData.pointLight.isActive = true;
 
 	// 並行光源をセッティング
 	constBufferData.dirLight.isActive = false;
@@ -220,13 +233,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
 
 	// デバッグ用でノイズ画面を出すフラグ。
-	DEGU_PIPLINE_ID debugPiplineID = AO_PIPLINE;
+	DEGU_PIPLINE_ID debugPiplineID = DENOISE_AO_PIPLINE;
 
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
 	// ライトが動いたか
 	bool isMoveLight = false;
+
+	for (int index = 0; index < PorygonInstanceRegister::Ins()->GetRegisterSize(); ++index) {
+
+		PorygonInstanceRegister::Ins()->AddRotate(index, { 0.1f,0.1f,0.1f });
+
+	}
 
 	/*----------ゲームループ----------*/
 	while (true) {
@@ -312,7 +331,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->SetComputeRootSignature(setPipline.GetGlobalRootSig()->GetRootSig().Get());
 		DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 		raytracingOutput.SetComputeRootDescriptorTalbe(2);
-		raytracingOutputData.SetComputeRootDescriptorTalbe(3);
+		// デノイズパイプライン以外だったら
+		if (debugPiplineID != DENOISE_AO_PIPLINE) {
+			raytracingOutputData.SetComputeRootDescriptorTalbe(3);
+		}
+		else {
+			colorOutput.SetComputeRootDescriptorTalbe(3);
+		}
 		DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
@@ -325,16 +350,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
 
 		// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
-		//if (debugPiplineID == DENOISE_AO_PIPLINE) {
+		if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-		//	//blurX.UpdateInputSB(raytracingOutput.GetRaytracingOutput().Get());
-		//	//blurX.Dispatch((MAX_PIX) / 4, 1, 1);
-		//	//memcpy()
+			// デノイズをかける。
+			Denoiser::Ins()->ApplyGaussianBlur(raytracingOutput.GetUAVIndex(), denoiseOutput.GetUAVIndex(), 10);
+			Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput.GetUAVIndex(), denoiseOutput1.GetUAVIndex(), 10);
+			Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput1.GetUAVIndex(), denoiseOutput2.GetUAVIndex(), 10);
 
-		//}
+			// デノイズをかけたライティング情報と色情報を混ぜる。
+			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+			Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), raytracingOutput.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
+			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
-		// デノイズをかける。
-		Denoiser::Ins()->ApplyDenoise(raytracingOutput.GetUAVIndex(), denoiseOutput.GetUAVIndex(), 10);
+		}
 
 
 		// バックバッファのインデックスを取得する。
@@ -350,7 +378,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 			D3D12_RESOURCE_STATE_COPY_DEST),
 		};
 		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseOutput.GetRaytracingOutput().Get());
+
+		// 通常パイプラインだったら
+		if (debugPiplineID != DENOISE_AO_PIPLINE) {
+			DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
+		}
+		else {
+			DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseResultOutput.GetRaytracingOutput().Get());
+		}
 
 		// レンダーターゲットのリソースバリアをもとに戻す。
 		D3D12_RESOURCE_BARRIER endBarriers[] = {
@@ -696,20 +731,5 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 　→ノイズが01なので、逆に輝度が大きすぎる…
 　→逆に言えば、01の輝度の差があるところなんてノイズしかありえない？やってみよう！
 ・以上のことを今週までに実装する。
-
-
-・デバッグ用の切り替えIDに新しいやつを追加する。
-・IF分で新しいやつのときはコンピュートシェーダーで加工する処理を挟む。
-・魔導書かなんかからガウシアンブラーのコードを持ってきて(既存コードからいけるならそれで)コンピュートシェーダーに書く。
-・加工！合成！
-
-
-・コンピュートシェーダーにテクスチャを渡して、値をそのまま返してそれを描画できるかをちぇっくする。
-
-・⇡をする前にコンピュートシェーダーに新たな機能を追加する必要がある。
-・InputやOutputはRaytracingOutputクラス(多分ディスクリプタに登録済み)を直接渡す。
-・その際にそれに対応したパイプラインやルートシグネチャを作れるようにする。
-・パイプラインとルートシグネチャをうまくセットして、後はRaytracingOutputをセットすればうまく起動するかも！？
-
 
 */

@@ -260,7 +260,30 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         
         // 点光源と並行光源のどちらにレイを飛ばすかを調べる。
         int lightingRandom = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
-        lightingRandom = lightingRandom % 4;
+        lightingRandom = lightingRandom % 3;
+        
+        // 接点と点光源の距離
+        float lightDistance = length(vtx.Position - gSceneParam.pointLight.lightPos);
+        
+        // 点光源が選ばれていて、ライトとの距離が規定値より離れていたら他の2つを選ぶ。
+        if (lightingRandom == 0)
+        {
+            if (gSceneParam.pointLight.lightPower < lightDistance)
+            {
+                lightingRandom = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898 + numPix.x, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+                lightingRandom = lightingRandom % 2 + 1;
+            }
+
+        }
+        
+        // 点光源以外が選ばれていて、点光源が規定値より近かったら点光源を選ぶ。
+        if (lightingRandom != 0)
+        {
+            if (lightDistance < gSceneParam.pointLight.lightPower)
+            {
+                lightingRandom = 0;
+            }
+        }
         
         // どのライティングをするかによって処理を変える。
         switch (lightingRandom)
@@ -321,40 +344,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
                 break;
             
             case 2:
-            {
-                
-                    // ライトまでの距離
-                    float lightLength = length(gSceneParam.spotLight.pos - vtx.Position);
-            
-                    // 点光源へシャドウレイを飛ばす。
-                    if (lightLength < gSceneParam.spotLight.power && gSceneParam.spotLight.isActive)
-                    {
-            
-                        lightVisibility = SoftShadow(vtx, 10., length(gSceneParam.spotLight.pos - vtx.Position));
-            
-                        // 影だったら
-                        if (0 <= lightVisibility)
-                        {
-             
-                            // 明るさを減衰させる。
-                            float rate = lightLength / gSceneParam.spotLight.power;
-                            rate = pow(rate, 5);
-                            rate = 1.0f - rate;
-                 
-                            // ランバートの反射率と明るさをかける。
-                            lightVisibility *= rate;
-                 
-                            pointLightColor += gSceneParam.spotLight.color * lightVisibility;
-                 
-             
-                        }
-            
-                    }
-             
-             
-                }
-            
-            case 3:
             {
             
                 // 飛ばすレイの回数

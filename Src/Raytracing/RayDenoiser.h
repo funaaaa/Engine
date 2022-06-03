@@ -22,6 +22,9 @@ private:
 	std::shared_ptr<RayComputeShader> blurY;
 	std::shared_ptr<RayComputeShader> blurFinal;
 
+	// 影テクスチャと色テクスチャを混ぜ合わせるシェーダー
+	std::shared_ptr<RayComputeShader> mixColorAndLuminance;
+
 	// 重みテーブル
 	static const int GAUSSIAN_WEIGHTS_COUNT = 8;
 	std::array<float, GAUSSIAN_WEIGHTS_COUNT> gaussianWeights;
@@ -39,7 +42,10 @@ public:
 	void Setting();
 
 	// ガウシアンブラーをかける。
-	void ApplyDenoise(const int& InputUAVIndex, const int& OutputUAVIndex, const int& BlurPower);
+	void ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVIndex, const int& BlurPower);
+
+	// 色情報と明るさ情報をかける。
+	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& OutputUAVIndex);
 
 private:
 
