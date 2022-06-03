@@ -80,6 +80,7 @@ public:
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
+	uint8_t* WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex);
 
 	// アクセッタ
 	ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }

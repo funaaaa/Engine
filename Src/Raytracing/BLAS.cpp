@@ -452,6 +452,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 			// このインデックスのテクスチャが存在していなかったら
 			if (textureHandle.size() <= index) {
 
+				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
 				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
 
 			}
@@ -493,6 +494,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 			// このインデックスのテクスチャが存在していなかったら
 			if (textureHandle.size() <= index) {
 
+				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
 				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
 
 			}
@@ -508,6 +510,64 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 
 	}
 
+}
+
+uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
+{
+	/*===== シェーダーレコードを書き込む =====*/
+
+	ComPtr<ID3D12StateObjectProperties> rtsoProps;
+	StateObject.As(&rtsoProps);
+	auto entryBegin = Dst;
+	auto shader = GetHitGroupName();
+
+	// 保存されているヒットグループ名と違っていたら書き込まない。
+	if (HitGroupName == shader) {
+
+		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
+		if (id == nullptr) {
+			throw std::logic_error("Not found ShaderIdentifier");
+		}
+
+		// シェーダー識別子を書き込む。
+		memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+
+		// 指定されたUAVを書き込む。
+		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[SpecifyIndex]));
+
+		Dst = entryBegin + recordSize;
+		return Dst;
+
+	}
+	else {
+
+		// シェーダー識別子を書き込む。
+		auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
+		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+
+		// 指定されたUAVを書き込む。
+		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[SpecifyIndex]));
+
+		Dst = entryBegin + recordSize;
+		return Dst;
+
+	}
 }
 
 void BLAS::WriteToMemory(ComPtr<ID3D12Resource>& Resource, const void* pData, size_t DataSize)

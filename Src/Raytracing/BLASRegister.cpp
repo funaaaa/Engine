@@ -91,6 +91,15 @@ uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, const int& Index, UINT Re
 
 }
 
+uint8_t* BLASRegister::WriteShaderRecordSpecifyUAV(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
+{
+
+	/*===== シェーダーレコードを書き込む =====*/
+
+	return blas[Index]->WriteShaderRecordSpecifyUAV(Dst, RecordSize, StateObject, HitGroupName, SpecifyIndex);
+
+}
+
 Microsoft::WRL::ComPtr<ID3D12Resource>& BLASRegister::GetBLASBuffer(const int& Index)
 {
 	return blas[Index]->GetBLASBuffer();

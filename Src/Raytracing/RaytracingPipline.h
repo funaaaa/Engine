@@ -23,7 +23,7 @@ struct RayPiplineShaderData {
 // レイトレーシングで使用するパイプライン
 class RaytracingPipline {
 
-private:
+protected:
 
 	/*===== メンバ変数 =====*/
 
@@ -52,7 +52,7 @@ public:
 	D3D12_DISPATCH_RAYS_DESC GetDispatchRayDesc() { return dispatchRayDesc; }
 	std::shared_ptr<RayRootsignature> GetGlobalRootSig() { return globalRootSig; }
 
-private:
+protected:
 
 	// ヒットグループの中で最も使用データサイズが大きものを取得する。
 	UINT GetLargestDataSizeInHitGroup();
