@@ -5,6 +5,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include <memory>
+#include "WindowsAPI.h"
 
 class RayRootsignature;
 
@@ -45,7 +46,7 @@ public:
 	void Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount = 4);
 
 	// シェーダーテーブルを構築
-	void ConstructionShaderTable();
+	void ConstructionShaderTable(const int& DispatchX = window_width, const int& DispatchY = window_height);
 
 	// ゲッタ
 	Microsoft::WRL::ComPtr<ID3D12StateObject> GetStateObject() { return stateObject; }

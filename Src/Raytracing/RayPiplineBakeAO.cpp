@@ -4,7 +4,7 @@
 #include "BLASRegister.h"
 #include "WindowsAPI.h"
 
-void RayPiplineBakeAO::ConstructionShaderTableBakeAO(std::vector<std::shared_ptr<RaytracingOutput>> BakeTargets)
+void RayPiplineBakeAO::ConstructionShaderTableBakeAO(std::vector<std::shared_ptr<RaytracingOutput>> BakeTargets, const int& DispatchX, const int& DispatchY)
 {
 
 	/*===== シェーダーテーブルを構築 =====*/
@@ -140,8 +140,8 @@ void RayPiplineBakeAO::ConstructionShaderTableBakeAO(std::vector<std::shared_ptr
 	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
 	startAddress += hitgroupRegion;
 	// レイの情報
-	dispatchRayDesc.Width = window_width;
-	dispatchRayDesc.Height = window_height;
+	dispatchRayDesc.Width = DispatchX;
+	dispatchRayDesc.Height = DispatchY;
 	dispatchRayDesc.Depth = 1;
 
 }

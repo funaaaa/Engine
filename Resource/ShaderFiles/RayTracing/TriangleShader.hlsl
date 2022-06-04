@@ -11,7 +11,7 @@ ConstantBuffer<SceneCB> gSceneParam : register(b0);
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 Texture2D<float4> texture : register(t2, space1);
-Texture2D<float4> normalMap : register(t3, space1);
+//Texture2D<float4> normalMap : register(t3, space1);
 RWTexture2D<float4> aoBakeTex : register(u0, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
@@ -232,7 +232,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     }
        
     // 法線マップから法線情報を抽出。
-    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
+    //vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
 
     // 呼び出し回数が制限を超えないようにする。
     if (checkRecursiveLimit(payload, 1))

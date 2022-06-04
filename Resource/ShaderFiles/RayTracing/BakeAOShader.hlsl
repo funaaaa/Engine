@@ -95,7 +95,7 @@ void mainRayGen()
 
     rayDesc.Direction = normalize(dir);
     rayDesc.TMin = 0;
-    rayDesc.TMax = 100000;
+    rayDesc.TMax = 10000;
 
     // ペイロードの設定
     Payload payload;
@@ -167,7 +167,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // 隠蔽度合い
     float visibility = 0.0f;
         
-    const int SAMPLING_COUNT = 30;
+    const int SAMPLING_COUNT = 0;
         
         // 飛ばすレイの回数
     for (int index = 0; index < SAMPLING_COUNT; ++index)
@@ -199,12 +199,12 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
 
         // 最終結果の色を保存。
     float3 texColor = debugTexImg.SampleLevel(smp, vtx.uv, 0.0f).xyz;
-    payload.color.xyz = float3(visibility, visibility, visibility) * texColor;
+    payload.color.xyz = texColor;
     
     uint uavSizeX = 0;
     uint uavSizeY = 0;
     gOutput.GetDimensions(uavSizeX, uavSizeY);
-    gOutput[uint2(uavSizeY * vtx.uv.y, uavSizeX * vtx.uv.x)] = float4(float3(visibility, visibility, visibility), 1);
+    gOutput[uint2(uavSizeX * vtx.uv.x, uavSizeY * vtx.uv.y)] = float4(texColor, 1);
         
     Reflection(vtx.Position, vtx.Normal, payload);
 

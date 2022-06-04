@@ -276,7 +276,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			// デノイズをかけたライティング情報と色情報を混ぜる。
 			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-			Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), raytracingOutput.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
+			Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), denoiseOutput.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
 			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 		}

@@ -114,7 +114,7 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 4;
+	initData.SRVcount = 3;
 	initData.CBVcount = 0;
 	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());
@@ -124,7 +124,7 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 4;
+	initData.SRVcount = 3;
 	initData.CBVcount = 0;
 	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());
@@ -134,7 +134,7 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 4;
+	initData.SRVcount = 3;
 	initData.CBVcount = 0;
 	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());
@@ -144,7 +144,7 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 4;
+	initData.SRVcount = 3;
 	initData.CBVcount = 0;
 	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());

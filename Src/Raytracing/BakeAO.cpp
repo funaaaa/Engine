@@ -9,6 +9,8 @@
 #include "BLAS.h"
 #include <DirectXMath.h>
 
+#include "Input.h"
+
 void BakeAO::ExecutionBake(const int& TexCount, TLAS& Tlas, KariConstBufferData& KariData, DynamicConstBuffer& ConstBuff, RaytracingOutput& DebugTex)
 {
 
@@ -45,17 +47,19 @@ void BakeAO::ExecutionBake(const int& TexCount, TLAS& Tlas, KariConstBufferData&
 	// パイプラインを設定。
 	vector<RayPiplineShaderData> shaders;
 	shaders.push_back({ "Resource/ShaderFiles/RayTracing/BakeAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	pipline->Setting(shaders, HitGroupMgr::HITGROUP_ID::BAKE_AO_HIT_GROUP, 1, 1, 1, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2), 4);
+	pipline->Setting(shaders, HitGroupMgr::HITGROUP_ID::BAKE_AO_HIT_GROUP, 1, 1, 1, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2), 10);
 
 	// シェーダーテーブルを構築。
-	pipline->ConstructionShaderTableBakeAO(bakeTex);
+	pipline->ConstructionShaderTableBakeAO(bakeTex, window_width * 1.0f, window_height * 1.0f);
 
 	// 視点などの初期値
 	Vec3 defEyePos = KariData.eye;
-	Vec3 defTargetPos = KariData.target;
+	Vec3 defTargetPos = KariData.eye + Vec3(0, 0, 100);
+	//KariData.target = KariData.eye + Vec3(0, 0, 100);
 
 	// 100回サンプリングする。
-	for (int index = 0; index < 50; ++index) {
+	bool isEndBake = true;
+	while(isEndBake) {
 
 		// 実行する前準備。
 		DirectXBase::Ins()->processBeforeDrawing();
@@ -76,14 +80,75 @@ void BakeAO::ExecutionBake(const int& TexCount, TLAS& Tlas, KariConstBufferData&
 		// 乱数の種を更新。
 		KariData.seed = FHelper::GetRand(0, 3000);
 
-		// 視点を移動させる。
-		KariData.eye = defEyePos;
-		KariData.target = defTargetPos;
+		//// 視点を移動させる。
+		//KariData.eye = defEyePos;
+		//KariData.target = defTargetPos;
+		//KariData.eye.x += 1.0f;
+		//KariData.target.x += 1.0f;
 
-		// 移動させる量を求める。
-		Vec3 randomMovePos = FHelper::GetRandXMFLOAT3(-1000, 1000);
-		//KariData.eye += FHelper::GetRandXMFLOAT3(-1000, 1000);
-		KariData.target += FHelper::GetRandXMFLOAT3(-4000, 4000);
+		////// 移動させる量を求める。
+		////Vec3 randomMovePos = FHelper::GetRandXMFLOAT3(-1500, 1500);
+		//KariData.eye += FHelper::GetRandXMFLOAT3(-500, 500);
+		//KariData.eye.y = FHelper::GetRand(0, 100);
+		//KariData.target += FHelper::GetRandXMFLOAT3(-3000, 3000);
+		//KariData.target.y = FHelper::GetRand(0, 2000);
+
+		bool isMove = false;
+
+		// カメラを更新。
+		Camera::Ins()->Update();
+
+		float speed = 5.0f;
+		float rot = 0.03f;
+		if (Input::isKey(DIK_W)) {
+			Camera::Ins()->Move(speed);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_S)) {
+			Camera::Ins()->Move(-speed);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_A)) {
+			Camera::Ins()->MoveRight(speed);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_D)) {
+			Camera::Ins()->MoveRight(-speed);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_UP)) {
+			Camera::Ins()->forwardVec.y += rot;
+			isMove = true;
+		}
+		if (Input::isKey(DIK_DOWN)) {
+			Camera::Ins()->forwardVec.y -= rot;
+			isMove = true;
+		}
+		if (Input::isKey(DIK_LEFT)) {
+			Camera::Ins()->AddRotationXZ(rot);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_RIGHT)) {
+			Camera::Ins()->AddRotationXZ(-rot);
+			isMove = true;
+		}
+		if (Input::isKey(DIK_LSHIFT)) {
+			Camera::Ins()->eye.y -= 10.0f;
+			isMove = true;
+		}
+		if (Input::isKey(DIK_SPACE)) {
+			Camera::Ins()->eye.y += 10.0f;
+			isMove = true;
+		}
+		if (Input::isKey(DIK_1)) {
+			isEndBake = false;
+		}
+
+		KariData.eye = Camera::Ins()->eye;
+		KariData.target = Camera::Ins()->target;
+		KariData.up = Camera::Ins()->up;
+
+
 		KariData.mtxView = XMMatrixLookAtLH(KariData.eye.ConvertXMVECTOR(), KariData.target.ConvertXMVECTOR(), KariData.up.ConvertXMVECTOR());
 		KariData.mtxViewInv = XMMatrixInverse(nullptr, KariData.mtxView);
 		auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();

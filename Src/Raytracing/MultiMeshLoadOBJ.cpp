@@ -346,44 +346,44 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 			}
 
 			// 先頭文字列がmap_Dispなら法線マップ。
-			if (key == "map_Disp") {
+			//if (key == "map_Disp") {
 
-				// 法線テクスチャ名を保存。
-				string textureNameBuff;
-				lineStream >> textureNameBuff;
+			//	// 法線テクスチャ名を保存。
+			//	string textureNameBuff;
+			//	lineStream >> textureNameBuff;
 
-				// 法線テクスチャ名を変換。
-				wstring buff = StringToWString(DirectryPath + textureNameBuff);
+			//	// 法線テクスチャ名を変換。
+			//	wstring buff = StringToWString(DirectryPath + textureNameBuff);
 
-				// 既に生成済みかをチェックする。
-				const int TEXPATH_COUNT = texturePath.size();
-				bool isLoad = false;
-				for (int index = 0; index < TEXPATH_COUNT; ++index) {
+			//	// 既に生成済みかをチェックする。
+			//	const int TEXPATH_COUNT = texturePath.size();
+			//	bool isLoad = false;
+			//	for (int index = 0; index < TEXPATH_COUNT; ++index) {
 
-					if (buff == texturePath[index]) {
+			//		if (buff == texturePath[index]) {
 
-						isLoad = true;
+			//			isLoad = true;
 
-						// テクスチャを読み込む。
-						TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str()));
+			//			// テクスチャを読み込む。
+			//			TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str()));
 
 
-					}
+			//		}
 
-				}
+			//	}
 
-				// ロードしていなかったら。
-				if (!isLoad) {
+			//	// ロードしていなかったら。
+			//	if (!isLoad) {
 
-					texturePath.emplace_back();
-					texturePath[texturePath.size() - 1] = buff;
+			//		texturePath.emplace_back();
+			//		texturePath[texturePath.size() - 1] = buff;
 
-					// テクスチャを読み込む。
-					TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
+			//		// テクスチャを読み込む。
+			//		TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
 
-				}
+			//	}
 
-			}
+			//}
 
 		}
 

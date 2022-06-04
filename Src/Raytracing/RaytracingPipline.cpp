@@ -158,7 +158,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 }
 
-void RaytracingPipline::ConstructionShaderTable()
+void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int& DispatchY)
 {
 
 	/*===== シェーダーテーブルを構築 =====*/
@@ -294,8 +294,8 @@ void RaytracingPipline::ConstructionShaderTable()
 	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
 	startAddress += hitgroupRegion;
 	// レイの情報
-	dispatchRayDesc.Width = window_width;
-	dispatchRayDesc.Height = window_height;
+	dispatchRayDesc.Width = DispatchX;
+	dispatchRayDesc.Height = DispatchY;
 	dispatchRayDesc.Depth = 1;
 
 }
