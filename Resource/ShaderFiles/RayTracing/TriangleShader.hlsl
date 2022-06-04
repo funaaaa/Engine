@@ -235,7 +235,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
 
     // 呼び出し回数が制限を超えないようにする。
-    if (checkRecursiveLimit(payload))
+    if (checkRecursiveLimit(payload, 1))
     {
         return; // 呼び出し回数が越えたら即リターン.
     }

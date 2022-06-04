@@ -80,6 +80,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 仮の定数バッファを宣言
 	KariConstBufferData constBufferData;
 	constBufferData.Init();
+	DynamicConstBuffer constBuff;
+	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
+	constBuff.Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), &constBufferData, sizeof(KariConstBufferData));
 
 	// AO用のパイプラインを設定。
 	vector<RayPiplineShaderData> useShaders;
@@ -100,7 +103,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
@@ -113,20 +116,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// TLASを生成。
 	TLAS tlas;
 	tlas.GenerateTLAS(L"TlasDescriptorHeap");
-
-	// AOをベイク。
-	RaytracingOutput bakeTex;
-	bakeTex.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	BakeAO::Ins()->ExecutionBake(BLASRegister::Ins()->GetBLASCount(), tlas, constBufferData.constBuff.GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex()), bakeTex);
-
-	// ベイクした結果のUAVをBLASに追加。
-	int counter = 0;
-	std::vector<std::shared_ptr<BLAS>>& blasBuff = BLASRegister::Ins()->GetBLAS();
-	for (auto& index : blasBuff) {
-		//BakeAO::Ins()->GetBakeTex()[counter]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS,D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		index->AddTex(BakeAO::Ins()->GetBakeTex()[counter]->GetUAVIndex());
-		++counter;
-	}
 
 	// レイトレ出力用クラスをセット。
 	RaytracingOutput raytracingOutput;
@@ -143,6 +132,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// 累積デノイズ用での保存用クラス。
 	RaytracingOutput raytracingOutputData;
 	raytracingOutputData.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
+
+	// AOをベイク。
+	RaytracingOutput bakeTex;
+	bakeTex.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	BakeAO::Ins()->ExecutionBake(BLASRegister::Ins()->GetBLASCount(), tlas, constBufferData, constBuff, bakeTex);
 
 	// シェーダーテーブルを生成。
 	aoPipline.ConstructionShaderTable();
@@ -180,7 +174,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		//SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
 
 		//isMoveLight = false;
-		//Input(constBufferData, isMoveLight, debugPiplineID);
+		Input(constBufferData, isMoveLight, debugPiplineID);
 
 		//ImGuiWindow::Ins()->processAfterDrawing();
 
@@ -245,8 +239,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		constBufferData.mtxView = XMMatrixLookAtLH(constBufferData.eye.ConvertXMVECTOR(), constBufferData.target.ConvertXMVECTOR(), constBufferData.up.ConvertXMVECTOR());
 		constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
 		// 定数バッファの中身を更新する。
-		constBufferData.constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
-		auto sceneConstantBuffer = constBufferData.constBuff.GetBuffer(frameIndex);
+		constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
+		auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
 
 		// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
@@ -282,7 +276,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 			// デノイズをかけたライティング情報と色情報を混ぜる。
 			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-			Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), bakeTex.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
+			Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), raytracingOutput.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
 			denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 		}
@@ -659,5 +653,14 @@ void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PI
 
 ・UAVを書き込む位置？
 ・まずはUAVにしてPIXでみる。
+
+
+
+・なぜか出来ないどうしてだ。
+・今までの方法をやめて、従来通りの描画形式でやってみる。
+　→最初のフレームだけ焼き込みを行って、それを元にシェーダーレコードを書き込んでから通常パスへと言った感じ。
+　→でもこれってBakeAOでの処理と変わらなくね？
+　→まずはBakeAOと通常パストの違いを徹底的にみる。
+
 
 */

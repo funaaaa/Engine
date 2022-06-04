@@ -539,6 +539,9 @@ uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+		// デバッグ用でテクスチャを書き込む。
+		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
 
 		// 指定されたUAVを書き込む。
 		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(SpecifyIndex));
@@ -554,6 +557,11 @@ uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr
 		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
 		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
+		// ヒットグループ名からヒットグループ名IDを取得する。
+		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+
+		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;
+
 		// 今回のプログラムでは以下の順序でディスクリプタを記録。
 		// [0] : インデックスバッファ
 		// [1] : 頂点バッファ
@@ -561,8 +569,21 @@ uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
 
-		// 指定されたUAVを書き込む。
-		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(SpecifyIndex));
+		for (int index = 0; index < srvCount; ++index) {
+
+			// このインデックスのテクスチャが存在していなかったら
+			if (textureHandle.size() <= index) {
+
+				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+
+			}
+			else {
+
+				Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+
+			}
+		}
 
 		Dst = entryBegin + recordSize;
 		return Dst;

@@ -7,7 +7,7 @@
 #include "BLASRegister.h"
 #include <DirectXMath.h>
 
-void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize)
+void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount)
 {
 
 	/*===== セッティング処理 =====*/
@@ -147,7 +147,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 	// パイプラインの設定。
 	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-	pipelineConfig->Config(4);
+	pipelineConfig->Config(ReflectionCount);
 
 	// 生成する。
 	HRESULT resultBuff = DirectXBase::Ins()->dev->CreateStateObject(

@@ -42,7 +42,7 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// セッティング処理
-	void Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize);
+	void Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount = 4);
 
 	// シェーダーテーブルを構築
 	void ConstructionShaderTable();

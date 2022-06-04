@@ -2,6 +2,7 @@
 #include "DynamicConstBuffer.h"
 #include "Vec.h"
 #include "FHelper.h"
+#include "DirectXBase.h"
 #include "Camera.h"
 
 struct RayPointLightData {
@@ -57,12 +58,12 @@ struct KariConstBufferData {
 	Vec3 eye = { 0,0,-10 };
 	Vec3 target = { 0,0,0 };
 	Vec3 up = { 0,1,0 };
-	DynamicConstBuffer constBuff;
 
 
 	void Init() {
 
 		Camera::Ins()->GenerateMatView();
+		Camera::Ins()->Update();
 
 		eye = Camera::Ins()->eye;
 		target = Camera::Ins()->target;
@@ -106,8 +107,6 @@ struct KariConstBufferData {
 		isNormalScene = false;
 		isMeshScene = false;
 		isNoAO = false;
-
-		constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
 
 	}
 

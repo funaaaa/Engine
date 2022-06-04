@@ -93,6 +93,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT wi
 	);
 	if (FAILED(hr)) {
 		OutputDebugStringA("CreateTexture2D failed.\n");
+		assert(0);
 	}
 	return resource;
 }

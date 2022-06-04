@@ -232,7 +232,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     }
     
     // 呼び出し回数が制限を超えないようにする。
-    if (checkRecursiveLimit(payload))
+    if (checkRecursiveLimit(payload, 1))
     {
         return; // 呼び出し回数が越えたら即リターン.
     }

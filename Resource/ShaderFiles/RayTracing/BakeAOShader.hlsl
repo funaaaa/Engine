@@ -10,11 +10,13 @@ ConstantBuffer<SceneCB> gSceneParam : register(b0);
 // ヒットグループのローカルルートシグネチャ
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
+Texture2D<float4> debugTexImg : register(t2, space1);
+Texture2D<float4> debugTexImg2 : register(t3, space1); // 使ってない
+RWTexture2D<float4> gOutput : register(u0, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 
 // RayGenerationシェーダーのローカルルートシグネチャ
-RWTexture2D<float4> gOutput : register(u0, space1);
 RWTexture2D<float4> debugTex : register(u0);
 
 // 当たった位置の情報を取得する関数
@@ -40,6 +42,34 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
     v.Normal = normalize(v.Normal);
 
     return v;
+}
+
+// 反射させる。
+void Reflection(float3 vertexPosition, float3 vertexNormal, inout Payload payload)
+{
+    float3 worldPos = mul(float4(vertexPosition, 1), ObjectToWorld4x3());
+    float3 worldNormal = mul(vertexNormal, (float3x3) ObjectToWorld4x3());
+    float3 worldRayDir = WorldRayDirection();
+    float3 reflectDir = reflect(worldRayDir, worldNormal);
+    
+    uint rayMask = 0xFF;
+
+    RayDesc rayDesc;
+    rayDesc.Origin = worldPos;
+    rayDesc.Direction = reflectDir;
+    rayDesc.TMin = 0.01;
+    rayDesc.TMax = 100000;
+    
+    TraceRay(
+        gRtScene,
+        0,
+        rayMask,
+        0, // ray index
+        1, // MultiplierForGeometryContrib
+        0, // miss index
+        rayDesc,
+        payload);
+    
 }
 
 // RayGenerationシェーダー
@@ -76,7 +106,7 @@ void mainRayGen()
     uint rayMask = 0xFF;
     
     RAY_FLAG flag = RAY_FLAG_NONE;
-    flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    //flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     //flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
 
     // レイを発射
@@ -126,61 +156,57 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     uint instanceID = InstanceID();
     
     // 呼び出し回数が制限を超えないようにする。
-    if (checkRecursiveLimit(payload))
+    if (checkRecursiveLimit(payload, 1))
     {
         return; // 呼び出し回数が越えたら即リターン.
     }
-
-    // 通常ライティング
-    if (instanceID == 2)
-    {
-        
-        uint2 pixldx = DispatchRaysIndex().xy;
-        uint2 numPix = DispatchRaysDimensions().xy;
+    
+    uint2 pixldx = DispatchRaysIndex().xy;
+    uint2 numPix = DispatchRaysDimensions().xy;
         
         // 隠蔽度合い
-        float visibility = 0.0f;
+    float visibility = 0.0f;
         
-        const int SAMPLING_COUNT = 120;
+    const int SAMPLING_COUNT = 30;
         
         // 飛ばすレイの回数
-        for (int index = 0; index < SAMPLING_COUNT; ++index)
-        {
+    for (int index = 0; index < SAMPLING_COUNT; ++index)
+    {
                 
             // 乱数を生成してレイを飛ばす方向を決める。
-            float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-            float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-            float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-            randSeedX = randSeedX * 2.0f - 1.0f;
-            randSeedY = randSeedY * 2.0f - 1.0f;
-            randSeedZ = randSeedZ * 2.0f - 1.0f;
-            float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
+        float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+        float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+        float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+        randSeedX = randSeedX * 2.0f - 1.0f;
+        randSeedY = randSeedY * 2.0f - 1.0f;
+        randSeedZ = randSeedZ * 2.0f - 1.0f;
+        float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
             // シャドウレイを飛ばす。
-            float smpleVisiblity = ShootAOShadowRay(vtx.Position, vtx.Normal, 500, gRtScene);
+        float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 500, gRtScene);
             
             // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
-            float nol = saturate(dot(vtx.Normal, sampleDir));
-            float pdf = 1.0 / (2.0 * PI);
-            visibility += smpleVisiblity * nol / pdf;
+        float nol = saturate(dot(vtx.Normal, sampleDir));
+        float pdf = 1.0 / (2.0 * PI);
+        visibility += smpleVisiblity * nol / pdf;
                 
-        }
+    }
         // 平均を取る。
-        visibility = (1.0f / PI) * (1.0f / float(SAMPLING_COUNT)) * visibility;
+    visibility = (1.0f / PI) * (1.0f / float(SAMPLING_COUNT)) * visibility;
         
         // 隠蔽度合いが限界を超えないようにする。
-        visibility = saturate(visibility);
+    visibility = saturate(visibility);
 
         // 最終結果の色を保存。
-        payload.color.xyz = vtx.Normal;
-        gOutput[vtx.uv] = float4(1, 1, 1, 1);
+    float3 texColor = debugTexImg.SampleLevel(smp, vtx.uv, 0.0f).xyz;
+    payload.color.xyz = float3(visibility, visibility, visibility) * texColor;
+    
+    uint uavSizeX = 0;
+    uint uavSizeY = 0;
+    gOutput.GetDimensions(uavSizeX, uavSizeY);
+    gOutput[uint2(uavSizeY * vtx.uv.y, uavSizeX * vtx.uv.x)] = float4(float3(visibility, visibility, visibility), 1);
         
-
-    }
-    else if (instanceID == 3)
-    {
-        payload.color = float3(1, 1, 1);
-    }
+    Reflection(vtx.Position, vtx.Normal, payload);
 
 }
 
