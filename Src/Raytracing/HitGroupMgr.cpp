@@ -106,6 +106,7 @@ void HitGroupMgr::Setting()
 	hitGroupNames.emplace_back(L"AO_HIT_GROUP");
 	hitGroupNames.emplace_back(L"DENOISE_AO_HIT_GROUP");
 	hitGroupNames.emplace_back(L"BAKE_AO_HIT_GROUP");
+	hitGroupNames.emplace_back(L"SHADOW_HIT_GROUP");
 
 	// ヒットグループを生成。
 	HitGroupInitData initData;
@@ -149,6 +150,16 @@ void HitGroupMgr::Setting()
 	initData.UAVcount = 1;
 	hitGroup.push_back(std::make_shared<HitGroup>());
 	hitGroup[BAKE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[BAKE_AO_HIT_GROUP]);
+
+	// 第四要素
+	initData.CH = { L"mainCHS",true };
+	initData.AH = { L"mainAnyHit",true };
+	initData.IS = { L"",false };
+	initData.SRVcount = 3;
+	initData.CBVcount = 0;
+	initData.UAVcount = 1;
+	hitGroup.push_back(std::make_shared<HitGroup>());
+	hitGroup[SHADOW_HIT_GROUP]->Generate(initData, 1, hitGroupNames[SHADOW_HIT_GROUP]);
 
 
 }

@@ -287,16 +287,17 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
                 break;
             }
                 
-           
-            int seed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + index + DispatchRaysIndex().y * numPix.x, 100);
-            float3 sampleDir = GetUniformHemisphereSample(seed, vtx.Normal);
+            // 乱数を生成してレイを飛ばす方向を決める。
+            float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+            float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+            float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
+            randSeedX = randSeedX * 2.0f - 1.0f;
+            randSeedY = randSeedY * 2.0f - 1.0f;
+            randSeedZ = randSeedZ * 2.0f - 1.0f;
+            float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
             
             // シャドウレイを飛ばす。
-            float aoLightVisibilityBuff = ShootAOShadowRay(vtx.Position, sampleDir, 100, gRtScene);
-            
-            float NoL = saturate(dot(vtx.Normal, sampleDir));
-            float pdf = 1.0 / (2.0 * PI);
-            aoLightVisibility += aoLightVisibilityBuff * NoL / pdf;
+            aoLightVisibility = ShootAOShadowRay(vtx.Position, sampleDir, 300, gRtScene);
             
             // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
             //float nol = saturate(dot(vtx.Normal, sampleDir));
@@ -328,17 +329,17 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         //texColor *= visibility;
         
         // 最終結果の色を保存。
-        payload.color.xyz = texColor;
+        payload.color.xyz = visibility + (pointLightColor + dirLightColor) / PI;
         payload.luminance = visibility + (pointLightColor + dirLightColor) / PI;
-        //payload.luminance = vtx.Normal;
         //payload.luminance = aoBakeTex[attrib.barys];
         
         
-        //uint uavSizeX = 0;
-        //uint uavSizeY = 0;
-        //aoBakeTex.GetDimensions(uavSizeX, uavSizeY);
-        //uint2 uavIndex = uint2(uavSizeX * vtx.uv.r, uavSizeY * vtx.uv.g);
-        //payload.luminance = float4(aoBakeTex[uavIndex].x, aoBakeTex[uavIndex].y, aoBakeTex[uavIndex].z, 1);
+        uint uavSizeX = 0;
+        uint uavSizeY = 0;
+        aoBakeTex.GetDimensions(uavSizeX, uavSizeY);
+        uint2 uavIndex = uint2(uavSizeX * vtx.uv.x, uavSizeY * vtx.uv.y);
+        
+        aoBakeTex[uavIndex] = float4(float3(visibility, visibility, visibility), 1);
         
         // ライトに当たった面だけ表示するフラグが立っていたら。
         if (gSceneParam.isLightHitScene)
