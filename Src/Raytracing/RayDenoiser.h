@@ -45,7 +45,7 @@ public:
 	void ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVIndex, const int& BlurPower);
 
 	// Fî•ñ‚Æ–¾‚é‚³î•ñ‚ğ‚©‚¯‚éB
-	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& OutputUAVIndex);
+	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& OutputUAVIndex);
 
 private:
 

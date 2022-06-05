@@ -17,8 +17,9 @@ RWTexture2D<float4> aoBakeTex : register(u0, space1);
 SamplerState smp : register(s0, space1);
 
 // RayGenerationシェーダーのローカルルートシグネチャ
-RWTexture2D<float4> lightOutput : register(u0);
-RWTexture2D<float4> colorOutput : register(u1);
+RWTexture2D<float4> aoOutput : register(u0);
+RWTexture2D<float4> lightingOutput : register(u1);
+RWTexture2D<float4> colorOutput : register(u2);
 
 // 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
@@ -135,7 +136,7 @@ void mainRayGen()
     // ペイロードの設定
     DenoisePayload payload;
     payload.color = float3(0, 0, 0);
-    payload.luminance = float3(0, 0, 0);
+    payload.aoLuminance = float3(0, 0, 0);
     payload.recursive = 0;
 
     // TransRayに必要な設定を作成
@@ -161,7 +162,8 @@ void mainRayGen()
     float3 col = payload.color;
 
     // 結果格納
-    lightOutput[launchIndex.xy] = float4(payload.luminance, 1);
+    lightingOutput[launchIndex.xy] = float4(payload.aoLuminance, 1);
+    aoOutput[launchIndex.xy] = float4(payload.lightLuminance, 1);
     colorOutput[launchIndex.xy] = float4(payload.color, 1);
 
 }
@@ -310,8 +312,9 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         
         
         // 光源へのライティングを加算する。
-        float visibility = 0;
-        visibility += pointLightVisibility + dirLightVisibility + aoLightVisibility;
+        float lightVisibility = 0;
+        lightVisibility += pointLightVisibility + dirLightVisibility;
+        float aoVisibility = aoLightVisibility;
         
         // 隠蔽度合いが限界を超えないようにする。
         //visibility = saturate(visibility);
@@ -319,7 +322,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         // ノイズのみを描画するフラグが立っていたら。
         if (gSceneParam.isNoiseOnlyScene)
         {
-            payload.color = float3(visibility, visibility, visibility);
+            payload.color = float3(lightVisibility + aoVisibility, lightVisibility + aoVisibility, lightVisibility + aoVisibility);
             return;
 
         }
@@ -329,7 +332,8 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         
         // 最終結果の色を保存。
         payload.color.xyz = texColor;
-        payload.luminance = visibility + (pointLightColor + dirLightColor) / PI;
+        payload.lightLuminance = lightVisibility + (pointLightColor + dirLightColor) / PI;
+        payload.aoLuminance = aoVisibility;
         //payload.luminance = vtx.Normal;
         //payload.luminance = aoBakeTex[attrib.barys];
         

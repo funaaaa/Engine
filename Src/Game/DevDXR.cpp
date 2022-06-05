@@ -10,19 +10,19 @@ void DevDXR::Init() {
 
 	// AO用のパイプラインを設定。
 	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// デフォルトのシェーダーを設定。
 	defShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// デフォルトのシェーダーを設定。
 	shadowShaders.push_back({ "Resource/ShaderFiles/RayTracing/ShadowShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	shadowPipline.Setting(shadowShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	shadowPipline.Setting(shadowShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
 	sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
@@ -44,6 +44,9 @@ void DevDXR::Init() {
 	// レイトレ出力用クラスをセット。
 	colorOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
+	// 明るさ情報出力用クラスをセット。
+	lightOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
 	// デノイズの結果出力用クラスをセット。
 	denoiseResultOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
@@ -61,9 +64,14 @@ void DevDXR::Init() {
 	shadowPipline.ConstructionShaderTable();
 
 	// デノイザー受け取り用
-	denoiseOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	denoiseOutput1.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	denoiseOutput2.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	aoDenoiseOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	aoDenoiseOutput1.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	aoDenoiseOutput2.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	// デノイザー受け取り用
+	lightDenoiseOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	lightDenoiseOutput1.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	lightDenoiseOutput2.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 
 	// デバッグ用でノイズ画面を出すフラグ。
@@ -90,15 +98,15 @@ void DevDXR::Init() {
 void DevDXR::Update() {
 
 	// IMGUI系
-	ImGuiWindow::Ins()->processBeforeDrawing();
+	//ImGuiWindow::Ins()->processBeforeDrawing();
 
 	// ウィンドウの名前を再設定。
-	SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
+	//SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
 
 	isMoveLight = false;
 	Input(constBufferData, isMoveLight, debugPiplineID);
 
-	ImGuiWindow::Ins()->processAfterDrawing();
+	//ImGuiWindow::Ins()->processAfterDrawing();
 
 
 	/*----------毎フレーム処理(描画前処理)----------*/
@@ -174,9 +182,9 @@ void DevDXR::Draw() {
 	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	DirectXBase::Ins()->cmdList->SetComputeRootSignature(setPipline.GetGlobalRootSig()->GetRootSig().Get());
 	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
-	raytracingOutput.SetComputeRootDescriptorTalbe(2);
-	// デノイズパイプライン以外だったら
-	colorOutput.SetComputeRootDescriptorTalbe(3);
+	lightOutput.SetComputeRootDescriptorTalbe(2);
+	raytracingOutput.SetComputeRootDescriptorTalbe(3);
+	colorOutput.SetComputeRootDescriptorTalbe(4);
 	DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 
@@ -188,17 +196,23 @@ void DevDXR::Draw() {
 	if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
 		// デノイズをかける。
-		Denoiser::Ins()->ApplyGaussianBlur(raytracingOutput.GetUAVIndex(), denoiseOutput.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput.GetUAVIndex(), denoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput1.GetUAVIndex(), denoiseOutput2.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput2.GetUAVIndex(), denoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput1.GetUAVIndex(), denoiseOutput2.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput2.GetUAVIndex(), denoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(denoiseOutput1.GetUAVIndex(), denoiseOutput2.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(raytracingOutput.GetUAVIndex(), aoDenoiseOutput.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput2.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput2.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput2.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
+		
+		Denoiser::Ins()->ApplyGaussianBlur(lightOutput.GetUAVIndex(), lightDenoiseOutput.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(lightDenoiseOutput.GetUAVIndex(), lightDenoiseOutput1.GetUAVIndex(), 100);
+		Denoiser::Ins()->ApplyGaussianBlur(lightDenoiseOutput1.GetUAVIndex(), lightDenoiseOutput2.GetUAVIndex(), 100);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), denoiseOutput2.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), lightDenoiseOutput2.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
 		denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
@@ -313,7 +327,7 @@ void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU
 		isMove = true;
 	}
 
-	InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
+	//InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
 
 }
 

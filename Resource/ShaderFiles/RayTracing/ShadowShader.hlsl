@@ -18,7 +18,8 @@ SamplerState smp : register(s0, space1);
 
 // RayGenerationシェーダーのローカルルートシグネチャ
 RWTexture2D<float4> lightOutput : register(u0);
-RWTexture2D<float4> colorOutput : register(u1);
+RWTexture2D<float4> lightingOutput : register(u1);
+RWTexture2D<float4> colorOutput : register(u2);
 
 // 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
@@ -135,7 +136,7 @@ void mainRayGen()
     // ペイロードの設定
     DenoisePayload payload;
     payload.color = float3(0, 0, 0);
-    payload.luminance = float3(0, 0, 0);
+    payload.aoLuminance = float3(0, 0, 0);
     payload.recursive = 0;
 
     // TransRayに必要な設定を作成
@@ -161,7 +162,7 @@ void mainRayGen()
     float3 col = payload.color;
 
     // 結果格納
-    lightOutput[launchIndex.xy] = float4(payload.luminance, 1);
+    lightOutput[launchIndex.xy] = float4(payload.aoLuminance, 1);
     colorOutput[launchIndex.xy] = float4(payload.color, 1);
 
 }
@@ -330,7 +331,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         
         // 最終結果の色を保存。
         payload.color.xyz = visibility + (pointLightColor + dirLightColor) / PI;
-        payload.luminance = visibility + (pointLightColor + dirLightColor) / PI;
+        payload.aoLuminance = visibility + (pointLightColor + dirLightColor) / PI;
         //payload.luminance = aoBakeTex[attrib.barys];
         
         

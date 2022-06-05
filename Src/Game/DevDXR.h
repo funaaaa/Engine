@@ -75,6 +75,9 @@ private:
 	// レイトレ出力用クラスをセット。
 	RaytracingOutput colorOutput;
 
+	// レイトレ出力用クラスをセット。
+	RaytracingOutput lightOutput;
+
 	// デノイズの結果出力用クラスをセット。
 	RaytracingOutput denoiseResultOutput;
 
@@ -85,9 +88,14 @@ private:
 	RaytracingOutput bakeTex;
 
 	// デノイザー受け取り用
-	RaytracingOutput denoiseOutput;
-	RaytracingOutput denoiseOutput1;
-	RaytracingOutput denoiseOutput2;
+	RaytracingOutput aoDenoiseOutput;
+	RaytracingOutput aoDenoiseOutput1;
+	RaytracingOutput aoDenoiseOutput2;
+
+	// ライティングデノイズ受け取り用
+	RaytracingOutput lightDenoiseOutput;
+	RaytracingOutput lightDenoiseOutput1;
+	RaytracingOutput lightDenoiseOutput2;
 
 
 	// デバッグ用のパイプラインを切り替えるやつ。
