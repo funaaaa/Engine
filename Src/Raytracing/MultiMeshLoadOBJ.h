@@ -19,7 +19,8 @@ private:
 
 	using string = std::string;
 
-	bool isOpaque;		// SPONZA読み込み用のデバッグ機能
+	bool isOpaque;		// SPONZA読み込み用のデバッグ機能 不透明フラグ
+	bool isFloor;		// SPONZA読み込み用のデバッグ機能 GIを床のみに使用するため。
 
 
 public:

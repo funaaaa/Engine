@@ -56,6 +56,9 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	// 不透明フラグを初期化。
 	isOpaque = true;
 
+	// 床のみにGIを適応させるためのフラグ。
+	isFloor = false;
+
 	while (std::getline(file, line)) {
 
 		// 1行分の文字列をストリームに変換して解析しやすくする。
@@ -177,7 +180,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				blasID.emplace_back(buff);
 
 				// 保存されているBLASIDでインスタンスを生成する。
-				int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 2);
+				int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, isFloor ? 10 : 0);
 				InstanceID.emplace_back(idBuff);
 
 				// その他データを初期化する。
@@ -187,6 +190,8 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				isLoadMaterialName = false;
 				textureHandle.clear();
 				textureHandle.shrink_to_fit();
+
+				isFloor = false;
 
 				isOpaque = true;
 
@@ -312,9 +317,17 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 
 						isLoad = true;
 
+						// 草テクスチャだったら不透明フラグを折る。
 						if (textureNameBuff == "sponzaTextures/vase_plant.png") {
 
 							isOpaque = false;
+
+						}
+
+						// 床テクスチャだったらGIを折る。
+						if (textureNameBuff == "sponzaTextures/sponza_floor_a_diff.png") {
+
+							isFloor = true;
 
 						}
 
@@ -335,9 +348,16 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 					// テクスチャを読み込む。
 					TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
 
+					// 草テクスチャだったら不透明フラグを折る。
 					if (textureNameBuff == "sponzaTextures/vase_plant.png") {
 
 						isOpaque = false;
+
+					}
+					// 床テクスチャだったらGIを折る。
+					if (textureNameBuff == "sponzaTextures/sponza_floor_a_diff.png") {
+
+						isFloor = true;
 
 					}
 

@@ -66,6 +66,9 @@ private:
 	// レイトレ出力用クラスをセット。
 	RaytracingOutput lightOutput;
 
+	// GI出力用クラスをセット。
+	RaytracingOutput giOutput;
+
 	// デノイズの結果出力用クラスをセット。
 	RaytracingOutput denoiseMixTextureOutput;
 

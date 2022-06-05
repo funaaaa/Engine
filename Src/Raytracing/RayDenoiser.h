@@ -48,7 +48,7 @@ public:
 	void ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVIndex, const int& BlurPower);
 
 	// 色情報と明るさ情報をかける。
-	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& OutputUAVIndex);
+	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& InputGIIndex, const int& OutputUAVIndex);
 
 	// デノイズ
 	void Denoise(const int& InOutImg, const int& DenoisePower, const int& DenoiseCount);

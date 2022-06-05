@@ -76,6 +76,7 @@ struct DenoisePayload
     float3 color;
     float3 aoLuminance;
     float3 lightLuminance;
+    float3 giColor;
     uint recursive;
 };
 // ペイロード 影情報を取得するための構造体

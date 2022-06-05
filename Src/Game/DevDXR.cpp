@@ -9,7 +9,7 @@ void DevDXR::Init() {
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 4, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
 	sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
@@ -33,6 +33,9 @@ void DevDXR::Init() {
 
 	// 明るさ情報出力用クラスをセット。
 	lightOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
+	// gi出力用クラスをセット。
+	giOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// デノイズの結果出力用クラスをセット。
 	denoiseMixTextureOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -128,6 +131,7 @@ void DevDXR::Draw() {
 	aoOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	lightOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	giOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
@@ -136,9 +140,12 @@ void DevDXR::Draw() {
 
 	// TLASを設定。
 	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
+
+	// 出力用UAVを設定。
 	lightOutput.SetComputeRootDescriptorTalbe(2);
 	aoOutput.SetComputeRootDescriptorTalbe(3);
 	colorOutput.SetComputeRootDescriptorTalbe(4);
+	giOutput.SetComputeRootDescriptorTalbe(5);
 	DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
 	// パイプラインを設定。
@@ -152,13 +159,16 @@ void DevDXR::Draw() {
 
 		// AOにデノイズをかける。
 		Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
-		
+
 		// ライトにデノイズをかける。
 		Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 100, 3);
 
+		// GIにデノイズをかける。
+		Denoiser::Ins()->Denoise(giOutput.GetUAVIndex(), 100, 5);
+
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), giOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
 		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
@@ -192,6 +202,7 @@ void DevDXR::Draw() {
 	aoOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	lightOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	giOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
 
