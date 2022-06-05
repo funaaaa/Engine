@@ -11,8 +11,6 @@ ConstantBuffer<SceneCB> gSceneParam : register(b0);
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 Texture2D<float4> debugTexImg : register(t2, space1);
-Texture2D<float4> debugTexImg2 : register(t3, space1); // 使ってない
-RWTexture2D<float4> gOutput : register(u0, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 

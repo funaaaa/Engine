@@ -42,21 +42,9 @@ private:
 	KariConstBufferData constBufferData;
 	DynamicConstBuffer constBuff;
 
-	// AO用のパイプラインを設定。
-	vector<RayPiplineShaderData> useShaders;
-	RaytracingPipline aoPipline;
-
 	// デノイズAO用のパイプラインを設定。
 	vector<RayPiplineShaderData> dAOuseShaders;
 	RaytracingPipline deAOPipline;
-
-	// デフォルトのシェーダーを設定。
-	vector<RayPiplineShaderData> defShaders;
-	RaytracingPipline defPipline;
-
-	// 影情報取得用パイプラインを設定。
-	vector<RayPiplineShaderData> shadowShaders;
-	RaytracingPipline shadowPipline;
 
 	// SPONZAを読み込む。
 	std::vector<int> sponzaInstance;
@@ -70,7 +58,7 @@ private:
 	TLAS tlas;
 
 	// レイトレ出力用クラスをセット。
-	RaytracingOutput raytracingOutput;
+	RaytracingOutput aoOutput;
 
 	// レイトレ出力用クラスをセット。
 	RaytracingOutput colorOutput;
@@ -79,23 +67,7 @@ private:
 	RaytracingOutput lightOutput;
 
 	// デノイズの結果出力用クラスをセット。
-	RaytracingOutput denoiseResultOutput;
-
-	// 累積デノイズ用での保存用クラス。
-	RaytracingOutput raytracingOutputData;
-
-	// AOをベイク。
-	RaytracingOutput bakeTex;
-
-	// デノイザー受け取り用
-	RaytracingOutput aoDenoiseOutput;
-	RaytracingOutput aoDenoiseOutput1;
-	RaytracingOutput aoDenoiseOutput2;
-
-	// ライティングデノイズ受け取り用
-	RaytracingOutput lightDenoiseOutput;
-	RaytracingOutput lightDenoiseOutput1;
-	RaytracingOutput lightDenoiseOutput2;
+	RaytracingOutput denoiseMixTextureOutput;
 
 
 	// デバッグ用のパイプラインを切り替えるやつ。

@@ -17,6 +17,10 @@ void Denoiser::Setting()
 	blurXOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 	blurYOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
+	// デノイズ時に排出する用クラスをセット。
+	denoiseOutput = std::make_shared<RaytracingOutput>();
+	denoiseOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
 	// 使用するコンピュートシェーダーを生成。
 	blurX = std::make_shared<RayComputeShader>();
 	blurY = std::make_shared<RayComputeShader>();
@@ -63,7 +67,7 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVI
 	blurFinal->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});*/
 	blurX->ChangeInputUAVIndex({ InputUAVIndex });
 	blurX->Dispatch((window_width / 1.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch((window_width / 1.0f) / 4, (window_height /1.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurY->Dispatch((window_width / 1.0f) / 4, (window_height / 1.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	blurFinal->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});
 
 	// 出力用UAVの状態を変える。
@@ -78,8 +82,57 @@ void Denoiser::MixColorAndLuminance(const int& InputColorIndex, const int& Input
 	/*===== 色情報と明るさ情報の乗算 =====*/
 
 	// コンピュートシェーダーを実行。
-	mixColorAndLuminance->ChangeInputUAVIndex({InputColorIndex,InputLuminanceIndex, InputLightLuminanceIndex});
+	mixColorAndLuminance->ChangeInputUAVIndex({ InputColorIndex,InputLuminanceIndex, InputLightLuminanceIndex });
 	mixColorAndLuminance->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});
+
+}
+
+void Denoiser::Denoise(const int& InOutImg, const int& DenoisePower, const int& DenoiseCount)
+{
+
+	/*===== デノイズ =====*/
+
+	// デノイズする数が1回だったら。
+	if (DenoiseCount == 1) {
+
+		// ガウシアンブラーをかける。
+		ApplyGaussianBlur(InOutImg, InOutImg, DenoisePower);
+
+	}
+	// デノイズする数が2回だったら。
+	else if (DenoiseCount == 2) {
+
+		// ガウシアンブラーをかける。
+		ApplyGaussianBlur(InOutImg, denoiseOutput->GetUAVIndex(), DenoisePower);
+		ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), InOutImg, DenoisePower);
+
+	}
+	else {
+
+		for (int index = 0; index < DenoiseCount; ++index) {
+
+			// デノイズが最初の一回だったら。
+			if (index == 0) {
+
+				ApplyGaussianBlur(InOutImg, denoiseOutput->GetUAVIndex(), DenoisePower);
+
+			}
+			// デノイズの最終段階だったら。
+			else if (index == DenoiseCount - 1) {
+
+				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), InOutImg, DenoisePower);
+
+			}
+			else {
+
+				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), denoiseOutput->GetUAVIndex(), DenoisePower);
+
+			}
+
+		}
+
+	}
+
 
 }
 

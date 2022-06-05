@@ -102,11 +102,7 @@ void HitGroupMgr::Setting()
 	/*===== ヒットグループ設定 =====*/
 
 	// ヒットグループ名のコンテナを設定。
-	hitGroupNames.emplace_back(L"DEF_HIT_GROUP");
-	hitGroupNames.emplace_back(L"AO_HIT_GROUP");
 	hitGroupNames.emplace_back(L"DENOISE_AO_HIT_GROUP");
-	hitGroupNames.emplace_back(L"BAKE_AO_HIT_GROUP");
-	hitGroupNames.emplace_back(L"SHADOW_HIT_GROUP");
 
 	// ヒットグループを生成。
 	HitGroupInitData initData;
@@ -117,49 +113,8 @@ void HitGroupMgr::Setting()
 	initData.IS = { L"",false };
 	initData.SRVcount = 3;
 	initData.CBVcount = 0;
-	initData.UAVcount = 1;
-	hitGroup.push_back(std::make_shared<HitGroup>());
-	hitGroup[DEF_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DEF_HIT_GROUP]);
-
-	// 第二要素
-	initData.CH = { L"mainCHS",true };
-	initData.AH = { L"mainAnyHit",true };
-	initData.IS = { L"",false };
-	initData.SRVcount = 3;
-	initData.CBVcount = 0;
-	initData.UAVcount = 1;
-	hitGroup.push_back(std::make_shared<HitGroup>());
-	hitGroup[AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[AO_HIT_GROUP]);
-
-	// 第三要素
-	initData.CH = { L"mainCHS",true };
-	initData.AH = { L"mainAnyHit",true };
-	initData.IS = { L"",false };
-	initData.SRVcount = 3;
-	initData.CBVcount = 0;
-	initData.UAVcount = 1;
+	initData.UAVcount = 0;
 	hitGroup.push_back(std::make_shared<HitGroup>());
 	hitGroup[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
-
-	// 第四要素
-	initData.CH = { L"mainCHS",true };
-	initData.AH = { L"mainAnyHit",true };
-	initData.IS = { L"",false };
-	initData.SRVcount = 3;
-	initData.CBVcount = 0;
-	initData.UAVcount = 1;
-	hitGroup.push_back(std::make_shared<HitGroup>());
-	hitGroup[BAKE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[BAKE_AO_HIT_GROUP]);
-
-	// 第四要素
-	initData.CH = { L"mainCHS",true };
-	initData.AH = { L"mainAnyHit",true };
-	initData.IS = { L"",false };
-	initData.SRVcount = 3;
-	initData.CBVcount = 0;
-	initData.UAVcount = 1;
-	hitGroup.push_back(std::make_shared<HitGroup>());
-	hitGroup[SHADOW_HIT_GROUP]->Generate(initData, 1, hitGroupNames[SHADOW_HIT_GROUP]);
-
 
 }

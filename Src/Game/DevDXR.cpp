@@ -7,28 +7,15 @@ void DevDXR::Init() {
 	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
 	constBuff.Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), &constBufferData, sizeof(KariConstBufferData));
 
-
-	// AO用のパイプラインを設定。
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
-
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
-	// デフォルトのシェーダーを設定。
-	defShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
-
-	// デフォルトのシェーダーを設定。
-	shadowShaders.push_back({ "Resource/ShaderFiles/RayTracing/ShadowShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	shadowPipline.Setting(shadowShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 3, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
-
 	// SPONZAを読み込む。
-	sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
+	sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
-	BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
+	BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
 	PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
@@ -39,7 +26,7 @@ void DevDXR::Init() {
 	tlas.GenerateTLAS(L"TlasDescriptorHeap");
 
 	// レイトレ出力用クラスをセット。
-	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	aoOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// レイトレ出力用クラスをセット。
 	colorOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -48,43 +35,16 @@ void DevDXR::Init() {
 	lightOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// デノイズの結果出力用クラスをセット。
-	denoiseResultOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-
-	// 累積デノイズ用での保存用クラス。
-	raytracingOutputData.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
-
-	// AOをベイク。
-	bakeTex.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	BakeAO::Ins()->ExecutionBake(BLASRegister::Ins()->GetBLASCount(), tlas, constBufferData, constBuff, bakeTex);
+	denoiseMixTextureOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// シェーダーテーブルを生成。
-	aoPipline.ConstructionShaderTable();
 	deAOPipline.ConstructionShaderTable();
-	defPipline.ConstructionShaderTable();
-	shadowPipline.ConstructionShaderTable();
-
-	// デノイザー受け取り用
-	aoDenoiseOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	aoDenoiseOutput1.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	aoDenoiseOutput2.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-
-	// デノイザー受け取り用
-	lightDenoiseOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	lightDenoiseOutput1.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	lightDenoiseOutput2.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-
 
 	// デバッグ用でノイズ画面を出すフラグ。
 	debugPiplineID = DENOISE_AO_PIPLINE;
 
 	// ライトが動いたか
 	isMoveLight = false;
-
-	for (int index = 0; index < PorygonInstanceRegister::Ins()->GetRegisterSize(); ++index) {
-
-		PorygonInstanceRegister::Ins()->AddRotate(index, { 0.1f,0.1f,0.1f });
-
-	}
 
 	// デバッグ用のパイプラインを切り替えるやつ。
 	enum DEGU_PIPLINE_ID {
@@ -153,67 +113,53 @@ void DevDXR::Draw() {
 	RaytracingPipline setPipline = {};
 
 	// デバッグ用のパイプラインIDに応じたパイプラインをセットする。
-	if (debugPiplineID == DEF_PIPLINE) {
+	setPipline = deAOPipline;
 
-		constBufferData.counter = 0;
-		setPipline = defPipline;
-
-	}
-	else if (debugPiplineID == AO_PIPLINE) {
-
-		setPipline = aoPipline;
-
-	}
-	else if (debugPiplineID == DENOISE_AO_PIPLINE) {
-
-		setPipline = deAOPipline;
-
-	}
-
+	// カメラ行列を更新。
 	auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 	constBufferData.mtxView = XMMatrixLookAtLH(constBufferData.eye.ConvertXMVECTOR(), constBufferData.target.ConvertXMVECTOR(), constBufferData.up.ConvertXMVECTOR());
 	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+
 	// 定数バッファの中身を更新する。
 	constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
 	auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
+
+	// バリアを設定し各リソースの状態を遷移させる.
+	aoOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	lightOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
 	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	DirectXBase::Ins()->cmdList->SetComputeRootSignature(setPipline.GetGlobalRootSig()->GetRootSig().Get());
+
+	// TLASを設定。
 	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
 	lightOutput.SetComputeRootDescriptorTalbe(2);
-	raytracingOutput.SetComputeRootDescriptorTalbe(3);
+	aoOutput.SetComputeRootDescriptorTalbe(3);
 	colorOutput.SetComputeRootDescriptorTalbe(4);
 	DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
 
-
+	// パイプラインを設定。
 	DirectXBase::Ins()->cmdList->SetPipelineState1(setPipline.GetStateObject().Get());
 
+	// レイトレーシングを実行。
 	DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
 
 	// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
 	if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-		// デノイズをかける。
-		Denoiser::Ins()->ApplyGaussianBlur(raytracingOutput.GetUAVIndex(), aoDenoiseOutput.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput2.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput2.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput2.GetUAVIndex(), aoDenoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(aoDenoiseOutput1.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), 100);
+		// AOにデノイズをかける。
+		Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
 		
-		Denoiser::Ins()->ApplyGaussianBlur(lightOutput.GetUAVIndex(), lightDenoiseOutput.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(lightDenoiseOutput.GetUAVIndex(), lightDenoiseOutput1.GetUAVIndex(), 100);
-		Denoiser::Ins()->ApplyGaussianBlur(lightDenoiseOutput1.GetUAVIndex(), lightDenoiseOutput2.GetUAVIndex(), 100);
+		// ライトにデノイズをかける。
+		Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 100, 3);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
-		denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoDenoiseOutput2.GetUAVIndex(), lightDenoiseOutput2.GetUAVIndex(), denoiseResultOutput.GetUAVIndex());
-		denoiseResultOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
+		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
 
@@ -221,9 +167,6 @@ void DevDXR::Draw() {
 	// バックバッファのインデックスを取得する。
 	UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 
-	// バリアを設定し各リソースの状態を遷移させる.
-	raytracingOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	raytracingOutputData.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
 		DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
@@ -233,12 +176,7 @@ void DevDXR::Draw() {
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
 
 	// 通常パイプラインだったら
-	if (debugPiplineID != DENOISE_AO_PIPLINE) {
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
-	}
-	else {
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseResultOutput.GetRaytracingOutput().Get());
-	}
+	DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput.GetRaytracingOutput().Get());
 
 	// レンダーターゲットのリソースバリアをもとに戻す。
 	D3D12_RESOURCE_BARRIER endBarriers[] = {
@@ -249,6 +187,12 @@ void DevDXR::Draw() {
 	D3D12_RESOURCE_STATE_RENDER_TARGET)
 
 	};
+
+	// バリアを設定し各リソースの状態を遷移させる.
+	aoOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	lightOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
 
 	DirectXBase::Ins()->processAfterDrawing();
@@ -559,12 +503,3 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 	}
 
 }
-
-
-
-/*
-
-サンプリングを半球にする。
-→ノイズを減らせる。
-
-*/
