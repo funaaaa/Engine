@@ -7,6 +7,9 @@ void TLAS::GenerateTLAS(const wchar_t* name)
 
 	/*===== TLAS生成処理 =====*/
 
+	// インスタンスの行列を計算。
+	PorygonInstanceRegister::Ins()->CalWorldMat();
+
 
 	/*-- 加速構造体を設定 --*/
 	SettingAccelerationStructure();

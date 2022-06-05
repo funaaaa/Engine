@@ -87,14 +87,22 @@ int HitGroupMgr::GetHitGroupSRVCount(const int& HitGroupID)
 
 }
 
+int HitGroupMgr::GetHitGroupUAVCount(const int& HitGroupID)
+{
+
+	/*===== ヒットグループのSRVの数を取得 =====*/
+
+	return hitGroup[HitGroupID]->GetUAVCount();
+
+}
+
 void HitGroupMgr::Setting()
 {
 
 	/*===== ヒットグループ設定 =====*/
 
 	// ヒットグループ名のコンテナを設定。
-	hitGroupNames.emplace_back(L"DEF_HIT_GROUP");
-	hitGroupNames.emplace_back(L"AO_HIT_GROUP");
+	hitGroupNames.emplace_back(L"DENOISE_AO_HIT_GROUP");
 
 	// ヒットグループを生成。
 	HitGroupInitData initData;
@@ -103,21 +111,10 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 4;
+	initData.SRVcount = 3;
 	initData.CBVcount = 0;
 	initData.UAVcount = 0;
-	hitGroup.push_back(std::make_shared<HitGroup>());	// ここでsize()をそのまま渡しているのは、0番目にはグローバルルートシグネチャが入るのでインクリメントする必要があるから。
-	hitGroup[DEF_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DEF_HIT_GROUP]);
-
-	// 第二要素
-	initData.CH = { L"mainCHS",true };
-	initData.AH = { L"mainAnyHit",true };
-	initData.IS = { L"",false };
-	initData.SRVcount = 4;
-	initData.CBVcount = 0;
-	initData.UAVcount = 0;
-	hitGroup.push_back(std::make_shared<HitGroup>());	// ここでsize()をそのまま渡しているのは、0番目にはグローバルルートシグネチャが入るのでインクリメントする必要があるから。
-	hitGroup[AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[AO_HIT_GROUP]);
-
+	hitGroup.push_back(std::make_shared<HitGroup>());
+	hitGroup[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
 
 }

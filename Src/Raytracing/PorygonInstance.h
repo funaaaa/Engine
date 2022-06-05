@@ -37,6 +37,9 @@ public:
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const Vec3& Rot);
 
+	// 回転(ラジアン、引数を代入)関数
+	void ChangeRotate(const Vec3& Rot);
+
 	// 拡大(引数を加算)関数
 	void AddScale(const Vec3& Scale);
 

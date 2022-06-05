@@ -1,472 +1,50 @@
-#include "SoundManager.h"
-#include "PiplineManager.h"
-#include "RenderTarget.h"
-#include "Camera.h"
-#include "Input.h"
-#include "FbxLoader.h"
-
-#include "BLASRegister.h"
-#include "PorygonInstance.h"
-#include "TLAS.h"
-#include "RayRootsignature.h"
-#include "DynamicConstBuffer.h"
-#include "DescriptorHeapMgr.h"
-#include "Vec.h"
-#include "PorygonInstanceRegister.h"
-#include "HitGroupMgr.h"
-#include "RaytracingPipline.h"
-#include "RaytracingOutput.h"
-#include "MultiMeshLoadOBJ.h"
-
-#include "HitGroup.h"
-
-#include <utilapiset.h>
-
-#include "FHelper.h"
+ï»¿#include "DevDXR.h"
 
 #define COLORHEX(hex) hex / 255.0f
 
 #define SCREEN_VIRTUAL_WIDTH 300
 
-// fpsXV
-void FPS();
-
-struct KariConstBufferData {
-
-	XMMATRIX mtxView;			// ƒrƒ…[s—ñB
-	XMMATRIX mtxProj;			// ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñB
-	XMMATRIX mtxViewInv;		// ƒrƒ…[‹ts—ñB
-	XMMATRIX mtxProjInv;		// ƒvƒƒWƒFƒNƒVƒ‡ƒ“‹ts—ñB
-	XMVECTOR lightDirection;	// •½sŒõŒ¹‚ÌŒü‚«B
-	XMVECTOR lightColor;		// •½sŒõŒ¹FB
-	XMVECTOR ambientColor;		// ŠÂ‹«ŒõB
-	Vec3 lightPos;
-	float lightSize;
-	int seed;
-	int counter;
-	int isNoiseScene;
-	int isLightHitScene;
-	int isNormalScene;
-	int isMeshScene;
-	int isNoAO;
-
-};
-
-// ƒfƒoƒbƒO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğØ‚è‘Ö‚¦‚é‚â‚ÂB
-enum DEGU_PIPLINE_ID {
-	DEF_PIPLINE,
-	AO_PIPLINE,
-};
-
-// “ü—Í‘€ì
-void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
-
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	/*----------DirectX‰Šú‰»ˆ—----------*/
-	DirectXBase directXBase;							// DirectXŠî”Õ•”•ª
-	directXBase.Init();									// DirectXŠî”Õ‚Ì‰Šú‰»
-	SoundManager::Ins()->SettingSoundManager();	// ƒTƒEƒ“ƒhƒ}ƒl[ƒWƒƒ[‚ğƒZƒbƒg‚·‚é
+	/*----------DirectXåˆæœŸåŒ–å‡¦ç†----------*/
+	//ImGuiWindow::Ins()->Init();
+	DirectXBase::Ins()->Init();									// DirectXåŸºç›¤ã®åˆæœŸåŒ–
+	SoundManager::Ins()->SettingSoundManager();	// ã‚µã‚¦ãƒ³ãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
 
-	/*----------ƒpƒCƒvƒ‰ƒCƒ“¶¬----------*/
+	/*----------ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ç”Ÿæˆ----------*/
 	PiplineManager::Ins()->Init();
 
-	/*----------•Ï”éŒ¾----------*/
+	/*----------å¤‰æ•°å®£è¨€----------*/
 	srand(time(NULL));
 
-	// ƒfƒBƒXƒNƒŠƒvƒ^ƒq[ƒv‚ğ‰Šú‰»B
+	// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ’ãƒ¼ãƒ—ã‚’åˆæœŸåŒ–ã€‚
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();
 
-	// FBXLoader‚ğ‰Šú‰»B
+	// FBXLoaderã‚’åˆæœŸåŒ–ã€‚
 	FbxLoader::Ins()->Init();
 
-	// ƒqƒbƒgƒOƒ‹[ƒv‚ğİ’èB
+	// ãƒ’ãƒƒãƒˆã‚°ãƒ«ãƒ¼ãƒ—ã‚’è¨­å®šã€‚
 	HitGroupMgr::Ins()->Setting();
 
-	// AO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğİ’èB
-	vector<RayPiplineShaderData> useShaders;
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	RaytracingPipline aoPipline;
-	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	// ãƒ‡ãƒã‚¤ã‚ºç”¨ã®ã‚¯ãƒ©ã‚¹ã‚’åˆæœŸåŒ–ã€‚
+	Denoiser::Ins()->Setting();
 
-	// ƒfƒtƒHƒ‹ƒg‚ÌƒVƒF[ƒ_[‚ğİ’èB
-	vector<RayPiplineShaderData> defShaders;
-	defShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	RaytracingPipline defPipline;
-	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
-
-	// SPONZA‚ğ“Ç‚İ‚ŞB
-	std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
-
-	// ƒ‰ƒCƒg—p‚ÌƒXƒtƒBƒA‚ğ“Ç‚İ‚ŞB
-	int sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::AO_HIT_GROUP], { L"Resource/white.png" });
-	int sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
-	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
-
-	PorygonInstanceRegister::Ins()->CalWorldMat();
-
-	// TLAS‚ğ¶¬B
-	TLAS tlas;
-	tlas.GenerateTLAS(L"TlasDescriptorHeap");
-
-	// ƒŒƒCƒgƒŒo—Í—pƒNƒ‰ƒX‚ğƒZƒbƒgB
-	RaytracingOutput raytracingOutput;
-	raytracingOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-
-	RaytracingOutput raytracingOutputBuff;
-	raytracingOutputBuff.Setting(DXGI_FORMAT_R32G32B32A32_FLOAT);
-
-	// ƒVƒF[ƒ_[ƒe[ƒuƒ‹‚ğ¶¬B
-	aoPipline.ConstructionShaderTable();
-	defPipline.ConstructionShaderTable();
-
-
-	// ‰¼‚Ì’è”ƒoƒbƒtƒ@‚ğéŒ¾
-	KariConstBufferData constBufferData;
-	constBufferData.ambientColor = { 1,1,1,1 };
-	constBufferData.lightColor = { 1,1,1,1 };
-	constBufferData.lightDirection = { 0,1,-0.27f,0 };
-	constBufferData.lightDirection = XMVector4Normalize(constBufferData.lightDirection);
-	constBufferData.mtxProj = XMMatrixPerspectiveFovLH(
-		XMConvertToRadians(60.0f),				//‰æŠp(60“x)
-		(float)window_width / window_height,	//ƒAƒXƒyƒNƒg”ä
-		0.1f, 1000000.0f							//‘O’[A‰œ’[
-	);
-	constBufferData.mtxProjInv = XMMatrixInverse(nullptr, constBufferData.mtxProj);
-	Vec3 eye = { 0,0,-10 };
-	Vec3 target = { 0,0,0 };
-	Vec3 up = { 0,1,0 };
-	constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
-	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
-	constBufferData.counter = 0;
-	constBufferData.isNoiseScene = false;
-	constBufferData.lightPos = Vec3(0, 300, 0);
-	constBufferData.lightSize = 30.0f;
-	constBufferData.isLightHitScene = false;
-	constBufferData.isNormalScene = false;
-	constBufferData.isMeshScene = false;
-	constBufferData.isNoAO = false;
-
-	DynamicConstBuffer constBuff;
-	constBuff.Generate(sizeof(KariConstBufferData), L"constBuffer");
-
-	// ƒfƒoƒbƒO—p‚ÅƒmƒCƒY‰æ–Ê‚ğo‚·ƒtƒ‰ƒOB
-	DEGU_PIPLINE_ID debugPiplineID = AO_PIPLINE;
-
-	// ƒJƒƒ‰‚ğ‰Šú‰»B
+	// ã‚«ãƒ¡ãƒ©ã‚’åˆæœŸåŒ–ã€‚
 	Camera::Ins()->Init();
 
+	// é–‹ç™ºç”¨
+	DevDXR dev;
+	dev.Init();
 
-	/*----------ƒQ[ƒ€ƒ‹[ƒv----------*/
+	/*----------ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—----------*/
 	while (true) {
-		/*----------–ˆƒtƒŒ[ƒ€ˆ—(•`‰æ‘Oˆ—)----------*/
-		directXBase.processBeforeDrawing();
 
-
-
-		/*----- XVˆ— -----*/
-
-		// ƒrƒ…[s—ñ‚ğ¶¬B
-		Camera::Ins()->GenerateMatView();
-
-		FPS();
-
-		// —”‚Ìí‚ğXVB
-		constBufferData.seed = FHelper::GetRand(0, 1000);
-
-		// ƒ‰ƒCƒg‚ª“®‚¢‚½‚©
-		bool isMoveLight = false;
-
-		Input(constBufferData, isMoveLight, debugPiplineID);
-
-		// ƒJƒƒ‰‚ğXVB
-		Camera::Ins()->Update();
-
-		eye = Camera::Ins()->eye;
-		target = Camera::Ins()->target;
-		up = Camera::Ins()->up;
-
-		// ƒ‰ƒCƒg‚ª“®‚¢‚½‚Æ‚«‚Ì‚İAƒ[ƒ‹ƒhs—ñ‚ğÄŒvZ‚µ‚ÄTLAS‚ğXV‚·‚éB
-		if (isMoveLight) {
-
-			PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.lightPos);
-			PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.lightSize);
-
-			tlas.Update();
-
-		}
-
-		/*----- •`‰æˆ— -----*/
-
-		// ‰æ–Ê‚É•\¦‚³‚ê‚éƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚É–ß‚·B
-		//DirectXBase::Ins()->SetRenderTarget();
-
-		RaytracingPipline setPipline = {};
-
-		// ƒfƒoƒbƒO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“ID‚É‰‚¶‚½ƒpƒCƒvƒ‰ƒCƒ“‚ğƒZƒbƒg‚·‚éB
-		if (debugPiplineID == DEF_PIPLINE) {
-
-			constBufferData.counter = 0;
-			setPipline = defPipline;
-
-		}
-		else if (debugPiplineID == AO_PIPLINE) {
-
-			setPipline = aoPipline;
-
-		}
-
-		auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
-		constBufferData.mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
-		constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
-		// ’è”ƒoƒbƒtƒ@‚Ì’†g‚ğXV‚·‚éB
-		constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
-		auto sceneConstantBuffer = constBuff.GetBuffer(frameIndex);
-
-		// ƒOƒ[ƒoƒ‹ƒ‹[ƒgƒVƒOƒlƒ`ƒƒ‚Åg‚¤‚ÆéŒ¾‚µ‚Ä‚¢‚éƒŠƒ\[ƒX‚ç‚ğƒZƒbƒgB
-		ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-		DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		DirectXBase::Ins()->cmdList->SetComputeRootSignature(setPipline.GetGlobalRootSig()->GetRootSig().Get());
-		DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas.GetDescriptorHeapIndex()));
-		raytracingOutput.SetComputeRootDescriptorTalbe(2);
-		raytracingOutputBuff.SetComputeRootDescriptorTalbe(3);
-		DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, sceneConstantBuffer->GetGPUVirtualAddress());
-
-
-		// ƒŒƒCƒgƒŒ[ƒVƒ“ƒOŒ‹‰Êƒoƒbƒtƒ@‚ğUAVó‘Ô‚Ö
-		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::Transition(
-			raytracingOutput.GetRaytracingOutput().Get(),
-			D3D12_RESOURCE_STATE_COPY_SOURCE,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS),
-			CD3DX12_RESOURCE_BARRIER::Transition(
-			raytracingOutputBuff.GetRaytracingOutput().Get(),
-			D3D12_RESOURCE_STATE_COPY_SOURCE,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS
-		)
-		};
-		DirectXBase::Ins()->cmdList->ResourceBarrier(2, barrierToUAV);
-
-		DirectXBase::Ins()->cmdList->SetPipelineState1(setPipline.GetStateObject().Get());
-
-		DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
-
-		// ƒoƒbƒNƒoƒbƒtƒ@‚ÌƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚éB
-		UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
-
-		// ƒoƒŠƒA‚ğİ’è‚µŠeƒŠƒ\[ƒX‚Ìó‘Ô‚ğ‘JˆÚ‚³‚¹‚é.
-		D3D12_RESOURCE_BARRIER barriers[] = {
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		raytracingOutput.GetRaytracingOutput().Get(),
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		raytracingOutputBuff.GetRaytracingOutput().Get(),
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE),
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_COPY_DEST),
-		};
-		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
-
-		// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚ÌƒŠƒ\[ƒXƒoƒŠƒA‚ğ‚à‚Æ‚É–ß‚·B
-		D3D12_RESOURCE_BARRIER endBarriers[] = {
-
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_RENDER_TARGET)
-
-		};
-		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
-
-		directXBase.processAfterDrawing();
+		
+		dev.Update();
+		dev.Draw();
+		
 
 	}
 
 	return 0;
 }
-
-
-// ƒ^ƒCƒgƒ‹ƒo[‚ÌFPS‚ÌXV
-void FPS()
-{
-	static DWORD prev_time = timeGetTime();	// ‘O‰ñ‚ÌŠÔ
-	static int frame_count = 0;		// ƒtƒŒ[ƒ€ƒJƒEƒ“ƒg
-	DWORD now_time = timeGetTime();		// ¡‰ñ‚ÌƒtƒŒ[ƒ€‚ÌŠÔ
-
-	frame_count++;	// ƒtƒŒ[ƒ€”‚ğƒJƒEƒ“ƒg‚·‚é
-
-	// Œo‰ßŠÔ‚ª‚P•b‚ğ’´‚¦‚½‚çƒJƒEƒ“ƒg‚ÆŠÔ‚ğƒŠƒZƒbƒg
-	if (now_time - prev_time >= 1000)
-	{
-		wchar_t fps[1000];
-		_itow_s(frame_count, fps, 10);
-		wchar_t moji[] = L"FPS";
-		wcscat_s(fps, moji);
-		SetWindowText(DirectXBase::Ins()->windowsAPI.hwnd, fps);
-		//OutputDebugString(fps);
-
-		prev_time = now_time;
-		frame_count = 0;
-	}
-}
-
-void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
-
-	bool isMove = false;
-
-	float speed = 5.0f;
-	float rot = 0.03f;
-	if (Input::isKey(DIK_W)) {
-		Camera::Ins()->Move(speed);
-		isMove = true;
-	}
-	if (Input::isKey(DIK_S)) {
-		Camera::Ins()->Move(-speed);
-		isMove = true;
-	}
-	if (Input::isKey(DIK_A)) {
-		Camera::Ins()->MoveRight(speed);
-		isMove = true;
-	}
-	if (Input::isKey(DIK_D)) {
-		Camera::Ins()->MoveRight(-speed);
-		isMove = true;
-	}
-	if (Input::isKey(DIK_UP)) {
-		Camera::Ins()->forwardVec.y += rot;
-		isMove = true;
-	}
-	if (Input::isKey(DIK_DOWN)) {
-		Camera::Ins()->forwardVec.y -= rot;
-		isMove = true;
-	}
-	if (Input::isKey(DIK_LEFT)) {
-		Camera::Ins()->AddRotationXZ(rot);
-		isMove = true;
-	}
-	if (Input::isKey(DIK_RIGHT)) {
-		Camera::Ins()->AddRotationXZ(-rot);
-		isMove = true;
-	}
-	if (Input::isKey(DIK_LSHIFT)) {
-		Camera::Ins()->eye.y -= 10.0f;
-		isMove = true;
-	}
-	if (Input::isKey(DIK_SPACE)) {
-		Camera::Ins()->eye.y += 10.0f;
-		isMove = true;
-	}
-
-	// DirLight‚É‚Â‚¢‚Ä
-
-	// ’l‚ğ•Û‘¶‚·‚éB
-	float dirX = constBufferData.lightPos.x;
-	float dirY = constBufferData.lightPos.y;
-	float dirZ = constBufferData.lightPos.z;
-	float lightSize = constBufferData.lightSize;
-	float MOVE_LENGTH = 1500.0f;
-	ImGui::SliderFloat("PointLightX", &constBufferData.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightY", &constBufferData.lightPos.y, 0.0f, 1000.0f);
-	ImGui::SliderFloat("PointLightZ", &constBufferData.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
-	ImGui::SliderFloat("PointLightRadius", &constBufferData.lightSize, 1.0f, 50.0f);
-
-	// •Ï‚í‚Á‚Ä‚¢‚½‚ç
-	if (dirX != constBufferData.lightPos.x || dirY != constBufferData.lightPos.y || dirZ != constBufferData.lightPos.z || lightSize != constBufferData.lightSize) {
-
-		isMove = true;
-		isMoveLight = true;
-
-	}
-
-	if (isMove) {
-		constBufferData.counter = 0;
-	}
-	else {
-		++constBufferData.counter;
-	}
-
-	// ƒƒbƒVƒ…‚ğ•\¦‚·‚éB
-	bool isMesh = constBufferData.isMeshScene;
-	bool prevIsMesh = isMesh;
-	ImGui::Checkbox("Mesh Scene", &isMesh);
-	constBufferData.isMeshScene = isMesh;
-	// ’l‚ª‘‚«Š·‚¦‚ç‚ê‚Ä‚¢‚½‚çAƒTƒ“ƒvƒŠƒ“ƒO‚ğ‰Šú‰»‚·‚éB
-	if (isMesh != prevIsMesh) {
-		constBufferData.counter = 0;
-	}
-
-	// –@ü‚ğ•\¦‚·‚éB
-	bool isNormal = constBufferData.isNormalScene;
-	bool prevIsNormal = isNormal;
-	ImGui::Checkbox("Normal Scene", &isNormal);
-	constBufferData.isNormalScene = isNormal;
-	// ’l‚ª‘‚«Š·‚¦‚ç‚ê‚Ä‚¢‚½‚çAƒTƒ“ƒvƒŠƒ“ƒO‚ğ‰Šú‰»‚·‚éB
-	if (isNormal != prevIsNormal) {
-		constBufferData.counter = 0;
-	}
-
-	// ƒ‰ƒCƒg‚ª‚ ‚½‚Á‚½–Ê‚¾‚¯•\¦‚·‚éƒtƒ‰ƒO‚ğXVB
-	bool isLightHit = constBufferData.isLightHitScene;
-	bool prevIsLightHit = isLightHit;
-	ImGui::Checkbox("LightHit Scene", &isLightHit);
-	constBufferData.isLightHitScene = isLightHit;
-	// ’l‚ª‘‚«Š·‚¦‚ç‚ê‚Ä‚¢‚½‚çAƒTƒ“ƒvƒŠƒ“ƒO‚ğ‰Šú‰»‚·‚éB
-	if (isLightHit != prevIsLightHit) {
-		constBufferData.counter = 0;
-	}
-
-	// ƒpƒCƒvƒ‰ƒCƒ“‚ğ‘I‘ğB
-	int debugPiplineBuff = debugPiplineID;
-	ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
-	ImGui::SameLine();
-	ImGui::RadioButton("AO PIPLINE", &debugPiplineBuff, 1);
-	debugPiplineID = (DEGU_PIPLINE_ID)debugPiplineBuff;
-
-	// AO‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğ‘I‘ğ‚³‚ê‚Ä‚¢‚½‚Æ‚«‚Ì‚İAƒmƒCƒY‚ğo‚·‚©‚Ìƒtƒ‰ƒO‚ğ•\¦‚·‚éB
-	if (debugPiplineID == AO_PIPLINE) {
-
-		// ƒfƒoƒbƒO—p‚ÅƒmƒCƒY‰æ–Ê‚ğo‚·‚½‚ß‚Ìƒtƒ‰ƒO‚ğƒZƒbƒgB
-		bool isNoise = constBufferData.isNoiseScene;
-		ImGui::Checkbox("Noise Scene", &isNoise);
-		constBufferData.isNoiseScene = isNoise;
-
-		// ƒAƒ“ƒrƒGƒ“ƒgƒIƒNƒŠƒ…[ƒWƒ‡ƒ“‚ğs‚¤‚©‚Ìƒtƒ‰ƒO‚ğƒZƒbƒgB
-		bool isNoAO = constBufferData.isNoAO;
-		ImGui::Checkbox("NoAO Scene", &isNoAO);
-		// ƒtƒ‰ƒO‚ª‘‚«Š·‚í‚Á‚Ä‚¢‚½‚çƒfƒmƒCƒYƒJƒEƒ“ƒ^[‚ğ‰Šú‰»‚·‚éB
-		if (isNoAO != constBufferData.isNoAO) {
-			constBufferData.counter = 0;
-		}
-		constBufferData.isNoAO = isNoAO;
-
-	}
-
-}
-
-
-/*
-
-ü@‚â‚è‚½‚¢‚±‚ÆE‚â‚ç‚È‚¯‚ê‚Î‚¢‚¯‚È‚¢‚±‚Æ
-//Eƒ\ƒtƒgƒVƒƒƒhƒE‚ÌƒfƒoƒbƒOî•ñ‚ğ‚í‚©‚è‚â‚·‚­‚·‚éB
-//@¨ŒõŒ¹‚ÌˆÊ’u‚Ì•\¦”ñ•\¦‚ğ‚í‚©‚è‚â‚·‚­‚·‚éB
-//@¨ŒõŒ¹‚É‚æ‚Á‚ÄÆ‚ç‚³‚ê‚½ˆÊ’u‚Ì‚İ‚ğ•\¦‚Å‚«‚é‚æ‚¤‚É‚·‚éB
-//E‚»‚Ì‚½‚ß‚É‚ÍƒpƒCƒvƒ‰ƒCƒ“‚ğ‚«‚¿‚ñ‚Æ•¡”ì‚ê‚é‚æ‚¤‚É‚·‚é•K—v‚ª‚ ‚éH
-//EAO‚ÌƒoƒO‚ğC³B–¾‚é‚³‚ªêŠ‚É‚æ‚Á‚Äˆá‚¤H
-//Eã‚ªI‚í‚Á‚½‚çA³‹K‰»ƒ‰ƒ“ƒo[ƒg‚É‚Â‚¢‚ÄŠw‚ÔB
-//@¨‚Ç‚¤‚µ‚Ä³‹K‰»ƒ‰ƒ“ƒo[ƒg‚ğg‚¤‚Ì‚©‚Ü‚Å‚«‚¿‚ñ‚Æ—‰ğ‚·‚éB
-//EƒŠƒjƒAƒ[ƒNƒtƒ[‚ğÀ‘•‚·‚éB
-//@¨ƒKƒ“ƒ}’l•â³H
-//Eƒ‰ƒCƒeƒBƒ“ƒO‚ÌƒoƒO‚ğC³‚·‚éB
-//EŒy—Ê‰»‚Ìˆ—‚ğ“ü‚ê‚éB
-EƒŠƒAƒ‹ƒ^ƒCƒ€ƒfƒmƒCƒY‚ğÀ‘•‚·‚éB
-@¨ˆÈ‘OŒ©‚½‹P“x‚Éd‚İ‚ğ‚¨‚¢‚½ƒuƒ‰[‚Å‚ÍÀ‘•‚Å‚«‚È‚¢‚©‚àB
-@¨ƒmƒCƒY‚ª01‚È‚Ì‚ÅA‹t‚É‹P“x‚ª‘å‚«‚·‚¬‚éc
-@¨‹t‚ÉŒ¾‚¦‚ÎA01‚Ì‹P“x‚Ì·‚ª‚ ‚é‚Æ‚±‚ë‚È‚ñ‚ÄƒmƒCƒY‚µ‚©‚ ‚è‚¦‚È‚¢H‚â‚Á‚Ä‚İ‚æ‚¤I
-EˆÈã‚Ì‚±‚Æ‚ğ¡T‚Ü‚Å‚ÉÀ‘•‚·‚éB
-
-*/

@@ -23,8 +23,7 @@ public:
 	// ヒットグループ識別ID
 	enum HITGROUP_ID {
 
-		DEF_HIT_GROUP,
-		AO_HIT_GROUP,
+		DENOISE_AO_HIT_GROUP,
 		MAX_HIT_GROUP,
 
 	};
@@ -62,5 +61,7 @@ public:
 
 	// ヒットグループのSRVの数を取得する。
 	int GetHitGroupSRVCount(const int& HitGroupID);
+	// ヒットグループのUAVの数を取得する。
+	int GetHitGroupUAVCount(const int& HitGroupID);
 
 };

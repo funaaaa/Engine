@@ -25,13 +25,13 @@ int BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string
 
 }
 
-int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle)
+int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成 =====*/
 
 	blas.push_back(std::make_shared<BLAS>());
-	blas.back()->GenerateBLASData(Data, HitGroupName, TextureHandle);
+	blas.back()->GenerateBLASData(Data, HitGroupName, TextureHandle, IsOpaque);
 
 	return blas.size() - 1;
 
@@ -88,6 +88,15 @@ uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, const int& Index, UINT Re
 	/*===== シェーダーレコードを書き込む =====*/
 
 	return blas[Index]->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName);
+
+}
+
+uint8_t* BLASRegister::WriteShaderRecordSpecifyUAV(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
+{
+
+	/*===== シェーダーレコードを書き込む =====*/
+
+	return blas[Index]->WriteShaderRecordSpecifyUAV(Dst, RecordSize, StateObject, HitGroupName, SpecifyIndex);
 
 }
 

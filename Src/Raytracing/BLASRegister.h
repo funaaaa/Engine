@@ -25,7 +25,7 @@ public:
 	// 生成処理
 	int GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
 	int GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	int GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle);
+	int GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASの更新
 	void Update(const int& Index);
@@ -40,11 +40,15 @@ public:
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
+	uint8_t* WriteShaderRecordSpecifyUAV(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex);
 
 	// バッファを取得。
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(const int& Index);
 
 	// BLASの数を取得。
 	int GetBLASCount() { return blas.size(); }
+
+	// BLASを取得。
+	std::vector<std::shared_ptr<BLAS>>& GetBLAS() { return blas; }
 
 };

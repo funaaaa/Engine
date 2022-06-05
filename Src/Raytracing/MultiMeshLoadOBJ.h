@@ -19,6 +19,8 @@ private:
 
 	using string = std::string;
 
+	bool isOpaque;		// SPONZA読み込み用のデバッグ機能
+
 
 public:
 

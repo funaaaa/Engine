@@ -43,6 +43,10 @@ public:
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void AddRotate(const int& Index, const Vec3& Rot);
 
+	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‘ã“ü)ŠÖ”
+	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);
+	void ChangeRotate(const int& Index, const Vec3& Rot);
+
 	// Šgk(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
 	void AddScale(const int& Index, const Vec3& Scale);

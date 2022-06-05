@@ -89,7 +89,8 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
+	isOpaque = true;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -184,7 +185,8 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
+	isOpaque = true;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -208,7 +210,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle)
+void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -276,7 +278,8 @@ void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupNa
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	isOpaque = IsOpaque;
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque);
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -319,7 +322,7 @@ void BLAS::Update()
 	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
 
 	// 更新のための値を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc();
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque);
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
@@ -416,11 +419,11 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 	StateObject.As(&rtsoProps);
 	auto entryBegin = Dst;
 	auto shader = GetHitGroupName();
-	auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
 
 	// 保存されているヒットグループ名と違っていたら書き込まない。
 	if (HitGroupName == shader) {
 
+		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
 		if (id == nullptr) {
 			throw std::logic_error("Not found ShaderIdentifier");
 		}
@@ -440,7 +443,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
 
 		// ヒットグループIDからSRVの数を取得。
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
+		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
 
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
@@ -449,6 +452,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 			// このインデックスのテクスチャが存在していなかったら
 			if (textureHandle.size() <= index) {
 
+				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
 				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
 
 			}
@@ -476,9 +480,29 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-		const int TEXTURE_COUNT = textureHandle.size();
-		for (int index = 0; index < textureHandle.size(); ++index) {
-			Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+
+		// ヒットグループ名からヒットグループ名IDを取得する。
+		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+
+		// ヒットグループIDからSRVの数を取得。
+		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
+
+		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
+		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
+		for (int index = 0; index < srvCount; ++index) {
+
+			// このインデックスのテクスチャが存在していなかったら
+			if (textureHandle.size() <= index) {
+
+				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+
+			}
+			else {
+
+				Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+
+			}
 		}
 
 		Dst = entryBegin + recordSize;
@@ -486,6 +510,85 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 
 	}
 
+}
+
+uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
+{
+	/*===== シェーダーレコードを書き込む =====*/
+
+	ComPtr<ID3D12StateObjectProperties> rtsoProps;
+	StateObject.As(&rtsoProps);
+	auto entryBegin = Dst;
+	auto shader = GetHitGroupName();
+
+	// 保存されているヒットグループ名と違っていたら書き込まない。
+	if (HitGroupName == shader) {
+
+		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
+		if (id == nullptr) {
+			throw std::logic_error("Not found ShaderIdentifier");
+		}
+
+		// シェーダー識別子を書き込む。
+		memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+		// デバッグ用でテクスチャを書き込む。
+		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+
+		// 指定されたUAVを書き込む。
+		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(SpecifyIndex));
+
+		Dst = entryBegin + recordSize;
+		return Dst;
+
+	}
+	else {
+
+		// シェーダー識別子を書き込む。
+		auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
+		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+		// ヒットグループ名からヒットグループ名IDを取得する。
+		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+
+		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;
+
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+
+		for (int index = 0; index < srvCount; ++index) {
+
+			// このインデックスのテクスチャが存在していなかったら
+			if (textureHandle.size() <= index) {
+
+				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+
+			}
+			else {
+
+				Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+
+			}
+		}
+
+		Dst = entryBegin + recordSize;
+		return Dst;
+
+	}
 }
 
 void BLAS::WriteToMemory(ComPtr<ID3D12Resource>& Resource, const void* pData, size_t DataSize)
@@ -563,7 +666,7 @@ ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flag
 
 }
 
-D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc()
+D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(const bool& IsOpaque)
 {
 
 	/*===== BLAS生成時に設定を取得する用関数 =====*/
@@ -571,7 +674,12 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc()
 	// 形状データのフラグを設定。
 	auto geometryDesc = D3D12_RAYTRACING_GEOMETRY_DESC{};
 	geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
-	geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NO_DUPLICATE_ANYHIT_INVOCATION;
+	if (IsOpaque) {
+		geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
+	}
+	else {
+		geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_NO_DUPLICATE_ANYHIT_INVOCATION;
+	}
 
 	// 形状データの細かい項目を設定。
 	auto& triangles = geometryDesc.Triangles;

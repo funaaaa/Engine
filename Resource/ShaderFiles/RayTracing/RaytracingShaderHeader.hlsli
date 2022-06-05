@@ -10,6 +10,37 @@ struct Vertex
     float2 uv;
 };
 
+// 点光源の情報
+struct PointLightData
+{
+    float3 lightPos;
+    float lightSize;
+    float3 lightColor;
+    float lightPower;
+    int isActive;
+    float3 pad;
+};
+
+// 並行光源の情報
+struct DirLightData
+{
+    float3 lightDir;
+    int isActive;
+    float3 lightColor;
+    float pad;
+};
+
+// スポットライトの情報
+struct SpotLightData
+{
+    float3 pos;
+    float angle;
+    float3 dir;
+    float power;
+    float3 color;
+    int isActive;
+};
+
 // 環境情報
 struct SceneCB
 {
@@ -17,14 +48,15 @@ struct SceneCB
     matrix mtxProj; // プロジェクション行列.
     matrix mtxViewInv; // ビュー逆行列.
     matrix mtxProjInv; // プロジェクション逆行列.
-    float4 lightDirection; // 平行光源の向き.
-    float4 lightColor; // 平行光源色.
     float4 ambientColor; // 環境光.
-    float3 lightPos;
-    float lightSize;
+    DirLightData dirLight;
+    PointLightData pointLight;
+    SpotLightData spotLight;
     int seed;
     int counter;
+    int aoSampleCount;
     int isNoiseScene; // ノイズを描画するフラグ
+    int isNoiseOnlyScene; // ノイズのみを描画するフラグ
     int isLightHitScene; // ライトにあたった面だけ描画するフラグ
     int isNormalScene; // 法線情報を描画するフラグ
     int isMeshScene; // ポリゴン情報を描画するフラグ
@@ -36,6 +68,14 @@ struct SceneCB
 struct Payload
 {
     float3 color;
+    uint recursive;
+};
+// ペイロード AOデノイザ用
+struct DenoisePayload
+{
+    float3 color;
+    float3 aoLuminance;
+    float3 lightLuminance;
     uint recursive;
 };
 // ペイロード 影情報を取得するための構造体
@@ -75,7 +115,17 @@ inline float3 CalcHitAttribute3(float3 vertexAttribute[3], float2 barycentrics)
 
 
 // 制限以上トレースしないようにする
-inline bool checkRecursiveLimit(inout Payload payload)
+inline bool checkRecursiveLimit(inout Payload payload, int max)
+{
+    ++payload.recursive;
+    if (max < payload.recursive)
+    {
+        //payload.color = float3(0, 0, 0);
+        return true;
+    }
+    return false;
+}
+inline bool checkRecursiveLimitDenoiseAO(inout DenoisePayload payload)
 {
     ++payload.recursive;
     if (1 < payload.recursive)
@@ -140,31 +190,6 @@ float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
     return mul(R, float3(x, y, z));
 }
 
-// 当たった位置の情報を取得する関数
-Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
-{
-    Vertex v = (Vertex) 0;
-    float3 barycentrics = CalcBarycentrics(attrib.barys);
-    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
-
-    float weights[3] =
-    {
-        barycentrics.x, barycentrics.y, barycentrics.z
-    };
-
-    for (int i = 0; i < 3; ++i)
-    {
-        uint index = indexBuffer[vertexId + i];
-        float w = weights[i];
-        v.Position += vertexBuffer[index].Position * w;
-        v.Normal += vertexBuffer[index].Normal * w;
-        v.uv += vertexBuffer[index].uv * w;
-    }
-    v.Normal = normalize(v.Normal);
-
-    return v;
-}
-
 float3 GetPerpendicularVector(float3 u)
 {
     float3 a = abs(u);
@@ -210,4 +235,115 @@ float3 GetUniformHemisphereSample(inout uint randSeed, float3 hitNorm)
     float y = cosTheta;
     // 法線ベクトルの座標系に射影
     return x * tangent + y * hitNorm.xyz + z * bitangent;
+}
+
+// シャドウレイ発射
+bool ShootShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
+{
+    RayDesc rayDesc;
+    rayDesc.Origin = origin;
+    rayDesc.Direction = direction;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = tMax;
+
+    ShadowPayload payload;
+    payload.isShadow = false;
+
+    RAY_FLAG flags = RAY_FLAG_NONE;
+    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderスキップしない
+    
+    // ライトは除外。
+    uint rayMask = ~(0x08);
+
+    TraceRay(
+    gRtScene,
+    flags,
+    rayMask,
+    0,
+    1,
+    1, // MISSシェーダーのインデックス
+    rayDesc,
+    payload);
+
+    return payload.isShadow;
+}
+bool ShootShadowRayNoAH(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
+{
+    RayDesc rayDesc;
+    rayDesc.Origin = origin;
+    rayDesc.Direction = direction;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = tMax;
+
+    ShadowPayload payload;
+    payload.isShadow = false;
+
+    RAY_FLAG flags = RAY_FLAG_NONE;
+    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
+    
+    // ライトは除外。
+    uint rayMask = ~(0x08);
+
+    TraceRay(
+    gRtScene,
+    flags,
+    rayMask,
+    0,
+    1,
+    1, // MISSシェーダーのインデックス
+    rayDesc,
+    payload);
+
+    return payload.isShadow;
+}
+
+// シャドウレイ発射
+bool ShootAOShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
+{
+    RayDesc rayDesc;
+    rayDesc.Origin = origin;
+    rayDesc.Direction = direction;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = tMax;
+
+    ShadowPayload payload;
+    payload.isShadow = false;
+
+    RAY_FLAG flags = RAY_FLAG_NONE;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
+    
+    // ライトは除外。
+    uint rayMask = ~(0x08);
+
+    TraceRay(
+    gRtScene,
+    flags,
+    rayMask,
+    0,
+    1,
+    1, // MISSシェーダーのインデックス
+    rayDesc,
+    payload);
+
+    return payload.isShadow;
+}
+
+uint initRand(uint val0, uint val1, uint backoff = 16)
+{
+    uint v0 = val0, v1 = val1, s0 = 0;
+
+	[unroll]
+    for (uint n = 0; n < backoff; n++)
+    {
+        s0 += 0x9e3779b9;
+        v0 += ((v1 << 4) + 0xa341316c) ^ (v1 + s0) ^ ((v1 >> 5) + 0xc8013ea4);
+        v1 += ((v0 << 4) + 0xad90777d) ^ (v0 + s0) ^ ((v0 >> 5) + 0x7e95761e);
+    }
+    return v0;
 }
