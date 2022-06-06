@@ -15,10 +15,15 @@ void DevDXR::Init() {
 	sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
-	BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
-	PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 3);
+	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
+	sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 1);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
+
+	//// 天球用のスフィアを生成する。
+	//skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.png" });
+	//skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, 1);
+	//PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(200, 200, 200));
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -79,6 +84,9 @@ void DevDXR::Update() {
 
 	/*----- 更新処理 -----*/
 
+	// 天球を回転させる。
+	//PorygonInstanceRegister::Ins()->AddRotate(skyDomeIns, { 0.01,0.01,0.01 });
+
 	// ウィンドウの名前を更新。
 	if (isDisplayFPS) {
 
@@ -126,6 +134,9 @@ void DevDXR::Draw() {
 
 
 	RaytracingPipline setPipline = {};
+
+	// TLAS更新。
+	//tlas.Update();
 
 	// デバッグ用のパイプラインIDに応じたパイプラインをセットする。
 	setPipline = deAOPipline;

@@ -52,6 +52,8 @@ private:
 	// ライト用のスフィアを読み込む。
 	int sphereBlas;
 	int sphereIns;
+	int skyDomeBlas;
+	int skyDomeIns;
 
 
 	// TLASを生成。

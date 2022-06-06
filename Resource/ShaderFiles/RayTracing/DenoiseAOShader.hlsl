@@ -262,6 +262,16 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         return;
     }
     
+    // Instance数が1だったらテクスチャの色をそのまま返す。
+    if (instanceID == 1)
+    {
+        payload.lightLuminance = float3(1, 1, 1);
+        payload.color = texColor;
+        payload.aoLuminance = float3(1, 1, 1);
+        payload.giColor = float3(1, 1, 1);
+        return;
+    }
+    
     // ポリゴンの描画するフラグが立っていたら。
     if (gSceneParam.isMeshScene)
     {
@@ -438,8 +448,8 @@ void mainAnyHit(inout DenoisePayload payload, MyAttribute attrib)
     
     int instanceID = InstanceID();
     
-    // インスタンスIDが3(ライト)なら当たり判定を棄却する。
-    if (instanceID == 3)
+    // インスタンスIDが1(ライト)なら当たり判定を棄却する。
+    if (instanceID == 1)
     {
         IgnoreHit();
 
