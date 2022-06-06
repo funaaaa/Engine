@@ -71,7 +71,7 @@ float SoftShadow(Vertex vtx, float lightSize, float length)
     // 乱数の種を求める。
     uint2 pixldx = DispatchRaysIndex().xy;
     uint2 numPix = DispatchRaysDimensions().xy;
-    int randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+    int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
     float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
     return ShootShadowRay(worldPosition, shadowRayDir, length, gRtScene);
@@ -91,7 +91,7 @@ float ShootDirShadow(Vertex vtx, float length)
     }
     
     // 光源の端を求める。
-    float3 toLightEdge = ((vtx.Position + -gSceneParam.dirLight.lightDir * 1000.0f) + perpL * 20) - worldPosition;
+    float3 toLightEdge = ((vtx.Position + -gSceneParam.dirLight.lightDir * 1000.0f) + perpL * 10) - worldPosition;
     toLightEdge = normalize(toLightEdge);
     
     // 角度を求める。
@@ -100,7 +100,7 @@ float ShootDirShadow(Vertex vtx, float length)
     // 乱数の種を求める。
     uint2 pixldx = DispatchRaysIndex().xy;
     uint2 numPix = DispatchRaysDimensions().xy;
-    int randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+    int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
     float3 shadowRayDir = GetConeSample(randSeed, -gSceneParam.dirLight.lightDir, coneAngle);
     return ShootShadowRayNoAH(worldPosition, shadowRayDir, length, gRtScene);
@@ -265,7 +265,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // ポリゴンの描画するフラグが立っていたら。
     if (gSceneParam.isMeshScene)
     {
-        payload.color = CalcBarycentrics(attrib.barys);
+        payload.lightLuminance = CalcBarycentrics(attrib.barys);
         return;
     }
 
@@ -275,7 +275,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // 法線を描画するフラグが立っていたら。
     if (gSceneParam.isNormalScene)
     {
-        payload.color = vtx.Normal;
+        payload.lightLuminance = vtx.Normal;
         return;
     }
     
@@ -373,27 +373,29 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     lightVisibility += pointLightVisibility + dirLightVisibility;
     float aoVisibility = aoLightVisibility;
     
-    // ノイズのみを描画するフラグが立っていたら。
-    if (gSceneParam.isNoiseOnlyScene)
-    {
-        payload.color = float3(lightVisibility + aoVisibility, lightVisibility + aoVisibility, lightVisibility + aoVisibility);
-        return;
-
-    }
-    
     // 最終結果の色を保存。
     payload.color.xyz = texColor;
     payload.lightLuminance = lightVisibility + (pointLightColor + dirLightColor) / PI;
     payload.aoLuminance = aoVisibility;
     
     // GIの色を取得する。
-    if (instanceID == 10)
+    if (instanceID == 10 && !gSceneParam.isNoGI)
     {
-        payload.giColor = ShootGIRay(vtx, 500) * 0.5f;
+        payload.giColor = ShootGIRay(vtx, 500) * 1.0f;
     }
     else
     {
         payload.giColor = float3(0, 0, 0);
+    }
+    
+    // GIのみを描画するフラグが立っていたらGI以外の色を無効化する。
+    if (gSceneParam.isGIOnlyScene)
+    {
+        
+        payload.lightLuminance = float3(1, 1, 1);
+        payload.color = float3(0, 0, 0);
+        payload.aoLuminance = float3(0, 0, 0);
+        
     }
     
     // ライトに当たった面だけ表示するフラグが立っていたら。

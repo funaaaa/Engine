@@ -56,20 +56,22 @@ void DevDXR::Init() {
 		DENOISE_AO_PIPLINE,
 	};
 
+	isDisplayFPS = false;
+
 }
 
 void DevDXR::Update() {
 
 	// IMGUI系
-	//ImGuiWindow::Ins()->processBeforeDrawing();
+	ImGuiWindow::Ins()->processBeforeDrawing();
 
 	// ウィンドウの名前を再設定。
-	//SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
+	SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
 
 	isMoveLight = false;
 	Input(constBufferData, isMoveLight, debugPiplineID);
 
-	//ImGuiWindow::Ins()->processAfterDrawing();
+	ImGuiWindow::Ins()->processAfterDrawing();
 
 
 	/*----------毎フレーム処理(描画前処理)----------*/
@@ -77,10 +79,20 @@ void DevDXR::Update() {
 
 	/*----- 更新処理 -----*/
 
+	// ウィンドウの名前を更新。
+	if (isDisplayFPS) {
+
+		FPS();
+
+	}
+	else {
+
+		SetWindowText(DirectXBase::Ins()->windowsAPI.hwnd, L"LE3A_21_フナクラベ_タクミ");
+
+	}
+
 	// ビュー行列を生成。
 	Camera::Ins()->GenerateMatView();
-
-	FPS();
 
 	// 乱数の種を更新。
 	constBufferData.seed = FHelper::GetRand(0, 1000);
@@ -157,14 +169,34 @@ void DevDXR::Draw() {
 	// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
 	if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-		// AOにデノイズをかける。
-		Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
+		// [ノイズを描画]のときはデノイズをかけない。
+		if (!constBufferData.isNoiseScene) {
 
-		// ライトにデノイズをかける。
-		Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 100, 3);
+			// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
+			if (!constBufferData.isMeshScene && !constBufferData.isNormalScene && !constBufferData.isLightHitScene) {
 
-		// GIにデノイズをかける。
-		Denoiser::Ins()->Denoise(giOutput.GetUAVIndex(), 100, 5);
+				// ライトにデノイズをかける。
+				Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 1, 3);
+
+			}
+
+			// [AOを行わない]のときはデノイズをかけない。
+			if (!constBufferData.isNoAO) {
+
+				// AOにデノイズをかける。
+				Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
+
+			}
+
+			// [GIを行わない]のときはデノイズをかけない。
+			if (!constBufferData.isNoGI) {
+
+				// GIにデノイズをかける。
+				Denoiser::Ins()->Denoise(giOutput.GetUAVIndex(), 100, 5);
+
+			}
+
+		}
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -185,8 +217,19 @@ void DevDXR::Draw() {
 	};
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
 
-	// 通常パイプラインだったら
-	DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput.GetRaytracingOutput().Get());
+	// デバッグ情報によって描画するデータを変える。
+	if (constBufferData.isLightHitScene || constBufferData.isMeshScene || constBufferData.isNormalScene) {
+
+		// デノイズされた通常の描画
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), lightOutput.GetRaytracingOutput().Get());
+
+	}
+	else {
+
+		// デノイズされた通常の描画
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput.GetRaytracingOutput().Get());
+
+	}
 
 	// レンダーターゲットのリソースバリアをもとに戻す。
 	D3D12_RESOURCE_BARRIER endBarriers[] = {
@@ -282,7 +325,7 @@ void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU
 		isMove = true;
 	}
 
-	//InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
+	InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
 
 }
 
@@ -378,59 +421,6 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 
 	}
 
-	// SpotLightについて
-	if (ImGui::TreeNode("SpotLight")) {
-
-		// ライトを表示するかどうかのフラグを更新。
-		bool isActive = static_cast<bool>(constBufferData.spotLight.isActive);
-		ImGui::Checkbox("IsActive", &isActive);
-		if (isActive != constBufferData.spotLight.isActive) isMove = true;
-		constBufferData.spotLight.isActive = static_cast<int>(isActive);
-
-		// 値を保存する。
-		float posX = constBufferData.spotLight.pos.x;
-		float posY = constBufferData.spotLight.pos.y;
-		float posZ = constBufferData.spotLight.pos.z;
-		float dirX = constBufferData.spotLight.dir.x;
-		float dirY = constBufferData.spotLight.dir.y;
-		float dirZ = constBufferData.spotLight.dir.z;
-		float angle = constBufferData.spotLight.angle;
-		float power = constBufferData.spotLight.power;
-		float MOVE_LENGTH = 1500.0f;
-		ImGui::SliderFloat("SpotLightX", &constBufferData.spotLight.pos.x, -MOVE_LENGTH, MOVE_LENGTH);
-		ImGui::SliderFloat("SpotLightY", &constBufferData.spotLight.pos.y, 0.0f, 1000.0f);
-		ImGui::SliderFloat("SpotLightZ", &constBufferData.spotLight.pos.z, -MOVE_LENGTH, MOVE_LENGTH);
-		ImGui::SliderFloat("SpotLightDirX", &constBufferData.spotLight.dir.x, -1.0f, 1.0f);
-		ImGui::SliderFloat("SpotLightDirY", &constBufferData.spotLight.dir.y, -1.0f, 1.0f);
-		ImGui::SliderFloat("SpotLightDirZ", &constBufferData.spotLight.dir.z, -1.0f, 1.0f);
-		ImGui::SliderFloat("SpotLightAngle", &constBufferData.spotLight.angle, 0.001f, DirectX::XM_PI * 2.0f);
-		ImGui::SliderFloat("SpotLightPower", &constBufferData.spotLight.power, 300.0f, 1000.0f);
-
-		// 変わっていたら
-		if (posX != constBufferData.spotLight.pos.x || posY != constBufferData.spotLight.pos.y || posZ != constBufferData.spotLight.pos.z ||
-			power != constBufferData.spotLight.power || angle != constBufferData.spotLight.angle ||
-			dirX != constBufferData.spotLight.dir.x || dirY != constBufferData.spotLight.dir.y || dirZ != constBufferData.spotLight.dir.z) {
-
-			isMove = true;
-			isMoveLight = true;
-			constBufferData.spotLight.dir.Normalize();
-
-		}
-
-		// ライトの色を設定。
-		array<float, 3> lightColor = { constBufferData.spotLight.color.x,constBufferData.spotLight.color.y,constBufferData.spotLight.color.z };
-		ImGui::ColorPicker3("LightColor", lightColor.data());
-		// 色が変わっていたら。
-		if (lightColor[0] != constBufferData.spotLight.color.x || lightColor[1] != constBufferData.spotLight.color.y || lightColor[2] != constBufferData.spotLight.color.z) {
-			isMove = true;
-		}
-		constBufferData.spotLight.color.x = lightColor[0];
-		constBufferData.spotLight.color.y = lightColor[1];
-		constBufferData.spotLight.color.z = lightColor[2];
-
-		ImGui::TreePop();
-
-	}
 
 	if (isMove) {
 		constBufferData.counter = 0;
@@ -472,42 +462,29 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 			constBufferData.counter = 0;
 		}
 
-		// パイプラインを選択。
-		int debugPiplineBuff = debugPiplineID;
-		ImGui::RadioButton("DEF PIPLINE", &debugPiplineBuff, 0);
-		ImGui::SameLine();
-		ImGui::RadioButton("AO PIPLINE", &debugPiplineBuff, 1);
-		ImGui::SameLine();
-		ImGui::RadioButton("DENOISE AO PIPLINE", &debugPiplineBuff, 2);
-		debugPiplineID = (DEGU_PIPLINE_ID)debugPiplineBuff;
+		// デバッグ用でノイズ画面を出すためのフラグをセット。
+		bool isNoise = constBufferData.isNoiseScene;
+		ImGui::Checkbox("Noise Scene", &isNoise);
+		constBufferData.isNoiseScene = isNoise;
 
-		// AOのパイプラインを選択されていたときのみ、ノイズを出すかのフラグを表示する。
-		if (debugPiplineID == AO_PIPLINE) {
+		// AOを行うかのフラグをセット。
+		bool isNoAO = constBufferData.isNoAO;
+		ImGui::Checkbox("NoAO Scene", &isNoAO);
+		constBufferData.isNoAO = isNoAO;
 
-			// デバッグ用でノイズ画面を出すためのフラグをセット。
-			bool isNoise = constBufferData.isNoiseScene;
-			ImGui::Checkbox("Noise Scene", &isNoise);
-			constBufferData.isNoiseScene = isNoise;
+		// GIを行うかのフラグをセット。
+		bool isNoGI = constBufferData.isNoGI;
+		ImGui::Checkbox("NoGI Scene", &isNoGI);
+		constBufferData.isNoGI = isNoGI;
 
-			// デバッグ用でノイズ画面のみを出すためのフラグをセット。
-			bool isNoiseOnly = constBufferData.isNoiseOnlyScene;
-			ImGui::Checkbox("NoiseOnly Scene", &isNoiseOnly);
-			// フラグが書き換わっていたらデノイズカウンターを初期化する。
-			if (isNoiseOnly != constBufferData.isNoiseOnlyScene) {
-				constBufferData.counter = 0;
-			}
-			constBufferData.isNoiseOnlyScene = isNoiseOnly;
+		// GIのみを描画するかのフラグをセット。
+		bool isGIOnlyScene = constBufferData.isGIOnlyScene;
+		ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene);
+		constBufferData.isGIOnlyScene = isGIOnlyScene;
 
-			// アンビエントオクリュージョンを行うかのフラグをセット。
-			bool isNoAO = constBufferData.isNoAO;
-			ImGui::Checkbox("NoAO Scene", &isNoAO);
-			// フラグが書き換わっていたらデノイズカウンターを初期化する。
-			if (isNoAO != constBufferData.isNoAO) {
-				constBufferData.counter = 0;
-			}
-			constBufferData.isNoAO = isNoAO;
+		// FPSを表示するかのフラグをセット。
+		ImGui::Checkbox("Display FPS", &isDisplayFPS);
 
-		}
 
 		ImGui::TreePop();
 

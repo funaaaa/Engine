@@ -72,6 +72,9 @@ private:
 	// デノイズの結果出力用クラスをセット。
 	RaytracingOutput denoiseMixTextureOutput;
 
+	// FPS表示をするか否か
+	bool isDisplayFPS;
+
 
 	// デバッグ用のパイプラインを切り替えるやつ。
 	enum DEGU_PIPLINE_ID {

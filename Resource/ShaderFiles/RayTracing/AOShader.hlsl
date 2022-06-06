@@ -390,14 +390,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         // 隠蔽度合いが限界を超えないようにする。
         //visibility = saturate(visibility);
         
-        // ノイズのみを描画するフラグが立っていたら。
-        if (gSceneParam.isNoiseOnlyScene)
-        {
-            payload.color = float3(visibility, visibility, visibility);
-            return;
-
-        }
-        
         // テクスチャとライティングの色に隠蔽率をかける。
         texColor *= visibility;
         

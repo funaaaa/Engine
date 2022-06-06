@@ -50,11 +50,12 @@ struct KariConstBufferData {
 	int counter;
 	int aoSampleCount;
 	int isNoiseScene;
-	int isNoiseOnlyScene;
 	int isLightHitScene;
 	int isNormalScene;
 	int isMeshScene;
 	int isNoAO;
+	int isNoGI;
+    int isGIOnlyScene;
 	Vec3 eye = { 0,0,-10 };
 	Vec3 target = { 0,0,0 };
 	Vec3 up = { 0,1,0 };
@@ -80,7 +81,6 @@ struct KariConstBufferData {
 		mtxViewInv = XMMatrixInverse(nullptr, mtxView);
 		counter = 0;
 		isNoiseScene = false;
-		isNoiseOnlyScene = false;
 
 		// 点光源をセッティング
 		pointLight.lightPos = Vec3(0, 300, 0);
@@ -107,6 +107,8 @@ struct KariConstBufferData {
 		isNormalScene = false;
 		isMeshScene = false;
 		isNoAO = false;
+		isNoGI = false;
+		isGIOnlyScene = false;
 
 	}
 
