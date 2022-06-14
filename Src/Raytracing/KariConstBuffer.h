@@ -5,6 +5,20 @@
 #include "DirectXBase.h"
 #include "Camera.h"
 
+// 大気散乱用
+struct AtmosphericScattering {
+
+	float kr;				// レイリー散乱定数
+	float km;				// ミー散乱定数
+	float samples;			// 大気散乱サンプル数
+	float outerRadius;		// 大気圏の最頂点の高さ
+	float innerRadius;		// 地上の高さ
+	float eSun;				// 太陽の強さ
+	float g;				// 散乱定数を求める際に使用する値
+	float aveHeight;		// 平均大気密度を求めるための高さ
+
+};
+
 struct RayPointLightData {
 
 	Vec3 lightPos;
@@ -46,6 +60,7 @@ struct KariConstBufferData {
 	RayDirLightData dirLight;
 	RayPointLightData pointLight;
 	RaySpotLightData spotLight;
+	AtmosphericScattering AS;	// 大気散乱用
 	int seed;
 	int counter;
 	int aoSampleCount;
@@ -55,7 +70,7 @@ struct KariConstBufferData {
 	int isMeshScene;
 	int isNoAO;
 	int isNoGI;
-    int isGIOnlyScene;
+	int isGIOnlyScene;
 	Vec3 eye = { 0,0,-10 };
 	Vec3 target = { 0,0,0 };
 	Vec3 up = { 0,1,0 };
@@ -99,6 +114,16 @@ struct KariConstBufferData {
 		spotLight.pos = Vec3{ 0,300,0 };
 		spotLight.power = 300.0f;
 		spotLight.angle = DirectX::XM_PI;
+
+		// 大気散乱用定数をセッティング
+		AS.eSun = 20.0f;
+		AS.g = -0.999f;
+		AS.innerRadius = 10000.0f;
+		AS.outerRadius = 10250.0f;
+		AS.km = 0.0000f;
+		AS.kr = 0.0025f;
+		AS.samples = 2.0f;
+		AS.aveHeight = 0.25f;
 
 		// その他のデバッグ情報をセッティング
 		seed = FHelper::GetRand(0, 1000);

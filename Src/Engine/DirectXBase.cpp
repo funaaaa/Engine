@@ -628,6 +628,12 @@ void ImGuiWindow::processBeforeDrawing() {
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
+	ImGui::CreateContext();
+	//auto& io = ImGui::GetIO();
+
+	// Enable docking(available in imgui `docking` branch at the moment)
+	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 	////ウィンドウ設定
 	ImGui::Begin("Light Menu");
 	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);

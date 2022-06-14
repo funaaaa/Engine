@@ -2,6 +2,21 @@
 // 円周率
 static const float PI = 3.141592653589f;
 
+// 大気散乱用
+struct AtmosphericScattering
+{
+
+    float kr; // レイリー散乱定数
+    float km; // ミー散乱定数
+    float samples; // 大気散乱サンプル数
+    float outerRadius; // 大気圏の最頂点の高さ
+    float innerRadius; // 地上の高さ
+    float eSun; // 太陽の強さ
+    float g; // 散乱定数を求める際に使用する値
+    float aveHeight; // 平均大気密度を求めるための高さ
+
+};
+
 // 頂点情報
 struct Vertex
 {
@@ -52,6 +67,7 @@ struct SceneCB
     DirLightData dirLight;
     PointLightData pointLight;
     SpotLightData spotLight;
+    AtmosphericScattering AS;
     int seed;
     int counter;
     int aoSampleCount;

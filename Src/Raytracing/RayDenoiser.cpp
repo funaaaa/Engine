@@ -61,14 +61,14 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVI
 	blurYOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// コンピュートシェーダーを実行。
-	/*blurX->ChangeInputUAVIndex({ InputUAVIndex });
+	blurX->ChangeInputUAVIndex({ InputUAVIndex });
 	blurX->Dispatch((window_width / 2.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	blurY->Dispatch((window_width / 2.0f) / 4, (window_height / 2.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurFinal->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});*/
-	blurX->ChangeInputUAVIndex({ InputUAVIndex });
-	blurX->Dispatch((window_width / 1.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch((window_width / 1.0f) / 4, (window_height / 1.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	blurFinal->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});
+	//blurX->ChangeInputUAVIndex({ InputUAVIndex });
+	//blurX->Dispatch((window_width / 1.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	//blurY->Dispatch((window_width / 1.0f) / 4, (window_height / 1.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	//blurFinal->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});
 
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);

@@ -12,18 +12,18 @@ void DevDXR::Init() {
 	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 4, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
+	//sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
 
 	// ライト用のスフィアを読み込む。
-	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
-	sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 1);
-	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
+	//sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
+	//sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 1);
+	//PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
+	//PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
-	//// 天球用のスフィアを生成する。
-	//skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.png" });
-	//skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, 1);
-	//PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(200, 200, 200));
+	// 天球用のスフィアを生成する。
+	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.png" });
+	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, 1);
+	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -180,39 +180,39 @@ void DevDXR::Draw() {
 	// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
 	if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-		// [ノイズを描画]のときはデノイズをかけない。
-		if (!constBufferData.isNoiseScene) {
+		//// [ノイズを描画]のときはデノイズをかけない。
+		//if (!constBufferData.isNoiseScene) {
 
-			// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
-			if (!constBufferData.isMeshScene && !constBufferData.isNormalScene && !constBufferData.isLightHitScene) {
+		//	// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
+		//	if (!constBufferData.isMeshScene && !constBufferData.isNormalScene && !constBufferData.isLightHitScene) {
 
-				// ライトにデノイズをかける。
-				Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 1, 3);
+		//		// ライトにデノイズをかける。
+		//		Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 1, 3);
 
-			}
+		//	}
 
-			// [AOを行わない]のときはデノイズをかけない。
-			if (!constBufferData.isNoAO) {
+		//	// [AOを行わない]のときはデノイズをかけない。
+		//	if (!constBufferData.isNoAO) {
 
-				// AOにデノイズをかける。
-				Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
+		//		// AOにデノイズをかける。
+		//		Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
 
-			}
+		//	}
 
-			// [GIを行わない]のときはデノイズをかけない。
-			if (!constBufferData.isNoGI) {
+		//	// [GIを行わない]のときはデノイズをかけない。
+		//	if (!constBufferData.isNoGI) {
 
-				// GIにデノイズをかける。
-				Denoiser::Ins()->Denoise(giOutput.GetUAVIndex(), 100, 5);
+		//		// GIにデノイズをかける。
+		//		Denoiser::Ins()->Denoise(giOutput.GetUAVIndex(), 100, 5);
 
-			}
+		//	}
 
-		}
+		//}
 
-		// デノイズをかけたライティング情報と色情報を混ぜる。
-		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), giOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
-		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		//// デノイズをかけたライティング情報と色情報を混ぜる。
+		//denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		//Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), giOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
+		//denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
 
@@ -238,7 +238,7 @@ void DevDXR::Draw() {
 	else {
 
 		// デノイズされた通常の描画
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput.GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), colorOutput.GetRaytracingOutput().Get());
 
 	}
 
@@ -291,9 +291,12 @@ void DevDXR::FPS()
 
 void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
 
+	float buff = 0.1f;
+	float test = 0.25f * std::exp(-0.00287 + buff * (0.459 + buff * (3.83 + buff * (-6.8 + buff * 5.25))));
+
 	bool isMove = false;
 
-	float speed = 5.0f;
+	float speed = 30.0f;
 	float rot = 0.03f;
 	if (Input::isKey(DIK_W)) {
 		Camera::Ins()->Move(speed);
@@ -354,12 +357,14 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 
 		// 値を保存する。
 		float dirX = constBufferData.dirLight.lihgtDir.x;
+		float dirY = constBufferData.dirLight.lihgtDir.y;
 		float dirZ = constBufferData.dirLight.lihgtDir.z;
 		ImGui::SliderFloat("DirLightX", &constBufferData.dirLight.lihgtDir.x, -1.0f, 1.0f);
+		ImGui::SliderFloat("DirLightY", &constBufferData.dirLight.lihgtDir.y, -1.0f, 1.0f);
 		ImGui::SliderFloat("DirLightZ", &constBufferData.dirLight.lihgtDir.z, -1.0f, 1.0f);
 
 		// 変わっていたら
-		if (dirX != constBufferData.dirLight.lihgtDir.x || dirZ != constBufferData.dirLight.lihgtDir.z) {
+		if (dirX != constBufferData.dirLight.lihgtDir.x || dirY != constBufferData.dirLight.lihgtDir.y || dirZ != constBufferData.dirLight.lihgtDir.z) {
 
 			isMove = true;
 			isMoveLight = true;
@@ -501,4 +506,43 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 
 	}
 
+	// 階層構造にする。
+	if (ImGui::TreeNode("AS")) {
+
+		// 太陽光線の強さを設定する。
+		ImGui::SliderFloat("Sun Power", &constBufferData.AS.eSun, -10, 100);
+
+		// レイリー散乱定数の値を設定する。
+		ImGui::SliderFloat("Rayleigh Scattering Power", &constBufferData.AS.kr, -1, 1);
+
+		// ミー散乱定数の値を設定する。
+		ImGui::SliderFloat("Mie Scattering Power", &constBufferData.AS.km, -1, 1);
+
+		// サンプリング数を設定する。
+		ImGui::SliderFloat("Sample Count", &constBufferData.AS.samples, 0, 10);
+
+		// 大気圏の一番上の高さ
+		ImGui::SliderFloat("Outer Radius", &constBufferData.AS.outerRadius, 0, 20000);
+
+		// 地上の高さ
+		ImGui::SliderFloat("Inner Radius", &constBufferData.AS.innerRadius, 0, 20000);
+
+		// 大気散乱を求める際に使用する定数
+		ImGui::SliderFloat("Scattering G", &constBufferData.AS.g, -1.0f, 1.0f);
+
+		// 平均大気密度を求めるための高さ
+		ImGui::SliderFloat("Aveheight", &constBufferData.AS.aveHeight, 0.0f, 1.0f);
+
+		ImGui::TreePop();
+
+	}
+
 }
+
+
+
+/*
+
+すべてのパラメーターを調整可能にして、デフォルトのコードでいろいろ試してみる。
+
+*/

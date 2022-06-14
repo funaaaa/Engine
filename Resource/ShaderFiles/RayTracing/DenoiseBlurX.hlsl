@@ -23,7 +23,7 @@ float4 GetPixelColor(int x, int y, int2 texSize)
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
-    uint2 basepos = uint2(DTid.x * 1, DTid.y);
+    uint2 basepos = uint2(DTid.x * 2, DTid.y);
     
     float4 color;
     
