@@ -7,7 +7,7 @@
 #include "BLASRegister.h"
 #include <DirectXMath.h>
 
-void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize)
+void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount)
 {
 
 	/*===== セッティング処理 =====*/
@@ -147,7 +147,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 	// パイプラインの設定。
 	auto pipelineConfig = subobjects.CreateSubobject<CD3DX12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-	pipelineConfig->Config(4);
+	pipelineConfig->Config(ReflectionCount);
 
 	// 生成する。
 	HRESULT resultBuff = DirectXBase::Ins()->dev->CreateStateObject(
@@ -158,7 +158,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 }
 
-void RaytracingPipline::ConstructionShaderTable()
+void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int& DispatchY)
 {
 
 	/*===== シェーダーテーブルを構築 =====*/
@@ -294,8 +294,8 @@ void RaytracingPipline::ConstructionShaderTable()
 	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
 	startAddress += hitgroupRegion;
 	// レイの情報
-	dispatchRayDesc.Width = window_width;
-	dispatchRayDesc.Height = window_height;
+	dispatchRayDesc.Width = DispatchX;
+	dispatchRayDesc.Height = DispatchY;
 	dispatchRayDesc.Depth = 1;
 
 }

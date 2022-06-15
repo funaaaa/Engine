@@ -5,6 +5,7 @@
 #include <d3d12.h>
 #include <wrl.h>
 #include <memory>
+#include "WindowsAPI.h"
 
 class RayRootsignature;
 
@@ -23,7 +24,7 @@ struct RayPiplineShaderData {
 // レイトレーシングで使用するパイプライン
 class RaytracingPipline {
 
-private:
+protected:
 
 	/*===== メンバ変数 =====*/
 
@@ -42,17 +43,17 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// セッティング処理
-	void Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize);
+	void Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount = 4);
 
 	// シェーダーテーブルを構築
-	void ConstructionShaderTable();
+	void ConstructionShaderTable(const int& DispatchX = window_width, const int& DispatchY = window_height);
 
 	// ゲッタ
 	Microsoft::WRL::ComPtr<ID3D12StateObject> GetStateObject() { return stateObject; }
 	D3D12_DISPATCH_RAYS_DESC GetDispatchRayDesc() { return dispatchRayDesc; }
 	std::shared_ptr<RayRootsignature> GetGlobalRootSig() { return globalRootSig; }
 
-private:
+protected:
 
 	// ヒットグループの中で最も使用データサイズが大きものを取得する。
 	UINT GetLargestDataSizeInHitGroup();

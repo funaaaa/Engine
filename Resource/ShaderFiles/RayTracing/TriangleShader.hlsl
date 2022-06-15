@@ -11,7 +11,6 @@ ConstantBuffer<SceneCB> gSceneParam : register(b0);
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 Texture2D<float4> texture : register(t2, space1);
-Texture2D<float4> normalMap : register(t3, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 
@@ -130,35 +129,6 @@ float3 Refraction(float3 vertexPosition, float3 vertexNormal, int recursive)
     }
 }
 
-// シャドウレイ発射
-bool ShootShadowRay(Vertex vtx, float3 origin, float3 direction)
-{
-    RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
-    rayDesc.TMin = 0.1f;
-    rayDesc.TMax = length(vtx.Position - gSceneParam.pointLight.lightPos);
-
-    ShadowPayload payload;
-    payload.isShadow = true;
-
-    RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE;
-
-    // ライトは除外。
-    uint rayMask = ~(0x08);
-
-    TraceRay(
-    gRtScene, flags, rayMask,
-    0,
-    1,
-    1, // MISSシェーダーのインデックス
-    rayDesc, payload);
-
-    return payload.isShadow;
-}
-
 // RayGenerationシェーダー
 [shader("raygeneration")]
 void mainRayGen()
@@ -260,10 +230,10 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     }
        
     // 法線マップから法線情報を抽出。
-    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
+    //vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
 
     // 呼び出し回数が制限を超えないようにする。
-    if (checkRecursiveLimit(payload))
+    if (checkRecursiveLimit(payload, 1))
     {
         return; // 呼び出し回数が越えたら即リターン.
     }
@@ -282,29 +252,23 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     // 通常ライティング
     else if (instanceID == 2)
     {
-        // lambert ライティングを行う.
-        float3 lightdir = -normalize(gSceneParam.pointLight.lightPos.xyz);
-
-        float nl = saturate(dot(vtx.Normal, lightdir));
         
-        // 正規化ランバート？
-        nl /= PI;
+        // テクスチャの色を取得
+        float4 texColor = texture.SampleLevel(smp, vtx.uv, 0.0f);
 
-        float3 lightcolor = gSceneParam.lightColor.xyz;
-        float3 ambientcolor = gSceneParam.ambientColor.xyz;
-        float4 materialcolor = texture.SampleLevel(smp, vtx.uv, 0.0f);
-        float3 color = 0;
-        color += lightcolor * materialcolor.xyz * nl;
-        color += ambientcolor * materialcolor.xyz;
-
-        // ライティングの結果の色を保存。
-        payload.color = color;
-
-        // シャドウレイを発射。
         float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
         float shadowRate = 1.0f;
-        bool isShadow = ShootShadowRay(vtx, worldPosition, normalize(gSceneParam.pointLight.lightPos - worldPosition));
-        //bool isShadow = ShootShadowRay(worldPosition, normalize(float3(0, 7, 0) - worldPosition));
+        
+        // 点光源へシャドウレイを発射。
+        bool isShadow = false;
+        if (gSceneParam.pointLight.isActive)
+        {
+            isShadow = ShootShadowRay(mul(float4(vtx.Position, 1), ObjectToWorld4x3()), normalize(gSceneParam.pointLight.lightPos - worldPosition), length(worldPosition - gSceneParam.pointLight.lightPos), gRtScene);
+        }
+        if (isShadow && gSceneParam.dirLight.isActive)
+        {
+            //isShadow = ShootShadowRay(worldPosition, gSceneParam.dirLight.lightDir, 10000.0f);
+        }
 
         // 影なら暗くする。
         if (isShadow)
@@ -312,6 +276,7 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             shadowRate = 0.5f;
         }
 
+        payload.color = texColor;
         payload.color.xyz *= shadowRate;
         
         payload.color = saturate(payload.color);

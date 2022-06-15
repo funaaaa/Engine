@@ -1,30 +1,31 @@
-
+﻿
 //#pragma enable_d3d11_debug_symbols
 
 #include "RaytracingShaderHeader.hlsli"
 
-// �O���[�o�����[�g�V�O�l�`��
+// グローバルルートシグネチャ
 RaytracingAccelerationStructure gRtScene : register(t0);
 ConstantBuffer<SceneCB> gSceneParam : register(b0);
 
-// �q�b�g�O���[�v�̃��[�J�����[�g�V�O�l�`��
+// ヒットグループのローカルルートシグネチャ
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 Texture2D<float4> texture : register(t2, space1);
-Texture2D<float4> normalMap : register(t3, space1);
-// �T���v���[
+// サンプラー
 SamplerState smp : register(s0, space1);
 
-// RayGeneration�V�F�[�_�[�̃��[�J�����[�g�V�O�l�`��
-RWTexture2D<float4> outputColor : register(u0);
-RWTexture2D<float4> outputLuminance : register(u1);
+// RayGenerationシェーダーのローカルルートシグネチャ
+RWTexture2D<float4> aoOutput : register(u0);
+RWTexture2D<float4> lightingOutput : register(u1);
+RWTexture2D<float4> colorOutput : register(u2);
+RWTexture2D<float4> giOutput : register(u3);
 
-// ���������ʒu�̏����擾����֐�
+// 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
 {
     Vertex v = (Vertex) 0;
     float3 barycentrics = CalcBarycentrics(attrib.barys);
-    uint vertexId = PrimitiveIndex() * 3; // Triangle List �̂���.
+    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
 
     float weights[3] =
     {
@@ -44,105 +45,299 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
     return v;
 }
 
-// �V���h�E���C����
-bool ShootShadowRay(float3 origin, float3 direction, float tMax)
+float Scale(float fcos)
 {
-    RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
-    rayDesc.TMin = 0.1f;
-    rayDesc.TMax = tMax;
-
-    ShadowPayload payload;
-    payload.isShadow = false;
-
-    RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShader�X�L�b�v
     
-    // ���C�g�͏��O�B
-    uint rayMask = ~(0x08);
-
-    TraceRay(
-    gRtScene,
-    flags,
-    rayMask,
-    0,
-    1,
-    1, // MISS�V�F�[�_�[�̃C���f�b�N�X
-    rayDesc,
-    payload);
-
-    return payload.isShadow;
+    //fcos = saturate(fcos);
+    
+    float x = 1.0 - fcos;
+    static const float fScaleDepth = 0.25;
+    float buff = fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.8 + x * 5.25))));
+    if (abs(buff) < 0.01f)
+    {
+        return 0;
+    }
+    else
+    {
+        return buff;
+    }
 }
 
-// �V���h�E���C����
-bool ShootAOShadowRay(float3 origin, float3 direction, float tMax)
+float3 IntersectionPos(float3 dir, float3 a, float radius)
 {
-    RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
-    rayDesc.TMin = 0.1f;
-    rayDesc.TMax = tMax;
+    float b = dot(a, dir);
+    float c = dot(a, a) - radius * radius;
+    float d = max(b * b - c, 0.0);
 
-    ShadowPayload payload;
-    payload.isShadow = false;
-
-    RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShader�X�L�b�v
-    
-    // ���C�g�͏��O�B
-    uint rayMask = ~(0x08);
-
-    TraceRay(
-    gRtScene,
-    flags,
-    rayMask,
-    0,
-    1,
-    1, // MISS�V�F�[�_�[�̃C���f�b�N�X
-    rayDesc,
-    payload);
-
-    return payload.isShadow;
+    return a + dir * (-b + sqrt(d));
 }
 
-// �\�t�g�V���h�E�ˏo�֐�
-float SoftShadow(Vertex vtx)
+// 大気散乱
+float3 AtmosphericScattering(Vertex vtx)
+{
+    
+    // 地平線以下は真っ黒にする。
+    if (vtx.Position.y < 0)
+    {
+        return float3(0.1f, 0.1f, 0.1f);
+    }
+    
+    // レイリー散乱定数
+    float kr = gSceneParam.AS.kr;
+    // ミー散乱定数
+    float km = gSceneParam.AS.km;
+ 
+    // 大気中の線分をサンプリングする数。
+    float fSamples = gSceneParam.AS.samples;
+ 
+    // 謎の色 色的には薄めの茶色
+    float3 three_primary_colors = float3(0.68f, 0.55f, 0.44f);
+    // 光の波長？
+    float3 v3InvWaveLength = 1.0f / pow(three_primary_colors, 4.0f);
+ 
+    // 大気圏の一番上の高さ。
+    float fOuterRadius = gSceneParam.AS.outerRadius;
+    // 地球全体の地上の高さ。
+    float fInnerRadius = gSceneParam.AS.innerRadius;
+ 
+    // 太陽光の強さ？
+    float fESun = gSceneParam.AS.eSun;
+    // 太陽光の強さにレイリー散乱定数をかけてレイリー散乱の強さを求めている。
+    float fKrESun = kr * fESun;
+    // 太陽光の強さにミー散乱定数をかけてレイリー散乱の強さを求めている。
+    float fKmESun = km * fESun;
+
+    // レイリー散乱定数に円周率をかけているのだが、限りなく0に近い値。
+    float fKr4PI = kr * 4.0f * PI;
+    // ミー散乱定数に円周率をかけているのだが、ミー散乱定数は0なのでこれの値は0。
+    float fKm4PI = km * 4.0f * PI;
+ 
+    // 地球全体での大気の割合。
+    float fScale = 1.0f / (fOuterRadius - fInnerRadius);
+    // 平均大気密度を求める高さ。
+    float fScaleDepth = gSceneParam.AS.aveHeight;
+    // 地球全体での大気の割合を平均大気密度で割った値。
+    float fScaleOverScaleDepth = fScale / fScaleDepth;
+ 
+    // 散乱定数を求める際に使用する値。
+    float g = gSceneParam.AS.g;
+    // 散乱定数を求める際に使用する値を二乗したもの。なぜ。
+    float g2 = g * g;
+    
+    // 当たった天球のワールド座標
+    float3 worldPos = normalize(mul(float4(vtx.Position, 1), ObjectToWorld4x3())) * fOuterRadius;
+    //worldPos = IntersectionPos(normalize(worldPos), float3(0.0, fInnerRadius, 0.0), fOuterRadius);
+    
+    // カメラ座標 元計算式だと中心固定になってしまっていそう。
+    float3 v3CameraPos = float3(0.0, 1.0f, 0.0f);
+    //float3 v3CameraPos = WorldRayOrigin();
+    
+    // ディレクショナルライトの場所を求める。
+    float3 dirLightPos = -gSceneParam.dirLight.lightDir * 1000000.0f;
+    
+    // ディレクショナルライトの方向を求める。
+    float3 v3LightDir = normalize(worldPos - dirLightPos);
+    //float3 v3LightDir = gSceneParam.dirLight.lightDir;
+ 
+    // 天球上頂点からカメラまでのベクトル(光が大気圏に突入した点からカメラまでの光のベクトル)
+    float3 v3Ray = worldPos - v3CameraPos;
+    
+    // 大気に突入してからの点とカメラまでの距離。
+    float fFar = length(v3Ray);
+    
+    // 正規化された拡散光が来た方向。
+    v3Ray /= fFar;
+    
+    //return v3Ray;
+ 
+    // サンプリングする始点座標 資料だとAの頂点
+    float3 v3Start = v3CameraPos;
+    // サンプルではカメラの位置が(0,Radius,0)なのでカメラの高さ。どの位置に移動しても地球視点で見れば原点(地球の中心)からの高さ。
+    float fCameraHeight = length(v3CameraPos);
+    // 地上からの法線(?)と拡散光がやってきた角度の内積によって求められた角度をカメラの高さで割る。
+    float fStartAngle = dot(v3Ray, normalize(v3Start)) / fCameraHeight;
+    // 開始地点の高さに平均大気密度をかけた値の指数を求める？
+    float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
+    // 開始地点のなにかの角度のオフセット。
+    float fStartOffset = fStartDepth * Scale(fStartAngle);
+    // サンプルポイント間の長さ。
+    float fSampleLength = fFar / fSamples;
+    // サンプルポイント間の長さに地球の大気の割合をかける。何故。
+    float fScaledLength = fSampleLength * fScale;
+    // 拡散光が来た方向にサンプルの長さをかけることでサンプルポイント間のレイをベクトルを求める。
+    float3 v3SampleRay = v3Ray * fSampleLength;
+    // 最初のサンプルポイントを求める。0.5をかけてるのは謎。
+    float3 v3SamplePoint = v3Start + v3SampleRay * 0.5f;
+ 
+    // 色情報
+    float3 v3FrontColor = 0.0f;
+    for (int n = 0; n < int(fSamples); n++)
+    {
+        // サンプルポイントの高さ。どちらにせよ原点は地球の中心なので、この値が現在位置の高さになる。
+        float fHeight = length(v3SamplePoint);
+        // 地上からサンプルポイントの高さの差に平均大気密度をかけたもの。
+        float fDepth = (fScaleOverScaleDepth * (fInnerRadius - fHeight));
+        // 地上から見たサンプルポイントの法線とディレクショナルライトの方向の角度を求めて、サンプルポイントの高さで割る。
+        float fLightAngle = dot(v3LightDir, v3SamplePoint) / fHeight;
+        // 地上から見たサンプルポイントの法線と散乱光が飛んできている方区の角度を求めて、サンプルポイントの高さで割る。
+        float fCameraAngle = dot(v3Ray, v3SamplePoint) / fHeight;
+        // 散乱光？
+        float fScatter = (fStartOffset + fDepth * (Scale(fLightAngle) - Scale(fCameraAngle)));
+        
+        //float divBuff = 1.0f;
+        //float minus = 1;
+        //float divTarget = fScatter;
+        //if (fScatter <= 3.9f)
+        //{
+        //    return float3(1, 0, 0);
+        //}
+        //else
+        //{
+        //    return float3(0, 0, 1);
+        //}
+        //return float3(divTarget / divBuff * minus, divTarget / divBuff * minus, divTarget / divBuff * minus);
+        
+        // 色ごとの減衰率？
+        //float3 v3Attenuate = exp(fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
+        float3 v3Attenuate = saturate(fScatter) * v3InvWaveLength;
+        // サンプルポイントの位置を考慮して散乱した色を求める。
+        v3FrontColor += v3Attenuate * (fDepth * fScaledLength) * 0.00001f;
+        // サンプルポイントを移動させる。
+        v3SamplePoint += v3SampleRay;
+        
+        //return v3FrontColor * 0.00001f;
+        
+    }
+ 
+    // レイリー散乱に使用する色情報
+    float3 c0 = v3FrontColor * (v3InvWaveLength * fKrESun);
+    // ミー散乱に使用する色情報
+    float3 c1 = v3FrontColor * fKmESun;
+    // カメラ座標から天球の座標へのベクトル。
+    float3 v3Direction = v3CameraPos - worldPos;
+ 
+    float fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
+    float fcos2 = fcos * fcos;
+ 
+    // レイリー散乱の明るさ。
+    float rayleighPhase = 0.75f * (1.0f + fcos2);
+    // ミー散乱の明るさ。
+    float miePhase = 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fcos2) / pow(1.0f + g2 - 2.0f * g * fcos, 1.5f);
+ 
+    // 最終結果の色
+    float3 col = 1.0f;
+    col.rgb = rayleighPhase * c0 + miePhase * c1;
+    return col;
+    
+}
+
+// ソフトシャドウ射出関数
+float SoftShadow(Vertex vtx, float lightSize, float length)
 {
     float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     
-    // �����ւ̒��S�x�N�g��
+    // 光源への中心ベクトル
     float3 pointLightPosition = gSceneParam.pointLight.lightPos;
     float3 lightDir = normalize(pointLightPosition - worldPosition);
     
-    // ���C�g�x�N�g���Ɛ����ȃx�N�g�������߂�B
+    // ライトベクトルと垂直なベクトルを求める。
     float3 perpL = cross(lightDir, float3(0, 1, 0));
     if (all(perpL == 0.0f))
     {
         perpL.x = 1.0f;
     }
     
-    // �����̒[�����߂�B
-    float3 toLightEdge = (pointLightPosition + perpL * gSceneParam.pointLight.lightSize) - worldPosition;
+    // 光源の端を求める。
+    float3 toLightEdge = (pointLightPosition + perpL * lightSize) - worldPosition;
     toLightEdge = normalize(toLightEdge);
     
-    // �p�x�����߂�B
+    // 角度を求める。
     float coneAngle = acos(dot(lightDir, toLightEdge)) * 2.0f;
     
-    // �����̎�����߂�B
+    // 乱数の種を求める。
     uint2 pixldx = DispatchRaysIndex().xy;
     uint2 numPix = DispatchRaysDimensions().xy;
-    int randSeed = (frac(sin(dot(vtx.Position.xy + pixldx + numPix, float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453)) * 100000;
+    int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
     float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
-
-    return ShootShadowRay(worldPosition, shadowRayDir, length(vtx.Position - gSceneParam.pointLight.lightPos));
+    return ShootShadowRay(worldPosition, shadowRayDir, length, gRtScene);
+    
 }
 
-// RayGeneration�V�F�[�_�[
+// ソフトシャドウ射出関数
+float ShootDirShadow(Vertex vtx, float length)
+{
+    float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
+    
+    // ライトベクトルと垂直なベクトルを求める。
+    float3 perpL = cross(-gSceneParam.dirLight.lightDir, float3(0, 1, 0));
+    if (all(perpL == 0.0f))
+    {
+        perpL.x = 1.0f;
+    }
+    
+    // 光源の端を求める。
+    float3 toLightEdge = ((vtx.Position + -gSceneParam.dirLight.lightDir * 1000.0f) + perpL * 10) - worldPosition;
+    toLightEdge = normalize(toLightEdge);
+    
+    // 角度を求める。
+    float coneAngle = acos(dot(-gSceneParam.dirLight.lightDir, toLightEdge)) * 2.0f;
+    
+    // 乱数の種を求める。
+    uint2 pixldx = DispatchRaysIndex().xy;
+    uint2 numPix = DispatchRaysDimensions().xy;
+    int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
+    
+    float3 shadowRayDir = GetConeSample(randSeed, -gSceneParam.dirLight.lightDir, coneAngle);
+    return ShootShadowRayNoAH(worldPosition, shadowRayDir, length, gRtScene);
+    
+}
+
+// GI
+float3 ShootGIRay(Vertex vtx, float length)
+{
+    float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
+    float3 worldNormal = mul(vtx.Normal, (float3x3) ObjectToWorld4x3());
+    float3 worldRayDir = WorldRayDirection();
+    float3 reflectDir = reflect(worldRayDir, worldNormal);
+    
+    // レイのフラグを設定。
+    RAY_FLAG flag = RAY_FLAG_NONE;
+    //flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    //flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
+    
+    // レイのマスク
+    uint rayMask = 0xFF;
+
+    // レイのパラメーターを設定。
+    RayDesc rayDesc;
+    rayDesc.Origin = worldPos;
+    rayDesc.Direction = reflectDir;
+    rayDesc.TMin = 0.01;
+    rayDesc.TMax = length;
+
+    // ペイロードを初期化。
+    DenoisePayload reflectPayload;
+    reflectPayload.color = float3(0, 0, 0);
+    reflectPayload.aoLuminance = float3(0, 0, 0);
+    reflectPayload.lightLuminance = float3(0, 0, 0);
+    reflectPayload.giColor = float3(0, 0, 0);
+    reflectPayload.recursive = 100000;
+    
+    // レイを発射。
+    TraceRay(
+        gRtScene,
+        flag,
+        rayMask,
+        0, // ray index
+        1, // MultiplierForGeometryContrib
+        0, // miss index
+        rayDesc,
+        reflectPayload);
+    return reflectPayload.giColor;
+}
+
+// RayGenerationシェーダー
 [shader("raygeneration")]
 void mainRayGen()
 {
@@ -156,7 +351,7 @@ void mainRayGen()
     matrix mtxViewInv = gSceneParam.mtxViewInv;
     matrix mtxProjInv = gSceneParam.mtxProjInv;
 
-    // ���C�̐ݒ�
+    // レイの設定
     RayDesc rayDesc;
     rayDesc.Origin = mul(mtxViewInv, float4(0, 0, 0, 1)).xyz;
 
@@ -167,24 +362,26 @@ void mainRayGen()
     rayDesc.TMin = 0;
     rayDesc.TMax = 100000;
 
-    // �y�C���[�h�̐ݒ�
+    // ペイロードの設定
     DenoisePayload payload;
     payload.color = float3(0, 0, 0);
-    payload.luminance = float3(0, 0, 0);
+    payload.aoLuminance = float3(0, 0, 0);
+    payload.lightLuminance = float3(0, 0, 0);
+    payload.giColor = float3(0, 0, 0);
     payload.recursive = 0;
 
-    // TransRay�ɕK�v�Ȑݒ���쐬
+    // TransRayに必要な設定を作成
     uint rayMask = 0xFF;
     
     RAY_FLAG flag = RAY_FLAG_NONE;
     flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShader�𖳎��B
+    //flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
 
-    // ���C�𔭎�
+    // レイを発射
     TraceRay(
     gRtScene, // TLAS
-    flag, // �Փ˔��萧�������t���O
-    rayMask, // �Փ˔���Ώۂ̃}�X�N�l
+    flag, // 衝突判定制御をするフラグ
+    rayMask, // 衝突判定対象のマスク値
     0, // ray index
     1, // MultiplierForGeometryContrib
     0, // miss index
@@ -192,190 +389,239 @@ void mainRayGen()
     payload);
     
     
-   // �F���Ɩ��邳����ۑ��B
-    outputColor[launchIndex.xy] = float4(payload.color, 1.0f);
-    outputLuminance[launchIndex.xy] = float4(payload.luminance, 1.0f);
+    // レイを発射した結果の色を取得
+    float3 col = payload.color;
+
+    // 結果格納
+    lightingOutput[launchIndex.xy] = float4(payload.aoLuminance, 1);
+    aoOutput[launchIndex.xy] = float4(payload.lightLuminance, 1);
+    colorOutput[launchIndex.xy] = float4(payload.color, 1);
+    giOutput[launchIndex.xy] = float4(payload.giColor, 1);
 
 }
 
-// miss�V�F�[�_�[ ���C���q�b�g���Ȃ��������ɌĂ΂��V�F�[�_�[
+// missシェーダー レイがヒットしなかった時に呼ばれるシェーダー
 [shader("miss")]
 void mainMS(inout DenoisePayload payload)
 {
 
-    // �P�F��Ԃ��悤�ɂ���B
+    // 単色を返すようにする。
+    payload.color = float3(0, 0, 0);
     //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
     //payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
 
 }
 
-// �V���h�E�pmiss�V�F�[�_�[
+// シャドウ用missシェーダー
 [shader("miss")]
 void shadowMS(inout ShadowPayload payload)
 {
-    // ���ɂ��������Ă��Ȃ��Ƃ������ƂȂ̂ŁA�e�͐������Ȃ��B
+    // 何にも当たっていないということなので、影は生成しない。
     payload.isShadow = true;
 }
 
-// closesthit�V�F�[�_�[ ���C���q�b�g�������ɌĂ΂��V�F�[�_�[
+// closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
 [shader("closesthit")]
 void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 {
     
-    // �Ăяo���񐔂������𒴂��Ȃ��悤�ɂ���B
-    if (checkRecursiveLimitDenoiseAO(payload))
-    {
-        return;
-    }
-    
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
     uint instanceID = InstanceID();
+
+    // テクスチャの色を保存。
+    float3 texColor = texture.SampleLevel(smp, vtx.uv, 0.0f);
     
-    // �|���S���̕`�悷��t���O�������Ă�����B
+    // 反射回数が100000回だったらGI用のレイなのでテクスチャの色を返す。
+    if (payload.recursive == 100000)
+    {
+        // レイの長さ
+        float rayLength = length(WorldRayOrigin() - vtx.Position);
+        
+        // レイの長さの最大値
+        const float MAX_RAY = 500.0f;
+        
+        // 割合を求める。
+        float rate = rayLength / MAX_RAY;
+        rate = 1.0f - saturate(rate);
+        
+        payload.giColor = texColor * rate;
+        return;
+    }
+    
+    // Instance数が1だったらテクスチャの色をそのまま返す。
+    if (instanceID == 1)
+    {
+        payload.lightLuminance = float3(1, 1, 1);
+        //payload.color = texColor;
+        payload.color = AtmosphericScattering(vtx);
+        payload.aoLuminance = float3(1, 1, 1);
+        payload.giColor = float3(1, 1, 1);
+        return;
+    }
+    
+    // ポリゴンの描画するフラグが立っていたら。
     if (gSceneParam.isMeshScene)
     {
-        payload.color = CalcBarycentrics(attrib.barys);
+        payload.lightLuminance = CalcBarycentrics(attrib.barys);
+        return;
+    }
+
+    // 法線マップが存在していたら法線マップから法線情報を抽出。
+    //vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
+    
+    // 法線を描画するフラグが立っていたら。
+    if (gSceneParam.isNormalScene)
+    {
+        payload.lightLuminance = vtx.Normal;
         return;
     }
     
-    // �@����`�悷��t���O�������Ă�����B
-    if (gSceneParam.isNormalScene)
+    // 呼び出し回数が制限を超えないようにする。
+    ++payload.recursive;
+    if (1 < payload.recursive)
     {
-        payload.color = vtx.Normal;
         return;
     }
 
-    // �@���}�b�v�����݂��Ă�����@���}�b�v����@�����𒊏o�B
-    vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
-
-    // �ʏ탉�C�e�B���O
-    if (instanceID == 2)
+    // 通常ライティング
+    uint2 pixldx = DispatchRaysIndex().xy;
+    uint2 numPix = DispatchRaysDimensions().xy;
+    
+    // ライティングの結果の明るさ
+    float pointLightVisibility = 0;
+    float dirLightVisibility = 0;
+    float aoLightVisibility = 0;
+    
+    // ポイントライトのライティング結果の色
+    float3 pointLightColor = float3(0, 0, 0);
+    
+    // 並行光源のライティング結果の色
+    float3 dirLightColor = float3(0, 0, 0);
+    
+    // ライトまでの距離
+    float lightLength = length(gSceneParam.pointLight.lightPos - vtx.Position);
+    
+    // 点光源へシャドウレイを飛ばす。
+    if (lightLength < gSceneParam.pointLight.lightPower && gSceneParam.pointLight.isActive)
     {
-        // lambert ���C�e�B���O���s��.
-        float3 lightdir = -normalize(gSceneParam.pointLight.lightPos.xyz);
-
-        float nl = saturate(dot(vtx.Normal, lightdir));
         
-        // ���K�������o�[�g�H
-        nl /= PI;
-
-        float3 lightcolor = gSceneParam.lightColor.xyz;
-        float3 ambientcolor = gSceneParam.ambientColor.xyz;
-        float4 materialcolor = texture.SampleLevel(smp, vtx.uv, 0.0f);
-        float3 color = 0;
-        color += lightcolor * materialcolor.xyz * nl;
-        color += ambientcolor * materialcolor.xyz;
-
-        // ���C�e�B���O�̌��ʂ̐F��ۑ��B
-        float3 resultColor = color;
+        pointLightVisibility = SoftShadow(vtx, gSceneParam.pointLight.lightSize, length(gSceneParam.pointLight.lightPos - vtx.Position));
         
-        uint2 pixldx = DispatchRaysIndex().xy;
-        uint2 numPix = DispatchRaysDimensions().xy;
-        
-        // �B���x����
-        float visibility = 0.0f;
-        
-        // �����փV���h�E���C���΂��B
-        float smpleVisiblity = SoftShadow(vtx);
-        
-        // �B���x���� += �T���v�����O�����l * �R�T�C���� * �m�����x�֐�
-        float nol = saturate(dot(vtx.Normal, normalize(gSceneParam.pointLight.lightPos.xyz)));
-        float pdf = 1.0 / (2.0 * 3.14f);
-        float lightVisibility = 0;
-        lightVisibility += smpleVisiblity;
-            
-        // ���C�e�B���O�̌��ʖ��邩�����珈�����΂��B
-        if (lightVisibility != 1.0f)
+        // 影だったら
+        if (0 <= pointLightVisibility)
         {
             
-            // ��΂����C�̉�
-            for (int index = 0; index < gSceneParam.aoSampleCount; ++index)
-            {
-                // �A���r�G���g�I�N�����[�W�������s��Ȃ��t���O�������Ă����珈�����΂��B
-                if (gSceneParam.isNoAO)
-                {
-                    break;
-                }
+            // 明るさを減衰させる。
+            float rate = lightLength / gSceneParam.pointLight.lightPower;
+            rate = pow(rate, 5);
+            rate = 1.0f - rate;
                 
-                // �����𐶐����ă��C���΂����������߂�B
-                float randSeedX = (frac(sin(dot(vtx.Position.xy + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(12.9898, 78.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                float randSeedY = (frac(sin(dot(vtx.Position.xz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(78.233, 12.9898)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                float randSeedZ = (frac(sin(dot(vtx.Position.yz + pixldx * (index + 1.0f) + numPix * (index + 1.0f), float2(32.9898, 48.233)) + gSceneParam.seed) * 43758.5453 * (index + 1.0f)));
-                randSeedX = randSeedX * 2.0f - 1.0f;
-                randSeedY = randSeedY * 2.0f - 1.0f;
-                randSeedZ = randSeedZ * 2.0f - 1.0f;
-                float3 sampleDir = float3(randSeedX, randSeedY, randSeedZ);
-            
-                // �V���h�E���C���΂��B
-                float smpleVisiblity = ShootAOShadowRay(vtx.Position, sampleDir, 300);
-            
-                // �B���x���� += �T���v�����O�����l * �R�T�C���� / �m�����x�֐�
-                float nol = saturate(dot(vtx.Normal, sampleDir));
-                float pdf = 1.0 / (2.0 * PI);
-                visibility += smpleVisiblity * nol / pdf;
-               
-            }
-            // ���ς����B
-            visibility = (1.0f / PI) * (1.0f / float(gSceneParam.aoSampleCount)) * visibility;
+            // ランバートの反射率と明るさをかける。
+            pointLightVisibility *= rate;
+                
+            pointLightColor += gSceneParam.pointLight.lightColor * pointLightVisibility;
+                
             
         }
         
-        
-        // �����ւ̃��C�e�B���O�����Z����B
-        visibility += lightVisibility;
-        
-        // �B���x���������E�𒴂��Ȃ��悤�ɂ���B
-        visibility = saturate(visibility);
-        
-        // �m�C�Y�݂̂�`�悷��t���O�������Ă�����B
-        if (gSceneParam.isNoiseOnlyScene)
-        {
-            payload.luminance = float3(visibility, visibility, visibility);
-            return;
-
-        }
-        
-        // �ŏI���ʂ̐F��ۑ��B
-        payload.color.xyz = resultColor;
-        
-        // ���邳����ۑ��B
-        payload.luminance = visibility;
-        
-        // ���C�g�ɓ��������ʂ����\������t���O�������Ă�����B
-        if (gSceneParam.isLightHitScene)
-        {
-            
-            // ���ɂ������Ă�����B
-            if (0.0f < lightVisibility)
-            {
-                payload.luminance = float3(1, 1, 1);
-            }
-            else
-            {
-                payload.luminance = float3(0, 0, 0);
-            }
-            
-            return;
-            
-        }
-        
-        //ShootReflectionRay(payload, vtx.Position, vtx.Normal);
-
     }
-    else if (instanceID == 3)
+    
+    // 並行光源にシャドウレイを飛ばす。
+    if (gSceneParam.dirLight.isActive)
     {
-        payload.color = float3(1, 1, 1);
+        
+        dirLightVisibility = ShootDirShadow(vtx, 3000.0f);
+        
+        dirLightColor = gSceneParam.dirLight.lightColor * dirLightVisibility;
+        
+    }
+    
+        
+    // 飛ばすレイの回数
+    for (int index = 0; index < 1; ++index)
+    {
+        // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
+        if (gSceneParam.isNoAO)
+        {
+            break;
+        }
+            
+       
+        int seed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + index + DispatchRaysIndex().y * numPix.x, 100);
+        float3 sampleDir = GetUniformHemisphereSample(seed, vtx.Normal);
+        
+        // シャドウレイを飛ばす。
+        float aoLightVisibilityBuff = ShootAOShadowRay(vtx.Position, sampleDir, 100, gRtScene);
+        
+        // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
+        float NoL = saturate(dot(vtx.Normal, sampleDir));
+        float pdf = 1.0 / (2.0 * PI);
+        aoLightVisibility += aoLightVisibilityBuff * NoL / pdf;
+        
+            
+    }
+    // 平均を取る。
+    aoLightVisibility = (1.0f / PI) * (1.0f / float(1)) * aoLightVisibility;
+        
+    
+    
+    // 光源へのライティングを加算する。
+    float lightVisibility = 0;
+    lightVisibility += pointLightVisibility + dirLightVisibility;
+    float aoVisibility = aoLightVisibility;
+    
+    // 最終結果の色を保存。
+    payload.color.xyz = texColor;
+    payload.lightLuminance = lightVisibility + (pointLightColor + dirLightColor) / PI;
+    payload.aoLuminance = aoVisibility;
+    
+    // GIの色を取得する。
+    if (instanceID == 10 && !gSceneParam.isNoGI)
+    {
+        payload.giColor = ShootGIRay(vtx, 500) * 1.0f;
+    }
+    else
+    {
+        payload.giColor = float3(0, 0, 0);
+    }
+    
+    // GIのみを描画するフラグが立っていたらGI以外の色を無効化する。
+    if (gSceneParam.isGIOnlyScene)
+    {
+        
+        payload.lightLuminance = float3(1, 1, 1);
+        payload.color = float3(0, 0, 0);
+        payload.aoLuminance = float3(0, 0, 0);
+        
+    }
+    
+    // ライトに当たった面だけ表示するフラグが立っていたら。
+    if (gSceneParam.isLightHitScene)
+    {
+        
+        // 光にあたっていたら。
+        if (0.0f < pointLightVisibility + dirLightVisibility)
+        {
+            payload.color = float3(1, 1, 1);
+        }
+        else
+        {
+            payload.color = float3(0, 0, 0);
+        }
+        
+        return;
+        
     }
 
 }
 
-// closesthit�V�F�[�_�[ �V���h�E�p
+// closesthitシェーダー シャドウ用
 [shader("closesthit")]
 void shadowCHS(inout ShadowPayload payload, MyAttribute attrib)
 {
 }
 
-// �A���t�@����AnyHitShader
+// アルファ抜きAnyHitShader
 [shader("anyhit")]
 void mainAnyHit(inout DenoisePayload payload, MyAttribute attrib)
 {
@@ -389,8 +635,8 @@ void mainAnyHit(inout DenoisePayload payload, MyAttribute attrib)
     
     int instanceID = InstanceID();
     
-    // �C���X�^���XID��3(���C�g)�Ȃ瓖���蔻������p����B
-    if (instanceID == 3)
+    // インスタンスIDが1(ライト)なら当たり判定を棄却する。
+    if (instanceID == 1)
     {
         IgnoreHit();
 

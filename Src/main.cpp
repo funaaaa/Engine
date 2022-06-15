@@ -1,34 +1,10 @@
-#include "SoundManager.h"
-#include "PiplineManager.h"
-#include "RenderTarget.h"
-#include "Camera.h"
-#include "Input.h"
-#include "FbxLoader.h"
-
-#include "BLASRegister.h"
-#include "PorygonInstance.h"
-#include "TLAS.h"
-#include "RayRootsignature.h"
-#include "DynamicConstBuffer.h"
-#include "DescriptorHeapMgr.h"
-#include "Vec.h"
-#include "PorygonInstanceRegister.h"
-#include "HitGroupMgr.h"
-#include "RaytracingPipline.h"
-#include "RaytracingOutput.h"
-#include "MultiMeshLoadOBJ.h"
-#include "ComputeShader.h"
-
-#include "HitGroup.h"
-
-#include <utilapiset.h>
-
-#include "FHelper.h"
+ï»¿#include "DevDXR.h"
 
 #define COLORHEX(hex) hex / 255.0f
 
 #define SCREEN_VIRTUAL_WIDTH 300
 
+<<<<<<< HEAD
 // fpsXV
 void FPS();
 
@@ -92,46 +68,34 @@ enum DEGU_PIPLINE_ID {
 // “ü—Í‘€ì
 void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
 
+=======
+>>>>>>> AtmosphericScattering
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
-	/*----------DirectX‰Šú‰»ˆ—----------*/
-	DirectXBase directXBase;							// DirectXŠî”Õ•”•ª
-	directXBase.Init();									// DirectXŠî”Õ‚Ì‰Šú‰»
-	SoundManager::Ins()->SettingSoundManager();	// ƒTƒEƒ“ƒhƒ}ƒl[ƒWƒƒ[‚ğƒZƒbƒg‚·‚é
+	/*----------DirectXåˆæœŸåŒ–å‡¦ç†----------*/
+	ImGuiWindow::Ins()->Init();
+	DirectXBase::Ins()->Init();									// DirectXåŸºç›¤ã®åˆæœŸåŒ–
+	SoundManager::Ins()->SettingSoundManager();	// ã‚µã‚¦ãƒ³ãƒ‰ãƒãƒãƒ¼ã‚¸ãƒ£ãƒ¼ã‚’ã‚»ãƒƒãƒˆã™ã‚‹
 
-	/*----------ƒpƒCƒvƒ‰ƒCƒ“¶¬----------*/
+	/*----------ãƒ‘ã‚¤ãƒ—ãƒ©ã‚¤ãƒ³ç”Ÿæˆ----------*/
 	PiplineManager::Ins()->Init();
 
-	/*----------•Ï”éŒ¾----------*/
+	/*----------å¤‰æ•°å®£è¨€----------*/
 	srand(time(NULL));
 
-	// ƒfƒBƒXƒNƒŠƒvƒ^ƒq[ƒv‚ğ‰Šú‰»B
+	// ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ãƒ’ãƒ¼ãƒ—ã‚’åˆæœŸåŒ–ã€‚
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();
 
-	// FBXLoader‚ğ‰Šú‰»B
+	// FBXLoaderã‚’åˆæœŸåŒ–ã€‚
 	FbxLoader::Ins()->Init();
 
-	// ƒqƒbƒgƒOƒ‹[ƒv‚ğİ’èB
+	// ãƒ’ãƒƒãƒˆã‚°ãƒ«ãƒ¼ãƒ—ã‚’è¨­å®šã€‚
 	HitGroupMgr::Ins()->Setting();
 
-	// AO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğİ’èB
-	vector<RayPiplineShaderData> useShaders;
-	useShaders.push_back({ "Resource/ShaderFiles/RayTracing/AOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	RaytracingPipline aoPipline;
-	aoPipline.Setting(useShaders, HitGroupMgr::AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	// ãƒ‡ãƒã‚¤ã‚ºç”¨ã®ã‚¯ãƒ©ã‚¹ã‚’åˆæœŸåŒ–ã€‚
+	Denoiser::Ins()->Setting();
 
-	// ƒfƒmƒCƒYAO—p‚ÌƒpƒCƒvƒ‰ƒCƒ“‚ğİ’èB
-	vector<RayPiplineShaderData> dAOuseShaders;
-	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	RaytracingPipline deAOPipline;
-	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
-
-	// ƒfƒtƒHƒ‹ƒg‚ÌƒVƒF[ƒ_[‚ğİ’èB
-	vector<RayPiplineShaderData> defShaders;
-	defShaders.push_back({ "Resource/ShaderFiles/RayTracing/TriangleShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	RaytracingPipline defPipline;
-	defPipline.Setting(defShaders, HitGroupMgr::DEF_HIT_GROUP, 1, 1, 2, sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
-
+<<<<<<< HEAD
 	// SPONZA‚ğ“Ç‚İ‚ŞB
 	//std::vector<int> sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF_HIT_GROUP]);
 
@@ -342,35 +306,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// ƒoƒbƒNƒoƒbƒtƒ@‚ÌƒCƒ“ƒfƒbƒNƒX‚ğæ“¾‚·‚éB
 		UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+=======
+	// ã‚«ãƒ¡ãƒ©ã‚’åˆæœŸåŒ–ã€‚
+	Camera::Ins()->Init();
 
-		// ƒoƒŠƒA‚ğİ’è‚µŠeƒŠƒ\[ƒX‚Ìó‘Ô‚ğ‘JˆÚ‚³‚¹‚é.
-		raytracingOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		raytracingOutputData.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		D3D12_RESOURCE_BARRIER barriers[] = {
-			CD3DX12_RESOURCE_BARRIER::Transition(
-			DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_COPY_DEST),
-		};
-		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), raytracingOutput.GetRaytracingOutput().Get());
+	// é–‹ç™ºç”¨
+	DevDXR dev;
+	dev.Init();
+>>>>>>> AtmosphericScattering
 
-		// ƒŒƒ“ƒ_[ƒ^[ƒQƒbƒg‚ÌƒŠƒ\[ƒXƒoƒŠƒA‚ğ‚à‚Æ‚É–ß‚·B
-		D3D12_RESOURCE_BARRIER endBarriers[] = {
+	/*----------ã‚²ãƒ¼ãƒ ãƒ«ãƒ¼ãƒ—----------*/
+	while (true) {
 
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_RENDER_TARGET)
-
-		};
-		DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
-
-		directXBase.processAfterDrawing();
+		
+		dev.Update();
+		dev.Draw();
+		
 
 	}
 
 	return 0;
+<<<<<<< HEAD
 }
 
 
@@ -563,4 +519,6 @@ void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE
 
 	}
 
+=======
+>>>>>>> AtmosphericScattering
 }
