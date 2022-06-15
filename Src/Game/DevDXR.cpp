@@ -113,7 +113,7 @@ void DevDXR::Update() {
 	constBufferData.up = Camera::Ins()->up;
 
 	// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
-	if (isMoveLight) {
+	//if (isMoveLight) {
 
 		// 点光源の位置を更新。
 		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
@@ -121,7 +121,7 @@ void DevDXR::Update() {
 
 		tlas.Update();
 
-	}
+	//}
 
 	/*----- 描画処理 -----*/
 
@@ -210,9 +210,9 @@ void DevDXR::Draw() {
 		//}
 
 		//// デノイズをかけたライティング情報と色情報を混ぜる。
-		//denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		//Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), giOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
-		//denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
 
@@ -238,6 +238,7 @@ void DevDXR::Draw() {
 	else {
 
 		// デノイズされた通常の描画
+		colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), colorOutput.GetRaytracingOutput().Get());
 
 	}
@@ -255,7 +256,7 @@ void DevDXR::Draw() {
 	// バリアを設定し各リソースの状態を遷移させる.
 	aoOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	lightOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	//colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	giOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
@@ -291,12 +292,14 @@ void DevDXR::FPS()
 
 void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
 
-	float buff = 0.1f;
-	float test = 0.25f * std::exp(-0.00287 + buff * (0.459 + buff * (3.83 + buff * (-6.8 + buff * 5.25))));
+	float inputValue = 1.0f;
+	float x = 1.0f - (inputValue);
+	static const float fScaleDepth = 0.25f;
+	float buff = fScaleDepth * std::exp(-0.00287f + x * (0.459f + x * (3.83f + x * (-6.8f + x * 5.25f))));
 
 	bool isMove = false;
 
-	float speed = 30.0f;
+	float speed = 10.0f;
 	float rot = 0.03f;
 	if (Input::isKey(DIK_W)) {
 		Camera::Ins()->Move(speed);
@@ -543,6 +546,11 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 
 /*
 
-すべてのパラメーターを調整可能にして、デフォルトのコードでいろいろ試してみる。
+角度は内積を使うことで1~-1の範囲にしている。
+→ライティングのときと同じ感じ
+でも-になることでScale関数の値がいかれる。
+→恐らく+しか想定していない？
+→そもそも-になるのが正しいのかを考える。
+　→地上を法線としたら-になる部分は見えない部分になるはず。
 
 */

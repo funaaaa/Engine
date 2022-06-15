@@ -47,9 +47,20 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
 
 float Scale(float fcos)
 {
+    
+    //fcos = saturate(fcos);
+    
     float x = 1.0 - fcos;
     static const float fScaleDepth = 0.25;
-    return fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.8 + x * 5.25))));
+    float buff = fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.8 + x * 5.25))));
+    if (abs(buff) < 0.01f)
+    {
+        return 0;
+    }
+    else
+    {
+        return buff;
+    }
 }
 
 float3 IntersectionPos(float3 dir, float3 a, float radius)
@@ -68,7 +79,7 @@ float3 AtmosphericScattering(Vertex vtx)
     // 地平線以下は真っ黒にする。
     if (vtx.Position.y < 0)
     {
-        return float3(0, 0, 0);
+        return float3(0.1f, 0.1f, 0.1f);
     }
     
     // レイリー散乱定数
@@ -118,7 +129,7 @@ float3 AtmosphericScattering(Vertex vtx)
     //worldPos = IntersectionPos(normalize(worldPos), float3(0.0, fInnerRadius, 0.0), fOuterRadius);
     
     // カメラ座標 元計算式だと中心固定になってしまっていそう。
-    float3 v3CameraPos = float3(0.0, fInnerRadius, 0.0f);
+    float3 v3CameraPos = float3(0.0, 1.0f, 0.0f);
     //float3 v3CameraPos = WorldRayOrigin();
     
     // ディレクショナルライトの場所を求める。
@@ -136,13 +147,15 @@ float3 AtmosphericScattering(Vertex vtx)
     
     // 正規化された拡散光が来た方向。
     v3Ray /= fFar;
+    
+    //return v3Ray;
  
     // サンプリングする始点座標 資料だとAの頂点
     float3 v3Start = v3CameraPos;
     // サンプルではカメラの位置が(0,Radius,0)なのでカメラの高さ。どの位置に移動しても地球視点で見れば原点(地球の中心)からの高さ。
     float fCameraHeight = length(v3CameraPos);
     // 地上からの法線(?)と拡散光がやってきた角度の内積によって求められた角度をカメラの高さで割る。
-    float fStartAngle = dot(v3Ray, v3Start) / fCameraHeight;
+    float fStartAngle = dot(v3Ray, normalize(v3Start)) / fCameraHeight;
     // 開始地点の高さに平均大気密度をかけた値の指数を求める？
     float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
     // 開始地点のなにかの角度のオフセット。
@@ -163,7 +176,7 @@ float3 AtmosphericScattering(Vertex vtx)
         // サンプルポイントの高さ。どちらにせよ原点は地球の中心なので、この値が現在位置の高さになる。
         float fHeight = length(v3SamplePoint);
         // 地上からサンプルポイントの高さの差に平均大気密度をかけたもの。
-        float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));
+        float fDepth = (fScaleOverScaleDepth * (fInnerRadius - fHeight));
         // 地上から見たサンプルポイントの法線とディレクショナルライトの方向の角度を求めて、サンプルポイントの高さで割る。
         float fLightAngle = dot(v3LightDir, v3SamplePoint) / fHeight;
         // 地上から見たサンプルポイントの法線と散乱光が飛んできている方区の角度を求めて、サンプルポイントの高さで割る。
@@ -171,17 +184,28 @@ float3 AtmosphericScattering(Vertex vtx)
         // 散乱光？
         float fScatter = (fStartOffset + fDepth * (Scale(fLightAngle) - Scale(fCameraAngle)));
         
-        float divBuff = 10000.0f;
-        float minus = 1;
-        return float3(Scale(fLightAngle) / divBuff * minus, Scale(fLightAngle) / divBuff * minus, Scale(fLightAngle) / divBuff * minus);
+        //float divBuff = 1.0f;
+        //float minus = 1;
+        //float divTarget = fScatter;
+        //if (fScatter <= 3.9f)
+        //{
+        //    return float3(1, 0, 0);
+        //}
+        //else
+        //{
+        //    return float3(0, 0, 1);
+        //}
+        //return float3(divTarget / divBuff * minus, divTarget / divBuff * minus, divTarget / divBuff * minus);
         
         // 色ごとの減衰率？
-        float3 v3Attenuate = exp(-fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
-        //float3 v3Attenuate = saturate(fScatter) * v3InvWaveLength;
+        //float3 v3Attenuate = exp(fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
+        float3 v3Attenuate = saturate(fScatter) * v3InvWaveLength;
         // サンプルポイントの位置を考慮して散乱した色を求める。
-        v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
+        v3FrontColor += v3Attenuate * (fDepth * fScaledLength) * 0.00001f;
         // サンプルポイントを移動させる。
         v3SamplePoint += v3SampleRay;
+        
+        //return v3FrontColor * 0.00001f;
         
     }
  

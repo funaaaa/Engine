@@ -106,7 +106,8 @@ struct KariConstBufferData {
 		// 並行光源をセッティング
 		dirLight.isActive = false;
 		dirLight.lightColor = Vec3{ 0,0,0 };
-		dirLight.lihgtDir = Vec3{ 0,-1,0 };
+		dirLight.lihgtDir = Vec3{ -0.5f,-1,0 };
+		dirLight.lihgtDir.Normalize();
 
 		// スポットライトをセッティング
 		spotLight.isActive = false;
