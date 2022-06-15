@@ -21,9 +21,9 @@ void DevDXR::Init() {
 	//PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
 	// 天球用のスフィアを生成する。
-	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.jpg" });
+	/*skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.jpg" });
 	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, 1);
-	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));
+	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));*/
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
