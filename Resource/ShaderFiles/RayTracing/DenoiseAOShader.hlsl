@@ -45,22 +45,11 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
     return v;
 }
 
-float Scale(float fcos)
+// サンプルコードからそのまま持ってきたやつ。
+float scale(float fCos)
 {
-    
-    //fcos = saturate(fcos);
-    
-    float x = 1.0 - fcos;
-    static const float fScaleDepth = 0.25;
-    float buff = fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.8 + x * 5.25))));
-    if (abs(buff) < 0.01f)
-    {
-        return 0;
-    }
-    else
-    {
-        return buff;
-    }
+    float x = 1.0 - fCos;
+    return 0.25 * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
 }
 
 float3 IntersectionPos(float3 dir, float3 a, float radius)
@@ -76,11 +65,12 @@ float3 IntersectionPos(float3 dir, float3 a, float radius)
 float3 AtmosphericScattering(Vertex vtx)
 {
     
-    // 地平線以下は真っ黒にする。
-    if (vtx.Position.y < 0)
-    {
-        return float3(0.1f, 0.1f, 0.1f);
-    }
+    
+    //// 地平線以下は真っ黒にする。
+    //if (vtx.Position.y < 0)
+    //{
+    //    return float3(0.1f, 0.1f, 0.1f);
+    //}
     
     // レイリー散乱定数
     float kr = gSceneParam.AS.kr;
@@ -125,11 +115,11 @@ float3 AtmosphericScattering(Vertex vtx)
     float g2 = g * g;
     
     // 当たった天球のワールド座標
-    float3 worldPos = normalize(mul(float4(vtx.Position, 1), ObjectToWorld4x3())) * fOuterRadius;
+    float3 worldPos = vtx.Position;
     //worldPos = IntersectionPos(normalize(worldPos), float3(0.0, fInnerRadius, 0.0), fOuterRadius);
     
     // カメラ座標 元計算式だと中心固定になってしまっていそう。
-    float3 v3CameraPos = float3(0.0, 1.0f, 0.0f);
+    float3 v3CameraPos = WorldRayOrigin();
     //float3 v3CameraPos = WorldRayOrigin();
     
     // ディレクショナルライトの場所を求める。
@@ -155,18 +145,19 @@ float3 AtmosphericScattering(Vertex vtx)
     // サンプルではカメラの位置が(0,Radius,0)なのでカメラの高さ。どの位置に移動しても地球視点で見れば原点(地球の中心)からの高さ。
     float fCameraHeight = length(v3CameraPos);
     // 地上からの法線(?)と拡散光がやってきた角度の内積によって求められた角度をカメラの高さで割る。
-    float fStartAngle = dot(v3Ray, normalize(v3Start)) / fCameraHeight;
+    //float fStartAngle = dot(v3Ray, normalize(v3Start)) / fCameraHeight;
+    float fStartAngle = acos(dot(v3Ray, normalize(v3Start))) / PI;
     // 開始地点の高さに平均大気密度をかけた値の指数を求める？
     float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
     // 開始地点のなにかの角度のオフセット。
-    float fStartOffset = fStartDepth * Scale(fStartAngle);
+    float fStartOffset = fStartDepth * scale(fStartAngle);
     // サンプルポイント間の長さ。
     float fSampleLength = fFar / fSamples;
     // サンプルポイント間の長さに地球の大気の割合をかける。何故。
     float fScaledLength = fSampleLength * fScale;
     // 拡散光が来た方向にサンプルの長さをかけることでサンプルポイント間のレイをベクトルを求める。
     float3 v3SampleRay = v3Ray * fSampleLength;
-    // 最初のサンプルポイントを求める。0.5をかけてるのは謎。
+    // 最初のサンプルポイントを求める。0.5をかけてるのは少し動かすため？
     float3 v3SamplePoint = v3Start + v3SampleRay * 0.5f;
  
     // 色情報
@@ -175,39 +166,36 @@ float3 AtmosphericScattering(Vertex vtx)
     {
         // サンプルポイントの高さ。どちらにせよ原点は地球の中心なので、この値が現在位置の高さになる。
         float fHeight = length(v3SamplePoint);
-        // 地上からサンプルポイントの高さの差に平均大気密度をかけたもの。
+        // 地上からサンプルポイントの高さの差に平均大気密度をかけたもの。  高度に応じて大気密度が指数的に小さくなっていくのを表現している？
         float fDepth = (fScaleOverScaleDepth * (fInnerRadius - fHeight));
         // 地上から見たサンプルポイントの法線とディレクショナルライトの方向の角度を求めて、サンプルポイントの高さで割る。
-        float fLightAngle = dot(v3LightDir, v3SamplePoint) / fHeight;
+        //float fLightAngle = dot(v3LightDir, v3SamplePoint) / fHeight;
+        float fLightAngle = acos(dot(v3LightDir, normalize(v3SamplePoint))) / PI; // こいつの値が-1になる→Scale内の計算でexpの引数が43になり、とてつもなくでかい値が入る。 → -にならないようにする？
+       // return float3(fLightAngle * -0.5, fLightAngle * -0.5, fLightAngle * -0.5);
         // 地上から見たサンプルポイントの法線と散乱光が飛んできている方区の角度を求めて、サンプルポイントの高さで割る。
-        float fCameraAngle = dot(v3Ray, v3SamplePoint) / fHeight;
+        //float fCameraAngle = dot(v3Ray, v3SamplePoint) / fHeight;
+        float fCameraAngle = acos(dot(v3Ray, normalize(v3SamplePoint))) / PI;
         // 散乱光？
-        float fScatter = (fStartOffset + fDepth * (Scale(fLightAngle) - Scale(fCameraAngle)));
-        
-        //float divBuff = 1.0f;
-        //float minus = 1;
-        //float divTarget = fScatter;
-        //if (fScatter <= 3.9f)
-        //{
-        //    return float3(1, 0, 0);
-        //}
-        //else
-        //{
-        //    return float3(0, 0, 1);
-        //}
-        //return float3(divTarget / divBuff * minus, divTarget / divBuff * minus, divTarget / divBuff * minus);
+        float fScatter = (fStartOffset + fDepth * (scale(fLightAngle * 1) - scale(fCameraAngle * 1)));
+       
+        float divbuff = 1.0f;
+        float minus = 1;
+        float divtarget = fLightAngle;
+        //return float3(divtarget / divbuff * minus, divtarget / divbuff * minus, divtarget / divbuff * minus);
         
         // 色ごとの減衰率？
-        //float3 v3Attenuate = exp(fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
-        float3 v3Attenuate = saturate(fScatter) * v3InvWaveLength;
+        float3 v3Attenuate = exp(fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
+        //float3 v3Attenuate = saturate(fScatter) * v3InvWaveLength;
         // サンプルポイントの位置を考慮して散乱した色を求める。
-        v3FrontColor += v3Attenuate * (fDepth * fScaledLength) * 0.00001f;
+        v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         // サンプルポイントを移動させる。
         v3SamplePoint += v3SampleRay;
+        //return normalize(v3SamplePoint);
         
-        //return v3FrontColor * 0.00001f;
+        //return exp(fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
         
     }
+        //return v3FrontColor;
  
     // レイリー散乱に使用する色情報
     float3 c0 = v3FrontColor * (v3InvWaveLength * fKrESun);
@@ -216,7 +204,8 @@ float3 AtmosphericScattering(Vertex vtx)
     // カメラ座標から天球の座標へのベクトル。
     float3 v3Direction = v3CameraPos - worldPos;
  
-    float fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
+    //float fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
+    float fcos = dot(v3LightDir, normalize(v3Direction));
     float fcos2 = fcos * fcos;
  
     // レイリー散乱の明るさ。
@@ -224,10 +213,12 @@ float3 AtmosphericScattering(Vertex vtx)
     // ミー散乱の明るさ。
     float miePhase = 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fcos2) / pow(1.0f + g2 - 2.0f * g * fcos, 1.5f);
  
+    //return v3FrontColor / 1000000000000.0f;
+    
     // 最終結果の色
     float3 col = 1.0f;
     col.rgb = rayleighPhase * c0 + miePhase * c1;
-    return col;
+    return col * 0.01f;
     
 }
 

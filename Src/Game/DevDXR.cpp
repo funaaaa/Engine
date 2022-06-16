@@ -23,7 +23,7 @@ void DevDXR::Init() {
 	// 天球用のスフィアを生成する。
 	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.jpg" });
 	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, 1);
-	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));
+	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(100000, 100000, 100000));
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -292,10 +292,16 @@ void DevDXR::FPS()
 
 void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
 
-	float inputValue = 1.0f;
+
+	float acosBuff = std::acos(-1);
+
+
+
+	float inputValue = -1;
 	float x = 1.0f - (inputValue);
 	static const float fScaleDepth = 0.25f;
-	float buff = fScaleDepth * std::exp(-0.00287f + x * (0.459f + x * (3.83f + x * (-6.8f + x * 5.25f))));
+	float expIn = -0.00287f + x * (0.459f + x * (3.83f + x * (-6.8f + x * 5.25f)));
+	float buff = fScaleDepth * std::exp(expIn);
 
 	bool isMove = false;
 
@@ -552,5 +558,13 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 →恐らく+しか想定していない？
 →そもそも-になるのが正しいのかを考える。
 　→地上を法線としたら-になる部分は見えない部分になるはず。
+
+・Scaleに渡している値の引数名は[fcos]
+→cosということは角度？
+→今渡しているのは内積の結果で出ただけの値。
+→角度を渡すのが前提となっているのだとしたらマイナスを入れては行けないのが納得できる。
+→ただサンプルではそのまま渡しているし、3Dで角度を求められる？
+→内積の結果をうまく使えばいけるか？
+→acosを使えばいけそう。でもうまくいかなかったから値が-になっていないかを調べる。
 
 */
