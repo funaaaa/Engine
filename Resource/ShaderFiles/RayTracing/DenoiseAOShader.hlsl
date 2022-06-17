@@ -351,6 +351,8 @@ float3 AtmosphericScattering(Vertex vtx)
  
     //return v3FrontColor / 1000000000000.0f;
     
+   // return float3(miePhase, miePhase, miePhase);
+    
     // 最終結果の色
     float3 col = 1.0f;
     col.rgb = rayleighPhase * c0 + miePhase * c1;
