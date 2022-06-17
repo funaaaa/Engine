@@ -10,9 +10,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
-	/*----------パイプライン生成----------*/
-	PiplineManager::Ins()->Init();
-
 	/*----------変数宣言----------*/
 	srand(time(NULL));
 
