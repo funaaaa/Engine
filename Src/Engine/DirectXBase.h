@@ -20,31 +20,33 @@ using namespace std;
 using namespace Microsoft::WRL;
 
 class DirectXBase : public Singleton<DirectXBase> {
+
 public:
-	static WindowsAPI windowsAPI;						//WindowsAPIクラス
-	static ComPtr<ID3D12Debug> debugController;
-	static ComPtr<ID3D12Device5> dev;
-	static ComPtr<IDXGIFactory6> dxgiFactory;
-	static vector<ComPtr<IDXGIAdapter1>> adapters;		//アダプターの列挙用
-	static ComPtr<IDXGIAdapter1> tmpAdapter;			//特定の名前を持つアダプターオブジェクトを入れる
-	static vector<D3D_FEATURE_LEVEL> levels;			//対応レベルの配列
-	static D3D_FEATURE_LEVEL featureLevel;
-	static ComPtr<IDXGISwapChain4> swapchain;
-	static ComPtr<ID3D12CommandAllocator> cmdAllocator;
-	static ComPtr<ID3D12GraphicsCommandList4> cmdList;
-	static ComPtr<ID3D12CommandQueue> cmdQueue;
-	static ComPtr<ID3D12DescriptorHeap> rtvHeaps;
-	static vector<ComPtr<ID3D12Resource>> backBuffers;
-	static D3D12_DESCRIPTOR_HEAP_DESC heapDesc;
-	static ComPtr<ID3D12Resource> depthBuffer;			//深度バッファ
-	static ComPtr<ID3D12DescriptorHeap> dsvHeap;		//深度バッファ用ディスクリプタヒープ
-	static ComPtr<ID3D12Fence> fence;
-	static UINT64 fenceVal;
-	static IDirectInput8* dinput;						//DirectInputオブジェクト
-	static IDirectInputDevice8* devkeybord;				//キーボードオブジェクト
-	static IDirectInputDevice8* devmouse;				//マウスオブジェクト
+
+	WindowsAPI windowsAPI;						//WindowsAPIクラス
+	Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
+	Microsoft::WRL::ComPtr<ID3D12Device5> dev;
+	Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory;
+	vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters;		//アダプターの列挙用
+	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter;			//特定の名前を持つアダプターオブジェクトを入れる
+	vector<D3D_FEATURE_LEVEL> levels;			//対応レベルの配列
+	D3D_FEATURE_LEVEL featureLevel;
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps;
+	vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers;
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc;
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer;			//深度バッファ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;		//深度バッファ用ディスクリプタヒープ
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
+	UINT64 fenceVal;
+	IDirectInput8* dinput;						//DirectInputオブジェクト
+	IDirectInputDevice8* devkeybord;				//キーボードオブジェクト
+	IDirectInputDevice8* devmouse;				//マウスオブジェクト
 	
-	static ComPtr<ID3D12DescriptorHeap> heapForImgui;	//imgui用ディスクリプタヒープ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heapForImgui;	//imgui用ディスクリプタヒープ
 
 
 public:
@@ -64,5 +66,5 @@ public:
 	void ResourceBarrierAfter();
 
 	//imgui用ヒープ生成
-	ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeaoForImgui();
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeaoForImgui();
 };

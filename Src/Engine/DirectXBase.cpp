@@ -8,30 +8,6 @@
 #include "imgui/imgui_impl_win32.h"
 #include <stdexcept>
 
-WindowsAPI DirectXBase::windowsAPI{};
-ComPtr<ID3D12Debug> DirectXBase::debugController{};
-ComPtr<ID3D12Device5> DirectXBase::dev{};
-ComPtr<IDXGIFactory6> DirectXBase::dxgiFactory{};
-vector<ComPtr<IDXGIAdapter1>> DirectXBase::adapters{};
-ComPtr<IDXGIAdapter1> DirectXBase::tmpAdapter{};
-vector<D3D_FEATURE_LEVEL> DirectXBase::levels{};
-D3D_FEATURE_LEVEL DirectXBase::featureLevel{};
-ComPtr<IDXGISwapChain4> DirectXBase::swapchain{};
-ComPtr<ID3D12CommandAllocator> DirectXBase::cmdAllocator{};
-ComPtr<ID3D12GraphicsCommandList4> DirectXBase::cmdList{};
-ComPtr<ID3D12CommandQueue> DirectXBase::cmdQueue{};
-ComPtr<ID3D12DescriptorHeap> DirectXBase::rtvHeaps{};
-ComPtr<ID3D12Resource> DirectXBase::depthBuffer{};
-ComPtr<ID3D12DescriptorHeap> DirectXBase::dsvHeap{};
-vector<ComPtr<ID3D12Resource>> DirectXBase::backBuffers{};
-D3D12_DESCRIPTOR_HEAP_DESC DirectXBase::heapDesc{};
-ComPtr<ID3D12Fence> DirectXBase::fence{};
-UINT64 DirectXBase::fenceVal{};
-IDirectInput8* DirectXBase::dinput{};
-IDirectInputDevice8* DirectXBase::devkeybord{};
-IDirectInputDevice8* DirectXBase::devmouse{};
-ComPtr<ID3D12DescriptorHeap> DirectXBase::heapForImgui{};
-
 DirectXBase::DirectXBase() {
 	backBuffers.resize(2);
 }
@@ -52,7 +28,7 @@ void DirectXBase::Init() {
 	HRESULT result = CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory));
 
 	//グラフィックスアダプターの選択
-	ComPtr<IDXGIAdapter1> tmpAdapter = nullptr;
+	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter = nullptr;
 	for (int i = 0;
 		dxgiFactory->EnumAdapters1(i, &tmpAdapter) != DXGI_ERROR_NOT_FOUND;
 		i++)
@@ -121,7 +97,7 @@ void DirectXBase::Init() {
 	result = dev->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&cmdQueue));
 
 	//スワップチェーンの生成
-	ComPtr<IDXGISwapChain1> swapChain1;
+	Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
 	DXGI_SWAP_CHAIN_DESC1 swapchainDesc{};
 	swapchainDesc.Width = 1280;
 	swapchainDesc.Height = 720;
@@ -373,9 +349,9 @@ void DirectXBase::ResourceBarrierAfter()
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 }
 
-ComPtr<ID3D12DescriptorHeap> DirectXBase::CreateDescriptorHeaoForImgui()
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXBase::CreateDescriptorHeaoForImgui()
 {
-	ComPtr<ID3D12DescriptorHeap> ret;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> ret;
 
 	D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 	desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
