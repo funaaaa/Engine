@@ -67,18 +67,6 @@ void DevDXR::Init() {
 
 void DevDXR::Update() {
 
-	// IMGUI系
-	ImGuiWindow::Ins()->processBeforeDrawing();
-
-	// ウィンドウの名前を再設定。
-	SetWindowText(ImGuiWindow::Ins()->windowsAPI.hwnd, L"ImGuiWindow");
-
-	isMoveLight = false;
-	Input(constBufferData, isMoveLight, debugPiplineID);
-
-	ImGuiWindow::Ins()->processAfterDrawing();
-
-
 	/*----------毎フレーム処理(描画前処理)----------*/
 	DirectXBase::Ins()->processBeforeDrawing();
 
@@ -86,6 +74,9 @@ void DevDXR::Update() {
 
 	// 天球を回転させる。
 	//PorygonInstanceRegister::Ins()->AddRotate(skyDomeIns, { 0.01,0.01,0.01 });
+
+	isMoveLight = false;
+	Input(constBufferData, isMoveLight, debugPiplineID);
 
 	// ウィンドウの名前を更新。
 	if (isDisplayFPS) {

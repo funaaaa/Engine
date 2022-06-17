@@ -7,7 +7,6 @@
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
-	ImGuiWindow::Ins()->Init();
 	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
