@@ -1,6 +1,5 @@
 #pragma once
 #include "SoundManager.h"
-#include "RenderTarget.h"
 #include "Camera.h"
 #include "Input.h"
 #include "FbxLoader.h"
