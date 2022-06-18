@@ -256,31 +256,6 @@ void DevDXR::Draw() {
 
 }
 
-
-// タイトルバーのFPSの更新
-void DevDXR::FPS()
-{
-	static DWORD prev_time = timeGetTime();	// 前回の時間
-	static int frame_count = 0;		// フレームカウント
-	DWORD now_time = timeGetTime();		// 今回のフレームの時間
-
-	frame_count++;	// フレーム数をカウントする
-
-	// 経過時間が１秒を超えたらカウントと時間をリセット
-	if (now_time - prev_time >= 1000)
-	{
-		wchar_t fps[1000];
-		_itow_s(frame_count, fps, 10);
-		wchar_t moji[] = L"FPS";
-		wcscat_s(fps, moji);
-		SetWindowText(DirectXBase::Ins()->windowsAPI.hwnd, fps);
-		//OutputDebugString(fps);
-
-		prev_time = now_time;
-		frame_count = 0;
-	}
-}
-
 void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
 
 
@@ -539,12 +514,28 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 
 }
 
+#pragma comment (lib, "winmm.lib")
 
+// タイトルバーのFPSの更新
+void DevDXR::FPS()
+{
+	static DWORD prev_time = timeGetTime();	// 前回の時間
+	static int frame_count = 0;		// フレームカウント
+	DWORD now_time = timeGetTime();		// 今回のフレームの時間
 
-/*
+	frame_count++;	// フレーム数をカウントする
 
-Struct.hを解体する。
-→その際にObject3DDeliveryDataに依存している処理が大量にあるのでその辺を改良する。
-→結構大変そう。
+	// 経過時間が１秒を超えたらカウントと時間をリセット
+	if (now_time - prev_time >= 1000)
+	{
+		wchar_t fps[1000];
+		_itow_s(frame_count, fps, 10);
+		wchar_t moji[] = L"FPS";
+		wcscat_s(fps, moji);
+		SetWindowText(DirectXBase::Ins()->windowsAPI.hwnd, fps);
+		//OutputDebugString(fps);
 
-*/
+		prev_time = now_time;
+		frame_count = 0;
+	}
+}

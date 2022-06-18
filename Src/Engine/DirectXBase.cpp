@@ -1,6 +1,5 @@
 #include "DirectXBase.h"
 #include <cassert>
-#include "struct.h"
 #include "Input.h"
 
 #include "imgui/imgui.h"

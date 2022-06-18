@@ -1,9 +1,6 @@
 #include "SoundManager.h"
 #include <cassert>
-#include "Struct.h"
-
-ComPtr<IXAudio2> SoundManager::xAudio2{};
-IXAudio2MasteringVoice* SoundManager::masterVoice{};
+#include "DirectXBase.h"
 
 //XAudio2VoiceCallbackのインスタンスをグローバル変数としてインスタンスを作る
 XAudio2VoiceCallback voiceCallback{};
@@ -16,7 +13,7 @@ void SoundManager::SettingSoundManager()
 	result = xAudio2->CreateMasteringVoice(&masterVoice);
 }
 
-SoundData SoundManager::SoundLoadWave(char* fileName)
+SoundManager::SoundData SoundManager::SoundLoadWave(char* fileName)
 {
 	HRESULT result;
 

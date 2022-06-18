@@ -148,6 +148,6 @@ void Camera::MoveRight(const float& Speed)
 
 Vec3 Camera::GetEyeVector()
 {
-	XMFLOAT3 returnBuff = FHelper::Normalize3D(XMFLOAT3(honraiTarget.x - honraiEye.x, honraiTarget.y - honraiEye.y, honraiTarget.z - honraiEye.z));
+	Vec3 returnBuff = (honraiTarget - honraiEye).GetNormal();
 	return returnBuff;
 }
