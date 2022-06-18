@@ -14,16 +14,16 @@ void DevDXR::Init() {
 	// SPONZAを読み込む。
 	//sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
 
-	// ライト用のスフィアを読み込む。
-	//sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
-	//sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 1);
-	//PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
-	//PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
-
 	// 天球用のスフィアを生成する。
 	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.jpg" });
 	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, 1);
 	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(10000000, 10000000, 10000000));
+
+	// ライト用のスフィアを読み込む。
+	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
+	sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 0);
+	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -172,38 +172,38 @@ void DevDXR::Draw() {
 	// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
 	if (debugPiplineID == DENOISE_AO_PIPLINE) {
 
-		//// [ノイズを描画]のときはデノイズをかけない。
-		//if (!constBufferData.isNoiseScene) {
+		// [ノイズを描画]のときはデノイズをかけない。
+		if (!constBufferData.isNoiseScene) {
 
-		//	// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
-		//	if (!constBufferData.isMeshScene && !constBufferData.isNormalScene && !constBufferData.isLightHitScene) {
+			// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
+			if (!constBufferData.isMeshScene && !constBufferData.isNormalScene && !constBufferData.isLightHitScene) {
 
-		//		// ライトにデノイズをかける。
-		//		Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 1, 3);
+				// ライトにデノイズをかける。
+				Denoiser::Ins()->Denoise(lightOutput.GetUAVIndex(), 1, 3);
 
-		//	}
+			}
 
-		//	// [AOを行わない]のときはデノイズをかけない。
-		//	if (!constBufferData.isNoAO) {
+			// [AOを行わない]のときはデノイズをかけない。
+			if (!constBufferData.isNoAO) {
 
-		//		// AOにデノイズをかける。
-		//		Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
+				// AOにデノイズをかける。
+				Denoiser::Ins()->Denoise(aoOutput.GetUAVIndex(), 100, 9);
 
-		//	}
+			}
 
-		//	// [GIを行わない]のときはデノイズをかけない。
-		//	if (!constBufferData.isNoGI) {
+			// [GIを行わない]のときはデノイズをかけない。
+			if (!constBufferData.isNoGI) {
 
-		//		// GIにデノイズをかける。
-		//		Denoiser::Ins()->Denoise(giOutput.GetUAVIndex(), 100, 5);
+				// GIにデノイズをかける。
+				Denoiser::Ins()->Denoise(giOutput.GetUAVIndex(), 100, 5);
 
-		//	}
+			}
 
-		//}
+		}
 
-		//// デノイズをかけたライティング情報と色情報を混ぜる。
+		// デノイズをかけたライティング情報と色情報を混ぜる。
 		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		//Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), giOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput.GetUAVIndex(), aoOutput.GetUAVIndex(), lightOutput.GetUAVIndex(), giOutput.GetUAVIndex(), denoiseMixTextureOutput.GetUAVIndex());
 		denoiseMixTextureOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
@@ -231,7 +231,7 @@ void DevDXR::Draw() {
 
 		// デノイズされた通常の描画
 		colorOutput.SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), colorOutput.GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput.GetRaytracingOutput().Get());
 
 	}
 

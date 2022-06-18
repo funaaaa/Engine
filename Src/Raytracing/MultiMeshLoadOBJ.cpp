@@ -221,7 +221,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	blasID.emplace_back(buff);
 
 	// 保存されているBLASIDでインスタンスを生成する。
-	int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 2);
+	int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 0);
 	InstanceID.emplace_back(idBuff);
 
 	// ファイルを閉じる。

@@ -443,7 +443,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         //payload.color = texColor;
         payload.color = AtmosphericScattering(vtx);
         payload.aoLuminance = float3(1, 1, 1);
-        payload.giColor = float3(1, 1, 1);
+        payload.giColor = float3(0, 0, 0);
         return;
     }
     
