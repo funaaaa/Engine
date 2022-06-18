@@ -1,9 +1,11 @@
 #pragma once
 #include "Singleton.h"
+
 #pragma warning(push)
 #pragma warning(disable:4267)
 #include <memory>
 #pragma warning(pop)
+
 #include <vector>
 #include <string>
 #include <array>

@@ -5,9 +5,17 @@
 ・Windowsからのメッセージ処理
 */
 #include <Windows.h>
+
+#pragma warning(push)
+#pragma warning(disable:4820)
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_dx12.h"
 #include "imgui/imgui_impl_win32.h"
 
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND,UINT,WPARAM,LPARAM);
+
+#pragma warning(pop)
 
 // ウィンドウサイズ
 const int window_width = 1280;  //横幅
