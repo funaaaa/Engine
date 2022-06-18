@@ -31,7 +31,7 @@ public:
 		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
 		descHeapDesc.NumDescriptors = CBV_SRV_UAV_COUNT;
 		// ディスクリプタヒープの生成。
-		HRESULT resultBuff = DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+		DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descriptorHeap));
 
 		// 先頭を初期化
 		head = 0;

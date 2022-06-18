@@ -62,7 +62,7 @@ public:
 	void LoadObj(std::string DirectoryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing);
 
 	//objファイルの読み込み時にマテリアルをロードするための関数
-	void LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData, ObjectData& ObjectData);
+	void LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData);
 
 	//法線の平均を求める関数
 	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);

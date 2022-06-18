@@ -9,7 +9,7 @@ TextureManager::TextureManager() {
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;		//シェーダーから見える
 	descHeapDesc.NumDescriptors = 512;									//SRV256個
 	//ディスクリプタヒープの生成
-	HRESULT result = DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescHeap));
+	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&srvDescHeap));
 }
 
 int TextureManager::LoadTexture(LPCWSTR fileName) {
@@ -44,7 +44,8 @@ int TextureManager::LoadTexture(LPCWSTR fileName) {
 
 	//テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
-	result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
+	CD3DX12_HEAP_PROPERTIES heapProp = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
+	result = DirectXBase::Ins()->dev->CreateCommittedResource(&heapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -125,7 +126,8 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 
 	//テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
-	result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
+	CD3DX12_HEAP_PROPERTIES texHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
+	result = DirectXBase::Ins()->dev->CreateCommittedResource(&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -174,8 +176,9 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 int TextureManager::CreateTexture(DirectX::XMFLOAT4 color)
 {
 	//同じ色のテクスチャがすでに生成済みかをチェックする
+	LPCWSTR selfTex = L"selfTexture";
 	for (int i = 0; i < texture.size(); ++i) {
-		if (texture.at(i).fileName == L"selfTexture" && texture.at(i).colorData.x == color.x && texture.at(i).colorData.y == color.y &&
+		if (texture.at(i).fileName == selfTex && texture.at(i).colorData.x == color.x && texture.at(i).colorData.y == color.y &&
 			texture.at(i).colorData.z == color.z && texture.at(i).colorData.w == color.w) {
 			//すでに生成してあるテクスチャなのでSRVヒープの番号を返す
 			return i;
@@ -206,7 +209,8 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 color)
 
 	//テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
-	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
+	CD3DX12_HEAP_PROPERTIES texHeapPropBuff = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
+	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(&texHeapPropBuff,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -283,8 +287,8 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 		0,
 		static_cast<UINT>(width),
 		static_cast<UINT>(height),
-		arraySize,
-		mipLevel,
+		static_cast<UINT8>(arraySize),
+		static_cast<UINT8>(mipLevel),
 		format,
 		1,
 		0,
@@ -310,7 +314,7 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 	//テクスチャバッファの生成
 	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
-	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
+	DirectXBase::Ins()->dev->CreateCommittedResource(
 		&prop,
 		D3D12_HEAP_FLAG_NONE,
 		&desc,

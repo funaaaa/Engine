@@ -24,8 +24,7 @@ public:
 	/*-- メンバ関数 --*/
 
 	// コンストラクタ
-	ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel);
-	ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel, const bool& isDXC);
+	ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel, const bool& isDXC = false);
 
 	// ロード処理
 	void LoadShader();

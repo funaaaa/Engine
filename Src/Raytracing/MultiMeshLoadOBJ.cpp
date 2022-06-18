@@ -423,7 +423,7 @@ std::wstring MultiMeshLoadOBJ::StringToWString(std::string oString)
 	std::wstring wstr;
 	wstr.resize(num1);
 
-	auto num2 = MultiByteToWideChar(
+	MultiByteToWideChar(
 		CP_ACP, MB_PRECOMPOSED | MB_ERR_INVALID_CHARS,
 		oString.c_str(), -1, &wstr[0], num1);
 

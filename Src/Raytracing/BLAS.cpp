@@ -76,11 +76,13 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
 
 	// 頂点インデックスデータでディスクリプタを生成。
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
@@ -170,11 +172,13 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
 
 	// 頂点インデックスデータでディスクリプタを生成。
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
@@ -263,11 +267,13 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
 
 	// 頂点インデックスデータでディスクリプタを生成。
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, DescriptorHeapMgr::Ins()->GetDescriptorHeap(), DescriptorHeapMgr::Ins()->GetHead());
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
@@ -449,12 +455,14 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 			if (textureHandle.size() <= index) {
 
 				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
+				WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
 			else {
 
-				Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
+				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
 		}
@@ -491,12 +499,14 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 			if (textureHandle.size() <= index) {
 
 				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
+				WriteGPUDescriptor(Dst, &texHandle);
 
 			}
 			else {
-
-				Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+				
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
+				Dst += WriteGPUDescriptor(Dst, &texHandle);
 
 			}
 		}
@@ -536,11 +546,14 @@ uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, Micros
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
 		// デバッグ用でテクスチャを書き込む。
-		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
-		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+		CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
+		WriteGPUDescriptor(Dst, &texHandle);
+		texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
+		WriteGPUDescriptor(Dst, &texHandle);
 
 		// 指定されたUAVを書き込む。
-		WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(SpecifyIndex));
+		CD3DX12_GPU_DESCRIPTOR_HANDLE uavHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(SpecifyIndex);
+		WriteGPUDescriptor(Dst, &uavHandle);
 
 		Dst = entryBegin + recordSize;
 		return Dst;
@@ -571,12 +584,14 @@ uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, Micros
 			if (textureHandle.size() <= index) {
 
 				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]));
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
+				WriteGPUDescriptor(Dst, &texHandle);
 
 			}
 			else {
 
-				Dst += WriteGPUDescriptor(Dst, &DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]));
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
+				Dst += WriteGPUDescriptor(Dst, &texHandle);
 
 			}
 		}
@@ -761,7 +776,7 @@ void BLAS::CreateAccelerationStructure()
 	DirectXBase::Ins()->cmdList->Close();
 
 	// BLASを構築。
-	ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
+	//ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
 	// 構築用関数を呼ぶ。
 	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };
 	DirectXBase::Ins()->cmdQueue->ExecuteCommandLists(1, commandLists);

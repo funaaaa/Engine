@@ -3,13 +3,13 @@
 #include "DirectXBase.h"
 
 
-void StructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
+void StructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 {
-	this->sizeOfElement = sizeOfElement;
-	this->numElement = numElement;
+	this->sizeOfElement = SizeOfElement;
+	this->numElement = NumElement;
 	auto device = DirectXBase::Ins()->dev;
 
-	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(sizeOfElement * numElement);
+	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(SizeOfElement * NumElement);
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	int bufferNo = 0;
 
@@ -20,7 +20,7 @@ void StructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
 	prop.Type = D3D12_HEAP_TYPE_CUSTOM;
 	prop.VisibleNodeMask = 1;
 	//	for (auto& buffer : buffersOnGPU) {
-	auto hr = device->CreateCommittedResource(
+	device->CreateCommittedResource(
 			&prop,
 			D3D12_HEAP_FLAG_NONE,
 			&desc,
@@ -34,8 +34,8 @@ void StructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
 	//マップ、アンマップのオーバーヘッドを軽減するためにはこのインスタンスが生きている間は行わない。
 		CD3DX12_RANGE readRange(0, 0);        //     intend to read from this resource on the CPU.
 		buffersOnGPU->Map(0, &readRange, reinterpret_cast<void**>(&buffersOnCPU));
-	if (initData != nullptr) {
-		memcpy(buffersOnCPU, initData, sizeOfElement * numElement);
+	if (InitData != nullptr) {
+		memcpy(buffersOnCPU, InitData, SizeOfElement * NumElement);
 		//buffersOnGPU->Unmap(0, &readRange);
 	}
 
@@ -43,17 +43,17 @@ void StructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
 	//	}
 	isInited = true;
 }
-void StructuredBuffer::Update(void* data)
+void StructuredBuffer::Update(void* Data)
 {
-	if (data == nullptr) return;
-	memcpy(buffersOnCPU, data, numElement * sizeOfElement);
+	if (Data == nullptr) return;
+	memcpy(buffersOnCPU, Data, numElement * sizeOfElement);
 }
 ID3D12Resource* StructuredBuffer::GetD3DResoruce()
 {
-	auto backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+	DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 	return buffersOnGPU;
 }
-void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, int bufferNo)
+void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle)
 {
 	if (!isInited) {
 		return;
@@ -72,6 +72,6 @@ void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE desc
 	device->CreateShaderResourceView(
 		buffersOnGPU,
 		&srvDesc,
-		descriptorHandle
+		DescriptorHandle
 	);
 }

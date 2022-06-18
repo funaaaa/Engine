@@ -14,19 +14,19 @@ public:
 	/// <param name="sizeOfElement">エレメントのサイズ。</param>
 	/// <param name="numElement">エレメントの数。</param>
 	/// <param name="initData">初期データ。</param>
-	void Init(int sizeOfElement, int numElement, void* initData);
+	void Init(int SizeOfElement, int NumElement, void* InitData);
 
 	/// <summary>
 	/// SRVに登録。
 	/// </summary>
 	/// <param name="descriptorHandle"></param>
-	void RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, int bufferNo);
+	void RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle);
 
 	/// <summary>
 	/// 構造化バッファの内容を更新。
 	/// </summary>
 	/// <param name="data"></param>
-	void Update(void* data);
+	void Update(void* Data);
 
 	/// <summary>
 	/// 初期化されているか判定。

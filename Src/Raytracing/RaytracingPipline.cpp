@@ -150,7 +150,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	pipelineConfig->Config(ReflectionCount);
 
 	// ¶¬‚·‚éB
-	HRESULT resultBuff = DirectXBase::Ins()->dev->CreateStateObject(
+	DirectXBase::Ins()->dev->CreateStateObject(
 		subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
 	);
 

@@ -1,12 +1,12 @@
 #include "RWStructuredBuffer.h"
 #include "DirectXBase.h"
 
-void RWStructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
+void RWStructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 {
-	this->sizeOfElement = sizeOfElement;
-	this->numElement = numElement;
+	this->sizeOfElement = SizeOfElement;
+	this->numElement = NumElement;
 	auto device = DirectXBase::Ins()->dev;
-	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(sizeOfElement * numElement);
+	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(SizeOfElement * NumElement);
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 	int bufferNo = 0;
 
@@ -32,8 +32,8 @@ void RWStructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
 			CD3DX12_RANGE readRange(0, 0);        //     intend to read from this resource on the CPU.
 			buffersOnGPU->Map(0, &readRange, reinterpret_cast<void**>(&buffersOnCPU));
 		}
-		if (initData != nullptr) {
-			memcpy(buffersOnCPU, initData, sizeOfElement * numElement);
+		if (InitData != nullptr) {
+			memcpy(buffersOnCPU, InitData, SizeOfElement * NumElement);
 		}
 		bufferNo++;
 	//}
@@ -42,7 +42,7 @@ void RWStructuredBuffer::Init(int sizeOfElement, int numElement, void* initData)
 
 ID3D12Resource* RWStructuredBuffer::GetD3DResoruce()
 {
-	auto backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+	DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 	return buffersOnGPU;
 }
 
@@ -52,11 +52,11 @@ ID3D12Resource* RWStructuredBuffer::GetD3DResoruce()
 /// <returns></returns>
 void* RWStructuredBuffer::GetResourceOnCPU()
 {
-	auto backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+	DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 	return buffersOnCPU;
 }
 
-void RWStructuredBuffer::RegistUnorderAccessView(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, int bufferNo)
+void RWStructuredBuffer::RegistUnorderAccessView(D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle)
 {
 	if (!isInited) {
 		return;
@@ -72,11 +72,11 @@ void RWStructuredBuffer::RegistUnorderAccessView(D3D12_CPU_DESCRIPTOR_HANDLE des
 		buffersOnGPU,
 		nullptr,
 		&desc,
-		descriptorHandle
+		DescriptorHandle
 	);
 }
 
-void RWStructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, int bufferNo)
+void RWStructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle)
 {
 	if (!isInited) {
 		return;
@@ -95,6 +95,6 @@ void RWStructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE de
 	device->CreateShaderResourceView(
 		buffersOnGPU,
 		&srvDesc,
-		descriptorHandle
+		DescriptorHandle
 	);
 }

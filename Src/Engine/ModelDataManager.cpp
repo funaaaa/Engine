@@ -108,14 +108,14 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 					vert.normal = normal[indexNormal - 1];
 					vert.uv = uv[indexTexcoord - 1];
 					//モデルデータに追加
-					modelData.at(static_cast<int>(modelData.size()) - 1).vertex.push_back(vert);
-					modelData.at(static_cast<int>(modelData.size()) - 1).index.push_back(static_cast<int>(modelData.at(static_cast<int>(modelData.size()) - 1).index.size()));
+					modelData[(static_cast<int>(modelData.size()) - 1)].vertex.push_back(vert);
+					modelData[(static_cast<int>(modelData.size()) - 1)].index.push_back(static_cast<unsigned short>(modelData[(static_cast<int>(modelData.size())) - 1].index.size()));
 					//proSpriteにも追加
 					ObjectData.vertex.push_back(vert);
 					ObjectData.index.push_back(static_cast<int>(ObjectData.index.size()));
 					//isSmoothingがtrueなら頂点情報を追加する
 					if (IsSmoothing == true) {
-						smoothData[indexPosition].push_back(static_cast<int>(ObjectData.vertex.size()) - 1);
+						smoothData[indexPosition].push_back(static_cast<unsigned short>(ObjectData.vertex.size()) - 1);
 					}
 				}
 			}
@@ -125,7 +125,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				std::string materialFileName;
 				lineStream >> materialFileName;
 				//マテリアルの読み込み
-				LoadObjMaterial(DirectryPath + materialFileName, modelData.at(modelData.size() - 1), ObjectData);
+				LoadObjMaterial(DirectryPath + materialFileName, modelData.at(modelData.size() - 1));
 			}
 		}
 		//ファイルを閉じる
@@ -290,13 +290,13 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 //	objectBuffer.constBuffDataB1.specular = modelData.at(dataNumber).material.specular;
 //}
 
-void ModelDataManager::LoadObjMaterial(const std::string& materialFileName, ModelData& modelData, ObjectData& objectBuffer)
+void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData)
 {
 
 	//ファイルストリーム
 	std::ifstream file;
 	//マテリアルファイルを開く
-	file.open(materialFileName);
+	file.open(MaterialFileName);
 	//ファイルオープン失敗をチェック
 	if (file.fail()) {
 		assert(0);
@@ -316,7 +316,7 @@ void ModelDataManager::LoadObjMaterial(const std::string& materialFileName, Mode
 		//先頭文字列がnewmtlならマテリアル名
 		if (key == "newmtl") {
 			//マテリアル名の読み込み
-			lineStream >> modelData.material.name;
+			lineStream >> ModelData.material.name;
 		}
 		////先頭文字列がKaならアンビエント色
 		//if (key == "Ka") {
@@ -348,23 +348,23 @@ void ModelDataManager::LoadObjMaterial(const std::string& materialFileName, Mode
 	}
 }
 
-void ModelDataManager::CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& smoothData, ObjectData& objectBuffer, ModelData& modelData)
+void ModelDataManager::CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectData, ModelData& ModelData)
 {
-	auto itr = smoothData.begin();
-	for (; itr != smoothData.end(); ++itr) {
+	auto itr = SmoothData.begin();
+	for (; itr != SmoothData.end(); ++itr) {
 		// 各面用の共通頂点コレクション
 		std::vector<unsigned short>& v = itr->second;
 		// 全頂点の法線を平均する
 		Vec3 normal = {};
 		for (unsigned short index : v) {
-			normal += objectBuffer.vertex[index].normal;
+			normal += ObjectData.vertex[index].normal;
 		}
 		normal = normal / (float)v.size();
 		normal.Normalize();
 
 		for (unsigned short index : v) {
-			objectBuffer.vertex[index].normal = normal;
-			modelData.vertex[index].normal = normal;
+			ObjectData.vertex[index].normal = normal;
+			ModelData.vertex[index].normal = normal;
 		}
 	}
 }

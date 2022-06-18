@@ -132,7 +132,7 @@ FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 	// ƒ{[ƒ“”z—ñ
 	std::vector<Bone>& bones = fbxModelData[Index].bones;
 
-	SkinData returnData;
+	SkinData returnData = {};
 
 	const int BONE_SIZE = static_cast<int>(bones.size());
 	for (int index = 0; index < BONE_SIZE; ++index) {
@@ -457,9 +457,9 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 
 }
 
-void FbxLoader::ParseMeshTexture(FbxModel& Model, const std::string& filePath)
-{
-}
+//void FbxLoader::ParseMeshTexture(FbxModel& Model, const std::string& filePath)
+//{
+//}
 
 void FbxLoader::ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh)
 {

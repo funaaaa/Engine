@@ -41,16 +41,18 @@ struct Bone {
 struct Node {
 	// 名前
 	std::string name;
+	// パディング
+	DirectX::XMFLOAT2 pad;
+	// ローカル変換行列
+	DirectX::XMMATRIX transform;
+	// グローバル変換行列
+	DirectX::XMMATRIX globalTransform;
 	// ローカルスケール
 	DirectX::XMVECTOR scaling = { 1.0f,1.0f,1.0f,0.0f };
 	// ローカル回転角
 	DirectX::XMVECTOR rotation = { 0.0f,0.0f,0.0f,0.0f };
 	// ローカル移動
 	DirectX::XMVECTOR translation = { 0.0f,0.0f,0.0f,1.0f };
-	// ローカル変換行列
-	DirectX::XMMATRIX transform;
-	// グローバル変換行列
-	DirectX::XMMATRIX globalTransform;
 	// 親ノード
 	Node* parent;
 };
@@ -206,7 +208,7 @@ private:
 	// マテリアル情報読み取り
 	void ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode);
 	// テクスチャ情報読み取り
-	void ParseMeshTexture(FbxModel& Model, const std::string& FilePath);
+	//void ParseMeshTexture(FbxModel& Model, const std::string& FilePath);
 	// スキニング情報読み取り
 	void ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh);
 

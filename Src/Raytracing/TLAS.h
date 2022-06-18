@@ -21,7 +21,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// TLASの生成
-	void GenerateTLAS(const wchar_t* name = nullptr);
+	void GenerateTLAS();
 
 	// アクセッタ
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetTLASBuffer() { return tlasBuffer; }

@@ -3,7 +3,7 @@
 #include "DirectXBase.h"
 
 //XAudio2VoiceCallbackのインスタンスをグローバル変数としてインスタンスを作る
-XAudio2VoiceCallback voiceCallback{};
+//XAudio2VoiceCallback voiceCallback{};
 
 void SoundManager::SettingSoundManager()
 {

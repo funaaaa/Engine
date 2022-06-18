@@ -75,7 +75,7 @@ void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& Threa
 	}
 
 	// バックバッファのフレームを取得。
-	auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+	//auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 
 	// CBVをセット。
 	counter = 0;

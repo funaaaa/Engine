@@ -6,22 +6,6 @@
 #include <iostream>
 #include <sstream>
 
-ShaderData::ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel)
-{
-
-	/*-- コンストラクタ --*/
-
-	// 引数を保存。
-	this->shaderPath = shaderPath;
-	this->entryPoint = entryPoint;
-	this->shaderModel = shaderModel;
-	this->shaderBlob = nullptr;
-
-	//シェーダーをロード。
-	LoadShader();
-
-}
-
 ShaderData::ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel, const bool& isDXC)
 {
 
@@ -33,8 +17,18 @@ ShaderData::ShaderData(const std::string& shaderPath, const std::string& entryPo
 	this->shaderModel = shaderModel;
 	this->shaderBlob = nullptr;
 
-	//シェーダーをロード。
-	LoadShaderDXC();
+	if (isDXC) {
+
+		//シェーダーをロード。
+		LoadShaderDXC();
+
+	}
+	else {
+
+		//シェーダーをロード。
+		LoadShader();
+
+	}
 
 }
 

@@ -1,7 +1,7 @@
 #include "PorygonInstance.h"
 #include "DirectXBase.h"
 
-D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& blassBuffer, const UINT& hitGroupIndex, const UINT& instanceID)
+D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
@@ -20,22 +20,22 @@ D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microso
 		worldMat);
 
 	// インスタンスの詳細を設定。
-	instanceDesc.InstanceID = instanceID;
+	instanceDesc.InstanceID = InstanceID;
 	instanceDesc.InstanceMask = 0xFF;
-	instanceDesc.InstanceContributionToHitGroupIndex = hitGroupIndex;
+	instanceDesc.InstanceContributionToHitGroupIndex = HitGroupIndex;
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc.AccelerationStructure = blassBuffer->GetGPUVirtualAddress();
+	instanceDesc.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
 
 	return instanceDesc;
 
 }
 
-void PorygonMeshInstance::AddTrans(const Vec3& pos)
+void PorygonMeshInstance::AddTrans(const Vec3& Pos)
 {
 
 	/*===== 移動関数 =====*/
 
-	transMat *= DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+	transMat *= DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
 
 }
 

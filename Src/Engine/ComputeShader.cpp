@@ -218,13 +218,13 @@ void ComputeShader::CommitDescHeap()
 	auto gpuHandle = descHeap->GetGPUDescriptorHandleForHeapStart();
 
 	//シェーダーリソースを登録する
-	inputSB->RegistShaderResourceView(cpuHandle, 0);
+	inputSB->RegistShaderResourceView(cpuHandle);
 
 	//次に進める。
 	cpuHandle.ptr += DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	//続いてUAV。
-	outputSB->RegistUnorderAccessView(cpuHandle, 0);
+	outputSB->RegistUnorderAccessView(cpuHandle);
 
 	//次に進める。
 	cpuHandle.ptr += DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);

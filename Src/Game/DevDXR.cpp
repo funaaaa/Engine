@@ -28,7 +28,7 @@ void DevDXR::Init() {
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
 	// TLASを生成。
-	tlas.GenerateTLAS(L"TlasDescriptorHeap");
+	tlas.GenerateTLAS();
 
 	// レイトレ出力用クラスをセット。
 	aoOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -107,10 +107,10 @@ void DevDXR::Update() {
 	//if (isMoveLight) {
 
 		// 点光源の位置を更新。
-		PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
-		PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
+	PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
 
-		tlas.Update();
+	tlas.Update();
 
 	//}
 
@@ -166,7 +166,8 @@ void DevDXR::Draw() {
 	DirectXBase::Ins()->cmdList->SetPipelineState1(setPipline.GetStateObject().Get());
 
 	// レイトレーシングを実行。
-	DirectXBase::Ins()->cmdList->DispatchRays(&setPipline.GetDispatchRayDesc());
+	D3D12_DISPATCH_RAYS_DESC rayDesc = setPipline.GetDispatchRayDesc();
+	DirectXBase::Ins()->cmdList->DispatchRays(&rayDesc);
 
 	// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
 	if (debugPiplineID == DENOISE_AO_PIPLINE) {
@@ -256,7 +257,7 @@ void DevDXR::Draw() {
 
 }
 
-void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
+void DevDXR::Input(KariConstBufferData& ConstBufferData, bool& IsMoveLight, DEGU_PIPLINE_ID& DebugPiplineID) {
 
 	bool isMove = false;
 
@@ -303,51 +304,53 @@ void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU
 		isMove = true;
 	}
 
-	InputImGUI(constBufferData, isMoveLight, debugPiplineID, isMove);
+	InputImGUI(ConstBufferData, IsMoveLight, DebugPiplineID, isMove);
 
 }
 
-void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID, bool& isMove)
+void DevDXR::InputImGUI(KariConstBufferData& ConstBufferData, bool& IsMoveLight, DEGU_PIPLINE_ID& DebugPiplineID, bool& IsMove)
 {
 
 	// DirLightについて
 	if (ImGui::TreeNode("DirLight")) {
 
 		// ライトを表示するかどうかのフラグを更新。
-		bool isActive = static_cast<bool>(constBufferData.dirLight.isActive);
+		bool isActive = static_cast<bool>(ConstBufferData.dirLight.isActive);
 		ImGui::Checkbox("IsActive", &isActive);
-		if (isActive != static_cast<bool>(constBufferData.dirLight.isActive)) isMove = true;
-		constBufferData.dirLight.isActive = static_cast<int>(isActive);
+		if (isActive != static_cast<bool>(ConstBufferData.dirLight.isActive)) IsMove = true;
+		ConstBufferData.dirLight.isActive = static_cast<int>(isActive);
 
 		// 値を保存する。
-		float dirX = constBufferData.dirLight.lihgtDir.x;
-		float dirY = constBufferData.dirLight.lihgtDir.y;
-		float dirZ = constBufferData.dirLight.lihgtDir.z;
-		ImGui::SliderFloat("DirLightX", &constBufferData.dirLight.lihgtDir.x, -1.0f, 1.0f);
-		ImGui::SliderFloat("DirLightY", &constBufferData.dirLight.lihgtDir.y, -1.0f, 1.0f);
-		ImGui::SliderFloat("DirLightZ", &constBufferData.dirLight.lihgtDir.z, -1.0f, 1.0f);
+		float dirX = ConstBufferData.dirLight.lihgtDir.x;
+		float dirY = ConstBufferData.dirLight.lihgtDir.y;
+		float dirZ = ConstBufferData.dirLight.lihgtDir.z;
+		ImGui::SliderFloat("DirLightX", &ConstBufferData.dirLight.lihgtDir.x, -1.0f, 1.0f);
+		ImGui::SliderFloat("DirLightY", &ConstBufferData.dirLight.lihgtDir.y, -1.0f, 1.0f);
+		ImGui::SliderFloat("DirLightZ", &ConstBufferData.dirLight.lihgtDir.z, -1.0f, 1.0f);
 
 		// 変わっていたら
-		if (dirX != constBufferData.dirLight.lihgtDir.x || dirY != constBufferData.dirLight.lihgtDir.y || dirZ != constBufferData.dirLight.lihgtDir.z) {
+		if (dirX != ConstBufferData.dirLight.lihgtDir.x || dirY != ConstBufferData.dirLight.lihgtDir.y || dirZ != ConstBufferData.dirLight.lihgtDir.z) {
 
-			isMove = true;
-			isMoveLight = true;
+			IsMove = true;
+			IsMoveLight = true;
 
 		}
+
+		DebugPiplineID;
 
 		// 正規化する。
-		constBufferData.dirLight.lihgtDir.Normalize();
+		ConstBufferData.dirLight.lihgtDir.Normalize();
 
 		// ライトの色を設定。
-		std::array<float, 3> lightColor = { constBufferData.dirLight.lightColor.x,constBufferData.dirLight.lightColor.y,constBufferData.dirLight.lightColor.z };
+		std::array<float, 3> lightColor = { ConstBufferData.dirLight.lightColor.x,ConstBufferData.dirLight.lightColor.y,ConstBufferData.dirLight.lightColor.z };
 		ImGui::ColorPicker3("LightColor", lightColor.data());
 		// 色が変わっていたら。
-		if (lightColor[0] != constBufferData.dirLight.lightColor.x || lightColor[1] != constBufferData.dirLight.lightColor.y || lightColor[2] != constBufferData.dirLight.lightColor.z) {
-			isMove = true;
+		if (lightColor[0] != ConstBufferData.dirLight.lightColor.x || lightColor[1] != ConstBufferData.dirLight.lightColor.y || lightColor[2] != ConstBufferData.dirLight.lightColor.z) {
+			IsMove = true;
 		}
-		constBufferData.dirLight.lightColor.x = lightColor[0];
-		constBufferData.dirLight.lightColor.y = lightColor[1];
-		constBufferData.dirLight.lightColor.z = lightColor[2];
+		ConstBufferData.dirLight.lightColor.x = lightColor[0];
+		ConstBufferData.dirLight.lightColor.y = lightColor[1];
+		ConstBufferData.dirLight.lightColor.z = lightColor[2];
 
 		ImGui::TreePop();
 
@@ -357,110 +360,110 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 	if (ImGui::TreeNode("PointLight")) {
 
 		// ライトを表示するかどうかのフラグを更新。
-		bool isActive = static_cast<bool>(constBufferData.pointLight.isActive);
+		bool isActive = static_cast<bool>(ConstBufferData.pointLight.isActive);
 		ImGui::Checkbox("IsActive", &isActive);
-		if (isActive != static_cast<bool>(constBufferData.pointLight.isActive)) isMove = true;
-		constBufferData.pointLight.isActive = static_cast<int>(isActive);
+		if (isActive != static_cast<bool>(ConstBufferData.pointLight.isActive)) IsMove = true;
+		ConstBufferData.pointLight.isActive = static_cast<int>(isActive);
 
 		// 値を保存する。
-		float dirX = constBufferData.pointLight.lightPos.x;
-		float dirY = constBufferData.pointLight.lightPos.y;
-		float dirZ = constBufferData.pointLight.lightPos.z;
-		float lightSize = constBufferData.pointLight.lightSize;
-		float aoSampleCount = static_cast<float>(constBufferData.aoSampleCount);
-		float pointLightPower = constBufferData.pointLight.lightPower;
+		float dirX = ConstBufferData.pointLight.lightPos.x;
+		float dirY = ConstBufferData.pointLight.lightPos.y;
+		float dirZ = ConstBufferData.pointLight.lightPos.z;
+		float lightSize = ConstBufferData.pointLight.lightSize;
+		float aoSampleCount = static_cast<float>(ConstBufferData.aoSampleCount);
+		float pointLightPower = ConstBufferData.pointLight.lightPower;
 		float MOVE_LENGTH = 1500.0f;
-		ImGui::SliderFloat("PointLightX", &constBufferData.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
-		ImGui::SliderFloat("PointLightY", &constBufferData.pointLight.lightPos.y, 0.0f, 1000.0f);
-		ImGui::SliderFloat("PointLightZ", &constBufferData.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
-		ImGui::SliderFloat("PointLightRadius", &constBufferData.pointLight.lightSize, 1.0f, 50.0f);
-		ImGui::SliderFloat("PointLightPower", &constBufferData.pointLight.lightPower, 300.0f, 1000.0f);
+		ImGui::SliderFloat("PointLightX", &ConstBufferData.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
+		ImGui::SliderFloat("PointLightY", &ConstBufferData.pointLight.lightPos.y, 0.0f, 1000.0f);
+		ImGui::SliderFloat("PointLightZ", &ConstBufferData.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
+		ImGui::SliderFloat("PointLightRadius", &ConstBufferData.pointLight.lightSize, 1.0f, 50.0f);
+		ImGui::SliderFloat("PointLightPower", &ConstBufferData.pointLight.lightPower, 300.0f, 1000.0f);
 		ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
-		constBufferData.aoSampleCount = static_cast<int>(aoSampleCount);
+		ConstBufferData.aoSampleCount = static_cast<int>(aoSampleCount);
 
 		// 変わっていたら
-		if (dirX != constBufferData.pointLight.lightPos.x || dirY != constBufferData.pointLight.lightPos.y || dirZ != constBufferData.pointLight.lightPos.z || lightSize != constBufferData.pointLight.lightSize || pointLightPower != constBufferData.pointLight.lightPower) {
+		if (dirX != ConstBufferData.pointLight.lightPos.x || dirY != ConstBufferData.pointLight.lightPos.y || dirZ != ConstBufferData.pointLight.lightPos.z || lightSize != ConstBufferData.pointLight.lightSize || pointLightPower != ConstBufferData.pointLight.lightPower) {
 
-			isMove = true;
-			isMoveLight = true;
+			IsMove = true;
+			IsMoveLight = true;
 
 		}
 
 		// ライトの色を設定。
-		std::array<float, 3> lightColor = { constBufferData.pointLight.lightColor.x,constBufferData.pointLight.lightColor.y,constBufferData.pointLight.lightColor.z };
+		std::array<float, 3> lightColor = { ConstBufferData.pointLight.lightColor.x,ConstBufferData.pointLight.lightColor.y,ConstBufferData.pointLight.lightColor.z };
 		ImGui::ColorPicker3("LightColor", lightColor.data());
 		// 色が変わっていたら。
-		if (lightColor[0] != constBufferData.pointLight.lightColor.x || lightColor[1] != constBufferData.pointLight.lightColor.y || lightColor[2] != constBufferData.pointLight.lightColor.z) {
-			isMove = true;
+		if (lightColor[0] != ConstBufferData.pointLight.lightColor.x || lightColor[1] != ConstBufferData.pointLight.lightColor.y || lightColor[2] != ConstBufferData.pointLight.lightColor.z) {
+			IsMove = true;
 		}
-		constBufferData.pointLight.lightColor.x = lightColor[0];
-		constBufferData.pointLight.lightColor.y = lightColor[1];
-		constBufferData.pointLight.lightColor.z = lightColor[2];
+		ConstBufferData.pointLight.lightColor.x = lightColor[0];
+		ConstBufferData.pointLight.lightColor.y = lightColor[1];
+		ConstBufferData.pointLight.lightColor.z = lightColor[2];
 
 		ImGui::TreePop();
 
 	}
 
 
-	if (isMove) {
-		constBufferData.counter = 0;
+	if (IsMove) {
+		ConstBufferData.counter = 0;
 	}
 	else {
-		++constBufferData.counter;
+		++ConstBufferData.counter;
 	}
 
 	// 階層構造にする。
 	if (ImGui::TreeNode("Debug")) {
 
 		// メッシュを表示する。
-		bool isMesh = constBufferData.isMeshScene;
+		bool isMesh = ConstBufferData.isMeshScene;
 		bool prevIsMesh = isMesh;
 		ImGui::Checkbox("Mesh Scene", &isMesh);
-		constBufferData.isMeshScene = isMesh;
+		ConstBufferData.isMeshScene = isMesh;
 		// 値が書き換えられていたら、サンプリングを初期化する。
 		if (isMesh != prevIsMesh) {
-			constBufferData.counter = 0;
+			ConstBufferData.counter = 0;
 		}
 
 		// 法線を表示する。
-		bool isNormal = constBufferData.isNormalScene;
+		bool isNormal = ConstBufferData.isNormalScene;
 		bool prevIsNormal = isNormal;
 		ImGui::Checkbox("Normal Scene", &isNormal);
-		constBufferData.isNormalScene = isNormal;
+		ConstBufferData.isNormalScene = isNormal;
 		// 値が書き換えられていたら、サンプリングを初期化する。
 		if (isNormal != prevIsNormal) {
-			constBufferData.counter = 0;
+			ConstBufferData.counter = 0;
 		}
 
 		// ライトがあたった面だけ表示するフラグを更新。
-		bool isLightHit = constBufferData.isLightHitScene;
+		bool isLightHit = ConstBufferData.isLightHitScene;
 		bool prevIsLightHit = isLightHit;
 		ImGui::Checkbox("LightHit Scene", &isLightHit);
-		constBufferData.isLightHitScene = isLightHit;
+		ConstBufferData.isLightHitScene = isLightHit;
 		// 値が書き換えられていたら、サンプリングを初期化する。
 		if (isLightHit != prevIsLightHit) {
-			constBufferData.counter = 0;
+			ConstBufferData.counter = 0;
 		}
 
 		// デバッグ用でノイズ画面を出すためのフラグをセット。
-		bool isNoise = constBufferData.isNoiseScene;
+		bool isNoise = ConstBufferData.isNoiseScene;
 		ImGui::Checkbox("Noise Scene", &isNoise);
-		constBufferData.isNoiseScene = isNoise;
+		ConstBufferData.isNoiseScene = isNoise;
 
 		// AOを行うかのフラグをセット。
-		bool isNoAO = constBufferData.isNoAO;
+		bool isNoAO = ConstBufferData.isNoAO;
 		ImGui::Checkbox("NoAO Scene", &isNoAO);
-		constBufferData.isNoAO = isNoAO;
+		ConstBufferData.isNoAO = isNoAO;
 
 		// GIを行うかのフラグをセット。
-		bool isNoGI = constBufferData.isNoGI;
+		bool isNoGI = ConstBufferData.isNoGI;
 		ImGui::Checkbox("NoGI Scene", &isNoGI);
-		constBufferData.isNoGI = isNoGI;
+		ConstBufferData.isNoGI = isNoGI;
 
 		// GIのみを描画するかのフラグをセット。
-		bool isGIOnlyScene = constBufferData.isGIOnlyScene;
+		bool isGIOnlyScene = ConstBufferData.isGIOnlyScene;
 		ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene);
-		constBufferData.isGIOnlyScene = isGIOnlyScene;
+		ConstBufferData.isGIOnlyScene = isGIOnlyScene;
 
 		// FPSを表示するかのフラグをセット。
 		ImGui::Checkbox("Display FPS", &isDisplayFPS);
@@ -474,28 +477,28 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 	if (ImGui::TreeNode("AS")) {
 
 		// 太陽光線の強さを設定する。
-		ImGui::SliderFloat("Sun Power", &constBufferData.AS.eSun, -10, 100);
+		ImGui::SliderFloat("Sun Power", &ConstBufferData.AS.eSun, -10, 100);
 
 		// レイリー散乱定数の値を設定する。
-		ImGui::SliderFloat("Rayleigh Scattering Power", &constBufferData.AS.kr, -1, 1);
+		ImGui::SliderFloat("Rayleigh Scattering Power", &ConstBufferData.AS.kr, -1, 1);
 
 		// ミー散乱定数の値を設定する。
-		ImGui::SliderFloat("Mie Scattering Power", &constBufferData.AS.km, -1, 1);
+		ImGui::SliderFloat("Mie Scattering Power", &ConstBufferData.AS.km, -1, 1);
 
 		// サンプリング数を設定する。
-		ImGui::SliderFloat("Sample Count", &constBufferData.AS.samples, 0, 10);
+		ImGui::SliderFloat("Sample Count", &ConstBufferData.AS.samples, 0, 10);
 
 		// 大気圏の一番上の高さ
-		ImGui::SliderFloat("Outer Radius", &constBufferData.AS.outerRadius, 0, 20000);
+		ImGui::SliderFloat("Outer Radius", &ConstBufferData.AS.outerRadius, 0, 20000);
 
 		// 地上の高さ
-		ImGui::SliderFloat("Inner Radius", &constBufferData.AS.innerRadius, 0, 20000);
+		ImGui::SliderFloat("Inner Radius", &ConstBufferData.AS.innerRadius, 0, 20000);
 
 		// 大気散乱を求める際に使用する定数
-		ImGui::SliderFloat("Scattering G", &constBufferData.AS.g, -1.0f, 1.0f);
+		ImGui::SliderFloat("Scattering G", &ConstBufferData.AS.g, -1.0f, 1.0f);
 
 		// 平均大気密度を求めるための高さ
-		ImGui::SliderFloat("Aveheight", &constBufferData.AS.aveHeight, 0.0f, 1.0f);
+		ImGui::SliderFloat("Aveheight", &ConstBufferData.AS.aveHeight, 0.0f, 1.0f);
 
 		ImGui::TreePop();
 

@@ -2,7 +2,7 @@
 #include "PorygonInstanceRegister.h"
 #include "DescriptorHeapMgr.h"
 
-void TLAS::GenerateTLAS(const wchar_t* name)
+void TLAS::GenerateTLAS()
 {
 
 	/*===== TLAS生成処理 =====*/
@@ -254,7 +254,7 @@ void TLAS::CreateAccelerationStructure()
 	DirectXBase::Ins()->cmdList->Close();
 
 	// TLASを構築。
-	ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
+	//ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
 
 	// 構築用関数を呼ぶ。
 	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };

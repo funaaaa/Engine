@@ -13,21 +13,21 @@ public:
 	/// <param name="sizeOfElement">エレメントのサイズ。</param>
 	/// <param name="numElement">エレメントの数。</param>
 	/// <param name="initData">初期データ。</param>
-	void Init(int sizeOfElement, int numElement, void* initData);
+	void Init(int SizeOfElement, int NumElement, void* InitData);
 
 	/// <summary>
 	/// UAVに登録。
 	/// </summary>
 	/// <param name=""></param>
 	/// <param name="bufferNo"></param>
-	void RegistUnorderAccessView(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, int bufferNo);
+	void RegistUnorderAccessView(D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle);
 
 	/// <summary>
 	/// SRVに登録。
 	/// </summary>
 	/// <param name="descriptorHandle"></param>
 	/// <param name="bufferNo"></param>
-	void RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle, int bufferNo);
+	void RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle);
 
 	/// <summary>
 	/// 初期化されているか判定。
