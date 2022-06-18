@@ -9,7 +9,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	vector<ComPtr<ID3D12Resource>> buffer;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> buffer;
 	int descHeapIndex;
 
 
@@ -27,13 +27,13 @@ public:
 	void Write(UINT bufferIndex, const void* data, UINT size);
 
 	// アクセッタ
-	ComPtr<ID3D12Resource> GetBuffer(UINT bufferIndex) const { return buffer[bufferIndex]; }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetBuffer(UINT bufferIndex) const { return buffer[bufferIndex]; }
 
 
 private:
 
 	// バッファ全般を生成する処理
-	ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
 
 	// アラインメント用
 	inline UINT RoundUp(size_t size, UINT align) { return UINT(size + align - 1) & ~(align - 1); }

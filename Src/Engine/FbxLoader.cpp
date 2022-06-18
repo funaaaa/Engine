@@ -138,7 +138,7 @@ FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 	for (int index = 0; index < BONE_SIZE; ++index) {
 
 		// 今の姿勢行列
-		XMMATRIX matCurrentPose;
+		DirectX::XMMATRIX matCurrentPose;
 
 		// 今の姿勢行列を取得。
 		FbxAMatrix fbxCurrentPose = bones[index].fbxCluster->GetLink()->EvaluateGlobalTransform(fbxModelData[Index].currentTime);
@@ -202,18 +202,18 @@ void FbxLoader::ParseNodeRecursive(FbxModel& Model, FbxNode* InputFbxNode, Node*
 	node.translation = { (float)translation[0], (float)translation[1], (float)translation[2], 1.0f };
 
 	// 回転角をDegree(度)からラジアンに変換
-	node.rotation.m128_f32[0] = XMConvertToRadians(node.rotation.m128_f32[0]);
-	node.rotation.m128_f32[1] = XMConvertToRadians(node.rotation.m128_f32[1]);
-	node.rotation.m128_f32[2] = XMConvertToRadians(node.rotation.m128_f32[2]);
+	node.rotation.m128_f32[0] = DirectX::XMConvertToRadians(node.rotation.m128_f32[0]);
+	node.rotation.m128_f32[1] = DirectX::XMConvertToRadians(node.rotation.m128_f32[1]);
+	node.rotation.m128_f32[2] = DirectX::XMConvertToRadians(node.rotation.m128_f32[2]);
 
 	// スケール、回転、平行移動行列の計算
-	XMMATRIX matScaling, matRotation, matTranslation;
-	matScaling = XMMatrixScalingFromVector(node.scaling);
-	matRotation = XMMatrixScalingFromVector(node.rotation);
-	matTranslation = XMMatrixScalingFromVector(node.translation);
+	DirectX::XMMATRIX matScaling, matRotation, matTranslation;
+	matScaling = DirectX::XMMatrixScalingFromVector(node.scaling);
+	matRotation = DirectX::XMMatrixScalingFromVector(node.rotation);
+	matTranslation = DirectX::XMMatrixScalingFromVector(node.translation);
 
 	// ローカル変形行列の計算
-	node.transform = XMMatrixIdentity();
+	node.transform = DirectX::XMMatrixIdentity();
 	node.transform *= matScaling;
 	node.transform *= matRotation;
 	node.transform *= matTranslation;
@@ -504,11 +504,11 @@ void FbxLoader::ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh)
 		fbxCluster->GetTransformLinkMatrix(fbxMat);
 
 		// XMMatrix型に変換する。
-		XMMATRIX initialPose;
+		DirectX::XMMATRIX initialPose;
 		ConvertMatrixFromFBX(initialPose, fbxMat);
 
 		// 初期姿勢行列の逆行列を得る。
-		bone.invInitialPose = XMMatrixInverse(nullptr, initialPose);
+		bone.invInitialPose = DirectX::XMMatrixInverse(nullptr, initialPose);
 
 	}
 

@@ -52,11 +52,11 @@ struct RaySpotLightData {
 
 struct KariConstBufferData {
 
-	XMMATRIX mtxView;			// ビュー行列。
-	XMMATRIX mtxProj;			// プロジェクション行列。
-	XMMATRIX mtxViewInv;		// ビュー逆行列。
-	XMMATRIX mtxProjInv;		// プロジェクション逆行列。
-	XMVECTOR ambientColor;		// 環境光。
+	DirectX::XMMATRIX mtxView;			// ビュー行列。
+	DirectX::XMMATRIX mtxProj;			// プロジェクション行列。
+	DirectX::XMMATRIX mtxViewInv;		// ビュー逆行列。
+	DirectX::XMMATRIX mtxProjInv;		// プロジェクション逆行列。
+	DirectX::XMVECTOR ambientColor;		// 環境光。
 	RayDirLightData dirLight;
 	RayPointLightData pointLight;
 	RaySpotLightData spotLight;
@@ -86,13 +86,13 @@ struct KariConstBufferData {
 		up = Camera::Ins()->up;
 
 		ambientColor = { 1,1,1,1 };
-		mtxProj = XMMatrixPerspectiveFovLH(
-			XMConvertToRadians(60.0f),				//画角(60度)
+		mtxProj = DirectX::XMMatrixPerspectiveFovLH(
+			DirectX::XMConvertToRadians(60.0f),				//画角(60度)
 			(float)window_width / window_height,	//アスペクト比
 			0.1f, 1000000.0f							//前端、奥端
 		);
 		mtxProjInv = XMMatrixInverse(nullptr, mtxProj);
-		mtxView = XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
+		mtxView = DirectX::XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 		mtxViewInv = XMMatrixInverse(nullptr, mtxView);
 		counter = 0;
 		isNoiseScene = false;

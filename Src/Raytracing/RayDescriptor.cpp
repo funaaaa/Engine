@@ -1,6 +1,6 @@
 #include "RayDescriptor.h"
 
-void RayDescriptor::CreateStructuredSRV(ComPtr<ID3D12Resource> resource, UINT numElements, UINT firstElement, UINT stride, ComPtr<ID3D12DescriptorHeap>& descHeap, UINT index)
+void RayDescriptor::CreateStructuredSRV(Microsoft::WRL::ComPtr<ID3D12Resource> resource, UINT numElements, UINT firstElement, UINT stride, Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& descHeap, UINT index)
 {
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};

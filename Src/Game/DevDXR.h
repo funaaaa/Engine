@@ -40,7 +40,7 @@ private:
 	DynamicConstBuffer constBuff;
 
 	// デノイズAO用のパイプラインを設定。
-	vector<RayPiplineShaderData> dAOuseShaders;
+	std::vector<RayPiplineShaderData> dAOuseShaders;
 	RaytracingPipline deAOPipline;
 
 	// SPONZAを読み込む。

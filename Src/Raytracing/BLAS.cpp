@@ -7,9 +7,7 @@
 #include "StructuredBuffer.h"
 #include "TextureManager.h"
 
-using namespace DirectX;
-
-void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -101,7 +99,7 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
+void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -208,7 +206,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
+void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -408,12 +406,12 @@ void BLAS::StopAnimation()
 }
 #include "HitGroupMgr.h"
 #include <assert.h>
-uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
+uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
 	/*===== シェーダーレコードを書き込む =====*/
 
-	ComPtr<ID3D12StateObjectProperties> rtsoProps;
+	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps;
 	StateObject.As(&rtsoProps);
 	auto entryBegin = Dst;
 	auto shader = GetHitGroupName();
@@ -510,11 +508,11 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12Sta
 
 }
 
-uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
+uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
 {
 	/*===== シェーダーレコードを書き込む =====*/
 
-	ComPtr<ID3D12StateObjectProperties> rtsoProps;
+	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps;
 	StateObject.As(&rtsoProps);
 	auto entryBegin = Dst;
 	auto shader = GetHitGroupName();
@@ -589,7 +587,7 @@ uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr
 	}
 }
 
-void BLAS::WriteToMemory(ComPtr<ID3D12Resource>& Resource, const void* pData, size_t DataSize)
+void BLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* pData, size_t DataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
@@ -612,7 +610,7 @@ void BLAS::WriteToMemory(ComPtr<ID3D12Resource>& Resource, const void* pData, si
 
 }
 
-ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
@@ -632,7 +630,7 @@ ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flag
 
 	// 実際にバッファを生成する。
 	HRESULT hr;
-	ComPtr<ID3D12Resource> resource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;

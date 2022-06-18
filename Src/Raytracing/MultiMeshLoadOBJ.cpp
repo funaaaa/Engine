@@ -128,9 +128,9 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				unsigned int indexTexcoord = 0;		// 受け皿
 
 				indexStream >> indexPosition;
-				indexStream.seekg(1, ios_base::cur);	// スラッシュを飛ばす。
+				indexStream.seekg(1, std::ios_base::cur);	// スラッシュを飛ばす。
 				indexStream >> indexTexcoord;
-				indexStream.seekg(1, ios_base::cur);	// スラッシュを飛ばす。
+				indexStream.seekg(1, std::ios_base::cur);	// スラッシュを飛ばす。
 				indexStream >> indexNormal;
 
 				// 頂点データの追加。
@@ -235,7 +235,7 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 {
 
 	// ファイルストリーム。
-	ifstream file;
+	std::ifstream file;
 
 	// マテリアルファイルを開く。
 	file.open(DirectryPath + MaterialFileName);
@@ -259,11 +259,11 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 	while (getline(file, line)) {
 
 		// 位置行分の文字列をストリームに変換。
-		istringstream lineStream(line);
+		std::istringstream lineStream(line);
 
 		// 半角スペース区切りで行の先頭文字列を取得。
 		string key;
-		getline(lineStream, key, ' ');
+		std::getline(lineStream, key, ' ');
 
 		// 先頭のタブ文字は無視する。
 		if (key[0] == '\t') {
@@ -309,7 +309,7 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 				lineStream >> textureNameBuff;
 
 				// テクスチャ名を変換。
-				wstring buff = StringToWString(DirectryPath + textureNameBuff);
+				std::wstring buff = StringToWString(DirectryPath + textureNameBuff);
 
 				// 既に生成済みかをチェックする。
 				const int TEXPATH_COUNT = static_cast<int>(texturePath.size());

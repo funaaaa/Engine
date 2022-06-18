@@ -47,7 +47,6 @@ public:
 		oldstate = state;
 		//現在のフレームのマウス情報を取得
 		ZeroMemory(&state, sizeof(XINPUT_STATE));
-		DWORD dwResult = XInputGetState(0, &state);
 
 		//振動情報の取得
 		XInputSetState(0, &vibration);
@@ -247,8 +246,8 @@ public:
 			return;
 		}
 
-		vibration.wLeftMotorSpeed = (int)(655.35 * LeftMotorRate);
-		vibration.wRightMotorSpeed = (int)(655.35 * RightMotorRate);
+		vibration.wLeftMotorSpeed = static_cast<WORD>(655.35 * LeftMotorRate);
+		vibration.wRightMotorSpeed = static_cast<WORD>(655.35 * RightMotorRate);
 		//0～100の範囲で指定
 	}
 };

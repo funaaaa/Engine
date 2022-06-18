@@ -7,14 +7,12 @@
 #include "Vec.h"
 #include <DirectXMath.h>
 
-using namespace DirectX;
-
 // レイトレ用頂点構造体
 struct RayVertex {
 
 	Vec3 position;
 	Vec3 normal;
-	XMFLOAT2 uv;
+	DirectX::XMFLOAT2 uv;
 
 };
 
@@ -25,21 +23,21 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	ComPtr<ID3D12Resource> vertexBuffer;	// 頂点バッファ
-	ComPtr<ID3D12Resource> indexBuffer;		// 頂点インデックスバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;	// 頂点バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;		// 頂点インデックスバッファ
 	RayDescriptor vertexDescriptor;			// 頂点ディスクリプタ
 	RayDescriptor indexDescriptor;			// 頂点インデックスディスクリプタ
 
-	ComPtr<ID3D12Resource> blasBuffer;		// BLAS用バッファ
-	ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
-	ComPtr<ID3D12Resource> updateBuffer;	// 更新用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer;		// BLAS用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> updateBuffer;	// 更新用バッファ
 
 	UINT vertexCount;						// 頂点の数
 	UINT indexCount;						// 頂点インデックスの数
 	UINT vertexStride;						// 1頂点のデータサイズ
 	UINT indexStride;						// 1頂点インデックスのデータサイズ
 
-	wstring hitGroupName;					// 使用するヒットグループの名前
+	std::wstring hitGroupName;					// 使用するヒットグループの名前
 
 	int modelIndex;							// モデルのインデックス
 
@@ -50,8 +48,8 @@ private:
 	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
 
 	// デバッグ用
-	vector<RayVertex> vertex;
-	vector<UINT> vertIndex;
+	std::vector<RayVertex> vertex;
+	std::vector<UINT> vertIndex;
 
 
 private:
@@ -64,9 +62,9 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// BLASの生成
-	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	void GenerateBLASData(ModelDataManager::ObjectData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
+	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
+	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
+	void GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASの更新
 	void Update();
@@ -83,27 +81,27 @@ public:
 	inline void AddTex(const int& Index) { textureHandle.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
-	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
-	uint8_t* WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex);
+	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
+	uint8_t* WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex);
 
 	// アクセッタ
-	ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }
-	ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
-	ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer; }
-	wstring& GetHitGroupName() { return hitGroupName; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer; }
+	std::wstring& GetHitGroupName() { return hitGroupName; }
 	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor; }
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
 
 	// デバッグ用
-	vector<RayVertex>& GetVertex() { return vertex; }
+	std::vector<RayVertex>& GetVertex() { return vertex; }
 
 private:
 
 	// アドレスに情報を書き込む処理
-	void WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
+	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
 
 	// バッファ全般を生成する処理
-	ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
 
 	// BLAS生成時に設定を取得する関数
 	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(const bool& IsOpaque);

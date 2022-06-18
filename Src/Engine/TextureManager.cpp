@@ -25,14 +25,14 @@ int TextureManager::LoadTexture(LPCWSTR fileName) {
 
 
 	//ロードしていなかったらロードする
-	TexMetadata metadata;
-	ScratchImage scratchImg;
+	DirectX::TexMetadata metadata;
+	DirectX::ScratchImage scratchImg;
 	HRESULT result = LoadFromWICFile(
 		fileName,
-		WIC_FLAGS_NONE,
+		DirectX::WIC_FLAGS_NONE,
 		&metadata, scratchImg
 	);
-	const Image* img = scratchImg.GetImage(0, 0, 0);
+	const DirectX::Image* img = scratchImg.GetImage(0, 0, 0);
 
 	//リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
@@ -43,7 +43,7 @@ int TextureManager::LoadTexture(LPCWSTR fileName) {
 		(UINT16)metadata.mipLevels);
 
 	//テクスチャバッファの生成
-	ComPtr<ID3D12Resource> texbuff = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
 	result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
@@ -106,14 +106,14 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 	proTexture.fileName = fileName;
 
 	//ロードしていなかったらロードする
-	TexMetadata metadata;
-	ScratchImage scratchImg;
+	DirectX::TexMetadata metadata;
+	DirectX::ScratchImage scratchImg;
 	HRESULT result = LoadFromWICFile(
 		fileName,
-		WIC_FLAGS_NONE,
+		DirectX::WIC_FLAGS_NONE,
 		&metadata, scratchImg
 	);
-	const Image* img = scratchImg.GetImage(0, 0, 0);
+	const DirectX::Image* img = scratchImg.GetImage(0, 0, 0);
 
 	//リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
@@ -124,7 +124,7 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 		(UINT16)metadata.mipLevels);
 
 	//テクスチャバッファの生成
-	ComPtr<ID3D12Resource> texbuff = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
 	result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
@@ -171,7 +171,7 @@ int TextureManager::LoadTextureInDescriptorHeapMgr(LPCWSTR fileName)
 	return DescriptorHeapMgr::Ins()->GetHead() - 1;
 }
 
-int TextureManager::CreateTexture(XMFLOAT4 color)
+int TextureManager::CreateTexture(DirectX::XMFLOAT4 color)
 {
 	//同じ色のテクスチャがすでに生成済みかをチェックする
 	for (int i = 0; i < texture.size(); ++i) {
@@ -186,7 +186,7 @@ int TextureManager::CreateTexture(XMFLOAT4 color)
 	const int texWidth = 256;
 	const int imageDataCount = texWidth * texWidth;
 	//画像イメージデータ配列
-	XMFLOAT4* imageData = new XMFLOAT4[imageDataCount];
+	DirectX::XMFLOAT4* imageData = new DirectX::XMFLOAT4[imageDataCount];
 
 	//全ピクセルの色を初期化
 	for (int i = 0; i < imageDataCount; ++i) {
@@ -205,7 +205,7 @@ int TextureManager::CreateTexture(XMFLOAT4 color)
 		(UINT16)1);
 
 	//テクスチャバッファの生成
-	ComPtr<ID3D12Resource> texbuff = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
 	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0),
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
@@ -218,8 +218,8 @@ int TextureManager::CreateTexture(XMFLOAT4 color)
 		0,
 		nullptr,							//全領域コピー
 		imageData,							//元データの先頭アドレス
-		sizeof(XMFLOAT4) * texWidth,		//一ラインのサイズ
-		sizeof(XMFLOAT4) * imageDataCount	//いちまいのサイズ
+		sizeof(DirectX::XMFLOAT4) * texWidth,		//一ラインのサイズ
+		sizeof(DirectX::XMFLOAT4) * imageDataCount	//いちまいのサイズ
 	);
 
 	//テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
@@ -260,7 +260,7 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 	const int texHeight = height;
 	const int imageDataCount = texWidth * texHeight;
 	//画像イメージデータ配列
-	XMFLOAT4* imageData = new XMFLOAT4[imageDataCount];
+	DirectX::XMFLOAT4* imageData = new DirectX::XMFLOAT4[imageDataCount];
 
 	//全ピクセルの色を初期化
 	for (int i = 0; i < imageDataCount; ++i) {
@@ -309,7 +309,7 @@ int TextureManager::CreateRenderTargetTexture(int width, int height, int mipLeve
 
 	//テクスチャバッファの生成
 	auto prop = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-	ComPtr<ID3D12Resource> texbuff = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
 	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&prop,
 		D3D12_HEAP_FLAG_NONE,
@@ -368,7 +368,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSRV(int IDNum) {
 	return basicHeapHandle;
 }
 
-ComPtr<ID3D12DescriptorHeap> TextureManager::GetDescHeap()
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> TextureManager::GetDescHeap()
 {
 	return srvDescHeap;
 }

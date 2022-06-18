@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-ShaderData::ShaderData(const string& shaderPath, const string& entryPoint, const string& shaderModel)
+ShaderData::ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel)
 {
 
 	/*-- コンストラクタ --*/
@@ -22,7 +22,7 @@ ShaderData::ShaderData(const string& shaderPath, const string& entryPoint, const
 
 }
 
-ShaderData::ShaderData(const string& shaderPath, const string& entryPoint, const string& shaderModel, const bool& isDXC)
+ShaderData::ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel, const bool& isDXC)
 {
 
 	/*-- コンストラクタ --*/
@@ -46,7 +46,7 @@ void ShaderData::LoadShader()
 	wchar_t shaderPathBuff[128];
 	FString::ConvertStringToWchar_t(shaderPath, shaderPathBuff, 128);
 
-	ComPtr<ID3DBlob> errorBlob = nullptr;
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 
 	HRESULT result = D3DCompileFromFile(
 		shaderPathBuff,										//シェーダファイル名
@@ -61,7 +61,7 @@ void ShaderData::LoadShader()
 	if (FAILED(result)) {
 
 		// hresultからエラーメッセージを取得
-		string errorMsg = system_category().message(result);
+		std::string errorMsg = std::system_category().message(result);
 
 		//errorBlobからエラー内容をstring型にコピー
 		std::string errstr;
@@ -89,21 +89,21 @@ void ShaderData::LoadShaderDXC()
 	std::stringstream strstream;
 	strstream << infile.rdbuf();
 	std::string shaderCode = strstream.str();
-	ComPtr<IDxcLibrary> library;
+	Microsoft::WRL::ComPtr<IDxcLibrary> library;
 	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
-	ComPtr<IDxcCompiler> compiler;
+	Microsoft::WRL::ComPtr<IDxcCompiler> compiler;
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
-	ComPtr<IDxcBlobEncoding> source;
+	Microsoft::WRL::ComPtr<IDxcBlobEncoding> source;
 	library->CreateBlobWithEncodingFromPinned(
 		(LPBYTE)shaderCode.c_str(), (UINT32)shaderCode.size(), CP_UTF8, &source);
-	ComPtr<IDxcIncludeHandler> includeHandler;
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler;
 	// インクルードを使う場合には適切に設定すること.
 	library->CreateIncludeHandler(&includeHandler);
 	// コンパイルオプションの指定.
 	std::vector<LPCWSTR> arguments;
 	arguments.emplace_back(L"/Od");
 	const auto target = L"lib_6_4";
-	ComPtr<IDxcOperationResult> dxcResult;
+	Microsoft::WRL::ComPtr<IDxcOperationResult> dxcResult;
 	hr = compiler->Compile(source.Get(), fileName.c_str(),
 		L"", target, arguments.data(), UINT(arguments.size()),
 		nullptr, 0, includeHandler.Get(), &dxcResult);
@@ -112,12 +112,12 @@ void ShaderData::LoadShaderDXC()
 	}
 	dxcResult->GetStatus(&hr);
 	if (FAILED(hr)) {
-		ComPtr<IDxcBlobEncoding> errBlob;
+		Microsoft::WRL::ComPtr<IDxcBlobEncoding> errBlob;
 		dxcResult->GetErrorBuffer(&errBlob);
 		// ... errBlob の内容をエラーメッセージとして表示 (省略)
 		throw std::runtime_error("failed shader compile");
 	}
-	ComPtr<IDxcBlob> blob;
+	Microsoft::WRL::ComPtr<IDxcBlob> blob;
 	dxcResult->GetResult(&blob);
 
 	shaderBlobDxc = blob;

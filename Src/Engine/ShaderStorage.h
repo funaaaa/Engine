@@ -12,9 +12,6 @@
 
 #pragma comment(lib, "Lib/Dxcompiler/dxcompiler.lib")
 
-using namespace std;
-using namespace Microsoft::WRL;
-
 // シェーダーデータクラスの前方宣言
 class ShaderData;
 
@@ -25,7 +22,7 @@ private:
 
 	/*-- メンバ変数 --*/
 
-	vector<shared_ptr<ShaderData>> shaderData;
+	std::vector<std::shared_ptr<ShaderData>> shaderData;
 
 
 public:
@@ -33,13 +30,13 @@ public:
 	/*-- メンバ関数 --*/
 
 	// シェーダーをロードする。
-	ComPtr<ID3DBlob> LoadShader(const string& shaderPath, const string& shaderModel, const string& entryPoint);
-	ComPtr<ID3DBlob> LoadShaderForDXC(const string& shaderPath, const string& shaderModel, const string& entryPoint);
+	Microsoft::WRL::ComPtr<ID3DBlob> LoadShader(const std::string& shaderPath, const std::string& shaderModel, const std::string& entryPoint);
+	Microsoft::WRL::ComPtr<ID3DBlob> LoadShaderForDXC(const std::string& shaderPath, const std::string& shaderModel, const std::string& entryPoint);
 
 	// シェーダーデータを返す。
-	ComPtr<ID3DBlob> GetShaderData(const string& shaderPath);
-	ComPtr<IDxcBlob> GetShaderDataForDXC(const string& shaderPath);
-	vector<char>& GetShaderBin(const string& shaderPath);
+	Microsoft::WRL::ComPtr<ID3DBlob> GetShaderData(const std::string& shaderPath);
+	Microsoft::WRL::ComPtr<IDxcBlob> GetShaderDataForDXC(const std::string& shaderPath);
+	std::vector<char>& GetShaderBin(const std::string& shaderPath);
 
 };
 

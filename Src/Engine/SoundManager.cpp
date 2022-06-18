@@ -18,9 +18,9 @@ SoundManager::SoundData SoundManager::SoundLoadWave(char* fileName)
 
 	//①ファイルオープン
 	//ファイル入力ストリームのインスタンス
-	ifstream file{};
+	std::ifstream file{};
 	//.wavをバイナリモードで開く
-	file.open(fileName, ios_base::binary);
+	file.open(fileName, std::ios_base::binary);
 	//ファイルオープンの失敗を検出する
 	assert(file.is_open());
 

@@ -5,8 +5,6 @@
 
 #include <d3dcompiler.h>
 
-using namespace Microsoft::WRL;
-
 #pragma comment(lib, "d3dcompiler.lib")
 
 ComputeShader::ComputeShader()
@@ -30,8 +28,8 @@ void ComputeShader::Init(LPCWSTR csPath,
 
 	/*-- コンピュートシェーダーをロード --*/
 
-	ComPtr<ID3DBlob> csBlob = nullptr;		//コンピュートシェーダーオブジェクト
-	ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
+	Microsoft::WRL::ComPtr<ID3DBlob> csBlob = nullptr;		//コンピュートシェーダーオブジェクト
+	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 
 	//コンピュートシェーダーェーダの読み込みとコンパイル
 	csBlob = LoadShader(csPath, "main", "cs_5_0", csBlob.Get(), errorBlob.Get());

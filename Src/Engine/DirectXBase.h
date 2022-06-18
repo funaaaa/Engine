@@ -16,9 +16,6 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
-using namespace std;
-using namespace Microsoft::WRL;
-
 class DirectXBase : public Singleton<DirectXBase> {
 
 public:
@@ -27,16 +24,16 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
 	Microsoft::WRL::ComPtr<ID3D12Device5> dev;
 	Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory;
-	vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters;		//アダプターの列挙用
+	std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters;		//アダプターの列挙用
 	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter;			//特定の名前を持つアダプターオブジェクトを入れる
-	vector<D3D_FEATURE_LEVEL> levels;			//対応レベルの配列
+	std::vector<D3D_FEATURE_LEVEL> levels;			//対応レベルの配列
 	D3D_FEATURE_LEVEL featureLevel;
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps;
-	vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers;
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc;
 	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer;			//深度バッファ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;		//深度バッファ用ディスクリプタヒープ

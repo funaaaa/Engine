@@ -50,7 +50,7 @@ void DynamicConstBuffer::Write(UINT bufferIndex, const void* data, UINT size)
 
 }
 
-ComPtr<ID3D12Resource> DynamicConstBuffer::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> DynamicConstBuffer::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
@@ -70,7 +70,7 @@ ComPtr<ID3D12Resource> DynamicConstBuffer::CreateBuffer(size_t size, D3D12_RESOU
 
 	// 実際にバッファを生成する。
 	HRESULT hr;
-	ComPtr<ID3D12Resource> resource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;

@@ -90,7 +90,7 @@ void TLAS::Update()
 
 }
 
-void TLAS::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
+void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
@@ -113,7 +113,7 @@ void TLAS::WriteToMemory(ComPtr<ID3D12Resource>& resource, const void* pData, si
 
 }
 
-ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
@@ -133,7 +133,7 @@ ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flag
 
 	// 実際にバッファを生成する。
 	HRESULT hr;
-	ComPtr<ID3D12Resource> resource;
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;

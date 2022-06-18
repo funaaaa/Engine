@@ -11,12 +11,12 @@ private:
 
 	/*-- メンバ変数 --*/
 
-	ComPtr<ID3DBlob> shaderBlob;		// シェーダーのデータ
-	ComPtr<IDxcBlob> shaderBlobDxc;		// シェーダーのデータ dxc用
-	vector<char> shaderBin;				// dxcでコンパイルした際に出力される謎の文字列
-	string entryPoint;					// シェーダーのエントリーポイント
-	string shaderModel;					// シェーダーモデル
-	string shaderPath;					// シェーダーのファイルパス これを使ってシェーダーを判断する。
+	Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;		// シェーダーのデータ
+	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlobDxc;		// シェーダーのデータ dxc用
+	std::vector<char> shaderBin;				// dxcでコンパイルした際に出力される謎の文字列
+	std::string entryPoint;					// シェーダーのエントリーポイント
+	std::string shaderModel;					// シェーダーモデル
+	std::string shaderPath;					// シェーダーのファイルパス これを使ってシェーダーを判断する。
 
 
 public:
@@ -24,19 +24,19 @@ public:
 	/*-- メンバ関数 --*/
 
 	// コンストラクタ
-	ShaderData(const string& shaderPath, const string& entryPoint, const string& shaderModel);
-	ShaderData(const string& shaderPath, const string& entryPoint, const string& shaderModel, const bool& isDXC);
+	ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel);
+	ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel, const bool& isDXC);
 
 	// ロード処理
 	void LoadShader();
 	void LoadShaderDXC();
 
 	// シェーダーのファイルパスを取得する処理
-	const string& GetShaderPath() { return shaderPath; }
+	const std::string& GetShaderPath() { return shaderPath; }
 	// シェーダーのデータを取得する処理
-	const ComPtr<ID3DBlob>& GetShaderBlob() { return shaderBlob; }
-	const ComPtr<IDxcBlob>& GetShaderBlobDXC() { return shaderBlobDxc; }
-	vector<char>& GetShaderBin() { return shaderBin; }
+	const Microsoft::WRL::ComPtr<ID3DBlob>& GetShaderBlob() { return shaderBlob; }
+	const Microsoft::WRL::ComPtr<IDxcBlob>& GetShaderBlobDXC() { return shaderBlobDxc; }
+	std::vector<char>& GetShaderBin() { return shaderBin; }
 
 
 private:

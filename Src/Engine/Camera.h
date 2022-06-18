@@ -3,11 +3,9 @@
 #include "Singleton.h"
 #include "Vec.h"
 
-using namespace DirectX;
-
 class Camera : public Singleton<Camera> {
 public:
-	XMMATRIX matView;		//ビュー行列
+	DirectX::XMMATRIX matView;		//ビュー行列
 	Vec3 eye;			//ゲームワールド内でのカメラ座標
 	Vec3 target;			//ゲームワールド内でカメラが見ている座標
 	Vec3 up;				//ゲームワールド内でカメラから見て上方向を指すベクトル
@@ -18,11 +16,11 @@ public:
 	Vec3 honraiTarget;	//本来あるべき注視点座標
 	Vec3 honraiUp;		//本来あるべき上ベクトル
 
-	XMMATRIX rotationMat;	//カメラの回転行列
-	XMMATRIX upRotationMat;	//カメラの上方向ベクトルの回転行列
+	DirectX::XMMATRIX rotationMat;	//カメラの回転行列
+	DirectX::XMMATRIX upRotationMat;	//カメラの上方向ベクトルの回転行列
 
-	XMMATRIX matPerspective;
-	XMMATRIX matProjection;
+	DirectX::XMMATRIX matPerspective;
+	DirectX::XMMATRIX matProjection;
 
 	float angleOfView;		//画角
 
@@ -51,7 +49,6 @@ public:
 	void GenerateMatViewSpeed(const float& nowSpeed, const float& maxSpeed);
 
 	//更新処理
-	void UpdateRacingGame(const Vec3& playerPos, const Vec3& playerForwardVec, const Vec3& playerUpVec, const float& nowSpeed, const float& maxSpeed);
 	void Update();
 
 	// 回転

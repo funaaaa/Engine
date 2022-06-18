@@ -1,7 +1,7 @@
 #include "ShaderStorage.h"
 #include "ShaderData.h"
 
-ComPtr<ID3DBlob> ShaderStorage::LoadShader(const string& shaderPath, const string& shaderModel, const string& entryPoint)
+Microsoft::WRL::ComPtr<ID3DBlob> ShaderStorage::LoadShader(const std::string& shaderPath, const std::string& shaderModel, const std::string& entryPoint)
 {
 
 	/*-- シェーダーのロード処理 --*/
@@ -20,13 +20,13 @@ ComPtr<ID3DBlob> ShaderStorage::LoadShader(const string& shaderPath, const strin
 	}
 
 	// シェーダーをロードして保存。
-	shaderData.emplace_back(make_unique<ShaderData>(shaderPath, entryPoint, shaderModel));
+	shaderData.emplace_back(std::make_unique<ShaderData>(shaderPath, entryPoint, shaderModel));
 
 	// 最後尾のデータをリターンする。
 	return shaderData[shaderData.size() - 1]->GetShaderBlob();
 }
 
-ComPtr<ID3DBlob> ShaderStorage::LoadShaderForDXC(const string& shaderPath, const string& shaderModel, const string& entryPoint)
+Microsoft::WRL::ComPtr<ID3DBlob> ShaderStorage::LoadShaderForDXC(const std::string& shaderPath, const std::string& shaderModel, const std::string& entryPoint)
 {
 
 	/*-- シェーダーのロード処理 --*/
@@ -45,14 +45,14 @@ ComPtr<ID3DBlob> ShaderStorage::LoadShaderForDXC(const string& shaderPath, const
 	}
 
 	// シェーダーをロードして保存。
-	shaderData.emplace_back(make_unique<ShaderData>(shaderPath, entryPoint, shaderModel, true));
+	shaderData.emplace_back(std::make_unique<ShaderData>(shaderPath, entryPoint, shaderModel, true));
 
 	// 最後尾のデータをリターンする。
 	return shaderData[shaderData.size() - 1]->GetShaderBlob();
 
 }
 
-ComPtr<ID3DBlob> ShaderStorage::GetShaderData(const string& shaderPath)
+Microsoft::WRL::ComPtr<ID3DBlob> ShaderStorage::GetShaderData(const std::string& shaderPath)
 {
 
 	/*-- シェーダーデータを返す処理 --*/
@@ -69,10 +69,10 @@ ComPtr<ID3DBlob> ShaderStorage::GetShaderData(const string& shaderPath)
 
 	}
 
-	return ComPtr<ID3DBlob>();
+	return Microsoft::WRL::ComPtr<ID3DBlob>();
 }
 
-ComPtr<IDxcBlob> ShaderStorage::GetShaderDataForDXC(const string& shaderPath)
+Microsoft::WRL::ComPtr<IDxcBlob> ShaderStorage::GetShaderDataForDXC(const std::string& shaderPath)
 {
 	/*-- シェーダーデータを返す処理 --*/
 
@@ -88,10 +88,10 @@ ComPtr<IDxcBlob> ShaderStorage::GetShaderDataForDXC(const string& shaderPath)
 
 	}
 
-	return ComPtr<IDxcBlob>();
+	return Microsoft::WRL::ComPtr<IDxcBlob>();
 }
 
-vector<char>& ShaderStorage::GetShaderBin(const string& shaderPath)
+std::vector<char>& ShaderStorage::GetShaderBin(const std::string& shaderPath)
 {
 	/*-- シェーダーデータを返す処理 --*/
 

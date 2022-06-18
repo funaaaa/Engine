@@ -134,8 +134,8 @@ void DevDXR::Draw() {
 
 	// カメラ行列を更新。
 	auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
-	constBufferData.mtxView = XMMatrixLookAtLH(constBufferData.eye.ConvertXMVECTOR(), constBufferData.target.ConvertXMVECTOR(), constBufferData.up.ConvertXMVECTOR());
-	constBufferData.mtxViewInv = XMMatrixInverse(nullptr, constBufferData.mtxView);
+	constBufferData.mtxView = DirectX::XMMatrixLookAtLH(constBufferData.eye.ConvertXMVECTOR(), constBufferData.target.ConvertXMVECTOR(), constBufferData.up.ConvertXMVECTOR());
+	constBufferData.mtxViewInv = DirectX::XMMatrixInverse(nullptr, constBufferData.mtxView);
 
 	// 定数バッファの中身を更新する。
 	constBuff.Write(frameIndex, &constBufferData, sizeof(KariConstBufferData));
@@ -339,7 +339,7 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 		constBufferData.dirLight.lihgtDir.Normalize();
 
 		// ライトの色を設定。
-		array<float, 3> lightColor = { constBufferData.dirLight.lightColor.x,constBufferData.dirLight.lightColor.y,constBufferData.dirLight.lightColor.z };
+		std::array<float, 3> lightColor = { constBufferData.dirLight.lightColor.x,constBufferData.dirLight.lightColor.y,constBufferData.dirLight.lightColor.z };
 		ImGui::ColorPicker3("LightColor", lightColor.data());
 		// 色が変わっていたら。
 		if (lightColor[0] != constBufferData.dirLight.lightColor.x || lightColor[1] != constBufferData.dirLight.lightColor.y || lightColor[2] != constBufferData.dirLight.lightColor.z) {
@@ -387,7 +387,7 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 		}
 
 		// ライトの色を設定。
-		array<float, 3> lightColor = { constBufferData.pointLight.lightColor.x,constBufferData.pointLight.lightColor.y,constBufferData.pointLight.lightColor.z };
+		std::array<float, 3> lightColor = { constBufferData.pointLight.lightColor.x,constBufferData.pointLight.lightColor.y,constBufferData.pointLight.lightColor.z };
 		ImGui::ColorPicker3("LightColor", lightColor.data());
 		// 色が変わっていたら。
 		if (lightColor[0] != constBufferData.pointLight.lightColor.x || lightColor[1] != constBufferData.pointLight.lightColor.y || lightColor[2] != constBufferData.pointLight.lightColor.z) {

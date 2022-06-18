@@ -8,7 +8,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	ComPtr<ID3D12DescriptorHeap> descriptorHeap;	// CBV,SRV,UAV用ディスクリプタヒープ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;	// CBV,SRV,UAV用ディスクリプタヒープ
 	int head;										// 先頭のインデックス
 
 
@@ -39,7 +39,7 @@ public:
 	}
 
 	// ディスクリプタヒープのゲッタ。
-	ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }
 
 	// 先頭のゲッタ
 	const int& GetHead() { return head; }
