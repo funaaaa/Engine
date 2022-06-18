@@ -5,7 +5,7 @@
 #include <wrl.h>
 #include <d3d12.h>
 #include "Singleton.h"
-#include "Struct.h"
+#include "ModelDataManager.h"
 
 class BLAS;
 
@@ -25,7 +25,7 @@ public:
 	// ê∂ê¨èàóù
 	int GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
 	int GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	int GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
+	int GenerateData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASÇÃçXêV
 	void Update(const int& Index);

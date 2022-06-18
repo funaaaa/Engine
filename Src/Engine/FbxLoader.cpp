@@ -1,8 +1,34 @@
 #include "FbxLoader.h"
 #include "DirectXBase.h"
-#include "Struct.h"
 #include <assert.h>
 #include "TextureManager.h"
+
+void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT> OutputVertexIndex)
+{
+
+	// 指定されたインデックスが範囲外だったら何も返さない。
+	if (fbxModelData.size() - 1 < Index || Index < 0) return;
+
+	// 指定されたインデックスを取得。
+	FbxModel modelData = fbxModelData[Index];
+
+	// 頂点データを変換。
+	const int VERTEX_COUNT = modelData.vertices.size();
+	OutputVertex.resize(VERTEX_COUNT);
+	for (int index = 0; index < VERTEX_COUNT; ++index) {
+		OutputVertex[index].pos = modelData.vertices[index].pos;
+		OutputVertex[index].normal = modelData.vertices[index].normal;
+		OutputVertex[index].uv = modelData.vertices[index].uv;
+	}
+
+	// 頂点インデックスデータを変換。
+	const int INDEX_COUNT = modelData.indices.size();
+	OutputVertexIndex.resize(INDEX_COUNT);
+	for (int index = 0; index < INDEX_COUNT; ++index) {
+		OutputVertexIndex[index] = modelData.indices[index];
+	}
+
+}
 
 void FbxLoader::Init()
 {
@@ -93,41 +119,6 @@ void FbxLoader::ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& S
 
 	}
 
-}
-
-Object3DDeliveryData FbxLoader::ConvertObject3DDeliveryData(const int& Index)
-{
-	Object3DDeliveryData returnData;
-
-	// 指定されたインデックスが範囲外だったら何も返さない。
-	if (fbxModelData.size() - 1 < Index || Index < 0) return {};
-
-	// 指定されたインデックスを取得。
-	FbxModel modelData = fbxModelData[Index];
-
-	// 頂点データを変換。
-	const int VERTEX_COUNT = modelData.vertices.size();
-	returnData.vertex.resize(VERTEX_COUNT);
-	for (int index = 0; index < VERTEX_COUNT; ++index) {
-		returnData.vertex[index].pos = modelData.vertices[index].pos;
-		returnData.vertex[index].normal = modelData.vertices[index].normal;
-		returnData.vertex[index].uv = modelData.vertices[index].uv;
-	}
-
-	// 頂点インデックスデータを変換。
-	const int INDEX_COUNT = modelData.indices.size();
-	returnData.index.resize(INDEX_COUNT);
-	for (int index = 0; index < INDEX_COUNT; ++index) {
-		returnData.index[index] = modelData.indices[index];
-	}
-
-	// ライティング周りの定数バッファデータを変換。
-	returnData.constBufferDataB1.alpha = 1.0f;
-	returnData.constBufferDataB1.ambient = modelData.ambient;
-	returnData.constBufferDataB1.diffuse = modelData.diffuse;
-	returnData.constBufferDataB1.specular = {};
-
-	return returnData;
 }
 
 FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)

@@ -2,6 +2,7 @@
 #include "DirectXBase.h"
 #include "RayDescriptor.h"
 #include "ComputeShader.h"
+#include "ModelDataManager.h"
 #include "FbxLoader.h"
 #include "Vec.h"
 #include <DirectXMath.h>
@@ -65,7 +66,7 @@ public:
 	// BLASÇÃê∂ê¨
 	void GenerateBLASObj(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
 	void GenerateBLASFbx(const string& DirectryPath, const string& ModelName, const wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	void GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
+	void GenerateBLASData(ModelDataManager::ObjectData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASÇÃçXêV
 	void Update();

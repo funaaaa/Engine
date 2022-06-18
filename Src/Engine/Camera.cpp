@@ -1,5 +1,4 @@
 #include "Camera.h"
-#include "Struct.h"
 #include "FHelper.h"
 #include "DirectXBase.h"
 #include <d3d12.h>

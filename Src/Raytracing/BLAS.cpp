@@ -26,10 +26,10 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	/*-- 形状データを読み込む --*/
 
 	// 読み込んだデータを一時保存する用のバッファ。
-	Object3DDeliveryData dataBuff;
+	ModelDataManager::ObjectData dataBuff;
 
 	// モデルをロード。
-	ModelDataManager::LoadObj(DirectryPath, ModelName, dataBuff, false);
+	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, false);
 
 	// 頂点数を求める。
 	vertexCount = dataBuff.vertex.size();
@@ -117,29 +117,27 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	/*-- 形状データを読み込む --*/
 
 	// 読み込んだデータを一時保存する用のバッファ。
-	Object3DDeliveryData dataBuff;
+	std::vector<FbxLoader::Vertex> modelVertexData;
+	std::vector<UINT> modelIndexData;
 
 	// モデルをロード。
 	modelIndex = FbxLoader::Ins()->LoadModelFromFile(DirectryPath, ModelName);
 
-	dataBuff = FbxLoader::Ins()->ConvertObject3DDeliveryData(modelIndex);
+	FbxLoader::Ins()->GetFbxData(modelIndex, modelVertexData, modelIndexData);
 
 	// 頂点数を求める。
-	vertexCount = dataBuff.vertex.size();
+	vertexCount = modelVertexData.size();
 
 	// 頂点インデックス数を求める。
-	indexCount = dataBuff.index.size();
-
-	Object3DDeliveryData fbxData;
-	ModelDataManager::LoadFbx((DirectryPath + ModelName).c_str(), fbxData);
+	indexCount = modelIndexData.size();
 
 	// 頂点データを変換。
 	for (int index = 0; index < vertexCount; ++index) {
 
 		RayVertex buff{};
-		buff.normal = dataBuff.vertex[index].normal;
-		buff.position = dataBuff.vertex[index].pos;
-		buff.uv = dataBuff.vertex[index].uv;
+		buff.normal = modelVertexData[index].normal;
+		buff.position = modelVertexData[index].pos;
+		buff.uv = modelVertexData[index].uv;
 
 		// データを保存。
 		vertex.push_back(buff);
@@ -147,7 +145,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	}
 
 	// 頂点インデックスデータを保存。
-	vertIndex = dataBuff.index;
+	vertIndex = modelIndexData;
 
 	// 頂点サイズを求める。
 	vertexStride = sizeof(RayVertex);
@@ -210,7 +208,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 
 }
 
-void BLAS::GenerateBLASData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
+void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/

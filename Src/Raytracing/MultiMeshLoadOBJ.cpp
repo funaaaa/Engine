@@ -1,6 +1,5 @@
 #include "MultiMeshLoadOBJ.h"
 #include "BLAS.h"
-#include "Struct.h"
 #include "Vec.h"
 #include "BLASRegister.h"
 #include "TextureManager.h"
@@ -10,6 +9,7 @@
 #include <sstream>
 #include <cassert>
 #include <memory>
+#include "ModelDataManager.h"
 
 std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName)
 {
@@ -30,7 +30,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	}
 
 	// BLASを生成する際に値として渡すデータ。
-	Object3DDeliveryData blasData;
+	ModelDataManager::ObjectData blasData;
 
 	// 一行ずつ読み込む。
 	string line;
@@ -131,7 +131,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				indexStream >> indexNormal;
 
 				// 頂点データの追加。
-				Vertex vert{};
+				ModelDataManager::Vertex vert{};
 				vert.pos = position[indexPosition - 1].ConvertXMFLOAT3();
 				vert.normal = normal[indexNormal - 1].ConvertXMFLOAT3();
 				vert.uv = uv[indexTexcoord - 1];

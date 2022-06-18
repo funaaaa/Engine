@@ -7,7 +7,7 @@
 #include <DirectXMath.h>
 #include <DirectXTex/DirectXTex.h>
 #include "fbxsdk.h"
-#include "Struct.h"
+#include "Vec.h"
 
 // ボーン番号とスキンウェイトのペア
 struct WeightSet {
@@ -136,13 +136,20 @@ public:
 	static const int MAX_BONES = 16;
 	// スキニング用構造体(コンピュートシェーダーに送る用)
 	struct SkinData {
-		std::array<XMMATRIX, MAX_BONES> bones;
+		std::array<DirectX::XMMATRIX, MAX_BONES> bones;
 	};
 	// スキニングアニメーションの行列計算に使用するコンピュートシェーダーの入力用構造体
 	struct SkinComputeInput {
 		FbxModel::VertexPosNormalUvSkin vertex;
 		FbxLoader::SkinData skinData;
 	};
+
+	struct Vertex {
+		Vec3 pos;
+		Vec3 normal;
+		DirectX::XMFLOAT2 uv;
+	};
+	void GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT> OutputVertexIndex);
 
 
 private:
@@ -162,9 +169,6 @@ public:
 
 	// FBXの行列をXMMATRIXに変換
 	void ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& Src);
-
-	// FbxModelをObject3DDeliveryDataに変換
-	Object3DDeliveryData ConvertObject3DDeliveryData(const int& Index);
 
 	// スキニング行列を取得。
 	SkinData GetSkinMat(const int& Index);

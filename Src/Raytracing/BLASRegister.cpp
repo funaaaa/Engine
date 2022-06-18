@@ -25,7 +25,7 @@ int BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string
 
 }
 
-int BLASRegister::GenerateData(Object3DDeliveryData Data, const wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
+int BLASRegister::GenerateData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/

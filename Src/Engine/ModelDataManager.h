@@ -1,30 +1,69 @@
 #pragma once
-#include "Struct.h"
 #include <string>
 #include <map>
+#include <vector>
 #include "Fbxsdk.h"
+#include "Vec.h"
+#include <wtypes.h>
+#include "Singleton.h"
 
-class ModelDataManager {
-private:
-	static vector<ModelData> modelData;			//モデルデータを保存しておく配列
+class ModelDataManager : public Singleton<ModelDataManager> {
 
 public:
-	//fbxファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
-	static void LoadFbx(const char* fileName, Object3DDeliveryData& objectBuffer);
+
+	// 頂点データ
+	struct Vertex {
+
+		Vec3 pos;
+		Vec3 normal;
+		DirectX::XMFLOAT2 uv;
+
+	};
+
+	// データを渡す構造体
+	struct ObjectData {
+
+		std::vector<Vertex> vertex;
+		std::vector<UINT> index;
+
+	};
+
+	//マテリアル
+	struct Material {
+		std::string name;								//マテリアル名
+		std::string textureName;						//テクスチャの名前
+		DirectX::XMFLOAT3 ambient = { 0.3f,0.3f,0.3f };	//アンビエント影響度
+		DirectX::XMFLOAT3 diffuse = { 0.3f,0.3f,0.3f };	//ディフューズ影響度
+		DirectX::XMFLOAT3 specular = { 0.3f,0.3f,0.3f };//スペキュラー影響度
+		float alpha;									//アルファ
+	};
+
+	//modelのデータ構造体
+	struct ModelData {
+		std::string modelName;				//モデルファイル名
+		Material material;					//マテリアル
+		std::vector<unsigned short> index;	//頂点インデックス
+		std::vector<Vertex> vertex;			//頂点
+		bool isSmoothing;					//法線をスムーズにするかどうか
+	};
+
+private:
+
+
+	std::vector<ModelData> modelData;			//モデルデータを保存しておく配列
+
+public:
 
 	//objファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
-	static void LoadObj(string directoryPath, string fileName, Object3DDeliveryData& objectBuffer, bool isSmoothing);
-
-	//fbxファイルを読み込む際、すべてのノードにアクセスするための関数
-	static void CollectMeshNode(FbxNode* node, vector<pair<string, FbxMesh*>>& list);
+	void LoadObj(std::string DirectoryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing);
 
 	//objファイルの読み込み時にマテリアルをロードするための関数
-	static void LoadObjMaterial(const string& materialFileName, ModelData& modelData, Object3DDeliveryData& spriteData);
+	void LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData, ObjectData& ObjectData);
 
 	//法線の平均を求める関数
-	static void CalculateSmoothedVertexNormals(map<unsigned short, vector<unsigned short>>& smoothData, Object3DDeliveryData& objectBuffer, ModelData& modelData);
+	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);
 
-	static int GetModelCount() { return modelData.size(); }
-	static const ModelData& GetModelData(const int& index) { return modelData[index]; }
+	int GetModelCount() { return modelData.size(); }
+	const ModelData& GetModelData(const int& Index) { return modelData[Index]; }
 
 };
