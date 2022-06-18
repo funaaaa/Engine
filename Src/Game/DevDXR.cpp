@@ -273,43 +273,43 @@ void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU
 
 	float speed = 10.0f;
 	float rot = 0.03f;
-	if (Input::isKey(DIK_W)) {
+	if (Input::Ins()->isKey(DIK_W)) {
 		Camera::Ins()->Move(speed);
 		isMove = true;
 	}
-	if (Input::isKey(DIK_S)) {
+	if (Input::Ins()->isKey(DIK_S)) {
 		Camera::Ins()->Move(-speed);
 		isMove = true;
 	}
-	if (Input::isKey(DIK_A)) {
+	if (Input::Ins()->isKey(DIK_A)) {
 		Camera::Ins()->MoveRight(speed);
 		isMove = true;
 	}
-	if (Input::isKey(DIK_D)) {
+	if (Input::Ins()->isKey(DIK_D)) {
 		Camera::Ins()->MoveRight(-speed);
 		isMove = true;
 	}
-	if (Input::isKey(DIK_UP)) {
+	if (Input::Ins()->isKey(DIK_UP)) {
 		Camera::Ins()->forwardVec.y += rot;
 		isMove = true;
 	}
-	if (Input::isKey(DIK_DOWN)) {
+	if (Input::Ins()->isKey(DIK_DOWN)) {
 		Camera::Ins()->forwardVec.y -= rot;
 		isMove = true;
 	}
-	if (Input::isKey(DIK_LEFT)) {
+	if (Input::Ins()->isKey(DIK_LEFT)) {
 		Camera::Ins()->AddRotationXZ(rot);
 		isMove = true;
 	}
-	if (Input::isKey(DIK_RIGHT)) {
+	if (Input::Ins()->isKey(DIK_RIGHT)) {
 		Camera::Ins()->AddRotationXZ(-rot);
 		isMove = true;
 	}
-	if (Input::isKey(DIK_LSHIFT)) {
+	if (Input::Ins()->isKey(DIK_LSHIFT)) {
 		Camera::Ins()->eye.y -= 10.0f;
 		isMove = true;
 	}
-	if (Input::isKey(DIK_SPACE)) {
+	if (Input::Ins()->isKey(DIK_SPACE)) {
 		Camera::Ins()->eye.y += 10.0f;
 		isMove = true;
 	}

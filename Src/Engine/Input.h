@@ -1,35 +1,36 @@
 #pragma once
 
-#define DIRECTINPUT_VERSION 0x0800	//DirectInputのバージョン指定
+#include "Singleton.h"
+
 #include <dinput.h>
 #include <Xinput.h>
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib,"xinput.lib")
 
-#define ALL_KEYS 256
+static const int ALL_KEYS = 256;
 
-#define XINPUT_THUMB_LEFTVERT 0
-#define XINPUT_THUMB_LEFTSIDE 1
-#define XINPUT_THUMB_RIGHTVERT 2
-#define XINPUT_THUMB_RIGHTSIDE 3
+static const int XINPUT_THUMB_LEFTVERT = 0;
+static const int XINPUT_THUMB_LEFTSIDE = 1;
+static const int XINPUT_THUMB_RIGHTVERT = 2;
+static const int XINPUT_THUMB_RIGHTSIDE  = 3;
 
-#define XINPUT_TRIGGER_LEFT 0
-#define XINPUT_TRIGGER_RIGHT 1
+static const int XINPUT_TRIGGER_LEFT = 0;
+static const int XINPUT_TRIGGER_RIGHT = 1;
 
-class Input
+class Input : public Singleton<Input>
 {
 public:
-	static BYTE keys[ALL_KEYS];					//現在のフレームのキー情報
-	static BYTE oldkeys[ALL_KEYS];				//前のフレームのキー情報
-	static DIMOUSESTATE mouse;					//現在のフレームのマウス情報
-	static DIMOUSESTATE oldmouse;				//前のフレームのマウス情報
-	static XINPUT_STATE state;					//現在のフレームのゲームパッド情報
-	static XINPUT_STATE oldstate;				//前のフレームのゲームパッド情報
-	static XINPUT_VIBRATION vibration;			//振動用
+	BYTE keys[ALL_KEYS];					//現在のフレームのキー情報
+	BYTE oldkeys[ALL_KEYS];				//前のフレームのキー情報
+	DIMOUSESTATE mouse;					//現在のフレームのマウス情報
+	DIMOUSESTATE oldmouse;				//前のフレームのマウス情報
+	XINPUT_STATE state;					//現在のフレームのゲームパッド情報
+	XINPUT_STATE oldstate;				//前のフレームのゲームパッド情報
+	XINPUT_VIBRATION vibration;			//振動用
 
 	//更新処理
-	static void Update(IDirectInputDevice8* devKeyboard, IDirectInputDevice8* devmouse) {
+	void Update(IDirectInputDevice8* devKeyboard, IDirectInputDevice8* devmouse) {
 		for (int i = 0; i < ALL_KEYS; ++i) {
 			//前のフレームのキー情報を保存
 			oldkeys[i] = keys[i];
@@ -58,37 +59,37 @@ public:
 
 	}
 
-	static bool isKey(int keyIndex) {
+	bool isKey(int keyIndex) {
 		if (keyIndex < 0 || keyIndex > 255)return false;
 		return keys[keyIndex];
 	}
 
-	static bool isKeyTrigger(int keyIndex) {
+	bool isKeyTrigger(int keyIndex) {
 		if (keyIndex < 0 || keyIndex > 255)return false;
 		return keys[keyIndex] && !oldkeys[keyIndex];
 	}
 
-	static bool isKeyRelease(int keyIndex) {
+	bool isKeyRelease(int keyIndex) {
 		if (keyIndex < 0 || keyIndex > 255)return false;
 		return !keys[keyIndex] && oldkeys[keyIndex];
 	}
 
-	static bool isMouse(int mouseIndex) {
+	bool isMouse(int mouseIndex) {
 		if (mouseIndex < 0 || mouseIndex > 255)return false;
 		return mouse.rgbButtons[mouseIndex];
 	}
 
-	static bool isMouseTrigger(int mouseIndex) {
+	bool isMouseTrigger(int mouseIndex) {
 		if (mouseIndex < 0 || mouseIndex > 255)return false;
 		return mouse.rgbButtons[mouseIndex] && !oldmouse.rgbButtons[mouseIndex];
 	}
 
-	static bool isMouseRelease(int mouseIndex) {
+	bool isMouseRelease(int mouseIndex) {
 		if (mouseIndex < 0 || mouseIndex > 255)return false;
 		return !mouse.rgbButtons[mouseIndex] && oldmouse.rgbButtons[mouseIndex];
 	}
 
-	static bool isPad(int pad)//引数　押すボタンの種類
+	bool isPad(int pad)//引数　押すボタンの種類
 	{
 
 		return state.Gamepad.wButtons & pad;
@@ -111,18 +112,18 @@ public:
 
 
 
-	static bool isPadTrigger(int pad)
+	bool isPadTrigger(int pad)
 	{
 		return (state.Gamepad.wButtons & pad) && !(oldstate.Gamepad.wButtons & pad);
 	}
 
-	static bool isPadEnd(int pad)
+	bool isPadEnd(int pad)
 	{
 		return !(state.Gamepad.wButtons & pad) && (oldstate.Gamepad.wButtons & pad);
 	}
 
 	//引数　傾けるスティックの左右と向き
-	static float isPadThumb(int pad)
+	float isPadThumb(int pad)
 	{
 		switch (pad)
 		{
@@ -138,7 +139,7 @@ public:
 		}
 	}
 
-	static float isOldPadThumb(int pad)
+	float isOldPadThumb(int pad)
 	{
 		switch (pad)
 		{
@@ -167,7 +168,7 @@ public:
 	//関数の戻り値を移動量にかけ、プレイヤーの座標に足せばいい
 	//プレイヤーの座標 += 関数の戻り値 * 移動量;
 
-	static float isPadThumbTrigger(int pad)
+	float isPadThumbTrigger(int pad)
 	{
 		switch (pad)
 		{
@@ -183,7 +184,7 @@ public:
 		}
 	}
 
-	static float isPadTri(int pad)
+	float isPadTri(int pad)
 	{
 		switch (pad)
 		{
@@ -203,7 +204,7 @@ public:
 	//押してるとき正の値が返る
 
 
-	static float isPadTriTrigger(int pad)
+	float isPadTriTrigger(int pad)
 	{
 		switch (pad)
 		{
@@ -215,7 +216,7 @@ public:
 		}
 	}
 
-	static float isPadTriEnd(int pad)
+	float isPadTriEnd(int pad)
 	{
 		switch (pad)
 		{
@@ -228,7 +229,7 @@ public:
 	}
 
 	//値指定版
-	static float isPadTriEndDefValue(int pad, float value)
+	float isPadTriEndDefValue(int pad, float value)
 	{
 		switch (pad)
 		{
@@ -240,7 +241,7 @@ public:
 		}
 	}
 	
-	static void StartVibration(int LeftMotorRate,int RightMotorRate)
+	void StartVibration(int LeftMotorRate,int RightMotorRate)
 	{
 		if (LeftMotorRate < 0 || LeftMotorRate > 100 || RightMotorRate < 0 || RightMotorRate > 100){
 			return;

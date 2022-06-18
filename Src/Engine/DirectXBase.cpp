@@ -226,7 +226,7 @@ void DirectXBase::processBeforeDrawing() {
 	}
 
 	//全キーの入力状態を取得する
-	Input::Update(devkeybord, devmouse);
+	Input::Ins()->Update(devkeybord, devmouse);
 
 	//レンダーターゲットのリソースバリア変更
 	UINT bbIndex = swapchain->GetCurrentBackBufferIndex();
