@@ -53,28 +53,28 @@ void main(uint3 DTid : SV_DispatchThreadID)
     iBone = input[DTid.x].vertex.boneIndex.x;
     weight = input[DTid.x].vertex.boneWeight.x;
     m = input[DTid.x].skinData.bones[iBone];
-    outputData.pos += weight * mul(m, input[DTid.x].vertex.pos);
+    outputData.pos += weight * mul((float3x3)m, input[DTid.x].vertex.pos);
     outputData.normal += weight * mul((float3x3) m, input[DTid.x].vertex.normal);
 
     // ボーン1
     iBone = input[DTid.x].vertex.boneIndex.y;
     weight = input[DTid.x].vertex.boneWeight.y;
     m = input[DTid.x].skinData.bones[iBone];
-    outputData.pos += weight * mul(m, input[DTid.x].vertex.pos);
+    outputData.pos += weight * mul((float3x3) m, input[DTid.x].vertex.pos);
     outputData.normal += weight * mul((float3x3) m, input[DTid.x].vertex.normal);
 
     // ボーン2
     iBone = input[DTid.x].vertex.boneIndex.z;
     weight = input[DTid.x].vertex.boneWeight.z;
     m = input[DTid.x].skinData.bones[iBone];
-    outputData.pos += weight * mul(m, input[DTid.x].vertex.pos);
+    outputData.pos += weight * mul((float3x3) m, input[DTid.x].vertex.pos);
     outputData.normal += weight * mul((float3x3) m, input[DTid.x].vertex.normal);
 
     // ボーン3
     iBone = input[DTid.x].vertex.boneIndex.w;
     weight = input[DTid.x].vertex.boneWeight.w;
     m = input[DTid.x].skinData.bones[iBone];
-    outputData.pos += weight * mul(m, input[DTid.x].vertex.pos);
+    outputData.pos += weight * mul((float3x3) m, input[DTid.x].vertex.pos);
     outputData.normal += weight * mul((float3x3) m, input[DTid.x].vertex.normal);
 
     output[DTid.x] = outputData;

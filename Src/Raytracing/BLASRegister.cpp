@@ -9,7 +9,7 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 	blas.push_back(std::make_shared<BLAS>());
 	blas.back()->GenerateBLASObj(DirectryPath, ModelName, HitGroupName, TexturePath);
 
-	return blas.size() - 1;
+	return static_cast<int>(blas.size()) - 1;
 
 }
 
@@ -21,7 +21,7 @@ int BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string
 	blas.push_back(std::make_shared<BLAS>());
 	blas.back()->GenerateBLASFbx(DirectryPath, ModelName, HitGroupName, TexturePath);
 
-	return blas.size() - 1;
+	return static_cast<int>(blas.size()) - 1;
 
 }
 
@@ -33,7 +33,7 @@ int BLASRegister::GenerateData(ModelDataManager::ObjectData Data, const std::wst
 	blas.push_back(std::make_shared<BLAS>());
 	blas.back()->GenerateBLASData(Data, HitGroupName, TextureHandle, IsOpaque);
 
-	return blas.size() - 1;
+	return static_cast<int>(blas.size()) - 1;
 
 }
 

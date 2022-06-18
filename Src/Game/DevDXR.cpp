@@ -258,17 +258,6 @@ void DevDXR::Draw() {
 
 void DevDXR::Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& debugPiplineID) {
 
-
-	float acosBuff = std::acos(-1);
-
-
-
-	float inputValue = -1;
-	float x = 1.0f - (inputValue);
-	static const float fScaleDepth = 0.25f;
-	float expIn = -0.00287f + x * (0.459f + x * (3.83f + x * (-6.8f + x * 5.25f)));
-	float buff = fScaleDepth * std::exp(expIn);
-
 	bool isMove = false;
 
 	float speed = 10.0f;
@@ -327,7 +316,7 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 		// ライトを表示するかどうかのフラグを更新。
 		bool isActive = static_cast<bool>(constBufferData.dirLight.isActive);
 		ImGui::Checkbox("IsActive", &isActive);
-		if (isActive != constBufferData.dirLight.isActive) isMove = true;
+		if (isActive != static_cast<bool>(constBufferData.dirLight.isActive)) isMove = true;
 		constBufferData.dirLight.isActive = static_cast<int>(isActive);
 
 		// 値を保存する。
@@ -370,7 +359,7 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 		// ライトを表示するかどうかのフラグを更新。
 		bool isActive = static_cast<bool>(constBufferData.pointLight.isActive);
 		ImGui::Checkbox("IsActive", &isActive);
-		if (isActive != constBufferData.pointLight.isActive) isMove = true;
+		if (isActive != static_cast<bool>(constBufferData.pointLight.isActive)) isMove = true;
 		constBufferData.pointLight.isActive = static_cast<int>(isActive);
 
 		// 値を保存する。
@@ -378,7 +367,7 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 		float dirY = constBufferData.pointLight.lightPos.y;
 		float dirZ = constBufferData.pointLight.lightPos.z;
 		float lightSize = constBufferData.pointLight.lightSize;
-		float aoSampleCount = constBufferData.aoSampleCount;
+		float aoSampleCount = static_cast<float>(constBufferData.aoSampleCount);
 		float pointLightPower = constBufferData.pointLight.lightPower;
 		float MOVE_LENGTH = 1500.0f;
 		ImGui::SliderFloat("PointLightX", &constBufferData.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
@@ -387,7 +376,7 @@ void DevDXR::InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight,
 		ImGui::SliderFloat("PointLightRadius", &constBufferData.pointLight.lightSize, 1.0f, 50.0f);
 		ImGui::SliderFloat("PointLightPower", &constBufferData.pointLight.lightPower, 300.0f, 1000.0f);
 		ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
-		constBufferData.aoSampleCount = aoSampleCount;
+		constBufferData.aoSampleCount = static_cast<int>(aoSampleCount);
 
 		// 変わっていたら
 		if (dirX != constBufferData.pointLight.lightPos.x || dirY != constBufferData.pointLight.lightPos.y || dirZ != constBufferData.pointLight.lightPos.z || lightSize != constBufferData.pointLight.lightSize || pointLightPower != constBufferData.pointLight.lightPower) {

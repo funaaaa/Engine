@@ -28,17 +28,17 @@ public:
 	Vec3(const XMVECTOR& Rhs) :x(Rhs.m128_f32[0]), y(Rhs.m128_f32[1]), z(Rhs.m128_f32[2]) {};
 
 	// “àÏ
-	inline const float& Dot(const Vec3& Rhs) {
+	inline float Dot(const Vec3& Rhs) {
 		return x * Rhs.x + y * Rhs.y + z * Rhs.z;
 	}
 	// ŠOÏ
-	inline const Vec3& Cross(const Vec3& Rhs) {
+	inline Vec3 Cross(const Vec3& Rhs) {
 		return Vec3(y * Rhs.z - z * Rhs.y,
 			z * Rhs.x - x * Rhs.z,
 			x * Rhs.y - y * Rhs.x);
 	}
 	// ’·‚³
-	inline const float& Length() {
+	inline float Length() {
 		return sqrtf(Dot(*this));
 	}
 	// ³‹K‰»

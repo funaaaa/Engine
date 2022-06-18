@@ -8,7 +8,10 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include "ModelDataManager.h"
 
 std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName)
@@ -309,7 +312,7 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 				wstring buff = StringToWString(DirectryPath + textureNameBuff);
 
 				// 既に生成済みかをチェックする。
-				const int TEXPATH_COUNT = texturePath.size();
+				const int TEXPATH_COUNT = static_cast<int>(texturePath.size());
 				bool isLoad = false;
 				for (int index = 0; index < TEXPATH_COUNT; ++index) {
 

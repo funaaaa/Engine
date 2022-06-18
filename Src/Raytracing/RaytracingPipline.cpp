@@ -16,7 +16,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	hitGroupName = HitGroupMgr::Ins()->hitGroupNames[UseHitGroup];
 
 	// 入力されたデータを保存する。
-	const int INPUT_COUNT = InputData.size();
+	const int INPUT_COUNT = static_cast<int>(InputData.size());
 	for (int index = 0; index < INPUT_COUNT; ++index) {
 
 		// 入力されたデータ構造体。
@@ -26,14 +26,14 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 		buff.shaderPath = InputData[index].shaderPath;
 
 		// 保存されているエントリポイントを保存。
-		const int RG_ENTRY_COUNT = InputData[index].rayGenEnteryPoint.size();
+		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint.size());
 		for (int entryPointIndex = 0; entryPointIndex < RG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
 			buff.rayGenEnteryPoint.push_back(InputData[index].rayGenEnteryPoint[entryPointIndex]);
 
 		}
-		const int MS_ENTRY_COUNT = InputData[index].missEntryPoint.size();
+		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint.size());
 		for (int entryPointIndex = 0; entryPointIndex < MS_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
@@ -42,7 +42,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 		}
 
 		// 保存する。
-		const int HS_ENTRY_COUNT = InputData[index].hitgroupEntryPoint.size();
+		const int HS_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint.size());
 		for (int entryPointIndex = 0; entryPointIndex < HS_ENTRY_COUNT; ++entryPointIndex) {
 			buff.hitgroupEntryPoint.push_back(InputData[index].hitgroupEntryPoint[entryPointIndex]);
 		}
@@ -70,7 +70,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	subobjects.SetStateObjectType(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
 	// シェーダーを読み込む。
-	const int SHADER_COUNT = shaderData.size();
+	const int SHADER_COUNT = static_cast<int>(shaderData.size());
 	for (int index = 0; index < SHADER_COUNT; ++index) {
 
 		shaderCode.emplace_back();
@@ -79,7 +79,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 		ShaderStorage::Ins()->LoadShaderForDXC(shaderData[index].shaderPath, "lib_6_4", "");
 
 		// シェーダーを読み込む。
-		shaderCode[index].BytecodeLength = ShaderStorage::Ins()->GetShaderBin(shaderData[index].shaderPath).size();
+		shaderCode[index].BytecodeLength = static_cast<SIZE_T>(ShaderStorage::Ins()->GetShaderBin(shaderData[index].shaderPath).size());
 		shaderCode[index].pShaderBytecode = ShaderStorage::Ins()->GetShaderBin(shaderData[index].shaderPath).data();
 
 		// シェーダーの各関数レコードの登録。
@@ -87,21 +87,21 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 		dxilLib->SetDXILLibrary(&shaderCode[index]);
 
 		// シェーダーのエントリポイントを登録。
-		const int RG_ENTRY_COUNT = InputData[index].rayGenEnteryPoint.size();
+		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint.size());
 		for (int entryPointIndex = 0; entryPointIndex < RG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
 			dxilLib->DefineExport(shaderData[index].rayGenEnteryPoint[entryPointIndex]);
 
 		}
-		const int MS_ENTRY_COUNT = InputData[index].missEntryPoint.size();
+		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint.size());
 		for (int entryPointIndex = 0; entryPointIndex < MS_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
 			dxilLib->DefineExport(shaderData[index].missEntryPoint[entryPointIndex]);
 
 		}
-		const int HG_ENTRY_COUNT = InputData[index].hitgroupEntryPoint.size();
+		const int HG_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint.size());
 		for (int entryPointIndex = 0; entryPointIndex < HG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
@@ -221,10 +221,10 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	{
 		uint8_t* p = rgsStart;
 
-		const int SHADER_DATA_COUNT = shaderData.size();
+		const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
 		for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-			const int RG_COUNT = shaderData[index].rayGenEnteryPoint.size();
+			const int RG_COUNT = static_cast<int>(shaderData[index].rayGenEnteryPoint.size());
 			for (int rgIndex = 0; rgIndex < RG_COUNT; ++rgIndex) {
 
 				void* id = rtsoProps->GetShaderIdentifier(shaderData[index].rayGenEnteryPoint[rgIndex]);
@@ -241,10 +241,10 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	{
 		uint8_t* p = missStart;
 
-		const int SHADER_DATA_COUNT = shaderData.size();
+		const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
 		for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-			const int MS_COUNT = shaderData[index].missEntryPoint.size();
+			const int MS_COUNT = static_cast<int>(shaderData[index].missEntryPoint.size());
 			for (int msIndex = 0; msIndex < MS_COUNT; ++msIndex) {
 
 				void* id = rtsoProps->GetShaderIdentifier(shaderData[index].missEntryPoint[msIndex]);
@@ -379,14 +379,14 @@ UINT RaytracingPipline::WriteShaderIdentifier(void* dst, const void* shaderId)
 	return D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 }
 
-const int& RaytracingPipline::GetRayGenerationCount()
+int RaytracingPipline::GetRayGenerationCount()
 {
 	int count = 0;
 
-	const int SHADER_DATA_COUNT = shaderData.size();
+	const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
 	for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-		count += shaderData[index].rayGenEnteryPoint.size();
+		count += static_cast<int>(shaderData[index].rayGenEnteryPoint.size());
 
 	}
 
@@ -394,14 +394,14 @@ const int& RaytracingPipline::GetRayGenerationCount()
 
 }
 
-const int& RaytracingPipline::GetMissCount()
+int RaytracingPipline::GetMissCount()
 {
 	int count = 0;
 
-	const int SHADER_DATA_COUNT = shaderData.size();
+	const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
 	for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-		count += shaderData[index].missEntryPoint.size();
+		count += static_cast<int>(shaderData[index].missEntryPoint.size());
 
 	}
 

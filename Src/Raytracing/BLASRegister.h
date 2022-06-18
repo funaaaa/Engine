@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include <string>
 #include <wrl.h>
 #include <d3d12.h>
@@ -46,7 +49,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(const int& Index);
 
 	// BLAS‚Ì”‚ğæ“¾B
-	int GetBLASCount() { return blas.size(); }
+	int GetBLASCount() { return static_cast<int>(blas.size()); }
 
 	// BLAS‚ğæ“¾B
 	std::vector<std::shared_ptr<BLAS>>& GetBLAS() { return blas; }

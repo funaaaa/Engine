@@ -14,7 +14,7 @@ namespace FHelper {
 	static const Vec3 COLOR_GREEN_VIVID = Vec3(0, COLOR_MAX, 0);			//RGBU‚èØ‚è‚Ì—Î
 	static const Vec3 COLOR_BLUE_VIVID = Vec3(0, 0, COLOR_MAX);				//RGBU‚èØ‚è‚ÌÂ
 
-	static const float F_PI_F = 3.14159265359;										//‰~ü—¦ 180“x
+	static const float F_PI_F = 3.14159265359f;										//‰~ü—¦ 180“x
 	static const float F_PI_DIV_F = F_PI_F / 2.0f;									//‰~ü—¦ 90“x
 	static const float F_PI_3DIV_F = F_PI_F + F_PI_3DIV_F;							//‰~ü—¦ 270“x
 	static const float F_2PI_F = F_PI_F * 2.0f;										//‰~ü—¦ 360“x
@@ -26,7 +26,7 @@ namespace FHelper {
 		return (rand() % (max - min + 1)) + min;
 	}
 	inline Vec3 GetRandXMFLOAT3(const int& min, const int& max) {
-		return Vec3(GetRand(min, max), GetRand(min, max), GetRand(min, max));
+		return Vec3(static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)));
 	}
 
 	//w’è‚Ì’l‚Ìw’è‚Ì’l‚Ì”ÍˆÍ‚Å‚Ì0~1‚ÌŠ„‡‚ğ‹‚ß‚é

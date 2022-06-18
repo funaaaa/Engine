@@ -4,7 +4,10 @@
 #include <vector>
 #include <d3d12.h>
 #include <wrl.h>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include "WindowsAPI.h"
 
 class RayRootsignature;
@@ -70,9 +73,9 @@ protected:
 	UINT WriteShaderIdentifier(void* dst, const void* shaderId);
 
 	// RayGenerationシェーダーの数を取得。
-	const int& GetRayGenerationCount();
+	int GetRayGenerationCount();
 
 	// MissShaderの数を取得。
-	const int& GetMissCount();
+	int GetMissCount();
 
 };

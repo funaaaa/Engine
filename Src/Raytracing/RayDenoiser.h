@@ -1,6 +1,9 @@
 #pragma once
 #include "Singleton.h"
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include <array>
 
 class RaytracingOutput;

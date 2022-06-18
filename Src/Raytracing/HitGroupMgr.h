@@ -1,5 +1,8 @@
 #pragma once
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include <vector>
 #include <string>
 #include <array>
@@ -40,7 +43,7 @@ public:
 	void Setting();
 
 	// 配列数のゲッタ
-	const int& GetHitGroupCount() { return hitGroup.size(); }
+	int GetHitGroupCount() { return static_cast<int>(hitGroup.size()); }
 	// CHのゲッタ
 	const LPCWSTR& GetCH(const int& Index);
 	const bool& GetCHFlag(const int& Index);

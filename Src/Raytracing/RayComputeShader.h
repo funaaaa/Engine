@@ -1,7 +1,10 @@
 #pragma once
 #include <wrl.h>
 #include <DirectXTex/d3dx12.h>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include <vector>
 
 class RayRootsignature;

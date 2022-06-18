@@ -1,13 +1,21 @@
 #pragma once
 #include "Singleton.h"
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include <vector>
 #include <string>
 #include <array>
 #include <DirectXMath.h>
 #include <DirectXTex/DirectXTex.h>
-#include "fbxsdk.h"
 #include "Vec.h"
+
+#pragma warning(push)
+#pragma warning(disable:4023)
+#pragma warning(disable:4099)
+#include "fbxsdk.h"
+#pragma warning(pop)
 
 // ボーン番号とスキンウェイトのペア
 struct WeightSet {

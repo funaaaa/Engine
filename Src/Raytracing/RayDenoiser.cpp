@@ -50,7 +50,7 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVI
 	/*===== デノイズ処理 =====*/
 
 	// 重みテーブルを計算。
-	CalcWeightsTableFromGaussian(BlurPower);
+	CalcWeightsTableFromGaussian(static_cast<float>(BlurPower));
 
 	// 重みテーブルを書き込む。
 	weightTableCBX->Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), gaussianWeights.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
@@ -62,9 +62,9 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVI
 
 	// コンピュートシェーダーを実行。
 	blurX->ChangeInputUAVIndex({ InputUAVIndex });
-	blurX->Dispatch((window_width / 2.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch((window_width / 2.0f) / 4, (window_height / 2.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurFinal->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});
+	blurX->Dispatch(static_cast<UINT>((window_width / 2.0f) / 4), static_cast<UINT>(window_height / 4), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurY->Dispatch(static_cast<UINT>((window_width / 2.0f) / 4), static_cast<UINT>((window_height / 2.0f) / 4), static_cast<UINT>(1), blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurFinal->Dispatch(static_cast<UINT>(window_width / 4), static_cast<UINT>(window_height / 4), static_cast<UINT>(1), OutputUAVIndex, {});
 	//blurX->ChangeInputUAVIndex({ InputUAVIndex });
 	//blurX->Dispatch((window_width / 1.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	//blurY->Dispatch((window_width / 1.0f) / 4, (window_height / 1.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });

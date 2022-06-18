@@ -6,7 +6,7 @@ ComPtr<ID3DBlob> ShaderStorage::LoadShader(const string& shaderPath, const strin
 
 	/*-- シェーダーのロード処理 --*/
 
-	const int SHADER_COUNT = shaderData.size();
+	const int SHADER_COUNT = static_cast<int>(shaderData.size());
 
 	// シェーダーの数分ループして、ロード済みのシェーダーかをチェックする。
 	for (int index = 0; index < SHADER_COUNT; ++index) {
@@ -31,7 +31,7 @@ ComPtr<ID3DBlob> ShaderStorage::LoadShaderForDXC(const string& shaderPath, const
 
 	/*-- シェーダーのロード処理 --*/
 
-	const int SHADER_COUNT = shaderData.size();
+	const int SHADER_COUNT = static_cast<int>(shaderData.size());
 
 	// シェーダーの数分ループして、ロード済みのシェーダーかをチェックする。
 	for (int index = 0; index < SHADER_COUNT; ++index) {
@@ -57,7 +57,7 @@ ComPtr<ID3DBlob> ShaderStorage::GetShaderData(const string& shaderPath)
 
 	/*-- シェーダーデータを返す処理 --*/
 
-	const int SHADER_COUNT = shaderData.size();
+	const int SHADER_COUNT = static_cast<int>(shaderData.size());
 
 	// 全てのシェーダーデータを検索する。
 	for (int index = 0; index < SHADER_COUNT; ++index) {
@@ -76,7 +76,7 @@ ComPtr<IDxcBlob> ShaderStorage::GetShaderDataForDXC(const string& shaderPath)
 {
 	/*-- シェーダーデータを返す処理 --*/
 
-	const int SHADER_COUNT = shaderData.size();
+	const int SHADER_COUNT = static_cast<int>(shaderData.size());
 
 	// 全てのシェーダーデータを検索する。
 	for (int index = 0; index < SHADER_COUNT; ++index) {
@@ -95,7 +95,7 @@ vector<char>& ShaderStorage::GetShaderBin(const string& shaderPath)
 {
 	/*-- シェーダーデータを返す処理 --*/
 
-	const int SHADER_COUNT = shaderData.size();
+	const int SHADER_COUNT = static_cast<int>(shaderData.size());
 
 	// 全てのシェーダーデータを検索する。
 	for (int index = 0; index < SHADER_COUNT; ++index) {
@@ -107,5 +107,7 @@ vector<char>& ShaderStorage::GetShaderBin(const string& shaderPath)
 
 	}
 
-	return vector<char>{};
+	// シェーダーがロードされていない。
+	assert(0);
+	return shaderData[0]->GetShaderBin();
 }

@@ -1,8 +1,15 @@
 #include "ModelDataManager.h"
+#pragma warning(push)
+#pragma warning(disable:4099)
+#pragma warning(disable:4023)
 #include "Fbxsdk.h"
+#pragma warning(pop)
 #include <sstream>
 #include <fstream>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 
 void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, ObjectData& ObjectData, bool IsSmoothing)
 {
@@ -101,14 +108,14 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 					vert.normal = normal[indexNormal - 1];
 					vert.uv = uv[indexTexcoord - 1];
 					//モデルデータに追加
-					modelData.at(modelData.size() - 1).vertex.push_back(vert);
-					modelData.at(modelData.size() - 1).index.push_back(modelData.at(modelData.size() - 1).index.size());
+					modelData.at(static_cast<int>(modelData.size()) - 1).vertex.push_back(vert);
+					modelData.at(static_cast<int>(modelData.size()) - 1).index.push_back(static_cast<int>(modelData.at(static_cast<int>(modelData.size()) - 1).index.size()));
 					//proSpriteにも追加
 					ObjectData.vertex.push_back(vert);
-					ObjectData.index.push_back(ObjectData.index.size());
+					ObjectData.index.push_back(static_cast<int>(ObjectData.index.size()));
 					//isSmoothingがtrueなら頂点情報を追加する
 					if (IsSmoothing == true) {
-						smoothData[indexPosition].push_back(ObjectData.vertex.size() - 1);
+						smoothData[indexPosition].push_back(static_cast<int>(ObjectData.vertex.size()) - 1);
 					}
 				}
 			}
@@ -139,7 +146,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 	for (int i = 0; i < modelData.at(dataNumber).vertex.size(); ++i) {
 		ObjectData.vertex.push_back(modelData.at(dataNumber).vertex.at(i));
 	}
-	
+
 }
 
 //void ModelDataManager::LoadObj(string directoryPath, string fileName, Object3DShadow& objectBuffer, bool isSmoothing)

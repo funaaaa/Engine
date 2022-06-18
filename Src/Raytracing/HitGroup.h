@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include <wtypes.h>
 
 class RayRootsignature;

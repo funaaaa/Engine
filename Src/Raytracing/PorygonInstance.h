@@ -2,7 +2,10 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <wrl.h>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include "Vec.h"
 
 // TLASに登録するインスタンスクラス

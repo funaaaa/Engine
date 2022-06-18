@@ -15,7 +15,6 @@ void SoundManager::SettingSoundManager()
 
 SoundManager::SoundData SoundManager::SoundLoadWave(char* fileName)
 {
-	HRESULT result;
 
 	//①ファイルオープン
 	//ファイル入力ストリームのインスタンス

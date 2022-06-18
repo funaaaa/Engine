@@ -13,7 +13,7 @@ void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, 
 	FbxModel modelData = fbxModelData[Index];
 
 	// 頂点データを変換。
-	const int VERTEX_COUNT = modelData.vertices.size();
+	const int VERTEX_COUNT = static_cast<int>(modelData.vertices.size());
 	OutputVertex.resize(VERTEX_COUNT);
 	for (int index = 0; index < VERTEX_COUNT; ++index) {
 		OutputVertex[index].pos = modelData.vertices[index].pos;
@@ -22,7 +22,7 @@ void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, 
 	}
 
 	// 頂点インデックスデータを変換。
-	const int INDEX_COUNT = modelData.indices.size();
+	const int INDEX_COUNT = static_cast<int>(modelData.indices.size());
 	OutputVertexIndex.resize(INDEX_COUNT);
 	for (int index = 0; index < INDEX_COUNT; ++index) {
 		OutputVertexIndex[index] = modelData.indices[index];
@@ -59,7 +59,7 @@ int FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& Model
 	/*===== ロード関数 =====*/
 
 	// このモデルが既にロードされていたら。
-	const int MODEL_COUNT = fbxModelData.size();
+	const int MODEL_COUNT = static_cast<int>(fbxModelData.size());
 	for (int index = 0; index < MODEL_COUNT; ++index) {
 
 		// 名前が同じファイルがあったら。
@@ -98,7 +98,7 @@ int FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& Model
 	// データを保存。
 	fbxModelData.emplace_back(modelData);
 
-	return fbxModelData.size() - 1;
+	return static_cast<int>(fbxModelData.size()) - 1;
 
 }
 
@@ -127,14 +127,14 @@ FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 	/*===== スキニング行列を取得 =====*/
 
 	// 指定されたインデックスが範囲外だったら何も返さない。
-	if (fbxModelData.size() - 1 < Index || Index < 0) return {};
+	if (static_cast<int>(fbxModelData.size()) - 1 < Index || Index < 0) return {};
 
 	// ボーン配列
 	std::vector<Bone>& bones = fbxModelData[Index].bones;
 
 	SkinData returnData;
 
-	const int BONE_SIZE = bones.size();
+	const int BONE_SIZE = static_cast<int>(bones.size());
 	for (int index = 0; index < BONE_SIZE; ++index) {
 
 		// 今の姿勢行列
@@ -161,12 +161,12 @@ void FbxLoader::GetSkinComputeInput(const int& Index, std::vector<SkinComputeInp
 	/*===== スキニングアニメーション用コンピュートシェーダーの入力構造体を取得 =====*/
 
 	// 指定されたインデックスが範囲外だったら何も返さない。
-	if (fbxModelData.size() - 1 < Index || Index < 0) return;
+	if (static_cast<int>(fbxModelData.size()) - 1 < Index || Index < 0) return;
 
 	FbxModel indexModel = fbxModelData[Index];
 	SkinData skinData = GetSkinMat(Index);
 
-	const int VERTEX_COUNT = indexModel.vertices.size();
+	const int VERTEX_COUNT = static_cast<int>(indexModel.vertices.size());
 	for (int index = 0; index < VERTEX_COUNT; ++index) {
 
 		Input[index].vertex = indexModel.vertices[index];
@@ -548,7 +548,7 @@ void FbxLoader::ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh)
 	auto& vertices = Model.vertices;
 
 	// 各頂点について処理
-	const int VERTICES_SIZE = vertices.size();
+	const int VERTICES_SIZE = static_cast<int>(vertices.size());
 	for (int index = 0; index < VERTICES_SIZE; ++index) {
 
 		// 頂点のウェイトから最も大きい4つを選択。

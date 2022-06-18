@@ -115,9 +115,9 @@ private:
 	void CreateAccelerationStructure();
 
 	// GPUディスクリプタを書き込む。
-	inline const UINT& WriteGPUDescriptor(void* Dst, const D3D12_GPU_DESCRIPTOR_HANDLE* Descriptor)
+	inline UINT WriteGPUDescriptor(void* Dst, const D3D12_GPU_DESCRIPTOR_HANDLE* Descriptor)
 	{
 		memcpy(Dst, Descriptor, sizeof(Descriptor));
-		return UINT(sizeof(Descriptor));
+		return static_cast<UINT>((sizeof(Descriptor)));
 	}
 };

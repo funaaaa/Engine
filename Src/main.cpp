@@ -11,7 +11,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
 	/*----------変数宣言----------*/
-	srand(time(NULL));
+	srand(static_cast<unsigned int>(time(NULL)));
 
 	// ディスクリプタヒープを初期化。
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();

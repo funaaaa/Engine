@@ -2,7 +2,11 @@
 #include <string>
 #include <map>
 #include <vector>
+#pragma warning(push)
+#pragma warning(disable:4023)
+#pragma warning(disable:4099)
 #include "Fbxsdk.h"
+#pragma warning(pop)
 #include "Vec.h"
 #include <wtypes.h>
 #include "Singleton.h"
@@ -63,7 +67,7 @@ public:
 	//–@ü‚Ì•½‹Ï‚ğ‹‚ß‚éŠÖ”
 	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);
 
-	int GetModelCount() { return modelData.size(); }
+	int GetModelCount() { return static_cast<int>(modelData.size()); }
 	const ModelData& GetModelData(const int& Index) { return modelData[Index]; }
 
 };

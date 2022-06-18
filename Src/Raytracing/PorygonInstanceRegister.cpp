@@ -17,7 +17,7 @@ int PorygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 	// InstanceDescÇï€éùÅB
 	instanceDesc.emplace_back(buff);
 
-	return instance.size() - 1;
+	return static_cast<int>(instance.size()) - 1;
 
 }
 
@@ -102,7 +102,7 @@ void PorygonInstanceRegister::ChangeScale(const int& Index, const Vec3& Scale)
 void PorygonInstanceRegister::CalWorldMat()
 {
 
-	const int INSTANCE_SIZE = instance.size();
+	const int INSTANCE_SIZE = static_cast<int>(instance.size());
 	for (int index = 0; index < INSTANCE_SIZE; ++index) {
 
 		instance[index]->CalWorldMat(instanceDesc[index]);

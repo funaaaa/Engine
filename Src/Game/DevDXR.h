@@ -5,7 +5,6 @@
 #include "FbxLoader.h"
 
 #include "RayDenoiser.h"
-#include "BakeAO.h"
 
 #include "BLASRegister.h"
 #include "PorygonInstance.h"

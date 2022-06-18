@@ -417,7 +417,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     uint instanceID = InstanceID();
 
     // テクスチャの色を保存。
-    float3 texColor = texture.SampleLevel(smp, vtx.uv, 0.0f);
+    float3 texColor = (float3)texture.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 反射回数が100000回だったらGI用のレイなのでテクスチャの色を返す。
     if (payload.recursive == 100000)

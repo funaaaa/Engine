@@ -5,7 +5,10 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <d3d12.h>
+#pragma warning(push)
+#pragma warning(disable:4267)
 #include <memory>
+#pragma warning(pop)
 #include <wrl.h>
 
 class PorygonMeshInstance;

@@ -15,7 +15,7 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	const int TEXTURE_PATH_COUNT = TexturePath.size();
+	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
 	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
 
 		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
@@ -32,13 +32,13 @@ void BLAS::GenerateBLASObj(const string& DirectryPath, const string& ModelName, 
 	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, false);
 
 	// 頂点数を求める。
-	vertexCount = dataBuff.vertex.size();
+	vertexCount = static_cast<UINT>(dataBuff.vertex.size());
 
 	// 頂点インデックス数を求める。
-	indexCount = dataBuff.index.size();
+	indexCount = static_cast<UINT>(dataBuff.index.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < vertexCount; ++index) {
+	for (int index = 0; index < static_cast<int>(vertexCount); ++index) {
 
 		RayVertex buff{};
 		buff.normal = dataBuff.vertex[index].normal;
@@ -107,7 +107,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	const int TEXTURE_PATH_COUNT = TexturePath.size();
+	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
 	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
 
 		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
@@ -126,13 +126,13 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 	FbxLoader::Ins()->GetFbxData(modelIndex, modelVertexData, modelIndexData);
 
 	// 頂点数を求める。
-	vertexCount = modelVertexData.size();
+	vertexCount = static_cast<UINT>(modelVertexData.size());
 
 	// 頂点インデックス数を求める。
-	indexCount = modelIndexData.size();
+	indexCount = static_cast<UINT>(modelIndexData.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < vertexCount; ++index) {
+	for (int index = 0; index < static_cast<int>(vertexCount); ++index) {
 
 		RayVertex buff{};
 		buff.normal = modelVertexData[index].normal;
@@ -202,7 +202,7 @@ void BLAS::GenerateBLASFbx(const string& DirectryPath, const string& ModelName, 
 		FbxLoader::Ins()->GetSkinComputeInput(modelIndex, skinComputeInput);
 
 		// スキニングアニメーションで使用するコンピュートシェーダーをロードしておく。
-		skinComput.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), skinComputeInput.size(), skinComputeInput.data(), sizeof(RayVertex), vertex.size(), vertex.data());
+		skinComput.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), static_cast<int>(skinComputeInput.size()), skinComputeInput.data(), sizeof(RayVertex), static_cast<int>(vertex.size()), vertex.data());
 
 	}
 
@@ -219,13 +219,13 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const wstring& Hi
 	/*-- 形状データを読み込む --*/
 
 	// 頂点数を求める。
-	vertexCount = Data.vertex.size();
+	vertexCount = static_cast<UINT>(Data.vertex.size());
 
 	// 頂点インデックス数を求める。
-	indexCount = Data.index.size();
+	indexCount = static_cast<UINT>(Data.index.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < vertexCount; ++index) {
+	for (int index = 0; index < static_cast<int>(vertexCount); ++index) {
 
 		RayVertex buff{};
 		buff.normal = Data.vertex[index].normal;
