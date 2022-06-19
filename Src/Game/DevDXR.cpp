@@ -12,12 +12,12 @@ void DevDXR::Init() {
 	deAOPipline.Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 4, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
-	//sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
+	sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
 
 	// 天球用のスフィアを生成する。
 	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.jpg" });
 	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, 1);
-	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(10000000, 10000000, 10000000));
+	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(100, 100, 100));
 
 	// ライト用のスフィアを読み込む。
 	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
@@ -107,8 +107,8 @@ void DevDXR::Update() {
 	//if (isMoveLight) {
 
 		// 点光源の位置を更新。
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
-	PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
+	///PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
+	//PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
 
 	tlas.Update();
 
@@ -531,3 +531,12 @@ void DevDXR::FPS()
 		frame_count = 0;
 	}
 }
+
+
+/*
+
+天球とそれ以外のオブジェクトが同時に描画できないバグが発生中。
+それ以外のオブジェクトのBLASを生成する段階では問題なく描画するが、Instanceを生成するとダメになる。
+多分リファクタリングするときに何かをやらかした
+
+*/

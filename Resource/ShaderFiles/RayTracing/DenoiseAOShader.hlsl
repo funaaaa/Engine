@@ -77,7 +77,7 @@ float3 AtmosphericScattering(Vertex vtx)
 {
     
     // 地平線以下は真っ黒にする。
-    if (vtx.Position.y < -15)
+    if (vtx.Position.y < -10)
     {
         return float3(0.1f, 0.1f, 0.1f);
     }
