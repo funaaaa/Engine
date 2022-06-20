@@ -92,7 +92,6 @@ void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec
 
 	// 現在のキャラの移動速度の割合から画角に加算する量を求める。
 	float addAngleOfView = (MAX_ANGLEOFVIEW - DEF_ANGLEOFVIEW) * CharaSpeedPer;
-	addAngleOfView /= 2.0f;	// ドリフト等によってまだまだ加速するので一旦は半分にしておく。
 
 	// 基準となる画角の値を変える。
 	baseAngleOfView = DEF_ANGLEOFVIEW + addAngleOfView;
