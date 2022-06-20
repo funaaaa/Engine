@@ -361,7 +361,7 @@ void FbxLoader::ParseMeshFaces(FbxModel& Model, FbxMesh* InputFbxMesh)
 			if (porygonIndex < 3) {
 
 				// 1点追加し、他の2頂点と三角形を構成する。
-				indices.emplace_back(fbxIndex);
+				indices.emplace_back(static_cast<unsigned short>(fbxIndex));
 
 			}
 			// 4頂点目

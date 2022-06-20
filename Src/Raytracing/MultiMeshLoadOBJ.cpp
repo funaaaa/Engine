@@ -141,7 +141,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 				// BLASのデータに追加。
 				blasData.vertex.emplace_back(vert);
-				blasData.index.emplace_back(blasData.index.size());
+				blasData.index.emplace_back(static_cast<UINT>(blasData.index.size()));
 
 			}
 		}

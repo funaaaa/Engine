@@ -121,7 +121,7 @@ struct KariConstBufferData {
 		AS.g = -0.999f;
 		AS.innerRadius = 10000.0f;
 		AS.outerRadius = 10250.0f;
-		AS.km = 0.01f;
+		AS.km = 0.005f;
 		AS.kr = 0.0025f;
 		AS.samples = 2.0f;
 		AS.aveHeight = 0.25f;

@@ -21,7 +21,7 @@ void DevDXR::Init() {
 
 	// ライト用のスフィアを読み込む。
 	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
-	sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 0);
+	sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, 2);
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
@@ -30,19 +30,19 @@ void DevDXR::Init() {
 	// TLASを生成。
 	tlas.GenerateTLAS();
 
-	// レイトレ出力用クラスをセット。
+	// AO出力用クラスをセット。
 	aoOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	// レイトレ出力用クラスをセット。
+	// 色出力用クラスをセット。
 	colorOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// 明るさ情報出力用クラスをセット。
 	lightOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	// gi出力用クラスをセット。
+	// GI出力用クラスをセット。
 	giOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	// デノイズの結果出力用クラスをセット。
+	// 最終出力用クラスをセット。
 	denoiseMixTextureOutput.Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// シェーダーテーブルを生成。
@@ -106,9 +106,9 @@ void DevDXR::Update() {
 	// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
 	//if (isMoveLight) {
 
-		// 点光源の位置を更新。
-	///PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
-	//PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
+	// 点光源の位置を更新。
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.pointLight.lightPos);
+	PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.pointLight.lightSize);
 
 	tlas.Update();
 
@@ -535,8 +535,9 @@ void DevDXR::FPS()
 
 /*
 
-天球とそれ以外のオブジェクトが同時に描画できないバグが発生中。
-それ以外のオブジェクトのBLASを生成する段階では問題なく描画するが、Instanceを生成するとダメになる。
-多分リファクタリングするときに何かをやらかした
+大気散乱の計算式は角度(ベクトル)さえわかれば色を取得できる？
+→天球のサイズと視点が固定だから。
+→だとしたら色取得用でレイを飛ばす必要がなくなる。
+→ディレクショナルライト用のレイも軽いものを使うことができる。
 
 */

@@ -73,11 +73,11 @@ float getMiePhase(float fCos, float fCos2, float g, float g2)
 }
 
 // 大気散乱
-float3 AtmosphericScattering(Vertex vtx)
+float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
 {
     
     // 地平線以下は真っ黒にする。
-    if (vtx.Position.y < -10)
+    if (pos.y < -10)
     {
         return float3(0.1f, 0.1f, 0.1f);
     }
@@ -125,7 +125,7 @@ float3 AtmosphericScattering(Vertex vtx)
     float g2 = g * g;
     
     // 当たった天球のワールド座標
-    float3 worldPos = normalize(mul(float4(vtx.Position, 1), ObjectToWorld4x3())) * fOuterRadius;
+    float3 worldPos = normalize(pos) * fOuterRadius;
     worldPos = IntersectionPos(normalize(worldPos), float3(0.0, fInnerRadius, 0.0), fOuterRadius);
     
     // カメラ座標 元計算式だと中心固定になってしまっていそう。
@@ -136,12 +136,6 @@ float3 AtmosphericScattering(Vertex vtx)
     
     // ディレクショナルライトへの方向を求める。
     float3 v3LightDir = normalize(dirLightPos - worldPos);
-    
-    // 交点までのベクトルと太陽までのベクトルが近かったら赤色に描画する。
-    if (0.999f < dot(normalize(dirLightPos - v3CameraPos), normalize(worldPos - v3CameraPos)))
-    {
-        return float3(1, 1, 1);
-    }
  
     // 天球上頂点からカメラまでのベクトル(光が大気圏に突入した点からカメラまでの光のベクトル)
     float3 v3Ray = worldPos - v3CameraPos;
@@ -211,6 +205,15 @@ float3 AtmosphericScattering(Vertex vtx)
     float rayleighPhase = 0.75f * (1.0f + fcos2);
     // ミー散乱の明るさ。
     float miePhase = 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fcos2) / pow(1.0f + g2 - 2.0f * g * fcos, 1.5f);
+    
+    // ミー散乱の色を保存。
+    mieColor = c0 * rayleighPhase;
+    
+    // 交点までのベクトルと太陽までのベクトルが近かったら白色に描画する。
+    if (0.999f < dot(normalize(dirLightPos - v3CameraPos), normalize(worldPos - v3CameraPos)))
+    {
+        return float3(1, 1, 1);
+    }
  
     // 最終結果の色
     float3 col = 1.0f;
@@ -252,8 +255,8 @@ float SoftShadow(Vertex vtx, float lightSize, float length)
     
 }
 
-// ソフトシャドウ射出関数
-float ShootDirShadow(Vertex vtx, float length)
+// 太陽光の影チェック用レイの準備関数 戻り値は太陽光の色
+bool ShootDirShadow(Vertex vtx, float length)
 {
     float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     
@@ -264,19 +267,29 @@ float ShootDirShadow(Vertex vtx, float length)
         perpL.x = 1.0f;
     }
     
+    // 並行光源の座標を仮で求める。
+    float3 dirLightPos = -gSceneParam.dirLight.lightDir * 15000.0f;
+    
+    // 並行光源までのベクトル。
+    float3 dirLightVec = dirLightPos - worldPosition;
+    dirLightVec = normalize(dirLightVec);
+    
     // 光源の端を求める。
-    float3 toLightEdge = ((vtx.Position + -gSceneParam.dirLight.lightDir * 1000.0f) + perpL * 10) - worldPosition;
-    toLightEdge = normalize(toLightEdge);
+    //float3 toLightEdge = ((vtx.Position + -gSceneParam.dirLight.lightDir * 1000.0f) + perpL * 10) - worldPosition;
+    //toLightEdge = normalize(toLightEdge);
     
-    // 角度を求める。
-    float coneAngle = acos(dot(-gSceneParam.dirLight.lightDir, toLightEdge)) * 2.0f;
+    //// 角度を求める。
+    //float coneAngle = acos(dot(dirLightVec, toLightEdge)) * 2.0f;
     
-    // 乱数の種を求める。
-    uint2 pixldx = DispatchRaysIndex().xy;
-    uint2 numPix = DispatchRaysDimensions().xy;
-    int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
+    //// 乱数の種を求める。
+    //uint2 pixldx = DispatchRaysIndex().xy;
+    //uint2 numPix = DispatchRaysDimensions().xy;
+    //int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
-    float3 shadowRayDir = GetConeSample(randSeed, -gSceneParam.dirLight.lightDir, coneAngle);
+    //// レイを撃つベクトル
+    //float3 shadowRayDir = GetConeSample(randSeed, dirLightVec, coneAngle);
+    float3 shadowRayDir = dirLightVec;
+    
     return ShootShadowRayNoAH(worldPosition, shadowRayDir, length, gRtScene);
     
 }
@@ -348,7 +361,7 @@ void mainRayGen()
 
     rayDesc.Direction = normalize(dir);
     rayDesc.TMin = 0;
-    rayDesc.TMax = 100000;
+    rayDesc.TMax = 20000;
 
     // ペイロードの設定
     DenoisePayload payload;
@@ -417,7 +430,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     uint instanceID = InstanceID();
 
     // テクスチャの色を保存。
-    float3 texColor = (float3)texture.SampleLevel(smp, vtx.uv, 0.0f);
+    float3 texColor = (float3) texture.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 反射回数が100000回だったらGI用のレイなのでテクスチャの色を返す。
     if (payload.recursive == 100000)
@@ -436,14 +449,51 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         return;
     }
     
-    // Instance数が1だったらテクスチャの色をそのまま返す。
+    // 反射回数が200000回だったらディレクショナルライトの影用のレイなので、このインスタンスが天球(1)以外だったら戻す。
+    //if (payload.recursive == 200000)
+    //{
+        
+    //    if (instanceID != 1)
+    //    {
+            
+    //        payload.giColor = 0;
+    //        return;
+            
+    //    }
+        
+    //}
+    
+    // Instance数が1だったら大気散乱を計算。
     if (instanceID == 1)
     {
+        float3 mieColor = float3(1, 1, 1);
+        
         payload.lightLuminance = float3(1, 1, 1);
         //payload.color = texColor;
-        payload.color = AtmosphericScattering(vtx);
+        payload.color = AtmosphericScattering(mul(vtx.Position, ObjectToWorld4x3()), mieColor);
         payload.aoLuminance = float3(1, 1, 1);
         payload.giColor = float3(0, 0, 0);
+        
+        //// 反射数が200000だったらディレクショナルライト用の処理なので、GIにも天球の色を入れる。
+        //if (payload.recursive == 200000)
+        //{
+            
+        //    // 青みが強いほど白い色を返し、赤みが強いほど赤っぽい色を返すようにする。
+            
+        //    payload.giColor = mieColor;
+            
+        //}
+        
+        return;
+    }
+    // Instance数が2だったらテクスチャの色をそのまま返す。
+    if (instanceID == 2)
+    {
+        payload.lightLuminance = float3(1, 1, 1);
+        payload.color = texColor;
+        payload.aoLuminance = float3(1, 1, 1);
+        payload.giColor = float3(0, 0, 0);
+        
         return;
     }
     
@@ -515,12 +565,43 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     }
     
     // 並行光源にシャドウレイを飛ばす。
-    if (gSceneParam.dirLight.isActive)
+    if (gSceneParam.dirLight.isActive && gSceneParam.dirLight.lightDir.y < 0.1f)
     {
         
-        dirLightVisibility = ShootDirShadow(vtx, 3000.0f);
+        // 並行光源での影情報を取得。
+        dirLightVisibility = ShootDirShadow(vtx, 10000.0f);
         
-        dirLightColor = gSceneParam.dirLight.lightColor * dirLightVisibility;
+        // 影の色を計算。
+        dirLightColor += dirLightVisibility * gSceneParam.dirLight.lightColor;
+        
+        // 影じゃない場合、天球上でのライティングの色を取得する。
+        if (dirLightVisibility == 1)
+        {
+            const float SKYDOME_RADIUS = 15000.0f;
+            const float SAMPLING_POS_Y = 0.0f;
+            
+            // サンプリングしたい天球上での位置までのベクトル。
+            float3 samplingVec = -gSceneParam.dirLight.lightDir * SKYDOME_RADIUS;
+            
+            // Y軸のサンプリングしたい位置を設定する。
+            samplingVec.y = SAMPLING_POS_Y;
+            
+            // 正規化する。
+            samplingVec = normalize(samplingVec);
+            
+            // 天球上のサンプリングしたい位置の座標を求める。
+            float3 samplingPos;
+            samplingPos = samplingVec * SKYDOME_RADIUS;
+            
+            // 大気散乱の色を取得。
+            float3 mieColor = float3(1, 1, 1);
+            float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
+            
+            // GIを設定。
+            payload.giColor = mieColor;
+            
+            
+        }
         
     }
     
@@ -539,7 +620,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         float3 sampleDir = GetUniformHemisphereSample(seed, vtx.Normal);
         
         // シャドウレイを飛ばす。
-        float aoLightVisibilityBuff = ShootAOShadowRay(vtx.Position, sampleDir, 100, gRtScene);
+        float aoLightVisibilityBuff = ShootAOShadowRay(vtx.Position, sampleDir, 500, gRtScene);
         
         // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
         float NoL = saturate(dot(vtx.Normal, sampleDir));
@@ -566,11 +647,12 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // GIの色を取得する。
     if (instanceID == 10 && !gSceneParam.isNoGI)
     {
-        payload.giColor = ShootGIRay(vtx, 500) * 1.0f;
+        payload.giColor += ShootGIRay(vtx, 500) * 1.0f;
+        payload.giColor = saturate(payload.giColor);
     }
     else
     {
-        payload.giColor = float3(0, 0, 0);
+        payload.giColor += float3(0, 0, 0);
     }
     
     // GIのみを描画するフラグが立っていたらGI以外の色を無効化する。
