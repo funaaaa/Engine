@@ -57,7 +57,9 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	// パラメーターt0にTLAS(SRV)を設定。
 	for (int index = 0; index < SRVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index);
 	// パラメーターb0にカメラ用バッファを設定。
-	for (int index = 0; index < CBVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
+	for (int index = 0; index < CBVCount; ++index) {
+		globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
+	}
 	// パラメーターu0に出力用バッファを設定。
 	for (int index = 0; index < UAVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index);
 

@@ -371,9 +371,9 @@ void FbxLoader::ParseMeshFaces(FbxModel& Model, FbxMesh* InputFbxMesh)
 				int index2 = indices[indices.size() - 1];
 				int index3 = fbxIndex;
 				int index0 = indices[indices.size() - 3];
-				indices.emplace_back(index2);
-				indices.emplace_back(index3);
-				indices.emplace_back(index0);
+				indices.emplace_back(static_cast<unsigned short>(index2));
+				indices.emplace_back(static_cast<unsigned short>(index3));
+				indices.emplace_back(static_cast<unsigned short>(index0));
 
 			}
 

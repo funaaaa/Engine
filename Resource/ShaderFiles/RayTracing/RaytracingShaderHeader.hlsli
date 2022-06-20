@@ -2,38 +2,13 @@
 // 円周率
 static const float PI = 3.141592653589f;
 
-// 大気散乱用
-struct AtmosphericScattering
+// カメラ用定数バッファ
+struct CameraConstBufferData
 {
-
-    float kr; // レイリー散乱定数
-    float km; // ミー散乱定数
-    float samples; // 大気散乱サンプル数
-    float outerRadius; // 大気圏の最頂点の高さ
-    float innerRadius; // 地上の高さ
-    float eSun; // 太陽の強さ
-    float g; // 散乱定数を求める際に使用する値
-    float aveHeight; // 平均大気密度を求めるための高さ
-
-};
-
-// 頂点情報
-struct Vertex
-{
-    float3 Position;
-    float3 Normal;
-    float2 uv;
-};
-
-// 点光源の情報
-struct PointLightData
-{
-    float3 lightPos;
-    float lightSize;
-    float3 lightColor;
-    float lightPower;
-    int isActive;
-    float3 pad;
+    matrix mtxView; // ビュー行列.
+    matrix mtxProj; // プロジェクション行列.
+    matrix mtxViewInv; // ビュー逆行列.
+    matrix mtxProjInv; // プロジェクション逆行列.
 };
 
 // 並行光源の情報
@@ -44,30 +19,38 @@ struct DirLightData
     float3 lightColor;
     float pad;
 };
-
-// スポットライトの情報
-struct SpotLightData
+// 点光源の情報
+struct PointLightData
 {
-    float3 pos;
-    float angle;
-    float3 dir;
-    float power;
-    float3 color;
+    float3 lightPos;
+    float lightSize;
+    float3 lightColor;
+    float lightPower;
     int isActive;
+    float3 pad;
 };
-
-// 環境情報
-struct SceneCB
+// ライト用定数バッファ
+struct LightConstBufferData
 {
-    matrix mtxView; // ビュー行列.
-    matrix mtxProj; // プロジェクション行列.
-    matrix mtxViewInv; // ビュー逆行列.
-    matrix mtxProjInv; // プロジェクション逆行列.
-    float4 ambientColor; // 環境光.
     DirLightData dirLight;
     PointLightData pointLight;
-    SpotLightData spotLight;
-    AtmosphericScattering AS;
+};
+
+// 大気散乱用定数バッファ
+struct ASConstBufferData
+{
+    float kr; // レイリー散乱定数
+    float km; // ミー散乱定数
+    float samples; // 大気散乱サンプル数
+    float outerRadius; // 大気圏の最頂点の高さ
+    float innerRadius; // 地上の高さ
+    float eSun; // 太陽の強さ
+    float g; // 散乱定数を求める際に使用する値
+    float aveHeight; // 平均大気密度を求めるための高さ
+};
+// デバッグ用定数バッファ
+struct DebugConstBufferData
+{
     int seed;
     int counter;
     int aoSampleCount;
@@ -78,8 +61,25 @@ struct SceneCB
     int isNoAO;
     int isNoGI; // GIを行わないフラグ
     int isGIOnlyScene;
+    float2 pad;
 };
 
+// すべての定数バッファを纏めたもの
+struct ConstBufferData
+{
+    CameraConstBufferData camera;
+    LightConstBufferData light;
+    ASConstBufferData as;
+    DebugConstBufferData debug;
+};
+
+// 頂点情報
+struct Vertex
+{
+    float3 Position;
+    float3 Normal;
+    float2 uv;
+};
 
 // ペイロード 色情報を取得するための構造体
 struct Payload

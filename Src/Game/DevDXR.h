@@ -25,7 +25,7 @@
 
 #include <utilapiset.h>
 
-#include "KariConstBuffer.h"
+#include "ConstBuffers.h"
 
 #include "FHelper.h"
 
@@ -35,9 +35,11 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	// 仮の定数バッファを宣言
-	KariConstBufferData constBufferData;
-	DynamicConstBuffer constBuff;
+	// 各定数バッファを宣言
+
+	// 定数バッファ
+	RayConstBufferData constBufferData;
+	DynamicConstBuffer constBuffer;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPiplineShaderData> dAOuseShaders;
@@ -106,8 +108,8 @@ private:
 	void FPS();
 
 	// 入力操作
-	void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
-	void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID, bool& isMove);
+	void Input(bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
+	void InputImGUI(bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID, bool& isMove);
 
 
 
