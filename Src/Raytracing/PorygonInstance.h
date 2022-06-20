@@ -39,6 +39,7 @@ public:
 
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const Vec3& Rot);
+	DirectX::XMMATRIX GetRotate() { return rotMat; }
 
 	// 回転(ラジアン、引数を代入)関数
 	void ChangeRotate(const Vec3& Rot);

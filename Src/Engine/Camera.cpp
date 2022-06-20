@@ -25,24 +25,6 @@ void Camera::GenerateMatView()
 	matProjection = DirectX::XMMatrixOrthographicOffCenterLH(0, window_width, window_height, 0, 0.01f, 100000.0f);
 }
 
-void Camera::GenerateMatViewSpeed(const float& nowSpeed, const float& maxSpeed)
-{
-	float rate = nowSpeed / maxSpeed;
-	if (fabs(rate) < 0.01f) {
-		rate = 0;
-	}
-
-	matView = DirectX::XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
-	//透視投影変換行列
-	matPerspective = DirectX::XMMatrixPerspectiveFovLH(
-		DirectX::XMConvertToRadians(rate * MAX_ANGLEOFVIEW + 60.0f),
-		(float)window_width / window_height,	//アスペクト比
-		0.1f, 100000.0f							//前端、奥端
-	);
-	//射影変換行列
-	matProjection = DirectX::XMMatrixOrthographicOffCenterLH(0, window_width, window_height, 0, 0.01f, 100000.0f);
-}
-
 void Camera::Init()
 {
 	eye = Vec3(0, 150, 10);
@@ -54,25 +36,28 @@ void Camera::Init()
 	matPerspective = {};
 	matProjection = {};
 	Camera::angleOfView = 60;
-	angleXZ = 0;
 	forwardVec = Vec3{ 0,0,1 };
+	angleOfView = DEF_ANGLEOFVIEW;
+	baseAngleOfView = angleOfView;
 
 }
 
 void Camera::Update()
 {
+	// ビュー行列を生成。
+	Camera::Ins()->GenerateMatView();
 
 	// 正面ベクトルを求める。
 	//forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
 	//forwardVec.Normalize();
-	forwardVec.x = cosf(angleXZ);
-	forwardVec.z = sinf(angleXZ);
+	//forwardVec.x = cosf(angleXZ);
+	//forwardVec.z = sinf(angleXZ);
 
 	//forwardVec.Normalize();
 
 	// 視点が限界を超えないようにする。
-	if(1.0f < forwardVec.y) forwardVec.y = 1.0f;
-	if(forwardVec.y < -1.0f) forwardVec.y = -1.0f;
+	if (1.0f < forwardVec.y) forwardVec.y = 1.0f;
+	if (forwardVec.y < -1.0f) forwardVec.y = -1.0f;
 
 	// 視点座標から視点点座標を求める。
 	const float EYE_TARGET = 100.0f;
@@ -83,47 +68,47 @@ void Camera::Update()
 
 }
 
-void Camera::AddRotation(const float& RotX, const float& RotY, const float& RotZ)
+void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec3& CharaUpVec, const float& CharaSpeedPer)
 {
 
-	// カメラの回転行列を回転させる。
-	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
-	buff *= DirectX::XMMatrixRotationZ(RotZ);
-	buff *= DirectX::XMMatrixRotationX(RotX);
-	buff *= DirectX::XMMatrixRotationY(RotY);
+	// 基準となる視点座標を求める。
+	baseEye = CharaPos + CharaForwardVec * -EYE_PLAYER_DISTANCE;
+	baseEye += up * TARGET_UPPER;
 
-	rotationMat = buff * rotationMat;
+	// 基準となる注視点座標を求める。
+	baseTarget = CharaPos + CharaForwardVec * TARGET_PLAYER_DISTNACE;
 
-}
+	// 基準となる上ベクトルを求める。
+	baseUp = CharaUpVec;
 
-void Camera::AddRotationXZ(const float& Rot)
-{
+	// 視点座標を補間する。
+	eye += (baseEye - eye) / 10.0f;
 
-	angleXZ += Rot;
+	// 注視点座標を補間する。
+	target += (baseTarget - target) / 10.0f;
 
-}
+	// 上ベクトルを更新する。
+	up += (baseUp - up) / 10.0f;
 
-void Camera::Move(const float& Speed)
-{
-	Vec3 forwardVecBuff = forwardVec;
-	forwardVecBuff.y = 0;
-	eye += forwardVecBuff * Speed;
+	// 現在のキャラの移動速度の割合から画角に加算する量を求める。
+	float addAngleOfView = (MAX_ANGLEOFVIEW - DEF_ANGLEOFVIEW) * CharaSpeedPer;
+	addAngleOfView /= 2.0f;	// ドリフト等によってまだまだ加速するので一旦は半分にしておく。
 
-}
+	// 基準となる画角の値を変える。
+	baseAngleOfView = DEF_ANGLEOFVIEW + addAngleOfView;
 
-void Camera::MoveRight(const float& Speed)
-{
-	DirectX::XMMATRIX mat = FHelper::CalRotationMat(DirectX::XMFLOAT3(0, -3.14f / 2.0f, 0));
-	Vec3 forwardVecBuff = forwardVec;
-	forwardVecBuff.y = 0;
-	Vec3 moveDir = FHelper::MulRotationMatNormal(forwardVecBuff.ConvertXMFLOAT3(), mat);
+	// 画角の値を基準となる値に近づける。
+	angleOfView += (baseAngleOfView - angleOfView) / 5.0f;
 
-	eye += moveDir * Speed;
+	// ビュー行列を生成。	
+	matView = DirectX::XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
+	//透視投影変換行列
+	matPerspective = DirectX::XMMatrixPerspectiveFovLH(
+		DirectX::XMConvertToRadians(angleOfView),				//画角(60度)
+		(float)window_width / window_height,	//アスペクト比
+		0.1f, 1000000.0f							//前端、奥端
+	);
+	//射影変換行列
+	matProjection = DirectX::XMMatrixOrthographicOffCenterLH(0, window_width, window_height, 0, 0.01f, 100000.0f);
 
-}
-
-Vec3 Camera::GetEyeVector()
-{
-	Vec3 returnBuff = (honraiTarget - honraiEye).GetNormal();
-	return returnBuff;
 }

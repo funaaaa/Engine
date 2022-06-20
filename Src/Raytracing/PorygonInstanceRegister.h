@@ -45,6 +45,7 @@ public:
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void AddRotate(const int& Index, const Vec3& Rot);
+	DirectX::XMMATRIX GetRotate(const int& Index);
 
 	// 回転(ラジアン、引数を代入)関数
 	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);

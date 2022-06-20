@@ -26,8 +26,10 @@
 #include <utilapiset.h>
 
 #include "ConstBuffers.h"
-
 #include "FHelper.h"
+
+#include "Player.h"
+
 
 class DevDXR {
 
@@ -35,7 +37,6 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	// 各定数バッファを宣言
 
 	// 定数バッファ
 	RayConstBufferData constBufferData;
@@ -90,6 +91,9 @@ private:
 	// ライトが動いたか
 	bool isMoveLight;
 
+	// プレイヤー
+	Player player;
+
 
 public:
 
@@ -108,8 +112,8 @@ private:
 	void FPS();
 
 	// 入力操作
-	void Input(bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
-	void InputImGUI(bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID, bool& isMove);
+	void Input();
+	void InputImGUI(bool& isMove);
 
 
 

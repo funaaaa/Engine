@@ -13,7 +13,7 @@ static const int ALL_KEYS = 256;
 static const int XINPUT_THUMB_LEFTVERT = 0;
 static const int XINPUT_THUMB_LEFTSIDE = 1;
 static const int XINPUT_THUMB_RIGHTVERT = 2;
-static const int XINPUT_THUMB_RIGHTSIDE  = 3;
+static const int XINPUT_THUMB_RIGHTSIDE = 3;
 
 static const int XINPUT_TRIGGER_LEFT = 0;
 static const int XINPUT_TRIGGER_RIGHT = 1;
@@ -47,6 +47,7 @@ public:
 		oldstate = state;
 		//現在のフレームのマウス情報を取得
 		ZeroMemory(&state, sizeof(XINPUT_STATE));
+		XInputGetState(0, &state);
 
 		//振動情報の取得
 		XInputSetState(0, &vibration);
@@ -188,9 +189,9 @@ public:
 		switch (pad)
 		{
 		case XINPUT_TRIGGER_LEFT:
-			return (float)state.Gamepad.bLeftTrigger / 255;
+			return static_cast<float>(state.Gamepad.bLeftTrigger) / 255.0f;
 		case XINPUT_TRIGGER_RIGHT:
-			return (float)state.Gamepad.bRightTrigger / 255;
+			return static_cast<float>(state.Gamepad.bRightTrigger) / 255.0f;
 		default: return 0;
 		}
 	}
@@ -239,10 +240,10 @@ public:
 		default: return 0;
 		}
 	}
-	
-	void StartVibration(int LeftMotorRate,int RightMotorRate)
+
+	void StartVibration(int LeftMotorRate, int RightMotorRate)
 	{
-		if (LeftMotorRate < 0 || LeftMotorRate > 100 || RightMotorRate < 0 || RightMotorRate > 100){
+		if (LeftMotorRate < 0 || LeftMotorRate > 100 || RightMotorRate < 0 || RightMotorRate > 100) {
 			return;
 		}
 

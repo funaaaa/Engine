@@ -25,6 +25,9 @@ void DevDXR::Init() {
 	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
+	// プレイヤーを初期化。
+	player.Init();
+
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
 	// TLASを生成。
@@ -72,11 +75,7 @@ void DevDXR::Update() {
 
 	/*----- 更新処理 -----*/
 
-	// 天球を回転させる。
-	//PorygonInstanceRegister::Ins()->AddRotate(skyDomeIns, { 0.01,0.01,0.01 });
-
-	isMoveLight = false;
-	Input(isMoveLight, debugPiplineID);
+	Input();
 
 	// ウィンドウの名前を更新。
 	if (isDisplayFPS) {
@@ -90,25 +89,20 @@ void DevDXR::Update() {
 
 	}
 
-	// ビュー行列を生成。
-	Camera::Ins()->GenerateMatView();
+	// プレイヤーを更新。
+	player.Update();
 
 	// 乱数の種を更新。
 	constBufferData.debug.seed = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
-	Camera::Ins()->Update();
-
-	// ライトが動いたときのみ、ワールド行列を再計算してTLASを更新する。
-	//if (isMoveLight) {
+	Camera::Ins()->Update(player.GetPos(), player.GetForwardVec(), player.GetUpVec(), player.GetNowSpeedPer());
 
 	// 点光源の位置を更新。
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.light.pointLight.lightPos);
 	PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.light.pointLight.lightSize);
 
 	tlas.Update();
-
-	//}
 
 	/*----- 描画処理 -----*/
 
@@ -130,8 +124,10 @@ void DevDXR::Draw() {
 
 	// カメラ行列を更新。
 	auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
-	constBufferData.camera.mtxView = DirectX::XMMatrixLookAtLH(Camera::Ins()->eye.ConvertXMVECTOR(), Camera::Ins()->target.ConvertXMVECTOR(), Camera::Ins()->up.ConvertXMVECTOR());
+	constBufferData.camera.mtxView = Camera::Ins()->matView;
 	constBufferData.camera.mtxViewInv = DirectX::XMMatrixInverse(nullptr, constBufferData.camera.mtxView);
+	constBufferData.camera.mtxProj = Camera::Ins()->matPerspective;
+	constBufferData.camera.mtxProjInv = DirectX::XMMatrixInverse(nullptr, constBufferData.camera.mtxProj);
 
 	// 定数バッファをセット。
 	constBuffer.Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), &constBufferData, sizeof(constBufferData));
@@ -254,58 +250,15 @@ void DevDXR::Draw() {
 
 }
 
-void DevDXR::Input(bool& IsMoveLight, DEGU_PIPLINE_ID& DebugPiplineID) {
+void DevDXR::Input() {
 
 	bool isMove = false;
 
-	float speed = 10.0f;
-	float rot = 0.03f;
-	if (Input::Ins()->isKey(DIK_W)) {
-		Camera::Ins()->Move(speed);
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_S)) {
-		Camera::Ins()->Move(-speed);
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_A)) {
-		Camera::Ins()->MoveRight(speed);
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_D)) {
-		Camera::Ins()->MoveRight(-speed);
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_UP)) {
-		Camera::Ins()->forwardVec.y += rot;
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_DOWN)) {
-		Camera::Ins()->forwardVec.y -= rot;
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_LEFT)) {
-		Camera::Ins()->AddRotationXZ(rot);
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_RIGHT)) {
-		Camera::Ins()->AddRotationXZ(-rot);
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_LSHIFT)) {
-		Camera::Ins()->eye.y -= 10.0f;
-		isMove = true;
-	}
-	if (Input::Ins()->isKey(DIK_SPACE)) {
-		Camera::Ins()->eye.y += 10.0f;
-		isMove = true;
-	}
-
-	InputImGUI(IsMoveLight, DebugPiplineID, isMove);
+	InputImGUI(isMove);
 
 }
 
-void DevDXR::InputImGUI(bool& IsMoveLight, DEGU_PIPLINE_ID& DebugPiplineID, bool& IsMove)
+void DevDXR::InputImGUI(bool& IsMove)
 {
 
 	// DirLightについて
@@ -329,25 +282,11 @@ void DevDXR::InputImGUI(bool& IsMoveLight, DEGU_PIPLINE_ID& DebugPiplineID, bool
 		if (dirX != constBufferData.light.dirLight.lihgtDir.x || dirY != constBufferData.light.dirLight.lihgtDir.y || dirZ != constBufferData.light.dirLight.lihgtDir.z) {
 
 			IsMove = true;
-			IsMoveLight = true;
 
 		}
-
-		DebugPiplineID;
 
 		// 正規化する。
 		constBufferData.light.dirLight.lihgtDir.Normalize();
-
-		// ライトの色を設定。
-		std::array<float, 3> lightColor = { constBufferData.light.dirLight.lightColor.x,constBufferData.light.dirLight.lightColor.y,constBufferData.light.dirLight.lightColor.z };
-		ImGui::ColorPicker3("LightColor", lightColor.data());
-		// 色が変わっていたら。
-		if (lightColor[0] != constBufferData.light.dirLight.lightColor.x || lightColor[1] != constBufferData.light.dirLight.lightColor.y || lightColor[2] != constBufferData.light.dirLight.lightColor.z) {
-			IsMove = true;
-		}
-		constBufferData.light.dirLight.lightColor.x = lightColor[0];
-		constBufferData.light.dirLight.lightColor.y = lightColor[1];
-		constBufferData.light.dirLight.lightColor.z = lightColor[2];
 
 		ImGui::TreePop();
 
@@ -382,7 +321,6 @@ void DevDXR::InputImGUI(bool& IsMoveLight, DEGU_PIPLINE_ID& DebugPiplineID, bool
 		if (dirX != constBufferData.light.pointLight.lightPos.x || dirY != constBufferData.light.pointLight.lightPos.y || dirZ != constBufferData.light.pointLight.lightPos.z || lightSize != constBufferData.light.pointLight.lightSize || pointLightPower != constBufferData.light.pointLight.lightPower) {
 
 			IsMove = true;
-			IsMoveLight = true;
 
 		}
 
