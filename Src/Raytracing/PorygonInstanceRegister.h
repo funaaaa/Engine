@@ -68,4 +68,15 @@ public:
 	// レジスターのサイズを取得する関数。
 	UINT GetRegisterSize() { return UINT(instance.size()); }
 
+	// hlsl側での動きを判断する用の識別子
+	enum{
+	
+		SHADER_ID_DEF = 0,			// 通常のレイ
+		SHADER_ID_AS = 1,			// 大気散乱用
+		SHADER_ID_TEXCOLOR = 2,		// テクスチャの色をそのまま返す
+		SHADER_ID_REFLECTION = 3,	// 反射させる。
+		SHADER_ID_COMPLETE_REFLECTION = 4,	// 完全反射させる。
+
+	};
+
 };

@@ -10,8 +10,8 @@ void Player::Init()
 
 	/*===== ‰Šú‰»ˆ— =====*/
 
-	int carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
-	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, 2);
+	int carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_COMPLETE_REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
 	pos = Vec3();

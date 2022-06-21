@@ -27,7 +27,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	ModelDataManager::ObjectData dataBuff;
 
 	// モデルをロード。
-	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, false);
+	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, true);
 
 	// 頂点数を求める。
 	vertexCount = static_cast<UINT>(dataBuff.vertex.size());

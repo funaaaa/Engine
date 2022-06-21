@@ -2,6 +2,16 @@
 // 円周率
 static const float PI = 3.141592653589f;
 
+// CHS内での識別用
+static const int CHS_IDENTIFICATION_INSTANCE_DEF = 0; // InstanceID 通常のレイ
+static const int CHS_IDENTIFICATION_INSTNACE_AS = 1; // InstanceID 大気散乱用のレイ
+static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR = 2; // InstanceID テクスチャの色をそのまま返す。用のレイ
+static const int CHS_IDENTIFICATION_ISNTANCE_REFLECTION = 3; // InstanceID 反射させる。
+static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // InstanceID 完全反射させる。
+static const int CHS_IDENTIFICATION_RAYID_GI = 100; // グローバルイルミネーション
+static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 101; // 反射レイ
+static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 102; // 完全反射反射レイ
+
 // カメラ用定数バッファ
 struct CameraConstBufferData
 {
@@ -95,6 +105,7 @@ struct DenoisePayload
     float3 lightLuminance;
     float3 giColor;
     uint recursive;
+    uint rayID;
 };
 // ペイロード 影情報を取得するための構造体
 struct ShadowPayload
@@ -352,6 +363,68 @@ bool ShootAOShadowRay(float3 origin, float3 direction, float tMax, RaytracingAcc
     return payload.isShadow;
 }
 
+// 反射レイ射出
+void ShootReflectionRay(float3 origin, float3 direction, inout DenoisePayload payload, RaytracingAccelerationStructure gRtScene)
+{
+    RayDesc rayDesc;
+    rayDesc.Origin = origin;
+    rayDesc.Direction = direction;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = 20000.0f;
+
+    // レイのIDを反射用レイに設定。
+    payload.rayID = CHS_IDENTIFICATION_RAYID_RECLECTION;
+
+    RAY_FLAG flags = RAY_FLAG_NONE;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
+    
+    // ライトは除外。
+    uint rayMask = ~(0x08);
+
+    TraceRay(
+    gRtScene,
+    flags,
+    rayMask,
+    0,
+    1,
+    0, // MISSシェーダーのインデックス
+    rayDesc,
+    payload);
+    
+}
+void ShootCompleteReflectionRay(float3 origin, float3 direction, inout DenoisePayload payload, RaytracingAccelerationStructure gRtScene)
+{
+    RayDesc rayDesc;
+    rayDesc.Origin = origin;
+    rayDesc.Direction = direction;
+    rayDesc.TMin = 0.1f;
+    rayDesc.TMax = 20000.0f;
+
+    // レイのIDを反射用レイに設定。
+    payload.rayID = CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION;
+
+    RAY_FLAG flags = RAY_FLAG_NONE;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
+    
+    // ライトは除外。
+    uint rayMask = ~(0x08);
+
+    TraceRay(
+    gRtScene,
+    flags,
+    rayMask,
+    0,
+    1,
+    0, // MISSシェーダーのインデックス
+    rayDesc,
+    payload);
+    
+}
+
 uint initRand(uint val0, uint val1, uint backoff = 16)
 {
     uint v0 = val0, v1 = val1, s0 = 0;
@@ -364,4 +437,21 @@ uint initRand(uint val0, uint val1, uint backoff = 16)
         v1 += ((v0 << 4) + 0xad90777d) ^ (v0 + s0) ^ ((v0 >> 5) + 0x7e95761e);
     }
     return v0;
+}
+
+
+// サンプルコードからそのまま持ってきたやつ。
+float scale(float fCos)
+{
+    float x = 1.0 - fCos;
+    return 0.25f * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
+}
+
+float3 IntersectionPos(float3 dir, float3 a, float radius)
+{
+    float b = dot(a, dir);
+    float c = dot(a, a) - radius * radius;
+    float d = max(b * b - c, 0.0);
+
+    return a + dir * (-b + sqrt(d));
 }
