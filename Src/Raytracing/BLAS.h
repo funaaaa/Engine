@@ -49,6 +49,8 @@ private:
 
 	// デバッグ用
 	std::vector<RayVertex> vertex;
+	std::vector<Vec3> vertexPos;
+	std::vector<Vec3> vertexNormal;
 	std::vector<UINT> vertIndex;
 
 
@@ -93,7 +95,10 @@ public:
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
 
 	// デバッグ用
-	std::vector<RayVertex>& GetVertex() { return vertex; }
+	std::vector<RayVertex> GetVertex() { return vertex; }
+	std::vector<Vec3> GetVertexPos() { return vertexPos; }
+	std::vector<Vec3> GetVertexNormal() { return vertexNormal; }
+	std::vector<UINT> GetVertexIndex() { return vertIndex; }
 
 private:
 

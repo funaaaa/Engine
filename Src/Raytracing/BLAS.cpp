@@ -99,6 +99,16 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	// ヒットグループ名を保存する。
 	this->hitGroupName = HitGroupName;
 
+	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
+	vertexPos.resize(static_cast<unsigned __int64>(vertex.size()));
+	vertexNormal.resize(static_cast<unsigned __int64>(vertex.size()));
+	int counter = 0;
+	for (auto& index : vertex) {
+		vertexPos[counter] = index.position;
+		vertexNormal[counter] = index.normal;
+		++counter;
+	}
+
 }
 
 void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
@@ -208,6 +218,16 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 	}
 
+	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
+	vertexPos.resize(static_cast<unsigned __int64>(vertex.size()));
+	vertexNormal.resize(static_cast<unsigned __int64>(vertex.size()));
+	int counter = 0;
+	for (auto& index : vertex) {
+		vertexPos[counter] = index.position;
+		vertexNormal[counter] = index.normal;
+		++counter;
+	}
+
 }
 
 void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
@@ -289,6 +309,16 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 
 	// ヒットグループ名を保存する。
 	this->hitGroupName = HitGroupName;
+
+	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
+	vertexPos.resize(static_cast<unsigned __int64>(vertex.size()));
+	vertexNormal.resize(static_cast<unsigned __int64>(vertex.size()));
+	int counter = 0;
+	for (auto& index : vertex) {
+		vertexPos[counter] = index.position;
+		vertexNormal[counter] = index.normal;
+		++counter;
+	}
 
 }
 
@@ -504,7 +534,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 			}
 			else {
-				
+
 				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
 				Dst += WriteGPUDescriptor(Dst, &texHandle);
 

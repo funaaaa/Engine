@@ -3,6 +3,7 @@
 
 #include <DirectXMath.h>
 #include "Vec.h"
+#include <vector>
 
 //DirectXに関する便利機能をまとめたもの
 namespace FHelper {
@@ -136,6 +137,22 @@ namespace FHelper {
 
 		}
 	}
+
+	//レイとオブジェクトの当たり判定
+	struct RayToModelCollisionData {
+
+		std::vector<Vec3> targetVertex;
+		std::vector<UINT> targetIndex;
+		std::vector<Vec3> targetNormal;
+		DirectX::XMMATRIX matRot;
+		DirectX::XMMATRIX matScale;
+		DirectX::XMMATRIX matTrans;
+		Vec3 rayPos;
+		Vec3 rayDir;
+
+	};
+	bool RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& ImpactPos, float& Distance, Vec3& HitNormal);
+
 }
 
 //イージング関係

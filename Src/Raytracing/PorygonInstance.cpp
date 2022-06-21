@@ -10,9 +10,9 @@ D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microso
 
 	// 移動行列を初期化。
 	worldMat = DirectX::XMMatrixIdentity();
-	transMat = DirectX::XMMatrixIdentity();
+	matTrans = DirectX::XMMatrixIdentity();
 	scaleMat = DirectX::XMMatrixIdentity();
-	rotMat = DirectX::XMMatrixIdentity();
+	matRot = DirectX::XMMatrixIdentity();
 
 	// 行列を設定。
 	XMStoreFloat3x4(
@@ -35,7 +35,7 @@ void PorygonMeshInstance::AddTrans(const Vec3& Pos)
 
 	/*===== 移動関数 =====*/
 
-	transMat *= DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
+	matTrans *= DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
 
 }
 
@@ -44,7 +44,7 @@ void PorygonMeshInstance::ChangeTrans(const Vec3& Pos)
 
 	/*===== 移動関数 =====*/
 
-	transMat = DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
+	matTrans = DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
 
 }
 
@@ -59,7 +59,7 @@ void PorygonMeshInstance::AddRotate(const Vec3& Rot)
 	buff *= DirectX::XMMatrixRotationX(Rot.x);
 	buff *= DirectX::XMMatrixRotationY(Rot.y);
 
-	rotMat = buff * rotMat;
+	matRot = buff * matRot;
 
 }
 
@@ -68,11 +68,11 @@ void PorygonMeshInstance::ChangeRotate(const Vec3& Rot)
 
 	/*===== 回転関数 =====*/
 
-	rotMat = DirectX::XMMatrixIdentity();
+	matRot = DirectX::XMMatrixIdentity();
 
-	rotMat *= DirectX::XMMatrixRotationZ(Rot.z);
-	rotMat *= DirectX::XMMatrixRotationX(Rot.x);
-	rotMat *= DirectX::XMMatrixRotationY(Rot.y);
+	matRot *= DirectX::XMMatrixRotationZ(Rot.z);
+	matRot *= DirectX::XMMatrixRotationX(Rot.x);
+	matRot *= DirectX::XMMatrixRotationY(Rot.y);
 
 }
 
@@ -110,8 +110,8 @@ void PorygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 	worldMat = DirectX::XMMatrixIdentity();
 
 	worldMat *= scaleMat;
-	worldMat *= rotMat;
-	worldMat *= transMat;
+	worldMat *= matRot;
+	worldMat *= matTrans;
 
 	// 設定の行列を更新する。
 	DirectX::XMStoreFloat3x4(

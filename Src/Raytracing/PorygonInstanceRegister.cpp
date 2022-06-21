@@ -48,6 +48,11 @@ void PorygonInstanceRegister::ChangeTrans(const int& Index, const Vec3& Pos)
 
 }
 
+DirectX::XMMATRIX PorygonInstanceRegister::GetTrans(const int& Index)
+{
+	return instance[Index]->GetTrans();
+}
+
 // ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ð‰ÁŽZ)ŠÖ”
 void PorygonInstanceRegister::AddRotate(const int& Index, const float& X, const float& Y, const float Z) {
 
@@ -88,6 +93,11 @@ void PorygonInstanceRegister::AddScale(const int& Index, const Vec3& Scale)
 
 	instance[Index]->AddScale(Scale);
 
+}
+
+DirectX::XMMATRIX PorygonInstanceRegister::GetScale(const int& Index)
+{
+	return instance[Index]->GetScale();
 }
 
 void PorygonInstanceRegister::ChangeScale(const int& Index, const float& X, const float& Y, const float Z)

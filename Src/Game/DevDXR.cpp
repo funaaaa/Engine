@@ -26,13 +26,13 @@ void DevDXR::Init() {
 	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
 
 	// ステージを読み込む。
-	int stageBlas = BLASRegister::Ins()->GenerateObj("Resource/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/stageUV.png" });
+	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/stageUV.png" });
 	stageIns = PorygonInstanceRegister::Ins()->CreateInstance(stageBlas, PorygonInstanceRegister::SHADER_ID_TEXCOLOR);
 	PorygonInstanceRegister::Ins()->AddScale(stageIns, Vec3(200, 200, 200));
 
 
 	// プレイヤーを初期化。
-	player.Init();
+	player.Init(stageBlas, stageIns);
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 

@@ -41,6 +41,7 @@ public:
 	// ˆÚ“®(ˆø”‚ÉˆÚ“®)ŠÖ”
 	void ChangeTrans(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeTrans(const int& Index, const Vec3& Pos);
+	DirectX::XMMATRIX GetTrans(const int& Index);
 
 	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
@@ -54,6 +55,7 @@ public:
 	// Šgk(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
 	void AddScale(const int& Index, const Vec3& Scale);
+	DirectX::XMMATRIX GetScale(const int& Index);
 
 	// Šgk(ˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);

@@ -54,6 +54,8 @@ private:
 	int sphereIns;
 	int skyDomeBlas;
 	int skyDomeIns;
+
+	int stageBlas;
 	int stageIns;
 
 

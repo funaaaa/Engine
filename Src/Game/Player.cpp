@@ -4,8 +4,9 @@
 #include "HitGroupMgr.h"
 #include "Input.h"
 #include "FHelper.h"
+#include "BLAS.h"
 
-void Player::Init()
+void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 {
 
 	/*===== 初期化処理 =====*/
@@ -14,11 +15,18 @@ void Player::Init()
 	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_COMPLETE_REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
-	pos = Vec3();
+	stageBlasIndex = StageBlasIndex;
+	stageInstanceIndex = StageInstanceIndex;
+
+	pos = Vec3(0, 30, 0);
 	forwardVec = Vec3(0, 0, 1);
+	bottomVec = Vec3(0, -1, 0);
+	size = Vec3(10, 10, 10);
 	speed = 0;
+	gravity = 0;
 	boostSpeed = 0;
 	isDrift = false;
+	isGround = true;
 
 }
 
@@ -32,6 +40,9 @@ void Player::Update()
 
 	// 移動処理
 	Move();
+
+	// 当たり判定
+	CheckHit();
 
 	// 座標を更新。
 	PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, pos);
@@ -142,6 +153,13 @@ void Player::Input()
 
 	}
 
+	// デバッグ用 Bボタンが押されたら初期位置に戻す。
+	if (Input::Ins()->isPad(XINPUT_GAMEPAD_B)) {
+
+		pos = Vec3(0, 30, 0);
+
+	}
+
 }
 
 void Player::Move()
@@ -168,6 +186,88 @@ void Player::Move()
 	else {
 
 		boostSpeed = 0;
+
+	}
+
+	// 地上にいたら重力を無効化する。
+	if (isGround) {
+
+		gravity = 0;
+
+	}
+	// 空中にいたら重力を加算する。
+	else {
+
+		gravity += ADD_GRAV;
+
+		// 重力量が限界を超えないようにする。
+		if (MAX_GRAV < gravity) {
+
+			gravity = MAX_GRAV;
+
+		}
+
+	}
+
+	// 座標に重力を加算する。
+	pos += Vec3(0, -1, 0) * gravity;
+
+	// 下ベクトルを車の回転行列分回転させる。
+	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+
+}
+
+void Player::CheckHit()
+{
+
+	/*===== 当たり判定 =====*/
+
+	{
+
+		/*-- ステージとの当たり判定 --*/
+
+		// 当たり判定に使用するデータ
+		FHelper::RayToModelCollisionData collistionData;
+
+		// 当たり判定に必要なデータを埋めていく。
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexIndex();
+		collistionData.rayPos = pos;
+		collistionData.rayDir = bottomVec;
+		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageInstanceIndex);
+		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageInstanceIndex);
+		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageInstanceIndex);
+
+		// 当たり判定の結果保存用変数。
+		bool isHit = false;
+		Vec3 impactPos;
+		float hitDistance;
+		Vec3 hitNormal;
+
+		// 当たり判定を行う。
+		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+
+		// 当たった距離がY軸のサイズよりも小さかったら。
+		isHit &= (hitDistance - size.y) < 0;
+		isHit &= 0 < hitDistance;
+
+		// 当たっていたら押し戻す。
+		if (isHit) {
+
+			// 法線方向に当たった分押し戻す。
+			pos += hitNormal * (size.y - hitDistance);
+
+			// 地上にいる判定。
+			isGround = true;
+
+		}
+		else {
+
+			// 空中にいる判定。
+			isGround = false;
+
+		}
 
 	}
 
