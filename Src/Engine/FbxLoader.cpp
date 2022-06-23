@@ -137,6 +137,8 @@ FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 	const int BONE_SIZE = static_cast<int>(bones.size());
 	for (int index = 0; index < BONE_SIZE; ++index) {
 
+		if (16 <= index)break;
+
 		// 今の姿勢行列
 		DirectX::XMMATRIX matCurrentPose;
 
@@ -538,7 +540,7 @@ void FbxLoader::ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh)
 			// スキンウェイト
 			float weight = (float)controlPointWeights[vertexIndex];
 			// その頂点の影響を受けるボーンリストに、ボーンとウェイトのペアを追加。
-			weightLists[vertIndex].emplace_back(WeightSet({ (UINT)index, (weight) }));
+			weightLists[vertIndex].emplace_back(WeightSet({ static_cast<UINT>(index), (weight) }));
 
 		}
 

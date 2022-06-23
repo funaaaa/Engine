@@ -11,7 +11,7 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 
 	/*===== 初期化処理 =====*/
 
-	int carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }, true);
+	carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }, true);
 	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_COMPLETE_REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
@@ -274,6 +274,25 @@ void Player::CheckHit()
 
 		}
 
+		// 正面方向の当たり判定を行うため、レイの飛ばす方向を変える。
+		collistionData.rayDir = forwardVec;
+
+		// 当たり判定を行う。
+		isHit = false;
+		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+
+		// 当たった距離がY軸のサイズよりも小さかったら。
+		isHit &= (hitDistance - size.y) < 0;
+		isHit &= 0 < hitDistance;
+
+		// 当たっていたら押し戻す。
+		if (isHit) {
+
+			// 法線方向に当たった分押し戻す。
+			pos += hitNormal * (size.x - hitDistance);
+
+		}
+
 	}
 
 }
@@ -318,6 +337,36 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 
 		// プレイヤーを回転させる。
 		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, quaternionMat);
+
+		// 上ベクトルを基準としたクォータニオンを求める。
+		Vec3 normal = HitNormal;
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY);
+
+		// クォータニオンを行列に治す。
+		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+
+		// プレイヤーを回転させる。
+		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
+
+
+		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
+
+		// 回転行列を取得。
+		DirectX::XMMATRIX rotationMatBuff = PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
+
+		// 上ベクトルを更新。
+		upVec = normal;
+
+		//正面ベクトルを更新。
+		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), rotationMatBuff);
+
+	}
+
+	// 当たった法線が上だった場合は行列を初期化して回転させる。
+	if (HitNormal == Vec3(0, 1, 0)) {
+
+		// プレイヤーを回転させる。
+		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, DirectX::XMMatrixIdentity());
 
 		// 上ベクトルを基準としたクォータニオンを求める。
 		Vec3 normal = HitNormal;

@@ -7,6 +7,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
+	int carBlasIndex;		// 車のモデルのBLASのインデックス
 	int carInstanceIndex;	// 車のモデルのインスタンスのインデックス
 	int stageBlasIndex;		// ステージのBLASのインデックス
 	int stageInstanceIndex;	// ステージのインスタンスのインデックス
@@ -23,7 +24,7 @@ private:
 	const float MAX_SPEED = 10.0f;		// 移動速度の最大値
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
-	const float MAX_GRAV = 3.0f;		// 重力の最大量
+	const float MAX_GRAV = 5.0f;		// 重力の最大量
 	const float ADD_GRAV = 0.05f;		// 重力の加算量
 
 
