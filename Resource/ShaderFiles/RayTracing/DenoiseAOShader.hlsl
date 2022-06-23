@@ -538,12 +538,30 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         // 並行光源での影情報を取得。
         dirLightVisibility = ShootDirShadow(vtx, 10000.0f);
         
-        // 影の色を計算。
-        dirLightColor += dirLightVisibility * gSceneParam.light.dirLight.lightColor;
-        
         // 影じゃない場合、天球上でのライティングの色を取得する。
         if (dirLightVisibility == 1)
         {
+        
+            // 影の色を計算。
+            //dirLightColor = dirLightVisibility * gSceneParam.light.dirLight.lightColor;
+            dirLightColor = float3(1, 1, 1) * dirLightVisibility;
+            
+            // ディフューズを計算する。
+            float mDiffuse = 0.5f;
+            float3 diffuse = dot(-gSceneParam.light.dirLight.lightDir, worldNormal) * mDiffuse;
+			// 光沢度
+            const float shininess = 4.0f;
+			// 頂点から視点への方向ベクトル
+            float3 eyedir = normalize(WorldRayOrigin() - worldPos);
+			// 反射光ベクトル
+            float3 reflect = normalize(gSceneParam.light.dirLight.lightDir + 2.0f * dot(-gSceneParam.light.dirLight.lightDir, worldNormal) * worldNormal);
+            // 鏡面反射光
+            float mSpecular = 0.99f;
+            float3 specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
+            
+            // 隠蔽度を更新。
+            dirLightVisibility = diffuse + specular;
+            
             const float SKYDOME_RADIUS = 15000.0f;
             const float SAMPLING_POS_Y = 0.0f;
             
@@ -564,8 +582,10 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
             float3 mieColor = float3(1, 1, 1);
             float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
             
-            // GIを設定。
-            payload.giColor += mieColor;
+            // ディレクショナルライトの色を設定。
+            dirLightColor.r += mieColor.r * dirLightVisibility;
+            
+            dirLightColor = normalize(dirLightColor);
             
             
         }
@@ -596,7 +616,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
             
     }
     // 平均を取る。
-    aoLightVisibility = (1.0f / PI) * (1.0f / float(1)) * aoLightVisibility;
+    aoLightVisibility = (1.0f / PI) * (1.0f / float(gSceneParam.debug.aoSampleCount)) * aoLightVisibility;
         
     
     
