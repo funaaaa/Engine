@@ -335,7 +335,7 @@ void mainRayGen()
 
     rayDesc.Direction = normalize(dir);
     rayDesc.TMin = 0;
-    rayDesc.TMax = 20000;
+    rayDesc.TMax = 30000;
 
     // ペイロードの設定
     DenoisePayload payload;

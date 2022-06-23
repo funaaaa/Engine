@@ -7,7 +7,7 @@
 #include "StructuredBuffer.h"
 #include "TextureManager.h"
 
-void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -27,7 +27,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	ModelDataManager::ObjectData dataBuff;
 
 	// モデルをロード。
-	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, true);
+	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, IsSmoothing);
 
 	// 頂点数を求める。
 	vertexCount = static_cast<UINT>(dataBuff.vertex.size());

@@ -1,13 +1,13 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 
-int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
+int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
 
 	blas.push_back(std::make_shared<BLAS>());
-	blas.back()->GenerateBLASObj(DirectryPath, ModelName, HitGroupName, TexturePath);
+	blas.back()->GenerateBLASObj(DirectryPath, ModelName, HitGroupName, TexturePath, IsSmoothing);
 
 	return static_cast<int>(blas.size()) - 1;
 

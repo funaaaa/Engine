@@ -66,6 +66,11 @@ void PorygonInstanceRegister::AddRotate(const int& Index, const Vec3& Rot) {
 
 }
 
+void PorygonInstanceRegister::AddRotate(const int& Index, const DirectX::XMMATRIX& Rot)
+{
+	instance[Index]->AddRotate(Rot);
+}
+
 DirectX::XMMATRIX PorygonInstanceRegister::GetRotate(const int& Index)
 {
 	return instance[Index]->GetRotate();
@@ -77,6 +82,11 @@ void PorygonInstanceRegister::ChangeRotate(const int& Index, const float& X, con
 }
 
 void PorygonInstanceRegister::ChangeRotate(const int& Index, const Vec3& Rot)
+{
+	instance[Index]->ChangeRotate(Rot);
+}
+
+void PorygonInstanceRegister::ChangeRotate(const int& Index, const DirectX::XMMATRIX& Rot)
 {
 	instance[Index]->ChangeRotate(Rot);
 }

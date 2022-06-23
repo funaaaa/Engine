@@ -63,6 +63,13 @@ void PorygonMeshInstance::AddRotate(const Vec3& Rot)
 
 }
 
+void PorygonMeshInstance::AddRotate(const DirectX::XMMATRIX& Rot)
+{
+
+	matRot = matRot * Rot;
+
+}
+
 void PorygonMeshInstance::ChangeRotate(const Vec3& Rot)
 {
 
@@ -73,6 +80,15 @@ void PorygonMeshInstance::ChangeRotate(const Vec3& Rot)
 	matRot *= DirectX::XMMatrixRotationZ(Rot.z);
 	matRot *= DirectX::XMMatrixRotationX(Rot.x);
 	matRot *= DirectX::XMMatrixRotationY(Rot.y);
+
+}
+
+void PorygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)
+{
+
+	/*===== âÒì]ä÷êî =====*/
+
+	matRot = Rot;
 
 }
 

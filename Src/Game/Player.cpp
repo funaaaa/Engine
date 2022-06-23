@@ -11,7 +11,7 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 
 	/*===== 初期化処理 =====*/
 
-	int carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	int carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }, true);
 	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_COMPLETE_REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
@@ -21,7 +21,9 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 	pos = Vec3(0, 30, 0);
 	forwardVec = Vec3(0, 0, 1);
 	bottomVec = Vec3(0, -1, 0);
+	upVec = Vec3(0, 1, 0);
 	size = Vec3(10, 10, 10);
+	rotY = 0;
 	speed = 0;
 	gravity = 0;
 	boostSpeed = 0;
@@ -56,22 +58,6 @@ void Player::Draw()
 
 }
 
-Vec3 Player::GetUpVec()
-{
-
-	/*===== 上ベクトルを取得 =====*/
-
-	// 回転行列を取得。
-	DirectX::XMMATRIX matRot = PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
-
-	// デフォルトの上ベクトル。
-	Vec3 defUpVec = Vec3(0, 1, 0);
-
-	// デフォルトの上ベクトルに回転行列をかけた値を返す。
-	return FHelper::MulRotationMatNormal(defUpVec, matRot);
-
-}
-
 float Player::GetNowSpeedPer()
 {
 
@@ -91,15 +77,21 @@ void Player::Input()
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
 	float inputRightTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_RIGHT);
-	if (INPUT_DEADLINE_TRI < inputRightTriValue) {
+	if (INPUT_DEADLINE_TRI < inputRightTriValue && isGround) {
 
 		speed += inputRightTriValue * ADD_SPEED;
 
 	}
+	else if (isGround) {
+
+		// 移動していなくて地上にいたら移動量を0に近づける。
+		speed -= speed / 10.0f;
+
+	}
 	else {
 
-		// 移動していなかったら移動量を0に近づける。
-		speed -= speed / 10.0f;
+		// 移動していなくて空中にいたら移動量を0に近づける。
+		speed -= speed / 200.0f;
 
 	}
 
@@ -145,8 +137,15 @@ void Player::Input()
 
 		}
 
+		// クォータニオンを求める。
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec.ConvertXMVECTOR(), handleAmount * inputLeftStickHori);
+
+		// 求めたクォータニオンを行列に治す。
+		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
+
 		// 回転を加算する。
-		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, Vec3(0, handleAmount * inputLeftStickHori, 0));
+		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, quaternionMat);
+		rotY += handleAmount * inputLeftStickHori;
 
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
@@ -255,11 +254,17 @@ void Player::CheckHit()
 		// 当たっていたら押し戻す。
 		if (isHit) {
 
+			// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
+			const float PUSH_BACK_OFFSET = 1.0f;
+
 			// 法線方向に当たった分押し戻す。
-			pos += hitNormal * (size.y - hitDistance);
+			pos += hitNormal * (size.y - (hitDistance + PUSH_BACK_OFFSET));
 
 			// 地上にいる判定。
 			isGround = true;
+
+			// 斜め床の回転処理。
+			RotObliqueFloor(hitNormal);
 
 		}
 		else {
@@ -268,6 +273,73 @@ void Player::CheckHit()
 			isGround = false;
 
 		}
+
+	}
+
+}
+
+void Player::RotObliqueFloor(const Vec3& HitNormal)
+{
+
+	/*===== 斜め床の回転処理 =====*/
+
+	/*-- 外積から回転軸を取得 --*/
+
+	// デフォルトの上ベクトル。
+	Vec3 defUpVec = Vec3(0, 1, 0);
+
+	// 回転軸を求める。
+	Vec3 axisOfRevolution = defUpVec.Cross(HitNormal);
+
+	// 回転軸を正規化する。
+	if (axisOfRevolution.Length() != 0) {
+		axisOfRevolution.Normalize();
+	}
+
+	/*-- 内積から回転量を取得 --*/
+
+	// 回転量を求める。
+	float amountOfRotation = defUpVec.Dot(HitNormal);
+
+	// 逆余弦を求める関数を使用して求めたcosθをラジアンに変換。
+	amountOfRotation = acosf(amountOfRotation);
+
+
+	/*-- クォータニオンを使って回転 --*/
+
+	// 回転軸が{0,0,0}だったら処理を飛ばす。
+	if (axisOfRevolution.Length() != 0 && amountOfRotation != 0) {
+
+		// クォータニオンを求める。
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(axisOfRevolution.ConvertXMVECTOR(), amountOfRotation);
+
+		// 求めたクォータニオンを行列に治す。
+		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
+
+		// プレイヤーを回転させる。
+		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, quaternionMat);
+
+		// 上ベクトルを基準としたクォータニオンを求める。
+		Vec3 normal = HitNormal;
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY);
+
+		// クォータニオンを行列に治す。
+		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+
+		// プレイヤーを回転させる。
+		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
+
+
+		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
+
+		// 回転行列を取得。
+		DirectX::XMMATRIX rotationMatBuff = PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
+
+		// 上ベクトルを更新。
+		upVec = normal;
+
+		//正面ベクトルを更新。
+		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), rotationMatBuff);
 
 	}
 

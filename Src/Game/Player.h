@@ -13,9 +13,11 @@ private:
 	Vec3 pos;				// 車の座標
 	Vec3 forwardVec;		// 進行方向ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
+	Vec3 upVec;				// 上方向ベクトル
 	Vec3 size;				// サイズ
 	float speed;			// 移動速度
 	float gravity;			// 重力
+	float rotY;				// ハンドル操作によって変わるY軸の回転量
 	bool isGround;			// 地上にいるか t=地上 f=空中
 
 	const float MAX_SPEED = 10.0f;		// 移動速度の最大値
@@ -53,7 +55,7 @@ public:
 
 	const Vec3& GetPos() { return pos; }
 	const Vec3& GetForwardVec() { return forwardVec; }
-	Vec3 GetUpVec();
+	Vec3 GetUpVec() { return upVec; };
 	float GetNowSpeedPer();
 
 private:
@@ -66,5 +68,8 @@ private:
 
 	// 当たり判定
 	void CheckHit();
+
+	// 斜め床の回転
+	void RotObliqueFloor(const Vec3& HitNormal);
 
 };

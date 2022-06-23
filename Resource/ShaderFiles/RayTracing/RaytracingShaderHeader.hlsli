@@ -370,7 +370,7 @@ void ShootReflectionRay(float3 origin, float3 direction, inout DenoisePayload pa
     rayDesc.Origin = origin;
     rayDesc.Direction = direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 20000.0f;
+    rayDesc.TMax = 30000.0f;
 
     // レイのIDを反射用レイに設定。
     payload.rayID = CHS_IDENTIFICATION_RAYID_RECLECTION;

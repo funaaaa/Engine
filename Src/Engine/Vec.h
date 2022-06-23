@@ -13,6 +13,8 @@ public:
 	float y;
 	float z;
 
+private:
+
 	using XMFLOAT3 = DirectX::XMFLOAT3;
 	using XMVECTOR = DirectX::XMVECTOR;
 
@@ -63,7 +65,7 @@ public:
 	}
 	// XMVECTOR‚Ö•ÏŠ·
 	inline XMVECTOR ConvertXMVECTOR() {
-		return {x,y,z};
+		return { x,y,z };
 	}
 
 

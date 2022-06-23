@@ -46,11 +46,13 @@ public:
 	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void AddRotate(const int& Index, const Vec3& Rot);
+	void AddRotate(const int& Index, const DirectX::XMMATRIX& Rot);
 	DirectX::XMMATRIX GetRotate(const int& Index);
 
 	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeRotate(const int& Index, const Vec3& Rot);
+	void ChangeRotate(const int& Index, const DirectX::XMMATRIX& Rot);
 
 	// Šgk(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);

@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "TextureManager.h"
 
-void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT> OutputVertexIndex)
+void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex)
 {
 
 	// 指定されたインデックスが範囲外だったら何も返さない。
