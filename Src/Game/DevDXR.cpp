@@ -1,4 +1,5 @@
 #include "DevDXR.h"
+#include "DriftParticleMgr.h"
 
 void DevDXR::Init() {
 
@@ -20,10 +21,17 @@ void DevDXR::Init() {
 	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(100, 100, 100));
 
 	// ライト用のスフィアを読み込む。
-	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
-	sphereIns = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, PorygonInstanceRegister::SHADER_ID_TEXCOLOR);
-	PorygonInstanceRegister::Ins()->AddScale(sphereIns, Vec3(10, 10, 10));
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, Vec3(0, 300, 0));
+	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	for (auto& index : sphereIns) {
+
+		index = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, PorygonInstanceRegister::SHADER_ID_LIGHT);
+		PorygonInstanceRegister::Ins()->AddScale(index, Vec3(1, 1, 1));
+		PorygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(0, 300, 0));
+
+	}
+
+	// ドリフト時のパーティクルのクラスをセッティングする。
+	DriftParticleMgr::Ins()->Setting(0);
 
 	// ステージを読み込む。
 	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
@@ -105,19 +113,35 @@ void DevDXR::Update() {
 	Camera::Ins()->Update(player.GetPos(), player.GetForwardVec(), player.GetUpVec(), player.GetNowSpeedPer());
 
 	// 点光源の位置を更新。
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns, constBufferData.light.pointLight.lightPos);
-	PorygonInstanceRegister::Ins()->ChangeScale(sphereIns, constBufferData.light.pointLight.lightSize);
+	int counter = 0;
+	for (auto& index : sphereIns) {
+		PorygonInstanceRegister::Ins()->ChangeTrans(index, constBufferData.light.pointLight[counter].lightPos);
+
+		// ライトが有効化されていなかったらサイズを0にして描画しない。
+		if (constBufferData.light.pointLight[counter].isActive) {
+			PorygonInstanceRegister::Ins()->ChangeScale(index, constBufferData.light.pointLight[counter].lightSize);
+		}
+		else {
+			PorygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(-100000, -100000, -100000));
+		}
+		++counter;
+	}
+
+	// 一旦点光源をプレイヤーの上部に張り付かせておく。
+	constBufferData.light.pointLight[0].isActive = true;
+	constBufferData.light.pointLight[0].lightPos = player.GetPos() + Vec3(0, 30, 0);
+	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns[0], constBufferData.light.pointLight[0].lightPos);
+
+	// ドリフト時のパーティクルを更新。
+	DriftParticleMgr::Ins()->Update(constBufferData);
 
 	tlas.Update();
-
-	/*----- 描画処理 -----*/
-
-	// 画面に表示されるレンダーターゲットに戻す。
-	//DirectXBase::Ins()->SetRenderTarget();
 
 }
 
 void DevDXR::Draw() {
+
+	/*----- 描画処理 -----*/
 
 
 	RaytracingPipline setPipline = {};
@@ -156,8 +180,8 @@ void DevDXR::Draw() {
 	DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, constBuffer.GetBuffer(frameIndex)->GetGPUVirtualAddress());
 
 	// 出力用UAVを設定。
-	lightOutput.SetComputeRootDescriptorTalbe(2);
-	aoOutput.SetComputeRootDescriptorTalbe(3);
+	aoOutput.SetComputeRootDescriptorTalbe(2);
+	lightOutput.SetComputeRootDescriptorTalbe(3);
 	colorOutput.SetComputeRootDescriptorTalbe(4);
 	giOutput.SetComputeRootDescriptorTalbe(5);
 
@@ -298,52 +322,52 @@ void DevDXR::InputImGUI(bool& IsMove)
 
 	}
 
-	// PointLightについて
-	if (ImGui::TreeNode("PointLight")) {
+	//// PointLightについて
+	//if (ImGui::TreeNode("PointLight")) {
 
-		// ライトを表示するかどうかのフラグを更新。
-		bool isActive = static_cast<bool>(constBufferData.light.pointLight.isActive);
-		ImGui::Checkbox("IsActive", &isActive);
-		if (isActive != static_cast<bool>(constBufferData.light.pointLight.isActive)) IsMove = true;
-		constBufferData.light.pointLight.isActive = static_cast<int>(isActive);
+	//	// ライトを表示するかどうかのフラグを更新。
+	//	bool isActive = static_cast<bool>(constBufferData.light.pointLight.isActive);
+	//	ImGui::Checkbox("IsActive", &isActive);
+	//	if (isActive != static_cast<bool>(constBufferData.light.pointLight.isActive)) IsMove = true;
+	//	constBufferData.light.pointLight.isActive = static_cast<int>(isActive);
 
-		// 値を保存する。
-		float dirX = constBufferData.light.pointLight.lightPos.x;
-		float dirY = constBufferData.light.pointLight.lightPos.y;
-		float dirZ = constBufferData.light.pointLight.lightPos.z;
-		float lightSize = constBufferData.light.pointLight.lightSize;
-		float aoSampleCount = static_cast<float>(constBufferData.debug.aoSampleCount);
-		float pointLightPower = constBufferData.light.pointLight.lightPower;
-		float MOVE_LENGTH = 1500.0f;
-		ImGui::SliderFloat("PointLightX", &constBufferData.light.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
-		ImGui::SliderFloat("PointLightY", &constBufferData.light.pointLight.lightPos.y, 0.0f, 1000.0f);
-		ImGui::SliderFloat("PointLightZ", &constBufferData.light.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
-		ImGui::SliderFloat("PointLightRadius", &constBufferData.light.pointLight.lightSize, 1.0f, 50.0f);
-		ImGui::SliderFloat("PointLightPower", &constBufferData.light.pointLight.lightPower, 300.0f, 1000.0f);
-		ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
-		constBufferData.debug.aoSampleCount = static_cast<int>(aoSampleCount);
+	//	// 値を保存する。
+	//	float dirX = constBufferData.light.pointLight.lightPos.x;
+	//	float dirY = constBufferData.light.pointLight.lightPos.y;
+	//	float dirZ = constBufferData.light.pointLight.lightPos.z;
+	//	float lightSize = constBufferData.light.pointLight.lightSize;
+	//	float aoSampleCount = static_cast<float>(constBufferData.debug.aoSampleCount);
+	//	float pointLightPower = constBufferData.light.pointLight.lightPower;
+	//	float MOVE_LENGTH = 1500.0f;
+	//	ImGui::SliderFloat("PointLightX", &constBufferData.light.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
+	//	ImGui::SliderFloat("PointLightY", &constBufferData.light.pointLight.lightPos.y, 0.0f, 1000.0f);
+	//	ImGui::SliderFloat("PointLightZ", &constBufferData.light.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
+	//	ImGui::SliderFloat("PointLightRadius", &constBufferData.light.pointLight.lightSize, 1.0f, 50.0f);
+	//	ImGui::SliderFloat("PointLightPower", &constBufferData.light.pointLight.lightPower, 100.0f, 1000.0f);
+	//	ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
+	//	constBufferData.debug.aoSampleCount = static_cast<int>(aoSampleCount);
 
-		// 変わっていたら
-		if (dirX != constBufferData.light.pointLight.lightPos.x || dirY != constBufferData.light.pointLight.lightPos.y || dirZ != constBufferData.light.pointLight.lightPos.z || lightSize != constBufferData.light.pointLight.lightSize || pointLightPower != constBufferData.light.pointLight.lightPower) {
+	//	// 変わっていたら
+	//	if (dirX != constBufferData.light.pointLight.lightPos.x || dirY != constBufferData.light.pointLight.lightPos.y || dirZ != constBufferData.light.pointLight.lightPos.z || lightSize != constBufferData.light.pointLight.lightSize || pointLightPower != constBufferData.light.pointLight.lightPower) {
 
-			IsMove = true;
+	//		IsMove = true;
 
-		}
+	//	}
 
-		// ライトの色を設定。
-		std::array<float, 3> lightColor = { constBufferData.light.pointLight.lightColor.x,constBufferData.light.pointLight.lightColor.y,constBufferData.light.pointLight.lightColor.z };
-		ImGui::ColorPicker3("LightColor", lightColor.data());
-		// 色が変わっていたら。
-		if (lightColor[0] != constBufferData.light.pointLight.lightColor.x || lightColor[1] != constBufferData.light.pointLight.lightColor.y || lightColor[2] != constBufferData.light.pointLight.lightColor.z) {
-			IsMove = true;
-		}
-		constBufferData.light.pointLight.lightColor.x = lightColor[0];
-		constBufferData.light.pointLight.lightColor.y = lightColor[1];
-		constBufferData.light.pointLight.lightColor.z = lightColor[2];
+	//	// ライトの色を設定。
+	//	std::array<float, 3> lightColor = { constBufferData.light.pointLight.lightColor.x,constBufferData.light.pointLight.lightColor.y,constBufferData.light.pointLight.lightColor.z };
+	//	ImGui::ColorPicker3("LightColor", lightColor.data());
+	//	// 色が変わっていたら。
+	//	if (lightColor[0] != constBufferData.light.pointLight.lightColor.x || lightColor[1] != constBufferData.light.pointLight.lightColor.y || lightColor[2] != constBufferData.light.pointLight.lightColor.z) {
+	//		IsMove = true;
+	//	}
+	//	constBufferData.light.pointLight.lightColor.x = lightColor[0];
+	//	constBufferData.light.pointLight.lightColor.y = lightColor[1];
+	//	constBufferData.light.pointLight.lightColor.z = lightColor[2];
 
-		ImGui::TreePop();
+	//	ImGui::TreePop();
 
-	}
+	//}
 
 
 	if (IsMove) {

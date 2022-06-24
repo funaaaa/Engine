@@ -196,12 +196,12 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
 }
 
 // ソフトシャドウ射出関数
-float SoftShadow(Vertex vtx, float lightSize, float length)
+float SoftShadow(Vertex vtx, float lightSize, float length, int lightIndex)
 {
     float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     
     // 光源への中心ベクトル
-    float3 pointLightPosition = gSceneParam.light.pointLight.lightPos;
+    float3 pointLightPosition = gSceneParam.light.pointLight[lightIndex].lightPos;
     float3 lightDir = normalize(pointLightPosition - worldPosition);
     
     // ライトベクトルと垂直なベクトルを求める。
@@ -369,8 +369,8 @@ void mainRayGen()
     float3 col = payload.color;
 
     // 結果格納
-    lightingOutput[launchIndex.xy] = float4(payload.aoLuminance, 1);
-    aoOutput[launchIndex.xy] = float4(payload.lightLuminance, 1);
+    lightingOutput[launchIndex.xy] = float4(payload.lightLuminance, 1);
+    aoOutput[launchIndex.xy] = float4(payload.aoLuminance, 1);
     colorOutput[launchIndex.xy] = float4(payload.color, 1);
     giOutput[launchIndex.xy] = float4(payload.giColor, 1);
 
@@ -430,6 +430,13 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         rate = 1.0f - saturate(rate);
         
         payload.giColor += texColor * rate;
+        
+        // このオブジェクトが全反射だったら黒を返す。
+        if (instanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
+        {
+            payload.giColor = float3(0, 0, 0);
+        }
+        
         return;
     }
     
@@ -443,11 +450,13 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         payload.aoLuminance += float3(1, 1, 1);
         payload.giColor += float3(0, 0, 0);
         
+  
+        
         return;
     }
     
     // Instance数がCHS_IDENTIFICATION_TEXCOLORだったらテクスチャの色をそのまま返す。
-    if (instanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || instanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
         payload.lightLuminance += float3(1, 1, 1);
         payload.color += texColor;
@@ -462,7 +471,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     {
         
         // 完全反射レイを飛ばす。
-        ShootReflectionRay(worldPos, reflect(WorldRayDirection(), worldNormal), payload, gRtScene);
+        ShootCompleteReflectionRay(worldPos, reflect(WorldRayDirection(), worldNormal), payload, gRtScene);
         
         // デバッグ用で若干白っぽくする。
         payload.color += 0.1f;
@@ -503,33 +512,67 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // 並行光源のライティング結果の色
     float3 dirLightColor = float3(0, 0, 0);
     
-    // ライトまでの距離
-    float lightLength = length(gSceneParam.light.pointLight.lightPos - worldPos);
-    
-    // 点光源へシャドウレイを飛ばす。
-    if (lightLength < gSceneParam.light.pointLight.lightPower && gSceneParam.light.pointLight.isActive)
+    for (int index = 0; index < POINT_LIGHT_COUNT; ++index)
     {
         
-        pointLightVisibility = SoftShadow(vtx, gSceneParam.light.pointLight.lightSize, length(gSceneParam.light.pointLight.lightPos - worldPos));
-        
-        // 影だったら
-        if (0 <= pointLightVisibility)
+        // ライトが有効化されていなかったら処理を飛ばす。
+        if (!gSceneParam.light.pointLight[index].isActive)
         {
-            
-            // 明るさを減衰させる。
-            float rate = lightLength / gSceneParam.light.pointLight.lightPower;
-            rate = pow(rate, 5);
-            rate = 1.0f - rate;
-                
-            // ランバートの反射率と明るさをかける。
-            pointLightVisibility *= rate;
-                
-            pointLightColor += gSceneParam.light.pointLight.lightColor * pointLightVisibility;
-                
-            
+            continue;
         }
         
+        // ライトまでの距離
+        float lightLength = length(gSceneParam.light.pointLight[index].lightPos - worldPos);
+    
+        // 点光源へシャドウレイを飛ばす。
+        if (lightLength < gSceneParam.light.pointLight[index].lightPower && gSceneParam.light.pointLight[index].isActive)
+        {
+        
+            float pointLightVisibilityBuff = 0;
+            pointLightVisibilityBuff = SoftShadow(vtx, gSceneParam.light.pointLight[index].lightSize, length(gSceneParam.light.pointLight[index].lightPos - worldPos), index);
+        
+            // 影だったら
+            if (0 <= pointLightVisibilityBuff)
+            {
+                
+                float3 pointLightDir = worldPos - gSceneParam.light.pointLight[index].lightPos;
+                pointLightDir = normalize(pointLightDir);
+            
+                // 明るさを減衰させる。
+                float rate = lightLength / gSceneParam.light.pointLight[index].lightPower;
+                rate = pow(rate, 5);
+                rate = 1.0f - rate;
+                
+                // ディフューズを計算する。
+                float mDiffuse = 0.5f;
+                float3 diffuse = dot(-pointLightDir, worldNormal) * mDiffuse;
+			    // 光沢度
+                const float shininess = 4.0f;
+		    	// 頂点から視点への方向ベクトル
+                float3 eyedir = normalize(WorldRayOrigin() - worldPos);
+		    	// 反射光ベクトル
+                float3 reflect = normalize(pointLightDir + 2.0f * dot(-pointLightDir, worldNormal) * worldNormal);
+                // 鏡面反射光
+                float mSpecular = 0.5f;
+                float3 specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
+                
+                // ランバートの反射率と明るさをかける。
+                pointLightVisibilityBuff = pointLightVisibilityBuff * ((diffuse + specular) * rate);
+                
+                pointLightColor += gSceneParam.light.pointLight[index].lightColor * pointLightVisibilityBuff;
+            
+                pointLightVisibility += pointLightVisibilityBuff;
+                
+            
+            }
+        
+        }
     }
+    
+    
+    
+    pointLightColor = saturate(pointLightColor);
+    pointLightVisibility = saturate(pointLightVisibility);
     
     // 並行光源にシャドウレイを飛ばす。
     if (gSceneParam.light.dirLight.isActive && gSceneParam.light.dirLight.lightDir.y < 0.1f)
@@ -587,6 +630,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
             
             dirLightColor = normalize(dirLightColor);
             
+
             
         }
         
@@ -606,17 +650,17 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         float3 sampleDir = GetUniformHemisphereSample(seed, worldNormal);
         
         // シャドウレイを飛ばす。
-        float aoLightVisibilityBuff = ShootAOShadowRay(worldPos, sampleDir, 100, gRtScene);
+        float aoLightVisibilityBuff = ShootAOShadowRay(worldPos, sampleDir, 10, gRtScene);
         
         // 隠蔽度合い += サンプリングした値 * コサイン項 / 確率密度関数
         float NoL = saturate(dot(worldNormal, sampleDir));
         float pdf = 1.0 / (2.0 * PI);
-        aoLightVisibility += aoLightVisibilityBuff * NoL / pdf;
+        aoLightVisibility += aoLightVisibilityBuff;
         
             
     }
     // 平均を取る。
-    aoLightVisibility = (1.0f / PI) * (1.0f / float(gSceneParam.debug.aoSampleCount)) * aoLightVisibility;
+    //aoLightVisibility = (1.0f / PI) * (1.0f / float(gSceneParam.debug.aoSampleCount)) * aoLightVisibility;
         
     
     
@@ -725,7 +769,7 @@ void mainAnyHit(inout DenoisePayload payload, MyAttribute attrib)
     int instanceID = InstanceID();
     
     // インスタンスIDが1(ライト)なら当たり判定を棄却する。
-    if (instanceID == 1)
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
         IgnoreHit();
 

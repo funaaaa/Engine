@@ -1,6 +1,7 @@
 #pragma once
 #include "Vec.h"
 #include <DirectXMath.h>
+#include <array>
 
 // 使用する定数バッファ達
 
@@ -41,8 +42,10 @@ struct RayLightConstBufferData {
 
 	};
 
-	RayDirLightConstBufferData dirLight;	// 並行光源
-	RayPointLightData pointLight;			// 点光源
+	static const int POINT_LIGHT_COUNT = 10;
+
+	RayDirLightConstBufferData dirLight;						// 並行光源
+	std::array<RayPointLightData, POINT_LIGHT_COUNT> pointLight;// 点光源
 
 	// 初期化処理
 	void Init();
@@ -88,7 +91,7 @@ struct DebugConstBufferData {
 };
 
 // すべての定数バッファを纏めたもの。
-struct RayConstBufferData{
+struct RayConstBufferData {
 
 	// カメラ
 	CameraConstBufferData camera;

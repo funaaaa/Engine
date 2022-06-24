@@ -79,31 +79,40 @@ void ShaderData::LoadShaderDXC()
 	if (!infile) {
 		throw std::runtime_error("failed shader compile.");
 	}
+
 	std::wstring fileName = StringToWString(shaderPath);
 	std::stringstream strstream;
+
 	strstream << infile.rdbuf();
+
 	std::string shaderCode = strstream.str();
 	Microsoft::WRL::ComPtr<IDxcLibrary> library;
 	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
 	Microsoft::WRL::ComPtr<IDxcCompiler> compiler;
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> source;
+
 	library->CreateBlobWithEncodingFromPinned(
 		(LPBYTE)shaderCode.c_str(), (UINT32)shaderCode.size(), CP_UTF8, &source);
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler;
+
 	// インクルードを使う場合には適切に設定すること.
 	library->CreateIncludeHandler(&includeHandler);
 	// コンパイルオプションの指定.
 	std::vector<LPCWSTR> arguments;
+
 	arguments.emplace_back(L"/Od");
 	const auto target = L"lib_6_4";
+
 	Microsoft::WRL::ComPtr<IDxcOperationResult> dxcResult;
 	hr = compiler->Compile(source.Get(), fileName.c_str(),
 		L"", target, arguments.data(), UINT(arguments.size()),
 		nullptr, 0, includeHandler.Get(), &dxcResult);
+
 	if (FAILED(hr)) {
 		throw std::runtime_error("failed shader compile.");
 	}
+
 	dxcResult->GetStatus(&hr);
 	if (FAILED(hr)) {
 		Microsoft::WRL::ComPtr<IDxcBlobEncoding> errBlob;
@@ -111,6 +120,7 @@ void ShaderData::LoadShaderDXC()
 		// ... errBlob の内容をエラーメッセージとして表示 (省略)
 		throw std::runtime_error("failed shader compile");
 	}
+
 	Microsoft::WRL::ComPtr<IDxcBlob> blob;
 	dxcResult->GetResult(&blob);
 

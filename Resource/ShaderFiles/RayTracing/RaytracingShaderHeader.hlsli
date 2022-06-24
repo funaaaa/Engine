@@ -8,6 +8,8 @@ static const int CHS_IDENTIFICATION_INSTNACE_AS = 1; // InstanceID ‘å‹CU——p‚Ìƒ
 static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR = 2; // InstanceID ƒeƒNƒXƒ`ƒƒ‚ÌF‚ğ‚»‚Ì‚Ü‚Ü•Ô‚·B—p‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_ISNTANCE_REFLECTION = 3; // InstanceID ”½Ë‚³‚¹‚éB
 static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // InstanceID Š®‘S”½Ë‚³‚¹‚éB
+static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ƒ‰ƒCƒg—p‚ÌƒIƒuƒWƒFƒNƒgBƒeƒNƒXƒ`ƒƒ‚ÌF‚ğ‚»‚Ì‚Ü‚Ü•Ô‚µAƒVƒƒƒhƒE‚Æ‚Ì“–‚½‚è”»’è‚ğs‚í‚È‚¢B
+
 static const int CHS_IDENTIFICATION_RAYID_GI = 100; // ƒOƒ[ƒoƒ‹ƒCƒ‹ƒ~ƒl[ƒVƒ‡ƒ“
 static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 101; // ”½ËƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 102; // Š®‘S”½Ë”½ËƒŒƒC
@@ -29,6 +31,7 @@ struct DirLightData
     float3 lightColor;
     float pad;
 };
+static const int POINT_LIGHT_COUNT = 10;
 // “_ŒõŒ¹‚Ìî•ñ
 struct PointLightData
 {
@@ -43,7 +46,7 @@ struct PointLightData
 struct LightConstBufferData
 {
     DirLightData dirLight;
-    PointLightData pointLight;
+    PointLightData pointLight[POINT_LIGHT_COUNT];
 };
 
 // ‘å‹CU——p’è”ƒoƒbƒtƒ@
@@ -312,7 +315,7 @@ bool ShootShadowRayNoAH(float3 origin, float3 direction, float tMax, RaytracingA
     RAY_FLAG flags = RAY_FLAG_NONE;
     flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderƒXƒLƒbƒv
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderƒXƒLƒbƒv
     
     // ƒ‰ƒCƒg‚ÍœŠOB
     uint rayMask = ~(0x08);

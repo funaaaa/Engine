@@ -28,15 +28,17 @@ void RayLightConstBufferData::Init()
 	/*===== ライト用定数バッファを初期化 =====*/
 
 	// 点光源をセッティング
-	pointLight.lightPos = Vec3(0, 300, 0);
-	pointLight.lightSize = 30.0f;
-	pointLight.lightPower = 300.0f;
-	pointLight.isActive = true;
+	for (auto& index : pointLight) {
+		index.lightPos = Vec3(0, 300, 0);
+		index.lightSize = 5.0f;
+		index.lightPower = 100.0f;
+		index.isActive = false;
+	}
 
 	// 並行光源をセッティング
-	dirLight.isActive = false;
+	dirLight.isActive = true;
 	dirLight.lightColor = Vec3{ 0,0,0 };
-	dirLight.lihgtDir = Vec3{ -0.5f,-1,0 };
+	dirLight.lihgtDir = Vec3{ -0.5f,-0.01f,0 };
 	dirLight.lihgtDir.Normalize();
 
 }

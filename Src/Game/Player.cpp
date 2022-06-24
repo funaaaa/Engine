@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "FHelper.h"
 #include "BLAS.h"
+#include "DriftParticleMgr.h"
 
 void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 {
@@ -12,7 +13,7 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 	/*===== 初期化処理 =====*/
 
 	carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }, true);
-	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_COMPLETE_REFLECTION);
+	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
 	stageBlasIndex = StageBlasIndex;
@@ -95,33 +96,13 @@ void Player::Input()
 
 	}
 
-	// LTが引かれていたらドリフト状態にする。
-	const float INPUT_DEADLINE_DRIFT = 0.9f;
-	float inputLeftTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_LEFT);
-	if (INPUT_DEADLINE_DRIFT < inputLeftTriValue) {
-
-		isDrift = true;
-
-	}
-	else {
-
-		// ドリストのブーストするまでのタイマーが規定値以上だったらブーストする。
-		if (DRIFT_BOOST_TIMER <= driftBoostTimer) {
-
-			boostSpeed = MAX_BOOST_SPEED;
-
-		}
-
-		// ドリフトのブーストするまでのタイマーを初期化する。
-		driftBoostTimer = 0;
-
-		isDrift = false;
-
-	}
+	// 現在のフレームの右スティックの傾き具合。
+	float nowFrameInputLeftStickHori = 0;
 
 	// 右スティックの横の傾き量でキャラを回転させる。
 	float inputLeftStickHori = Input::Ins()->isPadThumb(XINPUT_THUMB_LEFTSIDE);
-	if (0.2f < std::fabs(inputLeftStickHori)) {
+	const float LEFT_STICK_INPUT_DEADLINE = 0.2f;
+	if (LEFT_STICK_INPUT_DEADLINE < std::fabs(inputLeftStickHori)) {
 
 		// 回転量 通常状態とドリフト状態で違う。
 		float handleAmount = HANDLE_NORMAL;
@@ -146,9 +127,54 @@ void Player::Input()
 		// 回転を加算する。
 		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, quaternionMat);
 		rotY += handleAmount * inputLeftStickHori;
+		nowFrameInputLeftStickHori = inputLeftStickHori;
 
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+
+	}
+
+	// LTが引かれていたらドリフト状態にする。
+	const float INPUT_DEADLINE_DRIFT = 0.9f;
+	float inputLeftTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_LEFT);
+	bool isInputNowFrameLeftStrick = LEFT_STICK_INPUT_DEADLINE < fabs(nowFrameInputLeftStickHori);
+	if (INPUT_DEADLINE_DRIFT < inputLeftTriValue && isInputNowFrameLeftStrick) {
+
+		isDrift = true;
+
+		// ドリフトのベクトルを求める。
+		Vec3 driftVec = Vec3();
+		if (nowFrameInputLeftStickHori < 0) {
+
+			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+
+		}
+		else {
+
+			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+
+		}
+
+		// ドリフト時のパーティクルを生成。
+		DriftParticleMgr::Ins()->Generate(pos, driftVec, PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+
+	}
+	// すでにドリフト中だったら勝手に解除しないようにする。
+	else if (INPUT_DEADLINE_DRIFT < inputLeftTriValue && isDrift) {
+	}
+	else {
+
+		// ドリストのブーストするまでのタイマーが規定値以上だったらブーストする。
+		if (DRIFT_BOOST_TIMER <= driftBoostTimer) {
+
+			boostSpeed = MAX_BOOST_SPEED;
+
+		}
+
+		// ドリフトのブーストするまでのタイマーを初期化する。
+		driftBoostTimer = 0;
+
+		isDrift = false;
 
 	}
 

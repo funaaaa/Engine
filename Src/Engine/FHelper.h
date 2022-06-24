@@ -26,7 +26,30 @@ namespace FHelper {
 	inline int GetRand(const int& min, const int& max) {
 		return (rand() % (max - min + 1)) + min;
 	}
-	inline Vec3 GetRandXMFLOAT3(const int& min, const int& max) {
+	inline float GetRand(const float& min, const float& max) {
+
+		// ˆê’UÅ¬’l‚ÆÅ‘å’l‚ğ10000”{‚µ‚ÄintŒ^‚É‚·‚éB
+		const float MUL = 10000.0f;
+		int intMin = static_cast<int>(min * MUL);
+		int intMax = static_cast<int>(max * MUL);
+
+		int random = (rand() % (intMax - intMin + 1)) + intMin;
+
+		return static_cast<float>(random) / MUL;
+
+	}
+	inline float GetRand(const float& max) {
+
+		// ˆê’UÅ¬’l‚ÆÅ‘å’l‚ğ10000”{‚µ‚ÄintŒ^‚É‚·‚éB
+		const float MUL = 10000.0f;
+		int intMax = static_cast<int>(max * MUL);
+
+		int random = rand() % (intMax + 1);
+
+		return static_cast<float>(random) / MUL;
+
+	}
+	inline Vec3 GetRandVec3(const int& min, const int& max) {
 		return Vec3(static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)));
 	}
 

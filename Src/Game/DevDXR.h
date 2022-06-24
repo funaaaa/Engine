@@ -29,7 +29,7 @@
 #include "FHelper.h"
 
 #include "Player.h"
-
+#include <array>
 
 class DevDXR {
 
@@ -51,10 +51,13 @@ private:
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas;
-	int sphereIns;
+	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns;
+
+	// 天球用のスフィア
 	int skyDomeBlas;
 	int skyDomeIns;
 
+	// ステージ
 	int stageBlas;
 	int stageIns;
 
@@ -62,13 +65,13 @@ private:
 	// TLASを生成。
 	TLAS tlas;
 
-	// レイトレ出力用クラスをセット。
+	// アンビエントオクルージョン出力用クラスをセット。
 	RaytracingOutput aoOutput;
 
-	// レイトレ出力用クラスをセット。
+	// 色出力用クラスをセット。
 	RaytracingOutput colorOutput;
 
-	// レイトレ出力用クラスをセット。
+	// デノイズするライト出力用クラスをセット。
 	RaytracingOutput lightOutput;
 
 	// GI出力用クラスをセット。
