@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec.h"
+#include "ConstBuffers.h"
 
 class Player {
 
@@ -49,7 +50,7 @@ public:
 	void Init(const int& StageBlasIndex, const int& StageInstanceIndex);
 
 	// XVˆ—
-	void Update();
+	void Update(RayConstBufferData& ConstBufferData);
 
 	// •`‰æˆ—
 	void Draw();
@@ -62,7 +63,7 @@ public:
 private:
 
 	// “ü—Íˆ—
-	void Input();
+	void Input(RayConstBufferData& ConstBufferData);
 
 	// ˆÚ“®ˆ—
 	void Move();

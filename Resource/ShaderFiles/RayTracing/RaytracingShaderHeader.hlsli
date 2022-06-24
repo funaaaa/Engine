@@ -31,7 +31,7 @@ struct DirLightData
     float3 lightColor;
     float pad;
 };
-static const int POINT_LIGHT_COUNT = 10;
+static const int POINT_LIGHT_COUNT = 30;
 // 点光源の情報
 struct PointLightData
 {
@@ -40,7 +40,8 @@ struct PointLightData
     float3 lightColor;
     float lightPower;
     int isActive;
-    float3 pad;
+    int isShadow;
+    float2 pad;
 };
 // ライト用定数バッファ
 struct LightConstBufferData

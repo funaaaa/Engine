@@ -31,7 +31,7 @@ void DevDXR::Init() {
 	}
 
 	// ドリフト時のパーティクルのクラスをセッティングする。
-	DriftParticleMgr::Ins()->Setting(0);
+	//DriftParticleMgr::Ins()->Setting(0);
 
 	// ステージを読み込む。
 	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
@@ -104,7 +104,7 @@ void DevDXR::Update() {
 	}
 
 	// プレイヤーを更新。
-	player.Update();
+	player.Update(constBufferData);
 
 	// 乱数の種を更新。
 	constBufferData.debug.seed = FHelper::GetRand(0, 1000);
@@ -127,13 +127,8 @@ void DevDXR::Update() {
 		++counter;
 	}
 
-	// 一旦点光源をプレイヤーの上部に張り付かせておく。
-	constBufferData.light.pointLight[0].isActive = true;
-	constBufferData.light.pointLight[0].lightPos = player.GetPos() + Vec3(0, 30, 0);
-	PorygonInstanceRegister::Ins()->ChangeTrans(sphereIns[0], constBufferData.light.pointLight[0].lightPos);
-
 	// ドリフト時のパーティクルを更新。
-	DriftParticleMgr::Ins()->Update(constBufferData);
+	//DriftParticleMgr::Ins()->Update(constBufferData);
 
 	tlas.Update();
 

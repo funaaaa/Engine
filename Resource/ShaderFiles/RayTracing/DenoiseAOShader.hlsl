@@ -527,9 +527,17 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         // 点光源へシャドウレイを飛ばす。
         if (lightLength < gSceneParam.light.pointLight[index].lightPower && gSceneParam.light.pointLight[index].isActive)
         {
-        
+            
+            // 影を出さないフラグが立っていたら影を飛ばさない。
             float pointLightVisibilityBuff = 0;
-            pointLightVisibilityBuff = SoftShadow(vtx, gSceneParam.light.pointLight[index].lightSize, length(gSceneParam.light.pointLight[index].lightPos - worldPos), index);
+            if (!gSceneParam.light.pointLight[index].isShadow)
+            {
+                pointLightVisibilityBuff = SoftShadow(vtx, gSceneParam.light.pointLight[index].lightSize, length(gSceneParam.light.pointLight[index].lightPos - worldPos), index);
+            }
+            else
+            {
+                pointLightVisibilityBuff = 1;
+            }
         
             // 影だったら
             if (0 <= pointLightVisibilityBuff)

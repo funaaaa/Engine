@@ -33,16 +33,17 @@ struct RayLightConstBufferData {
 	// 点光源用定数バッファ
 	struct RayPointLightData {
 
-		Vec3 lightPos;		// ライトの座標
-		float lightSize;	// ライトのサイズ
-		Vec3 lightColor;	// ライトの色
-		float lightPower;	// ライトの強さ
-		int isActive;		// 有効化するかどうかのフラグ
-		Vec3 pad;			// パディング
+		Vec3 lightPos;			// ライトの座標
+		float lightSize;		// ライトのサイズ
+		Vec3 lightColor;		// ライトの色
+		float lightPower;		// ライトの強さ
+		int isActive;			// 有効化するかどうかのフラグ
+		int isShadow;			// 影を出さないフラグ
+		DirectX::XMFLOAT2 pad;	// パディング
 
 	};
 
-	static const int POINT_LIGHT_COUNT = 10;
+	static const int POINT_LIGHT_COUNT = 30;
 
 	RayDirLightConstBufferData dirLight;						// 並行光源
 	std::array<RayPointLightData, POINT_LIGHT_COUNT> pointLight;// 点光源

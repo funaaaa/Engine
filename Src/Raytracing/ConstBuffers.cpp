@@ -31,8 +31,9 @@ void RayLightConstBufferData::Init()
 	for (auto& index : pointLight) {
 		index.lightPos = Vec3(0, 300, 0);
 		index.lightSize = 5.0f;
-		index.lightPower = 100.0f;
+		index.lightPower = 10.0f;
 		index.isActive = false;
+		index.isShadow = true;
 	}
 
 	// 並行光源をセッティング

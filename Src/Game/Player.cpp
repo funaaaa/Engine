@@ -33,13 +33,13 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 
 }
 
-void Player::Update()
+void Player::Update(RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 更新処理 =====*/
 
 	// 入力処理
-	Input();
+	Input(ConstBufferData);
 
 	// 移動処理
 	Move();
@@ -70,7 +70,7 @@ float Player::GetNowSpeedPer()
 
 }
 
-void Player::Input()
+void Player::Input(RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 入力処理 =====*/
@@ -156,7 +156,7 @@ void Player::Input()
 		}
 
 		// ドリフト時のパーティクルを生成。
-		DriftParticleMgr::Ins()->Generate(pos, driftVec, PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+		//DriftParticleMgr::Ins()->Generate(pos, driftVec, PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex), ConstBufferData);
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。

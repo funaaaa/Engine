@@ -24,7 +24,7 @@ void DriftParticleMgr::Setting(const int& ConstBufferIndex)
 	}
 }
 
-void DriftParticleMgr::Generate(const Vec3& Pos, const Vec3& DriftVec, const DirectX::XMMATRIX& CarMatRot)
+void DriftParticleMgr::Generate(const Vec3& Pos, const Vec3& DriftVec, const DirectX::XMMATRIX& CarMatRot, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== ¶¬ˆ— =====*/
@@ -40,7 +40,7 @@ void DriftParticleMgr::Generate(const Vec3& Pos, const Vec3& DriftVec, const Dir
 
 			if (index->GetIsActive()) continue;
 
-			index->Generate(Pos, DriftVec, CarMatRot);
+			index->Generate(Pos, DriftVec, CarMatRot, ConstBufferData);
 
 			break;
 

@@ -34,7 +34,7 @@ public:
 	void Init();
 
 	// ¶¬ˆ—
-	void Generate(const Vec3& Pos, const Vec3& DriftVec, const DirectX::XMMATRIX& CarMatRot);
+	void Generate(const Vec3& Pos, const Vec3& DriftVec, const DirectX::XMMATRIX& CarMatRot, RayConstBufferData& ConstBufferData);
 
 	// XVˆ—
 	void Update(RayConstBufferData& ConstBufferData);
