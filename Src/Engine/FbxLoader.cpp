@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "TextureManager.h"
 
-void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT> OutputVertexIndex)
+void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex)
 {
 
 	// 指定されたインデックスが範囲外だったら何も返さない。
@@ -136,6 +136,8 @@ FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 
 	const int BONE_SIZE = static_cast<int>(bones.size());
 	for (int index = 0; index < BONE_SIZE; ++index) {
+
+		if (16 <= index)break;
 
 		// 今の姿勢行列
 		DirectX::XMMATRIX matCurrentPose;
@@ -371,9 +373,9 @@ void FbxLoader::ParseMeshFaces(FbxModel& Model, FbxMesh* InputFbxMesh)
 				int index2 = indices[indices.size() - 1];
 				int index3 = fbxIndex;
 				int index0 = indices[indices.size() - 3];
-				indices.emplace_back(index2);
-				indices.emplace_back(index3);
-				indices.emplace_back(index0);
+				indices.emplace_back(static_cast<unsigned short>(index2));
+				indices.emplace_back(static_cast<unsigned short>(index3));
+				indices.emplace_back(static_cast<unsigned short>(index0));
 
 			}
 
@@ -538,7 +540,7 @@ void FbxLoader::ParseSkin(FbxModel& Model, FbxMesh* InputFbxMesh)
 			// スキンウェイト
 			float weight = (float)controlPointWeights[vertexIndex];
 			// その頂点の影響を受けるボーンリストに、ボーンとウェイトのペアを追加。
-			weightLists[vertIndex].emplace_back(WeightSet({ (UINT)index, (weight) }));
+			weightLists[vertIndex].emplace_back(WeightSet({ static_cast<UINT>(index), (weight) }));
 
 		}
 

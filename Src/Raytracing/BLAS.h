@@ -49,6 +49,8 @@ private:
 
 	// デバッグ用
 	std::vector<RayVertex> vertex;
+	std::vector<Vec3> vertexPos;
+	std::vector<Vec3> vertexNormal;
 	std::vector<UINT> vertIndex;
 
 
@@ -62,7 +64,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// BLASの生成
-	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
+	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false);
 	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
 	void GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
@@ -93,7 +95,10 @@ public:
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
 
 	// デバッグ用
-	std::vector<RayVertex>& GetVertex() { return vertex; }
+	std::vector<RayVertex> GetVertex() { return vertex; }
+	std::vector<Vec3> GetVertexPos() { return vertexPos; }
+	std::vector<Vec3> GetVertexNormal() { return vertexNormal; }
+	std::vector<UINT> GetVertexIndex() { return vertIndex; }
 
 private:
 

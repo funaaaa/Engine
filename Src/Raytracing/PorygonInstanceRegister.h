@@ -41,18 +41,23 @@ public:
 	// 移動(引数に移動)関数
 	void ChangeTrans(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeTrans(const int& Index, const Vec3& Pos);
+	DirectX::XMMATRIX GetTrans(const int& Index);
 
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void AddRotate(const int& Index, const Vec3& Rot);
+	void AddRotate(const int& Index, const DirectX::XMMATRIX& Rot);
+	DirectX::XMMATRIX GetRotate(const int& Index);
 
 	// 回転(ラジアン、引数を代入)関数
 	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeRotate(const int& Index, const Vec3& Rot);
+	void ChangeRotate(const int& Index, const DirectX::XMMATRIX& Rot);
 
 	// 拡縮(引数を加算)関数
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
 	void AddScale(const int& Index, const Vec3& Scale);
+	DirectX::XMMATRIX GetScale(const int& Index);
 
 	// 拡縮(引数を代入)関数
 	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
@@ -66,5 +71,17 @@ public:
 
 	// レジスターのサイズを取得する関数。
 	UINT GetRegisterSize() { return UINT(instance.size()); }
+
+	// hlsl側での動きを判断する用の識別子
+	enum{
+	
+		SHADER_ID_DEF = 0,			// 通常のレイ
+		SHADER_ID_AS = 1,			// 大気散乱用
+		SHADER_ID_TEXCOLOR = 2,		// テクスチャの色をそのまま返す
+		SHADER_ID_REFLECTION = 3,	// 反射させる。
+		SHADER_ID_COMPLETE_REFLECTION = 4,	// 完全反射させる。
+		SHADER_ID_LIGHT = 5,		// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
+
+	};
 
 };

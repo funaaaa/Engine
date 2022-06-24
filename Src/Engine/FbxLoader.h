@@ -161,7 +161,7 @@ public:
 		Vec3 normal;
 		DirectX::XMFLOAT2 uv;
 	};
-	void GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT> OutputVertexIndex);
+	void GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex);
 
 
 private:

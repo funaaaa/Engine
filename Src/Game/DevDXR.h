@@ -25,9 +25,11 @@
 
 #include <utilapiset.h>
 
-#include "KariConstBuffer.h"
-
+#include "ConstBuffers.h"
 #include "FHelper.h"
+
+#include "Player.h"
+#include <array>
 
 class DevDXR {
 
@@ -35,9 +37,10 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	// 仮の定数バッファを宣言
-	KariConstBufferData constBufferData;
-	DynamicConstBuffer constBuff;
+
+	// 定数バッファ
+	RayConstBufferData constBufferData;
+	DynamicConstBuffer constBuffer;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPiplineShaderData> dAOuseShaders;
@@ -48,21 +51,27 @@ private:
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas;
-	int sphereIns;
+	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns;
+
+	// 天球用のスフィア
 	int skyDomeBlas;
 	int skyDomeIns;
+
+	// ステージ
+	int stageBlas;
+	int stageIns;
 
 
 	// TLASを生成。
 	TLAS tlas;
 
-	// レイトレ出力用クラスをセット。
+	// アンビエントオクルージョン出力用クラスをセット。
 	RaytracingOutput aoOutput;
 
-	// レイトレ出力用クラスをセット。
+	// 色出力用クラスをセット。
 	RaytracingOutput colorOutput;
 
-	// レイトレ出力用クラスをセット。
+	// デノイズするライト出力用クラスをセット。
 	RaytracingOutput lightOutput;
 
 	// GI出力用クラスをセット。
@@ -88,6 +97,9 @@ private:
 	// ライトが動いたか
 	bool isMoveLight;
 
+	// プレイヤー
+	Player player;
+
 
 public:
 
@@ -106,8 +118,8 @@ private:
 	void FPS();
 
 	// 入力操作
-	void Input(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID);
-	void InputImGUI(KariConstBufferData& constBufferData, bool& isMoveLight, DEGU_PIPLINE_ID& degugPiplineID, bool& isMove);
+	void Input();
+	void InputImGUI(bool& isMove);
 
 
 

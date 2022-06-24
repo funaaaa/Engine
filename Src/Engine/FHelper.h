@@ -3,6 +3,7 @@
 
 #include <DirectXMath.h>
 #include "Vec.h"
+#include <vector>
 
 //DirectXに関する便利機能をまとめたもの
 namespace FHelper {
@@ -25,7 +26,30 @@ namespace FHelper {
 	inline int GetRand(const int& min, const int& max) {
 		return (rand() % (max - min + 1)) + min;
 	}
-	inline Vec3 GetRandXMFLOAT3(const int& min, const int& max) {
+	inline float GetRand(const float& min, const float& max) {
+
+		// 一旦最小値と最大値を10000倍してint型にする。
+		const float MUL = 10000.0f;
+		int intMin = static_cast<int>(min * MUL);
+		int intMax = static_cast<int>(max * MUL);
+
+		int random = (rand() % (intMax - intMin + 1)) + intMin;
+
+		return static_cast<float>(random) / MUL;
+
+	}
+	inline float GetRand(const float& max) {
+
+		// 一旦最小値と最大値を10000倍してint型にする。
+		const float MUL = 10000.0f;
+		int intMax = static_cast<int>(max * MUL);
+
+		int random = rand() % (intMax + 1);
+
+		return static_cast<float>(random) / MUL;
+
+	}
+	inline Vec3 GetRandVec3(const int& min, const int& max) {
 		return Vec3(static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)));
 	}
 
@@ -136,6 +160,22 @@ namespace FHelper {
 
 		}
 	}
+
+	//レイとオブジェクトの当たり判定
+	struct RayToModelCollisionData {
+
+		std::vector<Vec3> targetVertex;
+		std::vector<UINT> targetIndex;
+		std::vector<Vec3> targetNormal;
+		DirectX::XMMATRIX matRot;
+		DirectX::XMMATRIX matScale;
+		DirectX::XMMATRIX matTrans;
+		Vec3 rayPos;
+		Vec3 rayDir;
+
+	};
+	bool RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& ImpactPos, float& Distance, Vec3& HitNormal);
+
 }
 
 //イージング関係

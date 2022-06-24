@@ -1,9 +1,5 @@
 ﻿#include "DevDXR.h"
 
-#define COLORHEX(hex) hex / 255.0f
-
-#define SCREEN_VIRTUAL_WIDTH 300
-
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
