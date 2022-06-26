@@ -102,6 +102,9 @@ void ShaderData::LoadShaderDXC()
 	std::vector<LPCWSTR> arguments;
 
 	arguments.emplace_back(L"/Od");
+	arguments.emplace_back(L"/Zi");
+	arguments.emplace_back(L"-Qembed_debug");
+
 	const auto target = L"lib_6_4";
 
 	Microsoft::WRL::ComPtr<IDxcOperationResult> dxcResult;

@@ -5,6 +5,7 @@
 #include "ModelDataManager.h"
 #include "FbxLoader.h"
 #include "Vec.h"
+#include "DynamicConstBuffer.h"
 #include <DirectXMath.h>
 
 // レイトレ用頂点構造体
@@ -25,8 +26,13 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;	// 頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;		// 頂点インデックスバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer;		// 頂点インデックスバッファ
 	RayDescriptor vertexDescriptor;			// 頂点ディスクリプタ
 	RayDescriptor indexDescriptor;			// 頂点インデックスディスクリプタ
+	RayDescriptor materialDescriptor;		// マテリアル情報用ディスクリプタ
+
+	// マテリアル情報用定数バッファ
+	ModelDataManager::Material material;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer;		// BLAS用バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
@@ -119,6 +125,11 @@ private:
 
 	// GPUディスクリプタを書き込む。
 	inline UINT WriteGPUDescriptor(void* Dst, const D3D12_GPU_DESCRIPTOR_HANDLE* Descriptor)
+	{
+		memcpy(Dst, Descriptor, sizeof(Descriptor));
+		return static_cast<UINT>((sizeof(Descriptor)));
+	}
+	inline UINT WriteGPUDescriptor(void* Dst, const D3D12_GPU_VIRTUAL_ADDRESS* Descriptor)
 	{
 		memcpy(Dst, Descriptor, sizeof(Descriptor));
 		return static_cast<UINT>((sizeof(Descriptor)));

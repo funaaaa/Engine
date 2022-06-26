@@ -87,6 +87,17 @@ struct ConstBufferData
     DebugConstBufferData debug;
 };
 
+// マテリアル情報
+struct Material
+{
+    float3 ambient;
+    float pad1;
+    float3 diffuse;
+    float pad2;
+    float3 specular;
+    float alpha; //アルファ
+};
+
 // 頂点情報
 struct Vertex
 {

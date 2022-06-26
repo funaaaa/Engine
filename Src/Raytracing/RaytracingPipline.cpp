@@ -314,9 +314,8 @@ UINT RaytracingPipline::GetLargestDataSizeInHitGroup()
 
 		// データサイズを取得。
 		UINT dataSize = 0;
-		const UINT CONST_DATA_SIZE = 4;
 		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetSRVCount(index);
-		dataSize += CONST_DATA_SIZE * HitGroupMgr::Ins()->GetCBVCount(index);
+		dataSize += sizeof(D3D12_GPU_VIRTUAL_ADDRESS) * HitGroupMgr::Ins()->GetCBVCount(index);
 		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetUAVCount(index);
 
 		// 取得したデータサイズが保存されているデータサイズより小さかったら処理を飛ばす。

@@ -29,6 +29,23 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	// モデルをロード。
 	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, IsSmoothing);
 
+	// マテリアル情報を保存。
+	material = dataBuff.material;
+
+	// マテリアル用定数バッファを生成。
+	materialBuffer = CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer, &material, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor.CreateStructuredSRV(materialBuffer, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
 	// 頂点数を求める。
 	vertexCount = static_cast<UINT>(dataBuff.vertex.size());
 
@@ -59,21 +76,21 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	// 頂点バッファを生成する。
 	vertexBuffer = CreateBuffer(
-		vertexStride * vertexCount,
+		static_cast<size_t>(vertexStride * vertexCount),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer, vertex.data(), static_cast<size_t>(vertexStride * vertexCount));
 
 	// 頂点インデックスバッファを生成する。
 	indexBuffer = CreateBuffer(
-		indexStride * indexCount,
+		static_cast<size_t>(indexStride * indexCount),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+	WriteToMemory(indexBuffer, vertIndex.data(), static_cast<size_t>(indexStride * indexCount));
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
@@ -135,6 +152,20 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 	FbxLoader::Ins()->GetFbxData(modelIndex, modelVertexData, modelIndexData);
 
+	// マテリアル用定数バッファを生成。
+	materialBuffer = CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer, &material, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor.CreateStructuredSRV(materialBuffer, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
 	// 頂点数を求める。
 	vertexCount = static_cast<UINT>(modelVertexData.size());
 
@@ -165,21 +196,21 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 	// 頂点バッファを生成する。
 	vertexBuffer = CreateBuffer(
-		vertexStride * vertexCount,
+		static_cast<size_t>(vertexStride * vertexCount),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer, vertex.data(), static_cast<size_t>(vertexStride * vertexCount));
 
 	// 頂点インデックスバッファを生成する。
 	indexBuffer = CreateBuffer(
-		indexStride * indexCount,
+		static_cast<size_t>(indexStride * indexCount),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+	WriteToMemory(indexBuffer, vertIndex.data(), static_cast<size_t>(indexStride * indexCount));
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
@@ -240,6 +271,20 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 
 	/*-- 形状データを読み込む --*/
 
+	// マテリアル用定数バッファを生成。
+	materialBuffer = CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer, &material, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor.CreateStructuredSRV(materialBuffer, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
 	// 頂点数を求める。
 	vertexCount = static_cast<UINT>(Data.vertex.size());
 
@@ -270,21 +315,21 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 
 	// 頂点バッファを生成する。
 	vertexBuffer = CreateBuffer(
-		vertexStride * vertexCount,
+		static_cast<size_t>(vertexStride * vertexCount),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer, vertex.data(), static_cast<size_t>(vertexStride * vertexCount));
 
 	// 頂点インデックスバッファを生成する。
 	indexBuffer = CreateBuffer(
-		indexStride * indexCount,
+		static_cast<size_t>(indexStride * indexCount),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+	WriteToMemory(indexBuffer, vertIndex.data(), static_cast<size_t>(indexStride * indexCount));
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
@@ -351,7 +396,7 @@ void BLAS::Update()
 	};
 
 	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer, vertex.data(), static_cast<size_t>(vertexStride * vertexCount));
 
 	// 更新のための値を設定。
 	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque);
@@ -471,11 +516,17 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
 
+		// マテリアル用のバッファをセット。
+		Dst += WriteGPUDescriptor(Dst, &materialDescriptor.GetGPUHandle());
+
 		// ヒットグループ名からヒットグループ名IDを取得する。
 		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
 
+		// 頂点、インデックス、マテリアルのオフセット
+		const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
+
 		// ヒットグループIDからSRVの数を取得。
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
+		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
@@ -515,11 +566,17 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
 		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
 
+		// マテリアル用のバッファをセット。
+		Dst += WriteGPUDescriptor(Dst, &materialDescriptor.GetGPUHandle());
+
 		// ヒットグループ名からヒットグループ名IDを取得する。
 		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
 
+		// 頂点、インデックス、マテリアルのオフセット
+		const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
+
 		// ヒットグループIDからSRVの数を取得。
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
+		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
@@ -827,16 +884,3 @@ void BLAS::CreateAccelerationStructure()
 	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }
-
-/*
-
-◯メモ
-・資料の実装を一通り終えた。
-・コンピュートシェーダーから値ちゃんと送られてるっぽい？
-・しかし形がおかしい。でも資料の最後の方に直し方があるから、ワンちゃんsoleで治るかも。
- →FbxLoader.cppでsortで出てくる条件式を逆にすると形はそれっぽくなる。アニメーションは反映されない。
-・アニメーションが再生されない。
-　→タイマーは変わっているので、ウェイト等の変数も正しく変わっているかを調べる。
-　→形は後回し、まずはタイマーを反映させる。
-
-*/

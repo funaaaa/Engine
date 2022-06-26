@@ -24,25 +24,26 @@ public:
 
 	};
 
+	// マテリアル
+	struct Material {
+		Vec3 ambient = { 0.3f,0.3f,0.3f };	//アンビエント影響度
+		float pad1;
+		Vec3 diffuse = { 0.3f,0.3f,0.3f };	//ディフューズ影響度
+		float pad2;
+		Vec3 specular = { 0.3f,0.3f,0.3f };//スペキュラー影響度
+		float alpha;									//アルファ
+	};
+
 	// データを渡す構造体
 	struct ObjectData {
 
 		std::vector<Vertex> vertex;
 		std::vector<UINT> index;
+		Material material;
 
 	};
 
-	//マテリアル
-	struct Material {
-		std::string name;								//マテリアル名
-		std::string textureName;						//テクスチャの名前
-		DirectX::XMFLOAT3 ambient = { 0.3f,0.3f,0.3f };	//アンビエント影響度
-		DirectX::XMFLOAT3 diffuse = { 0.3f,0.3f,0.3f };	//ディフューズ影響度
-		DirectX::XMFLOAT3 specular = { 0.3f,0.3f,0.3f };//スペキュラー影響度
-		float alpha;									//アルファ
-	};
-
-	//modelのデータ構造体
+	// modelのデータ構造体
 	struct ModelData {
 		std::string modelName;				//モデルファイル名
 		Material material;					//マテリアル

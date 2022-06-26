@@ -111,9 +111,9 @@ void HitGroupMgr::Setting()
 	initData.CH = { L"mainCHS",true };
 	initData.AH = { L"mainAnyHit",true };
 	initData.IS = { L"",false };
-	initData.SRVcount = 3;
-	initData.CBVcount = 0;
+	initData.SRVcount = 4;
 	initData.UAVcount = 0;
+	initData.CBVcount = 0;
 	hitGroup.push_back(std::make_shared<HitGroup>());
 	hitGroup[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
 

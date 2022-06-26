@@ -10,7 +10,8 @@ ConstantBuffer<ConstBufferData> gSceneParam : register(b0);
 // ヒットグループのローカルルートシグネチャ
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
-Texture2D<float4> texture : register(t2, space1);
+StructuredBuffer<Material> material : register(t2, space1);
+Texture2D<float4> texture : register(t3, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 
@@ -552,7 +553,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
                 rate = 1.0f - rate;
                 
                 // ディフューズを計算する。
-                float mDiffuse = 0.5f;
+                float mDiffuse = material[0].diffuse.x;
                 float3 diffuse = dot(-pointLightDir, worldNormal) * mDiffuse;
 			    // 光沢度
                 const float shininess = 4.0f;
@@ -561,11 +562,11 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 		    	// 反射光ベクトル
                 float3 reflect = normalize(pointLightDir + 2.0f * dot(-pointLightDir, worldNormal) * worldNormal);
                 // 鏡面反射光
-                float mSpecular = 0.5f;
+                float mSpecular = material[0].specular.x;
                 float3 specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
                 
                 // ランバートの反射率と明るさをかける。
-                pointLightVisibilityBuff = pointLightVisibilityBuff * ((diffuse + specular) * rate);
+                pointLightVisibilityBuff = pointLightVisibilityBuff * ((diffuse.x + specular.x) * rate);
                 
                 pointLightColor += gSceneParam.light.pointLight[index].lightColor * pointLightVisibilityBuff;
             
@@ -598,7 +599,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
             dirLightColor = float3(1, 1, 1) * dirLightVisibility;
             
             // ディフューズを計算する。
-            float mDiffuse = 0.5f;
+            float mDiffuse = material[0].diffuse.x;
             float3 diffuse = dot(-gSceneParam.light.dirLight.lightDir, worldNormal) * mDiffuse;
 			// 光沢度
             const float shininess = 4.0f;
@@ -607,11 +608,11 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 			// 反射光ベクトル
             float3 reflect = normalize(gSceneParam.light.dirLight.lightDir + 2.0f * dot(-gSceneParam.light.dirLight.lightDir, worldNormal) * worldNormal);
             // 鏡面反射光
-            float mSpecular = 0.99f;
+            float mSpecular = material[0].specular.x;
             float3 specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
             
             // 隠蔽度を更新。
-            dirLightVisibility = diffuse + specular;
+            dirLightVisibility = diffuse.x + specular.x;
             
             const float SKYDOME_RADIUS = 15000.0f;
             const float SAMPLING_POS_Y = 0.0f;
@@ -646,7 +647,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     
         
     // 飛ばすレイの回数
-    for (int index = 0; index < 1; ++index)
+    for (int aoindex = 0; aoindex < 1; ++aoindex)
     {
         // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
         if (gSceneParam.debug.isNoAO)
@@ -654,7 +655,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
             break;
         }
        
-        int seed = initRand(DispatchRaysIndex().x + (worldPos.x / 1000.0f) + index + DispatchRaysIndex().y * numPix.x, 100);
+        int seed = initRand(DispatchRaysIndex().x + (worldPos.x / 1000.0f) + aoindex + DispatchRaysIndex().y * numPix.x, 100);
         float3 sampleDir = GetUniformHemisphereSample(seed, worldNormal);
         
         // シャドウレイを飛ばす。

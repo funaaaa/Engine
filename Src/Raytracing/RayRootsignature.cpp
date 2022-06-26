@@ -18,7 +18,7 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shade
 
 	}
 	else if (type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV) {
-
+		
 		rootparam[rootparamCount].InitAsConstantBufferView(shaderRegister, registerSpace);
 		rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 

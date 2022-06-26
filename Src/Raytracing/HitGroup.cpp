@@ -29,16 +29,16 @@ void HitGroup::Generate(const HitGroupInitData& InputData, const int& RegisterSp
 		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index, registerSpace);
 
 	}
-	// CBVについて追加。
-	for (int index = 0; index < CBVcount; ++index) {
-
-		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index, registerSpace);
-
-	}
 	// UAVについて追加。
 	for (int index = 0; index < UAVcount; ++index) {
 
 		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index, registerSpace);
+
+	}
+	// CBVについて追加。
+	for (int index = 0; index < CBVcount; ++index) {
+
+		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index, registerSpace);
 
 	}
 	// サンプラーを追加。
