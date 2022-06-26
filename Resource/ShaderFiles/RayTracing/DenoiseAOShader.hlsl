@@ -12,6 +12,7 @@ StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 StructuredBuffer<Material> material : register(t2, space1);
 Texture2D<float4> texture : register(t3, space1);
+Texture2D<float4> normalTexture : register(t4, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 
@@ -417,6 +418,15 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // テクスチャの色を保存。
     float3 texColor = (float3) texture.SampleLevel(smp, vtx.uv, 0.0f);
     
+    // 法線マップの色を取得。
+    float3 normalMapColor = (float3) normalTexture.SampleLevel(smp, vtx.uv, 0.0f);
+    
+    // 法線マップの色とテクスチャの色が同じだったら、その法線マップはメモリの隙間を埋めるためにいれられたテクスチャなので、法線マップとして適応させない。
+    if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
+    {
+        worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
+    }
+    
     // レイのIDがCHS_IDENTIFICATION_GIだったらGI用のレイなのでテクスチャの色を返す。
     if (payload.rayID == CHS_IDENTIFICATION_RAYID_GI)
     {
@@ -450,13 +460,6 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         payload.color += AtmosphericScattering(worldPos, mieColor);
         payload.aoLuminance += float3(1, 1, 1);
         payload.giColor += float3(0, 0, 0);
-        
-        // 色が0.1f0.1f0.1fだったらY軸が0以下のところなので、明るさを暗くする。
-        if (payload.color.x == 0.1f && payload.color.y == 0.1f && payload.color.z == 0.1f)
-        {
-            payload.aoLuminance = float3(0, 0, 0);
-            payload.lightLuminance = float3(0, 0, 0);
-        }
         
         return;
     }
