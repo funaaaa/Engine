@@ -22,7 +22,7 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex, cons
 	stageGrassInstanceIndex = StageGrassInstanceIndex;
 
 	pos = Vec3(0, 30, 0);
-	forwardVec = Vec3(0, 0, 1);
+	forwardVec = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec = Vec3(0, 1, 0);
 	size = Vec3(10, 10, 10);
@@ -133,7 +133,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		nowFrameInputLeftStickHori = inputLeftStickHori;
 
 		// 正面ベクトルを車の回転行列分回転させる。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
 
 	}
 
@@ -185,6 +185,9 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	if (Input::Ins()->isPad(XINPUT_GAMEPAD_B)) {
 
 		pos = Vec3(0, 30, 0);
+		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
+		forwardVec = Vec3(0, 0, -1);
+		rotY = 0;
 
 	}
 
@@ -386,14 +389,14 @@ void Player::CheckHit()
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y * 2.0f) < 0;
+		isHit &= (hitDistance - size.y * 3.0f) < 0;
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら押し戻す。
 		if (isHit) {
 
 			// 法線方向に当たった分押し戻す。
-			pos += forwardVec * (size.x * 2.0f - hitDistance);
+			pos += forwardVec * (size.x * 3.0f - hitDistance);
 
 		}
 
@@ -463,7 +466,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		upVec = normal;
 
 		//正面ベクトルを更新。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), rotationMatBuff);
+		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
 
 	}
 
@@ -493,7 +496,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		upVec = normal;
 
 		//正面ベクトルを更新。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), rotationMatBuff);
+		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
 
 	}
 

@@ -24,7 +24,7 @@ private:
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
-	const float MAX_GRAV = 5.0f;		// 重力の最大量
+	const float MAX_GRAV = 7.0f;		// 重力の最大量
 	const float ADD_GRAV = 0.05f;		// 重力の加算量
 
 

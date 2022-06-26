@@ -1,5 +1,6 @@
 #include "DevDXR.h"
 #include "DriftParticleMgr.h"
+#include "TextureManager.h"
 
 void DevDXR::Init() {
 
@@ -37,7 +38,7 @@ void DevDXR::Init() {
 	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
 	stageIns = PorygonInstanceRegister::Ins()->CreateInstance(stageBlas, PorygonInstanceRegister::SHADER_ID_DEF);
 	PorygonInstanceRegister::Ins()->AddScale(stageIns, Vec3(200, 200, 200));
-	stageGrassBlas = BLASRegister::Ins()->GenerateObj("Resource/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png",L"Resource/grassNormal.png" });
+	stageGrassBlas = BLASRegister::Ins()->GenerateObj("Resource/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/green.png",L"Resource/grassNormal.png" });
 	stageGrassIns = PorygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas, PorygonInstanceRegister::SHADER_ID_DEF);
 	PorygonInstanceRegister::Ins()->AddScale(stageGrassIns, Vec3(200, 200, 200));
 
