@@ -7,7 +7,7 @@
 #include "BLAS.h"
 #include "DriftParticleMgr.h"
 
-void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
+void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex)
 {
 
 	/*===== 初期化処理 =====*/
@@ -18,6 +18,8 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 
 	stageBlasIndex = StageBlasIndex;
 	stageInstanceIndex = StageInstanceIndex;
+	stageGrassBlasIndex = StageGrassBlasIndex;
+	stageGrassInstanceIndex = StageGrassInstanceIndex;
 
 	pos = Vec3(0, 30, 0);
 	forwardVec = Vec3(0, 0, 1);
@@ -30,6 +32,7 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
 	boostSpeed = 0;
 	isDrift = false;
 	isGround = true;
+	isGrass = false;
 
 }
 
@@ -199,6 +202,13 @@ void Player::Move()
 
 	}
 
+	// 草の上にいたら移動速度の限界値を下げる。
+	if (isGrass && MAX_SPEED_ON_GRASS < speed) {
+
+		speed = MAX_SPEED_ON_GRASS;
+
+	}
+
 	// 座標移動させる。
 	pos += forwardVec * (speed + boostSpeed);
 
@@ -300,24 +310,93 @@ void Player::CheckHit()
 
 		}
 
+
+		/*-- 草との当たり判定 --*/
+
+		// 当たっていなかったら当たり判定を行う。
+		if (!isHit) {
+
+			// 当たり判定に必要なデータを埋めていく。
+			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageGrassBlasIndex]->GetVertexPos();
+			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageGrassBlasIndex]->GetVertexNormal();
+			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageGrassBlasIndex]->GetVertexIndex();
+			collistionData.rayPos = pos;
+			collistionData.rayDir = bottomVec;
+			collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageGrassInstanceIndex);
+			collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageGrassInstanceIndex);
+			collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageGrassInstanceIndex);
+
+			// 当たり判定の結果保存用変数。
+			isHit = false;
+			impactPos = Vec3();
+			hitDistance = 0;
+			hitNormal = Vec3();
+
+			// 当たり判定を行う。
+			isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+
+			// 当たった距離がY軸のサイズよりも小さかったら。
+			isHit &= (hitDistance - size.y) < 0;
+			isHit &= 0 < hitDistance;
+
+			// 当たっていたら押し戻す。
+			if (isHit) {
+
+				// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
+				const float PUSH_BACK_OFFSET = 1.0f;
+
+				// 法線方向に当たった分押し戻す。
+				pos += hitNormal * (size.y - (hitDistance + PUSH_BACK_OFFSET));
+
+				// 地上にいる判定。
+				isGround = true;
+
+				// 斜め床の回転処理。
+				RotObliqueFloor(hitNormal);
+
+				// 草の上にいる判定。
+				isGrass = true;
+
+			}
+			else {
+
+				// 空中にいる判定。
+				isGround = false;
+
+				// 草の上にいない判定。
+				isGrass = false;
+
+			}
+
+		}
+		// 通常の床で当たっているということは草の上にはいないということなので、falseにする。
+		else {
+
+			isGrass = false;
+
+		}
+
+
 		// 正面方向の当たり判定を行うため、レイの飛ばす方向を変える。
 		collistionData.rayDir = forwardVec;
+		collistionData.rayPos = pos - forwardVec * size.y;
 
 		// 当たり判定を行う。
 		isHit = false;
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y) < 0;
+		isHit &= (hitDistance - size.y * 2.0f) < 0;
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら押し戻す。
 		if (isHit) {
 
 			// 法線方向に当たった分押し戻す。
-			pos += hitNormal * (size.x - hitDistance);
+			pos += forwardVec * (size.x * 2.0f - hitDistance);
 
 		}
+
 
 	}
 

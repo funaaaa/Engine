@@ -451,7 +451,12 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         payload.aoLuminance += float3(1, 1, 1);
         payload.giColor += float3(0, 0, 0);
         
-  
+        // 色が0.1f0.1f0.1fだったらY軸が0以下のところなので、明るさを暗くする。
+        if (payload.color.x == 0.1f && payload.color.y == 0.1f && payload.color.z == 0.1f)
+        {
+            payload.aoLuminance = float3(0, 0, 0);
+            payload.lightLuminance = float3(0, 0, 0);
+        }
         
         return;
     }

@@ -60,7 +60,8 @@ private:
 	// ステージ
 	int stageBlas;
 	int stageIns;
-
+	int stageGrassBlas;
+	int stageGrassIns;
 
 	// TLASを生成。
 	TLAS tlas;

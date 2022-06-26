@@ -8,10 +8,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	int carBlasIndex;		// 車のモデルのBLASのインデックス
-	int carInstanceIndex;	// 車のモデルのインスタンスのインデックス
-	int stageBlasIndex;		// ステージのBLASのインデックス
-	int stageInstanceIndex;	// ステージのインスタンスのインデックス
+
 	Vec3 pos;				// 車の座標
 	Vec3 forwardVec;		// 進行方向ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
@@ -21,13 +18,23 @@ private:
 	float gravity;			// 重力
 	float rotY;				// ハンドル操作によって変わるY軸の回転量
 	bool isGround;			// 地上にいるか t=地上 f=空中
+	bool isGrass;			// 草の上にいるか t=草の上 f=草の上じゃない
 
-	const float MAX_SPEED = 10.0f;		// 移動速度の最大値
+	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
+	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
 	const float MAX_GRAV = 5.0f;		// 重力の最大量
 	const float ADD_GRAV = 0.05f;		// 重力の加算量
 
+
+	/*-- モデルのデータに関する変数 --*/
+	int carBlasIndex;		// 車のモデルのBLASのインデックス
+	int carInstanceIndex;	// 車のモデルのインスタンスのインデックス
+	int stageBlasIndex;		// ステージのBLASのインデックス
+	int stageInstanceIndex;	// ステージのインスタンスのインデックス
+	int stageGrassBlasIndex;	// 草ステージのBLASのインデックス
+	int stageGrassInstanceIndex;// 草ステージのインスタンスのインデックス
 
 
 	/*-- ドリフトに関する変数 --*/
@@ -47,7 +54,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	void Init(const int& StageBlasIndex, const int& StageInstanceIndex);
+	void Init(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);
