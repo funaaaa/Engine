@@ -58,6 +58,11 @@ GameScene::GameScene()
 	stageGrassIns = PorygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas, PorygonInstanceRegister::SHADER_ID_DEF);
 	PorygonInstanceRegister::Ins()->AddScale(stageGrassIns, Vec3(200, 200, 200));
 
+	// ゴール用のオブジェクトを読み込む。
+	goalBlas = BLASRegister::Ins()->GenerateObj("Resource/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	goalIns = PorygonInstanceRegister::Ins()->CreateInstance(goalBlas, PorygonInstanceRegister::SHADER_ID_REFRACTION);
+	PorygonInstanceRegister::Ins()->AddScale(goalIns, Vec3(200, 200, 200));
+	PorygonInstanceRegister::Ins()->AddTrans(goalIns, Vec3(10, -30, 0));
 
 	// プレイヤーを初期化。
 	player = std::make_shared<Player>(stageBlas, stageIns, stageGrassBlas, stageGrassIns);
@@ -167,8 +172,8 @@ void GameScene::Update()
 		++counter;
 	}
 
-	// ドリフト時のパーティクルを更新。
-	//DriftParticleMgr::Ins()->Update(constBufferData);
+	// ゴールオブジェクトを回転させる。
+	PorygonInstanceRegister::Ins()->AddRotate(goalIns, Vec3(0.01f, 0, 0));
 
 	tlas->Update();
 

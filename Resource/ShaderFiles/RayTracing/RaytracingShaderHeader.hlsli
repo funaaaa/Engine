@@ -1,29 +1,32 @@
-
-// ‰~ü—¦
+ï»¿
+// å††å‘¨ç‡
 static const float PI = 3.141592653589f;
 
-// CHS“à‚Å‚Ì¯•Ê—p
-static const int CHS_IDENTIFICATION_INSTANCE_DEF = 0; // InstanceID ’Êí‚ÌƒŒƒC
-static const int CHS_IDENTIFICATION_INSTNACE_AS = 1; // InstanceID ‘å‹CU——p‚ÌƒŒƒC
-static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR = 2; // InstanceID ƒeƒNƒXƒ`ƒƒ‚ÌF‚ğ‚»‚Ì‚Ü‚Ü•Ô‚·B—p‚ÌƒŒƒC
-static const int CHS_IDENTIFICATION_ISNTANCE_REFLECTION = 3; // InstanceID ”½Ë‚³‚¹‚éB
-static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // InstanceID Š®‘S”½Ë‚³‚¹‚éB
-static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ƒ‰ƒCƒg—p‚ÌƒIƒuƒWƒFƒNƒgBƒeƒNƒXƒ`ƒƒ‚ÌF‚ğ‚»‚Ì‚Ü‚Ü•Ô‚µAƒVƒƒƒhƒE‚Æ‚Ì“–‚½‚è”»’è‚ğs‚í‚È‚¢B
+// CHSã§ã®è­˜åˆ¥ç”¨å¤‰æ•°
+static const int CHS_IDENTIFICATION_INSTANCE_DEF = 0; // InstanceID é€šå¸¸ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+static const int CHS_IDENTIFICATION_INSTNACE_AS = 1; // InstanceID å¤§æ°—æ•£ä¹±ç”¨ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR = 2; // InstanceID ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’ãã®ã¾ã¾è¿”ã™ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+static const int CHS_IDENTIFICATION_ISNTANCE_REFLECTION = 3; // InstanceID åå°„ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // InstanceID å®Œå…¨åå°„ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ãƒ©ã‚¤ãƒˆç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’ãã®ã¾ã¾è¿”ã™ã€‚MissShaderã§å½“ãŸã‚Šåˆ¤å®šã‚’æ£„å´ã™ã‚‹ç‚ºã«ã‚‚ä½¿ç”¨ã™ã‚‹ã€‚
+static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID å±ˆæŠ˜ã®å‡¦ç†
 
-static const int CHS_IDENTIFICATION_RAYID_GI = 100; // ƒOƒ[ƒoƒ‹ƒCƒ‹ƒ~ƒl[ƒVƒ‡ƒ“
-static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 101; // ”½ËƒŒƒC
-static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 102; // Š®‘S”½Ë”½ËƒŒƒC
+static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ¬ã‚¤
+static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GIç”¨ã®ãƒ¬ã‚¤
+static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 102; // åå°„ç”¨ã®ãƒ¬ã‚¤
+static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 103; // å®Œå…¨åå°„ã®ãƒ¬ã‚¤
+static const int CHS_IDENTIFICATION_RAYID_REFRACTION = 104; // å±ˆæŠ˜ã®ãƒ¬ã‚¤
 
-// ƒJƒƒ‰—p’è”ƒoƒbƒtƒ@
+// ã‚«ãƒ¡ãƒ©ç”¨ã®å®šæ•°ãƒãƒƒãƒ•ã‚¡
 struct CameraConstBufferData
 {
-    matrix mtxView; // ƒrƒ…[s—ñ.
-    matrix mtxProj; // ƒvƒƒWƒFƒNƒVƒ‡ƒ“s—ñ.
-    matrix mtxViewInv; // ƒrƒ…[‹ts—ñ.
-    matrix mtxProjInv; // ƒvƒƒWƒFƒNƒVƒ‡ƒ“‹ts—ñ.
+    matrix mtxView; // ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—
+    matrix mtxProj; // ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—
+    matrix mtxViewInv; // é€†ãƒ“ãƒ¥ãƒ¼è¡Œåˆ—
+    matrix mtxProjInv; // é€†ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ã‚·ãƒ§ãƒ³è¡Œåˆ—
 };
 
-// •ÀsŒõŒ¹‚Ìî•ñ
+// ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 struct DirLightData
 {
     float3 lightDir;
@@ -32,7 +35,7 @@ struct DirLightData
     float pad;
 };
 static const int POINT_LIGHT_COUNT = 30;
-// “_ŒõŒ¹‚Ìî•ñ
+// ãƒã‚¤ãƒ³ãƒˆãƒ©ã‚¤ãƒˆç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 struct PointLightData
 {
     float3 lightPos;
@@ -43,42 +46,42 @@ struct PointLightData
     int isShadow;
     float2 pad;
 };
-// ƒ‰ƒCƒg—p’è”ƒoƒbƒtƒ@
+// ãƒ©ã‚¤ãƒˆç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 struct LightConstBufferData
 {
     DirLightData dirLight;
     PointLightData pointLight[POINT_LIGHT_COUNT];
 };
 
-// ‘å‹CU——p’è”ƒoƒbƒtƒ@
+// å¤§æ°—æ•£ä¹±ç”¨å®šæ•°ãƒãƒƒãƒ•ã‚¡
 struct ASConstBufferData
 {
-    float kr; // ƒŒƒCƒŠ[U—’è”
-    float km; // ƒ~[U—’è”
-    float samples; // ‘å‹CU—ƒTƒ“ƒvƒ‹”
-    float outerRadius; // ‘å‹CŒ—‚ÌÅ’¸“_‚Ì‚‚³
-    float innerRadius; // ’nã‚Ì‚‚³
-    float eSun; // ‘¾—z‚Ì‹­‚³
-    float g; // U—’è”‚ğ‹‚ß‚éÛ‚Ég—p‚·‚é’l
-    float aveHeight; // •½‹Ï‘å‹C–§“x‚ğ‹‚ß‚é‚½‚ß‚Ì‚‚³
+    float kr; // ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±å®šæ•°
+    float km; // ãƒŸãƒ¼æ•£ä¹±å®šæ•°
+    float samples; // ã‚µãƒ³ãƒ—ãƒ«æ•°
+    float outerRadius; // å¤§æ°—ã®å¤–å‘¨
+    float innerRadius; // åœ°ä¸Šã®å¤–å‘¨
+    float eSun; // å¤ªé™½å…‰ç·šã®å¼·ã•
+    float g; // æ•£ä¹±å®šæ•°
+    float aveHeight; // å¹³å‡å¤§æ°—å¯†åº¦ã‚’å–å¾—ã™ã‚‹é«˜ã•
 };
-// ƒfƒoƒbƒO—p’è”ƒoƒbƒtƒ@
+// ãƒ‡ãƒãƒƒã‚°ç”¨ã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼å®šæ•°ãƒãƒƒãƒ•ã‚¡
 struct DebugConstBufferData
 {
     int seed;
     int counter;
     int aoSampleCount;
-    int isNoiseScene; // ƒmƒCƒY‚ğ•`‰æ‚·‚éƒtƒ‰ƒO
-    int isLightHitScene; // ƒ‰ƒCƒg‚É‚ ‚½‚Á‚½–Ê‚¾‚¯•`‰æ‚·‚éƒtƒ‰ƒO
-    int isNormalScene; // –@üî•ñ‚ğ•`‰æ‚·‚éƒtƒ‰ƒO
-    int isMeshScene; // ƒ|ƒŠƒSƒ“î•ñ‚ğ•`‰æ‚·‚éƒtƒ‰ƒO
+    int isNoiseScene; // ãƒã‚¤ã‚ºã®ã¿ã®ã‚·ãƒ¼ãƒ³ã‚’æç”»ã™ã‚‹ã‹ã®ãƒ•ãƒ©ã‚°
+    int isLightHitScene; // ãƒ©ã‚¤ãƒˆã«å½“ãŸã£ãŸé¢ã®ã¿ã‚’æç”»ã™ã‚‹ãƒ•ãƒ©ã‚°
+    int isNormalScene; // æ³•ç·šæƒ…å ±ã‚’æç”»ã™ã‚‹ãƒ•ãƒ©ã‚°
+    int isMeshScene; // ãƒ¡ãƒƒã‚·ãƒ¥æƒ…å ±ã‚’æç”»ã™ã‚‹ãƒ•ãƒ©ã‚°
     int isNoAO;
-    int isNoGI; // GI‚ğs‚í‚È‚¢ƒtƒ‰ƒO
+    int isNoGI; // GIã®å‡¦ç†ã‚’è¡Œã‚ãªã„ãƒ•ãƒ©ã‚°
     int isGIOnlyScene;
     float2 pad;
 };
 
-// ‚·‚×‚Ä‚Ì’è”ƒoƒbƒtƒ@‚ğ“Z‚ß‚½‚à‚Ì
+// å®šæ•°ãƒãƒƒãƒ•ã‚¡
 struct ConstBufferData
 {
     CameraConstBufferData camera;
@@ -87,7 +90,7 @@ struct ConstBufferData
     DebugConstBufferData debug;
 };
 
-// ƒ}ƒeƒŠƒAƒ‹î•ñ
+// ãƒãƒ†ãƒªã‚¢ãƒ«æƒ…å ±
 struct Material
 {
     float3 ambient;
@@ -95,10 +98,10 @@ struct Material
     float3 diffuse;
     float pad2;
     float3 specular;
-    float alpha; //ƒAƒ‹ƒtƒ@
+    float alpha;
 };
 
-// ’¸“_î•ñ
+// é ‚ç‚¹æƒ…å ±
 struct Vertex
 {
     float3 Position;
@@ -106,13 +109,13 @@ struct Vertex
     float2 uv;
 };
 
-// ƒyƒCƒ[ƒh Fî•ñ‚ğæ“¾‚·‚é‚½‚ß‚Ì\‘¢‘Ì
+// ãƒšã‚¤ãƒ­ãƒ¼ãƒ‰
 struct Payload
 {
     float3 color;
     uint recursive;
 };
-// ƒyƒCƒ[ƒh AOƒfƒmƒCƒU—p
+// ãƒšã‚¤ãƒ­ãƒ¼ãƒ‰
 struct DenoisePayload
 {
     float3 color;
@@ -122,77 +125,30 @@ struct DenoisePayload
     uint recursive;
     uint rayID;
 };
-// ƒyƒCƒ[ƒh ‰eî•ñ‚ğæ“¾‚·‚é‚½‚ß‚Ì\‘¢‘Ì
+// å½±å–å¾—ç”¨ãƒšã‚¤ãƒ­ãƒ¼ãƒ‰
 struct ShadowPayload
 {
     bool isShadow;
 };
-// ƒAƒgƒŠƒrƒ…[ƒg “–‚½‚Á‚½ˆÊ’u‚ğæ“¾‚·‚é‚½‚ß‚Ì\‘¢‘Ì
 struct MyAttribute
 {
     float2 barys;
 };
 
-// “–‚½‚Á‚½ˆÊ’u‚ğŒvZ‚·‚éŠÖ”
+// barysã‚’è¨ˆç®—
 inline float3 CalcBarycentrics(float2 barys)
 {
     return float3(1.0 - barys.x - barys.y, barys.x, barys.y);
 }
 
-// “–‚½‚Á‚½ˆÊ’u‚ğ“Á’è
-inline float2 CalcHitAttribute2(float2 vertexAttribute[3], float2 barycentrics)
-{
-    float2 ret;
-    ret = vertexAttribute[0];
-    ret += barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]);
-    ret += barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-    return ret;
-}
-inline float3 CalcHitAttribute3(float3 vertexAttribute[3], float2 barycentrics)
-{
-    float3 ret;
-    ret = vertexAttribute[0];
-    ret += barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]);
-    ret += barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-    return ret;
-}
-
-
-// §ŒÀˆÈãƒgƒŒ[ƒX‚µ‚È‚¢‚æ‚¤‚É‚·‚é
-inline bool checkRecursiveLimit(inout Payload payload, int max)
-{
-    ++payload.recursive;
-    if (max < payload.recursive)
-    {
-        //payload.color = float3(0, 0, 0);
-        return true;
-    }
-    return false;
-}
-inline bool checkRecursiveLimitDenoiseAO(inout DenoisePayload payload)
-{
-    ++payload.recursive;
-    if (1 < payload.recursive)
-    {
-        //payload.color = float3(0, 0, 0);
-        return true;
-    }
-    return false;
-}
-
-// —”¶¬
-uint randomU(float2 uv)
-{
-    float r = dot(uv, float2(127.1, 311.7));
-    return uint(12345 * frac(sin(r) * 43758.5453123));
-}
-float nextRand(inout uint s)
+// ä¹±æ•°ã®ç¨®ã‚’æ›´æ–°
+float NextRand(inout uint s)
 {
     s = (1664525u * s + 1013904223u);
     return float(s & 0x00FFFFFF) / float(0x01000000);
 }
 
-float3x3 angleAxis3x3(float angle, float3 axis)
+float3x3 AngleAxis3x3(float angle, float3 axis)
 {
     float c, s;
     sincos(angle, s, c);
@@ -209,7 +165,7 @@ float3x3 angleAxis3x3(float angle, float3 axis)
         );
 }
 
-// ƒ\ƒtƒgƒVƒƒƒhƒE—p‚É—Õ‚Å‚Á‚Ä‚«‚½ˆ—B
+// å††éŒçŠ¶ã«ãƒ™ã‚¯ãƒˆãƒ«ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°
 float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
 {
     float cosAngle = cos(coneAngle);
@@ -217,8 +173,8 @@ float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
 
     // Generate points on the spherical cap around the north pole [1].
     // [1] See https://math.stackexchange.com/a/205589/81266
-    float z = nextRand(randSeed) * (1.0f - cosAngle) + cosAngle;
-    float phi = nextRand(randSeed) * 2.0f * PI;
+    float z = NextRand(randSeed) * (1.0f - cosAngle) + cosAngle;
+    float phi = NextRand(randSeed) * 2.0f * PI;
 
     float x = sqrt(1.0f - z * z) * cos(phi);
     float y = sqrt(1.0f - z * z) * sin(phi);
@@ -229,7 +185,7 @@ float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
     float angle = acos(dot(normalize(direction), north));
 
     // Convert rotation axis and angle to 3x3 rotation matrix [2]
-    float3x3 R = angleAxis3x3(angle, axis);
+    float3x3 R = AngleAxis3x3(angle, axis);
 
     return mul(R, float3(x, y, z));
 }
@@ -243,45 +199,21 @@ float3 GetPerpendicularVector(float3 u)
     return cross(u, float3(xm, ym, zm));
 }
 
-// –@üŠî€‚Å”¼‹…ó‚Ìƒ‰ƒ“ƒ_ƒ€‚ÈƒxƒNƒgƒ‹‚ğ¶¬B
-float3 GetCosHemisphereSample(uint randSeed, float3 hitNorm)
-{
-    // 2‚Â‚Ìƒ‰ƒ“ƒ_ƒ€‚È”’l‚ğæ“¾
-    float2 randVal = float2(nextRand(randSeed), nextRand(randSeed));
-    // –@ü‚É‚’¼‚ÈƒxƒNƒgƒ‹‚ğæ‚éiÅŒã‚É—˜—p‚·‚éj
-    float3 bitangent = GetPerpendicularVector(hitNorm);
-    float3 tangent = cross(bitangent, hitNorm);
-    // ƒfƒBƒXƒNã‚Éˆê—l‚ÉƒTƒ“ƒvƒŠƒ“ƒO
-    float r = sqrt(randVal.x);
-    float phi = 2.0f * 3.14f * randVal.y;
-    // ”¼‹…‚ÉË‰e‚·‚é
-    float x = r * cos(phi);
-    float z = r * sin(phi);
-    float y = sqrt(1.0 - randVal.x); // 1- r2
-    // –@üƒxƒNƒgƒ‹‚ÌÀ•WŒn‚ÉË‰e
-    return x * tangent + y * hitNorm.xyz + z * bitangent;
-}
-
 float3 GetUniformHemisphereSample(inout uint randSeed, float3 hitNorm)
 {
-    // 2‚Â‚Ìƒ‰ƒ“ƒ_ƒ€‚È”’l‚ğæ“¾
-    float2 randVal = float2(nextRand(randSeed), nextRand(randSeed));
-    // –@ü‚É‚’¼‚ÈƒxƒNƒgƒ‹‚ğæ‚éiÅŒã‚É—˜—p‚·‚éj
+    float2 randVal = float2(NextRand(randSeed), NextRand(randSeed));
     float3 bitangent = GetPerpendicularVector(hitNorm);
     float3 tangent = cross(bitangent, hitNorm);
-    // ƒÆAƒ³‚ğŒˆ‚ß‚é
     float cosTheta = randVal.x;
     float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
     float phi = 2.0f * 3.14f * randVal.y;
-    // ”¼‹…‚ÉË‰e‚·‚é
     float x = sinTheta * cos(phi);
     float z = sinTheta * sin(phi);
     float y = cosTheta;
-    // –@üƒxƒNƒgƒ‹‚ÌÀ•WŒn‚ÉË‰e
     return x * tangent + y * hitNorm.xyz + z * bitangent;
 }
 
-// ƒVƒƒƒhƒEƒŒƒC”­Ë
+// å½±ã®ãƒ¬ã‚¤ã‚’ç…§å°„
 bool ShootShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
 {
     RayDesc rayDesc;
@@ -296,9 +228,9 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccel
     RAY_FLAG flags = RAY_FLAG_NONE;
     flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderƒXƒLƒbƒv‚µ‚È‚¢
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderï¿½Xï¿½Lï¿½bï¿½vï¿½ï¿½ï¿½È‚ï¿½
     
-    // ƒ‰ƒCƒg‚ÍœŠOB
+    // ï¿½ï¿½ï¿½Cï¿½gï¿½Íï¿½ï¿½Oï¿½B
     uint rayMask = ~(0x08);
 
     TraceRay(
@@ -307,7 +239,7 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccel
     rayMask,
     0,
     1,
-    1, // MISSƒVƒF[ƒ_[‚ÌƒCƒ“ƒfƒbƒNƒX
+    1, // Missã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’æŒ‡å®šã™ã‚‹ã€‚
     rayDesc,
     payload);
 
@@ -327,9 +259,9 @@ bool ShootShadowRayNoAH(float3 origin, float3 direction, float tMax, RaytracingA
     RAY_FLAG flags = RAY_FLAG_NONE;
     flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderƒXƒLƒbƒv
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderï¿½Xï¿½Lï¿½bï¿½v
     
-    // ƒ‰ƒCƒg‚ÍœŠOB
+    // ï¿½ï¿½ï¿½Cï¿½gï¿½Íï¿½ï¿½Oï¿½B
     uint rayMask = ~(0x08);
 
     TraceRay(
@@ -338,14 +270,14 @@ bool ShootShadowRayNoAH(float3 origin, float3 direction, float tMax, RaytracingA
     rayMask,
     0,
     1,
-    1, // MISSƒVƒF[ƒ_[‚ÌƒCƒ“ƒfƒbƒNƒX
+    1, // Missã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’æŒ‡å®šã™ã‚‹ã€‚
     rayDesc,
     payload);
 
     return payload.isShadow;
 }
 
-// ƒVƒƒƒhƒEƒŒƒC”­Ë
+// AOç”¨ã®å½±ãƒ¬ã‚¤ã‚’å°„å‡º
 bool ShootAOShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
 {
     RayDesc rayDesc;
@@ -360,9 +292,9 @@ bool ShootAOShadowRay(float3 origin, float3 direction, float tMax, RaytracingAcc
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderƒXƒLƒbƒv
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderï¿½Xï¿½Lï¿½bï¿½v
     
-    // ƒ‰ƒCƒg‚ÍœŠOB
+    // ï¿½ï¿½ï¿½Cï¿½gï¿½Íï¿½ï¿½Oï¿½B
     uint rayMask = ~(0x08);
 
     TraceRay(
@@ -371,15 +303,15 @@ bool ShootAOShadowRay(float3 origin, float3 direction, float tMax, RaytracingAcc
     rayMask,
     0,
     1,
-    1, // MISSƒVƒF[ƒ_[‚ÌƒCƒ“ƒfƒbƒNƒX
+    1, // Missã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’æŒ‡å®šã™ã‚‹ã€‚
     rayDesc,
     payload);
 
     return payload.isShadow;
 }
 
-// ”½ËƒŒƒCËo
-void ShootReflectionRay(float3 origin, float3 direction, inout DenoisePayload payload, RaytracingAccelerationStructure gRtScene)
+// å€¤ã‚’è¨­å®šã—ã¦ãƒ¬ã‚¤ã‚’ç™ºå°„ã€‚
+void ShootRay(uint rayID, float3 origin, float3 direction, inout DenoisePayload payload, RaytracingAccelerationStructure gRtScene)
 {
     RayDesc rayDesc;
     rayDesc.Origin = origin;
@@ -387,15 +319,15 @@ void ShootReflectionRay(float3 origin, float3 direction, inout DenoisePayload pa
     rayDesc.TMin = 0.1f;
     rayDesc.TMax = 30000.0f;
 
-    // ƒŒƒC‚ÌID‚ğ”½Ë—pƒŒƒC‚Éİ’èB
-    payload.rayID = CHS_IDENTIFICATION_RAYID_RECLECTION;
+    // ï¿½ï¿½ï¿½Cï¿½ï¿½IDï¿½ğ”½Ë—pï¿½ï¿½ï¿½Cï¿½Éİ’ï¿½B
+    payload.rayID = rayID;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderƒXƒLƒbƒv
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderï¿½Xï¿½Lï¿½bï¿½v
     
-    // ƒ‰ƒCƒg‚ÍœŠOB
+    // ï¿½ï¿½ï¿½Cï¿½gï¿½Íï¿½ï¿½Oï¿½B
     uint rayMask = ~(0x08);
 
     TraceRay(
@@ -404,37 +336,7 @@ void ShootReflectionRay(float3 origin, float3 direction, inout DenoisePayload pa
     rayMask,
     0,
     1,
-    0, // MISSƒVƒF[ƒ_[‚ÌƒCƒ“ƒfƒbƒNƒX
-    rayDesc,
-    payload);
-    
-}
-void ShootCompleteReflectionRay(float3 origin, float3 direction, inout DenoisePayload payload, RaytracingAccelerationStructure gRtScene)
-{
-    RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
-    rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 20000.0f;
-
-    // ƒŒƒC‚ÌID‚ğ”½Ë—pƒŒƒC‚Éİ’èB
-    payload.rayID = CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION;
-
-    RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderƒXƒLƒbƒv
-    
-    // ƒ‰ƒCƒg‚ÍœŠOB
-    uint rayMask = ~(0x08);
-
-    TraceRay(
-    gRtScene,
-    flags,
-    rayMask,
-    0,
-    1,
-    0, // MISSƒVƒF[ƒ_[‚ÌƒCƒ“ƒfƒbƒNƒX
+    0, // Missã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ã‚’æŒ‡å®šã™ã‚‹ã€‚
     rayDesc,
     payload);
     
@@ -455,7 +357,7 @@ uint initRand(uint val0, uint val1, uint backoff = 16)
 }
 
 
-// ƒTƒ“ƒvƒ‹ƒR[ƒh‚©‚ç‚»‚Ì‚Ü‚Ü‚Á‚Ä‚«‚½‚â‚ÂB
+// è³‡æ–™ã‹ã‚‰æŒã£ã¦ããŸé–¢æ•°ã€‚
 float scale(float fCos)
 {
     float x = 1.0 - fCos;

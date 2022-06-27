@@ -81,6 +81,7 @@ public:
 		SHADER_ID_REFLECTION = 3,	// 反射させる。
 		SHADER_ID_COMPLETE_REFLECTION = 4,	// 完全反射させる。
 		SHADER_ID_LIGHT = 5,		// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
+		SHADER_ID_REFRACTION = 6,	// 屈折用のレイ。
 
 	};
 

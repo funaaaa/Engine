@@ -41,6 +41,10 @@ private:
 	int stageGrassBlas;
 	int stageGrassIns;
 
+	// ƒS[ƒ‹
+	int goalBlas;
+	int goalIns;
+
 	// TLAS‚ğ¶¬B
 	std::shared_ptr<TLAS> tlas;
 
