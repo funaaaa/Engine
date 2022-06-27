@@ -7,7 +7,7 @@
 #include "BLAS.h"
 #include "DriftParticleMgr.h"
 
-void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex)
+Player::Player(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex)
 {
 
 	/*===== 初期化処理 =====*/
@@ -20,6 +20,26 @@ void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex, cons
 	stageInstanceIndex = StageInstanceIndex;
 	stageGrassBlasIndex = StageGrassBlasIndex;
 	stageGrassInstanceIndex = StageGrassInstanceIndex;
+
+	pos = Vec3(0, 30, 0);
+	forwardVec = Vec3(0, 0, -1);
+	bottomVec = Vec3(0, -1, 0);
+	upVec = Vec3(0, 1, 0);
+	size = Vec3(10, 10, 10);
+	rotY = 0;
+	speed = 0;
+	gravity = 0;
+	boostSpeed = 0;
+	isDrift = false;
+	isGround = true;
+	isGrass = false;
+
+}
+
+void Player::Init()
+{
+
+	/*===== 初期化処理 =====*/
 
 	pos = Vec3(0, 30, 0);
 	forwardVec = Vec3(0, 0, -1);
@@ -389,14 +409,14 @@ void Player::CheckHit()
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y * 3.0f) < 0;
-		isHit &= 0 < hitDistance;
+		isHit &= fabs(hitDistance) < size.y * 2.0f;
+		//isHit &= 0 < hitDistance;
 
 		// 当たっていたら押し戻す。
 		if (isHit) {
 
 			// 法線方向に当たった分押し戻す。
-			pos += forwardVec * (size.x * 3.0f - hitDistance);
+			pos += forwardVec * (-hitDistance);
 
 		}
 

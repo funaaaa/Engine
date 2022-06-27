@@ -402,7 +402,8 @@ void shadowMS(inout ShadowPayload payload)
 [shader("closesthit")]
 void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 {
-    
+
+
     // 呼び出し回数が制限を超えないようにする。
     ++payload.recursive;
     if (2 < payload.recursive)

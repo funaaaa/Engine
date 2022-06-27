@@ -1,4 +1,10 @@
-﻿#include "DevDXR.h"
+﻿#include "SceneMgr.h"
+#include "SoundManager.h"
+#include "FbxLoader.h"
+#include "RayDenoiser.h"
+#include "Camera.h"
+#include "HitGroupMgr.h"
+#include "DescriptorHeapMgr.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -24,16 +30,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
-	// 開発用
-	DevDXR dev;
-	dev.Init();
+	// シーンクラス。
+	SceneMgr::Ins()->Init();
 
 	/*----------ゲームループ----------*/
 	while (true) {
 
 		
-		dev.Update();
-		dev.Draw();
+		SceneMgr::Ins()->Update();
+		SceneMgr::Ins()->Draw();
 		
 
 	}

@@ -54,7 +54,8 @@ public:
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
 	// ‰Šú‰»ˆ—
-	void Init(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex);
+	Player(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex);
+	void Init();
 
 	// XVˆ—
 	void Update(RayConstBufferData& ConstBufferData);

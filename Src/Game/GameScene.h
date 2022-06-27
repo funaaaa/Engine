@@ -1,50 +1,28 @@
 #pragma once
-#include "SoundManager.h"
-#include "Camera.h"
-#include "Input.h"
-#include "FbxLoader.h"
-
-#include "RayDenoiser.h"
-
-#include "BLASRegister.h"
-#include "PorygonInstance.h"
-#include "TLAS.h"
-#include "RayRootsignature.h"
-#include "DynamicConstBuffer.h"
-#include "DescriptorHeapMgr.h"
-#include "Vec.h"
-#include "PorygonInstanceRegister.h"
-#include "HitGroupMgr.h"
-#include "RaytracingPipline.h"
-#include "RaytracingOutput.h"
-#include "MultiMeshLoadOBJ.h"
-#include "ComputeShader.h"
-#include "BLAS.h"
-
-#include "HitGroup.h"
-
-#include <utilapiset.h>
-
+#include "BaseScene.h"
 #include "ConstBuffers.h"
-#include "FHelper.h"
+#include "RaytracingPipline.h"
+#include <memory>
 
-#include "Player.h"
-#include <array>
+class Player;
+class DynamicConstBuffer;
+class RaytracingPipline;
+class TLAS;
+class RaytracingOutput;
 
-class DevDXR {
+// ゲームシーン
+class GameScene : public BaseScene {
 
 private:
 
 	/*===== メンバ変数 =====*/
 
-
-	// 定数バッファ
 	RayConstBufferData constBufferData;
-	DynamicConstBuffer constBuffer;
+	std::shared_ptr<DynamicConstBuffer> constBuffer;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPiplineShaderData> dAOuseShaders;
-	RaytracingPipline deAOPipline;
+	std::shared_ptr<RaytracingPipline> deAOPipline;
 
 	// SPONZAを読み込む。
 	std::vector<int> sponzaInstance;
@@ -64,22 +42,22 @@ private:
 	int stageGrassIns;
 
 	// TLASを生成。
-	TLAS tlas;
+	std::shared_ptr<TLAS> tlas;
 
 	// アンビエントオクルージョン出力用クラスをセット。
-	RaytracingOutput aoOutput;
+	std::shared_ptr<RaytracingOutput> aoOutput;
 
 	// 色出力用クラスをセット。
-	RaytracingOutput colorOutput;
+	std::shared_ptr<RaytracingOutput> colorOutput;
 
 	// デノイズするライト出力用クラスをセット。
-	RaytracingOutput lightOutput;
+	std::shared_ptr<RaytracingOutput> lightOutput;
 
 	// GI出力用クラスをセット。
-	RaytracingOutput giOutput;
+	std::shared_ptr<RaytracingOutput> giOutput;
 
 	// デノイズの結果出力用クラスをセット。
-	RaytracingOutput denoiseMixTextureOutput;
+	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput;
 
 	// FPS表示をするか否か
 	bool isDisplayFPS;
@@ -99,20 +77,17 @@ private:
 	bool isMoveLight;
 
 	// プレイヤー
-	Player player;
+	std::shared_ptr<Player> player;
 
 
 public:
 
 	/*===== メンバ関数 =====*/
 
-	void Init();
-	void Update();
-	void Draw();
-
-
-private:
-
+	GameScene();
+	void Init()override;
+	void Update()override;
+	void Draw()override;
 
 
 	// fps更新
@@ -120,8 +95,7 @@ private:
 
 	// 入力操作
 	void Input();
-	void InputImGUI(bool& isMove);
-
+	void InputImGUI(bool& IsMove);
 
 
 };
