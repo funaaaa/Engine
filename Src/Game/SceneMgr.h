@@ -1,5 +1,5 @@
 #pragma once
-#include "GameScene.h"
+#include "BaseScene.h"
 #include "Singleton.h"
 #include <vector>
 #include <memory>

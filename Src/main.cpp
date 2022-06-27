@@ -36,10 +36,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	/*----------ゲームループ----------*/
 	while (true) {
 
-		
+		// 描画前処理
+		DirectXBase::Ins()->processBeforeDrawing();
+
+
 		SceneMgr::Ins()->Update();
 		SceneMgr::Ins()->Draw();
-		
+
+
+		// 描画後処理
+		DirectXBase::Ins()->processAfterDrawing();
 
 	}
 

@@ -11,6 +11,7 @@
 #include "RaytracingPipline.h"
 #include "RaytracingOutput.h"
 #include "TLAS.h"
+#include "Input.h"
 
 GameScene::GameScene()
 {
@@ -105,7 +106,7 @@ GameScene::GameScene()
 
 	isDisplayFPS = false;
 
-	nextScene = SCENE_ID::GAME;
+	nextScene = SCENE_ID::RESULT;
 	isTransition = false;
 
 }
@@ -115,9 +116,10 @@ void GameScene::Init()
 
 	/*===== ‰Šú‰»ˆ— =====*/
 
-	nextScene = SCENE_ID::GAME;
+	nextScene = SCENE_ID::RESULT;
 	isTransition = false;
 	player->Init();
+	Camera::Ins()->Init();
 
 }
 
@@ -125,9 +127,6 @@ void GameScene::Update()
 {
 
 	/*===== XVˆ— =====*/
-
-	// •`‰æ‘Oˆ—
-	DirectXBase::Ins()->processBeforeDrawing();
 
 	// “ü—Íˆ—
 	Input();
@@ -304,8 +303,6 @@ void GameScene::Draw()
 
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
 
-	DirectXBase::Ins()->processAfterDrawing();
-
 }
 
 #pragma comment (lib, "winmm.lib")
@@ -343,6 +340,12 @@ void GameScene::Input()
 	/*===== “ü—Íˆ— =====*/
 
 	bool isMove = false;
+
+	if (Input::Ins()->isKeyTrigger(DIK_RETURN)) {
+
+		isTransition = true;
+
+	}
 
 	InputImGUI(isMove);
 
