@@ -19,6 +19,7 @@ Player::Player(const StageData& StageObjectData)
 	stageModelData = StageObjectData;
 
 	pos = PLAYER_DEF_POS;
+	prevPos = pos;
 	forwardVec = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec = Vec3(0, 1, 0);
@@ -39,6 +40,7 @@ void Player::Init()
 	/*===== 初期化処理 =====*/
 
 	pos = PLAYER_DEF_POS;
+	prevPos = pos;
 	forwardVec = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec = Vec3(0, 1, 0);
@@ -69,6 +71,9 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 
 	// 座標を更新。
 	PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, pos);
+
+	// 座標を保存。
+	prevPos = pos;
 
 }
 
@@ -399,21 +404,28 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 
 
 		// 正面方向の当たり判定を行うため、レイの飛ばす方向を変える。
-		collistionData.rayDir = forwardVec;
-		collistionData.rayPos = pos - forwardVec * size.y;
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexIndex();
+		collistionData.rayPos = prevPos;
+		collistionData.rayDir = (pos - prevPos).GetNormal();
+		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
+		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
+		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
 
 		// 当たり判定を行う。
 		isHit = false;
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= fabs(hitDistance) < size.y * 2.0f;
+		isHit &= fabs(hitDistance) < (pos - prevPos).Length();
 
 		// 当たっていたら押し戻す。
 		if (isHit) {
 
 			// 法線方向に当たった分押し戻す。
-			pos += forwardVec * (-hitDistance);
+			float prevPosLength = (pos - prevPos).Length();
+			pos = impactPos + hitNormal * hitDistance;
 
 		}
 
@@ -433,7 +445,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexPos();
 		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexNormal();
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexIndex();
-		collistionData.rayPos = pos;
+		collistionData.rayPos = prevPos;
 		collistionData.rayDir = forwardVec;
 		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.middlePointInsIndex);
 		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.middlePointInsIndex);
@@ -449,7 +461,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y) < 0;
+		isHit &= hitDistance < (pos - prevPos).Length();
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら。
@@ -469,7 +481,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexPos();
 		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexNormal();
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexIndex();
-		collistionData.rayPos = pos;
+		collistionData.rayPos = prevPos;
 		collistionData.rayDir = forwardVec;
 		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.goalInsIndex);
 		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.goalInsIndex);
@@ -485,7 +497,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y) < 0;
+		isHit &= hitDistance < (pos - prevPos).Length();
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら。

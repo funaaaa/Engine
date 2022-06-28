@@ -27,6 +27,7 @@ private:
 
 
 	Vec3 pos;				// 車の座標
+	Vec3 prevPos;			// 車の前フレームの座標
 	Vec3 forwardVec;		// 進行方向ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
 	Vec3 upVec;				// 上方向ベクトル
