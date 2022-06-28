@@ -4,6 +4,23 @@
 
 class Player {
 
+
+public:
+
+	// ステージのモデルデータ
+	struct StageData {
+
+		int stageBlasIndex;
+		int stageInsIndex;
+		int stageGrassBlasIndex;
+		int stageGrassInsIndex;
+		int goalBlasIndex;
+		int goalInsIndex;
+		int middlePointBlasIndex;
+		int middlePointInsIndex;
+
+	};
+
 private:
 
 	/*===== メンバ変数 =====*/
@@ -26,15 +43,13 @@ private:
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
 	const float MAX_GRAV = 7.0f;		// 重力の最大量
 	const float ADD_GRAV = 0.05f;		// 重力の加算量
+	const Vec3 PLAYER_DEF_POS = Vec3(0, 30, -30);
 
 
 	/*-- モデルのデータに関する変数 --*/
 	int carBlasIndex;		// 車のモデルのBLASのインデックス
 	int carInstanceIndex;	// 車のモデルのインスタンスのインデックス
-	int stageBlasIndex;		// ステージのBLASのインデックス
-	int stageInstanceIndex;	// ステージのインスタンスのインデックス
-	int stageGrassBlasIndex;	// 草ステージのBLASのインデックス
-	int stageGrassInstanceIndex;// 草ステージのインスタンスのインデックス
+	StageData stageModelData;	// ステージのモデルデータ
 
 
 	/*-- ドリフトに関する変数 --*/
@@ -54,11 +69,11 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	Player(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex);
+	Player(const StageData& StageObjectData);
 	void Init();
 
 	// 更新処理
-	void Update(RayConstBufferData& ConstBufferData);
+	void Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount);
 
 	// 描画処理
 	void Draw();
@@ -77,7 +92,7 @@ private:
 	void Move();
 
 	// 当たり判定
-	void CheckHit();
+	void CheckHit(bool& IsPassedMiddlePoint, int& RapCount);
 
 	// 斜め床の回転
 	void RotObliqueFloor(const Vec3& HitNormal);

@@ -45,6 +45,17 @@ private:
 	int goalBlas;
 	int goalIns;
 
+	// ƒS[ƒ‹‚Æ‚©‚Ì“–‚½‚è”»’è—p
+	int goalCollisionBlas;
+	int goalCollisionIns;
+	int middlePointCollisionBlas;
+	int middlePointCollisionIns;
+
+	// ƒS[ƒ‹ŠÖŒW
+	bool isPassedMiddlePoint;
+	int rapCount;
+	const Vec3 GOAL_DEF_POS = Vec3(10, -30, 0);
+
 	// TLAS‚ğ¶¬B
 	std::shared_ptr<TLAS> tlas;
 

@@ -7,7 +7,7 @@
 #include "BLAS.h"
 #include "DriftParticleMgr.h"
 
-Player::Player(const int& StageBlasIndex, const int& StageInstanceIndex, const int& StageGrassBlasIndex, const int& StageGrassInstanceIndex)
+Player::Player(const StageData& StageObjectData)
 {
 
 	/*===== 初期化処理 =====*/
@@ -16,12 +16,9 @@ Player::Player(const int& StageBlasIndex, const int& StageInstanceIndex, const i
 	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
-	stageBlasIndex = StageBlasIndex;
-	stageInstanceIndex = StageInstanceIndex;
-	stageGrassBlasIndex = StageGrassBlasIndex;
-	stageGrassInstanceIndex = StageGrassInstanceIndex;
+	stageModelData = StageObjectData;
 
-	pos = Vec3(0, 30, 0);
+	pos = PLAYER_DEF_POS;
 	forwardVec = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec = Vec3(0, 1, 0);
@@ -41,7 +38,7 @@ void Player::Init()
 
 	/*===== 初期化処理 =====*/
 
-	pos = Vec3(0, 30, 0);
+	pos = PLAYER_DEF_POS;
 	forwardVec = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec = Vec3(0, 1, 0);
@@ -56,7 +53,7 @@ void Player::Init()
 
 }
 
-void Player::Update(RayConstBufferData& ConstBufferData)
+void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount)
 {
 
 	/*===== 更新処理 =====*/
@@ -68,7 +65,7 @@ void Player::Update(RayConstBufferData& ConstBufferData)
 	Move();
 
 	// 当たり判定
-	CheckHit();
+	CheckHit(IsPassedMiddlePoint, RapCount);
 
 	// 座標を更新。
 	PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, pos);
@@ -204,7 +201,8 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
 	if (Input::Ins()->isPad(XINPUT_GAMEPAD_B)) {
 
-		pos = Vec3(0, 30, 0);
+		pos = PLAYER_DEF_POS;
+		PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));
 		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
 		forwardVec = Vec3(0, 0, -1);
 		rotY = 0;
@@ -275,7 +273,7 @@ void Player::Move()
 
 }
 
-void Player::CheckHit()
+void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 {
 
 	/*===== 当たり判定 =====*/
@@ -288,14 +286,14 @@ void Player::CheckHit()
 		FHelper::RayToModelCollisionData collistionData;
 
 		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexIndex();
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexIndex();
 		collistionData.rayPos = pos;
 		collistionData.rayDir = bottomVec;
-		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageInstanceIndex);
-		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageInstanceIndex);
-		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageInstanceIndex);
+		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
+		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
+		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -340,14 +338,14 @@ void Player::CheckHit()
 		if (!isHit) {
 
 			// 当たり判定に必要なデータを埋めていく。
-			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageGrassBlasIndex]->GetVertexPos();
-			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageGrassBlasIndex]->GetVertexNormal();
-			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageGrassBlasIndex]->GetVertexIndex();
+			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageGrassBlasIndex]->GetVertexPos();
+			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageGrassBlasIndex]->GetVertexNormal();
+			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageGrassBlasIndex]->GetVertexIndex();
 			collistionData.rayPos = pos;
 			collistionData.rayDir = bottomVec;
-			collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageGrassInstanceIndex);
-			collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageGrassInstanceIndex);
-			collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageGrassInstanceIndex);
+			collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageGrassInsIndex);
+			collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageGrassInsIndex);
+			collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageGrassInsIndex);
 
 			// 当たり判定の結果保存用変数。
 			isHit = false;
@@ -410,7 +408,6 @@ void Player::CheckHit()
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
 		isHit &= fabs(hitDistance) < size.y * 2.0f;
-		//isHit &= 0 < hitDistance;
 
 		// 当たっていたら押し戻す。
 		if (isHit) {
@@ -422,6 +419,85 @@ void Player::CheckHit()
 
 
 	}
+
+
+	/*-- 中心地点とゴール地点との当たり判定 --*/
+
+	// 中間地点に達していなかったら中間地点との当たり判定を行う。
+	if (!IsPassedMiddlePoint) {
+
+		// 当たり判定に使用するデータ
+		FHelper::RayToModelCollisionData collistionData;
+
+		// 当たり判定に必要なデータを埋めていく。
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexIndex();
+		collistionData.rayPos = pos;
+		collistionData.rayDir = forwardVec;
+		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.middlePointInsIndex);
+		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.middlePointInsIndex);
+		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.middlePointInsIndex);
+
+		// 当たり判定の結果保存用変数。
+		bool isHit = false;
+		Vec3 impactPos;
+		float hitDistance;
+		Vec3 hitNormal;
+
+		// 当たり判定を行う。
+		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+
+		// 当たった距離がY軸のサイズよりも小さかったら。
+		isHit &= (hitDistance - size.y) < 0;
+		isHit &= 0 < hitDistance;
+
+		// 当たっていたら。
+		if (isHit) {
+
+			IsPassedMiddlePoint = true;
+
+		}
+
+	}
+	else {
+
+		// 当たり判定に使用するデータ
+		FHelper::RayToModelCollisionData collistionData;
+
+		// 当たり判定に必要なデータを埋めていく。
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexIndex();
+		collistionData.rayPos = pos;
+		collistionData.rayDir = forwardVec;
+		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.goalInsIndex);
+		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.goalInsIndex);
+		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.goalInsIndex);
+
+		// 当たり判定の結果保存用変数。
+		bool isHit = false;
+		Vec3 impactPos;
+		float hitDistance;
+		Vec3 hitNormal;
+
+		// 当たり判定を行う。
+		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+
+		// 当たった距離がY軸のサイズよりも小さかったら。
+		isHit &= (hitDistance - size.y) < 0;
+		isHit &= 0 < hitDistance;
+
+		// 当たっていたら。
+		if (isHit) {
+
+			IsPassedMiddlePoint = false;
+			++RapCount;
+
+		}
+
+	}
+
 
 }
 

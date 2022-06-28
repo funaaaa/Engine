@@ -62,18 +62,27 @@ GameScene::GameScene()
 	goalBlas = BLASRegister::Ins()->GenerateObj("Resource/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
 	goalIns = PorygonInstanceRegister::Ins()->CreateInstance(goalBlas, PorygonInstanceRegister::SHADER_ID_REFRACTION);
 	PorygonInstanceRegister::Ins()->AddScale(goalIns, Vec3(200, 200, 200));
-	PorygonInstanceRegister::Ins()->AddTrans(goalIns, Vec3(10, -30, 0));
+	PorygonInstanceRegister::Ins()->AddTrans(goalIns, GOAL_DEF_POS);
 
-	int goalCollisitionBlas = BLASRegister::Ins()->GenerateObj("Resource/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
-	int goalCollisitionIns = PorygonInstanceRegister::Ins()->CreateInstance(goalCollisitionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
-	PorygonInstanceRegister::Ins()->AddScale(goalCollisitionIns, Vec3(200, 200, 200));
+	goalCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
+	goalCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(goalCollisionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
+	PorygonInstanceRegister::Ins()->AddScale(goalCollisionIns, Vec3(200, 200, 200));
 
-	int middleCollisitonBlas = BLASRegister::Ins()->GenerateObj("Resource/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
-	int middleCollsitionIns = PorygonInstanceRegister::Ins()->CreateInstance(middleCollisitonBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
-	PorygonInstanceRegister::Ins()->AddScale(middleCollsitionIns, Vec3(200, 200, 200));
+	middlePointCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
+	middlePointCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(middlePointCollisionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
+	PorygonInstanceRegister::Ins()->AddScale(middlePointCollisionIns, Vec3(200, 200, 200));
 
 	// プレイヤーを初期化。
-	player = std::make_shared<Player>(stageBlas, stageIns, stageGrassBlas, stageGrassIns);
+	Player::StageData stageData;
+	stageData.stageBlasIndex = stageBlas;
+	stageData.stageInsIndex = stageIns;
+	stageData.stageGrassBlasIndex = stageGrassBlas;
+	stageData.stageGrassInsIndex = stageGrassIns;
+	stageData.middlePointBlasIndex = middlePointCollisionBlas;
+	stageData.middlePointInsIndex = middlePointCollisionIns;
+	stageData.goalBlasIndex = goalCollisionBlas;
+	stageData.goalInsIndex = goalCollisionIns;
+	player = std::make_shared<Player>(stageData);
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -122,6 +131,9 @@ GameScene::GameScene()
 	nextScene = SCENE_ID::RESULT;
 	isTransition = false;
 
+	isPassedMiddlePoint = false;
+	rapCount = 0;
+
 }
 
 void GameScene::Init()
@@ -133,6 +145,9 @@ void GameScene::Init()
 	isTransition = false;
 	player->Init();
 	Camera::Ins()->Init();
+
+	isPassedMiddlePoint = false;
+	rapCount = 0;
 
 }
 
@@ -157,7 +172,7 @@ void GameScene::Update()
 	}
 
 	// プレイヤーを更新。
-	player->Update(constBufferData);
+	player->Update(constBufferData, isPassedMiddlePoint, rapCount);
 
 	// 乱数の種を更新。
 	constBufferData.debug.seed = FHelper::GetRand(0, 1000);
@@ -178,6 +193,31 @@ void GameScene::Update()
 			PorygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(-100000, -100000, -100000));
 		}
 		++counter;
+	}
+
+	// 中間地点に達していたらゴールを定位置に出す。
+	if (isPassedMiddlePoint) {
+
+		PorygonInstanceRegister::Ins()->ChangeTrans(goalIns, GOAL_DEF_POS);
+		PorygonInstanceRegister::Ins()->ChangeScale(goalIns, Vec3(200, 200, 200));
+		PorygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns, GOAL_DEF_POS);
+		PorygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns, Vec3(200, 200, 200));
+
+	}
+	else {
+
+		PorygonInstanceRegister::Ins()->ChangeTrans(goalIns, Vec3(-10000, -10000, -10000));
+		PorygonInstanceRegister::Ins()->ChangeScale(goalIns, Vec3(0, 0, 0));
+		PorygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns, Vec3(-10000, -10000, -10000));
+		PorygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns, Vec3(0, 0, 0));
+
+	}
+
+	// 3週していたらリザルトシーンに移動する。
+	if (3 <= rapCount) {
+
+		isTransition = true;
+
 	}
 
 	// ゴールオブジェクトを回転させる。
