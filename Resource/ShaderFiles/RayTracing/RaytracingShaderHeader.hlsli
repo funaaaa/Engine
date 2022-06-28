@@ -10,6 +10,7 @@ static const int CHS_IDENTIFICATION_ISNTANCE_REFLECTION = 3; // InstanceID 反�
 static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // InstanceID 完全反射のオブジェクト
 static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ライト用オブジェクト テクスチャの色をそのまま返す。MissShaderで当たり判定を棄却する為にも使用する。
 static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID 屈折の処理
+static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ライティングも描画も行わないオブジェクト
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // デフォルトのレイ
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI用のレイ

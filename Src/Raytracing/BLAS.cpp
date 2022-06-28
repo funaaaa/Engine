@@ -7,7 +7,7 @@
 #include "StructuredBuffer.h"
 #include "TextureManager.h"
 
-void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing)
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -106,8 +106,8 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
-	isOpaque = true;
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
+	isOpaque = IsOpaque;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);

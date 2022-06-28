@@ -831,7 +831,7 @@ void mainAnyHit(inout DenoisePayload payload, MyAttribute attrib)
     int instanceID = InstanceID();
     
     // インスタンスIDが1(ライト)なら当たり判定を棄却する。
-    if (instanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT || instanceID == CHS_IDENTIFICATION_INSTANCE_INVISIBILITY)
     {
         IgnoreHit();
 

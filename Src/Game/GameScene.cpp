@@ -64,6 +64,14 @@ GameScene::GameScene()
 	PorygonInstanceRegister::Ins()->AddScale(goalIns, Vec3(200, 200, 200));
 	PorygonInstanceRegister::Ins()->AddTrans(goalIns, Vec3(10, -30, 0));
 
+	int goalCollisitionBlas = BLASRegister::Ins()->GenerateObj("Resource/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
+	int goalCollisitionIns = PorygonInstanceRegister::Ins()->CreateInstance(goalCollisitionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
+	PorygonInstanceRegister::Ins()->AddScale(goalCollisitionIns, Vec3(200, 200, 200));
+
+	int middleCollisitonBlas = BLASRegister::Ins()->GenerateObj("Resource/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
+	int middleCollsitionIns = PorygonInstanceRegister::Ins()->CreateInstance(middleCollisitonBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
+	PorygonInstanceRegister::Ins()->AddScale(middleCollsitionIns, Vec3(200, 200, 200));
+
 	// プレイヤーを初期化。
 	player = std::make_shared<Player>(stageBlas, stageIns, stageGrassBlas, stageGrassIns);
 
