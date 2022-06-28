@@ -9,6 +9,7 @@ class DynamicConstBuffer;
 class RaytracingPipline;
 class TLAS;
 class RaytracingOutput;
+class Sprite;
 
 // ƒQ[ƒ€ƒV[ƒ“
 class GameScene : public BaseScene {
@@ -50,6 +51,13 @@ private:
 	int goalCollisionIns;
 	int middlePointCollisionBlas;
 	int middlePointCollisionIns;
+
+	// UIŠÖŒW
+	std::shared_ptr<Sprite> nowRapCountSprite;
+	std::shared_ptr<Sprite> maxRapCountSprite;
+	std::shared_ptr<Sprite> rapSlashSprite;
+	std::array<int, 11> numFontHandle;
+
 
 	// ƒS[ƒ‹ŠÖŒW
 	bool isPassedMiddlePoint;

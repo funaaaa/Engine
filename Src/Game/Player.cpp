@@ -138,8 +138,10 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			handleAmount = HANDLE_DRIFT;
 
 			// ついでにドリフト状態の時のブーストするまでのタイマーを更新する。
-			++driftBoostTimer;
-			if (DRIFT_BOOST_TIMER < driftBoostTimer) driftBoostTimer = DRIFT_BOOST_TIMER;
+			if (isGround) {
+				++driftBoostTimer;
+				if (DRIFT_BOOST_TIMER < driftBoostTimer) driftBoostTimer = DRIFT_BOOST_TIMER;
+			}
 
 		}
 

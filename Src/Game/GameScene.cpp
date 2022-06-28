@@ -12,6 +12,9 @@
 #include "RaytracingOutput.h"
 #include "TLAS.h"
 #include "Input.h"
+#include "TextureManager.h"
+#include "Sprite.h"
+#include "Pipline.h"
 
 GameScene::GameScene()
 {
@@ -134,6 +137,29 @@ GameScene::GameScene()
 	isPassedMiddlePoint = false;
 	rapCount = 0;
 
+	// スプライトを生成。
+	nowRapCountSprite = std::make_shared<Sprite>();
+	nowRapCountSprite->GenerateSpecifyTextureID(Vec3(95, 80, 0.1f), DirectX::XMFLOAT2(16, 32), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	maxRapCountSprite = std::make_shared<Sprite>();
+	maxRapCountSprite->GenerateSpecifyTextureID(Vec3(180, 80, 0.1f), DirectX::XMFLOAT2(16, 32), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	rapSlashSprite = std::make_shared<Sprite>();
+	rapSlashSprite->GenerateSpecifyTextureID(Vec3(140, 80, 0.1f), DirectX::XMFLOAT2(16, 32), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+
+	// フォントをロード
+	{
+		numFontHandle[0] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/0.png");
+		numFontHandle[1] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/1.png");
+		numFontHandle[2] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/2.png");
+		numFontHandle[3] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/3.png");
+		numFontHandle[4] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/4.png");
+		numFontHandle[5] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/5.png");
+		numFontHandle[6] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/6.png");
+		numFontHandle[7] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/7.png");
+		numFontHandle[8] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/8.png");
+		numFontHandle[9] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/9.png");
+		numFontHandle[10] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/slash.png");
+	}
+
 }
 
 void GameScene::Init()
@@ -219,6 +245,11 @@ void GameScene::Update()
 		isTransition = true;
 
 	}
+
+	// ラップ数のUIを更新。
+	maxRapCountSprite->ChangeTextureID(numFontHandle[3], 0);
+	nowRapCountSprite->ChangeTextureID(numFontHandle[rapCount], 0);
+	rapSlashSprite->ChangeTextureID(numFontHandle[10], 0);
 
 	// ゴールオブジェクトを回転させる。
 	PorygonInstanceRegister::Ins()->AddRotate(goalIns, Vec3(0.01f, 0, 0));
@@ -355,6 +386,11 @@ void GameScene::Draw()
 	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
+
+	// UIを描画
+	nowRapCountSprite->Draw();
+	maxRapCountSprite->Draw();
+	rapSlashSprite->Draw();
 
 }
 
