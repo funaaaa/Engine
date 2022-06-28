@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "HitGroupMgr.h"
 #include "DescriptorHeapMgr.h"
+#include "PiplineManager.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

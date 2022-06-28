@@ -8,7 +8,7 @@ protected:
 	/*-- メンバ変数 --*/
 
 	// 頂点データ関係
-	vector<Vertex> vertex;										//頂点
+	std::vector<Vertex> vertex;										//頂点
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertBuff;			//頂点バッファ
 	D3D12_VERTEX_BUFFER_VIEW vbView;							//頂点バッファビュー
 
@@ -18,11 +18,11 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> constDescHeap;	//CBV用ディスクリプタヒープ
 
 	// デバッグor当たり判定用
-	XMFLOAT3 pos;												//座標
+	Vec3 pos;												//座標
 
 
 public:
 
-	inline const vector<Vertex>& GetVertex() { return vertex; }
+	inline const std::vector<Vertex>& GetVertex() { return vertex; }
 
 };

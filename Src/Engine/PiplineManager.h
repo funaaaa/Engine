@@ -5,7 +5,6 @@
 #include <string>
 #include <DirectXTex/d3dx12.h>
 #include "Singleton.h"
-#include "Enum.h"
 #include "Pipline.h"
 
 using namespace std;
@@ -31,7 +30,7 @@ public:
 	/// <param name="rootparam">ルートパラメーター</param>
 	/// <param name="primitive">プリミティブ形状</param>
 	/// <param name="blendID">ブレンドのID</param>
-	void GeneratePipline(PiplineID piplineID,
+	void GeneratePipline(Pipline::PIPLINE_ID piplineID,
 		string PSname,
 		string VSname,
 		int inputLayoutCount,
@@ -39,7 +38,7 @@ public:
 		int rootparamCount,
 		CD3DX12_ROOT_PARAMETER* rootparam,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-		int blendID,
+		Pipline::BLEND_ID blendID,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 	/// <summary>
@@ -55,7 +54,7 @@ public:
 	/// <param name="rootparam">ルートパラメーター</param>
 	/// <param name="primitive">プリミティブ形状</param>
 	/// <param name="blendID">ブレンドのID</param>
-	void GeneratePipline(PiplineID piplineID,
+	void GeneratePipline(Pipline::PIPLINE_ID piplineID,
 		string PSname,
 		string VSname,
 		string GSname,
@@ -64,11 +63,11 @@ public:
 		int rootparamCount,
 		CD3DX12_ROOT_PARAMETER* rootparam,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-		int blendID,
+		Pipline::BLEND_ID blendID,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	void GeneratePiplineDepth(PiplineID piplineID,
+	void GeneratePiplineDepth(Pipline::PIPLINE_ID piplineID,
 		string PSname,
 		string VSname,
 		int inputLayoutCount,
@@ -76,7 +75,7 @@ public:
 		int rootparamCount,
 		CD3DX12_ROOT_PARAMETER* rootparam,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-		int blendID,
+		Pipline::BLEND_ID blendID,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM,
 		DXGI_FORMAT dxgiFormat2 = DXGI_FORMAT_R8_UNORM);

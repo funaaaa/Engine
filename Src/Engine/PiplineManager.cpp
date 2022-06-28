@@ -1,11 +1,10 @@
 #include "PiplineManager.h"
-#include "Enum.h"
 #include "Pipline.h"
 #include <cassert>
 
 //map<string, Pipline> PiplineManager::pipline{};
 
-void PiplineManager::GeneratePipline(PiplineID piplineID,
+void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID piplineID,
 	string PSname,
 	string VSname,
 	int inputLayoutCount,
@@ -13,7 +12,7 @@ void PiplineManager::GeneratePipline(PiplineID piplineID,
 	int rootparamCount,
 	CD3DX12_ROOT_PARAMETER* rootparam,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-	int blendID,
+	Pipline::BLEND_ID blendID,
 	D3D12_CULL_MODE cullMode,
 	DXGI_FORMAT dxgiFormat)
 {
@@ -29,11 +28,11 @@ void PiplineManager::GeneratePipline(PiplineID piplineID,
 	}
 
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines.push_back(Pipline(piplineID, PSname, VSname, inputLayoutCount, inputLayout, rootparamCount, rootparam, primitive, blendID, cullMode, dxgiFormat));
+	piplines.emplace_back(Pipline(piplineID, PSname, VSname, inputLayoutCount, inputLayout, rootparamCount, rootparam, primitive, blendID, cullMode, dxgiFormat));
 
 }
 
-void PiplineManager::GeneratePipline(PiplineID piplineID,
+void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID piplineID,
 	string PSname,
 	string VSname,
 	string GSname,
@@ -42,7 +41,7 @@ void PiplineManager::GeneratePipline(PiplineID piplineID,
 	int rootparamCount,
 	CD3DX12_ROOT_PARAMETER* rootparam,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-	int blendID,
+	Pipline::BLEND_ID blendID,
 	D3D12_CULL_MODE cullMode,
 	DXGI_FORMAT dxgiFormat)
 {
@@ -62,7 +61,7 @@ void PiplineManager::GeneratePipline(PiplineID piplineID,
 
 }
 
-void PiplineManager::GeneratePiplineDepth(PiplineID piplineID,
+void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID piplineID,
 	string PSname,
 	string VSname,
 	int inputLayoutCount,
@@ -70,7 +69,7 @@ void PiplineManager::GeneratePiplineDepth(PiplineID piplineID,
 	int rootparamCount,
 	CD3DX12_ROOT_PARAMETER* rootparam,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-	int blendID,
+	Pipline::BLEND_ID blendID,
 	D3D12_CULL_MODE cullMode,
 	DXGI_FORMAT dxgiFormat,
 	DXGI_FORMAT dxgiFormat2)
@@ -85,7 +84,7 @@ void PiplineManager::GeneratePiplineDepth(PiplineID piplineID,
 			return;
 		}
 	}
-
+	dxgiFormat2;
 	//指定されたパイプラインIDごとに生成して最後尾に追加
 	piplines.push_back(Pipline(piplineID, PSname, VSname, inputLayoutCount, inputLayout, rootparamCount, rootparam, primitive, blendID, cullMode, dxgiFormat));
 
@@ -135,27 +134,27 @@ void PiplineManager::Init()
 #pragma region descrange
 	/*ディスクリプタテーブルの生成*/
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);					//t0レジスタ
-	CD3DX12_DESCRIPTOR_RANGE descRangeSRV1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+	/*CD3DX12_DESCRIPTOR_RANGE descRangeSRV1(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV2(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1);
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV3(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2);
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV4(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3);
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV5(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4);
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV6(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 5);
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV7(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6);
-	CD3DX12_DESCRIPTOR_RANGE descRangeSRV8(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7);
+	CD3DX12_DESCRIPTOR_RANGE descRangeSRV8(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7);*/
 #pragma endregion
 
 #pragma region rootparam
 	/*ルートパラメータの生成*/
 	CD3DX12_ROOT_PARAMETER const1Tex1[2]{};
-	CD3DX12_ROOT_PARAMETER const2tex1[3]{};
+	/*CD3DX12_ROOT_PARAMETER const2tex1[3]{};
 	CD3DX12_ROOT_PARAMETER const3Tex1[4]{};
 	CD3DX12_ROOT_PARAMETER const1Tex8[9]{};
 	CD3DX12_ROOT_PARAMETER const1Tex2[3]{};
 	CD3DX12_ROOT_PARAMETER const3Tex2[5]{};
 	CD3DX12_ROOT_PARAMETER const4Tex2[6]{};
 	CD3DX12_ROOT_PARAMETER const1[1]{};
-	CD3DX12_ROOT_PARAMETER const2[2]{};
+	CD3DX12_ROOT_PARAMETER const2[2]{};*/
 
 
 	//定数用
@@ -163,79 +162,79 @@ void PiplineManager::Init()
 	//テクスチャ用
 	const1Tex1[1].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const2tex1[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const2tex1[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const2tex1[2].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const2tex1[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const2tex1[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const2tex1[2].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const3Tex1[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const3Tex1[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const3Tex1[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const3Tex1[3].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const3Tex1[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const3Tex1[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const3Tex1[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const3Tex1[3].InitAsDescriptorTable(1, &descRangeSRV, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const1Tex8[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[1].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[2].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[3].InitAsDescriptorTable(1, &descRangeSRV3, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[4].InitAsDescriptorTable(1, &descRangeSRV4, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[5].InitAsDescriptorTable(1, &descRangeSRV5, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[6].InitAsDescriptorTable(1, &descRangeSRV6, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[7].InitAsDescriptorTable(1, &descRangeSRV7, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex8[8].InitAsDescriptorTable(1, &descRangeSRV8, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const1Tex8[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[1].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[2].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[3].InitAsDescriptorTable(1, &descRangeSRV3, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[4].InitAsDescriptorTable(1, &descRangeSRV4, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[5].InitAsDescriptorTable(1, &descRangeSRV5, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[6].InitAsDescriptorTable(1, &descRangeSRV6, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[7].InitAsDescriptorTable(1, &descRangeSRV7, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex8[8].InitAsDescriptorTable(1, &descRangeSRV8, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const1Tex2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex2[1].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const1Tex2[2].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const1Tex2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex2[1].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const1Tex2[2].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const3Tex2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const3Tex2[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const3Tex2[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const3Tex2[3].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const3Tex2[4].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const3Tex2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const3Tex2[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const3Tex2[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const3Tex2[3].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const3Tex2[4].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const4Tex2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const4Tex2[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const4Tex2[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const4Tex2[3].InitAsConstantBufferView(3, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const4Tex2[4].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
-	//テクスチャ用
-	const4Tex2[5].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const4Tex2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const4Tex2[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const4Tex2[2].InitAsConstantBufferView(2, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const4Tex2[3].InitAsConstantBufferView(3, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const4Tex2[4].InitAsDescriptorTable(1, &descRangeSRV1, D3D12_SHADER_VISIBILITY_ALL);
+	////テクスチャ用
+	//const4Tex2[5].InitAsDescriptorTable(1, &descRangeSRV2, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const1[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const1[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 
-	//定数用
-	const2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
-	//定数用
-	const2[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const2[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
+	////定数用
+	//const2[1].InitAsConstantBufferView(1, 0, D3D12_SHADER_VISIBILITY_ALL);
 
 #pragma endregion
 
@@ -244,7 +243,7 @@ void PiplineManager::Init()
 
 	/*スプライト用のパイプライン*/
 	//GeneratePipline(PIPLINE_SPRITE_ADD, "Resource/ShaderFiles/SpritePS.hlsl", "Resource/ShaderFiles/SpriteVS.hlsl", 3, inputLayout, 2, const1Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ADD);
-	GeneratePipline(PIPLINE_SPRITE_ALPHA, "Resource/ShaderFiles/SpritePS.hlsl", "Resource/ShaderFiles/SpriteVS.hlsl", 3, inputLayout, 2, const1Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
+	GeneratePipline(Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, "Resource/ShaderFiles/SpritePS.hlsl", "Resource/ShaderFiles/SpriteVS.hlsl", 3, inputLayout, 2, const1Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, Pipline::BLEND_ID::BLENDMODE_ALPHA);
 
 	/*オブジェクト用のパイプライン*/
 	//GeneratePipline(PIPLINE_OBJECT_LIGHT_ALPHA, "Resource/ShaderFiles/ObjectLightPS.hlsl", "Resource/ShaderFiles/ObjectVS.hlsl", 3, inputLayout, 4, const3Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA, D3D12_CULL_MODE_BACK);
@@ -280,8 +279,8 @@ void PiplineManager::Init()
 	//GeneratePipline(PIPLINE_MULTIPATH_MONOCHROME_ALPHA, L"Resource/ShaderFiles/MultiPathMonochromePS.hlsl", L"Resource/ShaderFiles/MultiPathNormalVS.hlsl", 3, inputLayout, 3, const2tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
 	//GeneratePipline(PIPLINE_MULTIPATH_BLUR_ADD, L"Resource/ShaderFiles/MultiPathBlurPS.hlsl", L"Resource/ShaderFiles/MultiPathNormalVS.hlsl", 3, inputLayout, 3, const2tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ADD);
 	//GeneratePipline(PIPLINE_MULTIPATH_BLUR_ALPHA, L"Resource/ShaderFiles/MultiPathBlurPS.hlsl", L"Resource/ShaderFiles/MultiPathNormalVS.hlsl", 3, inputLayout, 3, const2tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
-	GeneratePipline(PIPLINE_MULTIPATH_GAUSSIAN_X_ALPHA, "Resource/ShaderFiles/GaussXPS.hlsl", "Resource/ShaderFiles/GaussXVS.hlsl", 3, inputLayout, 3, const2tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
-	GeneratePipline(PIPLINE_MULTIPATH_GAUSSIAN_Y_ALPHA, "Resource/ShaderFiles/GaussYPS.hlsl", "Resource/ShaderFiles/GaussYVS.hlsl", 3, inputLayout, 3, const2tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
+	//GeneratePipline(PIPLINE_MULTIPATH_GAUSSIAN_X_ALPHA, "Resource/ShaderFiles/GaussXPS.hlsl", "Resource/ShaderFiles/GaussXVS.hlsl", 3, inputLayout, 3, const2tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
+	//GeneratePipline(PIPLINE_MULTIPATH_GAUSSIAN_Y_ALPHA, "Resource/ShaderFiles/GaussYPS.hlsl", "Resource/ShaderFiles/GaussYVS.hlsl", 3, inputLayout, 3, const2tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
 	//GeneratePipline(PIPLINE_MULTIPATH_FOG_ALPHA, L"Resource/ShaderFiles/MultiPathFogPS.hlsl", L"Resource/ShaderFiles/MultiPathNormalVS.hlsl", 3, inputLayout, 3, const1Tex2, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA);
 
 	/*便利系用パイプライン*/

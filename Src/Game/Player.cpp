@@ -424,7 +424,6 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		if (isHit) {
 
 			// –@ü•ûŒü‚É“–‚½‚Á‚½•ª‰Ÿ‚µ–ß‚·B
-			float prevPosLength = (pos - prevPos).Length();
 			pos = impactPos + hitNormal * hitDistance;
 
 		}
