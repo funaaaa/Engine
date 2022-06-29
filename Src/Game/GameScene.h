@@ -52,6 +52,10 @@ private:
 	int middlePointCollisionBlas;
 	int middlePointCollisionIns;
 
+	// 装飾のブロックのインデックス
+	std::vector<int> stageOrnamentBlas;
+	std::vector<int> stageOrnamentIns;
+
 	// UI関係
 	std::shared_ptr<Sprite> nowRapCountSprite;
 	std::shared_ptr<Sprite> maxRapCountSprite;
@@ -79,12 +83,17 @@ private:
 	// GI出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> giOutput;
 
+	// デノイズマスク用クラスをセット。
+	std::shared_ptr<RaytracingOutput> denoiseMaskOutput;
+
 	// デノイズの結果出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput;
 
 	// FPS表示をするか否か
 	bool isDisplayFPS;
 
+	// 太陽の角度
+	float sunAngle;
 
 	// デバッグ用のパイプラインを切り替えるやつ。
 	enum DEGU_PIPLINE_ID {

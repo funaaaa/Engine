@@ -123,6 +123,7 @@ struct DenoisePayload
     float3 aoLuminance;
     float3 lightLuminance;
     float3 giColor;
+    float3 denoiseMask;
     uint recursive;
     uint rayID;
 };
@@ -318,7 +319,7 @@ void ShootRay(uint rayID, float3 origin, float3 direction, inout DenoisePayload 
     rayDesc.Origin = origin;
     rayDesc.Direction = direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 30000.0f;
+    rayDesc.TMax = 300000.0f;
 
     // ���C��ID�𔽎˗p���C�ɐݒ�B
     payload.rayID = rayID;

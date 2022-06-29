@@ -30,7 +30,7 @@ GameScene::GameScene()
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	deAOPipline = std::make_shared<RaytracingPipline>();
-	deAOPipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 4, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	deAOPipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
 	//sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
@@ -38,7 +38,7 @@ GameScene::GameScene()
 	// 天球用のスフィアを生成する。
 	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.jpg" });
 	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, PorygonInstanceRegister::SHADER_ID_AS);
-	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(100, 100, 100));
+	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));
 
 	// ライト用のスフィアを読み込む。
 	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
@@ -75,6 +75,29 @@ GameScene::GameScene()
 	middlePointCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(middlePointCollisionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
 	PorygonInstanceRegister::Ins()->AddScale(middlePointCollisionIns, Vec3(200, 200, 200));
 
+	// ステージの装飾オブジェクトをロード
+	{
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockA.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockB.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockC.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockE.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockF.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "goalSideObj.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+	}
+	for (auto& index : stageOrnamentIns) {
+
+		PorygonInstanceRegister::Ins()->AddScale(index, Vec3(200, 200, 200));
+
+	}
+
 	// プレイヤーを初期化。
 	Player::StageData stageData;
 	stageData.stageBlasIndex = stageBlas;
@@ -109,6 +132,10 @@ GameScene::GameScene()
 	giOutput = std::make_shared<RaytracingOutput>();
 	giOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
+	// デノイズマスク用クラスをセット。
+	denoiseMaskOutput = std::make_shared<RaytracingOutput>();
+	denoiseMaskOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+
 	// 最終出力用クラスをセット。
 	denoiseMixTextureOutput = std::make_shared<RaytracingOutput>();
 	denoiseMixTextureOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -121,6 +148,7 @@ GameScene::GameScene()
 
 	// ライトが動いたか
 	isMoveLight = false;
+	sunAngle = 0;
 
 	// デバッグ用のパイプラインを切り替えるやつ。
 	enum DEGU_PIPLINE_ID {
@@ -174,6 +202,7 @@ void GameScene::Init()
 
 	isPassedMiddlePoint = false;
 	rapCount = 0;
+	sunAngle = 0;
 
 }
 
@@ -256,6 +285,15 @@ void GameScene::Update()
 
 	tlas->Update();
 
+	// 太陽の角度を更新。
+	sunAngle += 0.01f;
+	if (DirectX::XM_2PI < sunAngle) {
+		sunAngle = 0.0f;
+	}
+	constBufferData.light.dirLight.lihgtDir = Vec3(-cos(sunAngle), -sin(sunAngle), 0);
+	// 天球自体も回転させる。
+	PorygonInstanceRegister::Ins()->AddRotate(skyDomeIns, Vec3(0.001f, 0, 0));
+
 }
 
 void GameScene::Draw()
@@ -278,6 +316,7 @@ void GameScene::Draw()
 	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
@@ -295,6 +334,7 @@ void GameScene::Draw()
 	lightOutput->SetComputeRootDescriptorTalbe(3);
 	colorOutput->SetComputeRootDescriptorTalbe(4);
 	giOutput->SetComputeRootDescriptorTalbe(5);
+	denoiseMaskOutput->SetComputeRootDescriptorTalbe(6);
 
 	// パイプラインを設定。
 	DirectXBase::Ins()->cmdList->SetPipelineState1(deAOPipline->GetStateObject().Get());
@@ -313,7 +353,7 @@ void GameScene::Draw()
 			if (!constBufferData.debug.isMeshScene && !constBufferData.debug.isNormalScene && !constBufferData.debug.isLightHitScene) {
 
 				// ライトにデノイズをかける。
-				Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), 1, 3);
+				Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 4);
 
 			}
 
@@ -321,7 +361,7 @@ void GameScene::Draw()
 			if (!constBufferData.debug.isNoAO) {
 
 				// AOにデノイズをかける。
-				Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(), 100, 9);
+				Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
 
 			}
 
@@ -329,7 +369,7 @@ void GameScene::Draw()
 			if (!constBufferData.debug.isNoGI) {
 
 				// GIにデノイズをかける。
-				Denoiser::Ins()->Denoise(giOutput->GetUAVIndex(), 100, 5);
+				//Denoiser::Ins()->Denoise(giOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 1);
 
 			}
 
@@ -365,6 +405,8 @@ void GameScene::Draw()
 
 		// デノイズされた通常の描画
 		colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		//Denoiser::Ins()->Denoise(denoiseMaskOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 5);
+
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
 
 	}
@@ -384,6 +426,7 @@ void GameScene::Draw()
 	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	//colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
 

@@ -24,7 +24,7 @@ private:
 	std::shared_ptr<RayComputeShader> blurX;
 	std::shared_ptr<RayComputeShader> blurY;
 	std::shared_ptr<RayComputeShader> blurFinal;
-	
+
 	// デノイズ時に使用する一時保蔵要テクスチャ
 	std::shared_ptr<RaytracingOutput> denoiseOutput;
 
@@ -48,13 +48,13 @@ public:
 	void Setting();
 
 	// ガウシアンブラーをかける。
-	void ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVIndex, const int& BlurPower);
+	void ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMaskIndex, const int& OutputUAVIndex, const int& BlurPower);
 
 	// 色情報と明るさ情報をかける。
 	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& InputGIIndex, const int& OutputUAVIndex);
 
 	// デノイズ
-	void Denoise(const int& InOutImg, const int& DenoisePower, const int& DenoiseCount);
+	void Denoise(const int& InOutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount);
 
 private:
 

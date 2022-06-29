@@ -21,6 +21,7 @@ RWTexture2D<float4> aoOutput : register(u0);
 RWTexture2D<float4> lightingOutput : register(u1);
 RWTexture2D<float4> colorOutput : register(u2);
 RWTexture2D<float4> giOutput : register(u3);
+RWTexture2D<float4> denoiseMaskoutput : register(u4);
 
 // 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
@@ -250,7 +251,7 @@ bool ShootDirShadow(Vertex vtx, float length)
     dirLightVec = normalize(dirLightVec);
     
     // 光源の端を求める。
-    //float3 toLightEdge = ((vtx.Position + -gSceneParam.dirLight.lightDir * 1000.0f) + perpL * 10) - worldPosition;
+    //float3 toLightEdge = ((worldPosition + dirLightPos) + perpL * 1) - worldPosition;
     //toLightEdge = normalize(toLightEdge);
     
     //// 角度を求める。
@@ -259,7 +260,7 @@ bool ShootDirShadow(Vertex vtx, float length)
     //// 乱数の種を求める。
     //uint2 pixldx = DispatchRaysIndex().xy;
     //uint2 numPix = DispatchRaysDimensions().xy;
-    //int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
+    //int randSeed = initRand(DispatchRaysIndex().x + (worldPosition.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
     //// レイを撃つベクトル
     //float3 shadowRayDir = GetConeSample(randSeed, dirLightVec, coneAngle);
@@ -337,7 +338,7 @@ void mainRayGen()
 
     rayDesc.Direction = normalize(dir);
     rayDesc.TMin = 0;
-    rayDesc.TMax = 30000;
+    rayDesc.TMax = 300000;
 
     // ペイロードの設定
     DenoisePayload payload;
@@ -375,6 +376,7 @@ void mainRayGen()
     aoOutput[launchIndex.xy] = float4(payload.aoLuminance, 1);
     colorOutput[launchIndex.xy] = float4(payload.color, 1);
     giOutput[launchIndex.xy] = float4(payload.giColor, 1);
+    denoiseMaskoutput[launchIndex.xy] = float4(payload.denoiseMask, 1);
 
 }
 
@@ -422,6 +424,9 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // 法線マップの色を取得。
     float3 normalMapColor = (float3) normalTexture.SampleLevel(smp, vtx.uv, 0.0f);
     
+    // マスク用のテクスチャを保存。
+    payload.denoiseMask = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3())) * (InstanceIndex() / 10.0f);
+    
     // 法線マップの色とテクスチャの色が同じだったら、その法線マップはメモリの隙間を埋めるためにいれられたテクスチャなので、法線マップとして適応させない。
     if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
     {
@@ -462,6 +467,9 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         payload.color += AtmosphericScattering(worldPos, mieColor);
         payload.aoLuminance += float3(1, 1, 1);
         payload.giColor += float3(0, 0, 0);
+        
+        // マスク用のテクスチャを白くする。
+        payload.denoiseMask = float3(1, 1, 1);
         
         return;
     }
@@ -505,6 +513,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     if (gSceneParam.debug.isNormalScene)
     {
         payload.lightLuminance = worldNormal;
+        //payload.lightLuminance = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3())) * (InstanceIndex() / 10.0f);
         return;
     }
 
@@ -594,7 +603,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     pointLightVisibility = saturate(pointLightVisibility);
     
     // 並行光源にシャドウレイを飛ばす。
-    if (gSceneParam.light.dirLight.isActive && gSceneParam.light.dirLight.lightDir.y < 0.1f)
+    if (gSceneParam.light.dirLight.isActive/* && gSceneParam.light.dirLight.lightDir.y < 0.1f*/)
     {
         
         // 並行光源での影情報を取得。
@@ -719,13 +728,15 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     {
         
         // 光にあたっていたら。
-        if (0.0f < pointLightVisibility + dirLightVisibility)
+        if (0.0f < lightVisibility)
         {
             payload.color = float3(1, 1, 1);
+            payload.lightLuminance = float3(1, 1, 1);
         }
         else
         {
             payload.color = float3(0, 0, 0);
+            payload.lightLuminance = float3(0, 0, 0);
         }
         
         return;

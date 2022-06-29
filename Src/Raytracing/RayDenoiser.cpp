@@ -28,8 +28,8 @@ void Denoiser::Setting()
 	mixColorAndLuminance = std::make_shared<RayComputeShader>();
 
 	// ガウシアンブラーに使用するコンピュートシェーダーをセット。
-	blurX->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurX.hlsl", 0, 1, 1, { 0 });
-	blurY->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurY.hlsl", 0, 1, 1, { blurXOutput->GetUAVIndex() });
+	blurX->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurX.hlsl", 0, 1, 2, { 0 });
+	blurY->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurY.hlsl", 0, 1, 2, { blurXOutput->GetUAVIndex() });
 	blurFinal->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseFinal.hlsl", 0, 0, 1, { blurYOutput->GetUAVIndex() });
 	mixColorAndLuminance->Setting(L"Resource/ShaderFiles/RayTracing/MixColorAndLuminance.hlsl", 0, 0, 4, { 0,0 });
 
@@ -44,7 +44,7 @@ void Denoiser::Setting()
 
 }
 
-void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVIndex, const int& BlurPower)
+void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMaskIndex, const int& OutputUAVIndex, const int& BlurPower)
 {
 
 	/*===== デノイズ処理 =====*/
@@ -61,9 +61,10 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& OutputUAVI
 	blurYOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// コンピュートシェーダーを実行。
-	blurX->ChangeInputUAVIndex({ InputUAVIndex });
-	blurX->Dispatch(static_cast<UINT>((window_width / 2.0f) / 4), static_cast<UINT>(window_height / 4), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch(static_cast<UINT>((window_width / 2.0f) / 4), static_cast<UINT>((window_height / 2.0f) / 4), static_cast<UINT>(1), blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurX->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
+	blurY->ChangeInputUAVIndex({ blurXOutput->GetUAVIndex(), DenoiseMaskIndex });
+	blurX->Dispatch(static_cast<UINT>((window_width / 1.0f) / 4), static_cast<UINT>(window_height / 4), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 4), static_cast<UINT>((window_height / 1.0f) / 4), static_cast<UINT>(1), blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	blurFinal->Dispatch(static_cast<UINT>(window_width / 4), static_cast<UINT>(window_height / 4), static_cast<UINT>(1), OutputUAVIndex, {});
 	//blurX->ChangeInputUAVIndex({ InputUAVIndex });
 	//blurX->Dispatch((window_width / 1.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
@@ -87,7 +88,7 @@ void Denoiser::MixColorAndLuminance(const int& InputColorIndex, const int& Input
 
 }
 
-void Denoiser::Denoise(const int& InOutImg, const int& DenoisePower, const int& DenoiseCount)
+void Denoiser::Denoise(const int& InOutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount)
 {
 
 	/*===== デノイズ =====*/
@@ -96,15 +97,15 @@ void Denoiser::Denoise(const int& InOutImg, const int& DenoisePower, const int& 
 	if (DenoiseCount == 1) {
 
 		// ガウシアンブラーをかける。
-		ApplyGaussianBlur(InOutImg, InOutImg, DenoisePower);
+		ApplyGaussianBlur(InOutImg, DenoiseMaskIndex, InOutImg, DenoisePower);
 
 	}
 	// デノイズする数が2回だったら。
 	else if (DenoiseCount == 2) {
 
 		// ガウシアンブラーをかける。
-		ApplyGaussianBlur(InOutImg, denoiseOutput->GetUAVIndex(), DenoisePower);
-		ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), InOutImg, DenoisePower);
+		ApplyGaussianBlur(InOutImg, DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
+		ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, InOutImg, DenoisePower);
 
 	}
 	else {
@@ -114,18 +115,18 @@ void Denoiser::Denoise(const int& InOutImg, const int& DenoisePower, const int& 
 			// デノイズが最初の一回だったら。
 			if (index == 0) {
 
-				ApplyGaussianBlur(InOutImg, denoiseOutput->GetUAVIndex(), DenoisePower);
+				ApplyGaussianBlur(InOutImg, DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
 
 			}
 			// デノイズの最終段階だったら。
 			else if (index == DenoiseCount - 1) {
 
-				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), InOutImg, DenoisePower);
+				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, InOutImg, DenoisePower);
 
 			}
 			else {
 
-				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), denoiseOutput->GetUAVIndex(), DenoisePower);
+				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
 
 			}
 
