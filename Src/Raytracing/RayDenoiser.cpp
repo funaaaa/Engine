@@ -63,9 +63,9 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	// コンピュートシェーダーを実行。
 	blurX->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
 	blurY->ChangeInputUAVIndex({ blurXOutput->GetUAVIndex(), DenoiseMaskIndex });
-	blurX->Dispatch(static_cast<UINT>((window_width / 1.0f) / 4), static_cast<UINT>(window_height / 4), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 4), static_cast<UINT>((window_height / 1.0f) / 4), static_cast<UINT>(1), blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurFinal->Dispatch(static_cast<UINT>(window_width / 4), static_cast<UINT>(window_height / 4), static_cast<UINT>(1), OutputUAVIndex, {});
+	blurX->Dispatch(static_cast<UINT>((window_width / 1.0f) / 16), static_cast<UINT>(window_height / 16), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 16), static_cast<UINT>((window_height / 1.0f) / 16), static_cast<UINT>(1), blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurFinal->Dispatch(static_cast<UINT>(window_width / 16), static_cast<UINT>(window_height / 16), static_cast<UINT>(1), OutputUAVIndex, {});
 	//blurX->ChangeInputUAVIndex({ InputUAVIndex });
 	//blurX->Dispatch((window_width / 1.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	//blurY->Dispatch((window_width / 1.0f) / 4, (window_height / 1.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });

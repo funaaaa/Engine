@@ -49,7 +49,7 @@ float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor,
     
 }
 
-[numthreads(4, 4, 1)]
+[numthreads(16, 16, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     

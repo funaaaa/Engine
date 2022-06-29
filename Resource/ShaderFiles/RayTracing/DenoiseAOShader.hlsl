@@ -49,12 +49,13 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
 }
 
 // 大気散乱
-float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
+float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnderGround)
 {
     
     // 地平線以下は真っ黒にする。
     if (pos.y < -10)
     {
+        isUnderGround = true;
         return float3(0.1f, 0.1f, 0.1f);
     }
     
@@ -244,14 +245,14 @@ bool ShootDirShadow(Vertex vtx, float length)
     }
     
     // 並行光源の座標を仮で求める。
-    float3 dirLightPos = -gSceneParam.light.dirLight.lightDir * 15000.0f;
+    float3 dirLightPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
     
     // 並行光源までのベクトル。
     float3 dirLightVec = dirLightPos - worldPosition;
     dirLightVec = normalize(dirLightVec);
     
-    // 光源の端を求める。
-    //float3 toLightEdge = ((worldPosition + dirLightPos) + perpL * 1) - worldPosition;
+    //// 光源の端を求める。
+    //float3 toLightEdge = ((worldPosition + dirLightPos) + perpL * 10000) - worldPosition;
     //toLightEdge = normalize(toLightEdge);
     
     //// 角度を求める。
@@ -260,7 +261,7 @@ bool ShootDirShadow(Vertex vtx, float length)
     //// 乱数の種を求める。
     //uint2 pixldx = DispatchRaysIndex().xy;
     //uint2 numPix = DispatchRaysDimensions().xy;
-    //int randSeed = initRand(DispatchRaysIndex().x + (worldPosition.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
+    //int randSeed = initRand(DispatchRaysIndex().x + (worldPosition.x * gSceneParam.light.dirLight.lightDir.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
     //// レイを撃つベクトル
     //float3 shadowRayDir = GetConeSample(randSeed, dirLightVec, coneAngle);
@@ -462,14 +463,29 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     if (instanceID == CHS_IDENTIFICATION_INSTNACE_AS)
     {
         float3 mieColor = float3(1, 1, 1);
+        bool isUnderGround = false;
         
         payload.lightLuminance += float3(1, 1, 1);
-        payload.color += AtmosphericScattering(worldPos, mieColor);
+        payload.color += AtmosphericScattering(worldPos, mieColor, isUnderGround);
         payload.aoLuminance += float3(1, 1, 1);
         payload.giColor += float3(0, 0, 0);
         
         // マスク用のテクスチャを白くする。
         payload.denoiseMask = float3(1, 1, 1);
+        
+        // 天球の明るさを求める。
+        float t = dot(payload.color.xyz, float3(0.2125f, 0.7154f, 0.0721f));
+        
+        // 地平線より下じゃなかったら星を描画する。
+        if (!isUnderGround)
+        {
+            t = (1.0f - t);
+            t = t == 0.0f ? 0.0f : pow(2.0f, 10.0f * t - 10.0f);
+            t = t == 0.0f ? 0.0f : pow(2.0f, 10.0f * t - 10.0f);
+            payload.color += texColor * t;
+            payload.color = saturate(payload.color);
+            
+        }
         
         return;
     }
@@ -505,15 +521,11 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         payload.lightLuminance = CalcBarycentrics(attrib.barys);
         return;
     }
-
-    // 法線マップが存在していたら法線マップから法線情報を抽出。
-    //vtx.Normal = normalMap.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 法線を描画するフラグが立っていたら。
     if (gSceneParam.debug.isNormalScene)
     {
         payload.lightLuminance = worldNormal;
-        //payload.lightLuminance = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3())) * (InstanceIndex() / 10.0f);
         return;
     }
 
@@ -601,43 +613,50 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     
     pointLightColor = saturate(pointLightColor);
     pointLightVisibility = saturate(pointLightVisibility);
+            
+    // 太陽の位置
+    float3 sunPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
+    float3 sunDir = normalize(sunPos - worldPos);
     
     // 並行光源にシャドウレイを飛ばす。
-    if (gSceneParam.light.dirLight.isActive/* && gSceneParam.light.dirLight.lightDir.y < 0.1f*/)
+    if (gSceneParam.light.dirLight.isActive/* && gSceneParam.light.dirLight.lightDir.y < 0.2f*/)
     {
         
         // 並行光源での影情報を取得。
         dirLightVisibility = ShootDirShadow(vtx, 10000.0f);
         
         // 影じゃない場合、天球上でのライティングの色を取得する。
-        if (dirLightVisibility == 1)
+        if (0 < dirLightVisibility && gSceneParam.light.dirLight.lightDir.y < 0.2f)
         {
         
             // 影の色を計算。
             //dirLightColor = dirLightVisibility * gSceneParam.light.dirLight.lightColor;
-            dirLightColor = float3(1, 1, 1) * dirLightVisibility;
+            dirLightColor = float3(0, 0, 0);
             
             // ディフューズを計算する。
             float mDiffuse = material[0].diffuse.x;
-            float3 diffuse = dot(-gSceneParam.light.dirLight.lightDir, worldNormal) * mDiffuse;
+            float diffuse = dot(sunDir, worldNormal) * mDiffuse;
+            
 			// 光沢度
             const float shininess = 4.0f;
 			// 頂点から視点への方向ベクトル
             float3 eyedir = normalize(WorldRayOrigin() - worldPos);
 			// 反射光ベクトル
-            float3 reflect = normalize(gSceneParam.light.dirLight.lightDir + 2.0f * dot(-gSceneParam.light.dirLight.lightDir, worldNormal) * worldNormal);
+            float3 reflect = normalize(-sunDir + 2.0f * dot(sunDir, worldNormal) * worldNormal);
             // 鏡面反射光
             float mSpecular = material[0].specular.x;
             float3 specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
             
             // 隠蔽度を更新。
-            dirLightVisibility = diffuse.x + specular.x;
+            dirLightVisibility = diffuse + specular;
             
             const float SKYDOME_RADIUS = 15000.0f;
             const float SAMPLING_POS_Y = 0.0f;
             
             // サンプリングしたい天球上での位置までのベクトル。
-            float3 samplingVec = -gSceneParam.light.dirLight.lightDir * SKYDOME_RADIUS;
+            //float3 samplingVec = normalize(float3(1.0f, 0.1f, 0.1f)) * SKYDOME_RADIUS;
+            float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir * float3(1.0f, 0.0f, 1.0f)) * SKYDOME_RADIUS;
+            samplingVec.y = 0.1f;
             
             // Y軸のサンプリングしたい位置を設定する。
             samplingVec.y = SAMPLING_POS_Y;
@@ -651,15 +670,21 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
             
             // 大気散乱の色を取得。
             float3 mieColor = float3(1, 1, 1);
-            float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
+            bool isUnderGround = false;
+            float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor, isUnderGround);
             
-            // ディレクショナルライトの色を設定。
-            dirLightColor.r += mieColor.r * dirLightVisibility;
+            // ディレクショナルライトの色を設定。 夕焼けのときに赤っぽくするために赤い成分以外を弱める。
+            dirLightColor += mieColor * float3(1.0f, 0.5f, 0.5f);
             
             dirLightColor = normalize(dirLightColor);
             
 
             
+        }
+        else
+        {
+            dirLightColor = float3(0, 0, 0);
+            dirLightVisibility = 0;
         }
         
     }
@@ -788,6 +813,30 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         ShootRay(CHS_IDENTIFICATION_RAYID_REFRACTION, worldPos, rayDir, payload, gRtScene);
 
     }
+    
+    //// フォグの計算を行う。
+    //const float MAX_RAY_LENGTH = 8000.0f; // レイの最大の長さ
+    //float rayLength = RayTCurrent(); // 現在の深度。
+    //float depthRate = rayLength / MAX_RAY_LENGTH;
+    //// レイの長さのレートにイージングをかける。
+    //depthRate = 1.0f - cos((depthRate * PI) / 2.0f);
+    //const float SKYDOME_RADIUS = 15000.0f;
+    //const float SAMPLING_POS_Y = 0.0f;
+    //// サンプリングしたい天球上での位置までのベクトル。
+    //float3 samplingVec = WorldRayDirection() * SKYDOME_RADIUS;
+    //// Y軸のサンプリングしたい位置を設定する。
+    //samplingVec.y = SAMPLING_POS_Y;
+    //// 正規化する。
+    //samplingVec = normalize(samplingVec);
+    //// 天球上のサンプリングしたい位置の座標を求める。
+    //float3 samplingPos;
+    //samplingPos = samplingVec * SKYDOME_RADIUS;
+    //// 大気散乱の色を取得。
+    //float3 mieColor = float3(1, 1, 1);
+    //float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
+    //payload.color += mieColor * (depthRate - 0.5f);
+    //payload.color = saturate(payload.color);
+    
     
     // レイの種類によって要素を割る。
     if (!(payload.rayID == CHS_IDENTIFICATION_RAYID_DEF))

@@ -286,11 +286,18 @@ void GameScene::Update()
 	tlas->Update();
 
 	// 太陽の角度を更新。
-	sunAngle += 0.001f;
+	sunAngle += 0.0001f;
 	if (DirectX::XM_2PI < sunAngle) {
 		sunAngle = 0.0f;
 	}
-	constBufferData.light.dirLight.lihgtDir = Vec3(-cos(sunAngle), -sin(sunAngle), 0);
+	if (Input::Ins()->isKey(DIK_A)) {
+		sunAngle += 0.05f;
+	}
+	if (Input::Ins()->isKey(DIK_S)) {
+		sunAngle += 0.01f;
+	}
+	constBufferData.light.dirLight.lihgtDir = Vec3(-cos(sunAngle), -sin(sunAngle), 0.5f);
+	constBufferData.light.dirLight.lihgtDir.Normalize();
 	// 天球自体も回転させる。
 	PorygonInstanceRegister::Ins()->AddRotate(skyDomeIns, Vec3(0.001f, 0, 0));
 

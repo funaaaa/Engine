@@ -13,7 +13,7 @@ float4 GetPixelColor(int x, int y, int2 texSize)
     return InputImg[uint2(x, y)];
 }
 
-[numthreads(4, 4, 1)]
+[numthreads(16, 16, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
