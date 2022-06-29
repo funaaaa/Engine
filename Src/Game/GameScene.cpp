@@ -286,7 +286,7 @@ void GameScene::Update()
 	tlas->Update();
 
 	// 太陽の角度を更新。
-	sunAngle += 0.01f;
+	sunAngle += 0.001f;
 	if (DirectX::XM_2PI < sunAngle) {
 		sunAngle = 0.0f;
 	}
