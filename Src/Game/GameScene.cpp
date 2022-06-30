@@ -426,7 +426,7 @@ void GameScene::Draw()
 	else {
 
 		// ƒfƒmƒCƒY‚³‚ê‚½’Êí‚Ì•`‰æ
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseLightOutput->GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
 
 
 	}

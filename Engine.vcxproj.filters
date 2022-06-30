@@ -329,12 +329,6 @@
     <None Include="lib\imgui\imgui.ini">
       <Filter>エンジン\lib</Filter>
     </None>
-    <None Include="Resource\ShaderFiles\RayTracing\RaytracingShaderHeader.hlsli">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\SpriteShaderHeader.hlsli">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="エンジン">
@@ -486,28 +480,5 @@
     <ResourceCompile Include="icon.rc">
       <Filter>エンジン\アイコン</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SpritePS.hlsl">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SpriteVS.hlsl">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurX.hlsl">
-      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurY.hlsl">
-      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseFinal.hlsl">
-      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
-      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
-    </FxCompile>
   </ItemGroup>
 </Project>
