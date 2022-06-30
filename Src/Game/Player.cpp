@@ -161,6 +161,18 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	}
 
+	// 臨時でキーボードでも回転できるようにする。
+	if(Input::Ins()->isKey(DIK_RIGHT)){
+	
+		rotY += inputLeftStickHori;
+	
+	}
+	if(Input::Ins()->isKey(DIK_LEFT)){
+	
+		rotY -= inputLeftStickHori;
+	
+	}
+
 	// LTが引かれていたらドリフト状態にする。
 	const float INPUT_DEADLINE_DRIFT = 0.9f;
 	float inputLeftTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_LEFT);
