@@ -10,8 +10,6 @@
 #include "Singleton.h"
 #include <dxcapi.h>
 
-#pragma comment(lib, "Lib/Dxcompiler/dxcompiler.lib")
-
 // シェーダーデータクラスの前方宣言
 class ShaderData;
 

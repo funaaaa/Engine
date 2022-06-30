@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 
+#pragma comment(lib, "dxcompiler.lib")
+
 ShaderData::ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel, const bool& isDXC)
 {
 

@@ -184,6 +184,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 		// ドリフト時のパーティクルを生成。
 		//DriftParticleMgr::Ins()->Generate(pos, driftVec, PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex), ConstBufferData);
+		ConstBufferData;
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。

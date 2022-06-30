@@ -1,6 +1,8 @@
 #include "ShaderStorage.h"
 #include "ShaderData.h"
 
+#pragma comment(lib, "dxcompiler.lib")
+
 Microsoft::WRL::ComPtr<ID3DBlob> ShaderStorage::LoadShader(const std::string& shaderPath, const std::string& shaderModel, const std::string& entryPoint)
 {
 
