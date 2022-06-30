@@ -365,6 +365,12 @@ void GameScene::Draw()
 			// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
 			if (!constBufferData.debug.isMeshScene && !constBufferData.debug.isNormalScene && !constBufferData.debug.isLightHitScene) {
 
+				D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+					lightOutput->GetRaytracingOutput().Get())
+				};
+
+				DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+
 				// ライトにデノイズをかける。
 				Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 1);
 
@@ -373,8 +379,14 @@ void GameScene::Draw()
 			// [AOを行わない]のときはデノイズをかけない。
 			if (!constBufferData.debug.isNoAO) {
 
+				D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+					aoOutput->GetRaytracingOutput().Get())
+				};
+
+				DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+
 				// AOにデノイズをかける。
-				//Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(),denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
+				Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(),denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
 
 			}
 
@@ -426,7 +438,7 @@ void GameScene::Draw()
 	else {
 
 		// デノイズされた通常の描画	バグがわかりやすいようにブラーをかけたライトの色のみを出力するようにしています。
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseLightOutput->GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
 
 
 	}
