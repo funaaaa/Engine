@@ -2,6 +2,7 @@
 #include "TextureManager.h"
 #include "DirectXBase.h"
 #include "PiplineManager.h"
+#include "DescriptorHeapMgr.h"
 
 void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID)
 {
@@ -140,7 +141,7 @@ void Sprite::Draw()
 	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());
 
 	// ディスクリプタヒープ設定コマンド
-	ID3D12DescriptorHeap* ppHeaps2[] = { TextureManager::Ins()->GetDescHeap().Get() };
+	ID3D12DescriptorHeap* ppHeaps2[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
 	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 
 	// シェーダーリソースビュー設定コマンド

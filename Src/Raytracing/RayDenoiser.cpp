@@ -65,8 +65,6 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	blurY->ChangeInputUAVIndex({ blurXOutput->GetUAVIndex(), DenoiseMaskIndex });
 	blurX->Dispatch(static_cast<UINT>(window_width / 32), static_cast<UINT>(window_height / 32), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32), static_cast<UINT>((window_height / 1.0f) / 32), static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	//blurFinal->Dispatch(static_cast<UINT>(window_width / 16), static_cast<UINT>(window_height / 16), static_cast<UINT>(1), OutputUAVIndex, {});*/
-	///blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32), static_cast<UINT>((window_height / 1.0f) / 32), static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -81,7 +79,7 @@ void Denoiser::MixColorAndLuminance(const int& InputColorIndex, const int& Input
 
 	// コンピュートシェーダーを実行。
 	mixColorAndLuminance->ChangeInputUAVIndex({ InputColorIndex,InputLuminanceIndex, InputLightLuminanceIndex, InputGIIndex });
-	mixColorAndLuminance->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});
+	mixColorAndLuminance->Dispatch(window_width / 32, window_height / 32, 1, OutputUAVIndex, {});
 
 }
 

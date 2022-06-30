@@ -335,7 +335,7 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 						}
 
 						// テクスチャを読み込む。
-						TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str()));
+						TextureHandle.emplace_back(TextureManager::Ins()->LoadTexture(texturePath[index].c_str()));
 
 
 					}
@@ -349,7 +349,7 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 					texturePath[texturePath.size() - 1] = buff;
 
 					// テクスチャを読み込む。
-					TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
+					TextureHandle.emplace_back(TextureManager::Ins()->LoadTexture(texturePath[texturePath.size() - 1].c_str()));
 
 					// 草テクスチャだったら不透明フラグを折る。
 					if (textureNameBuff == "sponzaTextures/vase_plant.png") {

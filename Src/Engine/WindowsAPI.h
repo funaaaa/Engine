@@ -8,6 +8,8 @@
 
 #pragma warning(push)
 #pragma warning(disable:4820)
+#pragma warning(disable:5219)
+#pragma warning(disable:5039)
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_dx12.h"

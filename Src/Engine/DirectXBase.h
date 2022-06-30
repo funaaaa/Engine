@@ -2,6 +2,7 @@
 
 #include <DirectXTex/d3dx12.h>
 #include <dxgi1_6.h>
+#define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 #include <xstring>
 #include <vector>

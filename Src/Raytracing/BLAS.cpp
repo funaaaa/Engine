@@ -16,7 +16,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
 	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
 
-		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
+		textureHandle.emplace_back(TextureManager::Ins()->LoadTexture(TexturePath[index]));
 
 	}
 
@@ -137,7 +137,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
 	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
 
-		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
+		textureHandle.emplace_back(TextureManager::Ins()->LoadTexture(TexturePath[index]));
 
 	}
 

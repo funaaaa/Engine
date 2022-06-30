@@ -8,7 +8,7 @@ RWTexture2D<float4> InputGI : register(u3);
 // o—ÍæUAV  
 RWTexture2D<float4> OutputImg : register(u4);
 
-[numthreads(4, 4, 1)]
+[numthreads(32, 32, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
