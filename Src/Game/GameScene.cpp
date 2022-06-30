@@ -374,7 +374,7 @@ void GameScene::Draw()
 			if (!constBufferData.debug.isNoAO) {
 
 				// AOにデノイズをかける。
-				Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(),denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
+				//Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(),denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
 
 			}
 
@@ -425,8 +425,8 @@ void GameScene::Draw()
 	}
 	else {
 
-		// デノイズされた通常の描画
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
+		// デノイズされた通常の描画	バグがわかりやすいようにブラーをかけたライトの色のみを出力するようにしています。
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseLightOutput->GetRaytracingOutput().Get());
 
 
 	}
