@@ -1,7 +1,7 @@
 #pragma once
 #include "DirectXBase.h"
 #include <d3d12.h>
-#include <dxcapi.h>
+#include "dxcapi.h"
 #include <string>
 
 // シェーダーデータを保存するためのデータクラス

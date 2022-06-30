@@ -219,6 +219,7 @@
     <ClInclude Include="Src\Engine\Camera.h" />
     <ClInclude Include="Src\Engine\ComputeShader.h" />
     <ClInclude Include="Src\Engine\DirectXBase.h" />
+    <ClInclude Include="Src\Engine\dxcapi.h" />
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />
     <ClInclude Include="Src\Engine\FString.h" />

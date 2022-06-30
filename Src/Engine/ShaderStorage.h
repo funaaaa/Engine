@@ -8,7 +8,7 @@
 #include <string>
 #include <wrl/client.h>
 #include "Singleton.h"
-#include <dxcapi.h>
+#include "dxcapi.h"
 
 // シェーダーデータクラスの前方宣言
 class ShaderData;

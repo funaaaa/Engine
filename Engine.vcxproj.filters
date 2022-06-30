@@ -318,6 +318,9 @@
     <ClInclude Include="Src\Engine\Sprite.h">
       <Filter>エンジン\描画データ</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Engine\dxcapi.h">
+      <Filter>エンジン\シェーダー管理クラス</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
