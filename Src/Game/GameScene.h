@@ -73,12 +73,14 @@ private:
 
 	// アンビエントオクルージョン出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> aoOutput;
+	std::shared_ptr<RaytracingOutput> denoiseAOOutput;
 
 	// 色出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> colorOutput;
 
 	// デノイズするライト出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> lightOutput;
+	std::shared_ptr<RaytracingOutput> denoiseLightOutput;
 
 	// GI出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> giOutput;

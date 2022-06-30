@@ -54,7 +54,7 @@ public:
 	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& InputGIIndex, const int& OutputUAVIndex);
 
 	// ƒfƒmƒCƒY
-	void Denoise(const int& InOutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount);
+	void Denoise(const int& InImg, const int& OutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount);
 
 private:
 

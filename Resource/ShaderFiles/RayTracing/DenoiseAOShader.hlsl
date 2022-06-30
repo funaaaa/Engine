@@ -371,6 +371,13 @@ void mainRayGen()
     
     // ƒŒƒC‚ğ”­Ë‚µ‚½Œ‹‰Ê‚ÌF‚ğæ“¾
     float3 col = payload.color;
+    
+    // Œ‹‰Ê‘‚«‚İ—pUAV‚ğˆê’U‰Šú‰»B
+    lightingOutput[launchIndex.xy] = float4(1, 1, 1, 1);
+    aoOutput[launchIndex.xy] = float4(1, 1, 1, 1);
+    colorOutput[launchIndex.xy] = float4(1, 1, 1, 1);
+    giOutput[launchIndex.xy] = float4(1, 1, 1, 1);
+    denoiseMaskoutput[launchIndex.xy] = float4(1, 1, 1, 1);
 
     // Œ‹‰ÊŠi”[
     lightingOutput[launchIndex.xy] = float4(payload.lightLuminance, 1);

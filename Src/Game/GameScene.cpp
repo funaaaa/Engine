@@ -119,6 +119,8 @@ GameScene::GameScene()
 	// AO出力用クラスをセット。
 	aoOutput = std::make_shared<RaytracingOutput>();
 	aoOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseAOOutput = std::make_shared<RaytracingOutput>();
+	denoiseAOOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// 色出力用クラスをセット。
 	colorOutput = std::make_shared<RaytracingOutput>();
@@ -127,6 +129,8 @@ GameScene::GameScene()
 	// 明るさ情報出力用クラスをセット。
 	lightOutput = std::make_shared<RaytracingOutput>();
 	lightOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseLightOutput = std::make_shared<RaytracingOutput>();
+	denoiseLightOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// GI出力用クラスをセット。
 	giOutput = std::make_shared<RaytracingOutput>();
@@ -320,7 +324,9 @@ void GameScene::Draw()
 
 	// バリアを設定し各リソースの状態を遷移させる.
 	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -360,7 +366,7 @@ void GameScene::Draw()
 			if (!constBufferData.debug.isMeshScene && !constBufferData.debug.isNormalScene && !constBufferData.debug.isLightHitScene) {
 
 				// ライトにデノイズをかける。
-				Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 4);
+				Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 2);
 
 			}
 
@@ -368,7 +374,7 @@ void GameScene::Draw()
 			if (!constBufferData.debug.isNoAO) {
 
 				// AOにデノイズをかける。
-				Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
+				Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(),denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
 
 			}
 
@@ -384,7 +390,7 @@ void GameScene::Draw()
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		denoiseMixTextureOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput->GetUAVIndex(), aoOutput->GetUAVIndex(), lightOutput->GetUAVIndex(), giOutput->GetUAVIndex(), denoiseMixTextureOutput->GetUAVIndex());
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput->GetUAVIndex(), denoiseAOOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), giOutput->GetUAVIndex(), denoiseMixTextureOutput->GetUAVIndex());
 		denoiseMixTextureOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
@@ -416,6 +422,7 @@ void GameScene::Draw()
 
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
 
+
 	}
 
 	// レンダーターゲットのリソースバリアをもとに戻す。
@@ -430,7 +437,9 @@ void GameScene::Draw()
 
 	// バリアを設定し各リソースの状態を遷移させる.
 	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	//colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);

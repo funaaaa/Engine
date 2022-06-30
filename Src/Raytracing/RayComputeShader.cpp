@@ -31,8 +31,8 @@ void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& C
 	for (int index = 0; index < CBVCount; ++index) {
 		rootSignature->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
 	}
-	for (int index = 0; index < UAVCount + 1 + inputCBVCount; ++index) {	// +1しているのは出力用のデータがUAVだから
-		rootSignature->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index + inputCBVCount);
+	for (int index = 0; index < UAVCount + 1; ++index) {	// +1しているのは出力用のデータがUAVだから
+		rootSignature->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index);
 	}
 
 	// ルートシグネチャを生成。

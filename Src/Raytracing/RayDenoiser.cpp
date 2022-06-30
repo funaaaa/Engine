@@ -63,13 +63,10 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	// コンピュートシェーダーを実行。
 	blurX->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
 	blurY->ChangeInputUAVIndex({ blurXOutput->GetUAVIndex(), DenoiseMaskIndex });
-	blurX->Dispatch(static_cast<UINT>((window_width / 1.0f) / 16), static_cast<UINT>(window_height / 16), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 16), static_cast<UINT>((window_height / 1.0f) / 16), static_cast<UINT>(1), blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurFinal->Dispatch(static_cast<UINT>(window_width / 16), static_cast<UINT>(window_height / 16), static_cast<UINT>(1), OutputUAVIndex, {});
-	//blurX->ChangeInputUAVIndex({ InputUAVIndex });
-	//blurX->Dispatch((window_width / 1.0f) / 4, window_height / 4, 1, blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	//blurY->Dispatch((window_width / 1.0f) / 4, (window_height / 1.0f) / 4, 1, blurYOutput->GetUAVIndex(), { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	//blurFinal->Dispatch(window_width / 4, window_height / 4, 1, OutputUAVIndex, {});
+	blurX->Dispatch(static_cast<UINT>(window_width / 32), static_cast<UINT>(window_height / 32), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32), static_cast<UINT>((window_height / 1.0f) / 32), static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	//blurFinal->Dispatch(static_cast<UINT>(window_width / 16), static_cast<UINT>(window_height / 16), static_cast<UINT>(1), OutputUAVIndex, {});*/
+	///blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32), static_cast<UINT>((window_height / 1.0f) / 32), static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -88,7 +85,7 @@ void Denoiser::MixColorAndLuminance(const int& InputColorIndex, const int& Input
 
 }
 
-void Denoiser::Denoise(const int& InOutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount)
+void Denoiser::Denoise(const int& InImg, const int& OutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount)
 {
 
 	/*===== デノイズ =====*/
@@ -97,15 +94,15 @@ void Denoiser::Denoise(const int& InOutImg, const int& DenoiseMaskIndex, const i
 	if (DenoiseCount == 1) {
 
 		// ガウシアンブラーをかける。
-		ApplyGaussianBlur(InOutImg, DenoiseMaskIndex, InOutImg, DenoisePower);
+		ApplyGaussianBlur(InImg, DenoiseMaskIndex, OutImg, DenoisePower);
 
 	}
 	// デノイズする数が2回だったら。
 	else if (DenoiseCount == 2) {
 
 		// ガウシアンブラーをかける。
-		ApplyGaussianBlur(InOutImg, DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
-		ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, InOutImg, DenoisePower);
+		ApplyGaussianBlur(InImg, DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
+		ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, OutImg, DenoisePower);
 
 	}
 	else {
@@ -115,13 +112,13 @@ void Denoiser::Denoise(const int& InOutImg, const int& DenoiseMaskIndex, const i
 			// デノイズが最初の一回だったら。
 			if (index == 0) {
 
-				ApplyGaussianBlur(InOutImg, DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
+				ApplyGaussianBlur(InImg, DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
 
 			}
 			// デノイズの最終段階だったら。
 			else if (index == DenoiseCount - 1) {
 
-				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, InOutImg, DenoisePower);
+				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, OutImg, DenoisePower);
 
 			}
 			else {
