@@ -4,6 +4,8 @@
 #include <dxcapi.h>
 #include <string>
 
+#pragma comment(lib, "Lib/Dxcompiler/dxcompiler.lib")
+
 // シェーダーデータを保存するためのデータクラス
 class ShaderData {
 
