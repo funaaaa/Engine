@@ -139,17 +139,17 @@ public:
 	void operator-=(const float& Rhs) {
 		x -= Rhs;
 		y -= Rhs;
-		y -= Rhs;
+		z -= Rhs;
 	};
 	void operator*=(const float& Rhs) {
 		x *= Rhs;
 		y *= Rhs;
-		y *= Rhs;
+		z *= Rhs;
 	};
 	void operator/=(const float& Rhs) {
 		x /= Rhs;
 		y /= Rhs;
-		y /= Rhs;
+		z /= Rhs;
 	};
 	void operator%=(const float& Rhs) {
 		x = fmodf(x, Rhs);
@@ -261,6 +261,191 @@ public:
 		x = fmodf(x, Rhs.m128_f32[0]);
 		y = fmodf(y, Rhs.m128_f32[1]);
 		z = fmodf(z, Rhs.m128_f32[2]);
+	};
+
+#pragma endregion
+
+};
+
+
+class Vec2 {
+
+public:
+
+	/*===== メンバ変数 =====*/
+
+	float x;
+	float y;
+
+private:
+
+	using XMFLOAT2 = DirectX::XMFLOAT2;
+
+public:
+
+	/*===== メンバ関数 =====*/
+
+	// コンストラクタ
+	Vec2() :x(0), y(0) {};
+	Vec2(const float& X, const float& Y) : x(X), y(Y) {};
+	Vec2(const float& X) :x(X), y(X) {};
+	Vec2(const XMFLOAT2& Rhs) :x(Rhs.x), y(Rhs.y){};
+
+	// 内積
+	inline float Dot(const Vec2& Rhs) {
+		return x * Rhs.x + y * Rhs.y;
+	}
+	// 外積
+	inline Vec2 Cross(const Vec2& Rhs) {
+		return x * Rhs.y - y * Rhs.x;
+	}
+	// 長さ
+	inline float Length() {
+		return sqrtf(Dot(*this));
+	}
+	// 正規化
+	inline void Normalize() {
+		float length = this->Length();
+		x /= length;
+		y /= length;
+	}
+	// 正規化した値を取得
+	inline Vec2 GetNormal() {
+		float length = this->Length();
+		Vec2 buff = *this;
+		buff.x /= length;
+		buff.y /= length;
+		return buff;
+	}
+	// XMFLOAT2へ変換
+	inline XMFLOAT2 ConvertXMFLOAT2() {
+		return XMFLOAT2(x, y);
+	}
+
+
+#pragma region オペレーター演算子
+	Vec2 operator-() const {
+		return Vec2(-x, -y);
+	}
+	Vec2 operator+(const Vec2& Rhs) const {
+		return Vec2(x + Rhs.x, y + Rhs.y);
+	};
+	Vec2 operator-(const Vec2& Rhs)const {
+		return Vec2(x - Rhs.x, y - Rhs.y);
+	};
+	Vec2 operator*(const Vec2& Rhs)const {
+		return Vec2(x * Rhs.x, y * Rhs.y);
+	};
+	Vec2 operator*(const float& Rhs)const {
+		return Vec2(x * Rhs, y * Rhs);
+	};
+	Vec2 operator/(const Vec2& Rhs)const {
+		return Vec2(x / Rhs.x, y / Rhs.y);
+	};
+	Vec2 operator/(const float& Rhs)const {
+		return Vec2(x / Rhs, y / Rhs);
+	};
+	Vec2 operator%(const Vec2& Rhs) const {
+		return Vec2(fmodf(x, Rhs.x), fmodf(y, Rhs.y));
+	};
+	void operator=(const Vec2& Rhs) {
+		x = Rhs.x;
+		y = Rhs.y;
+	};
+	bool operator==(const Vec2& Rhs)const {
+		return (x == Rhs.x && y == Rhs.y);
+	};
+	bool operator!=(const Vec2& Rhs)const {
+		return !(*this == Rhs);
+	};
+	void operator+=(const Vec2& Rhs) {
+		x += Rhs.x;
+		y += Rhs.y;
+	};
+	void operator-=(const Vec2& Rhs) {
+		x -= Rhs.x;
+		y -= Rhs.y;
+	};
+	void operator*=(const Vec2& Rhs) {
+		x *= Rhs.x;
+		y *= Rhs.y;
+	};
+	void operator/=(const Vec2& Rhs) {
+		x /= Rhs.x;
+		y /= Rhs.y;
+	};
+	void operator%=(const Vec2& Rhs) {
+		x = fmodf(x, Rhs.x);
+		y = fmodf(y, Rhs.y);
+	};
+
+	void operator+=(const float& Rhs) {
+		x += Rhs;
+		y += Rhs;
+	};
+	void operator-=(const float& Rhs) {
+		x -= Rhs;
+		y -= Rhs;
+	};
+	void operator*=(const float& Rhs) {
+		x *= Rhs;
+		y *= Rhs;
+	};
+	void operator/=(const float& Rhs) {
+		x /= Rhs;
+		y /= Rhs;
+	};
+	void operator%=(const float& Rhs) {
+		x = fmodf(x, Rhs);
+		y = fmodf(y, Rhs);
+	};
+
+	/*===== DirectXMath関係のオペレーター演算子 =====*/
+
+	Vec2 operator+(const XMFLOAT2& Rhs) const {
+		return Vec2(x + Rhs.x, y + Rhs.y);
+	};
+	Vec2 operator-(const XMFLOAT2& Rhs)const {
+		return Vec2(x - Rhs.x, y - Rhs.y);
+	};
+	Vec2 operator*(const XMFLOAT2& Rhs)const {
+		return Vec2(x * Rhs.x, y * Rhs.y);
+	};
+	Vec2 operator/(const XMFLOAT2& Rhs)const {
+		return Vec2(x / Rhs.x, y / Rhs.y);
+	};
+	Vec2 operator%(const XMFLOAT2& Rhs) const {
+		return Vec2(fmodf(x, Rhs.x), fmodf(y, Rhs.y));
+	};
+	void operator=(const XMFLOAT2& Rhs) {
+		x = Rhs.x;
+		y = Rhs.y;
+	};
+	bool operator==(const XMFLOAT2& Rhs)const {
+		return (x == Rhs.x && y == Rhs.y);
+	};
+	bool operator!=(const XMFLOAT2& Rhs)const {
+		return !(*this == Rhs);
+	};
+	void operator+=(const XMFLOAT2& Rhs) {
+		x += Rhs.x;
+		y += Rhs.y;
+	};
+	void operator-=(const XMFLOAT2& Rhs) {
+		x -= Rhs.x;
+		y -= Rhs.y;
+	};
+	void operator*=(const XMFLOAT2& Rhs) {
+		x *= Rhs.x;
+		y *= Rhs.y;
+	};
+	void operator/=(const XMFLOAT2& Rhs) {
+		x /= Rhs.x;
+		y /= Rhs.y;
+	};
+	void operator%=(const XMFLOAT2& Rhs) {
+		x = fmodf(x, Rhs.x);
+		y = fmodf(y, Rhs.y);
 	};
 
 #pragma endregion

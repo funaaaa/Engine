@@ -75,7 +75,7 @@ public:
 	struct Vertex {
 		Vec3 pos;			// xyz座標
 		Vec3 normal;		// 法線
-		DirectX::XMFLOAT2 uv;			// uv座標
+		Vec2 uv;			// uv座標
 	};
 
 	// 行列用アクセッタ

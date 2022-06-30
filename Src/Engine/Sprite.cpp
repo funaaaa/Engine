@@ -3,7 +3,7 @@
 #include "DirectXBase.h"
 #include "PiplineManager.h"
 
-void Sprite::CommonGenerate(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int ProjectionID, int PiplineID)
+void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID)
 {
 	//パイプランの名前の保存
 	this->piplineID = PiplineID;
@@ -19,16 +19,16 @@ void Sprite::CommonGenerate(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int Projecti
 	//頂点バッファの生成
 	Vertex vertexBuff;
 	vertexBuff.pos = Vec3(-Size.x, Size.y, 10);		//左下
-	vertexBuff.uv = DirectX::XMFLOAT2(0, 1);
+	vertexBuff.uv = Vec2(0, 1);
 	vertex.push_back(vertexBuff);
 	vertexBuff.pos = Vec3(-Size.x, -Size.y, 10);	//左上
-	vertexBuff.uv = DirectX::XMFLOAT2(0, 0);
+	vertexBuff.uv = Vec2(0, 0);
 	vertex.push_back(vertexBuff);
 	vertexBuff.pos = Vec3(Size.x, Size.y, 10);		//右下
-	vertexBuff.uv = DirectX::XMFLOAT2(1, 1);
+	vertexBuff.uv = Vec2(1, 1);
 	vertex.push_back(vertexBuff);
 	vertexBuff.pos = Vec3(Size.x, -Size.y, 10);		//右上
-	vertexBuff.uv = DirectX::XMFLOAT2(1, 0);
+	vertexBuff.uv = Vec2(1, 0);
 	vertex.push_back(vertexBuff);
 
 	//頂点バッファビューの生成
@@ -88,7 +88,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int Projecti
 	DirectXBase::Ins()->dev->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 }
 
-void Sprite::GenerateForTexture(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int ProjectionID, int PiplineID, LPCWSTR FileName)
+void Sprite::GenerateForTexture(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, LPCWSTR FileName)
 {
 
 	// テクスチャをロード
@@ -99,7 +99,7 @@ void Sprite::GenerateForTexture(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int Proj
 
 }
 
-void Sprite::GenerateForColor(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int ProjectionID, int PiplineID, DirectX::XMFLOAT4 Color)
+void Sprite::GenerateForColor(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, DirectX::XMFLOAT4 Color)
 {
 
 	// テクスチャをロード
@@ -110,7 +110,7 @@ void Sprite::GenerateForColor(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int Projec
 
 }
 
-void Sprite::GenerateSpecifyTextureID(Vec3 CenterPos, DirectX::XMFLOAT2 Size, int ProjectionID, int PiplineID, int TextureID)
+void Sprite::GenerateSpecifyTextureID(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, int TextureID)
 {
 
 	// テクスチャをロード

@@ -171,11 +171,11 @@ GameScene::GameScene()
 
 	// スプライトを生成。
 	nowRapCountSprite = std::make_shared<Sprite>();
-	nowRapCountSprite->GenerateSpecifyTextureID(Vec3(95, 80, 0.1f), DirectX::XMFLOAT2(16, 32), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	nowRapCountSprite->GenerateSpecifyTextureID(Vec3(95, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
 	maxRapCountSprite = std::make_shared<Sprite>();
-	maxRapCountSprite->GenerateSpecifyTextureID(Vec3(180, 80, 0.1f), DirectX::XMFLOAT2(16, 32), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	maxRapCountSprite->GenerateSpecifyTextureID(Vec3(180, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
 	rapSlashSprite = std::make_shared<Sprite>();
-	rapSlashSprite->GenerateSpecifyTextureID(Vec3(140, 80, 0.1f), DirectX::XMFLOAT2(16, 32), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	rapSlashSprite->GenerateSpecifyTextureID(Vec3(140, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
 
 	// フォントをロード
 	{
