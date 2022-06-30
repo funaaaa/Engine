@@ -1,497 +1,339 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Camera.cpp">
-      <Filter>エンジン\カメラ関係</Filter>
+    <ClCompile Include="lib\imgui\imgui.cpp">
+      <Filter>エンジン\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="LightManager.cpp">
-      <Filter>エンジン\ライト関係</Filter>
+    <ClCompile Include="lib\imgui\imgui_demo.cpp">
+      <Filter>エンジン\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="DebugText.cpp">
-      <Filter>エンジン\デバッグテキスト関係</Filter>
+    <ClCompile Include="lib\imgui\imgui_draw.cpp">
+      <Filter>エンジン\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXBase.cpp">
-      <Filter>エンジン\基盤関係</Filter>
+    <ClCompile Include="lib\imgui\imgui_impl_dx12.cpp">
+      <Filter>エンジン\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Input.cpp">
-      <Filter>エンジン\入力関係</Filter>
+    <ClCompile Include="lib\imgui\imgui_impl_win32.cpp">
+      <Filter>エンジン\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Joycon.cpp">
-      <Filter>エンジン\入力関係</Filter>
+    <ClCompile Include="lib\imgui\imgui_tables.cpp">
+      <Filter>エンジン\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ModelDataManager.cpp">
-      <Filter>エンジン\モデルデータ関係</Filter>
+    <ClCompile Include="lib\imgui\imgui_widgets.cpp">
+      <Filter>エンジン\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ShapeManager.cpp">
-      <Filter>エンジン\モデルデータ関係</Filter>
-    </ClCompile>
-    <ClCompile Include="PiplineManager.cpp">
-      <Filter>エンジン\パイプライン関係</Filter>
-    </ClCompile>
-    <ClCompile Include="MultiPathFunction.cpp">
-      <Filter>エンジン\マルチパスレンダリング関係</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderTarget.cpp">
-      <Filter>エンジン\マルチパスレンダリング関係</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureManager.cpp">
-      <Filter>エンジン\テクスチャデータ関係</Filter>
-    </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
-      <Filter>エンジン\音データ関係</Filter>
-    </ClCompile>
-    <ClCompile Include="WIndowsAPI.cpp">
+    <ClCompile Include="Src\Engine\WIndowsAPI.cpp">
       <Filter>エンジン\windowsAPI</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectManager.cpp">
-      <Filter>エンジン\構造体操作関係</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui.cpp">
-      <Filter>エンジン\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_demo.cpp">
-      <Filter>エンジン\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_draw.cpp">
-      <Filter>エンジン\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_dx12.cpp">
-      <Filter>エンジン\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_impl_win32.cpp">
-      <Filter>エンジン\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_tables.cpp">
-      <Filter>エンジン\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="imgui\imgui_widgets.cpp">
-      <Filter>エンジン\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>アプリケーション</Filter>
-    </ClCompile>
-    <ClCompile Include="Pipline.cpp">
-      <Filter>エンジン\パイプライン関係</Filter>
-    </ClCompile>
-    <ClCompile Include="FHelper.cpp">
-      <Filter>エンジン\便利系</Filter>
-    </ClCompile>
-    <ClCompile Include="StructuredBuffer.cpp">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClCompile>
-    <ClCompile Include="RWStructuredBuffer.cpp">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClCompile>
-    <ClCompile Include="ComputeShader.cpp">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseDrawData.cpp">
-      <Filter>エンジン\描画データ関係\描画データ基底クラス</Filter>
-    </ClCompile>
-    <ClCompile Include="Line.cpp">
-      <Filter>エンジン\描画データ関係\Line描画</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>エンジン\描画データ関係\Sprite描画</Filter>
-    </ClCompile>
-    <ClCompile Include="Object3D.cpp">
-      <Filter>エンジン\描画データ関係\Object3D描画</Filter>
-    </ClCompile>
-    <ClCompile Include="BaseObject3D.cpp">
-      <Filter>エンジン\描画データ関係\Object3D描画\基底</Filter>
-    </ClCompile>
-    <ClCompile Include="SpriteGaussian.cpp">
-      <Filter>エンジン\描画データ関係\Sprite描画</Filter>
-    </ClCompile>
-    <ClCompile Include="GSParticle.cpp">
-      <Filter>エンジン\描画データ関係\GSParticle描画</Filter>
-    </ClCompile>
-    <ClCompile Include="LightCamera.cpp">
+    <ClCompile Include="Src\Engine\Camera.cpp">
       <Filter>エンジン\カメラ関係</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderData.cpp">
-      <Filter>エンジン\シェーダー\シェーダー管理クラス</Filter>
+    <ClCompile Include="Src\Engine\ComputeShader.cpp">
+      <Filter>エンジン\コンピュートシェーダー</Filter>
     </ClCompile>
-    <ClCompile Include="ShaderStorage.cpp">
-      <Filter>エンジン\シェーダー\シェーダー管理クラス</Filter>
+    <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp">
+      <Filter>エンジン\コンピュートシェーダー</Filter>
     </ClCompile>
-    <ClCompile Include="PorygonMeshBLAS.cpp">
-      <Filter>レイトレーシング\BLAS</Filter>
+    <ClCompile Include="Src\Engine\StructuredBuffer.cpp">
+      <Filter>エンジン\コンピュートシェーダー</Filter>
     </ClCompile>
-    <ClCompile Include="PorygonInstance.cpp">
-      <Filter>レイトレーシング\Instance</Filter>
+    <ClCompile Include="Src\Engine\ShaderData.cpp">
+      <Filter>エンジン\シェーダー管理クラス</Filter>
     </ClCompile>
-    <ClCompile Include="PorygonInstanceRegister.cpp">
-      <Filter>レイトレーシング\InstanceRegister</Filter>
+    <ClCompile Include="Src\Engine\ShaderStorage.cpp">
+      <Filter>エンジン\シェーダー管理クラス</Filter>
     </ClCompile>
-    <ClCompile Include="TLAS.cpp">
-      <Filter>レイトレーシング\TLAS</Filter>
+    <ClCompile Include="Src\Engine\TextureManager.cpp">
+      <Filter>エンジン\テクスチャデータ関係</Filter>
     </ClCompile>
-    <ClCompile Include="RayRootsignature.cpp">
-      <Filter>レイトレーシング\レイトレーシングルートシグネチャ</Filter>
+    <ClCompile Include="Src\Engine\FbxLoader.cpp">
+      <Filter>エンジン\モデルデータ関係</Filter>
     </ClCompile>
-    <ClCompile Include="RayDescriptor.cpp">
-      <Filter>レイトレーシング\レイディスクリプタ</Filter>
+    <ClCompile Include="Src\Engine\ModelDataManager.cpp">
+      <Filter>エンジン\モデルデータ関係</Filter>
     </ClCompile>
-    <ClCompile Include="DynamicConstBuffer.cpp">
-      <Filter>レイトレーシング\動的定数バッファ</Filter>
+    <ClCompile Include="Src\Engine\SoundManager.cpp">
+      <Filter>エンジン\音データ関係</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\DirectXBase.cpp">
+      <Filter>エンジン\基盤関係</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\Joycon.cpp">
+      <Filter>エンジン\入力関係</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\PorygonInstance.cpp">
+      <Filter>レイトレーシング\加速構造体\Instance</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\PorygonInstanceRegister.cpp">
+      <Filter>レイトレーシング\加速構造体\InstanceRegister</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\TLAS.cpp">
+      <Filter>レイトレーシング\加速構造体\TLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\RayDescriptor.cpp">
+      <Filter>レイトレーシング\基礎\ディスクリプタ</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\RayRootsignature.cpp">
+      <Filter>レイトレーシング\基礎\レイトレーシングルートシグネチャ</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\DynamicConstBuffer.cpp">
+      <Filter>レイトレーシング\基礎\動的定数バッファ</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\BLAS.cpp">
+      <Filter>レイトレーシング\加速構造体\BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\BLASRegister.cpp">
+      <Filter>レイトレーシング\加速構造体\BLAS</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\HitGroup.cpp">
+      <Filter>レイトレーシング\加速構造体\HitGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp">
+      <Filter>レイトレーシング\加速構造体\HitGroup</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\RaytracingPipline.cpp">
+      <Filter>レイトレーシング\基礎\レイトレーシングパイプライン</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp">
+      <Filter>レイトレーシング\基礎\出力</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp">
+      <Filter>レイトレーシング\基礎\OBJ複数メッシュ読み込み</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\RayComputeShader.cpp">
+      <Filter>レイトレーシング\デノイズ\レイトレーシングコンピュートシェーダー</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\RayDenoiser.cpp">
+      <Filter>レイトレーシング\デノイズ\デノイザー</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\ConstBuffers.cpp">
+      <Filter>レイトレーシング\基礎\動的定数バッファ</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\main.cpp">
+      <Filter>アプリケーション\基本的クラス</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\Player.cpp">
+      <Filter>アプリケーション\プレイヤー</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\FHelper.cpp">
+      <Filter>エンジン\便利系</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\DriftParticle.cpp">
+      <Filter>アプリケーション\ドリフトパーティクル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\DriftParticleMgr.cpp">
+      <Filter>アプリケーション\ドリフトパーティクル</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\SceneMgr.cpp">
+      <Filter>アプリケーション\シーン管理\管理</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\GameScene.cpp">
+      <Filter>アプリケーション\シーン管理\シーン</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\TitleScene.cpp">
+      <Filter>アプリケーション\シーン管理\シーン</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\ResultScene.cpp">
+      <Filter>アプリケーション\シーン管理\シーン</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\Pipline.cpp">
+      <Filter>エンジン\パイプライン</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\PiplineManager.cpp">
+      <Filter>エンジン\パイプライン</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\BaseDrawData.cpp">
+      <Filter>エンジン\描画データ</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\Sprite.cpp">
+      <Filter>エンジン\描画データ</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Camera.h">
-      <Filter>エンジン\カメラ関係</Filter>
+    <ClInclude Include="lib\imgui\imconfig.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="CircleShadow.h">
-      <Filter>エンジン\ライト関係</Filter>
+    <ClInclude Include="lib\imgui\imgui.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="LightManager.h">
-      <Filter>エンジン\ライト関係</Filter>
+    <ClInclude Include="lib\imgui\imgui_impl_dx12.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="DebugText.h">
-      <Filter>エンジン\デバッグテキスト関係</Filter>
+    <ClInclude Include="lib\imgui\imgui_impl_win32.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXBase.h">
-      <Filter>エンジン\基盤関係</Filter>
+    <ClInclude Include="lib\imgui\imgui_internal.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Engine.h">
-      <Filter>エンジン\基盤関係</Filter>
+    <ClInclude Include="lib\imgui\imstb_rectpack.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Enum.h">
-      <Filter>エンジン\基盤関係</Filter>
+    <ClInclude Include="lib\imgui\imstb_textedit.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Struct.h">
-      <Filter>エンジン\基盤関係</Filter>
+    <ClInclude Include="lib\imgui\imstb_truetype.h">
+      <Filter>エンジン\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>エンジン\入力関係</Filter>
-    </ClInclude>
-    <ClInclude Include="Joycon.h">
-      <Filter>エンジン\入力関係</Filter>
-    </ClInclude>
-    <ClInclude Include="Singleton.h">
-      <Filter>エンジン\基盤関係</Filter>
-    </ClInclude>
-    <ClInclude Include="ModelDataManager.h">
-      <Filter>エンジン\モデルデータ関係</Filter>
-    </ClInclude>
-    <ClInclude Include="ShapeManager.h">
-      <Filter>エンジン\モデルデータ関係</Filter>
-    </ClInclude>
-    <ClInclude Include="PiplineManager.h">
-      <Filter>エンジン\パイプライン関係</Filter>
-    </ClInclude>
-    <ClInclude Include="Pipline.h">
-      <Filter>エンジン\パイプライン関係</Filter>
-    </ClInclude>
-    <ClInclude Include="MultiPathFunction.h">
-      <Filter>エンジン\マルチパスレンダリング関係</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderTarget.h">
-      <Filter>エンジン\マルチパスレンダリング関係</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureManager.h">
-      <Filter>エンジン\テクスチャデータ関係</Filter>
-    </ClInclude>
-    <ClInclude Include="SoundManager.h">
-      <Filter>エンジン\音データ関係</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowsAPI.h">
+    <ClInclude Include="Src\Engine\WindowsAPI.h">
       <Filter>エンジン\windowsAPI</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectManager.h">
-      <Filter>エンジン\構造体操作関係</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imconfig.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_dx12.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_impl_win32.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imgui_internal.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imstb_rectpack.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imstb_textedit.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="imgui\imstb_truetype.h">
-      <Filter>エンジン\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="FHelper.h">
-      <Filter>エンジン\便利系</Filter>
-    </ClInclude>
-    <ClInclude Include="ComputeShader.h">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClInclude>
-    <ClInclude Include="StructuredBuffer.h">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClInclude>
-    <ClInclude Include="RWStructuredBuffer.h">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseDrawData.h">
-      <Filter>エンジン\描画データ関係\描画データ基底クラス</Filter>
-    </ClInclude>
-    <ClInclude Include="Line.h">
-      <Filter>エンジン\描画データ関係\Line描画</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>エンジン\描画データ関係\Sprite描画</Filter>
-    </ClInclude>
-    <ClInclude Include="Object3D.h">
-      <Filter>エンジン\描画データ関係\Object3D描画</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseLine.h">
-      <Filter>エンジン\描画データ関係\Line描画\基底</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseObject3D.h">
-      <Filter>エンジン\描画データ関係\Object3D描画\基底</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseSprite.h">
-      <Filter>エンジン\描画データ関係\Sprite描画\基底</Filter>
-    </ClInclude>
-    <ClInclude Include="SpriteGaussian.h">
-      <Filter>エンジン\描画データ関係\Sprite描画</Filter>
-    </ClInclude>
-    <ClInclude Include="GSParticle.h">
-      <Filter>エンジン\描画データ関係\GSParticle描画</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseGSParticle.h">
-      <Filter>エンジン\描画データ関係\GSParticle描画\基底</Filter>
-    </ClInclude>
-    <ClInclude Include="LightCamera.h">
+    <ClInclude Include="Src\Engine\Camera.h">
       <Filter>エンジン\カメラ関係</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderData.h">
-      <Filter>エンジン\シェーダー\シェーダー管理クラス</Filter>
+    <ClInclude Include="Src\Engine\ComputeShader.h">
+      <Filter>エンジン\コンピュートシェーダー</Filter>
     </ClInclude>
-    <ClInclude Include="ShaderStorage.h">
-      <Filter>エンジン\シェーダー\シェーダー管理クラス</Filter>
+    <ClInclude Include="Src\Engine\RWStructuredBuffer.h">
+      <Filter>エンジン\コンピュートシェーダー</Filter>
     </ClInclude>
-    <ClInclude Include="FString.h">
+    <ClInclude Include="Src\Engine\StructuredBuffer.h">
+      <Filter>エンジン\コンピュートシェーダー</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\ShaderData.h">
+      <Filter>エンジン\シェーダー管理クラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\ShaderStorage.h">
+      <Filter>エンジン\シェーダー管理クラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\TextureManager.h">
+      <Filter>エンジン\テクスチャデータ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\FbxLoader.h">
+      <Filter>エンジン\モデルデータ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\ModelDataManager.h">
+      <Filter>エンジン\モデルデータ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\SoundManager.h">
+      <Filter>エンジン\音データ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\DirectXBase.h">
+      <Filter>エンジン\基盤関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\Singleton.h">
+      <Filter>エンジン\基盤関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\Input.h">
+      <Filter>エンジン\入力関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\Joycon.h">
+      <Filter>エンジン\入力関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\FHelper.h">
       <Filter>エンジン\便利系</Filter>
     </ClInclude>
-    <ClInclude Include="ConstBufferData.h">
-      <Filter>エンジン\定数バッファ</Filter>
+    <ClInclude Include="Src\Engine\FString.h">
+      <Filter>エンジン\便利系</Filter>
     </ClInclude>
-    <ClInclude Include="PorygonMeshBLAS.h">
-      <Filter>レイトレーシング\BLAS</Filter>
+    <ClInclude Include="Src\Raytracing\PorygonInstance.h">
+      <Filter>レイトレーシング\加速構造体\Instance</Filter>
     </ClInclude>
-    <ClInclude Include="PorygonInstance.h">
-      <Filter>レイトレーシング\Instance</Filter>
+    <ClInclude Include="Src\Raytracing\PorygonInstanceRegister.h">
+      <Filter>レイトレーシング\加速構造体\InstanceRegister</Filter>
     </ClInclude>
-    <ClInclude Include="InstanceIDMgr.h">
-      <Filter>レイトレーシング\Instance</Filter>
+    <ClInclude Include="Src\Raytracing\TLAS.h">
+      <Filter>レイトレーシング\加速構造体\TLAS</Filter>
     </ClInclude>
-    <ClInclude Include="PorygonInstanceRegister.h">
-      <Filter>レイトレーシング\InstanceRegister</Filter>
+    <ClInclude Include="Src\Raytracing\DescriptorHeapMgr.h">
+      <Filter>レイトレーシング\基礎\ディスクリプタヒープ管理クラス</Filter>
     </ClInclude>
-    <ClInclude Include="TLAS.h">
-      <Filter>レイトレーシング\TLAS</Filter>
+    <ClInclude Include="Src\Raytracing\RayDescriptor.h">
+      <Filter>レイトレーシング\基礎\ディスクリプタ</Filter>
     </ClInclude>
-    <ClInclude Include="RayRootsignature.h">
-      <Filter>レイトレーシング\レイトレーシングルートシグネチャ</Filter>
+    <ClInclude Include="Src\Raytracing\RayRootsignature.h">
+      <Filter>レイトレーシング\基礎\レイトレーシングルートシグネチャ</Filter>
     </ClInclude>
-    <ClInclude Include="RayDescriptor.h">
-      <Filter>レイトレーシング\レイディスクリプタ</Filter>
+    <ClInclude Include="Src\Raytracing\DynamicConstBuffer.h">
+      <Filter>レイトレーシング\基礎\動的定数バッファ</Filter>
     </ClInclude>
-    <ClInclude Include="DynamicConstBuffer.h">
-      <Filter>レイトレーシング\動的定数バッファ</Filter>
+    <ClInclude Include="Src\Engine\Vec.h">
+      <Filter>エンジン\便利系</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Resource\ShaderFiles\GSParticlePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSパーティクル関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSParticleVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSパーティクル関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSParticleGS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSパーティクル関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SpriteVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\スプライト関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SpritePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\スプライト関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\Sampling8TexturePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SamplingLuminancePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GaussXPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GaussXVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GaussYPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GaussYVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathBlurPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathMonochromePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathNormalPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathNormalVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\LinePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\ライン関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\LineVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\ライン関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectNoLightPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\OBJGS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceLightPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\インスタンシング描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceNoLightPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\インスタンシング描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceToonShaderPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\インスタンシング描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\インスタンシング描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceOutlineVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\インスタンシング描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectOutlineVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSInstanceGS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSインスタンシング描画関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSInstancePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSインスタンシング描画関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSInstanceVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSインスタンシング描画関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectMRTDepthVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\MRT描画</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\トゥーンシェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\トゥーンシェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderShadowPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\トゥーンシェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderShadowFogPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\フォグ</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectBumpPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\バンプマッピング</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\TestCS.hlsl">
-      <Filter>エンジン\シェーダー\計算系シェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\Sampling2TexturePS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightFogPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\フォグ</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightFogBumpPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\バンプマッピング</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\Sampling8TexturePSTitle.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectGetShadowMapPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightShadowMapPS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectShadowMapVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectGetShadowMapVS.hlsl">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\triangleShaderHeader.hlsl">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </FxCompile>
+    <ClInclude Include="Src\Raytracing\BLAS.h">
+      <Filter>レイトレーシング\加速構造体\BLAS</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\BLASRegister.h">
+      <Filter>レイトレーシング\加速構造体\BLAS</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\HitGroup.h">
+      <Filter>レイトレーシング\加速構造体\HitGroup</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\HitGroupMgr.h">
+      <Filter>レイトレーシング\加速構造体\HitGroup</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\RaytracingPipline.h">
+      <Filter>レイトレーシング\基礎\レイトレーシングパイプライン</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\RaytracingOutput.h">
+      <Filter>レイトレーシング\基礎\出力</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h">
+      <Filter>レイトレーシング\基礎\OBJ複数メッシュ読み込み</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\RayComputeShader.h">
+      <Filter>レイトレーシング\デノイズ\レイトレーシングコンピュートシェーダー</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\RayDenoiser.h">
+      <Filter>レイトレーシング\デノイズ\デノイザー</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\ConstBuffers.h">
+      <Filter>レイトレーシング\基礎\動的定数バッファ</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\Player.h">
+      <Filter>アプリケーション\プレイヤー</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\DriftParticle.h">
+      <Filter>アプリケーション\ドリフトパーティクル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\DriftParticleMgr.h">
+      <Filter>アプリケーション\ドリフトパーティクル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\BaseScene.h">
+      <Filter>アプリケーション\シーン管理\管理</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\SceneMgr.h">
+      <Filter>アプリケーション\シーン管理\管理</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\GameScene.h">
+      <Filter>アプリケーション\シーン管理\シーン</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\ResultScene.h">
+      <Filter>アプリケーション\シーン管理\シーン</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\TitleScene.h">
+      <Filter>アプリケーション\シーン管理\シーン</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\Pipline.h">
+      <Filter>エンジン\パイプライン</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\PiplineManager.h">
+      <Filter>エンジン\パイプライン</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\BaseDrawData.h">
+      <Filter>エンジン\描画データ</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\BaseSprite.h">
+      <Filter>エンジン\描画データ</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\Sprite.h">
+      <Filter>エンジン\描画データ</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
       <Filter>エンジン\lib</Filter>
     </None>
-    <None Include="imgui.ini">
-      <Filter>エンジン\lib</Filter>
-    </None>
     <None Include="hid.dll">
       <Filter>エンジン\lib</Filter>
     </None>
-    <None Include="Resource\ShaderFiles\GSParticleShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSパーティクル関係</Filter>
+    <None Include="lib\imgui\imgui.ini">
+      <Filter>エンジン\lib</Filter>
+    </None>
+    <None Include="Resource\ShaderFiles\RayTracing\RaytracingShaderHeader.hlsli">
+      <Filter>レイトレーシング\シェーダー</Filter>
     </None>
     <None Include="Resource\ShaderFiles\SpriteShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\スプライト関係</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\MultiPathShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\LineShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\ライン関係</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\ObjectShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\ObjectInstanceShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\インスタンシング描画</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\GSInstanceShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\GSインスタンシング描画関係</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\ObjectMRTShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\MRT描画</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\ObjectToonShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\トゥーンシェーダー</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\ObjectToonShadowShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\トゥーンシェーダー</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\ObjectShadowMapShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
-    </None>
-    <None Include="Resource\ShaderFiles\ObjectGetShadowMapShaderHeader.hlsli">
-      <Filter>エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ</Filter>
+      <Filter>レイトレーシング\シェーダー</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -504,26 +346,11 @@
     <Filter Include="エンジン\基盤関係">
       <UniqueIdentifier>{8f8c1f2d-02f8-410a-813b-d1ea05034a9f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="エンジン\デバッグテキスト関係">
-      <UniqueIdentifier>{21fbd0ef-70dd-4894-80cd-7afd0e65c60f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\ライト関係">
-      <UniqueIdentifier>{cbe0a0de-d6cc-4f4a-a8eb-9c58a476ef7d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="エンジン\カメラ関係">
       <UniqueIdentifier>{2e920129-4112-41f5-b01c-723fffb7d5e7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="エンジン\シェーダー">
-      <UniqueIdentifier>{f199363f-2fdf-46cd-beca-da70678ca19e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="エンジン\モデルデータ関係">
       <UniqueIdentifier>{7e4aa878-0547-469e-821a-5d93d86f0697}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\パイプライン関係">
-      <UniqueIdentifier>{d4295cc9-d291-479b-8bd9-ffb43bf65cfb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\マルチパスレンダリング関係">
-      <UniqueIdentifier>{22dc9551-c2af-4a80-b00c-2a1badf495ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="エンジン\テクスチャデータ関係">
       <UniqueIdentifier>{e79b3ffc-21d7-4a66-b055-38aca89d7ce4}</UniqueIdentifier>
@@ -546,92 +373,8 @@
     <Filter Include="エンジン\便利系">
       <UniqueIdentifier>{25a638f1-bce9-4f0e-8bf2-aa854281a892}</UniqueIdentifier>
     </Filter>
-    <Filter Include="エンジン\構造体操作関係">
-      <UniqueIdentifier>{fb32ffb7-c5b7-4495-8f58-1ded71e96595}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー">
-      <UniqueIdentifier>{8b1f4b60-d870-4738-8743-6bd43ea9e740}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\ライン関係">
-      <UniqueIdentifier>{00aee083-0d97-4748-9264-ddbf3a476a7b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\マルチパスレンダリング関係">
-      <UniqueIdentifier>{7d4f16dd-28db-45db-a58c-eb7b079af86f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\スプライト関係">
-      <UniqueIdentifier>{6d8976f8-d753-4a93-95e5-92bf11b3f251}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\GSパーティクル関係">
-      <UniqueIdentifier>{c86f9a0f-1cf5-4f45-8aa5-3b7166f440c9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\GSインスタンシング描画関係">
-      <UniqueIdentifier>{5746bc5b-8c1d-4e10-b95f-dcf102014564}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係">
-      <UniqueIdentifier>{091246f8-45f2-4518-aac2-3c455035263d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画">
-      <UniqueIdentifier>{7949201e-c292-4b4d-9743-d15479cd4482}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係\インスタンシング描画">
-      <UniqueIdentifier>{70ff92a8-081b-4a9a-9b53-bcc4842a32d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係\MRT描画">
-      <UniqueIdentifier>{6771dcd0-759a-4f38-926c-903a7706818c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\計算系シェーダー">
-      <UniqueIdentifier>{75f07a24-112f-4cfe-97de-8d34ca029751}</UniqueIdentifier>
-    </Filter>
     <Filter Include="エンジン\コンピュートシェーダー">
       <UniqueIdentifier>{99c38a50-9035-4ce5-bfc1-93064ffc4e12}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\トゥーンシェーダー">
-      <UniqueIdentifier>{31cd174d-3d0a-4211-bba9-a182ae3d9c0d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\フォグ">
-      <UniqueIdentifier>{716d6942-9f3a-4abb-b5ac-8bbac6517a05}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\バンプマッピング">
-      <UniqueIdentifier>{03125080-ee3b-45de-a100-8506d4ad0193}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係">
-      <UniqueIdentifier>{22cf7718-9974-41d9-a32a-9e5579641a5e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\描画データ基底クラス">
-      <UniqueIdentifier>{522792a8-9167-4f61-b513-3ef14724b429}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\Line描画">
-      <UniqueIdentifier>{d2339ecd-e13e-463d-a59a-7508cf0a8afa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\Sprite描画">
-      <UniqueIdentifier>{77dad2f2-8508-441a-90c4-3d07aa1d6858}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\Object3D描画">
-      <UniqueIdentifier>{bec32e24-83e6-4746-a1ae-db1cc0e4f912}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\Line描画\基底">
-      <UniqueIdentifier>{e1988790-6e1d-46d6-9ec5-ceefa280614e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\Object3D描画\基底">
-      <UniqueIdentifier>{ad69b94a-873e-4a74-95d2-918a205aede4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\Sprite描画\基底">
-      <UniqueIdentifier>{082c1759-4bff-48af-80b3-fdc549303447}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\GSParticle描画">
-      <UniqueIdentifier>{f2da0245-52da-48c7-8185-75e2eb697470}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\描画データ関係\GSParticle描画\基底">
-      <UniqueIdentifier>{bf20f1f0-fdec-4d19-997c-19ca31bacf7b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\描画系シェーダー\3Dモデル関係\通常描画\シャドウマップ">
-      <UniqueIdentifier>{605ee9d5-f055-4e74-bce5-3ff99930a977}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\シェーダー\シェーダー管理クラス">
-      <UniqueIdentifier>{b8899956-1398-4148-9326-014897d5189b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\定数バッファ">
-      <UniqueIdentifier>{05828882-30f8-47a2-91c2-24317500e41b}</UniqueIdentifier>
     </Filter>
     <Filter Include="レイトレーシング">
       <UniqueIdentifier>{53aa4391-833f-4167-8cec-2d49f0fe089e}</UniqueIdentifier>
@@ -639,26 +382,89 @@
     <Filter Include="レイトレーシング\シェーダー">
       <UniqueIdentifier>{834c0fb9-c8d1-4aa5-a7b7-020ecbb0e4dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="レイトレーシング\BLAS">
+    <Filter Include="レイトレーシング\シェーダー\コンピュートシェーダー">
+      <UniqueIdentifier>{6c92c4e9-0890-4da7-8d64-c570283d8da4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\デノイズ">
+      <UniqueIdentifier>{4c028104-f6e3-4fe3-834f-2800fcfe25e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\加速構造体">
+      <UniqueIdentifier>{9fd3709d-234d-43d2-bf78-e0a7cc76c585}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\加速構造体\BLAS">
       <UniqueIdentifier>{55bd6c2a-ebbe-4ab6-a212-885bb8c66649}</UniqueIdentifier>
     </Filter>
-    <Filter Include="レイトレーシング\Instance">
-      <UniqueIdentifier>{cdfc1d28-7ae1-4274-997d-b1bcecec08c0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="レイトレーシング\InstanceRegister">
-      <UniqueIdentifier>{409860f1-33ce-4b9a-9f58-66ca542d38df}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="レイトレーシング\TLAS">
+    <Filter Include="レイトレーシング\加速構造体\TLAS">
       <UniqueIdentifier>{3b69c815-aa06-4f55-b4e4-3181b72270ae}</UniqueIdentifier>
     </Filter>
-    <Filter Include="レイトレーシング\レイトレーシングルートシグネチャ">
+    <Filter Include="レイトレーシング\加速構造体\HitGroup">
+      <UniqueIdentifier>{5769ee9c-4903-4f13-ae71-03ad8d91f268}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\加速構造体\InstanceRegister">
+      <UniqueIdentifier>{409860f1-33ce-4b9a-9f58-66ca542d38df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\加速構造体\Instance">
+      <UniqueIdentifier>{cdfc1d28-7ae1-4274-997d-b1bcecec08c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\デノイズ\レイトレーシングコンピュートシェーダー">
+      <UniqueIdentifier>{96bd1db5-a349-4296-ac93-e61640036525}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎">
+      <UniqueIdentifier>{45d4b72a-4649-4c10-b0ac-16a77cafbb2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎\ディスクリプタヒープ管理クラス">
+      <UniqueIdentifier>{4b50ede0-1fbe-42ee-80a5-a61fa9896c51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎\レイトレーシングパイプライン">
+      <UniqueIdentifier>{bbf0bb9a-2986-4951-b71d-dd02558952af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎\レイトレーシングルートシグネチャ">
       <UniqueIdentifier>{2dee10ef-ae11-407f-904a-0656717c5a8e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="レイトレーシング\レイディスクリプタ">
+    <Filter Include="レイトレーシング\基礎\動的定数バッファ">
+      <UniqueIdentifier>{4ef98c17-6994-4e1a-81d4-6fe47737563d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎\OBJ複数メッシュ読み込み">
+      <UniqueIdentifier>{1f30ad24-57be-4298-b3fc-fd489f00d687}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\デノイズ\デノイザー">
+      <UniqueIdentifier>{7c053e35-ebff-4a0f-ab97-3b62b69316a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\シェーダー管理クラス">
+      <UniqueIdentifier>{b8899956-1398-4148-9326-014897d5189b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎\出力">
+      <UniqueIdentifier>{6dc83ae1-952d-40f7-b900-340217e1209e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎\ディスクリプタ">
       <UniqueIdentifier>{33b90ca8-cb92-4665-8159-fa0b92fce967}</UniqueIdentifier>
     </Filter>
-    <Filter Include="レイトレーシング\動的定数バッファ">
-      <UniqueIdentifier>{4ef98c17-6994-4e1a-81d4-6fe47737563d}</UniqueIdentifier>
+    <Filter Include="アプリケーション\基本的クラス">
+      <UniqueIdentifier>{b0feb384-4a79-42b0-9897-08a45c86c9d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\アイコン">
+      <UniqueIdentifier>{299f50b9-6625-41dc-91f3-85547e1e9efd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\プレイヤー">
+      <UniqueIdentifier>{eb1a53ea-e033-4de3-9667-a4d7d1b53aa8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ドリフトパーティクル">
+      <UniqueIdentifier>{f43c079c-78a3-44fd-9d63-8cda086f0ff5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\シーン管理">
+      <UniqueIdentifier>{bebf1805-2f15-4301-b1a5-35703fcb31b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\シーン管理\シーン">
+      <UniqueIdentifier>{359ff94a-70a7-4f9d-8cb5-4d6bb248a7e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\シーン管理\管理">
+      <UniqueIdentifier>{3f9012e7-9449-4727-a95f-39a2bb738758}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\パイプライン">
+      <UniqueIdentifier>{a13175ce-5683-44c7-80e2-b660025116f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\描画データ">
+      <UniqueIdentifier>{b8f3580e-6dd8-4cd5-bf78-7b6739a6c9e8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -672,13 +478,36 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="icon.ico">
+      <Filter>エンジン\アイコン</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="icon.rc">
-      <Filter>アプリケーション</Filter>
+      <Filter>エンジン\アイコン</Filter>
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon.ico">
-      <Filter>アプリケーション</Filter>
-    </Image>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+      <Filter>レイトレーシング\シェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\SpritePS.hlsl">
+      <Filter>レイトレーシング\シェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\SpriteVS.hlsl">
+      <Filter>レイトレーシング\シェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurX.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurY.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseFinal.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
