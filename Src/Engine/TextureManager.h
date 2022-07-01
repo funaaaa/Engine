@@ -8,12 +8,12 @@
 #include <DirectXTex/DirectXTex.h>
 
 struct Texture {
-	LPCWSTR fileName;				// ファイル名
+	LPCWSTR fileName;								// ファイル名
 	Microsoft::WRL::ComPtr<ID3D12Resource> texBuff;	// テクスチャバッファ
 	//以下は必ず必要ではないがあったら便利
-	DirectX::TexMetadata metadata;			// 画像のサイズなど、テクスチャとしての各情報が入る
+	DirectX::TexMetadata metadata;					// 画像のサイズなど、テクスチャとしての各情報が入る
 	DirectX::ScratchImage* scratchImg;
-	DirectX::XMFLOAT4 colorData;			// 色を指定してテクスチャを生成する際、このテクスチャがどの色なのかを渡すための変数
+	DirectX::XMFLOAT4 colorData;					// 色を指定してテクスチャを生成する際、このテクスチャがどの色なのかを渡すための変数
 };
 
 class TextureManager : public Singleton<TextureManager> {

@@ -4,21 +4,21 @@
 
 //map<string, Pipline> PiplineManager::pipline{};
 
-void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID piplineID,
-	string PSname,
-	string VSname,
-	int inputLayoutCount,
-	D3D12_INPUT_ELEMENT_DESC* inputLayout,
-	int rootparamCount,
-	CD3DX12_ROOT_PARAMETER* rootparam,
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-	Pipline::BLEND_ID blendID,
-	D3D12_CULL_MODE cullMode,
-	DXGI_FORMAT dxgiFormat)
+void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
+	std::string PSname,
+	std::string VSname,
+	int InputLayoutCount,
+	D3D12_INPUT_ELEMENT_DESC* InputLayout,
+	int RootparamCount,
+	CD3DX12_ROOT_PARAMETER* Rootparam,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
+	Pipline::BLEND_ID BlendID,
+	D3D12_CULL_MODE CullMode,
+	DXGI_FORMAT DxgiFormat)
 {
 	//すでに生成してあるリストの中からパイプラインIDが重複していなかったら生成する。
 	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines[i].GetPiplineID() == piplineID) {
+		if (piplines[i].GetPiplineID() == PiplineID) {
 
 			OutputDebugString(L"\nError すでに生成してあるパイプラインを生成しようとしました。\n");
 			exit(true);
@@ -28,26 +28,26 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID piplineID,
 	}
 
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines.emplace_back(Pipline(piplineID, PSname, VSname, inputLayoutCount, inputLayout, rootparamCount, rootparam, primitive, blendID, cullMode, dxgiFormat));
+	piplines.emplace_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
-void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID piplineID,
-	string PSname,
-	string VSname,
-	string GSname,
-	int inputLayoutCount,
-	D3D12_INPUT_ELEMENT_DESC* inputLayout,
-	int rootparamCount,
-	CD3DX12_ROOT_PARAMETER* rootparam,
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-	Pipline::BLEND_ID blendID,
-	D3D12_CULL_MODE cullMode,
-	DXGI_FORMAT dxgiFormat)
+void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
+	std::string PSname,
+	std::string VSname,
+	std::string GSname,
+	int InputLayoutCount,
+	D3D12_INPUT_ELEMENT_DESC* InputLayout,
+	int RootparamCount,
+	CD3DX12_ROOT_PARAMETER* Rootparam,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
+	Pipline::BLEND_ID BlendID,
+	D3D12_CULL_MODE CullMode,
+	DXGI_FORMAT DxgiFormat)
 {
 	//すでに生成してあるリストの中からパイプラインIDが重複していなかったら生成する
 	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines[i].GetPiplineID() == piplineID) {
+		if (piplines[i].GetPiplineID() == PiplineID) {
 
 			OutputDebugString(L"\nError すでに生成してあるパイプラインを生成しようとしました。\n");
 			exit(true);
@@ -57,26 +57,26 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID piplineID,
 	}
 
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines.push_back(Pipline(piplineID, PSname, VSname, inputLayoutCount, inputLayout, rootparamCount, rootparam, primitive, blendID, cullMode, dxgiFormat));
+	piplines.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
-void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID piplineID,
-	string PSname,
-	string VSname,
-	int inputLayoutCount,
-	D3D12_INPUT_ELEMENT_DESC* inputLayout,
-	int rootparamCount,
-	CD3DX12_ROOT_PARAMETER* rootparam,
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
-	Pipline::BLEND_ID blendID,
-	D3D12_CULL_MODE cullMode,
-	DXGI_FORMAT dxgiFormat,
-	DXGI_FORMAT dxgiFormat2)
+void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID PiplineID,
+	std::string PSname,
+	std::string VSname,
+	int InputLayoutCount,
+	D3D12_INPUT_ELEMENT_DESC* InputLayout,
+	int RootparamCount,
+	CD3DX12_ROOT_PARAMETER* Rootparam,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
+	Pipline::BLEND_ID BlendID,
+	D3D12_CULL_MODE CullMode,
+	DXGI_FORMAT DxgiFormat,
+	DXGI_FORMAT DxgiFormat2)
 {
 	//すでに生成してあるリストの中からパイプラインIDが重複していなかったら生成する
 	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines[i].GetPiplineID() == piplineID) {
+		if (piplines[i].GetPiplineID() == PiplineID) {
 
 			OutputDebugString(L"\nError すでに生成してあるパイプラインを生成しようとしました。\n");
 			exit(true);
@@ -84,16 +84,16 @@ void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID piplineID,
 			return;
 		}
 	}
-	dxgiFormat2;
+	DxgiFormat2;
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines.push_back(Pipline(piplineID, PSname, VSname, inputLayoutCount, inputLayout, rootparamCount, rootparam, primitive, blendID, cullMode, dxgiFormat));
+	piplines.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
-void PiplineManager::SetPipline(int piplineID)
+void PiplineManager::SetPipline(int PiplineID)
 {
 	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines.at(i).GetPiplineID() == piplineID) {
+		if (piplines.at(i).GetPiplineID() == PiplineID) {
 			piplines.at(i).SetPipline();
 			return;
 		}
@@ -144,7 +144,7 @@ void PiplineManager::Init()
 	CD3DX12_DESCRIPTOR_RANGE descRangeSRV8(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7);*/
 #pragma endregion
 
-#pragma region rootparam
+#pragma region Rootparam
 	/*ルートパラメータの生成*/
 	CD3DX12_ROOT_PARAMETER const1Tex1[2]{};
 	/*CD3DX12_ROOT_PARAMETER const2tex1[3]{};
