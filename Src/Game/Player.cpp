@@ -513,6 +513,49 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 	}
 
 
+	/*===== 装飾オブジェクトとの当たり判定 =====*/
+
+	{
+
+		const int BLAS_COUNT = stageModelData.stageOrnamentInsIndex.size();
+		for (int index = 0; index < BLAS_COUNT; ++index) {
+
+			// 当たり判定に使用するデータ
+			FHelper::RayToModelCollisionData collistionData;
+			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageOrnamentBlasIndex[index]]->GetVertexPos();
+			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageOrnamentBlasIndex[index]]->GetVertexNormal();
+			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageOrnamentBlasIndex[index]]->GetVertexIndex();
+			collistionData.rayPos = prevPos;
+			collistionData.rayDir = (pos - prevPos).GetNormal();
+			collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageOrnamentInsIndex[index]);
+			collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageOrnamentInsIndex[index]);
+			collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageOrnamentInsIndex[index]);
+
+			// 当たり判定を行う。
+			bool isHit = false;
+			Vec3 impactPos;
+			float hitDistance;
+			Vec3 hitNormal;
+			isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+
+			// 当たった距離がY軸のサイズよりも小さかったら。
+			isHit &= fabs(hitDistance) < (pos - prevPos).Length();
+
+			// 当たっていたら押し戻す。
+			if (isHit) {
+
+				// 法線方向に当たった分押し戻す。
+				pos = impactPos + hitNormal * hitDistance;
+				speed = 0;
+				boostSpeed = 0;
+
+			}
+
+		}
+
+	}
+
+
 }
 
 void Player::RotObliqueFloor(const Vec3& HitNormal)

@@ -845,8 +845,7 @@ worldNormal;
         }
         
         // ペイロードのレイのIDをデフォルトに戻す。
-        payload.rayID =
-CHS_IDENTIFICATION_RAYID_DEF;
+        payload.rayID = CHS_IDENTIFICATION_RAYID_DEF;
         
     }
 

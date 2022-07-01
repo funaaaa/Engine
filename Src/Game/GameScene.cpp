@@ -109,6 +109,8 @@ GameScene::GameScene()
 	stageData.middlePointInsIndex = middlePointCollisionIns;
 	stageData.goalBlasIndex = goalCollisionBlas;
 	stageData.goalInsIndex = goalCollisionIns;
+	stageData.stageOrnamentBlasIndex = stageOrnamentBlas;
+	stageData.stageOrnamentInsIndex = stageOrnamentIns;
 	player = std::make_shared<Player>(stageData);
 
 	PorygonInstanceRegister::Ins()->CalWorldMat();

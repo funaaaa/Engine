@@ -1,6 +1,7 @@
 #pragma once
 #include "Vec.h"
 #include "ConstBuffers.h"
+#include <vector>
 
 class Player {
 
@@ -18,6 +19,8 @@ public:
 		int goalInsIndex;
 		int middlePointBlasIndex;
 		int middlePointInsIndex;
+		std::vector<int> stageOrnamentBlasIndex;
+		std::vector<int> stageOrnamentInsIndex;
 
 	};
 
