@@ -19,6 +19,9 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float4 color = InputColor[DTid.xy];
     
     float4 gi = InputGI[DTid.xy];
+    gi.x *= saturate(luminance.x + lightLuminance.x);
+    gi.y *= saturate(luminance.y + lightLuminance.y);
+    gi.z *= saturate(luminance.z + lightLuminance.z);
     
     OutputImg[DTid.xy] = (luminance + lightLuminance) * (color + gi);
     

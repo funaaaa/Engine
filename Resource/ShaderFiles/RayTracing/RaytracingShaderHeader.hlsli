@@ -11,6 +11,7 @@ static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // Instanc
 static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ライト用オブジェクト テクスチャの色をそのまま返す。MissShaderで当たり判定を棄却する為にも使用する。
 static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID 屈折の処理
 static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ライティングも描画も行わないオブジェクト
+static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID 通常の処理 + GIも行う。
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // デフォルトのレイ
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI用のレイ
@@ -70,8 +71,6 @@ struct ASConstBufferData
 struct DebugConstBufferData
 {
     int seed;
-    int counter;
-    int aoSampleCount;
     int isNoiseScene; // ノイズのみのシーンを描画するかのフラグ
     int isLightHitScene; // ライトに当たった面のみを描画するフラグ
     int isNormalScene; // 法線情報を描画するフラグ
@@ -79,7 +78,6 @@ struct DebugConstBufferData
     int isNoAO;
     int isNoGI; // GIの処理を行わないフラグ
     int isGIOnlyScene;
-    float2 pad;
 };
 
 // 定数バッファ

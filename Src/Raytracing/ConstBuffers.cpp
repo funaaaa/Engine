@@ -66,7 +66,6 @@ void DebugConstBufferData::Init()
 	/*===== デバッグ用定数バッファを初期化 =====*/
 
 	seed = FHelper::GetRand(0, 1000);
-	aoSampleCount = 1;
 	isLightHitScene = false;
 	isNormalScene = false;
 	isMeshScene = false;
@@ -74,7 +73,6 @@ void DebugConstBufferData::Init()
 	isNoGI = false;
 	isGIOnlyScene = false;
 	isNoiseScene = false;
-	counter = 0;
 
 }
 

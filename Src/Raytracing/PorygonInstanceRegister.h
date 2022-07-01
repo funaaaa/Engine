@@ -83,6 +83,7 @@ public:
 		SHADER_ID_LIGHT = 5,		// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
 		SHADER_ID_REFRACTION = 6,	// 屈折用のレイ
 		SHADER_ID_INVISIBILITY = 7,	// 不可視のオブジェクト
+		SHADER_ID_DEF_GI = 8,		// 通常のレイ GIも行う。
 
 	};
 

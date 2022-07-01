@@ -497,5 +497,8 @@
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
       <Filter>レイトレーシング\シェーダー</Filter>
     </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

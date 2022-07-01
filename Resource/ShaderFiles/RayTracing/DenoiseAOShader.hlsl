@@ -277,11 +277,11 @@ float3 ShootGIRay(Vertex vtx, float length)
     float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     float3 worldNormal = mul(vtx.Normal, (float3x3) ObjectToWorld4x3());
     float3 worldRayDir = WorldRayDirection();
-    float3 reflectDir = reflect(worldRayDir, worldNormal);
+    float3 reflectDir = reflect(worldRayDir, vtx.Normal);
     
     // レイのフラグを設定。
     RAY_FLAG flag = RAY_FLAG_NONE;
-    //flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     //flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
     
     // レイのマスク
@@ -291,7 +291,7 @@ float3 ShootGIRay(Vertex vtx, float length)
     RayDesc rayDesc;
     rayDesc.Origin = worldPos;
     rayDesc.Direction = reflectDir;
-    rayDesc.TMin = 0.01;
+    rayDesc.TMin = 0.0;
     rayDesc.TMax = length;
 
     // ペイロードを初期化。
@@ -416,7 +416,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 
     // 呼び出し回数が制限を超えないようにする。
     ++payload.recursive;
-    if (2 < payload.recursive)
+    if (3 < payload.recursive)
     {
         return;
     }
@@ -448,18 +448,24 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         float rayLength = length(WorldRayOrigin() - worldPos);
         
         // レイの長さの最大値
-        const float MAX_RAY = 500.0f;
+        const float MAX_RAY = 300.0f;
         
         // 割合を求める。
         float rate = rayLength / MAX_RAY;
         rate = 1.0f - saturate(rate);
         
-        payload.giColor += texColor * rate;
+        payload.giColor = texColor * rate;
         
         // このオブジェクトが全反射だったら黒を返す。
         if (instanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
         {
             payload.giColor = float3(0, 0, 0);
+        }
+        
+        // このオブジェクトが反射だったら色を弱める。。
+        if (instanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
+        {
+            payload.giColor /= 2.0f;
         }
         
         return;
@@ -735,9 +741,9 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     payload.aoLuminance += aoVisibility;
     
     // GIの色を取得する。
-    if (instanceID == 10 && !gSceneParam.debug.isNoGI)
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI && !gSceneParam.debug.isNoGI)
     {
-        payload.giColor += ShootGIRay(vtx, 500) * 1.0f;
+        payload.giColor += ShootGIRay(vtx, 300) * (material[0].specular / 2.0f);
         payload.giColor = saturate(payload.giColor);
     }
     else

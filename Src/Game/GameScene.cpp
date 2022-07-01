@@ -55,7 +55,7 @@ GameScene::GameScene()
 
 	// ステージを読み込む。
 	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
-	stageIns = PorygonInstanceRegister::Ins()->CreateInstance(stageBlas, PorygonInstanceRegister::SHADER_ID_DEF);
+	stageIns = PorygonInstanceRegister::Ins()->CreateInstance(stageBlas, PorygonInstanceRegister::SHADER_ID_DEF_GI);
 	PorygonInstanceRegister::Ins()->AddScale(stageIns, Vec3(200, 200, 200));
 	stageGrassBlas = BLASRegister::Ins()->GenerateObj("Resource/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/green.png",L"Resource/grassNormal.png" });
 	stageGrassIns = PorygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas, PorygonInstanceRegister::SHADER_ID_DEF);
@@ -135,6 +135,8 @@ GameScene::GameScene()
 	// GI出力用クラスをセット。
 	giOutput = std::make_shared<RaytracingOutput>();
 	giOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseGiOutput = std::make_shared<RaytracingOutput>();
+	denoiseGiOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// デノイズマスク用クラスをセット。
 	denoiseMaskOutput = std::make_shared<RaytracingOutput>();
@@ -147,19 +149,8 @@ GameScene::GameScene()
 	// シェーダーテーブルを生成。
 	deAOPipline->ConstructionShaderTable();
 
-	// デバッグ用でノイズ画面を出すフラグ。
-	debugPiplineID = DENOISE_AO_PIPLINE;
-
 	// ライトが動いたか
-	isMoveLight = false;
 	sunAngle = 0;
-
-	// デバッグ用のパイプラインを切り替えるやつ。
-	enum DEGU_PIPLINE_ID {
-		DEF_PIPLINE,
-		AO_PIPLINE,
-		DENOISE_AO_PIPLINE,
-	};
 
 	isDisplayFPS = false;
 
@@ -329,6 +320,7 @@ void GameScene::Draw()
 	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
@@ -356,53 +348,59 @@ void GameScene::Draw()
 	D3D12_DISPATCH_RAYS_DESC rayDesc = deAOPipline->GetDispatchRayDesc();
 	DirectXBase::Ins()->cmdList->DispatchRays(&rayDesc);
 
-	// デバッグ用のパイプラインがデノイズ用パイプラインだったら、コンピュートシェーダーを使ってデノイズをかける。
-	if (debugPiplineID == DENOISE_AO_PIPLINE) {
+	// [ノイズを描画]のときはデノイズをかけない。
+	if (!constBufferData.debug.isNoiseScene) {
 
-		// [ノイズを描画]のときはデノイズをかけない。
-		if (!constBufferData.debug.isNoiseScene) {
+		// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
+		if (!constBufferData.debug.isMeshScene && !constBufferData.debug.isNormalScene && !constBufferData.debug.isLightHitScene) {
 
-			// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
-			if (!constBufferData.debug.isMeshScene && !constBufferData.debug.isNormalScene && !constBufferData.debug.isLightHitScene) {
+			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+				lightOutput->GetRaytracingOutput().Get())
+			};
 
-				D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-					lightOutput->GetRaytracingOutput().Get())
-				};
+			DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
 
-				DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
-
-				// ライトにデノイズをかける。
-				Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 1);
-
-			}
-
-			// [AOを行わない]のときはデノイズをかけない。
-			if (!constBufferData.debug.isNoAO) {
-
-				D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-					aoOutput->GetRaytracingOutput().Get())
-				};
-
-				DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
-
-				// AOにデノイズをかける。
-				Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(),denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
-
-			}
-
-			// [GIを行わない]のときはデノイズをかけない。
-			if (!constBufferData.debug.isNoGI) {
-
-				// GIにデノイズをかける。
-				//Denoiser::Ins()->Denoise(giOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 1);
-
-			}
+			// ライトにデノイズをかける。
+			Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 1, 1);
 
 		}
 
-		// デノイズをかけたライティング情報と色情報を混ぜる。
+		// [AOを行わない]のときはデノイズをかけない。
+		if (!constBufferData.debug.isNoAO) {
+
+			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+				aoOutput->GetRaytracingOutput().Get())
+			};
+
+			DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+
+			// AOにデノイズをかける。
+			Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(), denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
+
+		}
+
+		// [GIを行わない]のときはデノイズをかけない。
+		if (!constBufferData.debug.isNoGI) {
+
+			// GIにデノイズをかける。
+			Denoiser::Ins()->Denoise(giOutput->GetUAVIndex(), denoiseGiOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 1);
+
+		}
+
 		denoiseMixTextureOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput->GetUAVIndex(), denoiseAOOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), giOutput->GetUAVIndex(), denoiseMixTextureOutput->GetUAVIndex());
+
+		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+			colorOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseAOOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseLightOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseGiOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseMixTextureOutput->GetRaytracingOutput().Get())
+		};
+
+		DirectXBase::Ins()->cmdList->ResourceBarrier(5, barrierToUAV);
+
+		// デノイズをかけたライティング情報と色情報を混ぜる。
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput->GetUAVIndex(), denoiseAOOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), denoiseGiOutput->GetUAVIndex(), denoiseMixTextureOutput->GetUAVIndex());
 		denoiseMixTextureOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
@@ -426,6 +424,7 @@ void GameScene::Draw()
 	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// デバッグ情報によって描画するデータを変える。
@@ -496,199 +495,58 @@ void GameScene::Input()
 
 	/*===== 入力処理 =====*/
 
-	bool isMove = false;
-
 	if (Input::Ins()->isKeyTrigger(DIK_RETURN)) {
 
 		isTransition = true;
 
 	}
 
-	InputImGUI(isMove);
+	InputImGUI();
 
 }
 
-void GameScene::InputImGUI(bool& IsMove)
+void GameScene::InputImGUI()
 {
 
 	/*===== IMGUI更新 =====*/
 
-	// DirLightについて
-	if (ImGui::TreeNode("DirLight")) {
+	// メッシュを表示する。
+	bool isMesh = constBufferData.debug.isMeshScene;
+	ImGui::Checkbox("Mesh Scene", &isMesh);
+	constBufferData.debug.isMeshScene = isMesh;
 
-		// ライトを表示するかどうかのフラグを更新。
-		bool isActive = static_cast<bool>(constBufferData.light.dirLight.isActive);
-		ImGui::Checkbox("IsActive", &isActive);
-		if (isActive != static_cast<bool>(constBufferData.light.dirLight.isActive)) IsMove = true;
-		constBufferData.light.dirLight.isActive = static_cast<int>(isActive);
+	// 法線を表示する。
+	bool isNormal = constBufferData.debug.isNormalScene;
+	ImGui::Checkbox("Normal Scene", &isNormal);
+	constBufferData.debug.isNormalScene = isNormal;
 
-		// 値を保存する。
-		float dirX = constBufferData.light.dirLight.lihgtDir.x;
-		float dirY = constBufferData.light.dirLight.lihgtDir.y;
-		float dirZ = constBufferData.light.dirLight.lihgtDir.z;
-		ImGui::SliderFloat("DirLightX", &constBufferData.light.dirLight.lihgtDir.x, -1.0f, 1.0f);
-		ImGui::SliderFloat("DirLightY", &constBufferData.light.dirLight.lihgtDir.y, -1.0f, 1.0f);
-		ImGui::SliderFloat("DirLightZ", &constBufferData.light.dirLight.lihgtDir.z, -1.0f, 1.0f);
+	// ライトがあたった面だけ表示するフラグを更新。
+	bool isLightHit = constBufferData.debug.isLightHitScene;
+	ImGui::Checkbox("LightHit Scene", &isLightHit);
+	constBufferData.debug.isLightHitScene = isLightHit;
 
-		// 変わっていたら
-		if (dirX != constBufferData.light.dirLight.lihgtDir.x || dirY != constBufferData.light.dirLight.lihgtDir.y || dirZ != constBufferData.light.dirLight.lihgtDir.z) {
+	// デバッグ用でノイズ画面を出すためのフラグをセット。
+	bool isNoise = constBufferData.debug.isNoiseScene;
+	ImGui::Checkbox("Noise Scene", &isNoise);
+	constBufferData.debug.isNoiseScene = isNoise;
 
-			IsMove = true;
+	// AOを行うかのフラグをセット。
+	bool isNoAO = constBufferData.debug.isNoAO;
+	ImGui::Checkbox("NoAO Scene", &isNoAO);
+	constBufferData.debug.isNoAO = isNoAO;
 
-		}
+	// GIを行うかのフラグをセット。
+	bool isNoGI = constBufferData.debug.isNoGI;
+	ImGui::Checkbox("NoGI Scene", &isNoGI);
+	constBufferData.debug.isNoGI = isNoGI;
 
-		// 正規化する。
-		constBufferData.light.dirLight.lihgtDir.Normalize();
+	// GIのみを描画するかのフラグをセット。
+	bool isGIOnlyScene = constBufferData.debug.isGIOnlyScene;
+	ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene);
+	constBufferData.debug.isGIOnlyScene = isGIOnlyScene;
 
-		ImGui::TreePop();
+	// FPSを表示するかのフラグをセット。
+	ImGui::Checkbox("Display FPS", &isDisplayFPS);
 
-	}
-
-	//// PointLightについて
-	//if (ImGui::TreeNode("PointLight")) {
-
-	//	// ライトを表示するかどうかのフラグを更新。
-	//	bool isActive = static_cast<bool>(constBufferData.light.pointLight.isActive);
-	//	ImGui::Checkbox("IsActive", &isActive);
-	//	if (isActive != static_cast<bool>(constBufferData.light.pointLight.isActive)) IsMove = true;
-	//	constBufferData.light.pointLight.isActive = static_cast<int>(isActive);
-
-	//	// 値を保存する。
-	//	float dirX = constBufferData.light.pointLight.lightPos.x;
-	//	float dirY = constBufferData.light.pointLight.lightPos.y;
-	//	float dirZ = constBufferData.light.pointLight.lightPos.z;
-	//	float lightSize = constBufferData.light.pointLight.lightSize;
-	//	float aoSampleCount = static_cast<float>(constBufferData.debug.aoSampleCount);
-	//	float pointLightPower = constBufferData.light.pointLight.lightPower;
-	//	float MOVE_LENGTH = 1500.0f;
-	//	ImGui::SliderFloat("PointLightX", &constBufferData.light.pointLight.lightPos.x, -MOVE_LENGTH, MOVE_LENGTH);
-	//	ImGui::SliderFloat("PointLightY", &constBufferData.light.pointLight.lightPos.y, 0.0f, 1000.0f);
-	//	ImGui::SliderFloat("PointLightZ", &constBufferData.light.pointLight.lightPos.z, -MOVE_LENGTH, MOVE_LENGTH);
-	//	ImGui::SliderFloat("PointLightRadius", &constBufferData.light.pointLight.lightSize, 1.0f, 50.0f);
-	//	ImGui::SliderFloat("PointLightPower", &constBufferData.light.pointLight.lightPower, 100.0f, 1000.0f);
-	//	ImGui::SliderFloat("AOSampleCount", &aoSampleCount, 1.0f, 30.0f);
-	//	constBufferData.debug.aoSampleCount = static_cast<int>(aoSampleCount);
-
-	//	// 変わっていたら
-	//	if (dirX != constBufferData.light.pointLight.lightPos.x || dirY != constBufferData.light.pointLight.lightPos.y || dirZ != constBufferData.light.pointLight.lightPos.z || lightSize != constBufferData.light.pointLight.lightSize || pointLightPower != constBufferData.light.pointLight.lightPower) {
-
-	//		IsMove = true;
-
-	//	}
-
-	//	// ライトの色を設定。
-	//	std::array<float, 3> lightColor = { constBufferData.light.pointLight.lightColor.x,constBufferData.light.pointLight.lightColor.y,constBufferData.light.pointLight.lightColor.z };
-	//	ImGui::ColorPicker3("LightColor", lightColor.data());
-	//	// 色が変わっていたら。
-	//	if (lightColor[0] != constBufferData.light.pointLight.lightColor.x || lightColor[1] != constBufferData.light.pointLight.lightColor.y || lightColor[2] != constBufferData.light.pointLight.lightColor.z) {
-	//		IsMove = true;
-	//	}
-	//	constBufferData.light.pointLight.lightColor.x = lightColor[0];
-	//	constBufferData.light.pointLight.lightColor.y = lightColor[1];
-	//	constBufferData.light.pointLight.lightColor.z = lightColor[2];
-
-	//	ImGui::TreePop();
-
-	//}
-
-
-	if (IsMove) {
-		constBufferData.debug.counter = 0;
-	}
-	else {
-		++constBufferData.debug.counter;
-	}
-
-	// 階層構造にする。
-	if (ImGui::TreeNode("Debug")) {
-
-		// メッシュを表示する。
-		bool isMesh = constBufferData.debug.isMeshScene;
-		bool prevIsMesh = isMesh;
-		ImGui::Checkbox("Mesh Scene", &isMesh);
-		constBufferData.debug.isMeshScene = isMesh;
-		// 値が書き換えられていたら、サンプリングを初期化する。
-		if (isMesh != prevIsMesh) {
-			constBufferData.debug.counter = 0;
-		}
-
-		// 法線を表示する。
-		bool isNormal = constBufferData.debug.isNormalScene;
-		bool prevIsNormal = isNormal;
-		ImGui::Checkbox("Normal Scene", &isNormal);
-		constBufferData.debug.isNormalScene = isNormal;
-		// 値が書き換えられていたら、サンプリングを初期化する。
-		if (isNormal != prevIsNormal) {
-			constBufferData.debug.counter = 0;
-		}
-
-		// ライトがあたった面だけ表示するフラグを更新。
-		bool isLightHit = constBufferData.debug.isLightHitScene;
-		bool prevIsLightHit = isLightHit;
-		ImGui::Checkbox("LightHit Scene", &isLightHit);
-		constBufferData.debug.isLightHitScene = isLightHit;
-		// 値が書き換えられていたら、サンプリングを初期化する。
-		if (isLightHit != prevIsLightHit) {
-			constBufferData.debug.counter = 0;
-		}
-
-		// デバッグ用でノイズ画面を出すためのフラグをセット。
-		bool isNoise = constBufferData.debug.isNoiseScene;
-		ImGui::Checkbox("Noise Scene", &isNoise);
-		constBufferData.debug.isNoiseScene = isNoise;
-
-		// AOを行うかのフラグをセット。
-		bool isNoAO = constBufferData.debug.isNoAO;
-		ImGui::Checkbox("NoAO Scene", &isNoAO);
-		constBufferData.debug.isNoAO = isNoAO;
-
-		// GIを行うかのフラグをセット。
-		bool isNoGI = constBufferData.debug.isNoGI;
-		ImGui::Checkbox("NoGI Scene", &isNoGI);
-		constBufferData.debug.isNoGI = isNoGI;
-
-		// GIのみを描画するかのフラグをセット。
-		bool isGIOnlyScene = constBufferData.debug.isGIOnlyScene;
-		ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene);
-		constBufferData.debug.isGIOnlyScene = isGIOnlyScene;
-
-		// FPSを表示するかのフラグをセット。
-		ImGui::Checkbox("Display FPS", &isDisplayFPS);
-
-
-		ImGui::TreePop();
-
-	}
-
-	// 階層構造にする。
-	if (ImGui::TreeNode("AS")) {
-
-		// 太陽光線の強さを設定する。
-		ImGui::SliderFloat("Sun Power", &constBufferData.as.eSun, -10, 100);
-
-		// レイリー散乱定数の値を設定する。
-		ImGui::SliderFloat("Rayleigh Scattering Power", &constBufferData.as.kr, -1, 1);
-
-		// ミー散乱定数の値を設定する。
-		ImGui::SliderFloat("Mie Scattering Power", &constBufferData.as.km, -1, 1);
-
-		// サンプリング数を設定する。
-		ImGui::SliderFloat("Sample Count", &constBufferData.as.samples, 0, 10);
-
-		// 大気圏の一番上の高さ
-		ImGui::SliderFloat("Outer Radius", &constBufferData.as.outerRadius, 0, 20000);
-
-		// 地上の高さ
-		ImGui::SliderFloat("Inner Radius", &constBufferData.as.innerRadius, 0, 20000);
-
-		// 大気散乱を求める際に使用する定数
-		ImGui::SliderFloat("Scattering G", &constBufferData.as.g, -1.0f, 1.0f);
-
-		// 平均大気密度を求めるための高さ
-		ImGui::SliderFloat("Aveheight", &constBufferData.as.aveHeight, 0.0f, 1.0f);
-
-		ImGui::TreePop();
-
-	}
 
 }

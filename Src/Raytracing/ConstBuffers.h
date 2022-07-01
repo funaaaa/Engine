@@ -74,8 +74,6 @@ struct AtmosphericScatteringConstBufferData {
 struct DebugConstBufferData {
 
 	int seed;			// 乱数の種
-	int counter;		// 累積デノイズ用のサンプル数
-	int aoSampleCount;	// AOで何回サンプルするかの数
 	int isNoiseScene;	// ノイズのみの画面を描画するか
 	int isLightHitScene;// ライトに当たった場所のみを描画するか
 	int isNormalScene;	// 法線情報のみを描画するか
@@ -83,8 +81,6 @@ struct DebugConstBufferData {
 	int isNoAO;			// AOを行わないか
 	int isNoGI;			// GIを行わないか
 	int isGIOnlyScene;	// GIのみを行うか
-	float pad1;			// パディング
-	float pad2;			// パディング
 
 	// 初期化処理
 	void Init();

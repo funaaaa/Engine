@@ -84,6 +84,7 @@ private:
 
 	// GI出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> giOutput;
+	std::shared_ptr<RaytracingOutput> denoiseGiOutput;
 
 	// デノイズマスク用クラスをセット。
 	std::shared_ptr<RaytracingOutput> denoiseMaskOutput;
@@ -96,19 +97,6 @@ private:
 
 	// 太陽の角度
 	float sunAngle;
-
-	// デバッグ用のパイプラインを切り替えるやつ。
-	enum DEGU_PIPLINE_ID {
-		DEF_PIPLINE,
-		AO_PIPLINE,
-		DENOISE_AO_PIPLINE,
-	};
-
-	// デバッグ用でノイズ画面を出すフラグ。
-	DEGU_PIPLINE_ID debugPiplineID;
-
-	// ライトが動いたか
-	bool isMoveLight;
 
 	// プレイヤー
 	std::shared_ptr<Player> player;
@@ -129,7 +117,7 @@ public:
 
 	// 入力操作
 	void Input();
-	void InputImGUI(bool& IsMove);
+	void InputImGUI();
 
 
 };
