@@ -4,11 +4,10 @@
 #include <d3d12.h>
 
 Camera::Camera() {
-	eye = DirectX::XMFLOAT3(window_width / 2, window_height / 2, 500);		//視点座標		ゲームワールド内でのカメラ座標
-	target = DirectX::XMFLOAT3(window_width / 2 + 1, window_height / 2, 0);		//注視点座標		ゲームワールド内でカメラが見ている座標
-	up = DirectX::XMFLOAT3(0, 1, 0);											//上方向ベクトル	ゲームワールド内でカメラから見て上方向を指すベクトル
+	eye = DirectX::XMFLOAT3(window_width / 2, window_height / 2, 500);		// 視点座標		ゲームワールド内でのカメラ座標
+	target = DirectX::XMFLOAT3(window_width / 2 + 1, window_height / 2, 0);	// 注視点座標		ゲームワールド内でカメラが見ている座標
+	up = DirectX::XMFLOAT3(0, 1, 0);										// 上方向ベクトル	ゲームワールド内でカメラから見て上方向を指すベクトル
 	matView = DirectX::XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
-	//XMStoreFloat3(&(forwardVec), XMVector3Normalize(XMLoadFloat3(&forwardVec)));
 	angleOfView = 60.0f;
 }
 
@@ -17,9 +16,9 @@ void Camera::GenerateMatView()
 	matView = DirectX::XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	//透視投影変換行列
 	matPerspective = DirectX::XMMatrixPerspectiveFovLH(
-		DirectX::XMConvertToRadians(60.0f),				//画角(60度)
-		(float)window_width / window_height,	//アスペクト比
-		0.1f, 1000000.0f							//前端、奥端
+		DirectX::XMConvertToRadians(60.0f),		// 画角(60度)
+		(float)window_width / window_height,	// アスペクト比
+		0.1f, 1000000.0f						// 前端、奥端
 	);
 	//射影変換行列
 	matProjection = DirectX::XMMatrixOrthographicOffCenterLH(0, window_width, window_height, 0, 0.01f, 100000.0f);
@@ -30,8 +29,6 @@ void Camera::Init()
 	eye = Vec3(0, 150, 10);
 	target = Vec3(1, 0, 0);
 	up = Vec3(0, 1, 0);
-	rotationMat = DirectX::XMMatrixIdentity();
-	upRotationMat = DirectX::XMMatrixIdentity();
 	matView = DirectX::XMMatrixLookAtLH(eye.ConvertXMVECTOR(), target.ConvertXMVECTOR(), up.ConvertXMVECTOR());
 	matPerspective = {};
 	matProjection = {};
@@ -39,32 +36,6 @@ void Camera::Init()
 	forwardVec = Vec3{ 0,0,1 };
 	angleOfView = DEF_ANGLEOFVIEW;
 	baseAngleOfView = angleOfView;
-
-}
-
-void Camera::Update()
-{
-	// ビュー行列を生成。
-	Camera::Ins()->GenerateMatView();
-
-	// 正面ベクトルを求める。
-	//forwardVec = FHelper::MulRotationMatNormal({ 0,0,-1 }, rotationMat);
-	//forwardVec.Normalize();
-	//forwardVec.x = cosf(angleXZ);
-	//forwardVec.z = sinf(angleXZ);
-
-	//forwardVec.Normalize();
-
-	// 視点が限界を超えないようにする。
-	if (1.0f < forwardVec.y) forwardVec.y = 1.0f;
-	if (forwardVec.y < -1.0f) forwardVec.y = -1.0f;
-
-	// 視点座標から視点点座標を求める。
-	const float EYE_TARGET = 100.0f;
-	target = eye + forwardVec * EYE_TARGET;
-
-	// 上ベクトルを求める。
-	//up = FHelper::MulRotationMatNormal({ 0,1,0 }, rotationMat);
 
 }
 

@@ -9,7 +9,6 @@ void CameraConstBufferData::Init()
 	/*===== カメラ用定数バッファを初期化 =====*/
 
 	Camera::Ins()->GenerateMatView();
-	Camera::Ins()->Update();
 
 	mtxProj = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(60.0f),				//画角(60度)

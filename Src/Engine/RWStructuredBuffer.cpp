@@ -6,9 +6,8 @@ void RWStructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 	this->sizeOfElement = SizeOfElement;
 	this->numElement = NumElement;
 	auto device = DirectXBase::Ins()->dev;
-	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(SizeOfElement * NumElement);
+	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(static_cast<size_t>(SizeOfElement * NumElement));
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-	int bufferNo = 0;
 
 	D3D12_HEAP_PROPERTIES prop{};
 	prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_WRITE_BACK;
@@ -17,30 +16,26 @@ void RWStructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 	prop.Type = D3D12_HEAP_TYPE_CUSTOM;
 	prop.VisibleNodeMask = 1;
 
-	//for (auto& buffer : m_buffersOnGPU) {
-		device->CreateCommittedResource(
-			&prop,
-			D3D12_HEAP_FLAG_NONE,
-			&desc,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-			nullptr,
-			IID_PPV_ARGS(&buffersOnGPU)
-		);
-		//構造化バッファをCPUからアクセス可能な仮想アドレス空間にマッピングする。
-		//マップ、アンマップのオーバーヘッドを軽減するためにはこのインスタンスが生きている間は行わない。
-		{
-			CD3DX12_RANGE readRange(0, 0);        //     intend to read from this resource on the CPU.
-			buffersOnGPU->Map(0, &readRange, reinterpret_cast<void**>(&buffersOnCPU));
-		}
-		if (InitData != nullptr) {
-			memcpy(buffersOnCPU, InitData, SizeOfElement * NumElement);
-		}
-		bufferNo++;
-	//}
+	device->CreateCommittedResource(
+		&prop,
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		nullptr,
+		IID_PPV_ARGS(&buffersOnGPU)
+	);
+	// 構造化バッファをCPUからアクセス可能な仮想アドレス空間にマッピングする。
+	{
+		CD3DX12_RANGE readRange(0, 0);
+		buffersOnGPU->Map(0, &readRange, reinterpret_cast<void**>(&buffersOnCPU));
+	}
+	if (InitData != nullptr) {
+		memcpy(buffersOnCPU, InitData, static_cast<size_t>(SizeOfElement * NumElement));
+	}
 	isInited = true;
 }
 
-ID3D12Resource* RWStructuredBuffer::GetD3DResoruce()
+Microsoft::WRL::ComPtr<ID3D12Resource> RWStructuredBuffer::GetD3DResoruce()
 {
 	DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 	return buffersOnGPU;
@@ -69,7 +64,7 @@ void RWStructuredBuffer::RegistUnorderAccessView(D3D12_CPU_DESCRIPTOR_HANDLE Des
 	desc.Buffer.NumElements = static_cast<UINT>(numElement);
 	desc.Buffer.StructureByteStride = sizeOfElement;
 	device->CreateUnorderedAccessView(
-		buffersOnGPU,
+		buffersOnGPU.Get(),
 		nullptr,
 		&desc,
 		DescriptorHandle
@@ -93,7 +88,7 @@ void RWStructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE De
 	srvDesc.Buffer.StructureByteStride = sizeOfElement;
 	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	device->CreateShaderResourceView(
-		buffersOnGPU,
+		buffersOnGPU.Get(),
 		&srvDesc,
 		DescriptorHandle
 	);

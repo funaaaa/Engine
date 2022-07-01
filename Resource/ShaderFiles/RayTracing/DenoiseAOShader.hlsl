@@ -275,7 +275,6 @@ bool ShootDirShadow(Vertex vtx, float length)
 float3 ShootGIRay(Vertex vtx, float length)
 {
     float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-    float3 worldNormal = mul(vtx.Normal, (float3x3) ObjectToWorld4x3());
     float3 worldRayDir = WorldRayDirection();
     float3 reflectDir = reflect(worldRayDir, vtx.Normal);
     

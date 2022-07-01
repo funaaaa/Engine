@@ -1,27 +1,30 @@
 #pragma once
 #include <wrl.h>
 #include <DirectXTex/d3dx12.h>
+#include <memory>
 
 class StructuredBuffer;
 class RWStructuredBuffer;
 
-//コンピュートシェーダークラス
+// コンピュートシェーダークラス 
+// このクラスは最初に作成したコンピュートシェーダークラスで、テクスチャ等は扱えず構造化バッファを送ることしか出来ません。
+// いずれRayComputeShader側にこの機能を追加し、このクラスは削除する予定です。
 class ComputeShader {
 
 private:
 
 	/*-- メンバ変数 --*/
 
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;	//ルートシグネチャ
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipline;		//パイプライン
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descHeap;		//ディスクリプタヒープ 情報とかが保存されているのはinputSBとoutputSBの中
-	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUDescHeapHandle;			//SRV開始ハンドル GPU
-	D3D12_GPU_DESCRIPTOR_HANDLE uavGPUDescHeapHandle;			//UAV開始ハンドル GPU
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;	// ルートシグネチャ
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipline;		// パイプライン
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descHeap;		// ディスクリプタヒープ 情報とかが保存されているのはinputSBとoutputSBの中
+	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUDescHeapHandle;			// SRV開始ハンドル GPU
+	D3D12_GPU_DESCRIPTOR_HANDLE uavGPUDescHeapHandle;			// UAV開始ハンドル GPU
 
 public:
 
-	StructuredBuffer* inputSB;									//入力用構造体バッファ
-	RWStructuredBuffer* outputSB;								//書き込み用構造体バッファ
+	std::shared_ptr<StructuredBuffer> inputSB;					// 入力用構造体バッファ
+	std::shared_ptr<RWStructuredBuffer> outputSB;				// 書き込み用構造体バッファ
 
 
 public:
@@ -42,52 +45,52 @@ public:
 	/// <param name="sizeOfOutput">書き込み用データ構造体の1要素のサイズ sizeOfを使う</param>
 	/// <param name="countOfOutputElement">書き込み用データ構造体の要素数</param>
 	/// <param name="outputFormatData">書き込み用データ構造体のポインタ</param>
-	void Init(LPCWSTR csPath,
-		int sizeOfInput, int countOfInputElement, void* inputFormatData,
-		int sizeOfOutput, int countOfOutputElement, void* outputFormatData);
+	void Init(LPCWSTR CsPath,
+		int SizeOfInput, int CountOfInputElement, void* InputFormatData,
+		int SizeOfOutput, int CountOfOutputElement, void* OutputFormatData);
 
 	//ディスパッチコール
-	void Dispatch(UINT threadGroupCountX, UINT threadGroupCountY, UINT threadGroupCountZ);
+	void Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ);
 
 
 	/*-- 機能関数 --*/
 
 	//入力用構造化バッファを更新
-	void UpdateInputSB(void* updateSB);
+	void UpdateInputSB(void* UpdateSB);
 
 
 private:
 
 	/*-- シェーダー読み込み関係 --*/
 
-	//シェーダー読み込み
-	LPD3DBLOB LoadShader(LPCWSTR shaderFileName, const char entryPointName[], const char shaderModel[], ID3DBlob* shaderBlob, ID3DBlob* errorBlob);
-	//シェーダーのロードエラーをチェック
-	void CheckRoadShaderError(HRESULT result, ID3DBlob* errorBlob);
+	// シェーダー読み込み
+	LPD3DBLOB LoadShader(LPCWSTR ShaderFileName, const char EntryPointName[], const char ShaderModel[], ID3DBlob* ShaderBlob, ID3DBlob* ErrorBlob);
+	// シェーダーのロードエラーをチェック
+	void CheckRoadShaderError(HRESULT Result, ID3DBlob* ErrorBlob);
 
 	/*-- ルートシグネチャ --*/
 
-	//ルートシグネチャの生成
+	// ルートシグネチャの生成
 	void GenerateRootSignature();
 
-	//ディスクリプタヒープの要素
+	// ディスクリプタヒープの要素
 	enum {
-		enDescriptorHeap_CB,
-		enDescriptorHeap_SRV,
-		enDescriptorHeap_UAV,
-		enNumDescriptorHeap
+		DESCRIPTORHEAP_CB,
+		DESCRIPTORHEAP_SRV,
+		DESCRIPTORHEAP_UAV,
+		DESCRIPTORHEAP_NUM
 	};
 
 
 	/*-- パイプライン --*/
 
-	//パイプラインの生成
+	// パイプラインの生成
 	void GeneratePipline(Microsoft::WRL::ComPtr<ID3DBlob> csBlob);
 
 
 	/*-- ディスクリプタヒープ --*/
 
-	//ディスクリプタヒープに各ディスクリプタをセットする
+	// ディスクリプタヒープに各ディスクリプタをセットする
 	void CommitDescHeap();
 
 };

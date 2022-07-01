@@ -123,7 +123,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -144,7 +144,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\Dxcompiler</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -19,38 +19,33 @@ void StructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 	prop.MemoryPoolPreference = D3D12_MEMORY_POOL_L0;
 	prop.Type = D3D12_HEAP_TYPE_CUSTOM;
 	prop.VisibleNodeMask = 1;
-	//	for (auto& buffer : buffersOnGPU) {
 	device->CreateCommittedResource(
-			&prop,
-			D3D12_HEAP_FLAG_NONE,
-			&desc,
-			D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
-			nullptr,
-			IID_PPV_ARGS(&buffersOnGPU)
-		);
+		&prop,
+		D3D12_HEAP_FLAG_NONE,
+		&desc,
+		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		nullptr,
+		IID_PPV_ARGS(&buffersOnGPU)
+	);
 
 
-	//構造化バッファをCPUからアクセス可能な仮想アドレス空間にマッピングする。
-	//マップ、アンマップのオーバーヘッドを軽減するためにはこのインスタンスが生きている間は行わない。
-		CD3DX12_RANGE readRange(0, 0);        //     intend to read from this resource on the CPU.
-		buffersOnGPU->Map(0, &readRange, reinterpret_cast<void**>(&buffersOnCPU));
+	// 構造化バッファをCPUからアクセス可能な仮想アドレス空間にマッピングする。
+	CD3DX12_RANGE readRange(0, 0);
+	buffersOnGPU->Map(0, &readRange, reinterpret_cast<void**>(&buffersOnCPU));
 	if (InitData != nullptr) {
-		memcpy(buffersOnCPU, InitData, SizeOfElement * NumElement);
-		//buffersOnGPU->Unmap(0, &readRange);
+		memcpy(buffersOnCPU, InitData, static_cast<size_t>(SizeOfElement * NumElement));
 	}
 
 	bufferNo++;
-	//	}
 	isInited = true;
 }
 void StructuredBuffer::Update(void* Data)
 {
 	if (Data == nullptr) return;
-	memcpy(buffersOnCPU, Data, numElement * sizeOfElement);
+	memcpy(buffersOnCPU, Data, static_cast<size_t>(numElement * sizeOfElement));
 }
-ID3D12Resource* StructuredBuffer::GetD3DResoruce()
+Microsoft::WRL::ComPtr<ID3D12Resource> StructuredBuffer::GetD3DResoruce()
 {
-	DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 	return buffersOnGPU;
 }
 void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE DescriptorHandle)
@@ -70,7 +65,7 @@ void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE Desc
 	srvDesc.Buffer.StructureByteStride = sizeOfElement;
 	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	device->CreateShaderResourceView(
-		buffersOnGPU,
+		buffersOnGPU.Get(),
 		&srvDesc,
 		DescriptorHandle
 	);
