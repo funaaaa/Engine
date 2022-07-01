@@ -26,7 +26,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;	// 頂点バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;		// 頂点インデックスバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer;		// 頂点インデックスバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer;	// 頂点インデックスバッファ
 	RayDescriptor vertexDescriptor;			// 頂点ディスクリプタ
 	RayDescriptor indexDescriptor;			// 頂点インデックスディスクリプタ
 	RayDescriptor materialDescriptor;		// マテリアル情報用ディスクリプタ
@@ -43,7 +43,7 @@ private:
 	UINT vertexStride;						// 1頂点のデータサイズ
 	UINT indexStride;						// 1頂点インデックスのデータサイズ
 
-	std::wstring hitGroupName;					// 使用するヒットグループの名前
+	std::wstring hitGroupName;				// 使用するヒットグループの名前
 
 	int modelIndex;							// モデルのインデックス
 
@@ -90,8 +90,7 @@ public:
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
-	uint8_t* WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex);
-
+	
 	// アクセッタ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }

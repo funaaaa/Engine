@@ -32,7 +32,7 @@ public:
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
 	// Ins‚ğ¶¬‚·‚éB
-	int CreateInstance(const int& BlasIndex, const UINT& instanceID);
+	int CreateInstance(const int& BlasIndex, const UINT& InstanceID);
 
 	// ˆÚ“®(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);

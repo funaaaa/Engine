@@ -14,9 +14,9 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	// テクスチャを読み込む。
 	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
-	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
+	for (auto& index : TexturePath) {
 
-		textureHandle.emplace_back(TextureManager::Ins()->LoadTexture(TexturePath[index]));
+		textureHandle.emplace_back(TextureManager::Ins()->LoadTexture(index));
 
 	}
 
@@ -498,195 +498,114 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	auto shader = GetHitGroupName();
 
 	// 保存されているヒットグループ名と違っていたら書き込まない。
-	if (HitGroupName == shader) {
+	//if (HitGroupName == shader) {
 
-		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
-		if (id == nullptr) {
-			throw std::logic_error("Not found ShaderIdentifier");
-		}
-
-		// シェーダー識別子を書き込む。
-		memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-
-		// マテリアル用のバッファをセット。
-		Dst += WriteGPUDescriptor(Dst, &materialDescriptor.GetGPUHandle());
-
-		// ヒットグループ名からヒットグループ名IDを取得する。
-		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
-
-		// 頂点、インデックス、マテリアルのオフセット
-		const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
-
-		// ヒットグループIDからSRVの数を取得。
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
-
-		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
-		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-		for (int index = 0; index < srvCount; ++index) {
-
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle.size() <= index) {
-
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-				WriteGPUDescriptor(Dst, &texDescHandle);
-
-			}
-			else {
-
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
-				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-
-			}
-		}
-
-		Dst = entryBegin + recordSize;
-		return Dst;
-
-	}
-	else {
-
-		// シェーダー識別子を書き込む。
-		auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
-		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-
-		// マテリアル用のバッファをセット。
-		Dst += WriteGPUDescriptor(Dst, &materialDescriptor.GetGPUHandle());
-
-		// ヒットグループ名からヒットグループ名IDを取得する。
-		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
-
-		// 頂点、インデックス、マテリアルのオフセット
-		const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
-
-		// ヒットグループIDからSRVの数を取得。
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
-
-		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
-		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-		for (int index = 0; index < srvCount; ++index) {
-
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle.size() <= index) {
-
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-				WriteGPUDescriptor(Dst, &texHandle);
-
-			}
-			else {
-
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
-				Dst += WriteGPUDescriptor(Dst, &texHandle);
-
-			}
-		}
-
-		Dst = entryBegin + recordSize;
-		return Dst;
-
+	auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
+	if (id == nullptr) {
+		throw std::logic_error("Not found ShaderIdentifier");
 	}
 
-}
+	// シェーダー識別子を書き込む。
+	memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
-uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
-{
-	/*===== シェーダーレコードを書き込む =====*/
+	// 今回のプログラムでは以下の順序でディスクリプタを記録。
+	// [0] : インデックスバッファ
+	// [1] : 頂点バッファ
+	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
 
-	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps;
-	StateObject.As(&rtsoProps);
-	auto entryBegin = Dst;
-	auto shader = GetHitGroupName();
+	// マテリアル用のバッファをセット。
+	Dst += WriteGPUDescriptor(Dst, &materialDescriptor.GetGPUHandle());
 
-	// 保存されているヒットグループ名と違っていたら書き込まない。
-	if (HitGroupName == shader) {
+	// ヒットグループ名からヒットグループ名IDを取得する。
+	int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
 
-		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
-		if (id == nullptr) {
-			throw std::logic_error("Not found ShaderIdentifier");
+	// 頂点、インデックス、マテリアルのオフセット
+	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
+
+	// ヒットグループIDからSRVの数を取得。
+	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
+
+	// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
+	// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
+	for (int index = 0; index < srvCount; ++index) {
+
+		// このインデックスのテクスチャが存在していなかったら
+		if (textureHandle.size() <= index) {
+
+			// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
+			WriteGPUDescriptor(Dst, &texDescHandle);
+
 		}
+		else {
 
-		// シェーダー識別子を書き込む。
-		memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
+			Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-		// デバッグ用でテクスチャを書き込む。
-		CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-		WriteGPUDescriptor(Dst, &texHandle);
-		texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-		WriteGPUDescriptor(Dst, &texHandle);
-
-		// 指定されたUAVを書き込む。
-		CD3DX12_GPU_DESCRIPTOR_HANDLE uavHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(SpecifyIndex);
-		WriteGPUDescriptor(Dst, &uavHandle);
-
-		Dst = entryBegin + recordSize;
-		return Dst;
-
-	}
-	else {
-
-		// シェーダー識別子を書き込む。
-		auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
-		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
-		// ヒットグループ名からヒットグループ名IDを取得する。
-		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
-
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;
-
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-
-		for (int index = 0; index < srvCount; ++index) {
-
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle.size() <= index) {
-
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-				WriteGPUDescriptor(Dst, &texHandle);
-
-			}
-			else {
-
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
-				Dst += WriteGPUDescriptor(Dst, &texHandle);
-
-			}
 		}
-
-		Dst = entryBegin + recordSize;
-		return Dst;
-
 	}
+
+	Dst = entryBegin + recordSize;
+	return Dst;
+
+	//}
+
+
+	// ヒットグループが複数あったときの処理。今は一つしか無いので消す。
+	//else {
+
+	//	// シェーダー識別子を書き込む。
+	//	auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
+	//	memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+	//	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+	//	// 今回のプログラムでは以下の順序でディスクリプタを記録。
+	//	// [0] : インデックスバッファ
+	//	// [1] : 頂点バッファ
+	//	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+	//	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+	//	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+
+	//	// マテリアル用のバッファをセット。
+	//	Dst += WriteGPUDescriptor(Dst, &materialDescriptor.GetGPUHandle());
+
+	//	// ヒットグループ名からヒットグループ名IDを取得する。
+	//	int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+
+	//	// 頂点、インデックス、マテリアルのオフセット
+	//	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
+
+	//	// ヒットグループIDからSRVの数を取得。
+	//	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
+
+	//	// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
+	//	// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
+	//	for (int index = 0; index < srvCount; ++index) {
+
+	//		// このインデックスのテクスチャが存在していなかったら
+	//		if (textureHandle.size() <= index) {
+
+	//			// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
+	//			WriteGPUDescriptor(Dst, &texHandle);
+
+	//		}
+	//		else {
+
+	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
+	//			Dst += WriteGPUDescriptor(Dst, &texHandle);
+
+	//		}
+	//	}
+
+	//	Dst = entryBegin + recordSize;
+	//	return Dst;
+
+	//}
+
 }
 
 void BLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* pData, size_t DataSize)
@@ -772,6 +691,7 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(const bool& IsOpaque)
 	// 形状データのフラグを設定。
 	auto geometryDesc = D3D12_RAYTRACING_GEOMETRY_DESC{};
 	geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+	// 不透明フラグ。ここで不透明にするとシェーダー側でAnyHitShaderをOnにしていても呼ばれなくなるらしい！
 	if (IsOpaque) {
 		geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
 	}
@@ -868,7 +788,7 @@ void BLAS::CreateAccelerationStructure()
 	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };
 	DirectXBase::Ins()->cmdQueue->ExecuteCommandLists(1, commandLists);
 
-	//グラフィックコマンドリストの完了待ち
+	// グラフィックコマンドリストの完了待ち
 	DirectXBase::Ins()->cmdQueue->Signal(DirectXBase::Ins()->fence.Get(), ++DirectXBase::Ins()->fenceVal);
 	if (DirectXBase::Ins()->fence->GetCompletedValue() != DirectXBase::Ins()->fenceVal) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
@@ -877,10 +797,10 @@ void BLAS::CreateAccelerationStructure()
 		CloseHandle(event);
 	}
 
-	//コマンドアロケータのリセット
-	DirectXBase::Ins()->cmdAllocator->Reset();						//キューをクリア
+	// コマンドアロケータのリセット
+	DirectXBase::Ins()->cmdAllocator->Reset();	//キューをクリア
 
-	//コマンドリストのリセット
-	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
+	// コマンドリストのリセット
+	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);//再びコマンドリストを貯める準備
 
 }

@@ -10,6 +10,7 @@
 class RayRootsignature;
 
 // 新しくレイトレ用に作ったコンピュートシェーダー
+// 現在はテクスチャ系のみ送ることが出来る。もともとあったComputeShaderクラスと結合する予定。
 class RayComputeShader {
 
 private:
@@ -40,9 +41,9 @@ public:
 
 private:
 
-	//シェーダー読み込み
+	// シェーダー読み込み
 	LPD3DBLOB LoadShader(LPCWSTR ShaderFileName, const std::string& EntryPointName, const std::string& ShaderModel, ID3DBlob* ShaderBlob, ID3DBlob* ErrorBlob);
-	//シェーダーのロードエラーをチェック
+	// シェーダーのロードエラーをチェック
 	void CheckRoadShaderError(HRESULT Result, ID3DBlob* ErrorBlob);
 
 

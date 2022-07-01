@@ -90,42 +90,42 @@ void TLAS::Update()
 
 }
 
-void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
+void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
 
 	// nullチェック。
-	if (resource == nullptr) return;
+	if (Resource == nullptr) return;
 
 	// マップ処理を行う。
 	void* mapped = nullptr;
-	D3D12_RANGE range{ 0, dataSize };
-	HRESULT hr = resource->Map(0, nullptr, (void**)&mapped);
+	D3D12_RANGE range{ 0, DataSize };
+	HRESULT hr = Resource->Map(0, nullptr, (void**)&mapped);
 
 	// マップが成功したら値を書き込む。
 	if (SUCCEEDED(hr)) {
 
-		memcpy(mapped, pData, dataSize);
-		resource->Unmap(0, nullptr);
+		memcpy(mapped, PData, DataSize);
+		Resource->Unmap(0, nullptr);
 
 	}
 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
 
 	// 引数から設定用構造体を設定する。
 	D3D12_HEAP_PROPERTIES heapProps{};
-	if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
+	if (HeapType == D3D12_HEAP_TYPE_DEFAULT) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
 	}
-	if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
+	if (HeapType == D3D12_HEAP_TYPE_UPLOAD) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
@@ -137,21 +137,21 @@ Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RES
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;
-	resDesc.Width = size;
+	resDesc.Width = Size;
 	resDesc.Height = 1;
 	resDesc.DepthOrArraySize = 1;
 	resDesc.MipLevels = 1;
 	resDesc.Format = DXGI_FORMAT_UNKNOWN;
 	resDesc.SampleDesc = { 1, 0 };
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	resDesc.Flags = flags;
+	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
 	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
-		initialState,
+		InitialState,
 		nullptr,
 		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
 	);

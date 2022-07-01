@@ -133,7 +133,7 @@ void Denoiser::Denoise(const int& InImg, const int& OutImg, const int& DenoiseMa
 
 }
 
-void Denoiser::CalcWeightsTableFromGaussian(float Pwer)
+void Denoiser::CalcWeightsTableFromGaussian(float Power)
 {
 
 	/*===== ガウシアンブラーの重みを計算 =====*/
@@ -145,7 +145,7 @@ void Denoiser::CalcWeightsTableFromGaussian(float Pwer)
 	// ループ変数のxが基準テクセルからの距離。
 	for (int x = 0; x < GAUSSIAN_WEIGHTS_COUNT; x++)
 	{
-		gaussianWeights[x] = expf(-0.5f * (float)(x * x) / Pwer);
+		gaussianWeights[x] = expf(-0.5f * static_cast<float>(x * x) / Power);
 		total += 2.0f * gaussianWeights.at(x);
 	}
 
