@@ -10,123 +10,109 @@ namespace FHelper {
 
 	/*----- 便利変数 -----*/
 
-	static const int COLOR_MAX = 255;												//色の最大値
-	static const Vec3 COLOR_RED_VIVID = Vec3(COLOR_MAX, 0, 0);				//RGB振り切りの赤
-	static const Vec3 COLOR_GREEN_VIVID = Vec3(0, COLOR_MAX, 0);			//RGB振り切りの緑
-	static const Vec3 COLOR_BLUE_VIVID = Vec3(0, 0, COLOR_MAX);				//RGB振り切りの青
+	static const int COLOR_MAX = 255;										// 色の最大値
+	static const Vec3 COLOR_RED_VIVID = Vec3(COLOR_MAX, 0, 0);				// RGB振り切りの赤
+	static const Vec3 COLOR_GREEN_VIVID = Vec3(0, COLOR_MAX, 0);			// RGB振り切りの緑
+	static const Vec3 COLOR_BLUE_VIVID = Vec3(0, 0, COLOR_MAX);				// RGB振り切りの青
 
-	static const float F_PI_F = 3.14159265359f;										//円周率 180度
-	static const float F_PI_DIV_F = F_PI_F / 2.0f;									//円周率 90度
-	static const float F_PI_3DIV_F = F_PI_F + F_PI_3DIV_F;							//円周率 270度
-	static const float F_2PI_F = F_PI_F * 2.0f;										//円周率 360度
+	static const float F_PI_F = 3.14159265359f;								// 円周率 180度
+	static const float F_PI_DIV_F = F_PI_F / 2.0f;							// 円周率 90度
+	static const float F_PI_3DIV_F = F_PI_F + F_PI_3DIV_F;					// 円周率 270度
+	static const float F_2PI_F = F_PI_F * 2.0f;								// 円周率 360度
 
 	/*----- 便利関数 -----*/
 
-	//乱数取得
-	inline int GetRand(const int& min, const int& max) {
-		return (rand() % (max - min + 1)) + min;
+	// 乱数取得
+	inline int GetRand(const int& Min, const int& Max) {
+		return (rand() % (Max - Min + 1)) + Min;
 	}
-	inline float GetRand(const float& min, const float& max) {
+	inline float GetRand(const float& Min, const float& Max) {
 
 		// 一旦最小値と最大値を10000倍してint型にする。
 		const float MUL = 10000.0f;
-		int intMin = static_cast<int>(min * MUL);
-		int intMax = static_cast<int>(max * MUL);
+		int intMin = static_cast<int>(Min * MUL);
+		int intMax = static_cast<int>(Max * MUL);
 
 		int random = (rand() % (intMax - intMin + 1)) + intMin;
 
 		return static_cast<float>(random) / MUL;
 
 	}
-	inline float GetRand(const float& max) {
+	inline float GetRand(const float& Max) {
 
 		// 一旦最小値と最大値を10000倍してint型にする。
 		const float MUL = 10000.0f;
-		int intMax = static_cast<int>(max * MUL);
+		int intMax = static_cast<int>(Max * MUL);
 
 		int random = rand() % (intMax + 1);
 
 		return static_cast<float>(random) / MUL;
 
 	}
-	inline Vec3 GetRandVec3(const int& min, const int& max) {
-		return Vec3(static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)), static_cast<float>(GetRand(min, max)));
+	inline Vec3 GetRandVec3(const int& Min, const int& Max) {
+		return Vec3(static_cast<float>(GetRand(Min, Max)), static_cast<float>(GetRand(Min, Max)), static_cast<float>(GetRand(Min, Max)));
 	}
 
-	//指定の値の指定の値の範囲での0~1の割合を求める
-	inline float CalPercentageZeroToOne(const float& nowValue, const float& minValue, const float& maxValue) {
-		float maxBuff = maxValue;
-		float nowValueBuff = nowValue;
-		//最小値が0未満の場合は最大値に足す
-		if (minValue < 0) {
-			maxBuff += fabs(minValue);
-			nowValueBuff += fabs(minValue);
+	// 指定の値の指定の値の範囲での0~1の割合を求める
+	inline float CalPercentageZeroToOne(const float& NowValue, const float& MinValue, const float& MaxValue) {
+		float maxBuff = MaxValue;
+		float nowValueBuff = NowValue;
+		// 最小値が0未満の場合は最大値に足す
+		if (MinValue < 0) {
+			maxBuff += fabs(MinValue);
+			nowValueBuff += fabs(MinValue);
 		}
-		//最小値が0より大きい場合は最大値から引く
-		else if (minValue > 0) {
-			maxBuff -= fabs(minValue);
-			nowValueBuff -= fabs(minValue);
+		// 最小値が0より大きい場合は最大値から引く
+		else if (0 < MinValue) {
+			maxBuff -= fabs(MinValue);
+			nowValueBuff -= fabs(MinValue);
 		}
-		//丁度0の場合はそのまま
+		// 丁度0の場合はそのまま
 		else {
 		}
 
 		float returnBuff = nowValueBuff / maxBuff;
 
-		//0以下1以上にならないようにする
+		// 0以下1以上にならないようにする
 		if (returnBuff <= 0) returnBuff = 0;
-		if (returnBuff >= 1) returnBuff = 1;
+		if (1 <= returnBuff) returnBuff = 1;
 
 		return returnBuff;
 
 	}
 
-	//画面中央
+	// 画面中央
 	inline Vec3 WindowCenterPos() {
-		return Vec3(window_width / 2.0f, window_height / 2.0f, 0);
+		return Vec3(static_cast<float>(window_width) / 2.0f, static_cast<float>(window_height) / 2.0f, 0);
 	}
 
-	//画面サイズの半分
-	inline DirectX::XMFLOAT2 WindowHalfSize() {
-		return DirectX::XMFLOAT2(window_width / 2.0f, window_height / 2.0f);
+	// 画面サイズの半分
+	inline Vec2 WindowHalfSize() {
+		return Vec2(static_cast<float>(window_width) / 2.0f, static_cast<float>(window_height) / 2.0f);
 	}
 
-	//ベクトルに回転行列をかけたを値を正規化して返す
-	inline Vec3 MulRotationMatNormal(const Vec3& formatVec, const DirectX::XMMATRIX& rotationMat) {
-		Vec3 formatVecBuff = formatVec;
-		//回転行列をかける
-		formatVecBuff = DirectX::XMVector3Transform(formatVecBuff.ConvertXMVECTOR(), rotationMat);
-		//正規化する
+	// ベクトルに回転行列をかけたを値を正規化して返す
+	inline Vec3 MulRotationMatNormal(const Vec3& FormatVec, const DirectX::XMMATRIX& RotationMat) {
+		Vec3 formatVecBuff = FormatVec;
+		// 回転行列をかける
+		formatVecBuff = DirectX::XMVector3Transform(formatVecBuff.ConvertXMVECTOR(), RotationMat);
+		// 正規化する
 		formatVecBuff.Normalize();
 
 		return formatVecBuff;
 	}
 
-	//回転行列を生成する
-	inline DirectX::XMMATRIX CalRotationMat(const Vec3& value) {
+	// 回転行列を生成する
+	inline DirectX::XMMATRIX CalRotationMat(const Vec3& Value) {
 		DirectX::XMMATRIX returnBuff = DirectX::XMMatrixIdentity();
-		returnBuff *= DirectX::XMMatrixRotationZ(value.z);
-		returnBuff *= DirectX::XMMatrixRotationX(value.x);
-		returnBuff *= DirectX::XMMatrixRotationY(value.y);
+		returnBuff *= DirectX::XMMatrixRotationZ(Value.z);
+		returnBuff *= DirectX::XMMatrixRotationX(Value.x);
+		returnBuff *= DirectX::XMMatrixRotationY(Value.y);
 		return returnBuff;
 	};
 
-	//指定の値を指定の値に近付けた値を返す
-	inline float AddDivValue(const float& nowValue, const float& targetValue, const int& divCount) {
-		return (targetValue - nowValue) / divCount + nowValue;
-	}
-	inline DirectX::XMFLOAT2 AddDivValueXMFLOAT2(const DirectX::XMFLOAT2& nowValue, const DirectX::XMFLOAT2& targetValue, const int& divCount) {
-		return DirectX::XMFLOAT2((targetValue.x - nowValue.x) / divCount + nowValue.x,
-			(targetValue.y - nowValue.y) / divCount + nowValue.y);
-	}
-	inline Vec3 AddDivValueXMFLOAT3(const Vec3& nowValue, const Vec3& targetValue, const int& divCount) {
-		return Vec3(AddDivValue(nowValue.x, targetValue.x, divCount),
-			AddDivValue(nowValue.y, targetValue.y, divCount),
-			AddDivValue(nowValue.z, targetValue.z, divCount));
-	}
-
-	//画面内に収まっているかを判定
-	inline bool CheckInScreen(const Vec3& checkPos, const float& virtualWidth, const float& virtualHeight, const DirectX::XMMATRIX& matView, const DirectX::XMMATRIX& matPerspective) {
+	// 画面内に収まっているかを判定
+	inline bool CheckInScreen(const Vec3& CheckPos, const float& VirtualWidth, const float& VirtualHeight, const DirectX::XMMATRIX& MatView, const DirectX::XMMATRIX& MatPerspective) {
 		float w = window_width / 2.0f;
 		float h = window_height / 2.0f;
 		DirectX::XMMATRIX viewport = {
@@ -137,9 +123,9 @@ namespace FHelper {
 		};
 
 		// ビュー変換とプロジェクション変換
-		Vec3 worldPos = checkPos;
-		worldPos = DirectX::XMVector3Transform(worldPos.ConvertXMVECTOR(), matView);
-		worldPos = DirectX::XMVector3Transform(worldPos.ConvertXMVECTOR(), matPerspective);
+		Vec3 worldPos = CheckPos;
+		worldPos = DirectX::XMVector3Transform(worldPos.ConvertXMVECTOR(), MatView);
+		worldPos = DirectX::XMVector3Transform(worldPos.ConvertXMVECTOR(), MatPerspective);
 
 		Vec3 tmp;
 		tmp = worldPos;
@@ -150,7 +136,7 @@ namespace FHelper {
 		Vec3 pos = viewVec;
 
 
-		if (pos.x > -virtualWidth && pos.x < window_width + virtualWidth && pos.y > -virtualHeight && pos.y < window_height + virtualHeight) {
+		if (-VirtualWidth < pos.x && pos.x < window_width + VirtualWidth && -VirtualHeight < pos.y && pos.y < window_height + VirtualHeight) {
 
 			return true;
 		}
@@ -161,7 +147,7 @@ namespace FHelper {
 		}
 	}
 
-	//レイとオブジェクトの当たり判定
+	// レイとオブジェクトの当たり判定
 	struct RayToModelCollisionData {
 
 		std::vector<Vec3> targetVertex;
@@ -185,32 +171,32 @@ namespace FEasing {
 
 	//tは0~1の範囲
 
-	inline float EaseInSine(const float& time) {
+	inline float EaseInSine(const float& Time) {
 
-		return 1.0f - cosf((time * FHelper::F_PI_F) / 2.0f);
-
-	}
-
-	inline float EaseInOutSine(const float& time) {
-		return -(cosf(FHelper::F_PI_F * time) - 1.0f) / 2.0f;
-	}
-
-	inline float EaseOutSine(const float& time) {
-
-		return sinf((time * FHelper::F_PI_F) / 2.0f);
+		return 1.0f - cosf((Time * FHelper::F_PI_F) / 2.0f);
 
 	}
 
-	inline float EaseOutCubic(const float& time) {
-		return 1.0f - powf(1 - time, 3.0f);
+	inline float EaseInOutSine(const float& Time) {
+		return -(cosf(FHelper::F_PI_F * Time) - 1.0f) / 2.0f;
 	}
 
-	inline float EaseOutQuar(const float& time) {
-		return 1.0f - powf(1 - time, 4.0f);
+	inline float EaseOutSine(const float& Time) {
+
+		return sinf((Time * FHelper::F_PI_F) / 2.0f);
+
 	}
 
-	inline float EaseInOutQuint(const float& time) {
-		return time < 0.5f ? 16.0f * time * time * time * time * time : 1.0f - powf(-2.0f * time + 2.0f, 5.0f) / 2.0f;
+	inline float EaseOutCubic(const float& Time) {
+		return 1.0f - powf(1 - Time, 3.0f);
+	}
+
+	inline float EaseOutQuar(const float& Time) {
+		return 1.0f - powf(1 - Time, 4.0f);
+	}
+
+	inline float EaseInOutQuint(const float& Time) {
+		return Time < 0.5f ? 16.0f * Time * Time * Time * Time * Time : 1.0f - powf(-2.0f * Time + 2.0f, 5.0f) / 2.0f;
 	}
 
 }
