@@ -703,16 +703,11 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     }
     
         
-    // 飛ばすレイの回数
-    for (int aoindex = 0; aoindex < 1; ++aoindex)
+    // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
+    if (!gSceneParam.debug.isNoAO)
     {
-        // アンビエントオクリュージョンを行わないフラグが立っていたら処理を飛ばす。
-        if (gSceneParam.debug.isNoAO)
-        {
-            break;
-        }
        
-        int seed = initRand(DispatchRaysIndex().x + (worldPos.x / 1000.0f) + aoindex + DispatchRaysIndex().y * numPix.x, 100);
+        int seed = initRand(DispatchRaysIndex().x + (worldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
         float3 sampleDir = GetUniformHemisphereSample(seed, worldNormal);
         
         // シャドウレイを飛ばす。
@@ -722,11 +717,9 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         float NoL = saturate(dot(worldNormal, sampleDir));
         float pdf = 1.0 / (2.0 * PI);
         aoLightVisibility += aoLightVisibilityBuff;
-        
-            
     }
-    // 平均を取る。
-    //aoLightVisibility = (1.0f / PI) * (1.0f / float(gSceneParam.debug.aoSampleCount)) * aoLightVisibility;
+        
+   
         
     
     
@@ -819,7 +812,8 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         
         if (length(rayDir) == 0)
         {
-            payload.color = worldNormal;
+            payload.color =
+worldNormal;
             return;
         }
 
@@ -877,7 +871,8 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         }
         
         // ペイロードのレイのIDをデフォルトに戻す。
-        payload.rayID = CHS_IDENTIFICATION_RAYID_DEF;
+        payload.rayID =
+CHS_IDENTIFICATION_RAYID_DEF;
         
     }
 

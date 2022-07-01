@@ -63,8 +63,8 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	// コンピュートシェーダーを実行。
 	blurX->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
 	blurY->ChangeInputUAVIndex({ blurXOutput->GetUAVIndex(), DenoiseMaskIndex });
-	blurX->Dispatch(static_cast<UINT>(window_width / 32), static_cast<UINT>(window_height / 32), static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32), static_cast<UINT>((window_height / 1.0f) / 32), static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurX->Dispatch(static_cast<UINT>(window_width / 32) + 1, static_cast<UINT>(window_height / 32) + 1, static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32) + 1, static_cast<UINT>((window_height / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);

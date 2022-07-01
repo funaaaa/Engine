@@ -23,7 +23,7 @@ private:
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPiplineShaderData> dAOuseShaders;
-	std::shared_ptr<RaytracingPipline> deAOPipline;
+	std::shared_ptr<RaytracingPipline> pipline;
 
 	// SPONZAを読み込む。
 	std::vector<int> sponzaInstance;
@@ -97,6 +97,7 @@ private:
 
 	// 太陽の角度
 	float sunAngle;
+	float sunSpeed;
 
 	// プレイヤー
 	std::shared_ptr<Player> player;

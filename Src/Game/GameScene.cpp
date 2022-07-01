@@ -29,8 +29,8 @@ GameScene::GameScene()
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	deAOPipline = std::make_shared<RaytracingPipline>();
-	deAOPipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	pipline = std::make_shared<RaytracingPipline>();
+	pipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
 
 	// SPONZAを読み込む。
 	//sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
@@ -147,10 +147,11 @@ GameScene::GameScene()
 	denoiseMixTextureOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	// シェーダーテーブルを生成。
-	deAOPipline->ConstructionShaderTable();
+	pipline->ConstructionShaderTable();
 
-	// ライトが動いたか
+	// 太陽に関する変数
 	sunAngle = 0;
+	sunSpeed = 0.0001f;
 
 	isDisplayFPS = false;
 
@@ -182,6 +183,16 @@ GameScene::GameScene()
 		numFontHandle[9] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/9.png");
 		numFontHandle[10] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/slash.png");
 	}
+
+	// バリアを設定し各リソースの状態を遷移させる.
+	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 }
 
@@ -281,16 +292,7 @@ void GameScene::Update()
 	tlas->Update();
 
 	// 太陽の角度を更新。
-	sunAngle += 0.0001f;
-	if (DirectX::XM_2PI < sunAngle) {
-		sunAngle = 0.0f;
-	}
-	if (Input::Ins()->isKey(DIK_A)) {
-		sunAngle += 0.05f;
-	}
-	if (Input::Ins()->isKey(DIK_S)) {
-		sunAngle += 0.01f;
-	}
+	sunAngle += sunSpeed;
 	constBufferData.light.dirLight.lihgtDir = Vec3(-cos(sunAngle), -sin(sunAngle), 0.5f);
 	constBufferData.light.dirLight.lihgtDir.Normalize();
 	// 天球自体も回転させる。
@@ -313,20 +315,11 @@ void GameScene::Draw()
 	// 定数バッファをセット。
 	constBuffer->Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), &constBufferData, sizeof(constBufferData));
 
-	// バリアを設定し各リソースの状態を遷移させる.
-	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
 	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	DirectXBase::Ins()->cmdList->SetComputeRootSignature(deAOPipline->GetGlobalRootSig()->GetRootSig().Get());
+	DirectXBase::Ins()->cmdList->SetComputeRootSignature(pipline->GetGlobalRootSig()->GetRootSig().Get());
 
 	// TLASを設定。
 	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas->GetDescriptorHeapIndex()));
@@ -335,17 +328,17 @@ void GameScene::Draw()
 	DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, constBuffer->GetBuffer(frameIndex)->GetGPUVirtualAddress());
 
 	// 出力用UAVを設定。
-	aoOutput->SetComputeRootDescriptorTalbe(2);
-	lightOutput->SetComputeRootDescriptorTalbe(3);
-	colorOutput->SetComputeRootDescriptorTalbe(4);
-	giOutput->SetComputeRootDescriptorTalbe(5);
-	denoiseMaskOutput->SetComputeRootDescriptorTalbe(6);
+	aoOutput->SetComputeRootDescriptorTalbe(2);		// AOの結果出力用
+	lightOutput->SetComputeRootDescriptorTalbe(3);	// ライトの明るさの結果出力用
+	colorOutput->SetComputeRootDescriptorTalbe(4);	// テクスチャの色情報出力用
+	giOutput->SetComputeRootDescriptorTalbe(5);		// giの結果出力用
+	denoiseMaskOutput->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
-	DirectXBase::Ins()->cmdList->SetPipelineState1(deAOPipline->GetStateObject().Get());
+	DirectXBase::Ins()->cmdList->SetPipelineState1(pipline->GetStateObject().Get());
 
 	// レイトレーシングを実行。
-	D3D12_DISPATCH_RAYS_DESC rayDesc = deAOPipline->GetDispatchRayDesc();
+	D3D12_DISPATCH_RAYS_DESC rayDesc = pipline->GetDispatchRayDesc();
 	DirectXBase::Ins()->cmdList->DispatchRays(&rayDesc);
 
 	// [ノイズを描画]のときはデノイズをかけない。
@@ -365,9 +358,8 @@ void GameScene::Draw()
 
 		}
 
-		// [AOを行わない]のときはデノイズをかけない。
-		if (!constBufferData.debug.isNoAO) {
-
+		// AO情報にデノイズをかける。
+		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
 				aoOutput->GetRaytracingOutput().Get())
 			};
@@ -376,11 +368,16 @@ void GameScene::Draw()
 
 			// AOにデノイズをかける。
 			Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(), denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
-
 		}
 
-		// [GIを行わない]のときはデノイズをかけない。
-		if (!constBufferData.debug.isNoGI) {
+
+		// GI情報にデノイズをかける。
+		{
+			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+				giOutput->GetRaytracingOutput().Get())
+			};
+
+			DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
 
 			// GIにデノイズをかける。
 			Denoiser::Ins()->Denoise(giOutput->GetUAVIndex(), denoiseGiOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 1);
@@ -404,6 +401,27 @@ void GameScene::Draw()
 		denoiseMixTextureOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	}
+	// デノイズしないデバッグ状態の場合は、レイトレ関数から出力された生の値を合成する。
+	else {
+
+
+		denoiseMixTextureOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+			colorOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			aoOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			lightOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			giOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseMixTextureOutput->GetRaytracingOutput().Get())
+		};
+
+		DirectXBase::Ins()->cmdList->ResourceBarrier(5, barrierToUAV);
+
+		// デノイズをかけたライティング情報と色情報を混ぜる。
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput->GetUAVIndex(), aoOutput->GetUAVIndex(), lightOutput->GetUAVIndex(), giOutput->GetUAVIndex(), denoiseMixTextureOutput->GetUAVIndex());
+		denoiseMixTextureOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+	}
 
 
 	// バックバッファのインデックスを取得する。
@@ -417,26 +435,18 @@ void GameScene::Draw()
 	};
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
 
-	// バリアを設定し各リソースの状態を遷移させる.
-	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-
 	// デバッグ情報によって描画するデータを変える。
 	if (constBufferData.debug.isLightHitScene || constBufferData.debug.isMeshScene || constBufferData.debug.isNormalScene) {
 
 		// デノイズされた通常の描画
+		lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), lightOutput->GetRaytracingOutput().Get());
+		lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	}
 	else {
 
-		// デノイズされた通常の描画	バグがわかりやすいようにブラーをかけたライトの色のみを出力するようにしています。
+		// デノイズされた通常の描画
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
 
 
@@ -509,6 +519,9 @@ void GameScene::InputImGUI()
 {
 
 	/*===== IMGUI更新 =====*/
+
+	// 太陽の移動速度を更新。
+	ImGui::SliderFloat("Sun Speed", &sunSpeed, 0.0f, 0.1f, "%.5f");
 
 	// メッシュを表示する。
 	bool isMesh = constBufferData.debug.isMeshScene;
