@@ -37,13 +37,13 @@ public:
 	}
 
 	// ルートパラメーター追加処理
-	void AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shaderRegister, UINT registerSpace = 0);
+	void AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT ShaderRegister, UINT RegisterSpace = 0);
 
 	// スタティックサンプラー追加処理
-	void AddStaticSampler(const int& registerSpace = 0);
+	void AddStaticSampler(const int& RegisterSpace = 0);
 
 	// ルートシグネチャの生成
-	void Create(const bool& isLocal, const wchar_t* name = nullptr);
+	void Create(const bool& IsLocal, const wchar_t* Name = nullptr);
 
 	// アクセッタ
 	inline Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSig() { return rootsignature; }

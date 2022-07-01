@@ -48,10 +48,10 @@ public:
 	inline void IncrementHead() { ++head; }
 
 	// 指定のインデックスのCPUハンドルを取得
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(const int& index){
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(const int& Index){
 
 	return CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		descriptorHeap.Get()->GetGPUDescriptorHandleForHeapStart(), index, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		descriptorHeap.Get()->GetGPUDescriptorHandleForHeapStart(), Index, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	}
 

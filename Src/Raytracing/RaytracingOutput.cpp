@@ -57,15 +57,15 @@ void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOU
 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT width, UINT height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT Width, UINT Height, DXGI_FORMAT Format, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
 {
 	D3D12_HEAP_PROPERTIES heapProps{};
-	if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
+	if (HeapType == D3D12_HEAP_TYPE_DEFAULT) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
 	}
-	if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
+	if (HeapType == D3D12_HEAP_TYPE_UPLOAD) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
@@ -75,20 +75,20 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT wi
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 	resDesc.Alignment = 0;
-	resDesc.Width = width;
-	resDesc.Height = height;
+	resDesc.Width = Width;
+	resDesc.Height = Height;
 	resDesc.DepthOrArraySize = 1;
 	resDesc.MipLevels = 1;
-	resDesc.Format = format;
+	resDesc.Format = Format;
 	resDesc.SampleDesc = { 1, 0 };
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	resDesc.Flags = flags;
+	resDesc.Flags = Flags;
 
 	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
-		initialState,
+		InitialState,
 		nullptr,
 		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
 	);

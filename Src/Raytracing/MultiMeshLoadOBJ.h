@@ -6,7 +6,7 @@
 #include <array>
 #include <wtypes.h>
 
-// OBJ複数メッシュクラス
+// OBJ複数メッシュクラス 実質SPONZA読み込み用クラス 今は使用していません。
 class MultiMeshLoadOBJ : public Singleton<MultiMeshLoadOBJ> {
 
 private:

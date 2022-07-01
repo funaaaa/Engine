@@ -1,35 +1,35 @@
 #include "RayRootsignature.h"
 #include "DirectXBase.h"
 
-void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shaderRegister, UINT registerSpace)
+void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT ShaderRegister, UINT RegisterSpace)
 {
 
 	/*===== ルートパラメーター追加処理 =====*/
 
 
-	if (type == D3D12_DESCRIPTOR_RANGE_TYPE_SRV) {
+	if (Type == D3D12_DESCRIPTOR_RANGE_TYPE_SRV) {
 
-		descRange[rootparamCount] = CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, shaderRegister, registerSpace);
+		descRange[rootparamCount] = CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, ShaderRegister, RegisterSpace);
 		rootparam[rootparamCount].InitAsDescriptorTable(1, &descRange[rootparamCount]);
 		//rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
-		rootparam[rootparamCount].Descriptor.ShaderRegister = shaderRegister;
-		rootparam[rootparamCount].Descriptor.RegisterSpace = registerSpace;
+		rootparam[rootparamCount].Descriptor.ShaderRegister = ShaderRegister;
+		rootparam[rootparamCount].Descriptor.RegisterSpace = RegisterSpace;
 		rootparam[rootparamCount].DescriptorTable.NumDescriptorRanges = 1;
 
 	}
-	else if (type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV) {
+	else if (Type == D3D12_DESCRIPTOR_RANGE_TYPE_CBV) {
 		
-		rootparam[rootparamCount].InitAsConstantBufferView(shaderRegister, registerSpace);
+		rootparam[rootparamCount].InitAsConstantBufferView(ShaderRegister, RegisterSpace);
 		rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 
 	}
-	else if (type == D3D12_DESCRIPTOR_RANGE_TYPE_UAV) {
+	else if (Type == D3D12_DESCRIPTOR_RANGE_TYPE_UAV) {
 
-		descRange[rootparamCount] = CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, shaderRegister, registerSpace);
+		descRange[rootparamCount] = CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, ShaderRegister, RegisterSpace);
 		rootparam[rootparamCount].InitAsDescriptorTable(1, &descRange[rootparamCount]);
 		//rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
-		rootparam[rootparamCount].Descriptor.ShaderRegister = shaderRegister;
-		rootparam[rootparamCount].Descriptor.RegisterSpace = registerSpace;
+		rootparam[rootparamCount].Descriptor.ShaderRegister = ShaderRegister;
+		rootparam[rootparamCount].Descriptor.RegisterSpace = RegisterSpace;
 		rootparam[rootparamCount].DescriptorTable.NumDescriptorRanges = 1;
 
 	}
@@ -41,7 +41,7 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shade
 
 }
 
-void RayRootsignature::AddStaticSampler(const int& registerSpace) {
+void RayRootsignature::AddStaticSampler(const int& RegisterSpace) {
 
 	/*===== スタティックサンプラー追加処理 =====*/
 
@@ -49,7 +49,7 @@ void RayRootsignature::AddStaticSampler(const int& registerSpace) {
 	buff.Init(0,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR
 	);
-	buff.RegisterSpace = registerSpace;
+	buff.RegisterSpace = RegisterSpace;
 	buff.ShaderRegister = 0;
 	sampler[samplerCount] = buff;
 
@@ -57,7 +57,7 @@ void RayRootsignature::AddStaticSampler(const int& registerSpace) {
 
 }
 
-void RayRootsignature::Create(const bool& isLocal, const wchar_t* name)
+void RayRootsignature::Create(const bool& IsLocal, const wchar_t* Name)
 {
 
 	/*===== ルートシグネチャ生成処理 =====*/
@@ -70,7 +70,7 @@ void RayRootsignature::Create(const bool& isLocal, const wchar_t* name)
 	rootSigDesc.pStaticSamplers = sampler.data();
 
 	// ローカルルートシグネチャのフラグが立っていたら、ローカルルートシグネチャのフラグを設定する。
-	if (isLocal) {
+	if (IsLocal) {
 
 		rootSigDesc.Flags |= D3D12_ROOT_SIGNATURE_FLAG_LOCAL_ROOT_SIGNATURE;
 
@@ -87,8 +87,8 @@ void RayRootsignature::Create(const bool& isLocal, const wchar_t* name)
 		IID_PPV_ARGS(&rootsignature));
 
 	// 名前を設定
-	if (name != nullptr) {
-		rootsignature->SetName(name);
+	if (Name != nullptr) {
+		rootsignature->SetName(Name);
 	}
 
 }

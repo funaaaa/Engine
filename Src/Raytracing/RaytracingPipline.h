@@ -62,15 +62,15 @@ protected:
 	UINT GetLargestDataSizeInHitGroup();
 
 	// アライメント
-	UINT RoundUp(size_t size, UINT align) {
-		return UINT(size + align - 1) & ~(align - 1);
+	UINT RoundUp(size_t Size, UINT Align) {
+		return UINT(Size + Align - 1) & ~(Align - 1);
 	}
 
 	// バッファを生成。
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType, const wchar_t* name = nullptr);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType, const wchar_t* Name = nullptr);
 
 	// シェーダー識別子を書き込む。
-	UINT WriteShaderIdentifier(void* dst, const void* shaderId);
+	UINT WriteShaderIdentifier(void* Dst, const void* ShaderId);
 
 	// RayGenerationシェーダーの数を取得。
 	int GetRayGenerationCount();
