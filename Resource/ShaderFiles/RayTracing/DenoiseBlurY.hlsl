@@ -12,6 +12,7 @@ cbuffer GaussianWeight : register(b0)
     float4 weights[2];
 };
 
+// デノイズ対象のテクスチャをサンプリング
 float4 GetPixelColor(int x, int y)
 {
     uint2 texSize = uint2(1280 / 1, 720);
@@ -21,6 +22,7 @@ float4 GetPixelColor(int x, int y)
 
     return InputImg[uint2(x, y)];
 }
+// マスクのテクスチャをサンプリング
 float4 GetMaskColor(int x, int y)
 {
     uint2 texSize = uint2(1280 / 1, 720);

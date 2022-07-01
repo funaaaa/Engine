@@ -23,31 +23,6 @@ RWTexture2D<float4> colorOutput : register(u2);
 RWTexture2D<float4> giOutput : register(u3);
 RWTexture2D<float4> denoiseMaskoutput : register(u4);
 
-// 当たった位置の情報を取得する関数
-Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
-{
-    Vertex v = (Vertex) 0;
-    float3 barycentrics = CalcBarycentrics(attrib.barys);
-    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
-
-    float weights[3] =
-    {
-        barycentrics.x, barycentrics.y, barycentrics.z
-    };
-
-    for (int i = 0; i < 3; ++i)
-    {
-        uint index = indexBuffer[vertexId + i];
-        float w = weights[i];
-        v.Position += vertexBuffer[index].Position * w;
-        v.Normal += vertexBuffer[index].Normal * w;
-        v.uv += vertexBuffer[index].uv * w;
-    }
-    v.Normal = normalize(v.Normal);
-
-    return v;
-}
-
 // 大気散乱
 float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnderGround)
 {
@@ -132,7 +107,7 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnd
     // 開始地点の高さに平均大気密度をかけた値の指数を求める？
     float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
     // 開始地点のなにかの角度のオフセット。
-    float fStartOffset = fStartDepth * scale(fStartAngle);
+    float fStartOffset = fStartDepth * Scale(fStartAngle);
     
     // サンプルポイント間の長さ。
     float fSampleLength = fFar / fSamples;
@@ -156,7 +131,7 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnd
         // 地上から見たサンプルポイントの法線と散乱光が飛んできている方区の角度を求めて、サンプルポイントの高さで割る。
         float fCameraAngle = dot(v3Ray, v3SamplePoint) / fHeight;
         // 散乱光？
-        float fScatter = (fStartOffset + fDepth * (scale(fLightAngle * 1) - scale(fCameraAngle * 1)));
+        float fScatter = (fStartOffset + fDepth * (Scale(fLightAngle * 1) - Scale(fCameraAngle * 1)));
         
         // 色ごとの減衰率？
         float3 v3Attenuate = exp(-fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
@@ -225,7 +200,7 @@ float SoftShadow(Vertex vtx, float lightSize, float length, int lightIndex)
     // 乱数の種を求める。
     uint2 pixldx = DispatchRaysIndex().xy;
     uint2 numPix = DispatchRaysDimensions().xy;
-    int randSeed = initRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
+    int randSeed = InitRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
     float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
     return ShootShadowRay(worldPosition, shadowRayDir, length, gRtScene);
@@ -261,7 +236,7 @@ bool ShootDirShadow(Vertex vtx, float length)
     //// 乱数の種を求める。
     //uint2 pixldx = DispatchRaysIndex().xy;
     //uint2 numPix = DispatchRaysDimensions().xy;
-    //int randSeed = initRand(DispatchRaysIndex().x + (worldPosition.x * gSceneParam.light.dirLight.lightDir.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
+    //int randSeed = InitRand(DispatchRaysIndex().x + (worldPosition.x * gSceneParam.light.dirLight.lightDir.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
     
     //// レイを撃つベクトル
     //float3 shadowRayDir = GetConeSample(randSeed, dirLightVec, coneAngle);
@@ -706,7 +681,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     if (!gSceneParam.debug.isNoAO)
     {
        
-        int seed = initRand(DispatchRaysIndex().x + (worldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
+        int seed = InitRand(DispatchRaysIndex().x + (worldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
         float3 sampleDir = GetUniformHemisphereSample(seed, worldNormal);
         
         // シャドウレイを飛ばす。
