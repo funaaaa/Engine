@@ -41,7 +41,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	while (true) {
 
 		// 描画前処理
-		DirectXBase::Ins()->processBeforeDrawing();
+		DirectXBase::Ins()->ProcessBeforeDrawing();
 
 
 		SceneMgr::Ins()->Update();
@@ -49,7 +49,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 		// 描画後処理
-		DirectXBase::Ins()->processAfterDrawing();
+		DirectXBase::Ins()->ProcessAfterDrawing();
 
 	}
 

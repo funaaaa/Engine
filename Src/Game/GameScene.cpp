@@ -15,6 +15,7 @@
 #include "TextureManager.h"
 #include "Sprite.h"
 #include "Pipline.h"
+#include "WindowsAPI.h"
 
 GameScene::GameScene()
 {
@@ -228,7 +229,7 @@ void GameScene::Update()
 	}
 	else {
 
-		SetWindowText(DirectXBase::Ins()->windowsAPI.hwnd, L"LE3A_21_フナクラベ_タクミ");
+		SetWindowText(DirectXBase::Ins()->windowsAPI->hwnd, L"LE3A_21_フナクラベ_タクミ");
 
 	}
 
@@ -491,7 +492,7 @@ void GameScene::FPS()
 		_itow_s(frame_count, fps, 10);
 		wchar_t moji[] = L"FPS";
 		wcscat_s(fps, moji);
-		SetWindowText(DirectXBase::Ins()->windowsAPI.hwnd, fps);
+		SetWindowText(DirectXBase::Ins()->windowsAPI->hwnd, fps);
 		//OutputDebugString(fps);
 
 		prev_time = now_time;
@@ -505,7 +506,7 @@ void GameScene::Input()
 
 	/*===== 入力処理 =====*/
 
-	if (Input::Ins()->isKeyTrigger(DIK_RETURN)) {
+	if (Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
 		isTransition = true;
 

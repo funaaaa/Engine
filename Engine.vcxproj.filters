@@ -148,6 +148,9 @@
     <ClCompile Include="Src\Engine\Sprite.cpp">
       <Filter>エンジン\描画データ</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Engine\Input.cpp">
+      <Filter>エンジン\入力関係</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">

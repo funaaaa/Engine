@@ -1,6 +1,7 @@
 #include "RaytracingOutput.h"
 #include "DescriptorHeapMgr.h"
 #include "DirectXBase.h"
+#include "WindowsAPI.h"
 
 void RaytracingOutput::Setting(DXGI_FORMAT Format)
 {

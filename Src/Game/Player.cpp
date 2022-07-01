@@ -102,7 +102,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
-	float inputRightTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_RIGHT);
+	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
 	if (INPUT_DEADLINE_TRI < inputRightTriValue && isGround) {
 
 		speed += inputRightTriValue * ADD_SPEED;
@@ -125,7 +125,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	float nowFrameInputLeftStickHori = 0;
 
 	// 右スティックの横の傾き量でキャラを回転させる。
-	float inputLeftStickHori = Input::Ins()->isPadThumb(XINPUT_THUMB_LEFTSIDE);
+	float inputLeftStickHori = Input::Ins()->PadStick(XINPUT_THUMB_LEFTSIDE);
 	const float LEFT_STICK_INPUT_DEADLINE = 0.2f;
 	if (LEFT_STICK_INPUT_DEADLINE < std::fabs(inputLeftStickHori)) {
 
@@ -161,21 +161,9 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	}
 
-	// 臨時でキーボードでも回転できるようにする。
-	if(Input::Ins()->isKey(DIK_RIGHT)){
-	
-		rotY += inputLeftStickHori;
-	
-	}
-	if(Input::Ins()->isKey(DIK_LEFT)){
-	
-		rotY -= inputLeftStickHori;
-	
-	}
-
 	// LTが引かれていたらドリフト状態にする。
 	const float INPUT_DEADLINE_DRIFT = 0.9f;
-	float inputLeftTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_LEFT);
+	float inputLeftTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_LEFT);
 	bool isInputNowFrameLeftStrick = LEFT_STICK_INPUT_DEADLINE < fabs(nowFrameInputLeftStickHori);
 	if (INPUT_DEADLINE_DRIFT < inputLeftTriValue && isInputNowFrameLeftStrick) {
 
@@ -219,7 +207,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	}
 
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
-	if (Input::Ins()->isPad(XINPUT_GAMEPAD_B)) {
+	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B)) {
 
 		pos = PLAYER_DEF_POS;
 		PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));

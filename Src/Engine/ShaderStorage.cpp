@@ -1,5 +1,6 @@
 #include "ShaderStorage.h"
 #include "ShaderData.h"
+#include <assert.h>
 
 #pragma comment(lib, "dxcompiler.lib")
 

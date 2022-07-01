@@ -171,6 +171,7 @@
     <ClCompile Include="Src\Engine\DirectXBase.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
+    <ClCompile Include="Src\Engine\Input.cpp" />
     <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
     <ClCompile Include="Src\Engine\Pipline.cpp" />

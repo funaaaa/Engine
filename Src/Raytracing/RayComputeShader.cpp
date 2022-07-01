@@ -3,6 +3,7 @@
 #include "DirectXBase.h"
 #include "DescriptorHeapMgr.h"
 #include "RayRootsignature.h"
+#include <assert.h>
 
 void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& CBVCount, const int& UAVCount, std::vector<int> UAVIndex)
 {

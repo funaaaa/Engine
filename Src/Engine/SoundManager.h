@@ -3,35 +3,34 @@
 #include "Singleton.h"
 #include <wrl/client.h>
 #include <xaudio2.h>
-
-#pragma comment(lib,"xaudio2.lib")
+#include <array>
 
 class SoundManager : public Singleton<SoundManager> {
 
 public:
 
-	//サウンド関係の構造体
-	//チャンクヘッダ
+	// サウンド関係の構造体
+	// チャンクヘッダ
 	struct ChunkHeader {
-		char id[4];		//チャンク毎のID
-		int32_t size;	//チャンクサイズ
+		std::array<char, 4> id;		// チャンク毎のID
+		int32_t size;				// チャンクサイズ
 	};
-	//RIFFヘッダチャンク
+	// RIFFヘッダチャンク
 	struct RiffHeader {
-		ChunkHeader chunk;	//"RIFF"
-		char type[4];	//"WAVE
+		ChunkHeader chunk;			// "RIFF"
+		std::array<char, 4> type;	//"WAVE
 	};
-	//FMTチャンク
+	// FMTチャンク
 	struct FormatChunk {
-		ChunkHeader chunk;		//"fmt"
-		WAVEFORMATEX fmt;	//波形フォーマット
+		ChunkHeader chunk;			// "fmt"
+		WAVEFORMATEX fmt;			// 波形フォーマット
 	};
 
-	//音声データ
+	// 音声データ
 	struct SoundData {
-		WAVEFORMATEX wfex;			//波形フォーマット
-		BYTE* pBuffer;				//バッファの先頭アドレス
-		unsigned int bufferSize;	//バッファのサイズ
+		WAVEFORMATEX wfex;			// 波形フォーマット
+		BYTE* pBuffer;				// バッファの先頭アドレス
+		unsigned int bufferSize;	// バッファのサイズ
 		IXAudio2SourceVoice* source;
 		float volume;
 	};
@@ -46,12 +45,12 @@ public:
 	IXAudio2MasteringVoice* masterVoice;
 
 	void SettingSoundManager();
-	//サウンド再生
-	SoundData SoundLoadWave(char* fileName);
-	//音声データの再生
-	void SoundUnload(SoundData* soundData);
-	//音声再生
-	void SoundPlayerWave(SoundData& soundData, int loopCount);
+	// サウンド再生
+	SoundData SoundLoadWave(char* FileName);
+	// 音声データの再生
+	void SoundUnload(SoundData* SoundData);
+	// 音声再生
+	void SoundPlayerWave(SoundData& SoundData, int LoopCount);
 };
 
 //コールバック用

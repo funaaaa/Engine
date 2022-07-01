@@ -3,6 +3,7 @@
 #include "RayComputeShader.h"
 #include "DynamicConstBuffer.h"
 #include "DirectXBase.h"
+#include "WindowsAPI.h"
 
 void Denoiser::Setting()
 {

@@ -30,7 +30,7 @@ void TitleScene::Update()
 
 	/*===== XVˆ— =====*/
 
-	if (Input::Ins()->isKeyTrigger(DIK_RETURN)) {
+	if (Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
 		isTransition = true;
 

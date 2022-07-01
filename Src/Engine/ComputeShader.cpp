@@ -2,6 +2,7 @@
 #include "StructuredBuffer.h"
 #include "RWStructuredBuffer.h"
 #include "DirectXBase.h"
+#include <assert.h>
 
 #include <d3dcompiler.h>
 
