@@ -13,7 +13,7 @@ struct RayVertex {
 
 	Vec3 position;
 	Vec3 normal;
-	DirectX::XMFLOAT2 uv;
+	Vec2 uv;
 
 };
 

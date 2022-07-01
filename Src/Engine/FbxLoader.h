@@ -44,7 +44,7 @@ struct Node {
 	// 名前
 	std::string name;
 	// パディング
-	DirectX::XMFLOAT2 pad;
+	Vec2 pad;
 	// ローカル変換行列
 	DirectX::XMMATRIX transform;
 	// グローバル変換行列
@@ -73,9 +73,9 @@ public:
 	// 頂点データ構造体
 	struct VertexPosNormalUvSkin
 	{
-		DirectX::XMFLOAT3 pos;		// 座標
-		DirectX::XMFLOAT3 normal;	// 法線
-		DirectX::XMFLOAT2 uv;		// UV
+		Vec3 pos;		// 座標
+		Vec3 normal;	// 法線
+		Vec2 uv;		// UV
 		std::array<UINT, MAX_BONE_INDICES> boneIndex;	// ボーンの番号
 		std::array<float, MAX_BONE_INDICES> boneWeight;	// ボーンの重み
 	};
@@ -102,9 +102,9 @@ public:
 public:
 
 	// アンビエント係数
-	DirectX::XMFLOAT3 ambient = { 1.0f,1.0f,1.0f };
+	Vec3 ambient = { 1.0f,1.0f,1.0f };
 	// ディフーズ係数
-	DirectX::XMFLOAT3 diffuse = { 1.0f,1.0f,1.0f };
+	Vec3 diffuse = { 1.0f,1.0f,1.0f };
 	// テクスチャID
 	int textureID;
 
@@ -159,7 +159,7 @@ public:
 	struct Vertex {
 		Vec3 pos;
 		Vec3 normal;
-		DirectX::XMFLOAT2 uv;
+		Vec2 uv;
 	};
 	void GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex);
 

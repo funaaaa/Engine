@@ -335,15 +335,15 @@ void FbxLoader::ParseMeshFaces(FbxModel& Model, FbxMesh* InputFbxMesh)
 
 			// FBX頂点配列のインデックス
 			int fbxIndex = InputFbxMesh->GetPolygonVertex(index, porygonIndex);
-			assert(fbxIndex >= 0);
+			assert(0 <= fbxIndex);
 
 			// 法線情報読み込み
 			FbxModel::VertexPosNormalUvSkin& vertex = vertices[fbxIndex];
 			FbxVector4 normal;
 			if (InputFbxMesh->GetPolygonVertexNormal(index, porygonIndex, normal)) {
-				vertex.normal.x = (float)normal[0];
-				vertex.normal.y = (float)normal[1];
-				vertex.normal.z = (float)normal[2];
+				vertex.normal.x = static_cast<float>(normal[0]);
+				vertex.normal.y = static_cast<float>(normal[1]);
+				vertex.normal.z = static_cast<float>(normal[2]);
 			}
 
 			// テクスチャUV読み込み
@@ -352,8 +352,8 @@ void FbxLoader::ParseMeshFaces(FbxModel& Model, FbxMesh* InputFbxMesh)
 				bool lUnmappedUV;
 				// 0版決め打ちで読み込み
 				if (InputFbxMesh->GetPolygonVertexUV(index, porygonIndex, uvNames[0], uvs, lUnmappedUV)) {
-					vertex.uv.x = (float)uvs[0];
-					vertex.uv.y = (float)uvs[1];
+					vertex.uv.x = static_cast<float>(uvs[0]);
+					vertex.uv.y = static_cast<float>(uvs[1]);
 				}
 			}
 
@@ -408,15 +408,15 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 
 				// 環境光係数
 				FbxPropertyT<FbxDouble3> ambient = lambert->Ambient;
-				Model.ambient.x = (float)ambient.Get()[0];
-				Model.ambient.y = (float)ambient.Get()[1];
-				Model.ambient.z = (float)ambient.Get()[2];
+				Model.ambient.x = static_cast<float>(ambient.Get()[0]);
+				Model.ambient.y = static_cast<float>(ambient.Get()[1]);
+				Model.ambient.z = static_cast<float>(ambient.Get()[2]);
 
 				// 拡散反射光係数
 				FbxPropertyT<FbxDouble3> diffuse = lambert->Diffuse;
-				Model.diffuse.x = (float)diffuse.Get()[0];
-				Model.diffuse.y = (float)diffuse.Get()[1];
-				Model.diffuse.z = (float)diffuse.Get()[2];
+				Model.diffuse.x = static_cast<float>(diffuse.Get()[0]);
+				Model.diffuse.y = static_cast<float>(diffuse.Get()[1]);
+				Model.diffuse.z = static_cast<float>(diffuse.Get()[2]);
 
 			}
 
@@ -433,12 +433,12 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 					string name = ExtractFileName(path_str);
 
 					// パスを変換。
-					wchar_t wFilePath[128];
+					std::array<wchar_t, 128> wFilePath;
 					string fullPath = directryPath + name;
-					MultiByteToWideChar(CP_ACP, 0, fullPath.c_str(), -1, wFilePath, _countof(wFilePath));
+					MultiByteToWideChar(CP_ACP, 0, fullPath.c_str(), -1, wFilePath.data(), static_cast<int>(wFilePath.size()));
 
 					// テクスチャ読み込み。
-					Model.textureID = TextureManager::Ins()->LoadTexture(wFilePath);
+					Model.textureID = TextureManager::Ins()->LoadTexture(wFilePath.data());
 
 					textureLoaded = true;
 

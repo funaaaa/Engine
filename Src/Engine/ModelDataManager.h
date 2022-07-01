@@ -20,7 +20,7 @@ public:
 
 		Vec3 pos;
 		Vec3 normal;
-		DirectX::XMFLOAT2 uv;
+		Vec2 uv;
 
 	};
 
@@ -59,13 +59,13 @@ private:
 
 public:
 
-	//objファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
+	// objファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
 	void LoadObj(std::string DirectoryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing);
 
-	//objファイルの読み込み時にマテリアルをロードするための関数
+	// objファイルの読み込み時にマテリアルをロードするための関数
 	void LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData);
 
-	//法線の平均を求める関数
+	// 法線の平均を求める関数
 	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);
 
 	int GetModelCount() { return static_cast<int>(modelData.size()); }
