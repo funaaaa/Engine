@@ -6,19 +6,19 @@ class Sprite : public BaseSprite {
 private:
 
 	// ‹¤’Ê‚Ì¶¬ˆ—
-	void CommonGenerate(Vec3 centerPos, Vec2 size, int projectionID, int piplineID);
+	void CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID);
 
 public:
 
 	// ¶¬ˆ—
-	void GenerateForTexture(Vec3 centerPos, Vec2 size, int projectionID, int piplineID, LPCWSTR fileName);
-	void GenerateForColor(Vec3 centerPos, Vec2 size, int projectionID, int piplineID, DirectX::XMFLOAT4 color);
-	void GenerateSpecifyTextureID(Vec3 centerPos, Vec2 size, int projectionID, int piplineID, int textureID);
+	void GenerateForTexture(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, LPCWSTR FileName);
+	void GenerateForColor(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, DirectX::XMFLOAT4 Color);
+	void GenerateSpecifyTextureID(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, int TextureID);
 
 	// •`‰æˆ—
 	void Draw();
 
 	// F‚ğ•Ï‚¦‚éˆ—
-	inline void SetColor(const DirectX::XMFLOAT4& color) { constBufferDataB0.color = color; }
+	inline void SetColor(const DirectX::XMFLOAT4& Color) { constBufferDataB0.color = Color; }
 
 };

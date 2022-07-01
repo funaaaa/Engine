@@ -6,33 +6,33 @@
 
 void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID)
 {
-	//パイプランの名前の保存
+	// パイプランの名前の保存
 	this->piplineID = PiplineID;
 
-	//設定構造体
+	// 設定構造体
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			//シェーダーから見える
-	descHeapDesc.NumDescriptors = 2;										//CBV2つ
-	//ディスクリプタヒープの生成
+	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
+	descHeapDesc.NumDescriptors = 2;										// CBV2つ
+	// ディスクリプタヒープの生成
 	DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&constDescHeap));
 
-	//頂点バッファの生成
+	// 頂点バッファの生成
 	Vertex vertexBuff;
-	vertexBuff.pos = Vec3(-Size.x, Size.y, 10);		//左下
+	vertexBuff.pos = Vec3(-Size.x, Size.y, 10);		// 左下
 	vertexBuff.uv = Vec2(0, 1);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos = Vec3(-Size.x, -Size.y, 10);	//左上
+	vertexBuff.pos = Vec3(-Size.x, -Size.y, 10);	// 左上
 	vertexBuff.uv = Vec2(0, 0);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos = Vec3(Size.x, Size.y, 10);		//右下
+	vertexBuff.pos = Vec3(Size.x, Size.y, 10);		// 右下
 	vertexBuff.uv = Vec2(1, 1);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos = Vec3(Size.x, -Size.y, 10);		//右上
+	vertexBuff.pos = Vec3(Size.x, -Size.y, 10);		// 右上
 	vertexBuff.uv = Vec2(1, 0);
 	vertex.push_back(vertexBuff);
 
-	//頂点バッファビューの生成
+	// 頂点バッファビューの生成
 	CD3DX12_HEAP_PROPERTIES vtxHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC vtxResDesc = CD3DX12_RESOURCE_DESC::Buffer(vertex.size() * sizeof(Vertex));
 	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(
@@ -44,7 +44,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 		IID_PPV_ARGS(&vertBuff)
 	);
 
-	//頂点バッファビューの設定
+	// 頂点バッファビューの設定
 	vbView.BufferLocation = vertBuff->GetGPUVirtualAddress();
 	vbView.SizeInBytes = static_cast<UINT>(vertex.size()) * static_cast<UINT>(sizeof(Vertex));
 	vbView.StrideInBytes = sizeof(Vertex);
@@ -61,14 +61,14 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 		IID_PPV_ARGS(&constBuffB0)
 	);
 
-	//行列を初期化
+	// 行列を初期化
 	projectionID = ProjectionID;
 	rotationMat = DirectX::XMMatrixIdentity();
 	scaleMat = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	positionMat = DirectX::XMMatrixTranslation(CenterPos.x, CenterPos.y, CenterPos.z);
 	pos = CenterPos;
 
-	//マップ処理を行う
+	// マップ処理を行う
 	Vertex* vertMap = nullptr;
 	vertBuff->Map(0, nullptr, (void**)&vertMap);
 	// 全頂点に対して
@@ -80,7 +80,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	vertBuff->Unmap(0, nullptr);
 
 	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
-	//CBVディスクリプタヒープの先頭アドレスを取得
+	// CBVディスクリプタヒープの先頭アドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		constDescHeap->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
