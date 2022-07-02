@@ -786,8 +786,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         
         if (length(rayDir) == 0)
         {
-            payload.color =
-worldNormal;
+            payload.color = worldNormal;
             return;
         }
 

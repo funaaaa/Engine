@@ -113,6 +113,30 @@ GameScene::GameScene()
 	stageData.stageOrnamentInsIndex = stageOrnamentIns;
 	player = std::make_shared<Player>(stageData);
 
+	// ゴール前のふわふわしているオブジェクトのBLASをロード
+	beforeTheGoalObjectBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	for (int index = 0; index < 4; ++index) {
+
+		std::pair<int, int> buff;
+		std::pair<Vec3, Vec3> defPosBuff;
+		buff.first = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::SHADER_ID_DEF);
+		defPosBuff.first = Vec3(250, 200, 1000 * index + 1500.0f);
+		PorygonInstanceRegister::Ins()->AddTrans(buff.first, defPosBuff.first);
+		PorygonInstanceRegister::Ins()->AddScale(buff.first, Vec3(40, 40, 40));
+		PorygonInstanceRegister::Ins()->AddRotate(buff.first, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
+		buff.second = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::SHADER_ID_DEF);
+		defPosBuff.second = Vec3(-250, 200, 1000 * index + 1500.0f);
+		PorygonInstanceRegister::Ins()->AddTrans(buff.second, buff.second);
+		PorygonInstanceRegister::Ins()->AddScale(buff.second, Vec3(40, 40, 40));
+		PorygonInstanceRegister::Ins()->AddRotate(buff.second, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
+		beforeTheGoalObjectIns.emplace_back(buff);
+		beforeTheGoalObjectDefPos.emplace_back(defPosBuff);
+		beforeTheGoalObjectTimer.push_back(1.0f * index);
+
+	}
+
+
+	// Instanceのワールド行列を生成。
 	PorygonInstanceRegister::Ins()->CalWorldMat();
 
 	// TLASを生成。
@@ -235,6 +259,9 @@ void GameScene::Update()
 
 	}
 
+	// 中間地点のオブジェクトを元の位置に戻す。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
+	PorygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns, Vec3(0, 0, 0));
+
 	// プレイヤーを更新。
 	player->Update(constBufferData, isPassedMiddlePoint, rapCount);
 
@@ -291,6 +318,23 @@ void GameScene::Update()
 
 	// ゴールオブジェクトを回転させる。
 	PorygonInstanceRegister::Ins()->AddRotate(goalIns, Vec3(0.01f, 0, 0));
+
+	// ゴール前のオブジェクトを回転させる。
+	for (int index = 0; index < 4; ++index) {
+
+		const float SIN_WAVE_MOVE = 50.0f;
+
+		PorygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns[index].first, Vec3(0.01f, 0.01f, 0));
+		PorygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns[index].second, Vec3(0.01f, 0.01f, 0));
+		PorygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns[index].first, beforeTheGoalObjectDefPos[index].first + Vec3(0, sinf(beforeTheGoalObjectTimer[index]) * SIN_WAVE_MOVE, 0));
+		PorygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns[index].second, beforeTheGoalObjectDefPos[index].second + Vec3(0, sinf(beforeTheGoalObjectTimer[index]) * SIN_WAVE_MOVE, 0));
+
+		beforeTheGoalObjectTimer[index] += 0.05f;
+
+	}
+
+	// 中間地点のオブジェクトをどっかに飛ばす。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
+	PorygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns, Vec3(-1000000, -1000000, -10000000));
 
 	tlas->Update();
 

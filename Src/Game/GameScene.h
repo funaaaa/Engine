@@ -56,6 +56,12 @@ private:
 	std::vector<int> stageOrnamentBlas;
 	std::vector<int> stageOrnamentIns;
 
+	// ゴール前でふわふわしているオブジェクトのインデックス。
+	int beforeTheGoalObjectBlas;
+	std::vector<std::pair<int, int>> beforeTheGoalObjectIns;
+	std::vector<std::pair<Vec3, Vec3>> beforeTheGoalObjectDefPos;
+	std::vector<float> beforeTheGoalObjectTimer;
+
 	// UI関係
 	std::shared_ptr<Sprite> nowRapCountSprite;
 	std::shared_ptr<Sprite> maxRapCountSprite;

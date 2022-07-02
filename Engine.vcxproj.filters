@@ -282,9 +282,6 @@
     <ClInclude Include="Src\Raytracing\ConstBuffers.h">
       <Filter>レイトレーシング\基礎\動的定数バッファ</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Game\Player.h">
-      <Filter>アプリケーション\プレイヤー</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Game\DriftParticle.h">
       <Filter>アプリケーション\ドリフトパーティクル</Filter>
     </ClInclude>
@@ -323,6 +320,9 @@
     </ClInclude>
     <ClInclude Include="Src\Engine\dxcapi.h">
       <Filter>エンジン\シェーダー管理クラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\Player.h">
+      <Filter>アプリケーション\基本的クラス</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
