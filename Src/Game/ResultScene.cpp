@@ -1,5 +1,7 @@
 #include "ResultScene.h"
 #include "Input.h"
+#include "FHelper.h"
+#include "Pipline.h"
 
 ResultScene::ResultScene()
 {
@@ -8,6 +10,8 @@ ResultScene::ResultScene()
 
 	isTransition = false;
 	nextScene = SCENE_ID::GAME;
+
+	result.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Result/result.png");
 
 }
 
@@ -36,4 +40,7 @@ void ResultScene::Update()
 
 void ResultScene::Draw()
 {
+
+	result.Draw();
+
 }

@@ -6,6 +6,7 @@
 #include "FHelper.h"
 #include "BLAS.h"
 #include "DriftParticleMgr.h"
+#include "Camera.h"
 
 Player::Player(const StageData& StageObjectData)
 {
@@ -221,6 +222,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
 		forwardVec = Vec3(0, 0, -1);
 		rotY = 0;
+		upVec = Vec3(0, 1, 0);
 
 	}
 

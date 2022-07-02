@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseScene.h"
+#include "Sprite.h"
 
 // リザルトシーン
 class ResultScene : public BaseScene {
@@ -8,6 +9,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
+	Sprite result;
 
 public:
 
