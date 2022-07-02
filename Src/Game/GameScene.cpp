@@ -261,6 +261,7 @@ void GameScene::Update()
 
 	// 中間地点のオブジェクトを元の大きさに戻す。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
 	PorygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns, Vec3(200, 200, 200));
+	PorygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns, Vec3(0, 0, 0));
 
 	// プレイヤーを更新。
 	player->Update(constBufferData, isPassedMiddlePoint, rapCount);
@@ -297,9 +298,9 @@ void GameScene::Update()
 	}
 	else {
 
-		//PorygonInstanceRegister::Ins()->ChangeTrans(goalIns, Vec3(-10000000, -10000000, -10000000));
+		PorygonInstanceRegister::Ins()->ChangeTrans(goalIns, Vec3(0, -100, 0));
 		PorygonInstanceRegister::Ins()->ChangeScale(goalIns, Vec3(0, 0, 0));
-		//PorygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns, Vec3(-10000000, -10000000, -10000000));
+		PorygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns, Vec3(0, -100, 0));
 		PorygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns, Vec3(0, 0, 0));
 
 	}
@@ -336,6 +337,7 @@ void GameScene::Update()
 
 	// 中間地点のオブジェクトを小さくする。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時で小さくしています！
 	PorygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns, Vec3(0, 0, 0));
+	PorygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns, Vec3(0, -100, 0));
 
 	tlas->Update();
 
