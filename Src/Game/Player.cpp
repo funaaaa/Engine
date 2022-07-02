@@ -103,9 +103,14 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
 	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
-	if (INPUT_DEADLINE_TRI < inputRightTriValue && isGround) {
+	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && isGround) {
 
 		speed += inputRightTriValue * ADD_SPEED;
+
+	}
+	else if (Input::Ins()->IsKey(DIK_W) && isGround) {
+
+		speed += ADD_SPEED;
 
 	}
 	else if (isGround) {
@@ -127,7 +132,8 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	// 右スティックの横の傾き量でキャラを回転させる。
 	float inputLeftStickHori = Input::Ins()->PadStick(XINPUT_THUMB_LEFTSIDE);
 	const float LEFT_STICK_INPUT_DEADLINE = 0.2f;
-	if (LEFT_STICK_INPUT_DEADLINE < std::fabs(inputLeftStickHori)) {
+	int inputADKey = Input::Ins()->IsKey(DIK_D) - Input::Ins()->IsKey(DIK_A);
+	if (LEFT_STICK_INPUT_DEADLINE < std::fabs(inputLeftStickHori) || inputADKey != 0) {
 
 		// 回転量 通常状態とドリフト状態で違う。
 		float handleAmount = HANDLE_NORMAL;
@@ -146,15 +152,15 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		}
 
 		// クォータニオンを求める。
-		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec.ConvertXMVECTOR(), handleAmount * inputLeftStickHori);
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec.ConvertXMVECTOR(), handleAmount * inputLeftStickHori + inputADKey * handleAmount);
 
 		// 求めたクォータニオンを行列に治す。
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転を加算する。
 		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, quaternionMat);
-		rotY += handleAmount * inputLeftStickHori;
-		nowFrameInputLeftStickHori = inputLeftStickHori;
+		rotY += handleAmount * inputLeftStickHori + inputADKey * handleAmount;
+		nowFrameInputLeftStickHori = inputLeftStickHori + inputADKey * handleAmount;
 
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
@@ -164,8 +170,9 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	// LTが引かれていたらドリフト状態にする。
 	const float INPUT_DEADLINE_DRIFT = 0.9f;
 	float inputLeftTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_LEFT);
-	bool isInputNowFrameLeftStrick = LEFT_STICK_INPUT_DEADLINE < fabs(nowFrameInputLeftStickHori);
-	if (INPUT_DEADLINE_DRIFT < inputLeftTriValue && isInputNowFrameLeftStrick) {
+	bool isInputNowFrameLeftStrick = LEFT_STICK_INPUT_DEADLINE < fabs(nowFrameInputLeftStickHori) || inputADKey != 0;
+	bool isInputLShift = Input::Ins()->IsKey(DIK_LSHIFT);
+	if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isInputNowFrameLeftStrick) {
 
 		isDrift = true;
 
@@ -188,7 +195,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。
-	else if (INPUT_DEADLINE_DRIFT < inputLeftTriValue && isDrift) {
+	else if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isDrift) {
 	}
 	else {
 
@@ -207,7 +214,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	}
 
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
-	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B)) {
+	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {
 
 		pos = PLAYER_DEF_POS;
 		PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));
@@ -517,7 +524,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 
 	{
 
-		const int BLAS_COUNT = stageModelData.stageOrnamentInsIndex.size();
+		const int BLAS_COUNT = static_cast<int>(stageModelData.stageOrnamentInsIndex.size());
 		for (int index = 0; index < BLAS_COUNT; ++index) {
 
 			// 当たり判定に使用するデータ

@@ -508,7 +508,7 @@ void GameScene::Input()
 
 	/*===== “ü—Íˆ— =====*/
 
-	if (Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
 		isTransition = true;
 

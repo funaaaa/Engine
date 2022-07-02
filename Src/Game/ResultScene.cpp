@@ -26,7 +26,7 @@ void ResultScene::Update()
 
 	/*===== XVˆ— =====*/
 
-	if (Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
 		isTransition = true;
 
