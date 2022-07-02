@@ -107,7 +107,7 @@ void ShaderData::LoadShaderDXC()
 
 	arguments.emplace_back(L"/Od");		// 最適化を無効にする。
 	arguments.emplace_back(L"/Zi");		// デバッグ情報を有効にする。
-	arguments.emplace_back(L"-Qembed_debug");	// 	PDBをシェーダーコンテナーに埋め込む。これを指定する場合はZiは必須らしい。
+	arguments.emplace_back(L"-Qembed_debug");	// PDBをシェーダーコンテナーに埋め込む。これを指定する場合はZiは必須らしい。
 
 	// シェーダーモデルは一旦これで固定する。
 	const auto target = L"lib_6_4";

@@ -102,11 +102,11 @@ LPD3DBLOB RayComputeShader::LoadShader(LPCWSTR ShaderFileName, const std::string
 	/*===== シェーダー読み込み =====*/
 
 	HRESULT result = D3DCompileFromFile(
-		ShaderFileName,										//シェーダファイル名
+		ShaderFileName,										// シェーダファイル名
 		nullptr,
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,					//インクルード可能にする
-		EntryPointName.c_str(), ShaderModel.c_str(),						//エントリーポイント名、シェーダーモデル指定
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,	//デバッグ用設定
+		D3D_COMPILE_STANDARD_FILE_INCLUDE,					// インクルード可能にする
+		EntryPointName.c_str(), ShaderModel.c_str(),		// エントリーポイント名、シェーダーモデル指定
+		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,	// デバッグ用設定
 		0,
 		&ShaderBlob, &ErrorBlob);
 

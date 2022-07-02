@@ -25,7 +25,7 @@ void DriftParticle::Setting(const int& BlasIndex, const int ConstBufferIndex)
 	particleIns = PorygonInstanceRegister::Ins()->CreateInstance(BlasIndex, PorygonInstanceRegister::SHADER_ID_REFLECTION);
 	constBufferIndex = ConstBufferIndex;
 	// ‚Ç‚±‚©‰“‚­‚É”ò‚Î‚·B
-	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-100000, -100000, -10000));
+	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-10000000, -10000000, -10000000));
 	PorygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(0, 0, 0));
 
 
@@ -39,7 +39,7 @@ void DriftParticle::Init()
 	isActive = false;
 
 	// ‚Ç‚±‚©‰“‚­‚É”ò‚Î‚·B
-	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-100000, -100000, -10000));
+	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-10000000, -10000000, -10000000));
 	PorygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(0, 0, 0));
 
 }

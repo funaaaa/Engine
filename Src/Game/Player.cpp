@@ -13,7 +13,7 @@ Player::Player(const StageData& StageObjectData)
 
 	/*===== 初期化処理 =====*/
 
-	carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }, true);
+	carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }, true);
 	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
@@ -29,6 +29,7 @@ Player::Player(const StageData& StageObjectData)
 	speed = 0;
 	gravity = 0;
 	boostSpeed = 0;
+	returnDefPosTimer = 0;
 	isDrift = false;
 	isGround = true;
 	isGrass = false;
@@ -46,6 +47,7 @@ void Player::Init()
 	bottomVec = Vec3(0, -1, 0);
 	upVec = Vec3(0, 1, 0);
 	size = Vec3(10, 10, 10);
+	returnDefPosTimer = 0;
 	rotY = 0;
 	speed = 0;
 	gravity = 0;
@@ -53,6 +55,7 @@ void Player::Init()
 	isDrift = false;
 	isGround = true;
 	isGrass = false;
+	PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
 
 }
 
@@ -75,6 +78,30 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 
 	// 座標を保存。
 	prevPos = pos;
+
+	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
+	if (isGround) {
+
+		returnDefPosTimer = 0;
+
+	}
+	else {
+
+		++returnDefPosTimer;
+
+		if (RETURN_DEFPOS_TIMER < returnDefPosTimer) {
+
+			pos = PLAYER_DEF_POS;
+			PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));
+			PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
+			forwardVec = Vec3(0, 0, -1);
+			rotY = 0;
+			upVec = Vec3(0, 1, 0);
+			returnDefPosTimer = 0;
+
+		}
+
+	}
 
 }
 

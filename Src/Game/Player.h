@@ -38,6 +38,8 @@ private:
 	float speed;			// 移動速度
 	float gravity;			// 重力
 	float rotY;				// ハンドル操作によって変わるY軸の回転量
+	int returnDefPosTimer;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
+	const int RETURN_DEFPOS_TIMER = 600;
 	bool isGround;			// 地上にいるか t=地上 f=空中
 	bool isGrass;			// 草の上にいるか t=草の上 f=草の上じゃない
 

@@ -31,66 +31,66 @@ GameScene::GameScene()
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	pipline = std::make_shared<RaytracingPipline>();
-	pipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(DirectX::XMFLOAT3) + sizeof(UINT) + sizeof(UINT), sizeof(DirectX::XMFLOAT2));
+	pipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2));
 
 	// SPONZAを読み込む。
 	//sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
 
 	// 天球用のスフィアを生成する。
-	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/skydome.jpg" });
+	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/skydome.jpg" });
 	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, PorygonInstanceRegister::SHADER_ID_AS);
 	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));
 
 	// ライト用のスフィアを読み込む。
-	sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	/*sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
 	for (auto& index : sphereIns) {
 
 		index = PorygonInstanceRegister::Ins()->CreateInstance(sphereBlas, PorygonInstanceRegister::SHADER_ID_LIGHT);
 		PorygonInstanceRegister::Ins()->AddScale(index, Vec3(1, 1, 1));
 		PorygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(0, 300, 0));
 
-	}
+	}*/
 
 	// ドリフト時のパーティクルのクラスをセッティングする。
 	//DriftParticleMgr::Ins()->Setting(0);
 
 	// ステージを読み込む。
-	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/white.png" });
+	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/white.png" });
 	stageIns = PorygonInstanceRegister::Ins()->CreateInstance(stageBlas, PorygonInstanceRegister::SHADER_ID_DEF_GI);
 	PorygonInstanceRegister::Ins()->AddScale(stageIns, Vec3(200, 200, 200));
-	stageGrassBlas = BLASRegister::Ins()->GenerateObj("Resource/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/green.png",L"Resource/grassNormal.png" });
+	stageGrassBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/green.png",L"Resource/Game/grassNormal.png" });
 	stageGrassIns = PorygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas, PorygonInstanceRegister::SHADER_ID_DEF_GI);
 	PorygonInstanceRegister::Ins()->AddScale(stageGrassIns, Vec3(200, 200, 200));
 
 	// ゴール用のオブジェクトを読み込む。
-	goalBlas = BLASRegister::Ins()->GenerateObj("Resource/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	goalBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
 	goalIns = PorygonInstanceRegister::Ins()->CreateInstance(goalBlas, PorygonInstanceRegister::SHADER_ID_REFRACTION);
 	PorygonInstanceRegister::Ins()->AddScale(goalIns, Vec3(200, 200, 200));
 	PorygonInstanceRegister::Ins()->AddTrans(goalIns, GOAL_DEF_POS);
 
-	goalCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
+	goalCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/inv.png" }, false, false);
 	goalCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(goalCollisionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
 	PorygonInstanceRegister::Ins()->AddScale(goalCollisionIns, Vec3(200, 200, 200));
 
-	middlePointCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/inv.png" }, false, false);
+	middlePointCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/inv.png" }, false, false);
 	middlePointCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(middlePointCollisionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
 	PorygonInstanceRegister::Ins()->AddScale(middlePointCollisionIns, Vec3(200, 200, 200));
 
 	// ステージの装飾オブジェクトをロード
 	{
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockA.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockA.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
 		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockB.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockB.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
 		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockC.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockC.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
 		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
 		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockE.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockE.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
 		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockF.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockF.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
 		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "goalSideObj.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "goalSideObj.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
 		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
 	}
 	for (auto& index : stageOrnamentIns) {
@@ -114,7 +114,7 @@ GameScene::GameScene()
 	player = std::make_shared<Player>(stageData);
 
 	// ゴール前のふわふわしているオブジェクトのBLASをロード
-	beforeTheGoalObjectBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	beforeTheGoalObjectBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
 	for (int index = 0; index < 4; ++index) {
 
 		std::pair<int, int> buff;
@@ -122,12 +122,12 @@ GameScene::GameScene()
 		buff.first = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::SHADER_ID_DEF);
 		defPosBuff.first = Vec3(250, 200, 1000 * index + 1500.0f);
 		PorygonInstanceRegister::Ins()->AddTrans(buff.first, defPosBuff.first);
-		PorygonInstanceRegister::Ins()->AddScale(buff.first, Vec3(40, 40, 40));
+		PorygonInstanceRegister::Ins()->AddScale(buff.first, Vec3(40.0f, 40.0f, 40.0f));
 		PorygonInstanceRegister::Ins()->AddRotate(buff.first, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
 		buff.second = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::SHADER_ID_DEF);
 		defPosBuff.second = Vec3(-250, 200, 1000 * index + 1500.0f);
-		PorygonInstanceRegister::Ins()->AddTrans(buff.second, buff.second);
-		PorygonInstanceRegister::Ins()->AddScale(buff.second, Vec3(40, 40, 40));
+		PorygonInstanceRegister::Ins()->AddTrans(buff.second, defPosBuff.second);
+		PorygonInstanceRegister::Ins()->AddScale(buff.second, Vec3(40.0f, 40.0f, 40.0f));
 		PorygonInstanceRegister::Ins()->AddRotate(buff.second, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
 		beforeTheGoalObjectIns.emplace_back(buff);
 		beforeTheGoalObjectDefPos.emplace_back(defPosBuff);
@@ -259,8 +259,8 @@ void GameScene::Update()
 
 	}
 
-	// 中間地点のオブジェクトを元の位置に戻す。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
-	PorygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns, Vec3(0, 0, 0));
+	// 中間地点のオブジェクトを元の大きさに戻す。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
+	PorygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns, Vec3(200, 200, 200));
 
 	// プレイヤーを更新。
 	player->Update(constBufferData, isPassedMiddlePoint, rapCount);
@@ -272,19 +272,19 @@ void GameScene::Update()
 	Camera::Ins()->Update(player->GetPos(), player->GetForwardVec(), player->GetUpVec(), player->GetNowSpeedPer());
 
 	// 点光源の位置を更新。
-	int counter = 0;
-	for (auto& index : sphereIns) {
-		PorygonInstanceRegister::Ins()->ChangeTrans(index, constBufferData.light.pointLight[counter].lightPos);
+	//int counter = 0;
+	//for (auto& index : sphereIns) {
+	//	PorygonInstanceRegister::Ins()->ChangeTrans(index, constBufferData.light.pointLight[counter].lightPos);
 
-		// ライトが有効化されていなかったらサイズを0にして描画しない。
-		if (constBufferData.light.pointLight[counter].isActive) {
-			PorygonInstanceRegister::Ins()->ChangeScale(index, constBufferData.light.pointLight[counter].lightSize);
-		}
-		else {
-			PorygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(-100000, -100000, -100000));
-		}
-		++counter;
-	}
+	//	// ライトが有効化されていなかったらサイズを0にして描画しない。
+	//	if (constBufferData.light.pointLight[counter].isActive) {
+	//		PorygonInstanceRegister::Ins()->ChangeScale(index, constBufferData.light.pointLight[counter].lightSize);
+	//	}
+	//	else {
+	//		PorygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(-10000000, -10000000, -10000000));
+	//	}
+	//	++counter;
+	//}
 
 	// 中間地点に達していたらゴールを定位置に出す。
 	if (isPassedMiddlePoint) {
@@ -297,9 +297,9 @@ void GameScene::Update()
 	}
 	else {
 
-		PorygonInstanceRegister::Ins()->ChangeTrans(goalIns, Vec3(-10000, -10000, -10000));
+		//PorygonInstanceRegister::Ins()->ChangeTrans(goalIns, Vec3(-10000000, -10000000, -10000000));
 		PorygonInstanceRegister::Ins()->ChangeScale(goalIns, Vec3(0, 0, 0));
-		PorygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns, Vec3(-10000, -10000, -10000));
+		//PorygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns, Vec3(-10000000, -10000000, -10000000));
 		PorygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns, Vec3(0, 0, 0));
 
 	}
@@ -320,7 +320,8 @@ void GameScene::Update()
 	PorygonInstanceRegister::Ins()->AddRotate(goalIns, Vec3(0.01f, 0, 0));
 
 	// ゴール前のオブジェクトを回転させる。
-	for (int index = 0; index < 4; ++index) {
+	static const int BEFORE_THE_GOAL_OBJECT_COUNT = 4;
+	for (int index = 0; index < BEFORE_THE_GOAL_OBJECT_COUNT; ++index) {
 
 		const float SIN_WAVE_MOVE = 50.0f;
 
@@ -333,8 +334,8 @@ void GameScene::Update()
 
 	}
 
-	// 中間地点のオブジェクトをどっかに飛ばす。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
-	PorygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns, Vec3(-1000000, -1000000, -10000000));
+	// 中間地点のオブジェクトを小さくする。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時で小さくしています！
+	PorygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns, Vec3(0, 0, 0));
 
 	tlas->Update();
 
