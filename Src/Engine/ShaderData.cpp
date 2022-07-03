@@ -105,16 +105,16 @@ void ShaderData::LoadShaderDXC()
 	// コンパイルオプションの指定
 	std::vector<LPCWSTR> arguments;
 
-	arguments.emplace_back(L"/Od");		// 最適化を無効にする。
-	arguments.emplace_back(L"/Zi");		// デバッグ情報を有効にする。
-	arguments.emplace_back(L"-Qembed_debug");	// PDBをシェーダーコンテナーに埋め込む。これを指定する場合はZiは必須らしい。
+	//arguments.emplace_back(L"/Od");		// 最適化を無効にする。
+	//arguments.emplace_back(L"/Zi");		// デバッグ情報を有効にする。
+	//arguments.emplace_back(L"-Qembed_debug");	// PDBをシェーダーコンテナーに埋め込む。これを指定する場合はZiは必須らしい。
 
 	// シェーダーモデルは一旦これで固定する。
 	const auto target = L"lib_6_4";
 
 	Microsoft::WRL::ComPtr<IDxcOperationResult> dxcResult;
 	hr = compiler->Compile(source.Get(), fileName.c_str(),
-		L"", target, arguments.data(), UINT(arguments.size()),
+		L"", target, arguments.data(), static_cast<UINT>(arguments.size()),
 		nullptr, 0, includeHandler.Get(), &dxcResult);
 
 	if (FAILED(hr)) {

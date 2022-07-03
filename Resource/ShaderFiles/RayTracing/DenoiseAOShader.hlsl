@@ -632,7 +632,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
             float3 reflect = normalize(-sunDir + 2.0f * dot(sunDir, worldNormal) * worldNormal);
             // 鏡面反射光
             float mSpecular = material[0].specular.x;
-            float3 specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
+            float specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
             
             // 隠蔽度を更新。
             dirLightVisibility = diffuse + specular;

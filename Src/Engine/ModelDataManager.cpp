@@ -18,7 +18,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 	// ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
 	int dataNumber = 0;
 
-	const int MODELDATA_SIZE = modelData.size();
+	const int MODELDATA_SIZE = static_cast<int>(modelData.size());
 	for (int index = 0; index < MODELDATA_SIZE; ++index) {
 		if (modelData[index].modelName == DirectryPath + FileName && modelData[index].isSmoothing == IsSmoothing) {
 			isLoad = true;
