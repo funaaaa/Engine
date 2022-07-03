@@ -398,10 +398,12 @@ void GameScene::Draw()
 		if (!constBufferData.debug.isMeshScene && !constBufferData.debug.isNormalScene && !constBufferData.debug.isLightHitScene) {
 
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				lightOutput->GetRaytracingOutput().Get())
+				lightOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseLightOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseMaskOutput->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+			DirectXBase::Ins()->cmdList->ResourceBarrier(3, barrierToUAV);
 
 			// ライトにデノイズをかける。
 			Denoiser::Ins()->Denoise(lightOutput->GetUAVIndex(), denoiseLightOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 1, 1);
@@ -411,10 +413,12 @@ void GameScene::Draw()
 		// AO情報にデノイズをかける。
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				aoOutput->GetRaytracingOutput().Get())
+				aoOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseAOOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseMaskOutput->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+			DirectXBase::Ins()->cmdList->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
 			Denoiser::Ins()->Denoise(aoOutput->GetUAVIndex(), denoiseAOOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 6);
@@ -424,10 +428,12 @@ void GameScene::Draw()
 		// GI情報にデノイズをかける。
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				giOutput->GetRaytracingOutput().Get())
+				giOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseGiOutput->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseMaskOutput->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+			DirectXBase::Ins()->cmdList->ResourceBarrier(3, barrierToUAV);
 
 			// GIにデノイズをかける。
 			Denoiser::Ins()->Denoise(giOutput->GetUAVIndex(), denoiseGiOutput->GetUAVIndex(), denoiseMaskOutput->GetUAVIndex(), 100, 1);
