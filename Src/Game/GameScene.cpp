@@ -29,7 +29,7 @@ GameScene::GameScene()
 	constBuffer->Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), &constBufferData, sizeof(RayConstBufferData));
 
 	// デノイズAO用のパイプラインを設定。
-	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"}});
+	dAOuseShaders.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	pipline = std::make_shared<RaytracingPipline>();
 	pipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2), 6);
 
@@ -145,33 +145,33 @@ GameScene::GameScene()
 
 	// AO出力用クラスをセット。
 	aoOutput = std::make_shared<RaytracingOutput>();
-	aoOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	aoOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput");
 	denoiseAOOutput = std::make_shared<RaytracingOutput>();
-	denoiseAOOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseAOOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseAOOutput");
 
 	// 色出力用クラスをセット。
 	colorOutput = std::make_shared<RaytracingOutput>();
-	colorOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	colorOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput");
 
 	// 明るさ情報出力用クラスをセット。
 	lightOutput = std::make_shared<RaytracingOutput>();
-	lightOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	lightOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"LightOutput");
 	denoiseLightOutput = std::make_shared<RaytracingOutput>();
-	denoiseLightOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseLightOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput");
 
 	// GI出力用クラスをセット。
 	giOutput = std::make_shared<RaytracingOutput>();
-	giOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	giOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput");
 	denoiseGiOutput = std::make_shared<RaytracingOutput>();
-	denoiseGiOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseGiOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput");
 
 	// デノイズマスク用クラスをセット。
 	denoiseMaskOutput = std::make_shared<RaytracingOutput>();
-	denoiseMaskOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseMaskOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMaskOutput");
 
 	// 最終出力用クラスをセット。
 	denoiseMixTextureOutput = std::make_shared<RaytracingOutput>();
-	denoiseMixTextureOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseMixTextureOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput");
 
 	// シェーダーテーブルを生成。
 	pipline->ConstructionShaderTable();
@@ -210,16 +210,6 @@ GameScene::GameScene()
 		numFontHandle[9] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/9.png");
 		numFontHandle[10] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/slash.png");
 	}
-
-	// バリアを設定し各リソースの状態を遷移させる.
-	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 }
 
@@ -377,6 +367,16 @@ void GameScene::Draw()
 	// 定数バッファをセット
 	DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, constBuffer->GetBuffer(frameIndex)->GetGPUVirtualAddress());
 
+	// バリアを設定し各リソースの状態を遷移させる.
+	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
 	// 出力用UAVを設定。
 	aoOutput->SetComputeRootDescriptorTalbe(2);		// AOの結果出力用
 	lightOutput->SetComputeRootDescriptorTalbe(3);	// ライトの明るさの結果出力用
@@ -519,6 +519,16 @@ void GameScene::Draw()
 	};
 
 	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
+
+	// バリアを設定し各リソースの状態を遷移させる.
+	aoOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseAOOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseLightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	colorOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	giOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseGiOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseMaskOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// UIを描画
 	nowRapCountSprite->Draw();

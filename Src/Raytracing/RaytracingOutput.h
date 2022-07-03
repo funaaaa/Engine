@@ -19,7 +19,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// セッティング
-	void Setting(DXGI_FORMAT Format);
+	void Setting(DXGI_FORMAT Format, LPCWSTR BufferName);
 
 	// ディスクリプタをセット。
 	void SetComputeRootDescriptorTalbe(const int& RootParamIndex);

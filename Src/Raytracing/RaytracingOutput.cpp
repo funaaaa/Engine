@@ -3,7 +3,7 @@
 #include "DirectXBase.h"
 #include "WindowsAPI.h"
 
-void RaytracingOutput::Setting(DXGI_FORMAT Format)
+void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName)
 {
 
 	/*===== 設定 =====*/
@@ -31,7 +31,7 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format)
 	// ディスクリプタヒープをインクリメント
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
-	rayTracingOutput->SetName(L"RayTracingOutputUAV");
+	rayTracingOutput->SetName(BufferName);
 
 }
 

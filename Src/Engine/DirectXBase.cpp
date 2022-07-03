@@ -2,6 +2,7 @@
 #include <cassert>
 #include "Input.h"
 #include <stdexcept>
+#include <d3d12sdklayers.h>
 #include "WindowsAPI.h"
 
 #pragma comment(lib, "d3d12.lib")
@@ -18,6 +19,10 @@ void DirectXBase::Init() {
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController))))
 	{
 		debugController->EnableDebugLayer();
+	}
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController))))
+	{
+		shaderDebugController->SetEnableGPUBasedValidation(true);
 	}
 #endif
 

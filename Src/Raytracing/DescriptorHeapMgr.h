@@ -32,6 +32,7 @@ public:
 		descHeapDesc.NumDescriptors = CBV_SRV_UAV_COUNT;
 		// ディスクリプタヒープの生成。
 		DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+		descriptorHeap->SetName(L"DescriptorHeapMgr");
 
 		// 先頭を初期化
 		head = 0;

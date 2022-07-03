@@ -20,6 +20,7 @@ public:
 
 	std::shared_ptr<WindowsAPI> windowsAPI;						//WindowsAPIクラス
 	Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
+	Microsoft::WRL::ComPtr<ID3D12Debug1> shaderDebugController;
 	Microsoft::WRL::ComPtr<ID3D12Device5> dev;
 	Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory;
 	std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters;//アダプターの列挙用

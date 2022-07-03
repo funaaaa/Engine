@@ -15,12 +15,12 @@ void Denoiser::Setting()
 	blurYOutput = std::make_shared<RaytracingOutput>();
 
 	// ブラー出力テスト用クラスをセット。
-	blurXOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
-	blurYOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	blurXOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseBlurXOutput");
+	blurYOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseBlurYOutput");
 
 	// デノイズ時に排出する用クラスをセット。
 	denoiseOutput = std::make_shared<RaytracingOutput>();
-	denoiseOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM);
+	denoiseOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseBlurBuffOutput");
 
 	// 使用するコンピュートシェーダーを生成。
 	blurX = std::make_shared<RayComputeShader>();
@@ -60,6 +60,7 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	blurYOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// コンピュートシェーダーを実行。
 	blurX->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
@@ -70,6 +71,7 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	blurYOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 }
 
