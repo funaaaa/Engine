@@ -1,34 +1,34 @@
 
-// 入力情報
+// ??????
 RWTexture2D<float4> InputColor : register(u0);
 RWTexture2D<float4> InputAOLuminance : register(u1);
 RWTexture2D<float4> InputLightLuminance : register(u2);
 RWTexture2D<float4> InputGI : register(u3);
 
-// 出力先UAV  
+// ?o???UAV  
 RWTexture2D<float4> OutputImg : register(u4);
 
 [numthreads(32, 32, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
-    // AOの明るさ
+    // AO?????
     float4 aoLuminance = InputAOLuminance[DTid.xy];
     
-    // ライティングの明るさ
+    // ???C?e?B???O?????
     float4 lightLuminance = InputLightLuminance[DTid.xy];
     
-    // テクスチャの色情報
+    // ?e?N?X?`????F???
     float4 color = InputColor[DTid.xy];
     
-    // GIの情報
+    // GI????
     float4 gi = InputGI[DTid.xy];
-    // ライトの明るさによってGIを弱める。
+    // ???C?g???????????GI??????B
     gi.x *= saturate(aoLuminance.x + lightLuminance.x);
     gi.y *= saturate(aoLuminance.y + lightLuminance.y);
     gi.z *= saturate(aoLuminance.z + lightLuminance.z);
     
-    // 最終的に全てのテクスチャを混ぜ合わせる。
+    // ??I?I??S???e?N?X?`??????????????B
     OutputImg[DTid.xy] = (aoLuminance + lightLuminance) * (color + gi);
     
 }

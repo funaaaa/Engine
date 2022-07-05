@@ -1,18 +1,18 @@
 
-// 入力情報
+// ??????
 RWTexture2D<float4> InputImg : register(u0);
 RWTexture2D<float4> InputMaskImg : register(u1);
 
-// 出力先UAV  
+// ?o???UAV  
 RWTexture2D<float4> OutputImg : register(u2);
 
-// 重みテーブル
+// ?d??e?[?u??
 cbuffer GaussianWeight : register(b0)
 {
     float4 weights[2];
 };
 
-// マスクのテクスチャをサンプリング
+// ?}?X?N??e?N?X?`?????T???v?????O
 float4 GetPixelColor(int x, int y)
 {
     uint2 texSize = uint2(1280, 720);
@@ -22,7 +22,7 @@ float4 GetPixelColor(int x, int y)
 
     return InputImg[uint2(x, y)];
 }
-// ライトリーク対策
+// ???C?g???[?N???
 float4 GetMaskColor(int x, int y)
 {
     uint2 texSize = uint2(1280, 720);
@@ -33,12 +33,16 @@ float4 GetMaskColor(int x, int y)
     return InputMaskImg[uint2(x, y)];
 }
 
-// ライトリーク対策
+// ???C?g???[?N???
 float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor, float4 baseColor, float4 targetColor, float weight)
 {
     
-    // マスクの色が同じだったらそのターゲットの色を返す。
-    if (baseMaskColor.x == targetMaskColor.x && baseMaskColor.y == targetMaskColor.y && baseMaskColor.z == targetMaskColor.z)
+    // ?}?X?N??F?????????????炻??^?[?Q?b?g??F?????B
+    float subR = abs(baseMaskColor.x - targetMaskColor.x);
+    float subG = abs(baseMaskColor.y - targetMaskColor.y);
+    float subB = abs(baseMaskColor.z - targetMaskColor.z);
+    const float SUB_NEAR = 0.1f;
+    if (subR < SUB_NEAR && subG < SUB_NEAR && subB < SUB_NEAR)
     {
         return targetColor * weight;
     }
@@ -57,7 +61,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     float4 color = float4(0, 0, 0, 0);
     
-    // 基盤の色
+    // ????F
     float4 baseColor = GetPixelColor(basepos.x, basepos.y);
     float4 baseMaskColor = GetMaskColor(basepos.x, basepos.y);
     

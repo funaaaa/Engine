@@ -500,11 +500,15 @@ void GameScene::Draw()
 		lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	}
-	else {
+	else if (Input::Ins()->IsKey(DIK_G)) {
 
 		// ƒfƒmƒCƒY‚³‚ê‚½’Êí‚Ì•`‰æ
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMaskOutput->GetRaytracingOutput().Get());
 
+	}
+	else {
+
+		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput->GetRaytracingOutput().Get());
 
 	}
 
