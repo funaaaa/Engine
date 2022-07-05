@@ -691,6 +691,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         float NoL = saturate(dot(worldNormal, sampleDir));
         float pdf = 1.0 / (2.0 * PI);
         aoLightVisibility += aoLightVisibilityBuff;
+        
     }
         
    

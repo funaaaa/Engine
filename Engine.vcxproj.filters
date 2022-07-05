@@ -322,7 +322,7 @@
       <Filter>エンジン\シェーダー管理クラス</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\Player.h">
-      <Filter>アプリケーション\基本的クラス</Filter>
+      <Filter>アプリケーション\プレイヤー</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

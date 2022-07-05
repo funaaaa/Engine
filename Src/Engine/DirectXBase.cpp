@@ -20,10 +20,10 @@ void DirectXBase::Init() {
 	{
 		debugController->EnableDebugLayer();
 	}
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController))))
+	/*if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController))))
 	{
 		shaderDebugController->SetEnableGPUBasedValidation(true);
-	}
+	}*/
 #endif
 
 	// ウィンドウ初期化
