@@ -38,7 +38,7 @@ GameScene::GameScene()
 
 	// 天球用のスフィアを生成する。
 	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/skydome.jpg" });
-	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, PorygonInstanceRegister::SHADER_ID_AS);
+	skyDomeIns = PorygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, PorygonInstanceRegister::SHADER_ID::AS);
 	PorygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));
 
 	// ライト用のスフィアを読み込む。
@@ -56,42 +56,42 @@ GameScene::GameScene()
 
 	// ステージを読み込む。
 	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/white.png" });
-	stageIns = PorygonInstanceRegister::Ins()->CreateInstance(stageBlas, PorygonInstanceRegister::SHADER_ID_DEF_GI);
+	stageIns = PorygonInstanceRegister::Ins()->CreateInstance(stageBlas, PorygonInstanceRegister::DEF_GI);
 	PorygonInstanceRegister::Ins()->AddScale(stageIns, Vec3(200, 200, 200));
 	stageGrassBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/green.png",L"Resource/Game/grassNormal.png" });
-	stageGrassIns = PorygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas, PorygonInstanceRegister::SHADER_ID_DEF_GI);
+	stageGrassIns = PorygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas, PorygonInstanceRegister::DEF_GI);
 	PorygonInstanceRegister::Ins()->AddScale(stageGrassIns, Vec3(200, 200, 200));
 
 	// ゴール用のオブジェクトを読み込む。
 	goalBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
-	goalIns = PorygonInstanceRegister::Ins()->CreateInstance(goalBlas, PorygonInstanceRegister::SHADER_ID_REFRACTION);
+	goalIns = PorygonInstanceRegister::Ins()->CreateInstance(goalBlas, PorygonInstanceRegister::SHADER_ID::REFRACTION);
 	PorygonInstanceRegister::Ins()->AddScale(goalIns, Vec3(200, 200, 200));
 	PorygonInstanceRegister::Ins()->AddTrans(goalIns, GOAL_DEF_POS);
 
 	goalCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/inv.png" }, false, false);
-	goalCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(goalCollisionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
+	goalCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(goalCollisionBlas, PorygonInstanceRegister::SHADER_ID::INVISIBILITY);
 	PorygonInstanceRegister::Ins()->AddScale(goalCollisionIns, Vec3(200, 200, 200));
 
 	middlePointCollisionBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/inv.png" }, false, false);
-	middlePointCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(middlePointCollisionBlas, PorygonInstanceRegister::SHADER_ID_INVISIBILITY);
+	middlePointCollisionIns = PorygonInstanceRegister::Ins()->CreateInstance(middlePointCollisionBlas, PorygonInstanceRegister::SHADER_ID::INVISIBILITY);
 	PorygonInstanceRegister::Ins()->AddScale(middlePointCollisionIns, Vec3(200, 200, 200));
 
 	// ステージの装飾オブジェクトをロード
 	{
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockA.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID::DEF));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockB.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID::DEF));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockC.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID::DEF));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID::DEF));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockE.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID::DEF));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockF.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID::DEF));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "goalSideObj.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID_DEF));
+		stageOrnamentIns.emplace_back(PorygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PorygonInstanceRegister::SHADER_ID::DEF));
 	}
 	for (auto& index : stageOrnamentIns) {
 
@@ -119,12 +119,12 @@ GameScene::GameScene()
 
 		std::pair<int, int> buff;
 		std::pair<Vec3, Vec3> defPosBuff;
-		buff.first = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::SHADER_ID_DEF);
+		buff.first = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::DEF);
 		defPosBuff.first = Vec3(250, 200, 1000 * index + 1500.0f);
 		PorygonInstanceRegister::Ins()->AddTrans(buff.first, defPosBuff.first);
 		PorygonInstanceRegister::Ins()->AddScale(buff.first, Vec3(40.0f, 40.0f, 40.0f));
 		PorygonInstanceRegister::Ins()->AddRotate(buff.first, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
-		buff.second = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::SHADER_ID_DEF);
+		buff.second = PorygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas, PorygonInstanceRegister::DEF);
 		defPosBuff.second = Vec3(-250, 200, 1000 * index + 1500.0f);
 		PorygonInstanceRegister::Ins()->AddTrans(buff.second, defPosBuff.second);
 		PorygonInstanceRegister::Ins()->AddScale(buff.second, Vec3(40.0f, 40.0f, 40.0f));
@@ -498,12 +498,6 @@ void GameScene::Draw()
 		lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), lightOutput->GetRaytracingOutput().Get());
 		lightOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	}
-	else if (Input::Ins()->IsKey(DIK_G)) {
-
-		// デノイズされた通常の描画
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMaskOutput->GetRaytracingOutput().Get());
 
 	}
 	else {

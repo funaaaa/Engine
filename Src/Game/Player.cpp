@@ -14,7 +14,7 @@ Player::Player(const StageData& StageObjectData)
 	/*===== ‰Šú‰»ˆ— =====*/
 
 	carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }, true);
-	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_REFLECTION);
+	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID::REFLECTION);
 	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
 	stageModelData = StageObjectData;

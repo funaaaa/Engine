@@ -242,7 +242,7 @@ bool ShootDirShadow(Vertex vtx, float length)
     //float3 shadowRayDir = GetConeSample(randSeed, dirLightVec, coneAngle);
     float3 shadowRayDir = dirLightVec;
     
-    return ShootShadowRayNoAH(worldPosition + vtx.Normal * 2.0f, shadowRayDir, length, gRtScene);
+    return ShootShadowRayNoAH(worldPosition + normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3())) * 2.0f, shadowRayDir, length, gRtScene);
     
 }
 

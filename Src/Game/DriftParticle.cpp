@@ -22,7 +22,7 @@ void DriftParticle::Setting(const int& BlasIndex, const int ConstBufferIndex)
 
 	/*===== セッティング =====*/
 
-	particleIns = PorygonInstanceRegister::Ins()->CreateInstance(BlasIndex, PorygonInstanceRegister::SHADER_ID_REFLECTION);
+	particleIns = PorygonInstanceRegister::Ins()->CreateInstance(BlasIndex, PorygonInstanceRegister::REFLECTION);
 	constBufferIndex = ConstBufferIndex;
 	// どこか遠くに飛ばす。
 	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-10000000, -10000000, -10000000));
