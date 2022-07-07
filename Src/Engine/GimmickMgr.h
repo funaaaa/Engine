@@ -10,7 +10,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	//std::vector<std::shared_ptr<BaseGimmick>> gimmicks;
+	std::vector<std::shared_ptr<BaseGimmick>> gimmicks;
 
 
 public:
@@ -21,6 +21,6 @@ public:
 	void AddGimmick(const BaseGimmick::ID& GimmickID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID);
 
 	// ギミック集を追加。
-	//std::vector<std::shared_ptr<BaseGimmick>> GetGimmickData() { return gimmicks; }
+	std::vector<std::shared_ptr<BaseGimmick>> GetGimmickData() { return gimmicks; }
 
 };

@@ -16,7 +16,7 @@ public:
 	BoostGimmick() {};
 
 	// ‰Šú‰»ˆ—
-	void Setting(const ID& GimmickID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID) override;
+	void Setting(const ID& GimmickID, const UINT& InstanceID, const UINT& ShaderID) override;
 
 	// XVˆ—
 	void Update() override;

@@ -3,6 +3,7 @@
 #include <vector>
 #include <wtypes.h>
 #include "PolygonInstanceRegister.h"
+#include "OBB.h"
 
 class BaseGimmick {
 
@@ -23,6 +24,7 @@ protected:
 	int blasIndex;	// オブジェクトのBLASのインデックス
 	int insIndex;	// オブジェクトのINSTANCEのインデックス
 	bool isActive;	// 有効化フラグ
+	OBB collider;	// 当たり判定用OBB
 
 
 public:
@@ -30,7 +32,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	virtual void Setting(const ID& GimmickID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID) = 0;
+	virtual void Setting(const ID& GimmickID, const UINT& InstanceID, const UINT& ShaderID) = 0;
 
 	// 更新処理
 	virtual void Update() = 0;

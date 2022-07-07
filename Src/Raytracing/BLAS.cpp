@@ -12,6 +12,10 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	/*===== BLASを生成する処理 =====*/
 
+	// パスを保存。
+	texturePath = TexturePath;
+	modelPath = DirectryPath + ModelName;
+
 	// テクスチャを読み込む。
 	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
 	for (auto& index : TexturePath) {

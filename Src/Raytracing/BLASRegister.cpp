@@ -6,10 +6,42 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 
 	/*===== BLASを生成 =====*/
 
-	blas.push_back(std::make_shared<BLAS>());
-	blas.back()->GenerateBLASObj(DirectryPath, ModelName, HitGroupName, TexturePath, IsSmoothing, IsOpaque);
+	// すでにロード済みかをチェックする。
+	bool isLoaded = false;
+	int blasIndex = 0;
+	for (auto& index : blas) {
 
-	return static_cast<int>(blas.size()) - 1;
+		// モデルの名前が同じかどうかをチェックする。
+		if (!(index->GetModelPath() == DirectryPath + ModelName)) continue;
+
+		// テクスチャ名が同じかどうかをチェックする。
+		std::vector<LPCWSTR> blasTexture = index->GetTexturePath();
+		for (auto& textureIndex : TexturePath) {
+
+			// テクスチャ名が同じかどうかをチェックする。
+			if (!(textureIndex == blasTexture[&textureIndex - &TexturePath[0]])) continue;
+
+			isLoaded = true;
+			blasIndex = &index - &blas[0];
+
+		}
+
+	}
+
+	// ロードされていたら
+	if (isLoaded) {
+
+		return blasIndex;
+
+	}
+	else {
+
+		blas.push_back(std::make_shared<BLAS>());
+		blas.back()->GenerateBLASObj(DirectryPath, ModelName, HitGroupName, TexturePath, IsSmoothing, IsOpaque);
+
+		return static_cast<int>(blas.size()) - 1;
+
+	}
 
 }
 

@@ -129,6 +129,11 @@ void PolygonInstanceRegister::ChangeScale(const int& Index, const Vec3& Scale)
 
 }
 
+UINT PolygonInstanceRegister::GetBLASIndex(const int& Index)
+{
+	return instance[Index]->GetBLASIndex();
+}
+
 void PolygonInstanceRegister::CalWorldMat()
 {
 

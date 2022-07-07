@@ -44,6 +44,8 @@ private:
 	UINT indexStride;						// 1頂点インデックスのデータサイズ
 
 	std::wstring hitGroupName;				// 使用するヒットグループの名前
+	std::string modelPath;					// 使用するモデルのパス
+	std::vector<LPCWSTR> texturePath;		// 使用するテクスチャのパス
 
 	int modelIndex;							// モデルのインデックス
 
@@ -90,7 +92,7 @@ public:
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
-	
+
 	// アクセッタ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
@@ -98,6 +100,8 @@ public:
 	std::wstring& GetHitGroupName() { return hitGroupName; }
 	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor; }
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
+	const std::string& GetModelPath() { return modelPath; }
+	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath; }
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex; }

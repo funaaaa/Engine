@@ -64,6 +64,9 @@ public:
 	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeScale(const int& Index, const Vec3& Scale);
 
+	// BLASのIndexをかける。
+	UINT GetBLASIndex(const int& Index);
+
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
 

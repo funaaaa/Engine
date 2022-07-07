@@ -2,14 +2,14 @@
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
 
-void BoostGimmick::Setting(const ID& GimmickID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID)
+void BoostGimmick::Setting(const ID& GimmickID, const UINT& InstanceID, const UINT& ShaderID)
 {
 
 	/*===== セッティング処理 =====*/
 
 	// オブジェクトをロード
-	blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
-	insIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID);
+	insIndex = InstanceID;
+	blasIndex = PolygonInstanceRegister::Ins()->GetBLASIndex(InstanceID);
 
 	// 各種変数を初期化。
 	gimmickID = GimmickID;
