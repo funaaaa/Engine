@@ -9,7 +9,7 @@
 #include "Vec.h"
 
 // TLASに登録するインスタンスクラス
-class PorygonMeshInstance {
+class PolygonMeshInstance {
 
 private:
 
@@ -22,6 +22,8 @@ private:
 	DirectX::XMMATRIX matTrans;
 	DirectX::XMMATRIX matRot;
 	DirectX::XMMATRIX scaleMat;
+
+	Vec3 pos;
 
 
 public:
@@ -56,6 +58,9 @@ public:
 
 	// ワールド行列を加算。
 	void CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input);
+
+	// 座標を取得。
+	inline const Vec3& GetPos() { return pos; }
 
 
 private:

@@ -1,7 +1,7 @@
-#include "PorygonInstance.h"
+#include "PolygonInstance.h"
 #include "DirectXBase.h"
 
-D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID)
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
@@ -30,7 +30,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PorygonMeshInstance::CreateInstance(const Microso
 
 }
 
-void PorygonMeshInstance::AddTrans(const Vec3& Pos)
+void PolygonMeshInstance::AddTrans(const Vec3& Pos)
 {
 
 	/*===== 移動関数 =====*/
@@ -39,7 +39,7 @@ void PorygonMeshInstance::AddTrans(const Vec3& Pos)
 
 }
 
-void PorygonMeshInstance::ChangeTrans(const Vec3& Pos)
+void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
 {
 
 	/*===== 移動関数 =====*/
@@ -48,7 +48,7 @@ void PorygonMeshInstance::ChangeTrans(const Vec3& Pos)
 
 }
 
-void PorygonMeshInstance::AddRotate(const Vec3& Rot)
+void PolygonMeshInstance::AddRotate(const Vec3& Rot)
 {
 
 	/*===== 回転関数 =====*/
@@ -63,14 +63,14 @@ void PorygonMeshInstance::AddRotate(const Vec3& Rot)
 
 }
 
-void PorygonMeshInstance::AddRotate(const DirectX::XMMATRIX& Rot)
+void PolygonMeshInstance::AddRotate(const DirectX::XMMATRIX& Rot)
 {
 
 	matRot = matRot * Rot;
 
 }
 
-void PorygonMeshInstance::ChangeRotate(const Vec3& Rot)
+void PolygonMeshInstance::ChangeRotate(const Vec3& Rot)
 {
 
 	/*===== 回転関数 =====*/
@@ -83,7 +83,7 @@ void PorygonMeshInstance::ChangeRotate(const Vec3& Rot)
 
 }
 
-void PorygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)
+void PolygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)
 {
 
 	/*===== 回転関数 =====*/
@@ -92,7 +92,7 @@ void PorygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)
 
 }
 
-void PorygonMeshInstance::AddScale(const Vec3& Scale)
+void PolygonMeshInstance::AddScale(const Vec3& Scale)
 {
 
 	/*===== 拡縮関数 =====*/
@@ -105,7 +105,7 @@ void PorygonMeshInstance::AddScale(const Vec3& Scale)
 
 }
 
-void PorygonMeshInstance::ChangeScale(const Vec3& Scale)
+void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 {
 
 	/*===== 拡縮関数 =====*/
@@ -118,7 +118,7 @@ void PorygonMeshInstance::ChangeScale(const Vec3& Scale)
 
 }
 
-void PorygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
+void PolygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 {
 
 	/*===== ワールド行列を計算 =====*/
@@ -136,7 +136,7 @@ void PorygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 
 }
 
-void PorygonMeshInstance::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize)
+void PolygonMeshInstance::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
@@ -159,7 +159,7 @@ void PorygonMeshInstance::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& 
 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> PorygonMeshInstance::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> PolygonMeshInstance::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/

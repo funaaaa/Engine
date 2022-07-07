@@ -1,7 +1,7 @@
 #include "BoostGimmick.h"
 #include "BLASRegister.h"
 #include "HitGroupMgr.h"
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 
 void BoostGimmick::Setting(const ID& GimmickID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID)
 {
@@ -10,7 +10,7 @@ void BoostGimmick::Setting(const ID& GimmickID, const std::string& DirectryPath,
 
 	// オブジェクトをロード
 	blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
-	insIndex = PorygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID);
+	insIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID);
 
 	// 各種変数を初期化。
 	gimmickID = GimmickID;

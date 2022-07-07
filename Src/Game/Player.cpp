@@ -1,6 +1,6 @@
 #include "Player.h"
 #include "BLASRegister.h"
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 #include "HitGroupMgr.h"
 #include "Input.h"
 #include "FHelper.h"
@@ -14,8 +14,8 @@ Player::Player(const StageData& StageObjectData)
 	/*===== 初期化処理 =====*/
 
 	carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }, true);
-	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID::REFLECTION);
-	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
+	carInstanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PolygonInstanceRegister::SHADER_ID::REFLECTION);
+	PolygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
 
 	stageModelData = StageObjectData;
 
@@ -55,7 +55,7 @@ void Player::Init()
 	isDrift = false;
 	isGround = true;
 	isGrass = false;
-	PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
+	PolygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
 
 }
 
@@ -74,7 +74,7 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 	CheckHit(IsPassedMiddlePoint, RapCount);
 
 	// 座標を更新。
-	PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, pos);
+	PolygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, pos);
 
 	// 座標を保存。
 	prevPos = pos;
@@ -92,8 +92,8 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 		if (RETURN_DEFPOS_TIMER < returnDefPosTimer) {
 
 			pos = PLAYER_DEF_POS;
-			PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));
-			PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
+			PolygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));
+			PolygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
 			forwardVec = Vec3(0, 0, -1);
 			rotY = 0;
 			upVec = Vec3(0, 1, 0);
@@ -186,12 +186,12 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転を加算する。
-		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, quaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, quaternionMat);
 		rotY += handleAmount * inputLeftStickHori + inputADKey * handleAmount;
 		nowFrameInputLeftStickHori = inputLeftStickHori + inputADKey * handleAmount;
 
 		// 正面ベクトルを車の回転行列分回転させる。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
 
 	}
 
@@ -208,17 +208,17 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		Vec3 driftVec = Vec3();
 		if (nowFrameInputLeftStickHori < 0) {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
 
 		}
 		else {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
 
 		}
 
 		// ドリフト時のパーティクルを生成。
-		//DriftParticleMgr::Ins()->Generate(pos, driftVec, PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex), ConstBufferData);
+		//DriftParticleMgr::Ins()->Generate(pos, driftVec, PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex), ConstBufferData);
 		ConstBufferData;
 
 	}
@@ -245,8 +245,8 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {
 
 		pos = PLAYER_DEF_POS;
-		PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));
-		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
+		PolygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, Vec3(0, 0, 0));
+		PolygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, Vec3(0, 0, 0));
 		forwardVec = Vec3(0, 0, -1);
 		rotY = 0;
 		upVec = Vec3(0, 1, 0);
@@ -313,7 +313,7 @@ void Player::Move()
 	pos += Vec3(0, -1, 0) * gravity;
 
 	// 下ベクトルを車の回転行列分回転させる。
-	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
 
 }
 
@@ -335,9 +335,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexIndex();
 		collistionData.rayPos = pos;
 		collistionData.rayDir = bottomVec;
-		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
-		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
-		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -387,9 +387,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageGrassBlasIndex]->GetVertexIndex();
 			collistionData.rayPos = pos;
 			collistionData.rayDir = bottomVec;
-			collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageGrassInsIndex);
-			collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageGrassInsIndex);
-			collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageGrassInsIndex);
+			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageGrassInsIndex);
+			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageGrassInsIndex);
+			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageGrassInsIndex);
 
 			// 当たり判定の結果保存用変数。
 			isHit = false;
@@ -448,9 +448,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexIndex();
 		collistionData.rayPos = prevPos;
 		collistionData.rayDir = (pos - prevPos).GetNormal();
-		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
-		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
-		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
 
 		// 当たり判定を行う。
 		isHit = false;
@@ -485,9 +485,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexIndex();
 		collistionData.rayPos = prevPos;
 		collistionData.rayDir = forwardVec;
-		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.middlePointInsIndex);
-		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.middlePointInsIndex);
-		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.middlePointInsIndex);
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.middlePointInsIndex);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.middlePointInsIndex);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.middlePointInsIndex);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -521,9 +521,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexIndex();
 		collistionData.rayPos = prevPos;
 		collistionData.rayDir = forwardVec;
-		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.goalInsIndex);
-		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.goalInsIndex);
-		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.goalInsIndex);
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.goalInsIndex);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.goalInsIndex);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.goalInsIndex);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -563,9 +563,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageOrnamentBlasIndex[index]]->GetVertexIndex();
 			collistionData.rayPos = prevPos;
 			collistionData.rayDir = (pos - prevPos).GetNormal();
-			collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageModelData.stageOrnamentInsIndex[index]);
-			collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageModelData.stageOrnamentInsIndex[index]);
-			collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageModelData.stageOrnamentInsIndex[index]);
+			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageOrnamentInsIndex[index]);
+			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageOrnamentInsIndex[index]);
+			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageOrnamentInsIndex[index]);
 
 			// 当たり判定を行う。
 			bool isHit = false;
@@ -633,7 +633,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, quaternionMat);
+		PolygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, quaternionMat);
 
 		// 上ベクトルを基準としたクォータニオンを求める。
 		Vec3 normal = HitNormal;
@@ -643,13 +643,13 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
 
 		// 上ベクトルを更新。
 		upVec = normal;
@@ -663,7 +663,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 	if (HitNormal == Vec3(0, 1, 0)) {
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, DirectX::XMMatrixIdentity());
+		PolygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, DirectX::XMMatrixIdentity());
 
 		// 上ベクトルを基準としたクォータニオンを求める。
 		Vec3 normal = HitNormal;
@@ -673,13 +673,13 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
 
 		// 上ベクトルを更新。
 		upVec = normal;

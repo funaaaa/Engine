@@ -61,10 +61,10 @@
     <ClCompile Include="Src\Engine\Joycon.cpp">
       <Filter>エンジン\入力関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Raytracing\PorygonInstance.cpp">
+    <ClCompile Include="Src\Raytracing\PolygonInstance.cpp">
       <Filter>レイトレーシング\加速構造体\Instance</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Raytracing\PorygonInstanceRegister.cpp">
+    <ClCompile Include="Src\Raytracing\PolygonInstanceRegister.cpp">
       <Filter>レイトレーシング\加速構造体\InstanceRegister</Filter>
     </ClCompile>
     <ClCompile Include="Src\Raytracing\TLAS.cpp">
@@ -237,10 +237,10 @@
     <ClInclude Include="Src\Engine\FString.h">
       <Filter>エンジン\便利系</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Raytracing\PorygonInstance.h">
+    <ClInclude Include="Src\Raytracing\PolygonInstance.h">
       <Filter>レイトレーシング\加速構造体\Instance</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Raytracing\PorygonInstanceRegister.h">
+    <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h">
       <Filter>レイトレーシング\加速構造体\InstanceRegister</Filter>
     </ClInclude>
     <ClInclude Include="Src\Raytracing\TLAS.h">

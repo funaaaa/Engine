@@ -1,5 +1,5 @@
 #include "TLAS.h"
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 #include "DescriptorHeapMgr.h"
 
 void TLAS::GenerateTLAS()
@@ -8,7 +8,7 @@ void TLAS::GenerateTLAS()
 	/*===== TLAS生成処理 =====*/
 
 	// インスタンスの行列を計算。
-	PorygonInstanceRegister::Ins()->CalWorldMat();
+	PolygonInstanceRegister::Ins()->CalWorldMat();
 
 
 	/*-- 加速構造体を設定 --*/
@@ -39,10 +39,10 @@ void TLAS::GenerateTLAS()
 //{
 //
 //	// インスタンスの情報を記録したバッファを準備する。
-//	size_t sizeofinstancedescs = porygoninstanceregister::instance()->getregistersize() * sizeof(d3d12_raytracing_instance_desc);
+//	size_t sizeofinstancedescs = PolygonInstanceRegister::instance()->getregistersize() * sizeof(d3d12_raytracing_instance_desc);
 //
 //	// 生成したバッファにデータを書き込む。
-//	writetomemory(instancedescbuffer, porygoninstanceregister::instance()->getdata(), sizeofinstancedescs);
+//	writetomemory(instancedescbuffer, PolygonInstanceRegister::instance()->getdata(), sizeofinstancedescs);
 //
 //}
 
@@ -52,21 +52,21 @@ void TLAS::Update()
 	/*===== TLASの更新処理 =====*/
 
 	// インスタンスの行列を計算。
-	PorygonInstanceRegister::Ins()->CalWorldMat();
+	PolygonInstanceRegister::Ins()->CalWorldMat();
 
 	// Instanceのサイズを取得。
-	auto sizeOfInstanceDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
+	auto sizeOfInstanceDescs = PolygonInstanceRegister::Ins()->GetRegisterSize();
 	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
 	// CPU から書き込み可能なバッファに書き込む。
-	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescBuffer, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// 更新のための値を設定。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
+	inputs.NumDescs = PolygonInstanceRegister::Ins()->GetRegisterSize();
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	// TLAS の更新処理を行うためのフラグを設定する。
 	inputs.Flags =
@@ -174,7 +174,7 @@ void TLAS::SettingAccelerationStructure()
 	/*-- TLASの生成に必要なメモリ量を求める --*/
 
 	// インスタンスの情報を記録したバッファを準備する。
-	size_t sizeOfInstanceDescs = PorygonInstanceRegister::Ins()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	size_t sizeOfInstanceDescs = PolygonInstanceRegister::Ins()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 	instanceDescBuffer = CreateBuffer(
 		sizeOfInstanceDescs,
 		D3D12_RESOURCE_FLAG_NONE,
@@ -182,14 +182,14 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_HEAP_TYPE_UPLOAD);
 
 	// 生成したバッファにデータを書き込む。
-	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescBuffer, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// メモリ量を求めるための設定を行う。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};
 	auto& inputs = buildASDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
+	inputs.NumDescs = PolygonInstanceRegister::Ins()->GetRegisterSize();
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 

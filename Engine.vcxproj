@@ -202,8 +202,8 @@
     <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp" />
     <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp" />
     <ClCompile Include="Src\Raytracing\OBB.cpp" />
-    <ClCompile Include="Src\Raytracing\PorygonInstance.cpp" />
-    <ClCompile Include="Src\Raytracing\PorygonInstanceRegister.cpp" />
+    <ClCompile Include="Src\Raytracing\PolygonInstance.cpp" />
+    <ClCompile Include="Src\Raytracing\PolygonInstanceRegister.cpp" />
     <ClCompile Include="Src\Raytracing\RayComputeShader.cpp" />
     <ClCompile Include="Src\Raytracing\RayDenoiser.cpp" />
     <ClCompile Include="Src\Raytracing\RayDescriptor.cpp" />
@@ -265,8 +265,8 @@
     <ClInclude Include="Src\Raytracing\HitGroupMgr.h" />
     <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h" />
     <ClInclude Include="Src\Raytracing\OBB.h" />
-    <ClInclude Include="Src\Raytracing\PorygonInstance.h" />
-    <ClInclude Include="Src\Raytracing\PorygonInstanceRegister.h" />
+    <ClInclude Include="Src\Raytracing\PolygonInstance.h" />
+    <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />
     <ClInclude Include="Src\Raytracing\RayDescriptor.h" />
     <ClInclude Include="Src\Raytracing\RayDenoiser.h" />
     <ClInclude Include="Src\Raytracing\RayRootsignature.h" />

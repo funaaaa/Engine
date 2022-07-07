@@ -11,16 +11,16 @@
 #pragma warning(pop)
 #include <wrl.h>
 
-class PorygonMeshInstance;
+class PolygonMeshInstance;
 
 // ポリゴンインスタンスの参照を保存するクラス
-class PorygonInstanceRegister : public Singleton<PorygonInstanceRegister> {
+class PolygonInstanceRegister : public Singleton<PolygonInstanceRegister> {
 
 private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<PorygonMeshInstance>> instance;
+	std::vector<std::shared_ptr<PolygonMeshInstance>> instance;
 
 	std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDesc;
 

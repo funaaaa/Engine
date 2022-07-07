@@ -3,7 +3,7 @@
 #include "Vec.h"
 #include "BLASRegister.h"
 #include "TextureManager.h"
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 #include <DirectXMath.h>
 #include <fstream>
 #include <sstream>
@@ -183,7 +183,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				blasID.emplace_back(buff);
 
 				// 保存されているBLASIDでインスタンスを生成する。
-				int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, isFloor ? 10 : 0);
+				int idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, isFloor ? 10 : 0);
 				InstanceID.emplace_back(idBuff);
 
 				// その他データを初期化する。
@@ -221,7 +221,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	blasID.emplace_back(buff);
 
 	// 保存されているBLASIDでインスタンスを生成する。
-	int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 0);
+	int idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 0);
 	InstanceID.emplace_back(idBuff);
 
 	// ファイルを閉じる。

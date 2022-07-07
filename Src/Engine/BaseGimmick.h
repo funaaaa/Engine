@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <wtypes.h>
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 
 class BaseGimmick {
 

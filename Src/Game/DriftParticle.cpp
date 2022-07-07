@@ -1,5 +1,5 @@
 #include "DriftParticle.h"
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 #include "FHelper.h"
 
 DriftParticle::DriftParticle()
@@ -22,11 +22,11 @@ void DriftParticle::Setting(const int& BlasIndex, const int ConstBufferIndex)
 
 	/*===== セッティング =====*/
 
-	particleIns = PorygonInstanceRegister::Ins()->CreateInstance(BlasIndex, PorygonInstanceRegister::REFLECTION);
+	particleIns = PolygonInstanceRegister::Ins()->CreateInstance(BlasIndex, PolygonInstanceRegister::REFLECTION);
 	constBufferIndex = ConstBufferIndex;
 	// どこか遠くに飛ばす。
-	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-10000000, -10000000, -10000000));
-	PorygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(0, 0, 0));
+	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-10000000, -10000000, -10000000));
+	PolygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(0, 0, 0));
 
 
 }
@@ -39,8 +39,8 @@ void DriftParticle::Init()
 	isActive = false;
 
 	// どこか遠くに飛ばす。
-	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-10000000, -10000000, -10000000));
-	PorygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(0, 0, 0));
+	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns, Vec3(-10000000, -10000000, -10000000));
+	PolygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(0, 0, 0));
 
 }
 
@@ -104,8 +104,8 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	scale -= SUB_SCALE;
 
 	// Instanceを更新。
-	PorygonInstanceRegister::Ins()->ChangeTrans(particleIns, pos);
-	PorygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(scale, scale, scale));
+	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns, pos);
+	PolygonInstanceRegister::Ins()->ChangeScale(particleIns, Vec3(scale, scale, scale));
 
 	// 大きさが0より小さくなったら初期化する。
 	if (scale < 0) {
