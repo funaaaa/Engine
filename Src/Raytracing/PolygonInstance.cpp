@@ -36,6 +36,7 @@ void PolygonMeshInstance::AddTrans(const Vec3& Pos)
 	/*===== ˆÚ“®ŠÖ” =====*/
 
 	matTrans *= DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
+	pos = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
 
 }
 
@@ -45,6 +46,7 @@ void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
 	/*===== ˆÚ“®ŠÖ” =====*/
 
 	matTrans = DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
+	pos = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
 
 }
 

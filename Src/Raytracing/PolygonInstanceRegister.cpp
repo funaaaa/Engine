@@ -53,6 +53,11 @@ DirectX::XMMATRIX PolygonInstanceRegister::GetTrans(const int& Index)
 	return instance[Index]->GetTrans();
 }
 
+Vec3 PolygonInstanceRegister::GetPos(const int& Index)
+{
+	return instance[Index]->GetPos();
+}
+
 // ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‰ÁZ)ŠÖ”
 void PolygonInstanceRegister::AddRotate(const int& Index, const float& X, const float& Y, const float Z) {
 

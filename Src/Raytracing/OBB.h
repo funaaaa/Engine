@@ -8,9 +8,9 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	Vec3 pos;						// 位置
-	std::array<Vec3, 3> dir;		// 方向ベクトル
-	Vec3 length;	// 各軸方向の長さ
+	Vec3 pos;					// 位置
+	std::array<Vec3, 3> dir;	// 方向ベクトル
+	Vec3 length;				// 各軸方向の長さ
 
 
 public:
