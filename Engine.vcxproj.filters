@@ -154,6 +154,12 @@
     <ClCompile Include="Src\Engine\BoostGimmick.cpp">
       <Filter>アプリケーション\ギミック</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Engine\GimmickMgr.cpp">
+      <Filter>アプリケーション\ギミック</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\OBB.cpp">
+      <Filter>レイトレーシング\当たり判定</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -333,6 +339,12 @@
     <ClInclude Include="Src\Engine\BoostGimmick.h">
       <Filter>アプリケーション\ギミック</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Engine\GimmickMgr.h">
+      <Filter>アプリケーション\ギミック</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\OBB.h">
+      <Filter>レイトレーシング\当たり判定</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -480,6 +492,9 @@
     </Filter>
     <Filter Include="アプリケーション\ギミック">
       <UniqueIdentifier>{b3447770-dcbf-4489-9a65-3f85b704bd85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\当たり判定">
+      <UniqueIdentifier>{d66ca974-3a97-4a18-8660-f3a0d8a50e06}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -4,6 +4,8 @@
 #include "RaytracingPipline.h"
 #include <memory>
 
+#include "OBB.h"
+
 class Player;
 class DynamicConstBuffer;
 class RaytracingPipline;

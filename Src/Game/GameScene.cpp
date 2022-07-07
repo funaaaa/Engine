@@ -62,6 +62,8 @@ GameScene::GameScene()
 	stageGrassIns = PorygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas, PorygonInstanceRegister::DEF_GI);
 	PorygonInstanceRegister::Ins()->AddScale(stageGrassIns, Vec3(200, 200, 200));
 
+
+
 	// ゴール用のオブジェクトを読み込む。
 	goalBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
 	goalIns = PorygonInstanceRegister::Ins()->CreateInstance(goalBlas, PorygonInstanceRegister::SHADER_ID::REFRACTION);
@@ -134,7 +136,6 @@ GameScene::GameScene()
 		beforeTheGoalObjectTimer.push_back(1.0f * index);
 
 	}
-
 
 	// Instanceのワールド行列を生成。
 	PorygonInstanceRegister::Ins()->CalWorldMat();
@@ -328,6 +329,7 @@ void GameScene::Update()
 	// 中間地点のオブジェクトを小さくする。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時で小さくしています！
 	PorygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns, Vec3(0, 0, 0));
 	PorygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns, Vec3(0, -100, 0));
+
 
 	tlas->Update();
 

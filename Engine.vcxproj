@@ -172,6 +172,7 @@
     <ClCompile Include="Src\Engine\DirectXBase.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
+    <ClCompile Include="Src\Engine\GimmickMgr.cpp" />
     <ClCompile Include="Src\Engine\Input.cpp" />
     <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
@@ -200,6 +201,7 @@
     <ClCompile Include="Src\Raytracing\HitGroup.cpp" />
     <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp" />
     <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp" />
+    <ClCompile Include="Src\Raytracing\OBB.cpp" />
     <ClCompile Include="Src\Raytracing\PorygonInstance.cpp" />
     <ClCompile Include="Src\Raytracing\PorygonInstanceRegister.cpp" />
     <ClCompile Include="Src\Raytracing\RayComputeShader.cpp" />
@@ -230,6 +232,7 @@
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />
     <ClInclude Include="Src\Engine\FString.h" />
+    <ClInclude Include="Src\Engine\GimmickMgr.h" />
     <ClInclude Include="Src\Engine\Input.h" />
     <ClInclude Include="Src\Engine\Joycon.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
@@ -261,6 +264,7 @@
     <ClInclude Include="Src\Raytracing\HitGroup.h" />
     <ClInclude Include="Src\Raytracing\HitGroupMgr.h" />
     <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h" />
+    <ClInclude Include="Src\Raytracing\OBB.h" />
     <ClInclude Include="Src\Raytracing\PorygonInstance.h" />
     <ClInclude Include="Src\Raytracing\PorygonInstanceRegister.h" />
     <ClInclude Include="Src\Raytracing\RayDescriptor.h" />

@@ -847,7 +847,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     }
     
     // ?}?X?N?p??e?N?X?`???????B
-    payload.denoiseMask = (vtx.Normal) * (InstanceIndex() / 10.0f);
+    payload.denoiseMask = (vtx.Normal) * InstanceIndex();
 
 }
 
