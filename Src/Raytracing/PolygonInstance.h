@@ -25,13 +25,15 @@ private:
 
 	Vec3 pos;
 
+	UINT blasIndex;
+
 
 public:
 
 	/*===== メンバ関数 =====*/
 
 	// Ins生成関数
-	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID);
+	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& InstanceID);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const Vec3& Pos);
@@ -61,6 +63,8 @@ public:
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos; }
+	// BLASインデックスを取得。
+	inline const UINT& GetBLASIndex() { return blasIndex; }
 
 
 private:

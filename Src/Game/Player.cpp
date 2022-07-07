@@ -1,12 +1,12 @@
 #include "Player.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
-#include "HitGroupMgr.h"
 #include "Input.h"
 #include "FHelper.h"
 #include "BLAS.h"
 #include "DriftParticleMgr.h"
 #include "Camera.h"
+#include "HitGroupMgr.h"
 
 Player::Player(const StageData& StageObjectData)
 {

@@ -1,7 +1,7 @@
 #include "PolygonInstance.h"
 #include "DirectXBase.h"
 
-D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& HitGroupIndex, const UINT& InstanceID)
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& InstanceID)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
@@ -22,9 +22,12 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 	// インスタンスの詳細を設定。
 	instanceDesc.InstanceID = InstanceID;
 	instanceDesc.InstanceMask = 0xFF;
-	instanceDesc.InstanceContributionToHitGroupIndex = HitGroupIndex;
+	instanceDesc.InstanceContributionToHitGroupIndex = BlasIndex;
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
 	instanceDesc.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
+
+	// BLASのIndexを保存。
+	blasIndex = BlasIndex;
 
 	return instanceDesc;
 

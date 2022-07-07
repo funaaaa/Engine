@@ -42,6 +42,7 @@ public:
 	void ChangeTrans(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeTrans(const int& Index, const Vec3& Pos);
 	DirectX::XMMATRIX GetTrans(const int& Index);
+	Vec3 GetPos(const int& Index);
 
 	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
