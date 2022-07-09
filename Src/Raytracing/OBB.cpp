@@ -1,7 +1,56 @@
 #include "OBB.h"
+#include "BLASRegister.h"
+#include "PolygonInstanceRegister.h"
+#include "FHelper.h"
+#include "HitGroupMgr.h"
+
+void OBB::Setting(const int& BlasIndex, const int& InsIndex)
+{
+
+	/*===== OBBをセッティング =====*/
+
+	// OBBをセット。
+	pos = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
+	defLength = BLASRegister::Ins()->GetVertexLengthMax(BlasIndex);
+	length = defLength;
+	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
+	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
+	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
+
+	// デバッグ用のOBB本体をロード。
+	ModelDataManager::ObjectData objectData;
+	blasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::Ins()->DENOISE_AO_HIT_GROUP], { L"Resource/Game/black.png" });
+
+	BLASRegister::Ins()->MulVec3Vertex(blasIndex, length);
+	BLASRegister::Ins()->Update(blasIndex);
+
+	insIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, PolygonInstanceRegister::SHADER_ID::DEF);
+
+}
+
+void OBB::SetMat(const int& InsIndex)
+{
+
+	/*===== InstanceIDを指定して行列を生成 =====*/
+
+	pos = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
+	length = FHelper::MulMat(defLength, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
+	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
+	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
+	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
+	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex, PolygonInstanceRegister::Ins()->GetRotate(InsIndex));
+	PolygonInstanceRegister::Ins()->ChangeScale(insIndex, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
+	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex, PolygonInstanceRegister::Ins()->GetTrans(InsIndex));
+
+}
 
 bool OBB::CheckHitOBB(OBB TargetOBB)
 {
+
+	/*===== OBBの当たり判定 =====*/
+
 	// 各方向ベクトルの確保
 	// N***:標準化方向ベクトル）
 	Vec3 NAe1 = dir[0], Ae1 = NAe1 * length.x;
@@ -152,6 +201,6 @@ float OBB::LenSegOnSeparateAxis(Vec3 Sep, Vec3 E1, Vec3 E2, Vec3 E3)
 	// 分離軸Sepは標準化されていること
 	float r1 = fabs(Sep.Dot(E1));
 	float r2 = fabs(Sep.Dot(E2));
-	float r3 = E3.Length() == 0 ? (fabs(Sep.Dot(E3))) : 0;
+	float r3 = 0 < E3.Length() ? (fabs(Sep.Dot(E3))) : 0;
 	return r1 + r2 + r3;
 }

@@ -2,6 +2,8 @@
 #include "Vec.h"
 #include "ConstBuffers.h"
 #include <vector>
+#include "OBB.h"
+
 
 class Player {
 
@@ -27,7 +29,7 @@ public:
 private:
 
 	/*===== メンバ変数 =====*/
-
+public:
 
 	Vec3 pos;				// 車の座標
 	Vec3 prevPos;			// 車の前フレームの座標
@@ -42,6 +44,10 @@ private:
 	const int RETURN_DEFPOS_TIMER = 600;
 	bool isGround;			// 地上にいるか t=地上 f=空中
 	bool isGrass;			// 草の上にいるか t=草の上 f=草の上じゃない
+
+	OBB obb;	// 当たり判定用OBB
+	OBB testOBB;
+	bool test;
 
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度

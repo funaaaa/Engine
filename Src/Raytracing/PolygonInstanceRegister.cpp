@@ -48,6 +48,13 @@ void PolygonInstanceRegister::ChangeTrans(const int& Index, const Vec3& Pos)
 
 }
 
+void PolygonInstanceRegister::ChangeTrans(const int& Index, DirectX::XMMATRIX& Trans)
+{
+
+	instance[Index]->ChangeTrans(Trans);
+
+}
+
 DirectX::XMMATRIX PolygonInstanceRegister::GetTrans(const int& Index)
 {
 	return instance[Index]->GetTrans();
@@ -123,6 +130,13 @@ void PolygonInstanceRegister::ChangeScale(const int& Index, const float& X, cons
 }
 
 void PolygonInstanceRegister::ChangeScale(const int& Index, const Vec3& Scale)
+{
+
+	instance[Index]->ChangeScale(Scale);
+
+}
+
+void PolygonInstanceRegister::ChangeScale(const int& Index, DirectX::XMMATRIX& Scale)
 {
 
 	instance[Index]->ChangeScale(Scale);

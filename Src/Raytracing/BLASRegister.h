@@ -43,7 +43,7 @@ public:
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
-	
+
 	// バッファを取得。
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(const int& Index);
 
@@ -52,5 +52,13 @@ public:
 
 	// BLASを取得。
 	std::vector<std::shared_ptr<BLAS>>& GetBLAS() { return blas; }
+
+	// すべての頂点情報にVec3情報をかける。 重い処理なのでたくさん呼ばない。
+	void MulVec3Vertex(const int& Index, Vec3 Vec);
+
+	// 頂点の最大最小の値を取得。
+	const Vec3& GetVertexMin(const int& Index);
+	const Vec3& GetVertexMax(const int& Index);
+	Vec3 GetVertexLengthMax(const int& Index);
 
 };

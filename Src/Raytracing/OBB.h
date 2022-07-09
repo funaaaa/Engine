@@ -4,6 +4,7 @@
 
 class OBB
 {
+
 public:
 
 	/*===== メンバ変数 =====*/
@@ -11,11 +12,22 @@ public:
 	Vec3 pos;					// 位置
 	std::array<Vec3, 3> dir;	// 方向ベクトル
 	Vec3 length;				// 各軸方向の長さ
+	Vec3 defLength;				// デフォルトの各軸方向の長さ
+
+	// デバッグ用
+	int blasIndex;
+	int insIndex;
 
 
 public:
 
 	/*===== メンバ関数 =====*/
+
+	// OBBを生成
+	void Setting(const int& BlasIndex, const int& InsIndex);
+
+	// InstanceIDを指定して各種行列を設定。
+	void SetMat(const int& InsIndex);
 
 	// OBBとの当たり判定
 	bool CheckHitOBB(OBB TargetOBB);

@@ -43,6 +43,9 @@ private:
 	UINT vertexStride;						// 1頂点のデータサイズ
 	UINT indexStride;						// 1頂点インデックスのデータサイズ
 
+	Vec3 vertexMax;							// 頂点の各成分の最大値
+	Vec3 vertexMin;							// 頂点の各成分の最小値
+
 	std::wstring hitGroupName;				// 使用するヒットグループの名前
 	std::string modelPath;					// 使用するモデルのパス
 	std::vector<LPCWSTR> texturePath;		// 使用するテクスチャのパス
@@ -56,7 +59,8 @@ private:
 	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
 
 	// デバッグ用
-	std::vector<RayVertex> vertex;
+	std::vector<RayVertex> defVertex;	// 生成した時点の頂点
+	std::vector<RayVertex> vertex;		// 現在の頂点 頂点を書き換える場合があるのでその時用
 	std::vector<Vec3> vertexPos;
 	std::vector<Vec3> vertexNormal;
 	std::vector<UINT> vertIndex;
@@ -93,6 +97,12 @@ public:
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
 
+	// 各成分の長さの最大を返す。
+	Vec3 GetVertexLengthMax();
+
+	// 全ての頂点にVec3情報をかける。 重い処理なので動的には呼ばない。
+	void MulVec3Vertex(Vec3 Vec);
+
 	// アクセッタ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
@@ -102,6 +112,8 @@ public:
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
 	const std::string& GetModelPath() { return modelPath; }
 	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath; }
+	const Vec3& GetVertexMin() { return vertexMin; }
+	const Vec3& GetVertexMax() { return vertexMax; }
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex; }

@@ -41,6 +41,7 @@ public:
 
 	// 移動(引数に移動)関数
 	void ChangeTrans(const Vec3& Pos);
+	void ChangeTrans(const DirectX::XMMATRIX& Trans);
 
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const Vec3& Rot);
@@ -57,12 +58,14 @@ public:
 
 	// 拡大(引数を代入)関数
 	void ChangeScale(const Vec3& Scale);
+	void ChangeScale(const DirectX::XMMATRIX& Scale);
 
 	// ワールド行列を加算。
 	void CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input);
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos; }
+	
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex; }
 

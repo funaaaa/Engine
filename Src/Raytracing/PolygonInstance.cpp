@@ -53,6 +53,13 @@ void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
 
 }
 
+void PolygonMeshInstance::ChangeTrans(const DirectX::XMMATRIX& Trans)
+{
+
+	matTrans = Trans;
+
+}
+
 void PolygonMeshInstance::AddRotate(const Vec3& Rot)
 {
 
@@ -120,6 +127,13 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 	buff = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
 
 	scaleMat = buff;
+
+}
+
+void PolygonMeshInstance::ChangeScale(const DirectX::XMMATRIX& Scale)
+{
+
+	scaleMat = Scale;
 
 }
 

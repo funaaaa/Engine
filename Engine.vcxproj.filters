@@ -160,6 +160,9 @@
     <ClCompile Include="Src\Raytracing\OBB.cpp">
       <Filter>レイトレーシング\当たり判定</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Engine\BaseGimmick.cpp">
+      <Filter>アプリケーション\ギミック</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -264,9 +267,6 @@
     <ClInclude Include="Src\Raytracing\BLAS.h">
       <Filter>レイトレーシング\加速構造体\BLAS</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Raytracing\BLASRegister.h">
-      <Filter>レイトレーシング\加速構造体\BLAS</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Raytracing\HitGroup.h">
       <Filter>レイトレーシング\加速構造体\HitGroup</Filter>
     </ClInclude>
@@ -344,6 +344,9 @@
     </ClInclude>
     <ClInclude Include="Src\Raytracing\OBB.h">
       <Filter>レイトレーシング\当たり判定</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\BLASRegister.h">
+      <Filter>レイトレーシング\加速構造体\BLAS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

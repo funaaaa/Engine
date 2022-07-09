@@ -101,6 +101,10 @@ namespace FHelper {
 
 		return formatVecBuff;
 	}
+	// ベクトルに行列をかけた値を返す。
+	inline Vec3 MulMat(Vec3 Vec, const DirectX::XMMATRIX& Mat) {
+		return DirectX::XMVector3Transform(Vec.ConvertXMVECTOR(), Mat);
+	}
 
 	// 回転行列を生成する
 	inline DirectX::XMMATRIX CalRotationMat(const Vec3& Value) {

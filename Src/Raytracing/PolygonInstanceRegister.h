@@ -41,6 +41,7 @@ public:
 	// ˆÚ“®(ˆø”‚ÉˆÚ“®)ŠÖ”
 	void ChangeTrans(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeTrans(const int& Index, const Vec3& Pos);
+	void ChangeTrans(const int& Index, DirectX::XMMATRIX& Trans);
 	DirectX::XMMATRIX GetTrans(const int& Index);
 	Vec3 GetPos(const int& Index);
 
@@ -63,6 +64,7 @@ public:
 	// Šgk(ˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeScale(const int& Index, const Vec3& Scale);
+	void ChangeScale(const int& Index, DirectX::XMMATRIX& Scale);
 
 	// BLAS‚ÌIndex‚ğ‚©‚¯‚éB
 	UINT GetBLASIndex(const int& Index);

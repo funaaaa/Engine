@@ -6,6 +6,7 @@
 #include "RWStructuredBuffer.h"
 #include "StructuredBuffer.h"
 #include "TextureManager.h"
+#include "FHelper.h"
 
 void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
 {
@@ -32,6 +33,10 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	// モデルをロード。
 	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, IsSmoothing);
+
+	// 各成分の値を保存。
+	vertexMax = dataBuff.vertexMax;
+	vertexMin = dataBuff.vertexMin;
 
 	// マテリアル情報を保存。
 	material = dataBuff.material;
@@ -129,6 +134,9 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 		vertexNormal[counter] = index.normal;
 		++counter;
 	}
+
+	// 頂点を保存。
+	defVertex = vertex;
 
 }
 
@@ -376,28 +384,28 @@ void BLAS::Update()
 
 	/*===== BLASの更新 =====*/
 
-	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
+	//// モデルがアニメーションを持っていたら。
+	//if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
 
-		// アニメーションの更新処理
-		auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex);
-		if (model.isPlay) {
+	//	// アニメーションの更新処理
+	//	auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex);
+	//	if (model.isPlay) {
 
-			model.currentTime += model.frameTime;
+	//		model.currentTime += model.frameTime;
 
-			// 最後まで再生したら先頭に戻す。
-			if (model.endTime < model.currentTime) {
+	//		// 最後まで再生したら先頭に戻す。
+	//		if (model.endTime < model.currentTime) {
 
-				model.currentTime = model.startTime;
+	//			model.currentTime = model.startTime;
 
-			}
+	//		}
 
-			// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-			FbxLoader::Ins()->GetSkinComputeInput(modelIndex, skinComputeInput);
+	//		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
+	//		FbxLoader::Ins()->GetSkinComputeInput(modelIndex, skinComputeInput);
 
-		}
+	//	}
 
-	};
+	//};
 
 	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
 	WriteToMemory(vertexBuffer, vertex.data(), static_cast<size_t>(vertexStride * vertexCount));
@@ -609,6 +617,53 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	//	return Dst;
 
 	//}
+
+}
+
+Vec3 BLAS::GetVertexLengthMax()
+{
+
+	/*===== 各成分の最大の長さを返す =====*/
+
+	Vec3 vertexLength;
+
+	if (fabs(vertexMin.x) < fabs(vertexMax.x)) {
+		vertexLength.x = fabs(vertexMax.x);
+	}
+	else {
+		vertexLength.x = fabs(vertexMin.x);
+	}
+
+	if (fabs(vertexMin.y) < fabs(vertexMax.y)) {
+		vertexLength.y = fabs(vertexMax.y);
+	}
+	else {
+		vertexLength.y = fabs(vertexMin.y);
+	}
+
+	if (fabs(vertexMin.z) < fabs(vertexMax.z)) {
+		vertexLength.z = fabs(vertexMax.z);
+	}
+	else {
+		vertexLength.z = fabs(vertexMin.z);
+	}
+
+	return vertexLength;
+}
+
+void BLAS::MulVec3Vertex(Vec3 Vec)
+{
+
+	/*===== すべての頂点に行列情報をかける ====*/
+
+	for (auto& index : vertex) {
+
+		index.position = defVertex[&index - &vertex[0]].position * Vec;
+
+	}
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexBuffer, vertex.data(), static_cast<size_t>(vertexStride * vertexCount));
 
 }
 

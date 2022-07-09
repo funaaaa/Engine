@@ -11,7 +11,7 @@
 #include <memory>
 #pragma warning(pop)
 
-void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, ObjectData& ObjectData, bool IsSmoothing)
+void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing)
 {
 	// objファイルがロード済みかどうか
 	bool isLoad = false;
@@ -35,6 +35,10 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		modelData.push_back({});
 		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).modelName = DirectryPath + FileName;
 		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).isSmoothing = IsSmoothing;
+
+		// 変数を初期化。
+		ObjectBuffer.vertexMax = Vec3();
+		ObjectBuffer.vertexMin = Vec3();
 
 		// フィルストリーム
 		std::ifstream file;
@@ -66,6 +70,8 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				lineStream >> pos.z;
 				// 座標を一旦保存
 				position.push_back(pos);
+				// 頂点の最大最小要素を保存。
+				SaveVertexMinMaxInfo(ObjectBuffer, pos);
 			}
 			// 先頭文字がvtならテクスチャ
 			if (key == "vt") {
@@ -112,11 +118,11 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 					modelData[(static_cast<int>(modelData.size()) - 1)].vertex.push_back(vert);
 					modelData[(static_cast<int>(modelData.size()) - 1)].index.push_back(static_cast<unsigned short>(modelData[(static_cast<int>(modelData.size())) - 1].index.size()));
 					// proSpriteにも追加
-					ObjectData.vertex.push_back(vert);
-					ObjectData.index.push_back(static_cast<int>(ObjectData.index.size()));
+					ObjectBuffer.vertex.push_back(vert);
+					ObjectBuffer.index.push_back(static_cast<int>(ObjectBuffer.index.size()));
 					// isSmoothingがtrueなら頂点情報を追加する
 					if (IsSmoothing == true) {
-						smoothData[indexPosition].push_back(static_cast<unsigned short>(ObjectData.vertex.size()) - 1);
+						smoothData[indexPosition].push_back(static_cast<unsigned short>(ObjectBuffer.vertex.size()) - 1);
 					}
 				}
 			}
@@ -127,7 +133,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				lineStream >> materialFileName;
 				// マテリアルの読み込み
 				LoadObjMaterial(DirectryPath + materialFileName, modelData.at(modelData.size() - 1));
-				ObjectData.material = modelData[modelData.size() - 1].material;
+				ObjectBuffer.material = modelData[modelData.size() - 1].material;
 
 			}
 		}
@@ -136,20 +142,20 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 
 		// isSmoothingがtrueだったら法線情報をなめらかにする
 		if (IsSmoothing) {
-			CalculateSmoothedVertexNormals(smoothData, ObjectData, modelData.at(modelData.size() - 1));
+			CalculateSmoothedVertexNormals(smoothData, ObjectBuffer, modelData.at(modelData.size() - 1));
 		}
 
 		return;
 	}
 
 	// objのデータをObjectDataに入れる
-	for(auto& index : modelData[dataNumber].index){
-		ObjectData.index.push_back(index);
+	for (auto& index : modelData[dataNumber].index) {
+		ObjectBuffer.index.push_back(index);
 	}
 	for (auto& index : modelData[dataNumber].vertex) {
-		ObjectData.vertex.push_back(index);
+		ObjectBuffer.vertex.push_back(index);
 	}
-	ObjectData.material = modelData[dataNumber].material;
+	ObjectBuffer.material = modelData[dataNumber].material;
 
 }
 
@@ -221,4 +227,35 @@ void ModelDataManager::CalculateSmoothedVertexNormals(std::map<unsigned short, s
 			ModelData.vertex[index].normal = normal;
 		}
 	}
+}
+
+void ModelDataManager::SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3& Pos)
+{
+
+	/*===== 頂点の最大最小の情報を保存 =====*/
+
+	// 最大を保存。
+
+	// Posの各成分が保存されている値よりも大きかったら。
+	if (ObjectBuffer.vertexMax.x < Pos.x) {
+		ObjectBuffer.vertexMax.x = Pos.x;
+	}
+	if (ObjectBuffer.vertexMax.y < Pos.y) {
+		ObjectBuffer.vertexMax.y = Pos.y;
+	}
+	if (ObjectBuffer.vertexMax.z < Pos.z) {
+		ObjectBuffer.vertexMax.z = Pos.z;
+	}
+
+	// Posの各成分が保存されている値よりも小さかったら。
+	if (Pos.x < ObjectBuffer.vertexMin.x) {
+		ObjectBuffer.vertexMin.x = Pos.x;
+	}
+	if (Pos.y < ObjectBuffer.vertexMin.y) {
+		ObjectBuffer.vertexMin.y = Pos.y;
+	}
+	if (Pos.z < ObjectBuffer.vertexMin.z) {
+		ObjectBuffer.vertexMin.z = Pos.z;
+	}
+
 }

@@ -166,6 +166,7 @@
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Src\Engine\BaseDrawData.cpp" />
+    <ClCompile Include="Src\Engine\BaseGimmick.cpp" />
     <ClCompile Include="Src\Engine\BoostGimmick.cpp" />
     <ClCompile Include="Src\Engine\Camera.cpp" />
     <ClCompile Include="Src\Engine\ComputeShader.cpp" />

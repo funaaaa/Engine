@@ -40,6 +40,8 @@ public:
 		std::vector<Vertex> vertex;
 		std::vector<UINT> index;
 		Material material;
+		Vec3 vertexMax;	// 頂点における各軸の最大の位置
+		Vec3 vertexMin;	// 頂点における各軸の最小の位置
 
 	};
 
@@ -70,5 +72,10 @@ public:
 
 	int GetModelCount() { return static_cast<int>(modelData.size()); }
 	const ModelData& GetModelData(const int& Index) { return modelData[Index]; }
+
+private:
+
+	// 最大最小の頂点を保存。
+	void SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3& Pos);
 
 };

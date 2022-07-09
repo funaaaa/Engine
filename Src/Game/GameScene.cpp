@@ -16,6 +16,7 @@
 #include "Sprite.h"
 #include "Pipline.h"
 #include "WindowsAPI.h"
+#include "GimmickMgr.h"
 
 GameScene::GameScene()
 {
@@ -626,6 +627,10 @@ void GameScene::InputImGUI()
 
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS);
+
+	bool isHit = false;
+	isHit = player->obb.CheckHitOBB(player->testOBB);
+	ImGui::Checkbox("OBB HIT", &isHit);
 
 
 }

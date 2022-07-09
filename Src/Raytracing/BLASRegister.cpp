@@ -127,3 +127,35 @@ Microsoft::WRL::ComPtr<ID3D12Resource>& BLASRegister::GetBLASBuffer(const int& I
 {
 	return blas[Index]->GetBLASBuffer();
 }
+
+void BLASRegister::MulVec3Vertex(const int& Index, Vec3 Vec)
+{
+
+	/*===== 全ての頂点情報に行列情報をかける =====*/
+
+	blas[Index]->MulVec3Vertex(Vec);
+
+}
+
+const Vec3& BLASRegister::GetVertexMin(const int& Index)
+{
+
+	/*===== 頂点の最小の値を取得 =====*/
+
+	return blas[Index]->GetVertexMin();
+
+}
+
+const Vec3& BLASRegister::GetVertexMax(const int& Index)
+{
+
+	/*===== 頂点の最大の値を取得 =====*/
+
+	return blas[Index]->GetVertexMax();
+
+}
+
+Vec3 BLASRegister::GetVertexLengthMax(const int& Index)
+{
+	return blas[Index]->GetVertexLengthMax();
+}

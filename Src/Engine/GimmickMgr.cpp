@@ -2,7 +2,7 @@
 #include "BoostGimmick.h"
 #include "BLASRegister.h"
 
-void GimmickMgr::AddGimmick(const BaseGimmick::ID& GimmickID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID)
+int GimmickMgr::AddGimmick(const BaseGimmick::ID& GimmickID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID)
 {
 
 	/*===== ƒMƒ~ƒbƒN‚ð’Ç‰Á =====*/
@@ -14,7 +14,65 @@ void GimmickMgr::AddGimmick(const BaseGimmick::ID& GimmickID, const std::string&
 
 	// Blas‚ðƒ[ƒh
 	int blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
+	// instance‚ð¶¬B
+	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID);
 
-	gimmicks.back()->Setting(GimmickID, blasIndex, ShaderID);
+	gimmicks.back()->Setting(GimmickID, instanceIndex);
+
+	return static_cast<int>(gimmicks.size()) - 1;
+
+}
+
+void GimmickMgr::AddTrans(const int& GimmickIndex, const Vec3& Trans)
+{
+
+	/*===== ˆÚ“®‚ð‰ÁŽZ =====*/
+
+	gimmicks[GimmickIndex]->AddTrans(Trans);
+
+}
+
+void GimmickMgr::ChangeTrans(const int& GimmickIndex, const Vec3& Trans)
+{
+
+	/*===== ˆÚ“®‚ð‘ã“ü =====*/
+
+	gimmicks[GimmickIndex]->ChangeTrans(Trans);
+
+}
+
+void GimmickMgr::AddScale(const int& GimmickIndex, const Vec3& Scale)
+{
+
+	/*===== ƒXƒP[ƒ‹‚ð‰ÁŽZ =====*/
+
+	gimmicks[GimmickIndex]->AddScale(Scale);
+
+}
+
+void GimmickMgr::ChangeScale(const int& GimmickIndex, const Vec3& Scale)
+{
+
+	/*===== ƒXƒP[ƒ‹‚ð‘ã“ü =====*/
+
+	gimmicks[GimmickIndex]->ChangeScale(Scale);
+
+}
+
+void GimmickMgr::AddRotate(const int& GimmickIndex, const Vec3& Rotate)
+{
+
+	/*===== ‰ñ“]‚ð‰ÁŽZ =====*/
+
+	gimmicks[GimmickIndex]->AddRotate(Rotate);
+
+}
+
+void GimmickMgr::ChangeRotate(const int& GimmickIndex, const Vec3& Rotate)
+{
+
+	/*===== ‰ñ“]‚ð‘ã“ü =====*/
+
+	gimmicks[GimmickIndex]->ChangeRotate(Rotate);
 
 }
