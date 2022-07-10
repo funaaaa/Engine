@@ -1,7 +1,7 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 
-int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
+int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque, const bool& IsNewGenerate)
 {
 
 	/*===== BLASを生成 =====*/
@@ -10,6 +10,8 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 	bool isLoaded = false;
 	int blasIndex = 0;
 	for (auto& index : blas) {
+
+		if (isLoaded) break;
 
 		// モデルの名前が同じかどうかをチェックする。
 		if (!(index->GetModelPath() == DirectryPath + ModelName)) continue;
@@ -29,7 +31,7 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 	}
 
 	// ロードされていたら
-	if (isLoaded) {
+	if (isLoaded && !IsNewGenerate) {
 
 		return blasIndex;
 

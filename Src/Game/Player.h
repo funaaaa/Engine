@@ -46,8 +46,6 @@ public:
 	bool isGrass;			// 草の上にいるか t=草の上 f=草の上じゃない
 
 	OBB obb;	// 当たり判定用OBB
-	OBB testOBB;
-	bool test;
 
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度

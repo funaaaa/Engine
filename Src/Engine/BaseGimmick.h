@@ -45,6 +45,8 @@ public:
 	// ƒQƒbƒ^
 	inline const int& GetBLASIndex() { return blasIndex; }
 	inline const int& GetINSTANCEIndex() { return insIndex; }
+	inline const bool& GetIsActive() { return isActive; }
+	inline OBB& GetOBB() { return collider; }
 
 	// ˆÚ“®ŠÖŒW
 	void AddTrans(const Vec3& Trans);

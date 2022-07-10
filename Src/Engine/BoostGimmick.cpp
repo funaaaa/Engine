@@ -17,7 +17,7 @@ void BoostGimmick::Setting(const ID& GimmickID, const UINT& InstanceID)
 
 	// 各種変数を初期化。
 	gimmickID = GimmickID;
-	isActive = false;
+	isActive = true;
 
 	// OBBをセット。
 	collider.Setting(blasIndex, insIndex);

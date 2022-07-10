@@ -88,6 +88,11 @@ DirectX::XMMATRIX PolygonInstanceRegister::GetRotate(const int& Index)
 	return instance[Index]->GetRotate();
 }
 
+Vec3 PolygonInstanceRegister::GetRotVec3(const int& Index)
+{
+	return instance[Index]->GetRotVec3();
+}
+
 void PolygonInstanceRegister::ChangeRotate(const int& Index, const float& X, const float& Y, const float Z)
 {
 	instance[Index]->ChangeRotate(Vec3(X, Y, Z));
@@ -120,6 +125,11 @@ void PolygonInstanceRegister::AddScale(const int& Index, const Vec3& Scale)
 DirectX::XMMATRIX PolygonInstanceRegister::GetScale(const int& Index)
 {
 	return instance[Index]->GetScale();
+}
+
+Vec3 PolygonInstanceRegister::GetScaleVec3(const int& Index)
+{
+	return instance[Index]->GetScaleVec3();
 }
 
 void PolygonInstanceRegister::ChangeScale(const int& Index, const float& X, const float& Y, const float Z)

@@ -54,6 +54,9 @@ private:
 	int middlePointCollisionBlas;
 	int middlePointCollisionIns;
 
+	// ブーストのギミック
+	int boostGimmickTest;
+
 	// 装飾のブロックのインデックス
 	std::vector<int> stageOrnamentBlas;
 	std::vector<int> stageOrnamentIns;
@@ -127,6 +130,9 @@ public:
 	// 入力操作
 	void Input();
 	void InputImGUI();
+
+	// ギミックを生成。
+	void GenerateGimmick();
 
 
 };

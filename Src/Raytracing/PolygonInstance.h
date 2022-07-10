@@ -24,6 +24,8 @@ private:
 	DirectX::XMMATRIX scaleMat;
 
 	Vec3 pos;
+	Vec3 rot;
+	Vec3 scale;
 
 	UINT blasIndex;
 
@@ -65,6 +67,8 @@ public:
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos; }
+	inline const Vec3& GetRotVec3() { return rot; }
+	inline const Vec3& GetScaleVec3() { return scale; }
 	
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex; }

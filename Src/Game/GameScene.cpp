@@ -34,26 +34,10 @@ GameScene::GameScene()
 	pipline = std::make_shared<RaytracingPipline>();
 	pipline->Setting(dAOuseShaders, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2), 6);
 
-	// SPONZAを読み込む。
-	//sponzaInstance = MultiMeshLoadOBJ::Ins()->RayMultiMeshLoadOBJ("Resource/", "sponza.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP]);
-
 	// 天球用のスフィアを生成する。
 	skyDomeBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/skydome.jpg" });
 	skyDomeIns = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas, PolygonInstanceRegister::SHADER_ID::AS);
 	PolygonInstanceRegister::Ins()->AddScale(skyDomeIns, Vec3(1000, 1000, 1000));
-
-	// ライト用のスフィアを読み込む。
-	/*sphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
-	for (auto& index : sphereIns) {
-
-		index = PolygonInstanceRegister::Ins()->CreateInstance(sphereBlas, PolygonInstanceRegister::SHADER_ID_LIGHT);
-		PolygonInstanceRegister::Ins()->AddScale(index, Vec3(1, 1, 1));
-		PolygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(0, 300, 0));
-
-	}*/
-
-	// ドリフト時のパーティクルのクラスをセッティングする。
-	//DriftParticleMgr::Ins()->Setting(0);
 
 	// ステージを読み込む。
 	stageBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/white.png" });
@@ -101,6 +85,9 @@ GameScene::GameScene()
 		PolygonInstanceRegister::Ins()->AddScale(index, Vec3(200, 200, 200));
 
 	}
+
+	// ギミックをロード。
+	GenerateGimmick();
 
 	// プレイヤーを初期化。
 	Player::StageData stageData;
@@ -264,20 +251,6 @@ void GameScene::Update()
 	// カメラを更新。
 	Camera::Ins()->Update(player->GetPos(), player->GetForwardVec(), player->GetUpVec(), player->GetNowSpeedPer());
 
-	// 点光源の位置を更新。
-	//int counter = 0;
-	//for (auto& index : sphereIns) {
-	//	PolygonInstanceRegister::Ins()->ChangeTrans(index, constBufferData.light.pointLight[counter].lightPos);
-
-	//	// ライトが有効化されていなかったらサイズを0にして描画しない。
-	//	if (constBufferData.light.pointLight[counter].isActive) {
-	//		PolygonInstanceRegister::Ins()->ChangeScale(index, constBufferData.light.pointLight[counter].lightSize);
-	//	}
-	//	else {
-	//		PolygonInstanceRegister::Ins()->ChangeTrans(index, Vec3(-10000000, -10000000, -10000000));
-	//	}
-	//	++counter;
-	//}
 
 	// 中間地点に達していたらゴールを定位置に出す。
 	if (isPassedMiddlePoint) {
@@ -626,11 +599,85 @@ void GameScene::InputImGUI()
 	constBufferData.debug.isGIOnlyScene = isGIOnlyScene;
 
 	// FPSを表示するかのフラグをセット。
-	ImGui::Checkbox("Display FPS", &isDisplayFPS);
+	//ImGui::Checkbox("Display FPS", &isDisplayFPS);
 
-	bool isHit = false;
-	isHit = player->obb.CheckHitOBB(player->testOBB);
-	ImGui::Checkbox("OBB HIT", &isHit);
+	//// 座標を更新。
+	//Vec3 gimmickPos = PolygonInstanceRegister::Ins()->GetPos(GimmickMgr::Ins()->GetGimmickData()[boostGimmickTest]->GetINSTANCEIndex());
 
+	//ImGui::DragFloat("PosX", &gimmickPos.x, 1);
+	//ImGui::DragFloat("PosY", &gimmickPos.y, 1);
+	//ImGui::DragFloat("PosZ", &gimmickPos.z, 1);
+
+	//// 回転を更新。
+	//Vec3 gimmickRot = PolygonInstanceRegister::Ins()->GetRotVec3(GimmickMgr::Ins()->GetGimmickData()[boostGimmickTest]->GetINSTANCEIndex());
+
+	//ImGui::DragFloat("RotX", &gimmickRot.x, 0.01f);
+	//ImGui::DragFloat("RotY", &gimmickRot.y, 0.01f);
+	//ImGui::DragFloat("RotZ", &gimmickRot.z, 0.01f);
+
+	//// 大きさを更新。
+	//Vec3 gimmickScale = PolygonInstanceRegister::Ins()->GetScaleVec3(GimmickMgr::Ins()->GetGimmickData()[boostGimmickTest]->GetINSTANCEIndex());
+
+	//ImGui::DragFloat("ScaleX", &gimmickScale.x, 1);
+	//ImGui::DragFloat("ScaleY", &gimmickScale.y, 1);
+	//ImGui::DragFloat("ScaleZ", &gimmickScale.z, 1);
+
+	//GimmickMgr::Ins()->ChangeTrans(boostGimmickTest, gimmickPos);
+	//GimmickMgr::Ins()->ChangeRotate(boostGimmickTest, gimmickRot);
+	//GimmickMgr::Ins()->ChangeScale(boostGimmickTest, gimmickScale);
+
+	// 1個目
+	GimmickMgr::Ins()->ChangeTrans(0, Vec3(100, -15, 1400));
+	GimmickMgr::Ins()->ChangeRotate(0, Vec3(0, 0, 0));
+	GimmickMgr::Ins()->ChangeScale(0, Vec3(100, 200, 200));
+
+	// 2個目
+	GimmickMgr::Ins()->ChangeTrans(1, Vec3(-80, -15, 3000));
+	GimmickMgr::Ins()->ChangeRotate(1, Vec3(0, 0, 0));
+	GimmickMgr::Ins()->ChangeScale(1, Vec3(100, 200, 200));
+
+	// 3個目
+	GimmickMgr::Ins()->ChangeTrans(2, Vec3(100, -15, 4000));
+	GimmickMgr::Ins()->ChangeRotate(2, Vec3(0, 0, 0));
+	GimmickMgr::Ins()->ChangeScale(2, Vec3(100, 200, 200));
+
+	// 4個目
+	GimmickMgr::Ins()->ChangeTrans(3, Vec3(-5842, -29, -167));
+	GimmickMgr::Ins()->ChangeRotate(3, Vec3(0, 1.48f, 0));
+	GimmickMgr::Ins()->ChangeScale(3, Vec3(200, 200, 200));
+
+	// 5個目
+	GimmickMgr::Ins()->ChangeTrans(4, Vec3(-7575, 526, 2793));
+	GimmickMgr::Ins()->ChangeRotate(4, Vec3(0, 1.56f, 0));
+	GimmickMgr::Ins()->ChangeScale(4, Vec3(200, 200, 200));
+
+	// 6個目
+	GimmickMgr::Ins()->ChangeTrans(5, Vec3(-2352, -18, 6336));
+	GimmickMgr::Ins()->ChangeRotate(5, Vec3(0, 1.58f, 0));
+	GimmickMgr::Ins()->ChangeScale(5, Vec3(190, 200, 200));
+
+
+}
+
+void GameScene::GenerateGimmick()
+{
+
+	// 1個目
+	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+
+	// 2個目
+	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	
+	// 3個目
+	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	
+	// 4個目
+	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	
+	// 5個目
+	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	
+	// 6個目
+	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }

@@ -20,7 +20,7 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 
 	// デバッグ用のOBB本体をロード。
 	ModelDataManager::ObjectData objectData;
-	blasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::Ins()->DENOISE_AO_HIT_GROUP], { L"Resource/Game/black.png" });
+	blasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::Ins()->DENOISE_AO_HIT_GROUP], { L"Resource/Game/black.png" }, false, true, true);
 
 	BLASRegister::Ins()->MulVec3Vertex(blasIndex, length);
 	BLASRegister::Ins()->Update(blasIndex);

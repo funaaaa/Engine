@@ -19,6 +19,8 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc.Transform),
 		worldMat);
 
+	scale = Vec3(1, 1, 1);
+
 	// インスタンスの詳細を設定。
 	instanceDesc.InstanceID = InstanceID;
 	instanceDesc.InstanceMask = 0xFF;
@@ -73,6 +75,9 @@ void PolygonMeshInstance::AddRotate(const Vec3& Rot)
 
 	matRot = buff * matRot;
 
+	// デバッグ用の回転を保存。
+	rot += Rot;
+
 }
 
 void PolygonMeshInstance::AddRotate(const DirectX::XMMATRIX& Rot)
@@ -92,6 +97,9 @@ void PolygonMeshInstance::ChangeRotate(const Vec3& Rot)
 	matRot *= DirectX::XMMatrixRotationZ(Rot.z);
 	matRot *= DirectX::XMMatrixRotationX(Rot.x);
 	matRot *= DirectX::XMMatrixRotationY(Rot.y);
+
+	// デバッグ用の回転を保存。
+	rot = Rot;
 
 }
 
@@ -115,6 +123,8 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 	scaleMat *= buff;
 
+	scale += Scale;
+
 }
 
 void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
@@ -127,6 +137,8 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 	buff = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
 
 	scaleMat = buff;
+
+	scale = Scale;
 
 }
 

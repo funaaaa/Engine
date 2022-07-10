@@ -7,6 +7,7 @@
 #include "DriftParticleMgr.h"
 #include "Camera.h"
 #include "HitGroupMgr.h"
+#include "GimmickMgr.h"
 
 Player::Player(const StageData& StageObjectData)
 {
@@ -36,7 +37,6 @@ Player::Player(const StageData& StageObjectData)
 
 	// OBBを生成。
 	obb.Setting(carBlasIndex, carInstanceIndex);
-	testOBB.Setting(carBlasIndex, carInstanceIndex);
 
 }
 
@@ -109,34 +109,6 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 
 	// OBBを更新。
 	obb.SetMat(carInstanceIndex);
-
-	static int a = 0;
-	if (a == 0) {
-
-		testOBB.SetMat(carInstanceIndex);
-		testOBB.pos += Vec3(0, -25, 0);
-		PolygonInstanceRegister::Ins()->AddTrans(testOBB.insIndex, Vec3(0, -25, 0));
-		++a;
-
-	}
-
-	float speed = 1.0f;
-	if (Input::Ins()->IsKey(DIK_UP)) {
-		testOBB.pos += Vec3(speed, 0, 0);
-		PolygonInstanceRegister::Ins()->AddTrans(testOBB.insIndex, Vec3(speed, 0, 0));
-	}
-	if (Input::Ins()->IsKey(DIK_LEFT)) {
-		testOBB.pos += Vec3(0, 0, speed);
-		PolygonInstanceRegister::Ins()->AddTrans(testOBB.insIndex, Vec3(0, 0, speed));
-	}
-	if (Input::Ins()->IsKey(DIK_DOWN)) {
-		testOBB.pos += Vec3(-speed, 0, 0);
-		PolygonInstanceRegister::Ins()->AddTrans(testOBB.insIndex, Vec3(-speed, 0, 0));
-	}
-	if (Input::Ins()->IsKey(DIK_RIGHT)) {
-		testOBB.pos += Vec3(0, 0, -speed);
-		PolygonInstanceRegister::Ins()->AddTrans(testOBB.insIndex, Vec3(0, 0, -speed));
-	}
 
 }
 
@@ -623,6 +595,31 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			}
 
 		}
+
+	}
+
+
+	/*===== ギミックとの当たり判定 =====*/
+
+	{
+
+		std::vector<std::shared_ptr<BaseGimmick>> gimmics = GimmickMgr::Ins()->GetGimmickData();
+		for (auto& index : gimmics) {
+
+			// フラグが立っていなかったら処理を続ける。
+			if (!index->GetIsActive()) continue;
+
+			// 当たり判定を行う。
+			bool isHit = obb.CheckHitOBB(index->GetOBB());
+
+			// 当たっていなかったら処理を飛ばす。
+			if (!isHit) continue;
+
+			// ブーストをマックスにする。
+			boostSpeed = MAX_BOOST_SPEED;
+
+		}
+
 
 	}
 
