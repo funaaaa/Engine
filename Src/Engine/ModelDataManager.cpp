@@ -72,6 +72,8 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				position.push_back(pos);
 				// 頂点の最大最小要素を保存。
 				SaveVertexMinMaxInfo(ObjectBuffer, pos);
+				modelData[(static_cast<int>(modelData.size()) - 1)].vertexMin = ObjectBuffer.vertexMin;
+				modelData[(static_cast<int>(modelData.size()) - 1)].vertexMax = ObjectBuffer.vertexMax;
 			}
 			// 先頭文字がvtならテクスチャ
 			if (key == "vt") {
@@ -156,6 +158,8 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		ObjectBuffer.vertex.push_back(index);
 	}
 	ObjectBuffer.material = modelData[dataNumber].material;
+	ObjectBuffer.vertexMin = modelData[dataNumber].vertexMin;
+	ObjectBuffer.vertexMax = modelData[dataNumber].vertexMax;
 
 }
 

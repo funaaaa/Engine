@@ -51,6 +51,8 @@ public:
 		Material material;					//マテリアル
 		std::vector<unsigned short> index;	//頂点インデックス
 		std::vector<Vertex> vertex;			//頂点
+		Vec3 vertexMax;	// 頂点における各軸の最大の位置
+		Vec3 vertexMin;	// 頂点における各軸の最小の位置
 		bool isSmoothing;					//法線をスムーズにするかどうか
 	};
 
