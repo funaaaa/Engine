@@ -24,7 +24,7 @@ private:
 	DirectX::XMMATRIX scaleMat;
 
 	Vec3 pos;
-	Vec3 rot;
+	Vec3 rot;		// デバッグ用 ギミックを配置するときの調整用に使用したもので、この値が正確な回転量を持っている前提でデバッグしてはいけない。 (Matrixを直接代入する場合の回転量は取得できていないため)
 	Vec3 scale;
 
 	UINT blasIndex;
@@ -69,7 +69,7 @@ public:
 	inline const Vec3& GetPos() { return pos; }
 	inline const Vec3& GetRotVec3() { return rot; }
 	inline const Vec3& GetScaleVec3() { return scale; }
-	
+
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex; }
 

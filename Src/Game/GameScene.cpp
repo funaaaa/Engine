@@ -71,8 +71,8 @@ GameScene::GameScene()
 		stageOrnamentIns.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFLECTION));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockC.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/green.png" }));
 		stageOrnamentIns.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
-		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/gray.png" }));
-		stageOrnamentIns.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFLECTION));
+		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
+		stageOrnamentIns.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockE.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/green.png" }));
 		stageOrnamentIns.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas[static_cast<int>(stageOrnamentBlas.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
 		stageOrnamentBlas.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockF.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
@@ -156,7 +156,7 @@ GameScene::GameScene()
 
 	// デノイズマスク用クラスをセット。
 	denoiseMaskOutput = std::make_shared<RaytracingOutput>();
-	denoiseMaskOutput->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMaskOutput");
+	denoiseMaskOutput->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput");
 
 	// 最終出力用クラスをセット。
 	denoiseMixTextureOutput = std::make_shared<RaytracingOutput>();
@@ -599,32 +599,7 @@ void GameScene::InputImGUI()
 	constBufferData.debug.isGIOnlyScene = isGIOnlyScene;
 
 	// FPSを表示するかのフラグをセット。
-	//ImGui::Checkbox("Display FPS", &isDisplayFPS);
-
-	//// 座標を更新。
-	//Vec3 gimmickPos = PolygonInstanceRegister::Ins()->GetPos(GimmickMgr::Ins()->GetGimmickData()[boostGimmickTest]->GetINSTANCEIndex());
-
-	//ImGui::DragFloat("PosX", &gimmickPos.x, 1);
-	//ImGui::DragFloat("PosY", &gimmickPos.y, 1);
-	//ImGui::DragFloat("PosZ", &gimmickPos.z, 1);
-
-	//// 回転を更新。
-	//Vec3 gimmickRot = PolygonInstanceRegister::Ins()->GetRotVec3(GimmickMgr::Ins()->GetGimmickData()[boostGimmickTest]->GetINSTANCEIndex());
-
-	//ImGui::DragFloat("RotX", &gimmickRot.x, 0.01f);
-	//ImGui::DragFloat("RotY", &gimmickRot.y, 0.01f);
-	//ImGui::DragFloat("RotZ", &gimmickRot.z, 0.01f);
-
-	//// 大きさを更新。
-	//Vec3 gimmickScale = PolygonInstanceRegister::Ins()->GetScaleVec3(GimmickMgr::Ins()->GetGimmickData()[boostGimmickTest]->GetINSTANCEIndex());
-
-	//ImGui::DragFloat("ScaleX", &gimmickScale.x, 1);
-	//ImGui::DragFloat("ScaleY", &gimmickScale.y, 1);
-	//ImGui::DragFloat("ScaleZ", &gimmickScale.z, 1);
-
-	//GimmickMgr::Ins()->ChangeTrans(boostGimmickTest, gimmickPos);
-	//GimmickMgr::Ins()->ChangeRotate(boostGimmickTest, gimmickRot);
-	//GimmickMgr::Ins()->ChangeScale(boostGimmickTest, gimmickScale);
+	ImGui::Checkbox("Display FPS", &isDisplayFPS);
 
 	// 1個目
 	GimmickMgr::Ins()->ChangeTrans(0, Vec3(100, -15, 1400));

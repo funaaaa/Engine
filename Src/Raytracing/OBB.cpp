@@ -18,6 +18,8 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
 	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
 
+#ifdef _DEBUG
+
 	// デバッグ用のOBB本体をロード。
 	ModelDataManager::ObjectData objectData;
 	blasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::Ins()->DENOISE_AO_HIT_GROUP], { L"Resource/Game/black.png" }, false, true, true);
@@ -26,6 +28,8 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 	BLASRegister::Ins()->Update(blasIndex);
 
 	insIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, PolygonInstanceRegister::SHADER_ID::DEF);
+
+#endif
 
 }
 
@@ -40,9 +44,14 @@ void OBB::SetMat(const int& InsIndex)
 	dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
 	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
 	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
+
+#ifdef _DEBUG
+
 	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex, PolygonInstanceRegister::Ins()->GetRotate(InsIndex));
 	PolygonInstanceRegister::Ins()->ChangeScale(insIndex, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
 	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex, PolygonInstanceRegister::Ins()->GetTrans(InsIndex));
+
+#endif
 
 }
 

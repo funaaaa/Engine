@@ -1,18 +1,20 @@
 
-// ??????
+// デノイズをかける際にライトリーク等の対策をするためのマスク用テクスチャ
 RWTexture2D<float4> InputImg : register(u0);
+
+// デノイズをかける際にライトリーク等の対策をするためのマスク用テクスチャ
 RWTexture2D<float4> InputMaskImg : register(u1);
 
-// ?o???UAV  
+// 出力先UAV
 RWTexture2D<float4> OutputImg : register(u2);
 
-// ?d??e?[?u??
+// ガウシアンブラーの重み
 cbuffer GaussianWeight : register(b0)
 {
     float4 weights[2];
 };
 
-// ?f?m?C?Y????e?N?X?`?????T???v?????O
+// テクスチャの色を取得
 float4 GetPixelColor(int x, int y)
 {
     uint2 texSize = uint2(1280 / 1, 720);
@@ -22,7 +24,7 @@ float4 GetPixelColor(int x, int y)
 
     return InputImg[uint2(x, y)];
 }
-// ?}?X?N??e?N?X?`?????T???v?????O
+// マスクテクスチャの色を取得
 float4 GetMaskColor(int x, int y)
 {
     uint2 texSize = uint2(1280 / 1, 720);
@@ -33,12 +35,11 @@ float4 GetMaskColor(int x, int y)
     return InputMaskImg[uint2(x, y)];
 }
 
-// ???C?g???[?N???
+// ライトリーク対策用のサンプリング関数
 float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor, float4 baseColor, float4 targetColor, float weight)
 {
-
     
-    // ?}?X?N??F?????????????炻??^?[?Q?b?g??F?????B
+    // ある程度ならマスクの色の違いを許容するようにする。
     float subR = abs(baseMaskColor.x - targetMaskColor.x);
     float subG = abs(baseMaskColor.y - targetMaskColor.y);
     float subB = abs(baseMaskColor.z - targetMaskColor.z);
@@ -62,7 +63,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     float4 color = float4(0, 0, 0, 0);
     
-    // ????F
+    // ガウシアンブラーをかける際の基準の色
     float4 baseColor = GetPixelColor(basepos.x, basepos.y);
     float4 baseMaskColor = GetMaskColor(basepos.x, basepos.y);
     

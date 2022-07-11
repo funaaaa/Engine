@@ -8,7 +8,10 @@ void BaseGimmick::AddTrans(const Vec3& Trans)
 	/*===== 移動を加算 =====*/
 
 	PolygonInstanceRegister::Ins()->AddTrans(insIndex, Trans);
+
+#ifdef _DEBUG
 	PolygonInstanceRegister::Ins()->AddTrans(collider.insIndex, Trans);
+#endif
 
 	// OBBも移動させる。
 	collider.pos = PolygonInstanceRegister::Ins()->GetPos(insIndex);
@@ -21,7 +24,10 @@ void BaseGimmick::ChangeTrans(const Vec3& Trans)
 	/*===== 移動を代入 =====*/
 
 	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex, Trans);
+
+#ifdef _DEBUG
 	PolygonInstanceRegister::Ins()->ChangeTrans(collider.insIndex, Trans);
+#endif
 
 	// OBBも移動させる。
 	collider.pos = PolygonInstanceRegister::Ins()->GetPos(insIndex);
@@ -34,7 +40,10 @@ void BaseGimmick::AddScale(const Vec3& Scale)
 	/*===== スケールを加算 =====*/
 
 	PolygonInstanceRegister::Ins()->AddScale(insIndex, Scale);
+
+#ifdef _DEBUG
 	PolygonInstanceRegister::Ins()->AddScale(collider.insIndex, Scale);
+#endif
 
 	// OBBの大きさも変える。
 	collider.length = FHelper::MulMat(collider.defLength, PolygonInstanceRegister::Ins()->GetScale(insIndex));
@@ -47,7 +56,10 @@ void BaseGimmick::ChangeScale(const Vec3& Scale)
 	/*===== スケールを代入 =====*/
 
 	PolygonInstanceRegister::Ins()->ChangeScale(insIndex, Scale);
+
+#ifdef _DEBUG
 	PolygonInstanceRegister::Ins()->ChangeScale(collider.insIndex, Scale);
+#endif
 
 	// OBBの大きさも変える。
 	collider.length = FHelper::MulMat(collider.defLength, PolygonInstanceRegister::Ins()->GetScale(insIndex));
@@ -60,7 +72,10 @@ void BaseGimmick::AddRotate(const Vec3& Rotate)
 	/*===== 回転を加算 =====*/
 
 	PolygonInstanceRegister::Ins()->AddRotate(insIndex, Rotate);
+
+#ifdef _DEBUG
 	PolygonInstanceRegister::Ins()->AddRotate(collider.insIndex, Rotate);
+#endif
 
 	// OBBのベクトルを回転させる。
 	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(insIndex);
@@ -76,7 +91,10 @@ void BaseGimmick::ChangeRotate(const Vec3& Rotate)
 	/*===== 回転を代入 =====*/
 
 	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex, Rotate);
+
+#ifdef _DEBUG
 	PolygonInstanceRegister::Ins()->ChangeRotate(collider.insIndex, Rotate);
+#endif
 
 	// OBBのベクトルを回転させる。
 	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(insIndex);
