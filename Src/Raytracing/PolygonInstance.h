@@ -23,6 +23,9 @@ private:
 	DirectX::XMMATRIX matRot;
 	DirectX::XMMATRIX scaleMat;
 
+	// 親Instanceのポインタ
+	std::weak_ptr<PolygonMeshInstance> parentInstance;
+
 	Vec3 pos;
 	Vec3 rot;		// デバッグ用 ギミックを配置するときの調整用に使用したもので、この値が正確な回転量を持っている前提でデバッグしてはいけない。 (Matrixを直接代入する場合の回転量は取得できていないため)
 	Vec3 scale;
@@ -64,6 +67,12 @@ public:
 
 	// ワールド行列を加算。
 	void CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input);
+
+	// ワールド行列を取得。
+	DirectX::XMMATRIX GetWorldMat();
+
+	// 親行列を設定。
+	void SetParentInstance(std::weak_ptr<PolygonMeshInstance> ParentInstance);
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos; }

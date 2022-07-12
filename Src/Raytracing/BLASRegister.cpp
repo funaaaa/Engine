@@ -24,7 +24,7 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 			if (!(textureIndex == blasTexture[&textureIndex - &TexturePath[0]])) continue;
 
 			isLoaded = true;
-			blasIndex = &index - &blas[0];
+			blasIndex = static_cast<int>(&index - &blas[0]);
 
 		}
 

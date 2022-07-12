@@ -57,8 +57,22 @@ public:
 
 
 	/*-- モデルのデータに関する変数 --*/
-	int carBlasIndex;		// 車のモデルのBLASのインデックス
-	int carInstanceIndex;	// 車のモデルのインスタンスのインデックス
+	// 車体
+	int carBodyBlasIndex;		// 車のモデルのBLASのインデックス
+	int carBodyInsIndex;		// 車のモデルのインスタンスのインデックス
+	// タイヤ
+	int carTireBlasIndex;
+	int carTireInsIndex;
+	// 鏡
+	int carMirrorBlasIndex;
+	int carMirrorInsIndex;
+	// 鏡のカバー
+	int carMirrorCoverBlasIndex;
+	int carMirrorCoverInsIndex;
+	// 窓
+	int carWindowBlasIndex;
+	int carWindowInsIndex;
+
 	StageData stageModelData;	// ステージのモデルデータ
 
 

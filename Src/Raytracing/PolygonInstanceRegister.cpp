@@ -48,7 +48,7 @@ void PolygonInstanceRegister::ChangeTrans(const int& Index, const Vec3& Pos)
 
 }
 
-void PolygonInstanceRegister::ChangeTrans(const int& Index, DirectX::XMMATRIX& Trans)
+void PolygonInstanceRegister::ChangeTrans(const int& Index, DirectX::XMMATRIX Trans)
 {
 
 	instance[Index]->ChangeTrans(Trans);
@@ -103,7 +103,7 @@ void PolygonInstanceRegister::ChangeRotate(const int& Index, const Vec3& Rot)
 	instance[Index]->ChangeRotate(Rot);
 }
 
-void PolygonInstanceRegister::ChangeRotate(const int& Index, const DirectX::XMMATRIX& Rot)
+void PolygonInstanceRegister::ChangeRotate(const int& Index, DirectX::XMMATRIX Rot)
 {
 	instance[Index]->ChangeRotate(Rot);
 }
@@ -146,10 +146,19 @@ void PolygonInstanceRegister::ChangeScale(const int& Index, const Vec3& Scale)
 
 }
 
-void PolygonInstanceRegister::ChangeScale(const int& Index, DirectX::XMMATRIX& Scale)
+void PolygonInstanceRegister::ChangeScale(const int& Index, DirectX::XMMATRIX Scale)
 {
 
 	instance[Index]->ChangeScale(Scale);
+
+}
+
+void PolygonInstanceRegister::SetParentInstance(const int& Index, const int& ParentIndex)
+{
+
+	/*===== es—ñ‚ðÝ’è =====*/
+
+	instance[Index]->SetParentInstance(instance[ParentIndex]);
 
 }
 

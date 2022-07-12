@@ -41,7 +41,7 @@ public:
 	// ˆÚ“®(ˆø”‚ÉˆÚ“®)ŠÖ”
 	void ChangeTrans(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeTrans(const int& Index, const Vec3& Pos);
-	void ChangeTrans(const int& Index, DirectX::XMMATRIX& Trans);
+	void ChangeTrans(const int& Index, DirectX::XMMATRIX Trans);
 	DirectX::XMMATRIX GetTrans(const int& Index);
 	Vec3 GetPos(const int& Index);
 
@@ -55,7 +55,7 @@ public:
 	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeRotate(const int& Index, const Vec3& Rot);
-	void ChangeRotate(const int& Index, const DirectX::XMMATRIX& Rot);
+	void ChangeRotate(const int& Index, DirectX::XMMATRIX Rot);
 
 	// Šgk(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
@@ -66,7 +66,10 @@ public:
 	// Šgk(ˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
 	void ChangeScale(const int& Index, const Vec3& Scale);
-	void ChangeScale(const int& Index, DirectX::XMMATRIX& Scale);
+	void ChangeScale(const int& Index, DirectX::XMMATRIX Scale);
+
+	// es—ñ‚ğİ’èB
+	void SetParentInstance(const int& Index, const int& ParentIndex);
 
 	// BLAS‚ÌIndex‚ğ‚©‚¯‚éB
 	UINT GetBLASIndex(const int& Index);

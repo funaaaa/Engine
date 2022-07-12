@@ -160,10 +160,48 @@ void PolygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 	worldMat *= matRot;
 	worldMat *= matTrans;
 
+	// 親行列が存在していたらだったら。
+	if (!parentInstance.expired()) {
+
+		worldMat *= parentInstance.lock()->GetWorldMat();
+
+	}
+
 	// 設定の行列を更新する。
 	DirectX::XMStoreFloat3x4(
 		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
 		worldMat);
+
+}
+
+DirectX::XMMATRIX PolygonMeshInstance::GetWorldMat()
+{
+
+	/*===== ワールド行列を取得 =====*/
+
+	DirectX::XMMATRIX worldMat = DirectX::XMMatrixIdentity();
+
+	worldMat *= scaleMat;
+	worldMat *= matRot;
+	worldMat *= matTrans;
+
+	// 親行列が存在していたらだったら。
+	if (!parentInstance.expired()) {
+
+		worldMat *= parentInstance.lock()->GetWorldMat();
+
+	}
+
+	return worldMat;
+
+}
+
+void PolygonMeshInstance::SetParentInstance(std::weak_ptr<PolygonMeshInstance> ParentInstance)
+{
+
+	/*===== 親行列を設定 =====*/
+
+	parentInstance = ParentInstance;
 
 }
 
