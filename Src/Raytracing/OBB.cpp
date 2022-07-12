@@ -18,7 +18,7 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
 	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 
 	// デバッグ用のOBB本体をロード。
 	ModelDataManager::ObjectData objectData;
@@ -46,7 +46,7 @@ void OBB::SetMat(const int& InsIndex)
 	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
 	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 
 	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex, PolygonInstanceRegister::Ins()->GetRotate(InsIndex));
 	PolygonInstanceRegister::Ins()->ChangeScale(insIndex, PolygonInstanceRegister::Ins()->GetScale(InsIndex));

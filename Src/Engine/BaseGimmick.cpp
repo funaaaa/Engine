@@ -9,7 +9,7 @@ void BaseGimmick::AddTrans(const Vec3& Trans)
 
 	PolygonInstanceRegister::Ins()->AddTrans(insIndex, Trans);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	PolygonInstanceRegister::Ins()->AddTrans(collider.insIndex, Trans);
 #endif
 
@@ -25,7 +25,7 @@ void BaseGimmick::ChangeTrans(const Vec3& Trans)
 
 	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex, Trans);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	PolygonInstanceRegister::Ins()->ChangeTrans(collider.insIndex, Trans);
 #endif
 
@@ -41,7 +41,7 @@ void BaseGimmick::AddScale(const Vec3& Scale)
 
 	PolygonInstanceRegister::Ins()->AddScale(insIndex, Scale);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	PolygonInstanceRegister::Ins()->AddScale(collider.insIndex, Scale);
 #endif
 
@@ -57,7 +57,7 @@ void BaseGimmick::ChangeScale(const Vec3& Scale)
 
 	PolygonInstanceRegister::Ins()->ChangeScale(insIndex, Scale);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	PolygonInstanceRegister::Ins()->ChangeScale(collider.insIndex, Scale);
 #endif
 
@@ -73,7 +73,7 @@ void BaseGimmick::AddRotate(const Vec3& Rotate)
 
 	PolygonInstanceRegister::Ins()->AddRotate(insIndex, Rotate);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	PolygonInstanceRegister::Ins()->AddRotate(collider.insIndex, Rotate);
 #endif
 
@@ -92,7 +92,7 @@ void BaseGimmick::ChangeRotate(const Vec3& Rotate)
 
 	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex, Rotate);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 	PolygonInstanceRegister::Ins()->ChangeRotate(collider.insIndex, Rotate);
 #endif
 
