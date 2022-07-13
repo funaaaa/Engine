@@ -191,6 +191,7 @@
     <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
     <ClCompile Include="Src\Game\GameScene.cpp" />
     <ClCompile Include="Src\Game\Player.cpp" />
+    <ClCompile Include="Src\Game\PlayerModel.cpp" />
     <ClCompile Include="Src\Game\ResultScene.cpp" />
     <ClCompile Include="Src\Game\SceneMgr.cpp" />
     <ClCompile Include="Src\Game\TitleScene.cpp" />
@@ -254,6 +255,7 @@
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />
     <ClInclude Include="Src\Game\GameScene.h" />
     <ClInclude Include="Src\Game\Player.h" />
+    <ClInclude Include="Src\Game\PlayerModel.h" />
     <ClInclude Include="Src\Game\ResultScene.h" />
     <ClInclude Include="Src\Game\SceneMgr.h" />
     <ClInclude Include="Src\Game\TitleScene.h" />
