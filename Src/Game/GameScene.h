@@ -113,6 +113,8 @@ private:
 	// ƒvƒŒƒCƒ„[
 	std::shared_ptr<Player> player;
 
+	int testIns;
+
 
 public:
 

@@ -1,5 +1,6 @@
 #include "PolygonInstance.h"
 #include "DirectXBase.h"
+#include <assert.h>
 
 D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& InstanceID)
 {
@@ -30,6 +31,9 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 
 	// BLASのIndexを保存。
 	blasIndex = BlasIndex;
+
+	isActive = true;
+	childCount = 0;
 
 	return instanceDesc;
 
@@ -202,6 +206,25 @@ void PolygonMeshInstance::SetParentInstance(std::weak_ptr<PolygonMeshInstance> P
 	/*===== 親行列を設定 =====*/
 
 	parentInstance = ParentInstance;
+	++parentInstance.lock()->childCount;
+
+}
+
+void PolygonMeshInstance::Disable()
+{
+
+	/*===== インスタンスを無効化 =====*/
+
+	// 親子関係の子供がいたら。
+	if (0 < childCount) {
+
+		// 親子関係の親を解放しようとしています。子供の挙動が意図しないものになる可能性があります。子供を先に開放してください。
+		assert(0);
+
+	}
+
+	isActive = false;
+	--parentInstance.lock()->childCount;
 
 }
 

@@ -55,7 +55,7 @@ void TLAS::Update()
 	PolygonInstanceRegister::Ins()->CalWorldMat();
 
 	// Instanceのサイズを取得。
-	auto sizeOfInstanceDescs = PolygonInstanceRegister::Ins()->GetRegisterSize();
+	auto sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
 	// CPU から書き込み可能なバッファに書き込む。
@@ -66,7 +66,7 @@ void TLAS::Update()
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PolygonInstanceRegister::Ins()->GetRegisterSize();
+	inputs.NumDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	// TLAS の更新処理を行うためのフラグを設定する。
 	inputs.Flags =
@@ -174,7 +174,7 @@ void TLAS::SettingAccelerationStructure()
 	/*-- TLASの生成に必要なメモリ量を求める --*/
 
 	// インスタンスの情報を記録したバッファを準備する。
-	size_t sizeOfInstanceDescs = PolygonInstanceRegister::Ins()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	size_t sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 	instanceDescBuffer = CreateBuffer(
 		sizeOfInstanceDescs,
 		D3D12_RESOURCE_FLAG_NONE,
@@ -189,7 +189,7 @@ void TLAS::SettingAccelerationStructure()
 	auto& inputs = buildASDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PolygonInstanceRegister::Ins()->GetRegisterSize();
+	inputs.NumDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 

@@ -2,10 +2,7 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <wrl.h>
-#pragma warning(push)
-#pragma warning(disable:4267)
 #include <memory>
-#pragma warning(pop)
 #include "Vec.h"
 
 // TLASに登録するインスタンスクラス
@@ -22,6 +19,10 @@ private:
 	DirectX::XMMATRIX matTrans;
 	DirectX::XMMATRIX matRot;
 	DirectX::XMMATRIX scaleMat;
+
+	bool isActive;	// このインスタンスが有効化されているかどうか。
+
+	int childCount;	// このインスタンスと親子関係を結んでいる子供の数。
 
 	// 親Instanceのポインタ
 	std::weak_ptr<PolygonMeshInstance> parentInstance;
@@ -81,6 +82,10 @@ public:
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex; }
+
+	// instanceを無効化する。
+	void Disable();
+	inline const bool GetIsActive() { return isActive; }
 
 
 private:

@@ -6,6 +6,7 @@
 #include "HitGroupMgr.h"
 #include "DescriptorHeapMgr.h"
 #include "PiplineManager.h"
+#include "PolygonInstanceRegister.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -21,6 +22,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// ディスクリプタヒープを初期化。
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();
+
+	// インスタンスをセット。
+	PolygonInstanceRegister::Ins()->Setting();
 
 	// FBXLoaderを初期化。
 	FbxLoader::Ins()->Init();

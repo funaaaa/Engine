@@ -3,21 +3,63 @@
 #include "BLASRegister.h"
 #include <assert.h>
 
+void PolygonInstanceRegister::Setting()
+{
+
+	/*===== インスタンスをセッティング =====*/
+
+	for (auto& index : instance) {
+
+		index = std::make_shared<PolygonMeshInstance>();
+		instanceDesc[&index - &instance[0]] = {};
+
+	}
+
+}
+
 int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& InstanceID)
 {
 
 	/*===== インスタンスを生成する =====*/
 
-	// 最後尾にプッシュ。
-	instance.emplace_back(std::make_shared<PolygonMeshInstance>());
+	// 生成するインスタンスのインデックスを求める。
+	int instanceIndex = -1;
+	for (auto& index : instance) {
+
+		if (index->GetIsActive()) continue;
+
+		instanceIndex = static_cast<int>(&index - &instance[0]);
+
+		break;
+
+	}
+
+	// 最初のInstanceだったら、全ての要素のBLASをアドレスを埋める。これをしないと、TLASを生成する際にBLASのアドレスが入ってないサイズがカットされてしまい、
+	// 最初の1FでしかInstanceを生成できなくなってしまうから。
+	// いずれ処理を変えたい。
+	if (instanceIndex == 0) {
+
+		for (auto& index : instanceDesc) {
+
+			index.AccelerationStructure = BLASRegister::Ins()->GetBLASBuffer(0)->GetGPUVirtualAddress();
+
+		}
+
+	}
+
+	// InstanceIndexが-1だったら最大数を超えているということなので、assertを出す。
+	if (instanceIndex == -1) {
+
+		assert(0);
+
+	}
 
 	// 最後尾のやつを生成する。
-	D3D12_RAYTRACING_INSTANCE_DESC buff = instance[instance.size() - 1]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, InstanceID);
+	D3D12_RAYTRACING_INSTANCE_DESC buff = instance[instanceIndex]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, InstanceID);
 
-	// InstanceDescを保持。
-	instanceDesc.emplace_back(buff);
+	instanceDesc[instanceIndex] = buff;
 
-	return static_cast<int>(instance.size()) - 1;
+	return instanceIndex;
 
 }
 
@@ -170,11 +212,25 @@ UINT PolygonInstanceRegister::GetBLASIndex(const int& Index)
 void PolygonInstanceRegister::CalWorldMat()
 {
 
-	const int INSTANCE_SIZE = static_cast<int>(instance.size());
-	for (int index = 0; index < INSTANCE_SIZE; ++index) {
+	for (auto& index : instance) {
 
-		instance[index]->CalWorldMat(instanceDesc[index]);
+		if (!index->GetIsActive())continue;
+
+		index->CalWorldMat(instanceDesc[&index - &instance[0]]);
 
 	}
+
+}
+
+void PolygonInstanceRegister::DestroyInstance(const int& Index)
+{
+
+	/*===== 指定のインスタンスを破棄 =====*/
+
+	// インデックスが範囲外だったらassert	。
+	if (Index < 0 || MAX_INSTANCE < Index) assert(0);
+
+	instance[Index]->Disable();
+	instanceDesc[Index] = {};
 
 }

@@ -3,12 +3,9 @@
 #include "Vec.h"
 
 #include <DirectXMath.h>
-#include <vector>
+#include <array>
 #include <d3d12.h>
-#pragma warning(push)
-#pragma warning(disable:4267)
 #include <memory>
-#pragma warning(pop)
 #include <wrl.h>
 
 class PolygonMeshInstance;
@@ -16,13 +13,18 @@ class PolygonMeshInstance;
 // ポリゴンインスタンスの参照を保存するクラス
 class PolygonInstanceRegister : public Singleton<PolygonInstanceRegister> {
 
-private:
+public:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<PolygonMeshInstance>> instance;
+	static const int MAX_INSTANCE = 128;	// インスタンスの最大数。
 
-	std::vector<D3D12_RAYTRACING_INSTANCE_DESC> instanceDesc;
+
+private:
+
+	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance;
+
+	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc;
 
 	using XMMATRIX = DirectX::XMMATRIX;
 
@@ -30,6 +32,9 @@ private:
 public:
 
 	/*===== メンバ関数 =====*/
+
+	// セッティング処理
+	void Setting();
 
 	// Insを生成する。
 	int CreateInstance(const int& BlasIndex, const UINT& InstanceID);
@@ -76,6 +81,9 @@ public:
 
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
+
+	// インスタンスを破棄。
+	void DestroyInstance(const int& Index);
 
 	// レジスターのDataを取得する関数。
 	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc.data(); };
