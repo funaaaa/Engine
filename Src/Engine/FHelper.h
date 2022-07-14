@@ -137,10 +137,10 @@ namespace FHelper {
 		// ÉXÉNÉäÅ[Éìïœä∑
 		Vec3 viewVec = DirectX::XMVectorSet(tmp.x / tmp.z, tmp.y / tmp.z, 1.0f, 1.0f);
 		viewVec = DirectX::XMVector3Transform(viewVec.ConvertXMVECTOR(), viewport);
-		Vec3 pos = viewVec;
+		Vec3 pos_ = viewVec;
 
 
-		if (-VirtualWidth < pos.x && pos.x < window_width + VirtualWidth && -VirtualHeight < pos.y && pos.y < window_height + VirtualHeight) {
+		if (-VirtualWidth < pos_.x && pos_.x < window_width + VirtualWidth && -VirtualHeight < pos_.y && pos_.y < window_height + VirtualHeight) {
 
 			return true;
 		}

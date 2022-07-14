@@ -64,14 +64,14 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 			// 先頭文字がvなら頂点座標
 			if (key == "v") {
 				// X,Y,Z座標読み込み
-				Vec3 pos{};
-				lineStream >> pos.x;
-				lineStream >> pos.y;
-				lineStream >> pos.z;
+				Vec3 pos_{};
+				lineStream >> pos_.x;
+				lineStream >> pos_.y;
+				lineStream >> pos_.z;
 				// 座標を一旦保存
-				position.push_back(pos);
+				position.push_back(pos_);
 				// 頂点の最大最小要素を保存。
-				SaveVertexMinMaxInfo(ObjectBuffer, pos);
+				SaveVertexMinMaxInfo(ObjectBuffer, pos_);
 				modelData[(static_cast<int>(modelData.size()) - 1)].vertexMin = ObjectBuffer.vertexMin;
 				modelData[(static_cast<int>(modelData.size()) - 1)].vertexMax = ObjectBuffer.vertexMax;
 			}
@@ -113,7 +113,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 					indexStream >> indexNormal;
 					// 頂点データの追加
 					Vertex vert{};
-					vert.pos = position[indexPosition - 1];
+					vert.pos_ = position[indexPosition - 1];
 					vert.normal = normal[indexNormal - 1];
 					vert.uv = uv[indexTexcoord - 1];
 					// モデルデータに追加

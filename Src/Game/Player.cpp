@@ -15,27 +15,27 @@ Player::Player(const StageData& StageObjectData)
 	/*===== 初期化処理 =====*/
 
 	// 車のモデルをロード
-	playerModel.Load();
+	playerModel_.Load();
 
-	stageModelData = StageObjectData;
+	stageModelData_ = StageObjectData;
 
-	pos = PLAYER_DEF_POS;
-	prevPos = pos;
-	forwardVec = Vec3(0, 0, -1);
+	pos_ = PLAYER_DEF_POS;
+	prevPos_ = pos_;
+	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
-	upVec = Vec3(0, 1, 0);
-	size = Vec3(15, 15, 15);
-	rotY = 0;
-	speed = 0;
-	gravity = 0;
-	boostSpeed = 0;
-	returnDefPosTimer = 0;
-	isDrift = false;
-	isGround = true;
-	isGrass = false;
+	upVec_ = Vec3(0, 1, 0);
+	size_ = Vec3(15, 15, 15);
+	rotY_ = 0;
+	speed_ = 0;
+	gravity_ = 0;
+	boostSpeed_ = 0;
+	returnDefPosTimer_ = 0;
+	isDrift_ = false;
+	isGround_ = true;
+	isGrass_ = false;
 
 	// OBBを生成。
-	obb.Setting(playerModel.carBodyBlasIndex, playerModel.carBodyInsIndex);
+	obb_.Setting(playerModel_.carBodyBlasIndex, playerModel_.carBodyInsIndex);
 
 }
 
@@ -44,21 +44,21 @@ void Player::Init()
 
 	/*===== 初期化処理 =====*/
 
-	pos = PLAYER_DEF_POS;
-	prevPos = pos;
-	forwardVec = Vec3(0, 0, -1);
+	pos_ = PLAYER_DEF_POS;
+	prevPos_ = pos_;
+	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
-	upVec = Vec3(0, 1, 0);
-	size = Vec3(30, 30, 30);
-	returnDefPosTimer = 0;
-	rotY = 0;
-	speed = 0;
-	gravity = 0;
-	boostSpeed = 0;
-	isDrift = false;
-	isGround = true;
-	isGrass = false;
-	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carBodyInsIndex, Vec3(0, 0, 0));
+	upVec_ = Vec3(0, 1, 0);
+	size_ = Vec3(30, 30, 30);
+	returnDefPosTimer_ = 0;
+	rotY_ = 0;
+	speed_ = 0;
+	gravity_ = 0;
+	boostSpeed_ = 0;
+	isDrift_ = false;
+	isGround_ = true;
+	isGrass_ = false;
+	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
 
 }
 
@@ -77,37 +77,37 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 	CheckHit(IsPassedMiddlePoint, RapCount);
 
 	// 座標を更新。
-	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel.carBodyInsIndex, pos);
+	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex, pos_);
 
 	// 座標を保存。
-	prevPos = pos;
+	prevPos_ = pos_;
 
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
-	if (isGround) {
+	if (isGround_) {
 
-		returnDefPosTimer = 0;
+		returnDefPosTimer_ = 0;
 
 	}
 	else {
 
-		++returnDefPosTimer;
+		++returnDefPosTimer_;
 
-		if (RETURN_DEFPOS_TIMER < returnDefPosTimer) {
+		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
 
-			pos = PLAYER_DEF_POS;
-			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel.carBodyInsIndex, Vec3(0, 0, 0));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carBodyInsIndex, Vec3(0, 0, 0));
-			forwardVec = Vec3(0, 0, -1);
-			rotY = 0;
-			upVec = Vec3(0, 1, 0);
-			returnDefPosTimer = 0;
+			pos_ = PLAYER_DEF_POS;
+			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
+			forwardVec_ = Vec3(0, 0, -1);
+			rotY_ = 0;
+			upVec_ = Vec3(0, 1, 0);
+			returnDefPosTimer_ = 0;
 
 		}
 
 	}
 
 	// OBBを更新。
-	obb.SetMat(playerModel.carBodyInsIndex);
+	obb_.SetMat(playerModel_.carBodyInsIndex);
 
 }
 
@@ -123,7 +123,7 @@ float Player::GetNowSpeedPer()
 
 	/*====== 移動速度の割合を計算 =====*/
 
-	float per = (speed + boostSpeed) / (MAX_SPEED + MAX_BOOST_SPEED);
+	float per = (speed_ + boostSpeed_) / (MAX_SPEED + MAX_BOOST_SPEED);
 
 	return per;
 
@@ -137,26 +137,26 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
 	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
-	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && isGround) {
+	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && isGround_) {
 
-		speed += inputRightTriValue * ADD_SPEED;
-
-	}
-	else if (Input::Ins()->IsKey(DIK_W) && isGround) {
-
-		speed += ADD_SPEED;
+		speed_ += inputRightTriValue * ADD_SPEED;
 
 	}
-	else if (isGround) {
+	else if (Input::Ins()->IsKey(DIK_W) && isGround_) {
+
+		speed_ += ADD_SPEED;
+
+	}
+	else if (isGround_) {
 
 		// 移動していなくて地上にいたら移動量を0に近づける。
-		speed -= speed / 10.0f;
+		speed_ -= speed_ / 10.0f;
 
 	}
 	else {
 
 		// 移動していなくて空中にいたら移動量を0に近づける。
-		speed -= speed / 200.0f;
+		speed_ -= speed_ / 200.0f;
 
 	}
 
@@ -173,22 +173,22 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		float handleAmount = HANDLE_NORMAL;
 
 		// ドリフト状態だったら回転量を多い方にする。
-		if (isDrift) {
+		if (isDrift_) {
 
 			handleAmount = HANDLE_DRIFT;
 
 			// ついでにドリフト状態の時のブーストするまでのタイマーを更新する。
-			if (isGround) {
-				++driftBoostTimer;
-				if (DRIFT_BOOST_TIMER < driftBoostTimer) driftBoostTimer = DRIFT_BOOST_TIMER;
+			if (isGround_) {
+				++driftBoostTimer_;
+				if (DRIFT_BOOST_TIMER < driftBoostTimer_) driftBoostTimer_ = DRIFT_BOOST_TIMER;
 			}
 
 			// タイヤを回転させる。
 			Vec3 rot = Vec3(0.0f, 0.5f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carRightTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carRightTireInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carLeftTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carLeftTireInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex, rot * static_cast<float>(inputADKey));
 
 		}
 		// ドリフト状態じゃなかったら。
@@ -196,36 +196,36 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 			// タイヤを回転させる。
 			Vec3 rot = Vec3(0.0f, 0.3f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carRightTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carRightTireInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carLeftTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carLeftTireInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex, rot * static_cast<float>(inputADKey));
 
 		}
 
 		// クォータニオンを求める。
-		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec.ConvertXMVECTOR(), handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount);
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec_.ConvertXMVECTOR(), handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount);
 
 		// 求めたクォータニオンを行列に治す。
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転を加算する。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel.carBodyInsIndex, quaternionMat);
-		rotY += handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex, quaternionMat);
+		rotY_ += handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
 		nowFrameInputLeftStickHori = inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
 
 		// 正面ベクトルを車の回転行列分回転させる。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel.carBodyInsIndex));
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
 
 	}
 	else {
 
 		// タイヤの回転をデフォルトに戻す。
 		Vec3 rot = Vec3(0.0f, 0.0f, 0.0f);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carRightTireFrameInsIndex, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carRightTireInsIndex, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carLeftTireFrameInsIndex, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carLeftTireInsIndex, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex, rot);
 
 	}
 
@@ -236,18 +236,18 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	bool isInputLShift = Input::Ins()->IsKey(DIK_LSHIFT);
 	if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isInputNowFrameLeftStrick) {
 
-		isDrift = true;
+		isDrift_ = true;
 
 		// ドリフトのベクトルを求める。
 		Vec3 driftVec = Vec3();
 		if (nowFrameInputLeftStickHori < 0) {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel.carBodyInsIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
 
 		}
 		else {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel.carBodyInsIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
 
 		}
 
@@ -257,33 +257,33 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。
-	else if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isDrift) {
+	else if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isDrift_) {
 	}
 	else {
 
 		// ドリストのブーストするまでのタイマーが規定値以上だったらブーストする。
-		if (DRIFT_BOOST_TIMER <= driftBoostTimer) {
+		if (DRIFT_BOOST_TIMER <= driftBoostTimer_) {
 
-			boostSpeed = MAX_BOOST_SPEED;
+			boostSpeed_ = MAX_BOOST_SPEED;
 
 		}
 
 		// ドリフトのブーストするまでのタイマーを初期化する。
-		driftBoostTimer = 0;
+		driftBoostTimer_ = 0;
 
-		isDrift = false;
+		isDrift_ = false;
 
 	}
 
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
 	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {
 
-		pos = PLAYER_DEF_POS;
-		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel.carBodyInsIndex, Vec3(0, 0, 0));
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carBodyInsIndex, Vec3(0, 0, 0));
-		forwardVec = Vec3(0, 0, -1);
-		rotY = 0;
-		upVec = Vec3(0, 1, 0);
+		pos_ = PLAYER_DEF_POS;
+		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
+		forwardVec_ = Vec3(0, 0, -1);
+		rotY_ = 0;
+		upVec_ = Vec3(0, 1, 0);
 
 	}
 
@@ -295,59 +295,59 @@ void Player::Move()
 	/*===== 移動処理 =====*/
 
 	// 移動速度が限界を超えないようにする。
-	if (MAX_SPEED < speed) {
+	if (MAX_SPEED < speed_) {
 
-		speed = MAX_SPEED;
+		speed_ = MAX_SPEED;
 
 	}
 
 	// 草の上にいたら移動速度の限界値を下げる。
-	if (isGrass && MAX_SPEED_ON_GRASS < speed) {
+	if (isGrass_ && MAX_SPEED_ON_GRASS < speed_) {
 
-		speed = MAX_SPEED_ON_GRASS;
+		speed_ = MAX_SPEED_ON_GRASS;
 
 	}
 
 	// 座標移動させる。
-	pos += forwardVec * (speed + boostSpeed);
+	pos_ += forwardVec_ * (speed_ + boostSpeed_);
 
 	// ドリフト時のブースト移動量を0に近づける。
-	if (0 < boostSpeed) {
+	if (0 < boostSpeed_) {
 
-		boostSpeed -= SUB_BOOST_SPEED;
+		boostSpeed_ -= SUB_BOOST_SPEED;
 
 	}
 	else {
 
-		boostSpeed = 0;
+		boostSpeed_ = 0;
 
 	}
 
 	// 地上にいたら重力を無効化する。
-	if (isGround) {
+	if (isGround_) {
 
-		gravity = 0;
+		gravity_ = 0;
 
 	}
 	// 空中にいたら重力を加算する。
 	else {
 
-		gravity += ADD_GRAV;
+		gravity_ += ADD_GRAV;
 
 		// 重力量が限界を超えないようにする。
-		if (MAX_GRAV < gravity) {
+		if (MAX_GRAV < gravity_) {
 
-			gravity = MAX_GRAV;
+			gravity_ = MAX_GRAV;
 
 		}
 
 	}
 
 	// 座標に重力を加算する。
-	pos += Vec3(0, -1, 0) * gravity;
+	pos_ += Vec3(0, -1, 0) * gravity_;
 
 	// 下ベクトルを車の回転行列分回転させる。
-	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel.carBodyInsIndex));
+	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
 
 }
 
@@ -364,14 +364,14 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		FHelper::RayToModelCollisionData collistionData;
 
 		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexIndex();
-		collistionData.rayPos = pos;
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
+		collistionData.rayPos = pos_;
 		collistionData.rayDir = bottomVec;
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -383,7 +383,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y) < 0;
+		isHit &= (hitDistance - size_.y) < 0;
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら押し戻す。
@@ -393,10 +393,10 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			const float PUSH_BACK_OFFSET = 1.0f;
 
 			// 法線方向に当たった分押し戻す。
-			pos += hitNormal * (size.y - (hitDistance + PUSH_BACK_OFFSET));
+			pos_ += hitNormal * (size_.y - (hitDistance + PUSH_BACK_OFFSET));
 
 			// 地上にいる判定。
-			isGround = true;
+			isGround_ = true;
 
 			// 斜め床の回転処理。
 			RotObliqueFloor(hitNormal);
@@ -405,7 +405,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		else {
 
 			// 空中にいる判定。
-			isGround = false;
+			isGround_ = false;
 
 		}
 
@@ -416,14 +416,14 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		if (!isHit) {
 
 			// 当たり判定に必要なデータを埋めていく。
-			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageGrassBlasIndex]->GetVertexPos();
-			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageGrassBlasIndex]->GetVertexNormal();
-			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageGrassBlasIndex]->GetVertexIndex();
-			collistionData.rayPos = pos;
+			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexPos();
+			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexNormal();
+			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexIndex();
+			collistionData.rayPos = pos_;
 			collistionData.rayDir = bottomVec;
-			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageGrassInsIndex);
-			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageGrassInsIndex);
-			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageGrassInsIndex);
+			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageGrassInsIndex_);
+			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageGrassInsIndex_);
+			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageGrassInsIndex_);
 
 			// 当たり判定の結果保存用変数。
 			isHit = false;
@@ -435,7 +435,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 			// 当たった距離がY軸のサイズよりも小さかったら。
-			isHit &= (hitDistance - size.y) < 0;
+			isHit &= (hitDistance - size_.y) < 0;
 			isHit &= 0 < hitDistance;
 
 			// 当たっていたら押し戻す。
@@ -445,25 +445,25 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 				const float PUSH_BACK_OFFSET = 1.0f;
 
 				// 法線方向に当たった分押し戻す。
-				pos += hitNormal * (size.y - (hitDistance + PUSH_BACK_OFFSET));
+				pos_ += hitNormal * (size_.y - (hitDistance + PUSH_BACK_OFFSET));
 
 				// 地上にいる判定。
-				isGround = true;
+				isGround_ = true;
 
 				// 斜め床の回転処理。
 				RotObliqueFloor(hitNormal);
 
 				// 草の上にいる判定。
-				isGrass = true;
+				isGrass_ = true;
 
 			}
 			else {
 
 				// 空中にいる判定。
-				isGround = false;
+				isGround_ = false;
 
 				// 草の上にいない判定。
-				isGrass = false;
+				isGrass_ = false;
 
 			}
 
@@ -471,33 +471,33 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		// 通常の床で当たっているということは草の上にはいないということなので、falseにする。
 		else {
 
-			isGrass = false;
+			isGrass_ = false;
 
 		}
 
 
 		// 正面方向の当たり判定を行うため、レイの飛ばす方向を変える。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageBlasIndex]->GetVertexIndex();
-		collistionData.rayPos = prevPos;
-		collistionData.rayDir = (pos - prevPos).GetNormal();
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageInsIndex);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageInsIndex);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageInsIndex);
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
+		collistionData.rayPos = prevPos_;
+		collistionData.rayDir = (pos_ - prevPos_).GetNormal();
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
 
 		// 当たり判定を行う。
 		isHit = false;
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= fabs(hitDistance) < (pos - prevPos).Length();
+		isHit &= fabs(hitDistance) < (pos_ - prevPos_).Length();
 
 		// 当たっていたら押し戻す。
 		if (isHit) {
 
 			// 法線方向に当たった分押し戻す。
-			pos = impactPos + hitNormal * hitDistance;
+			pos_ = impactPos + hitNormal * hitDistance;
 
 		}
 
@@ -514,14 +514,14 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		FHelper::RayToModelCollisionData collistionData;
 
 		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.middlePointBlasIndex]->GetVertexIndex();
-		collistionData.rayPos = prevPos;
-		collistionData.rayDir = forwardVec;
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.middlePointInsIndex);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.middlePointInsIndex);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.middlePointInsIndex);
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexIndex();
+		collistionData.rayPos = prevPos_;
+		collistionData.rayDir = forwardVec_;
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.middlePointInsIndex_);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.middlePointInsIndex_);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.middlePointInsIndex_);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -533,7 +533,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= hitDistance < (pos - prevPos).Length();
+		isHit &= hitDistance < (pos_ - prevPos_).Length();
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら。
@@ -550,14 +550,14 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		FHelper::RayToModelCollisionData collistionData;
 
 		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.goalBlasIndex]->GetVertexIndex();
-		collistionData.rayPos = prevPos;
-		collistionData.rayDir = forwardVec;
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.goalInsIndex);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.goalInsIndex);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.goalInsIndex);
+		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexPos();
+		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexNormal();
+		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexIndex();
+		collistionData.rayPos = prevPos_;
+		collistionData.rayDir = forwardVec_;
+		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.goalInsIndex_);
+		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.goalInsIndex_);
+		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.goalInsIndex_);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -569,7 +569,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= hitDistance < (pos - prevPos).Length();
+		isHit &= hitDistance < (pos_ - prevPos_).Length();
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら。
@@ -587,19 +587,19 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 
 	{
 
-		const int BLAS_COUNT = static_cast<int>(stageModelData.stageOrnamentInsIndex.size());
+		const int BLAS_COUNT = static_cast<int>(stageModelData_.stageOrnamentInsIndex_.size());
 		for (int index = 0; index < BLAS_COUNT; ++index) {
 
 			// 当たり判定に使用するデータ
 			FHelper::RayToModelCollisionData collistionData;
-			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageOrnamentBlasIndex[index]]->GetVertexPos();
-			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData.stageOrnamentBlasIndex[index]]->GetVertexNormal();
-			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData.stageOrnamentBlasIndex[index]]->GetVertexIndex();
-			collistionData.rayPos = prevPos;
-			collistionData.rayDir = (pos - prevPos).GetNormal();
-			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData.stageOrnamentInsIndex[index]);
-			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData.stageOrnamentInsIndex[index]);
-			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData.stageOrnamentInsIndex[index]);
+			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexPos();
+			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexNormal();
+			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexIndex();
+			collistionData.rayPos = prevPos_;
+			collistionData.rayDir = (pos_ - prevPos_).GetNormal();
+			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageOrnamentInsIndex_[index]);
+			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageOrnamentInsIndex_[index]);
+			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageOrnamentInsIndex_[index]);
 
 			// 当たり判定を行う。
 			bool isHit = false;
@@ -609,15 +609,15 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 			// 当たった距離がY軸のサイズよりも小さかったら。
-			isHit &= fabs(hitDistance) < (pos - prevPos).Length();
+			isHit &= fabs(hitDistance) < (pos_ - prevPos_).Length();
 
 			// 当たっていたら押し戻す。
 			if (isHit) {
 
 				// 法線方向に当たった分押し戻す。
-				pos = impactPos + hitNormal * hitDistance;
-				speed = 0;
-				boostSpeed = 0;
+				pos_ = impactPos + hitNormal * hitDistance;
+				speed_ = 0;
+				boostSpeed_ = 0;
 
 			}
 
@@ -637,13 +637,13 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			if (!index->GetIsActive()) continue;
 
 			// 当たり判定を行う。
-			bool isHit = obb.CheckHitOBB(index->GetOBB());
+			bool isHit = obb_.CheckHitOBB(index->GetOBB());
 
 			// 当たっていなかったら処理を飛ばす。
 			if (!isHit) continue;
 
 			// ブーストをマックスにする。
-			boostSpeed = MAX_BOOST_SPEED;
+			boostSpeed_ = MAX_BOOST_SPEED;
 
 		}
 
@@ -692,29 +692,29 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carBodyInsIndex, quaternionMat);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, quaternionMat);
 
 		// 上ベクトルを基準としたクォータニオンを求める。
 		Vec3 normal = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY);
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY_);
 
 		// クォータニオンを行列に治す。
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel.carBodyInsIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel.carBodyInsIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex);
 
 		// 上ベクトルを更新。
-		upVec = normal;
+		upVec_ = normal;
 
 		//正面ベクトルを更新。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
 
 	}
 
@@ -722,29 +722,29 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 	if (HitNormal == Vec3(0, 1, 0)) {
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel.carBodyInsIndex, DirectX::XMMatrixIdentity());
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, DirectX::XMMatrixIdentity());
 
 		// 上ベクトルを基準としたクォータニオンを求める。
 		Vec3 normal = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY);
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY_);
 
 		// クォータニオンを行列に治す。
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel.carBodyInsIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel.carBodyInsIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex);
 
 		// 上ベクトルを更新。
-		upVec = normal;
+		upVec_ = normal;
 
 		//正面ベクトルを更新。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
 
 	}
 

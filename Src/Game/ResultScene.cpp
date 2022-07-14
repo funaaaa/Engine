@@ -9,9 +9,9 @@ ResultScene::ResultScene()
 	/*===== コンストラクタ =====*/
 
 	isTransition = false;
-	nextScene = SCENE_ID::GAME;
+	nextScene_ = SCENE_ID::GAME;
 
-	result.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Result/result.png");
+	result_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Result/result.png");
 
 }
 
@@ -21,7 +21,7 @@ void ResultScene::Init()
 	/*===== 初期化処理 =====*/
 
 	isTransition = false;
-	nextScene = SCENE_ID::GAME;
+	nextScene_ = SCENE_ID::GAME;
 
 }
 
@@ -41,6 +41,6 @@ void ResultScene::Update()
 void ResultScene::Draw()
 {
 
-	result.Draw();
+	result_.Draw();
 
 }

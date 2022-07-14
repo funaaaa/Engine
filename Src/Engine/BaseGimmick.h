@@ -20,11 +20,11 @@ public:
 
 protected:
 
-	ID gimmickID;	// ギミックのID
-	int blasIndex;	// オブジェクトのBLASのインデックス
-	int insIndex;	// オブジェクトのINSTANCEのインデックス
-	bool isActive;	// 有効化フラグ
-	OBB collider;	// 当たり判定用OBB
+	ID gimmickID_;	// ギミックのID
+	int blasIndex_;	// オブジェクトのBLASのインデックス
+	int insIndex_;	// オブジェクトのINSTANCEのインデックス
+	bool isActive_;	// 有効化フラグ
+	OBB collider_;	// 当たり判定用OBB
 
 
 public:
@@ -38,15 +38,15 @@ public:
 	virtual void Update() = 0;
 
 	// 有効化。
-	inline void Activate() { isActive = true; }
+	inline void Activate() { isActive_ = true; }
 	// 無効化。
-	inline void Invalidate() { isActive = false; }
+	inline void Invalidate() { isActive_ = false; }
 
 	// ゲッタ
-	inline const int& GetBLASIndex() { return blasIndex; }
-	inline const int& GetINSTANCEIndex() { return insIndex; }
-	inline const bool& GetIsActive() { return isActive; }
-	inline OBB& GetOBB() { return collider; }
+	inline const int& GetBLASIndex() { return blasIndex_; }
+	inline const int& GetINSTANCEIndex() { return insIndex_; }
+	inline const bool& GetIsActive() { return isActive_; }
+	inline OBB& GetOBB() { return collider_; }
 
 	// 移動関係
 	void AddTrans(const Vec3& Trans);

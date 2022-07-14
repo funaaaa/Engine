@@ -9,14 +9,14 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	Vec3 pos;					// 位置
+	Vec3 pos_;					// 位置
 	std::array<Vec3, 3> dir;	// 方向ベクトル
 	Vec3 length;				// 各軸方向の長さ
 	Vec3 defLength;				// デフォルトの各軸方向の長さ
 
 	// デバッグ用
-	int blasIndex;
-	int insIndex;
+	int blasIndex_;
+	int insIndex_;
 
 
 public:
@@ -34,7 +34,7 @@ public:
 
 	inline const std::array<Vec3, 3>& GetDir() { return dir; };		// 指定軸番号の方向ベクトルを取得
 	inline const Vec3 GetLength() { return length; };				// 指定軸方向の長さを取得
-	inline const Vec3& GetPos() { return pos; };					// 位置を取得
+	inline const Vec3& GetPos() { return pos_; };					// 位置を取得
 
 private:
 

@@ -14,16 +14,16 @@ public:
 	// ステージのモデルデータ
 	struct StageData {
 
-		int stageBlasIndex;
-		int stageInsIndex;
-		int stageGrassBlasIndex;
-		int stageGrassInsIndex;
-		int goalBlasIndex;
-		int goalInsIndex;
-		int middlePointBlasIndex;
-		int middlePointInsIndex;
-		std::vector<int> stageOrnamentBlasIndex;
-		std::vector<int> stageOrnamentInsIndex;
+		int stageBlasIndex_;
+		int stageInsIndex_;
+		int stageGrassBlasIndex_;
+		int stageGrassInsIndex_;
+		int goalBlasIndex_;
+		int goalInsIndex_;
+		int middlePointBlasIndex_;
+		int middlePointInsIndex_;
+		std::vector<int> stageOrnamentBlasIndex_;
+		std::vector<int> stageOrnamentInsIndex_;
 
 	};
 
@@ -32,21 +32,21 @@ private:
 	/*===== メンバ変数 =====*/
 public:
 
-	Vec3 pos;				// 車の座標
-	Vec3 prevPos;			// 車の前フレームの座標
-	Vec3 forwardVec;		// 進行方向ベクトル
+	Vec3 pos_;				// 車の座標
+	Vec3 prevPos_;			// 車の前フレームの座標
+	Vec3 forwardVec_;		// 進行方向ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
-	Vec3 upVec;				// 上方向ベクトル
-	Vec3 size;				// サイズ
-	float speed;			// 移動速度
-	float gravity;			// 重力
-	float rotY;				// ハンドル操作によって変わるY軸の回転量
-	int returnDefPosTimer;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
+	Vec3 upVec_;				// 上方向ベクトル
+	Vec3 size_;				// サイズ
+	float speed_;			// 移動速度
+	float gravity_;			// 重力
+	float rotY_;				// ハンドル操作によって変わるY軸の回転量
+	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
 	const int RETURN_DEFPOS_TIMER = 600;
-	bool isGround;			// 地上にいるか t=地上 f=空中
-	bool isGrass;			// 草の上にいるか t=草の上 f=草の上じゃない
+	bool isGround_;			// 地上にいるか t=地上 f=空中
+	bool isGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 
-	OBB obb;	// 当たり判定用OBB
+	OBB obb_;	// 当たり判定用OBB
 
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
@@ -59,16 +59,16 @@ public:
 
 	/*-- モデルのデータに関する変数 --*/
 
-	PlayerModel playerModel;
+	PlayerModel playerModel_;
 
-	StageData stageModelData;	// ステージのモデルデータ
+	StageData stageModelData_;	// ステージのモデルデータ
 
 
 	/*-- ドリフトに関する変数 --*/
 
-	float boostSpeed;					// ブーストされているときの移動速度
-	int driftBoostTimer;				// ドリフトでブーストするまでのタイマー
-	bool isDrift;						// ドリフト状態かどうか。
+	float boostSpeed_;					// ブーストされているときの移動速度
+	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
+	bool isDrift_;						// ドリフト状態かどうか。
 
 	const float HANDLE_DRIFT = 0.06f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値
@@ -90,9 +90,9 @@ public:
 	// 描画処理
 	void Draw();
 
-	const Vec3& GetPos() { return pos; }
-	const Vec3& GetForwardVec() { return forwardVec; }
-	Vec3 GetUpVec() { return upVec; };
+	const Vec3& GetPos() { return pos_; }
+	const Vec3& GetForwardVec() { return forwardVec_; }
+	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
 
 private:

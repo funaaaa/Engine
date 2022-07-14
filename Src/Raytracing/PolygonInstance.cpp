@@ -20,7 +20,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc.Transform),
 		worldMat);
 
-	scale = Vec3(1, 1, 1);
+	scale_ = Vec3(1, 1, 1);
 
 	// インスタンスの詳細を設定。
 	instanceDesc.InstanceID = InstanceID;
@@ -30,7 +30,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 	instanceDesc.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
 
 	// BLASのIndexを保存。
-	blasIndex = BlasIndex;
+	blasIndex_ = BlasIndex;
 
 	isActive = true;
 	childCount = 0;
@@ -45,7 +45,7 @@ void PolygonMeshInstance::AddTrans(const Vec3& Pos)
 	/*===== 移動関数 =====*/
 
 	matTrans *= DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
-	pos = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
+	pos_ = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
 
 }
 
@@ -55,7 +55,7 @@ void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
 	/*===== 移動関数 =====*/
 
 	matTrans = DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
-	pos = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
+	pos_ = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
 
 }
 
@@ -127,7 +127,7 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 	scaleMat *= buff;
 
-	scale += Scale;
+	scale_ += Scale;
 
 }
 
@@ -142,7 +142,7 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 
 	scaleMat = buff;
 
-	scale = Scale;
+	scale_ = Scale;
 
 }
 

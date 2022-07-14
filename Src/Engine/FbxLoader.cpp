@@ -16,7 +16,7 @@ void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, 
 	const int VERTEX_COUNT = static_cast<int>(modelData.vertices.size());
 	OutputVertex.resize(VERTEX_COUNT);
 	for (int index = 0; index < VERTEX_COUNT; ++index) {
-		OutputVertex[index].pos = modelData.vertices[index].pos;
+		OutputVertex[index].pos_ = modelData.vertices[index].pos_;
 		OutputVertex[index].normal = modelData.vertices[index].normal;
 		OutputVertex[index].uv = modelData.vertices[index].uv;
 	}
@@ -294,9 +294,9 @@ void FbxLoader::ParseMeshVertices(FbxModel& Model, FbxMesh* InputFbxMesh)
 		FbxModel::VertexPosNormalUvSkin& vertex = vertices[index];
 
 		// 座標のコピー
-		vertex.pos.x = (float)pCoord[index][0];
-		vertex.pos.y = (float)pCoord[index][1];
-		vertex.pos.z = (float)pCoord[index][2];
+		vertex.pos_.x = (float)pCoord[index][0];
+		vertex.pos_.y = (float)pCoord[index][1];
+		vertex.pos_.z = (float)pCoord[index][2];
 
 	}
 

@@ -9,7 +9,7 @@ private:
 
 	/*===== ƒƒ“ƒo•Ï” =====*/
 
-	Sprite result;
+	Sprite result_;
 
 public:
 

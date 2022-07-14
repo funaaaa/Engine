@@ -67,7 +67,7 @@ void ComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UIN
 
 	/*-- パイプラインをセット --*/
 
-	DirectXBase::Ins()->cmdList->SetPipelineState(pipline.Get());
+	DirectXBase::Ins()->cmdList->SetPipelineState(pipline_.Get());
 
 
 	/*-- ディスクリプタヒープをセット --*/
@@ -182,7 +182,7 @@ void ComputeShader::GeneratePipline(Microsoft::WRL::ComPtr<ID3DBlob> csBlob)
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.NodeMask = 0;
 
-	auto hr = DirectXBase::Ins()->dev->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipline));
+	auto hr = DirectXBase::Ins()->dev->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipline_));
 	if (FAILED(hr)) {
 		// 生成に失敗した
 		assert(0);

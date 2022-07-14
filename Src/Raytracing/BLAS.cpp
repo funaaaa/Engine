@@ -66,7 +66,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 		RayVertex buff{};
 		buff.normal = dataBuff.vertex[index].normal;
-		buff.position = dataBuff.vertex[index].pos;
+		buff.position = dataBuff.vertex[index].pos_;
 		buff.uv = dataBuff.vertex[index].uv;
 
 		// データを保存。
@@ -189,7 +189,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 		RayVertex buff{};
 		buff.normal = modelVertexData[index].normal;
-		buff.position = modelVertexData[index].pos;
+		buff.position = modelVertexData[index].pos_;
 		buff.uv = modelVertexData[index].uv;
 
 		// データを保存。
@@ -308,7 +308,7 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 
 		RayVertex buff{};
 		buff.normal = Data.vertex[index].normal;
-		buff.position = Data.vertex[index].pos;
+		buff.position = Data.vertex[index].pos_;
 		buff.uv = Data.vertex[index].uv;
 
 		// データを保存。

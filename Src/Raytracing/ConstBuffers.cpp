@@ -31,12 +31,12 @@ void RayLightConstBufferData::Init()
 		index.lightPos = Vec3(0, 300, 0);
 		index.lightSize = 5.0f;
 		index.lightPower = 10.0f;
-		index.isActive = false;
+		index.isActive_ = false;
 		index.isShadow = true;
 	}
 
 	// 並行光源をセッティング
-	dirLight.isActive = true;
+	dirLight.isActive_ = true;
 	dirLight.lightColor = Vec3{ 0,0,0 };
 	dirLight.lihgtDir = Vec3{ -0.5f,-0.01f,0 };
 	dirLight.lihgtDir.Normalize();

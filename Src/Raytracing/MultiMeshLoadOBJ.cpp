@@ -75,13 +75,13 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 		if (key == "v") {
 
 			// X,Y,Z座標読み込み。
-			Vec3 pos{};
-			lineStream >> pos.x;
-			lineStream >> pos.y;
-			lineStream >> pos.z;
+			Vec3 pos_{};
+			lineStream >> pos_.x;
+			lineStream >> pos_.y;
+			lineStream >> pos_.z;
 
 			// 座標を一旦保存。
-			position.emplace_back(pos);
+			position.emplace_back(pos_);
 
 		}
 		// 先頭文字がvtならテクスチャ。
@@ -135,7 +135,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 				// 頂点データの追加。
 				ModelDataManager::Vertex vert{};
-				vert.pos = position[indexPosition - 1].ConvertXMFLOAT3();
+				vert.pos_ = position[indexPosition - 1].ConvertXMFLOAT3();
 				vert.normal = normal[indexNormal - 1].ConvertXMFLOAT3();
 				vert.uv = uv[indexTexcoord - 1];
 

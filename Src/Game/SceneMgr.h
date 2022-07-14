@@ -11,12 +11,12 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<BaseScene>> scenes;
+	std::vector<std::shared_ptr<BaseScene>> scenes_;
 
 public:
 
-	BaseScene::SCENE_ID nowScene;	// 現在のシーン番号
-	BaseScene::SCENE_ID nextScene;	// 次遷移するときのシーン番号
+	BaseScene::SCENE_ID nowScene_;	// 現在のシーン番号
+	BaseScene::SCENE_ID nextScene_;	// 次遷移するときのシーン番号
 
 
 public:

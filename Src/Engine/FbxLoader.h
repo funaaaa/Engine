@@ -73,7 +73,7 @@ public:
 	// 頂点データ構造体
 	struct VertexPosNormalUvSkin
 	{
-		Vec3 pos;		// 座標
+		Vec3 pos_;		// 座標
 		Vec3 normal;	// 法線
 		Vec2 uv;		// UV
 		std::array<UINT, MAX_BONE_INDICES> boneIndex;	// ボーンの番号
@@ -157,7 +157,7 @@ public:
 	};
 
 	struct Vertex {
-		Vec3 pos;
+		Vec3 pos_;
 		Vec3 normal;
 		Vec2 uv;
 	};

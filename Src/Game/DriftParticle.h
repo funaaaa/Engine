@@ -8,13 +8,13 @@ class DriftParticle {
 
 private:
 
-	int particleIns;		// パーティクルのインスタンスID
-	int constBufferIndex;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
-	Vec3 pos;				// 座標
-	Vec3 forwardVec;		// 進行方向ベクトル
-	float speed;			// 移動速度
-	float scale;			// 大きさ
-	bool isActive;			// 有効化フラグ
+	int particleIns_;		// パーティクルのインスタンスID
+	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
+	Vec3 pos_;				// 座標
+	Vec3 forwardVec_;		// 進行方向ベクトル
+	float speed_;			// 移動速度
+	float scale_;			// 大きさ
+	bool isActive_;			// 有効化フラグ
 
 	const float SPEED = 5.0f;
 	const float SUB_SPEED = 0.1f;
@@ -40,6 +40,6 @@ public:
 	void Update(RayConstBufferData& ConstBufferData);
 
 	// アクセッタ
-	const bool& GetIsActive() { return isActive; }
+	const bool& GetIsActive() { return isActive_; }
 
 };

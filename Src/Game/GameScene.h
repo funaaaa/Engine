@@ -20,100 +20,100 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	RayConstBufferData constBufferData;
-	std::shared_ptr<DynamicConstBuffer> constBuffer;
+	RayConstBufferData constBufferData_;
+	std::shared_ptr<DynamicConstBuffer> constBuffer_;
 
 	// デノイズAO用のパイプラインを設定。
-	std::vector<RayPiplineShaderData> dAOuseShaders;
-	std::shared_ptr<RaytracingPipline> pipline;
+	std::vector<RayPiplineShaderData> dAOuseShaders_;
+	std::shared_ptr<RaytracingPipline> pipline_;
 
 	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance;
+	std::vector<int> sponzaInstance_;
 
 	// ライト用のスフィアを読み込む。
-	int sphereBlas;
-	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns;
+	int sphereBlas_;
+	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns_;
 
 	// 天球用のスフィア
-	int skyDomeBlas;
-	int skyDomeIns;
+	int skyDomeBlas_;
+	int skyDomeIns_;
 
 	// ステージ
-	int stageBlas;
-	int stageIns;
-	int stageGrassBlas;
-	int stageGrassIns;
+	int stageBlas_;
+	int stageIns_;
+	int stageGrassBlas_;
+	int stageGrassIns_;
 
 	// ゴール
-	int goalBlas;
-	int goalIns;
+	int goalBlas_;
+	int goalIns_;
 
 	// ゴールとかの当たり判定用
-	int goalCollisionBlas;
-	int goalCollisionIns;
-	int middlePointCollisionBlas;
-	int middlePointCollisionIns;
+	int goalCollisionBlas_;
+	int goalCollisionIns_;
+	int middlePointCollisionBlas_;
+	int middlePointCollisionIns_;
 
 	// ブーストのギミック
-	int boostGimmickTest;
+	int boostGimmickTest_;
 
 	// 装飾のブロックのインデックス
-	std::vector<int> stageOrnamentBlas;
-	std::vector<int> stageOrnamentIns;
+	std::vector<int> stageOrnamentBlas_;
+	std::vector<int> stageOrnamentIns_;
 
 	// ゴール前でふわふわしているオブジェクトのインデックス。
-	int beforeTheGoalObjectBlas;
-	std::vector<std::pair<int, int>> beforeTheGoalObjectIns;
-	std::vector<std::pair<Vec3, Vec3>> beforeTheGoalObjectDefPos;
-	std::vector<float> beforeTheGoalObjectTimer;
+	int beforeTheGoalObjectBlas_;
+	std::vector<std::pair<int, int>> beforeTheGoalObjectIns_;
+	std::vector<std::pair<Vec3, Vec3>> beforeTheGoalObjectDefPos_;
+	std::vector<float> beforeTheGoalObjectTimer_;
 
 	// UI関係
-	std::shared_ptr<Sprite> nowRapCountSprite;
-	std::shared_ptr<Sprite> maxRapCountSprite;
-	std::shared_ptr<Sprite> rapSlashSprite;
-	std::array<int, 11> numFontHandle;
+	std::shared_ptr<Sprite> nowRapCountSprite_;
+	std::shared_ptr<Sprite> maxRapCountSprite_;
+	std::shared_ptr<Sprite> rapSlashSprite_;
+	std::array<int, 11> numFontHandle_;
 
 
 	// ゴール関係
-	bool isPassedMiddlePoint;
-	int rapCount;
+	bool isPassedMiddlePoint_;
+	int rapCount_;
 	const Vec3 GOAL_DEF_POS = Vec3(10, -30, 0);
 
 	// TLASを生成。
-	std::shared_ptr<TLAS> tlas;
+	std::shared_ptr<TLAS> tlas_;
 
 	// アンビエントオクルージョン出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> aoOutput;
-	std::shared_ptr<RaytracingOutput> denoiseAOOutput;
+	std::shared_ptr<RaytracingOutput> aoOutput_;
+	std::shared_ptr<RaytracingOutput> denoiseAOOutput_;
 
 	// 色出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> colorOutput;
+	std::shared_ptr<RaytracingOutput> colorOutput_;
 
 	// デノイズするライト出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> lightOutput;
-	std::shared_ptr<RaytracingOutput> denoiseLightOutput;
+	std::shared_ptr<RaytracingOutput> lightOutput_;
+	std::shared_ptr<RaytracingOutput> denoiseLightOutput_;
 
 	// GI出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> giOutput;
-	std::shared_ptr<RaytracingOutput> denoiseGiOutput;
+	std::shared_ptr<RaytracingOutput> giOutput_;
+	std::shared_ptr<RaytracingOutput> denoiseGiOutput_;
 
 	// デノイズマスク用クラスをセット。
-	std::shared_ptr<RaytracingOutput> denoiseMaskOutput;
+	std::shared_ptr<RaytracingOutput> denoiseMaskOutput_;
 
 	// デノイズの結果出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput;
+	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput_;
 
 	// FPS表示をするか否か
-	bool isDisplayFPS;
+	bool isDisplayFPS_;
 
 	// 太陽の角度
-	float sunAngle;
-	float sunSpeed;
+	float sunAngle_;
+	float sunSpeed_;
 
 	// プレイヤー
-	std::shared_ptr<Player> player;
+	std::shared_ptr<Player> player_;
 
-	int testIns;
+	int testIns_;
 
 
 public:

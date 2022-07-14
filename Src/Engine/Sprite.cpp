@@ -19,16 +19,16 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 
 	// 頂点バッファの生成
 	Vertex vertexBuff;
-	vertexBuff.pos = Vec3(-Size.x, Size.y, 10);		// 左下
+	vertexBuff.pos_ = Vec3(-Size.x, Size.y, 10);		// 左下
 	vertexBuff.uv = Vec2(0, 1);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos = Vec3(-Size.x, -Size.y, 10);	// 左上
+	vertexBuff.pos_ = Vec3(-Size.x, -Size.y, 10);	// 左上
 	vertexBuff.uv = Vec2(0, 0);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos = Vec3(Size.x, Size.y, 10);		// 右下
+	vertexBuff.pos_ = Vec3(Size.x, Size.y, 10);		// 右下
 	vertexBuff.uv = Vec2(1, 1);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos = Vec3(Size.x, -Size.y, 10);		// 右上
+	vertexBuff.pos_ = Vec3(Size.x, -Size.y, 10);		// 右上
 	vertexBuff.uv = Vec2(1, 0);
 	vertex.push_back(vertexBuff);
 
@@ -66,7 +66,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	rotationMat = DirectX::XMMatrixIdentity();
 	scaleMat = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
 	positionMat = DirectX::XMMatrixTranslation(CenterPos.x, CenterPos.y, CenterPos.z);
-	pos = CenterPos;
+	pos_ = CenterPos;
 
 	// マップ処理を行う
 	Vertex* vertMap = nullptr;
@@ -135,7 +135,7 @@ void Sprite::Draw()
 	MapConstDataB0(constBuffB0, constBufferDataB0);
 
 	// 座標を保存しておく
-	pos = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
 
 	// 定数バッファビュー設定コマンド
 	DirectXBase::Ins()->cmdList->SetGraphicsRootConstantBufferView(0, constBuffB0->GetGPUVirtualAddress());

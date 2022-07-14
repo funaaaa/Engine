@@ -18,7 +18,7 @@ public:
 	// 頂点データ
 	struct Vertex {
 
-		Vec3 pos;
+		Vec3 pos_;
 		Vec3 normal;
 		Vec2 uv;
 

@@ -18,7 +18,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> constDescHeap;	// CBV用ディスクリプタヒープ
 
 	// デバッグor当たり判定用
-	Vec3 pos;													// 座標
+	Vec3 pos_;													// 座標
 
 
 public:

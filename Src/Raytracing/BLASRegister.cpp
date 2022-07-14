@@ -8,7 +8,7 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 
 	// すでにロード済みかをチェックする。
 	bool isLoaded = false;
-	int blasIndex = 0;
+	int blasIndex_ = 0;
 	for (auto& index : blas) {
 
 		if (isLoaded) break;
@@ -24,7 +24,7 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 			if (!(textureIndex == blasTexture[&textureIndex - &TexturePath[0]])) continue;
 
 			isLoaded = true;
-			blasIndex = static_cast<int>(&index - &blas[0]);
+			blasIndex_ = static_cast<int>(&index - &blas[0]);
 
 		}
 
@@ -33,7 +33,7 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 	// ロードされていたら
 	if (isLoaded && !IsNewGenerate) {
 
-		return blasIndex;
+		return blasIndex_;
 
 	}
 	else {

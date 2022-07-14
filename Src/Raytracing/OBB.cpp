@@ -10,7 +10,7 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 	/*===== OBBをセッティング =====*/
 
 	// OBBをセット。
-	pos = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
+	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
 	defLength = BLASRegister::Ins()->GetVertexLengthMax(BlasIndex);
 	length = defLength;
 	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
@@ -39,7 +39,7 @@ void OBB::SetMat(const int& InsIndex)
 
 	/*===== InstanceIDを指定して行列を生成 =====*/
 
-	pos = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
+	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
 	length = FHelper::MulMat(defLength, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
 	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
 	dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
@@ -69,7 +69,7 @@ bool OBB::CheckHitOBB(OBB TargetOBB)
 	Vec3 NBe1 = TargetOBB.GetDir()[0], Be1 = NBe1 * TargetOBB.GetLength().x;
 	Vec3 NBe2 = TargetOBB.GetDir()[1], Be2 = NBe2 * TargetOBB.GetLength().y;
 	Vec3 NBe3 = TargetOBB.GetDir()[2], Be3 = NBe3 * TargetOBB.GetLength().z;
-	Vec3 Interval = pos - TargetOBB.GetPos();
+	Vec3 Interval = pos_ - TargetOBB.GetPos();
 
 	// 分離軸 : Ae1
 	float rA = Ae1.Length();

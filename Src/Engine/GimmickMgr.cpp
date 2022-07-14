@@ -9,17 +9,17 @@ int GimmickMgr::AddGimmick(const BaseGimmick::ID& GimmickID, const std::string& 
 
 	// IDがブーストだったら
 	if (GimmickID == BaseGimmick::ID::BOOST) {
-		gimmicks.emplace_back(std::make_shared<BoostGimmick>());
+		gimmicks_.emplace_back(std::make_shared<BoostGimmick>());
 	}
 
 	// Blasをロード
-	int blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
+	int blasIndex_ = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
 	// instanceを生成。
-	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID);
+	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, ShaderID);
 
-	gimmicks.back()->Setting(GimmickID, instanceIndex);
+	gimmicks_.back()->Setting(GimmickID, instanceIndex);
 
-	return static_cast<int>(gimmicks.size()) - 1;
+	return static_cast<int>(gimmicks_.size()) - 1;
 
 }
 
@@ -28,7 +28,7 @@ void GimmickMgr::AddTrans(const int& GimmickIndex, const Vec3& Trans)
 
 	/*===== 移動を加算 =====*/
 
-	gimmicks[GimmickIndex]->AddTrans(Trans);
+	gimmicks_[GimmickIndex]->AddTrans(Trans);
 
 }
 
@@ -37,7 +37,7 @@ void GimmickMgr::ChangeTrans(const int& GimmickIndex, const Vec3& Trans)
 
 	/*===== 移動を代入 =====*/
 
-	gimmicks[GimmickIndex]->ChangeTrans(Trans);
+	gimmicks_[GimmickIndex]->ChangeTrans(Trans);
 
 }
 
@@ -46,7 +46,7 @@ void GimmickMgr::AddScale(const int& GimmickIndex, const Vec3& Scale)
 
 	/*===== スケールを加算 =====*/
 
-	gimmicks[GimmickIndex]->AddScale(Scale);
+	gimmicks_[GimmickIndex]->AddScale(Scale);
 
 }
 
@@ -55,7 +55,7 @@ void GimmickMgr::ChangeScale(const int& GimmickIndex, const Vec3& Scale)
 
 	/*===== スケールを代入 =====*/
 
-	gimmicks[GimmickIndex]->ChangeScale(Scale);
+	gimmicks_[GimmickIndex]->ChangeScale(Scale);
 
 }
 
@@ -64,7 +64,7 @@ void GimmickMgr::AddRotate(const int& GimmickIndex, const Vec3& Rotate)
 
 	/*===== 回転を加算 =====*/
 
-	gimmicks[GimmickIndex]->AddRotate(Rotate);
+	gimmicks_[GimmickIndex]->AddRotate(Rotate);
 
 }
 
@@ -73,6 +73,6 @@ void GimmickMgr::ChangeRotate(const int& GimmickIndex, const Vec3& Rotate)
 
 	/*===== 回転を代入 =====*/
 
-	gimmicks[GimmickIndex]->ChangeRotate(Rotate);
+	gimmicks_[GimmickIndex]->ChangeRotate(Rotate);
 
 }

@@ -27,11 +27,11 @@ private:
 	// 親Instanceのポインタ
 	std::weak_ptr<PolygonMeshInstance> parentInstance;
 
-	Vec3 pos;
+	Vec3 pos_;
 	Vec3 rot;		// デバッグ用 ギミックを配置するときの調整用に使用したもので、この値が正確な回転量を持っている前提でデバッグしてはいけない。 (Matrixを直接代入する場合の回転量は取得できていないため)
-	Vec3 scale;
+	Vec3 scale_;
 
-	UINT blasIndex;
+	UINT blasIndex_;
 
 
 public:
@@ -76,12 +76,12 @@ public:
 	void SetParentInstance(std::weak_ptr<PolygonMeshInstance> ParentInstance);
 
 	// 座標を取得。
-	inline const Vec3& GetPos() { return pos; }
+	inline const Vec3& GetPos() { return pos_; }
 	inline const Vec3& GetRotVec3() { return rot; }
-	inline const Vec3& GetScaleVec3() { return scale; }
+	inline const Vec3& GetScaleVec3() { return scale_; }
 
 	// BLASインデックスを取得。
-	inline const UINT& GetBLASIndex() { return blasIndex; }
+	inline const UINT& GetBLASIndex() { return blasIndex_; }
 
 	// instanceを無効化する。
 	void Disable();

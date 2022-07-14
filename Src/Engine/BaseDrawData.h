@@ -62,7 +62,7 @@ protected:
 	DirectX::XMMATRIX positionMat;	// 座標行列
 
 	// デバッグ用の座標
-	Vec3 pos;						// 座標
+	Vec3 pos_;						// 座標
 
 
 
@@ -73,7 +73,7 @@ public:
 
 	// 頂点データ構造体
 	struct Vertex {
-		Vec3 pos;			// xyz座標
+		Vec3 pos_;			// xyz座標
 		Vec3 normal;		// 法線
 		Vec2 uv;			// uv座標
 	};
@@ -84,7 +84,7 @@ public:
 	inline DirectX::XMMATRIX GetPositionMat() { return positionMat; }
 
 	// 座標データを取得
-	inline Vec3 GetPos() { return pos; }
+	inline Vec3 GetPos() { return pos_; }
 
 	// テクスチャIDを取得
 	inline int GetTextureID(int Index) { return textureID[Index]; }

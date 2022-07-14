@@ -43,13 +43,13 @@ void BaseDrawData::AssignmentRotationMat(DirectX::XMMATRIX Amount)
 void BaseDrawData::ChangePosition(Vec3 Amount)
 {
 	positionMat = DirectX::XMMatrixTranslation(Amount.x, Amount.y, Amount.z);
-	pos = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
 }
 
 void BaseDrawData::ChangePosition(float X, float Y, float Z)
 {
 	positionMat = DirectX::XMMatrixTranslation(X, Y, Z);
-	pos = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
 }
 
 void BaseDrawData::MulRotationMat(DirectX::XMMATRIX RotationMat)
@@ -60,12 +60,12 @@ void BaseDrawData::MulRotationMat(DirectX::XMMATRIX RotationMat)
 void BaseDrawData::ChangePositionAdd(Vec3 Amount)
 {
 	positionMat *= DirectX::XMMatrixTranslation(Amount.x, Amount.y, Amount.z);
-	pos = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
 }
 void BaseDrawData::ChangePositionAdd(float X, float Y, float Z)
 {
 	positionMat *= DirectX::XMMatrixTranslation(X, Y, Z);
-	pos = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
 }
 
 

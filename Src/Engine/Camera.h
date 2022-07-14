@@ -10,7 +10,7 @@ public:
 	Vec3 target;				// ゲームワールド内でカメラが見ている座標
 	Vec3 up;					// ゲームワールド内でカメラから見て上方向を指すベクトル
 
-	Vec3 forwardVec;
+	Vec3 forwardVec_;
 
 	Vec3 baseEye;		// 基準となる視点座標 eyeはこの値に向かって補間される。
 	Vec3 baseTarget;	// 基準となる注視点座標 targetはこの値に向かって補間される。

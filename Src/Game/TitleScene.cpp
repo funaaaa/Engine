@@ -10,9 +10,9 @@ TitleScene::TitleScene()
 	/*===== コンストラクタ =====*/
 
 	isTransition = false;
-	nextScene = SCENE_ID::GAME;
+	nextScene_ = SCENE_ID::GAME;
 
-	title.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
+	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
 
 }
 
@@ -22,7 +22,7 @@ void TitleScene::Init()
 	/*===== 初期化処理 =====*/
 
 	isTransition = false;
-	nextScene = SCENE_ID::GAME;
+	nextScene_ = SCENE_ID::GAME;
 
 }
 
@@ -42,6 +42,6 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 
-	title.Draw();
+	title_.Draw();
 
 }

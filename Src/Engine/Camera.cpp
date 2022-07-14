@@ -33,7 +33,7 @@ void Camera::Init()
 	matPerspective = {};
 	matProjection = {};
 	Camera::angleOfView = 60;
-	forwardVec = Vec3{ 0,0,1 };
+	forwardVec_ = Vec3{ 0,0,1 };
 	angleOfView = DEF_ANGLEOFVIEW;
 	baseAngleOfView = angleOfView;
 
