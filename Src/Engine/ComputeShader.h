@@ -15,16 +15,16 @@ private:
 
 	/*-- メンバ変数 --*/
 
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature;	// ルートシグネチャ
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;	// ルートシグネチャ
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipline_;		// パイプライン
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descHeap;		// ディスクリプタヒープ 情報とかが保存されているのはinputSBとoutputSBの中
-	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUDescHeapHandle;			// SRV開始ハンドル GPU
-	D3D12_GPU_DESCRIPTOR_HANDLE uavGPUDescHeapHandle;			// UAV開始ハンドル GPU
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descHeap_;		// ディスクリプタヒープ 情報とかが保存されているのはinputSBとoutputSBの中
+	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUDescHeapHandle_;			// SRV開始ハンドル GPU
+	D3D12_GPU_DESCRIPTOR_HANDLE uavGPUDescHeapHandle_;			// UAV開始ハンドル GPU
 
 public:
 
-	std::shared_ptr<StructuredBuffer> inputSB;					// 入力用構造体バッファ
-	std::shared_ptr<RWStructuredBuffer> outputSB;				// 書き込み用構造体バッファ
+	std::shared_ptr<StructuredBuffer> inputSB_;					// 入力用構造体バッファ
+	std::shared_ptr<RWStructuredBuffer> outputSB_;				// 書き込み用構造体バッファ
 
 
 public:

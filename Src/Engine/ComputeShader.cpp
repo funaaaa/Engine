@@ -9,8 +9,8 @@
 ComputeShader::ComputeShader()
 {
 	// 生成
-	inputSB = std::make_shared<StructuredBuffer>();
-	outputSB = std::make_shared<RWStructuredBuffer>();
+	inputSB_ = std::make_shared<StructuredBuffer>();
+	outputSB_ = std::make_shared<RWStructuredBuffer>();
 }
 
 ComputeShader::~ComputeShader()
@@ -43,12 +43,12 @@ void ComputeShader::Init(LPCWSTR CsPath,
 
 	/*-- 入力用データ構造体を生成 --*/
 
-	inputSB->Init(SizeOfInput, CountOfInputElement, InputFormatData);
+	inputSB_->Init(SizeOfInput, CountOfInputElement, InputFormatData);
 
 
 	/*-- 出力用データ構造体を生成 --*/
 
-	outputSB->Init(SizeOfOutput, CountOfOutputElement, OutputFormatData);
+	outputSB_->Init(SizeOfOutput, CountOfOutputElement, OutputFormatData);
 
 
 	/*-- ディスクリプタヒープに登録する --*/
@@ -62,27 +62,27 @@ void ComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UIN
 
 	/*-- ルートシグネチャをセット --*/
 
-	DirectXBase::Ins()->cmdList->SetComputeRootSignature(rootSignature.Get());
+	DirectXBase::Ins()->cmdList_->SetComputeRootSignature(rootSignature_.Get());
 
 
 	/*-- パイプラインをセット --*/
 
-	DirectXBase::Ins()->cmdList->SetPipelineState(pipline_.Get());
+	DirectXBase::Ins()->cmdList_->SetPipelineState(pipline_.Get());
 
 
 	/*-- ディスクリプタヒープをセット --*/
 
-	ID3D12DescriptorHeap* descHeapBuff[1] = { descHeap.Get() };
-	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(1, descHeapBuff);
+	ID3D12DescriptorHeap* descHeapBuff[1] = { descHeap_.Get() };
+	DirectXBase::Ins()->cmdList_->SetDescriptorHeaps(1, descHeapBuff);
 
 	//ディスクリプタテーブルに登録する。
-	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(1, srvGPUDescHeapHandle);
-	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(2, uavGPUDescHeapHandle);
+	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(1, srvGPUDescHeapHandle_);
+	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(2, uavGPUDescHeapHandle_);
 
 
 	/*-- ディスパッチ --*/
 
-	DirectXBase::Ins()->cmdList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
+	DirectXBase::Ins()->cmdList_->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 
 }
 
@@ -164,7 +164,7 @@ void ComputeShader::GenerateRootSignature()
 	Microsoft::WRL::ComPtr<ID3DBlob> signature;
 	Microsoft::WRL::ComPtr<ID3DBlob> error;
 	D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);
-	auto hr = DirectXBase::Ins()->dev->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
+	auto hr = DirectXBase::Ins()->dev_->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
 	if (FAILED(hr)) {
 		// ルートシグネチャの作成に失敗した。
 		assert(0);
@@ -177,12 +177,12 @@ void ComputeShader::GeneratePipline(Microsoft::WRL::ComPtr<ID3DBlob> csBlob)
 
 	// パイプラインステートを作成
 	D3D12_COMPUTE_PIPELINE_STATE_DESC  psoDesc = { 0 };
-	psoDesc.pRootSignature = rootSignature.Get();
+	psoDesc.pRootSignature = rootSignature_.Get();
 	psoDesc.CS = CD3DX12_SHADER_BYTECODE(csBlob.Get());
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.NodeMask = 0;
 
-	auto hr = DirectXBase::Ins()->dev->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipline_));
+	auto hr = DirectXBase::Ins()->dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipline_));
 	if (FAILED(hr)) {
 		// 生成に失敗した
 		assert(0);
@@ -200,7 +200,7 @@ void ComputeShader::CommitDescHeap()
 	srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
 	// ディスクリプタヒープを生成
-	auto hr = DirectXBase::Ins()->dev->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&descHeap));
+	auto hr = DirectXBase::Ins()->dev_->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&descHeap_));
 	if (FAILED(hr)) {
 		MessageBox(nullptr, L"DescriptorHeap::Commit ディスクリプタヒープの作成に失敗しました。", L"エラー", MB_OK);
 		std::abort();
@@ -209,30 +209,30 @@ void ComputeShader::CommitDescHeap()
 	// 定数バッファやシェーダーリソースのディスクリプタをヒープに書き込んでいく。
 
 	// ハンドルの先頭を取得
-	auto cpuHandle = descHeap->GetCPUDescriptorHandleForHeapStart();
-	auto gpuHandle = descHeap->GetGPUDescriptorHandleForHeapStart();
+	auto cpuHandle = descHeap_->GetCPUDescriptorHandleForHeapStart();
+	auto gpuHandle = descHeap_->GetGPUDescriptorHandleForHeapStart();
 
 	// シェーダーリソースを登録する
-	inputSB->RegistShaderResourceView(cpuHandle);
+	inputSB_->RegistShaderResourceView(cpuHandle);
 
 	// 次に進める。
-	cpuHandle.ptr += DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	cpuHandle.ptr += DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// 続いてUAV。
-	outputSB->RegistUnorderAccessView(cpuHandle);
+	outputSB_->RegistUnorderAccessView(cpuHandle);
 
 	// 次に進める。
-	cpuHandle.ptr += DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	cpuHandle.ptr += DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	// シェーダーリソースのディスクリプタヒープの開始ハンドルを計算
-	srvGPUDescHeapHandle = gpuHandle;
-	gpuHandle.ptr += (UINT64)DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	srvGPUDescHeapHandle_ = gpuHandle;
+	gpuHandle.ptr += (UINT64)DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	// UAVリソースのディスクリプタヒープの開始ハンドルを計算
-	uavGPUDescHeapHandle = gpuHandle;
+	uavGPUDescHeapHandle_ = gpuHandle;
 
 }
 
 void ComputeShader::UpdateInputSB(void* updateSB)
 {
-	inputSB->Update(updateSB);
+	inputSB_->Update(updateSB);
 }

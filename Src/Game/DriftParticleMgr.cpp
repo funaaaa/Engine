@@ -15,10 +15,10 @@ void DriftParticleMgr::Setting(const int& ConstBufferIndex)
 
 
 	int counter = ConstBufferIndex;
-	for (auto& index : driftParticle_) {
+	for (auto& index_ : driftParticle_) {
 
-		index = std::make_shared<DriftParticle>();
-		index->Setting(particleSphereBlas, counter);
+		index_ = std::make_shared<DriftParticle>();
+		index_->Setting(particleSphereBlas, counter);
 		++counter;
 
 	}
@@ -36,11 +36,11 @@ void DriftParticleMgr::Generate(const Vec3& Pos, const Vec3& DriftVec, const Dir
 		particleGenerateDelay_ = 0;
 
 		// ¶¬‚·‚éB
-		for (auto& index : driftParticle_) {
+		for (auto& index_ : driftParticle_) {
 
-			if (index->GetIsActive()) continue;
+			if (index_->GetIsActive()) continue;
 
-			index->Generate(Pos, DriftVec, CarMatRot, ConstBufferData);
+			index_->Generate(Pos, DriftVec, CarMatRot, ConstBufferData);
 
 			break;
 
@@ -55,11 +55,11 @@ void DriftParticleMgr::Update(RayConstBufferData& ConstBufferData)
 
 	/*===== XVˆ— =====*/
 
-	for (auto& index : driftParticle_) {
+	for (auto& index_ : driftParticle_) {
 
-		if (!index->GetIsActive()) continue;
+		if (!index_->GetIsActive()) continue;
 
-		index->Update(ConstBufferData);
+		index_->Update(ConstBufferData);
 
 	}
 

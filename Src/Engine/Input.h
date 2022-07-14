@@ -19,50 +19,50 @@ static const int XINPUT_TRIGGER_RIGHT = 1;
 class Input : public Singleton<Input>
 {
 public:
-	std::array<BYTE, ALL_KEYS> keys;	// 現在のフレームのキー情報
-	std::array<BYTE, ALL_KEYS> oldkeys;	// 前のフレームのキー情報
-	DIMOUSESTATE mouse;					// 現在のフレームのマウス情報
-	DIMOUSESTATE oldmouse;				// 前のフレームのマウス情報
-	XINPUT_STATE state;					// 現在のフレームのゲームパッド情報
-	XINPUT_STATE oldstate;				// 前のフレームのゲームパッド情報
-	XINPUT_VIBRATION vibration;			// 振動用
+	std::array<BYTE, ALL_KEYS> keys_;	// 現在のフレームのキー情報
+	std::array<BYTE, ALL_KEYS> oldkeys_;	// 前のフレームのキー情報
+	DIMOUSESTATE mouse_;					// 現在のフレームのマウス情報
+	DIMOUSESTATE oldmouse_;				// 前のフレームのマウス情報
+	XINPUT_STATE state_;					// 現在のフレームのゲームパッド情報
+	XINPUT_STATE oldstate_;				// 前のフレームのゲームパッド情報
+	XINPUT_VIBRATION vibration_;			// 振動用
 
 	// 更新処理
 	void Update(IDirectInputDevice8* DevKeyboard, IDirectInputDevice8* Devmouse);
 
 	bool IsKey(int KeyIndex) {
 		if (KeyIndex < 0 || 255 < KeyIndex)return false;
-		return keys[KeyIndex];
+		return keys_[KeyIndex];
 	}
 
 	bool IsKeyTrigger(int KeyIndex) {
 		if (KeyIndex < 0 || 255 < KeyIndex)return false;
-		return keys[KeyIndex] && !oldkeys[KeyIndex];
+		return keys_[KeyIndex] && !oldkeys_[KeyIndex];
 	}
 
 	bool IsKeyRelease(int KeyIndex) {
 		if (KeyIndex < 0 || 255 < KeyIndex)return false;
-		return !keys[KeyIndex] && oldkeys[KeyIndex];
+		return !keys_[KeyIndex] && oldkeys_[KeyIndex];
 	}
 
 	bool IsMouse(int MouseIndex) {
 		if (MouseIndex < 0 || 255 < MouseIndex)return false;
-		return mouse.rgbButtons[MouseIndex];
+		return mouse_.rgbButtons[MouseIndex];
 	}
 
 	bool IsMouseTrigger(int MouseIndex) {
 		if (MouseIndex < 0 || 255 < MouseIndex)return false;
-		return mouse.rgbButtons[MouseIndex] && !oldmouse.rgbButtons[MouseIndex];
+		return mouse_.rgbButtons[MouseIndex] && !oldmouse_.rgbButtons[MouseIndex];
 	}
 
 	bool IsMouseRelease(int MouseIndex) {
 		if (MouseIndex < 0 || 255 < MouseIndex)return false;
-		return !mouse.rgbButtons[MouseIndex] && oldmouse.rgbButtons[MouseIndex];
+		return !mouse_.rgbButtons[MouseIndex] && oldmouse_.rgbButtons[MouseIndex];
 	}
 
 	bool IsPadBottom(int Pad)
 	{
-		return state.Gamepad.wButtons & Pad;
+		return state_.Gamepad.wButtons & Pad;
 	}
 
 	// XINPUT_GAMEPAD_DPAD_UP          0x0001		デジタル方向ボタン上
@@ -84,12 +84,12 @@ public:
 
 	bool IsPadBottomTrigger(int Pad)
 	{
-		return (state.Gamepad.wButtons & Pad) && !(oldstate.Gamepad.wButtons & Pad);
+		return (state_.Gamepad.wButtons & Pad) && !(oldstate_.Gamepad.wButtons & Pad);
 	}
 
 	bool IsPadBottomRelease(int Pad)
 	{
-		return !(state.Gamepad.wButtons & Pad) && (oldstate.Gamepad.wButtons & Pad);
+		return !(state_.Gamepad.wButtons & Pad) && (oldstate_.Gamepad.wButtons & Pad);
 	}
 
 	// 引数　傾けるスティックの左右と向き
@@ -99,13 +99,13 @@ public:
 		switch (Pad)
 		{
 		case XINPUT_THUMB_LEFTVERT:
-			return static_cast<float>(state.Gamepad.sThumbLY) / INPUT_MAX;
+			return static_cast<float>(state_.Gamepad.sThumbLY) / INPUT_MAX;
 		case XINPUT_THUMB_LEFTSIDE:
-			return static_cast<float>(state.Gamepad.sThumbLX) / INPUT_MAX;
+			return static_cast<float>(state_.Gamepad.sThumbLX) / INPUT_MAX;
 		case XINPUT_THUMB_RIGHTVERT:
-			return static_cast<float>(state.Gamepad.sThumbRY) / INPUT_MAX;
+			return static_cast<float>(state_.Gamepad.sThumbRY) / INPUT_MAX;
 		case XINPUT_THUMB_RIGHTSIDE:
-			return static_cast<float>(state.Gamepad.sThumbRX) / INPUT_MAX;
+			return static_cast<float>(state_.Gamepad.sThumbRX) / INPUT_MAX;
 		default: return 0;
 		}
 	}
@@ -116,13 +116,13 @@ public:
 		switch (Pad)
 		{
 		case XINPUT_THUMB_LEFTVERT:
-			return static_cast<float>(oldstate.Gamepad.sThumbLY) / INPUT_MAX;
+			return static_cast<float>(oldstate_.Gamepad.sThumbLY) / INPUT_MAX;
 		case XINPUT_THUMB_LEFTSIDE:
-			return static_cast<float>(oldstate.Gamepad.sThumbLX) / INPUT_MAX;
+			return static_cast<float>(oldstate_.Gamepad.sThumbLX) / INPUT_MAX;
 		case XINPUT_THUMB_RIGHTVERT:
-			return static_cast<float>(oldstate.Gamepad.sThumbRY) / INPUT_MAX;
+			return static_cast<float>(oldstate_.Gamepad.sThumbRY) / INPUT_MAX;
 		case XINPUT_THUMB_RIGHTSIDE:
-			return static_cast<float>(oldstate.Gamepad.sThumbRX) / INPUT_MAX;
+			return static_cast<float>(oldstate_.Gamepad.sThumbRX) / INPUT_MAX;
 		default: return 0;
 		}
 	}
@@ -139,13 +139,13 @@ public:
 		switch (Pad)
 		{
 		case XINPUT_THUMB_LEFTVERT:
-			return (static_cast<float>(state.Gamepad.sThumbLY) / INPUT_MAX) && !(static_cast<float>(oldstate.Gamepad.sThumbLY) / INPUT_MAX);
+			return (static_cast<float>(state_.Gamepad.sThumbLY) / INPUT_MAX) && !(static_cast<float>(oldstate_.Gamepad.sThumbLY) / INPUT_MAX);
 		case XINPUT_THUMB_LEFTSIDE:
-			return (static_cast<float>(state.Gamepad.sThumbLX) / INPUT_MAX) && !(static_cast<float>(oldstate.Gamepad.sThumbLX) / INPUT_MAX);
+			return (static_cast<float>(state_.Gamepad.sThumbLX) / INPUT_MAX) && !(static_cast<float>(oldstate_.Gamepad.sThumbLX) / INPUT_MAX);
 		case XINPUT_THUMB_RIGHTVERT:
-			return (static_cast<float>(state.Gamepad.sThumbRY) / INPUT_MAX) && !(static_cast<float>(oldstate.Gamepad.sThumbRY) / INPUT_MAX);
+			return (static_cast<float>(state_.Gamepad.sThumbRY) / INPUT_MAX) && !(static_cast<float>(oldstate_.Gamepad.sThumbRY) / INPUT_MAX);
 		case XINPUT_THUMB_RIGHTSIDE:
-			return (static_cast<float>(state.Gamepad.sThumbRX) / INPUT_MAX) && !(static_cast<float>(oldstate.Gamepad.sThumbRX) / INPUT_MAX);
+			return (static_cast<float>(state_.Gamepad.sThumbRX) / INPUT_MAX) && !(static_cast<float>(oldstate_.Gamepad.sThumbRX) / INPUT_MAX);
 		default: return 0;
 		}
 	}
@@ -156,9 +156,9 @@ public:
 		switch (Pad)
 		{
 		case XINPUT_TRIGGER_LEFT:
-			return static_cast<float>(state.Gamepad.bLeftTrigger) / INPUT_MAX;
+			return static_cast<float>(state_.Gamepad.bLeftTrigger) / INPUT_MAX;
 		case XINPUT_TRIGGER_RIGHT:
-			return static_cast<float>(state.Gamepad.bRightTrigger) / INPUT_MAX;
+			return static_cast<float>(state_.Gamepad.bRightTrigger) / INPUT_MAX;
 		default: return 0;
 		}
 	}
@@ -173,9 +173,9 @@ public:
 		switch (Pad)
 		{
 		case XINPUT_TRIGGER_LEFT:
-			return (static_cast<float>(state.Gamepad.bLeftTrigger) / INPUT_MAX) && !(static_cast<float>(oldstate.Gamepad.bLeftTrigger) / INPUT_MAX);
+			return (static_cast<float>(state_.Gamepad.bLeftTrigger) / INPUT_MAX) && !(static_cast<float>(oldstate_.Gamepad.bLeftTrigger) / INPUT_MAX);
 		case XINPUT_TRIGGER_RIGHT:
-			return (static_cast<float>(state.Gamepad.bRightTrigger) / INPUT_MAX) && !(static_cast<float>(oldstate.Gamepad.bRightTrigger) / INPUT_MAX);
+			return (static_cast<float>(state_.Gamepad.bRightTrigger) / INPUT_MAX) && !(static_cast<float>(oldstate_.Gamepad.bRightTrigger) / INPUT_MAX);
 		default: return 0;
 		}
 	}
@@ -186,9 +186,9 @@ public:
 		switch (Pad)
 		{
 		case XINPUT_TRIGGER_LEFT:
-			return !(static_cast<float>(state.Gamepad.bLeftTrigger) / INPUT_MAX) && (static_cast<float>(oldstate.Gamepad.bLeftTrigger) / INPUT_MAX);
+			return !(static_cast<float>(state_.Gamepad.bLeftTrigger) / INPUT_MAX) && (static_cast<float>(oldstate_.Gamepad.bLeftTrigger) / INPUT_MAX);
 		case XINPUT_TRIGGER_RIGHT:
-			return !(static_cast<float>(state.Gamepad.bRightTrigger) / INPUT_MAX) && (static_cast<float>(oldstate.Gamepad.bRightTrigger) / INPUT_MAX);
+			return !(static_cast<float>(state_.Gamepad.bRightTrigger) / INPUT_MAX) && (static_cast<float>(oldstate_.Gamepad.bRightTrigger) / INPUT_MAX);
 		default: return 0;
 		}
 	}
@@ -199,8 +199,8 @@ public:
 			return;
 		}
 
-		vibration.wLeftMotorSpeed = static_cast<WORD>(655.35f * LeftMotorRate);
-		vibration.wRightMotorSpeed = static_cast<WORD>(655.35f * RightMotorRate);
+		vibration_.wLeftMotorSpeed = static_cast<WORD>(655.35f * LeftMotorRate);
+		vibration_.wRightMotorSpeed = static_cast<WORD>(655.35f * RightMotorRate);
 		// 0～100の範囲で指定
 	}
 };

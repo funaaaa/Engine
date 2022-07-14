@@ -12,8 +12,8 @@
 struct RayVertex {
 
 	Vec3 position;
-	Vec3 normal;
-	Vec2 uv;
+	Vec3 normal_;
+	Vec2 uv_;
 
 };
 
@@ -32,7 +32,7 @@ private:
 	RayDescriptor materialDescriptor;		// マテリアル情報用ディスクリプタ
 
 	// マテリアル情報用定数バッファ
-	ModelDataManager::Material material;
+	ModelDataManager::Material material_;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer;		// BLAS用バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
@@ -43,8 +43,8 @@ private:
 	UINT vertexStride;						// 1頂点のデータサイズ
 	UINT indexStride;						// 1頂点インデックスのデータサイズ
 
-	Vec3 vertexMax;							// 頂点の各成分の最大値
-	Vec3 vertexMin;							// 頂点の各成分の最小値
+	Vec3 vertexMax_;							// 頂点の各成分の最大値
+	Vec3 vertexMin_;							// 頂点の各成分の最小値
 
 	std::wstring hitGroupName;				// 使用するヒットグループの名前
 	std::string modelPath;					// 使用するモデルのパス
@@ -60,7 +60,7 @@ private:
 
 	// デバッグ用
 	std::vector<RayVertex> defVertex;	// 生成した時点の頂点
-	std::vector<RayVertex> vertex;		// 現在の頂点 頂点を書き換える場合があるのでその時用
+	std::vector<RayVertex> vertex_;		// 現在の頂点 頂点を書き換える場合があるのでその時用
 	std::vector<Vec3> vertexPos;
 	std::vector<Vec3> vertexNormal;
 	std::vector<UINT> vertIndex;
@@ -112,11 +112,11 @@ public:
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
 	const std::string& GetModelPath() { return modelPath; }
 	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath; }
-	const Vec3& GetVertexMin() { return vertexMin; }
-	const Vec3& GetVertexMax() { return vertexMax; }
+	const Vec3& GetVertexMin() { return vertexMin_; }
+	const Vec3& GetVertexMax() { return vertexMax_; }
 
 	// デバッグ用
-	std::vector<RayVertex> GetVertex() { return vertex; }
+	std::vector<RayVertex> GetVertex() { return vertex_; }
 	std::vector<Vec3> GetVertexPos() { return vertexPos; }
 	std::vector<Vec3> GetVertexNormal() { return vertexNormal; }
 	std::vector<UINT> GetVertexIndex() { return vertIndex; }
@@ -127,7 +127,7 @@ private:
 	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
 
 	// バッファ全般を生成する処理
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
 
 	// BLAS生成時に設定を取得する関数
 	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(const bool& IsOpaque);

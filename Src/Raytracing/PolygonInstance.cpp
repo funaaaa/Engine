@@ -12,7 +12,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 	// 移動行列を初期化。
 	worldMat = DirectX::XMMatrixIdentity();
 	matTrans = DirectX::XMMatrixIdentity();
-	scaleMat = DirectX::XMMatrixIdentity();
+	scaleMat_ = DirectX::XMMatrixIdentity();
 	matRot = DirectX::XMMatrixIdentity();
 
 	// 行列を設定。
@@ -125,7 +125,7 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 	buff = DirectX::XMMatrixScaling(Scale.x_, Scale.y_, Scale.z_);
 
-	scaleMat *= buff;
+	scaleMat_ *= buff;
 
 	scale_ += Scale;
 
@@ -140,7 +140,7 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 
 	buff = DirectX::XMMatrixScaling(Scale.x_, Scale.y_, Scale.z_);
 
-	scaleMat = buff;
+	scaleMat_ = buff;
 
 	scale_ = Scale;
 
@@ -149,7 +149,7 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 void PolygonMeshInstance::ChangeScale(const DirectX::XMMATRIX& Scale)
 {
 
-	scaleMat = Scale;
+	scaleMat_ = Scale;
 
 }
 
@@ -160,7 +160,7 @@ void PolygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 
 	worldMat = DirectX::XMMatrixIdentity();
 
-	worldMat *= scaleMat;
+	worldMat *= scaleMat_;
 	worldMat *= matRot;
 	worldMat *= matTrans;
 
@@ -185,7 +185,7 @@ DirectX::XMMATRIX PolygonMeshInstance::GetWorldMat()
 
 	DirectX::XMMATRIX worldMat = DirectX::XMMatrixIdentity();
 
-	worldMat *= scaleMat;
+	worldMat *= scaleMat_;
 	worldMat *= matRot;
 	worldMat *= matTrans;
 
@@ -285,7 +285,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> PolygonMeshInstance::CreateBuffer(size_t 
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

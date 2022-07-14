@@ -19,6 +19,6 @@ public:
 	void Draw();
 
 	// F‚ğ•Ï‚¦‚éˆ—
-	inline void SetColor(const DirectX::XMFLOAT4& Color) { constBufferDataB0.color = Color; }
+	inline void SetColor(const DirectX::XMFLOAT4& Color) { constBufferDataB0_.color = Color; }
 
 };

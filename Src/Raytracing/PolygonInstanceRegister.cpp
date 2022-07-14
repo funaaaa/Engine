@@ -8,10 +8,10 @@ void PolygonInstanceRegister::Setting()
 
 	/*===== インスタンスをセッティング =====*/
 
-	for (auto& index : instance) {
+	for (auto& index_ : instance) {
 
-		index = std::make_shared<PolygonMeshInstance>();
-		instanceDesc[&index - &instance[0]] = {};
+		index_ = std::make_shared<PolygonMeshInstance>();
+		instanceDesc[&index_ - &instance[0]] = {};
 
 	}
 
@@ -24,11 +24,11 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 
 	// 生成するインスタンスのインデックスを求める。
 	int instanceIndex = -1;
-	for (auto& index : instance) {
+	for (auto& index_ : instance) {
 
-		if (index->GetIsActive()) continue;
+		if (index_->GetIsActive()) continue;
 
-		instanceIndex = static_cast<int>(&index - &instance[0]);
+		instanceIndex = static_cast<int>(&index_ - &instance[0]);
 
 		break;
 
@@ -39,9 +39,9 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 	// いずれ処理を変えたい。
 	if (instanceIndex == 0) {
 
-		for (auto& index : instanceDesc) {
+		for (auto& index_ : instanceDesc) {
 
-			index.AccelerationStructure = BLASRegister::Ins()->GetBLASBuffer(0)->GetGPUVirtualAddress();
+			index_.AccelerationStructure = BLASRegister::Ins()->GetBLASBuffer(0)->GetGPUVirtualAddress();
 
 		}
 
@@ -212,11 +212,11 @@ UINT PolygonInstanceRegister::GetBLASIndex(const int& Index)
 void PolygonInstanceRegister::CalWorldMat()
 {
 
-	for (auto& index : instance) {
+	for (auto& index_ : instance) {
 
-		if (!index->GetIsActive())continue;
+		if (!index_->GetIsActive())continue;
 
-		index->CalWorldMat(instanceDesc[&index - &instance[0]]);
+		index_->CalWorldMat(instanceDesc[&index_ - &instance[0]]);
 
 	}
 

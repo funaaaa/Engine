@@ -21,7 +21,7 @@ private:
 
 	/*-- ƒƒ“ƒo•Ï” --*/
 
-	std::vector<std::shared_ptr<ShaderData>> shaderData;
+	std::vector<std::shared_ptr<ShaderData>> shaderData_;
 
 
 public:

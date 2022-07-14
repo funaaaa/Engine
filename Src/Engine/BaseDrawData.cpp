@@ -5,12 +5,12 @@
 
 void BaseDrawData::ChangeScale(Vec3 Amount)
 {
-	scaleMat = DirectX::XMMatrixScaling(Amount.x_, Amount.y_, Amount.z_);
+	scaleMat_ = DirectX::XMMatrixScaling(Amount.x_, Amount.y_, Amount.z_);
 }
 
 void BaseDrawData::ChangeScale(float X, float Y, float Z)
 {
-	scaleMat = DirectX::XMMatrixScaling(X, Y, Z);
+	scaleMat_ = DirectX::XMMatrixScaling(X, Y, Z);
 }
 
 void BaseDrawData::ChangeRotation(Vec3 Amount)
@@ -19,7 +19,7 @@ void BaseDrawData::ChangeRotation(Vec3 Amount)
 	buff *= DirectX::XMMatrixRotationZ(Amount.z_);
 	buff *= DirectX::XMMatrixRotationX(Amount.x_);
 	buff *= DirectX::XMMatrixRotationY(Amount.y_);
-	rotationMat = buff * rotationMat;
+	rotationMat_ = buff * rotationMat_;
 }
 void BaseDrawData::ChangeRotation(float X, float Y, float Z)
 {
@@ -27,68 +27,68 @@ void BaseDrawData::ChangeRotation(float X, float Y, float Z)
 	buff *= DirectX::XMMatrixRotationZ(Z);
 	buff *= DirectX::XMMatrixRotationX(X);
 	buff *= DirectX::XMMatrixRotationY(Y);
-	rotationMat = buff * rotationMat;
+	rotationMat_ = buff * rotationMat_;
 }
 
 void BaseDrawData::InitRotation()
 {
-	rotationMat = DirectX::XMMatrixIdentity();
+	rotationMat_ = DirectX::XMMatrixIdentity();
 }
 
 void BaseDrawData::AssignmentRotationMat(DirectX::XMMATRIX Amount)
 {
-	rotationMat = Amount;
+	rotationMat_ = Amount;
 }
 
 void BaseDrawData::ChangePosition(Vec3 Amount)
 {
-	positionMat = DirectX::XMMatrixTranslation(Amount.x_, Amount.y_, Amount.z_);
-	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	positionMat_ = DirectX::XMMatrixTranslation(Amount.x_, Amount.y_, Amount.z_);
+	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);
 }
 
 void BaseDrawData::ChangePosition(float X, float Y, float Z)
 {
-	positionMat = DirectX::XMMatrixTranslation(X, Y, Z);
-	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	positionMat_ = DirectX::XMMatrixTranslation(X, Y, Z);
+	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);
 }
 
 void BaseDrawData::MulRotationMat(DirectX::XMMATRIX RotationMat)
 {
-	this->rotationMat *= RotationMat;
+	this->rotationMat_ *= RotationMat;
 }
 
 void BaseDrawData::ChangePositionAdd(Vec3 Amount)
 {
-	positionMat *= DirectX::XMMatrixTranslation(Amount.x_, Amount.y_, Amount.z_);
-	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	positionMat_ *= DirectX::XMMatrixTranslation(Amount.x_, Amount.y_, Amount.z_);
+	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);
 }
 void BaseDrawData::ChangePositionAdd(float X, float Y, float Z)
 {
-	positionMat *= DirectX::XMMatrixTranslation(X, Y, Z);
-	pos_ = Vec3(positionMat.r[3].m128_f32[0], positionMat.r[3].m128_f32[1], positionMat.r[3].m128_f32[2]);
+	positionMat_ *= DirectX::XMMatrixTranslation(X, Y, Z);
+	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);
 }
 
 
 void BaseDrawData::AssignmentWorldMatrix(const DirectX::XMMATRIX& PosMat, const DirectX::XMMATRIX& ScaleMat, const DirectX::XMMATRIX& RotationMat)
 {
-	this->positionMat = PosMat;
-	this->scaleMat = ScaleMat;
-	this->rotationMat = RotationMat;
+	this->positionMat_ = PosMat;
+	this->scaleMat_ = ScaleMat;
+	this->rotationMat_ = RotationMat;
 }
 
 void BaseDrawData::DoNotDisplay()
 {
-	isDisplay = false;
+	isDisplay_ = false;
 }
 
 void BaseDrawData::DisplayOnScreen()
 {
-	isDisplay = true;
+	isDisplay_ = true;
 }
 
 bool BaseDrawData::GetIsDisplay()
 {
-	return isDisplay;
+	return isDisplay_;
 }
 
 void BaseDrawData::ChangeTextureID(int TextureID, int Index)
@@ -99,41 +99,41 @@ void BaseDrawData::ChangeTextureID(int TextureID, int Index)
 	if (indexBuff < 0) indexBuff = 0;
 
 	// インデックスがtextureIDコンテナより大きかったら最大値にする。
-	if (indexBuff > static_cast<int>(this->textureID.size()) - 1) indexBuff = static_cast<int>(this->textureID.size()) - 1;
+	if (indexBuff > static_cast<int>(this->textureID_.size()) - 1) indexBuff = static_cast<int>(this->textureID_.size()) - 1;
 
 	// 指定のインデックスのテクスチャIDを変更する。
-	this->textureID.at(indexBuff) = TextureID;
+	this->textureID_.at(indexBuff) = TextureID;
 }
 
 void BaseDrawData::AddTextureID(int TextureID)
 {
 	// textureIDを追加。
-	this->textureID.push_back(TextureID);
+	this->textureID_.push_back(TextureID);
 }
 
 void BaseDrawData::ClearTextureID()
 {
-	textureID.clear();
+	textureID_.clear();
 }
 
 void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBuffB0, const ConstBufferDataB0& ConstBufferB0)
 {
 
 	// 転送する行列をLightCameraの引数次第で変える。
-	DirectX::XMMATRIX matProjection;
-	DirectX::XMMATRIX matPerspective;
-	DirectX::XMMATRIX matView;
-	Vec3 eye;
-	Vec3 target;
-	Vec3 up;
+	DirectX::XMMATRIX matProjection_;
+	DirectX::XMMATRIX matPerspective_;
+	DirectX::XMMATRIX matView_;
+	Vec3 eye_;
+	Vec3 target_;
+	Vec3 up_;
 
 
-	matProjection = Camera::Ins()->matProjection;
-	matPerspective = Camera::Ins()->matPerspective;
-	matView = Camera::Ins()->matView;
-	eye = Camera::Ins()->Ins()->eye;
-	target = Camera::Ins()->Ins()->target;
-	up = Camera::Ins()->Ins()->up;
+	matProjection_ = Camera::Ins()->matProjection_;
+	matPerspective_ = Camera::Ins()->matPerspective_;
+	matView_ = Camera::Ins()->matView_;
+	eye_ = Camera::Ins()->Ins()->eye_;
+	target_ = Camera::Ins()->Ins()->target_;
+	up_ = Camera::Ins()->Ins()->up_;
 
 
 
@@ -141,37 +141,37 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 	ConstBufferDataB0* constMap = nullptr;
 	ConstBuffB0->Map(0, nullptr, (void**)&constMap);
 	// 投影IDがbackGourndの場合は平行投影変換を行う
-	if (projectionID == Pipline::PROJECTIONID::UI) {
+	if (projectionID_ == Pipline::PROJECTIONID::UI) {
 		// ワールド行列の更新
 		DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
-		matWorld *= scaleMat;
-		matWorld *= rotationMat;
-		matWorld *= positionMat;
-		constMap->mat.world = matWorld;
-		constMap->mat.viewproj = Camera::Ins()->matProjection;		// 平行投影変換
-		constMap->eye = Camera::Ins()->eye;
+		matWorld *= scaleMat_;
+		matWorld *= rotationMat_;
+		matWorld *= positionMat_;
+		constMap->mat.world_ = matWorld;
+		constMap->mat.viewproj = Camera::Ins()->matProjection_;		// 平行投影変換
+		constMap->eye_ = Camera::Ins()->eye_;
 		constMap->color = ConstBufferB0.color;
 	}
 	// 投影IDがobjectの場合はいろいろな変換を行う
-	else if (projectionID == Pipline::PROJECTIONID::OBJECT) {
+	else if (projectionID_ == Pipline::PROJECTIONID::OBJECT) {
 		// ワールド行列の更新
 		DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
-		matWorld *= scaleMat;
-		matWorld *= rotationMat;
-		matWorld *= positionMat;
-		constMap->mat.world = matWorld;								// ワールド変換 * ビュー変換 * 透視投影変換
-		constMap->mat.viewproj = matView * matPerspective;
-		constMap->eye = eye;
+		matWorld *= scaleMat_;
+		matWorld *= rotationMat_;
+		matWorld *= positionMat_;
+		constMap->mat.world_ = matWorld;								// ワールド変換 * ビュー変換 * 透視投影変換
+		constMap->mat.viewproj = matView_ * matPerspective_;
+		constMap->eye_ = eye_;
 		constMap->color = ConstBufferB0.color;
 	}
 	// ビルボードの場合
-	else if (projectionID == Pipline::PROJECTIONID::BILLBOARD) {
+	else if (projectionID_ == Pipline::PROJECTIONID::BILLBOARD) {
 		// 視点座標
-		DirectX::XMVECTOR eyePosition = eye.ConvertXMVECTOR();
+		DirectX::XMVECTOR eyePosition = eye_.ConvertXMVECTOR();
 		// 注視点座標
-		DirectX::XMVECTOR targetPosition = target.ConvertXMVECTOR();
+		DirectX::XMVECTOR targetPosition = target_.ConvertXMVECTOR();
 		// (仮の)上方向
-		DirectX::XMVECTOR upVector = up.ConvertXMVECTOR();
+		DirectX::XMVECTOR upVector = up_.ConvertXMVECTOR();
 		// カメラZ軸
 		DirectX::XMVECTOR cameraAxisZ = DirectX::XMVectorSubtract(targetPosition, eyePosition);
 		// 0ベクトルだと向きが定まらないので除外
@@ -209,9 +209,9 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 		DirectX::XMVECTOR tY = DirectX::XMVector3Dot(cameraAxisY, reverseEyePosition);		// Y成分
 		DirectX::XMVECTOR tZ = DirectX::XMVector3Dot(cameraAxisZ, reverseEyePosition);		// Z成分
 		// 一つのベクトルにまとめる
-		DirectX::XMVECTOR translation = DirectX::XMVectorSet(tX.m128_f32[0], tY.m128_f32[1], tZ.m128_f32[2], 1.0f);
+		DirectX::XMVECTOR translation_ = DirectX::XMVectorSet(tX.m128_f32[0], tY.m128_f32[1], tZ.m128_f32[2], 1.0f);
 		// ビュー行列に平行移動分を設定
-		invMatView.r[3] = translation;
+		invMatView.r[3] = translation_;
 
 		// ビルボード行列
 		DirectX::XMMATRIX billboardMat = DirectX::XMMatrixIdentity();
@@ -222,12 +222,12 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 		// ワールド行列の更新
 		DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
 		matWorld *= billboardMat;
-		matWorld *= scaleMat;
-		matWorld *= rotationMat;
-		matWorld *= positionMat;
-		constMap->mat.world = matWorld;												// ワールド変換 * ビュー変換 * 透視投影変換
-		constMap->mat.viewproj = invMatView * matPerspective;
-		constMap->eye = eye;
+		matWorld *= scaleMat_;
+		matWorld *= rotationMat_;
+		matWorld *= positionMat_;
+		constMap->mat.world_ = matWorld;												// ワールド変換 * ビュー変換 * 透視投影変換
+		constMap->mat.viewproj = invMatView * matPerspective_;
+		constMap->eye_ = eye_;
 		constMap->color = ConstBufferB0.color;
 	}
 	ConstBuffB0->Unmap(0, nullptr);

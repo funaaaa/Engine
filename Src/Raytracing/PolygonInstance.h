@@ -18,7 +18,7 @@ private:
 
 	DirectX::XMMATRIX matTrans;
 	DirectX::XMMATRIX matRot;
-	DirectX::XMMATRIX scaleMat;
+	DirectX::XMMATRIX scaleMat_;
 
 	bool isActive;	// このインスタンスが有効化されているかどうか。
 
@@ -60,7 +60,7 @@ public:
 
 	// 拡大(引数を加算)関数
 	void AddScale(const Vec3& Scale);
-	DirectX::XMMATRIX GetScale() { return scaleMat; }
+	DirectX::XMMATRIX GetScale() { return scaleMat_; }
 
 	// 拡大(引数を代入)関数
 	void ChangeScale(const Vec3& Scale);

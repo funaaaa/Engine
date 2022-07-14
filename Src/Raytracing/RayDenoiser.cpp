@@ -54,8 +54,8 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	CalcWeightsTableFromGaussian(static_cast<float>(BlurPower));
 
 	// 重みテーブルを書き込む。
-	weightTableCBX->Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), gaussianWeights.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
-	weightTableCBY->Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), gaussianWeights.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
+	weightTableCBX->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), gaussianWeights.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
+	weightTableCBY->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), gaussianWeights.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
 
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -65,8 +65,8 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 	// コンピュートシェーダーを実行。
 	blurX->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
 	blurY->ChangeInputUAVIndex({ blurXOutput->GetUAVIndex(), DenoiseMaskIndex });
-	blurX->Dispatch(static_cast<UINT>(window_width / 32) + 1, static_cast<UINT>(window_height / 32) + 1, static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32) + 1, static_cast<UINT>((window_height / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurX->Dispatch(static_cast<UINT>(window_width / 32) + 1, static_cast<UINT>(window_height / 32) + 1, static_cast<UINT>(1), blurXOutput->GetUAVIndex(), { weightTableCBX->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	blurY->Dispatch(static_cast<UINT>((window_width / 1.0f) / 32) + 1, static_cast<UINT>((window_height / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 
 	// 出力用UAVの状態を変える。
 	blurXOutput->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -108,16 +108,16 @@ void Denoiser::Denoise(const int& InImg, const int& OutImg, const int& DenoiseMa
 	}
 	else {
 
-		for (int index = 0; index < DenoiseCount; ++index) {
+		for (int index_ = 0; index_ < DenoiseCount; ++index_) {
 
 			// デノイズが最初の一回だったら。
-			if (index == 0) {
+			if (index_ == 0) {
 
 				ApplyGaussianBlur(InImg, DenoiseMaskIndex, denoiseOutput->GetUAVIndex(), DenoisePower);
 
 			}
 			// デノイズの最終段階だったら。
-			else if (index == DenoiseCount - 1) {
+			else if (index_ == DenoiseCount - 1) {
 
 				ApplyGaussianBlur(denoiseOutput->GetUAVIndex(), DenoiseMaskIndex, OutImg, DenoisePower);
 

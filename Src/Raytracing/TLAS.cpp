@@ -26,8 +26,8 @@ void TLAS::GenerateTLAS()
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.RaytracingAccelerationStructure.Location = tlasBuffer->GetGPUVirtualAddress();
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-	DirectXBase::Ins()->dev->CreateShaderResourceView(nullptr, &srvDesc,
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	DirectXBase::Ins()->dev_->CreateShaderResourceView(nullptr, &srvDesc,
 		basicHeapHandle);
 
 	// ディスクリプタヒープをインクリメント
@@ -81,7 +81,7 @@ void TLAS::Update()
 	asDesc.ScratchAccelerationStructureData = tlasUpdateBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -147,7 +147,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -195,7 +195,7 @@ void TLAS::SettingAccelerationStructure()
 
 	// メモリ量を求める関数を実行する。
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO tlasPrebuild{};
-	DirectXBase::Ins()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
+	DirectXBase::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &tlasPrebuild
 	);
 
@@ -232,7 +232,7 @@ void TLAS::SettingAccelerationStructure()
 	buildASDesc.DestAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積んで実行する。
-	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr
 	);
 
@@ -250,32 +250,32 @@ void TLAS::CreateAccelerationStructure()
 
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer.Get());
-	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &uavBarrier);
-	DirectXBase::Ins()->cmdList->Close();
+	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
+	DirectXBase::Ins()->cmdList_->Close();
 
 	// TLASを構築。
 	//ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
 
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };
-	DirectXBase::Ins()->cmdQueue->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList_.Get() };
+	DirectXBase::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
 
 
 	/*-- リソースバリアを設定して書き込めないようにする --*/
 
 	//グラフィックコマンドリストの完了待ち
-	DirectXBase::Ins()->cmdQueue->Signal(DirectXBase::Ins()->fence.Get(), ++DirectXBase::Ins()->fenceVal);
-	if (DirectXBase::Ins()->fence->GetCompletedValue() != DirectXBase::Ins()->fenceVal) {
+	DirectXBase::Ins()->cmdQueue_->Signal(DirectXBase::Ins()->fence_.Get(), ++DirectXBase::Ins()->fenceVal_);
+	if (DirectXBase::Ins()->fence_->GetCompletedValue() != DirectXBase::Ins()->fenceVal_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		DirectXBase::Ins()->fence->SetEventOnCompletion(DirectXBase::Ins()->fenceVal, event);
+		DirectXBase::Ins()->fence_->SetEventOnCompletion(DirectXBase::Ins()->fenceVal_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	//コマンドアロケータのリセット
-	DirectXBase::Ins()->cmdAllocator->Reset();						//キューをクリア
+	DirectXBase::Ins()->cmdAllocator_->Reset();						//キューをクリア
 
 	//コマンドリストのリセット
-	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
+	DirectXBase::Ins()->cmdList_->Reset(DirectXBase::Ins()->cmdAllocator_.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }

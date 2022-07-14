@@ -4,21 +4,21 @@
 #include <DirectXTex/d3dx12.h>
 
 Pipline::Pipline(
-	PIPLINE_ID piplineID,
+	PIPLINE_ID piplineID_,
 	string PSname,
 	string VSname,
 	int inputLayoutCount,
 	D3D12_INPUT_ELEMENT_DESC* inputLayout,
 	int rootparamCount,
 	CD3DX12_ROOT_PARAMETER* rootparam,
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 	BLEND_ID blendID,
 	D3D12_CULL_MODE cullMode,
-	DXGI_FORMAT dxgiFormat) : primitive(primitive)
+	DXGI_FORMAT dxgiFormat) : primitive_(primitive_)
 {
 
 	// パイプラインIDを保存
-	this->piplineID = piplineID;
+	this->piplineID_ = piplineID_;
 
 	//シェーダー読み込み
 	Microsoft::WRL::ComPtr<ID3DBlob> vsBlob = nullptr;		//頂点シェーダオブジェクト
@@ -37,27 +37,27 @@ Pipline::Pipline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat);
 
-	DirectXBase::Ins()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
+	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
 Pipline::Pipline(
-	PIPLINE_ID piplineID,
+	PIPLINE_ID piplineID_,
 	string PSname,
 	string VSname,
 	int inputLayoutCount,
 	D3D12_INPUT_ELEMENT_DESC* inputLayout,
 	int rootparamCount,
 	CD3DX12_ROOT_PARAMETER* rootparam,
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 	BLEND_ID blendID,
 	bool isMRT,
 	D3D12_CULL_MODE cullMode,
 	DXGI_FORMAT dxgiFormat,
-	DXGI_FORMAT dxgiFormat2) : primitive(primitive)
+	DXGI_FORMAT dxgiFormat2) : primitive_(primitive_)
 {
 
 	// パイプラインIDを保存
-	this->piplineID = piplineID;
+	this->piplineID_ = piplineID_;
 
 	//シェーダー読み込み
 	Microsoft::WRL::ComPtr<ID3DBlob> vsBlob = nullptr;		//頂点シェーダオブジェクト
@@ -75,11 +75,11 @@ Pipline::Pipline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDescDepth(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat, dxgiFormat2);
 	isMRT;
-	DirectXBase::Ins()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
+	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
 Pipline::Pipline(
-	PIPLINE_ID piplineID,
+	PIPLINE_ID piplineID_,
 	string PSname,
 	string VSname,
 	string GSname,
@@ -87,14 +87,14 @@ Pipline::Pipline(
 	D3D12_INPUT_ELEMENT_DESC* inputLayout,
 	int rootparamCount,
 	CD3DX12_ROOT_PARAMETER* rootparam,
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 	BLEND_ID blendID,
 	D3D12_CULL_MODE cullMode,
-	DXGI_FORMAT dxgiFormat) : primitive(primitive)
+	DXGI_FORMAT dxgiFormat) : primitive_(primitive_)
 {
 
 	// パイプラインIDを保存
-	this->piplineID = piplineID;
+	this->piplineID_ = piplineID_;
 
 	//シェーダー読み込み
 	Microsoft::WRL::ComPtr<ID3DBlob> vsBlob = nullptr;		//頂点シェーダオブジェクト
@@ -119,26 +119,26 @@ Pipline::Pipline(
 
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat);
 
-	DirectXBase::Ins()->dev->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate));
+	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
 void Pipline::SetPipline()
 {
 	//パイプラインステート設定コマンド
-	DirectXBase::Ins()->cmdList->SetPipelineState(pipelinestate.Get());
+	DirectXBase::Ins()->cmdList_->SetPipelineState(pipelinestate_.Get());
 
 	//ルートシグネチャ設定コマンド
-	DirectXBase::Ins()->cmdList->SetGraphicsRootSignature(rootsignature.Get());
+	DirectXBase::Ins()->cmdList_->SetGraphicsRootSignature(rootsignature_.Get());
 
 	//プリミティブ形状設定コマンド
-	if (primitive == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) {
-		DirectXBase::Ins()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) {
+		DirectXBase::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
-	else if (primitive == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) {
-		DirectXBase::Ins()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) {
+		DirectXBase::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 	}
-	else if (primitive == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) {
-		DirectXBase::Ins()->cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) {
+		DirectXBase::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	}
 }
 
@@ -176,7 +176,7 @@ void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, 
 	}
 	gpipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 	gpipelineDesc.InputLayout.NumElements = inputLayoutCount;
-	gpipelineDesc.PrimitiveTopologyType = primitive;
+	gpipelineDesc.PrimitiveTopologyType = primitive_;
 	gpipelineDesc.NumRenderTargets = 1;											//描画対象は1つ
 	gpipelineDesc.RTVFormats[0] = dxgiFormat;									//0～255指定のRGBA
 	gpipelineDesc.SampleDesc.Count = 1;											//1ピクセルにつき1回サンプリング
@@ -200,10 +200,10 @@ void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, 
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = DirectXBase::Ins()->dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
+	result = DirectXBase::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
 
 	//パイプラインにルートシグネチャをセット
-	gpipelineDesc.pRootSignature = rootsignature.Get();
+	gpipelineDesc.pRootSignature = rootsignature_.Get();
 }
 
 void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam, int rootparamCount, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat, DXGI_FORMAT dxgiFormat2)
@@ -240,7 +240,7 @@ void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineD
 	}
 	gpipelineDesc.InputLayout.pInputElementDescs = inputLayout;
 	gpipelineDesc.InputLayout.NumElements = inputLayoutCount;
-	gpipelineDesc.PrimitiveTopologyType = primitive;
+	gpipelineDesc.PrimitiveTopologyType = primitive_;
 	gpipelineDesc.NumRenderTargets = 2;											//描画対象は1つ
 	gpipelineDesc.RTVFormats[0] = dxgiFormat;									//0～255指定のRGBA
 	gpipelineDesc.RTVFormats[1] = dxgiFormat2;									//0～255指定のRGBA
@@ -265,8 +265,8 @@ void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineD
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = DirectXBase::Ins()->dev->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature));
+	result = DirectXBase::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
 
 	//パイプラインにルートシグネチャをセット
-	gpipelineDesc.pRootSignature = rootsignature.Get();
+	gpipelineDesc.pRootSignature = rootsignature_.Get();
 }

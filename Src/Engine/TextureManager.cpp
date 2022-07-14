@@ -9,15 +9,15 @@ TextureManager::TextureManager() {
 int TextureManager::LoadTexture(LPCWSTR FileName) {
 
 	// ファイルがロード済みかをチェック
-	if (0 < texture.size()) {
+	if (0 < texture_.size()) {
 
 		int counter = 0;
-		for (auto& index : texture) {
+		for (auto& index_ : texture_) {
 
 			// ロードしてあったら識別番号を返す
-			if (index.fileName == FileName) {
+			if (index_.fileName_ == FileName) {
 
-				return descriptorHeadMgrIndex[counter];
+				return descriptorHeadMgrIndex_[counter];
 
 			}
 			++counter;
@@ -26,30 +26,30 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 
 	// テクスチャデータを保存
 	Texture proTexture{};
-	proTexture.fileName = FileName;
+	proTexture.fileName_ = FileName;
 
 	// ロードしていなかったらロードする
-	DirectX::TexMetadata metadata;
-	DirectX::ScratchImage scratchImg;
+	DirectX::TexMetadata metadata_;
+	DirectX::ScratchImage scratchImg_;
 	HRESULT result = LoadFromWICFile(
 		FileName,
 		DirectX::WIC_FLAGS_NONE,
-		&metadata, scratchImg
+		&metadata_, scratchImg_
 	);
-	const DirectX::Image* img = scratchImg.GetImage(0, 0, 0);
+	const DirectX::Image* img = scratchImg_.GetImage(0, 0, 0);
 
 	// リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-		metadata.format,
-		static_cast<UINT>(metadata.width),
-		static_cast<UINT>(metadata.height),
-		static_cast<UINT16>(metadata.arraySize),
-		static_cast<UINT16>(metadata.mipLevels));
+		metadata_.format,
+		static_cast<UINT>(metadata_.width),
+		static_cast<UINT>(metadata_.height),
+		static_cast<UINT16>(metadata_.arraySize),
+		static_cast<UINT16>(metadata_.mipLevels));
 
 	// テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
 	CD3DX12_HEAP_PROPERTIES texHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
-	result = DirectXBase::Ins()->dev->CreateCommittedResource(&texHeapProp,
+	result = DirectXBase::Ins()->dev_->CreateCommittedResource(&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -66,23 +66,23 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 	);
 
 	// テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
-	proTexture.metadata = metadata;
-	proTexture.scratchImg = &scratchImg;
-	proTexture.texBuff = texbuff;
-	texture.emplace_back(proTexture);
-	descriptorHeadMgrIndex.emplace_back(DescriptorHeapMgr::Ins()->GetHead());
+	proTexture.metadata_ = metadata_;
+	proTexture.scratchImg_ = &scratchImg_;
+	proTexture.texBuff_ = texbuff;
+	texture_.emplace_back(proTexture);
+	descriptorHeadMgrIndex_.emplace_back(DescriptorHeapMgr::Ins()->GetHead());
 
 	// ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	// シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
+	srvDesc.Format = metadata_.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	// ヒープにシェーダーリソースビュー生成
-	DirectXBase::Ins()->dev->CreateShaderResourceView(
+	DirectXBase::Ins()->dev_->CreateShaderResourceView(
 		texbuff.Get(),
 		&srvDesc,
 		basicHeapHandle
@@ -100,10 +100,10 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 Color)
 	LPCWSTR selfTex = L"SelfTexture";
 
 	int counter = 0;
-	for (auto& index : texture) {
+	for (auto& index_ : texture_) {
 
-		if (index.fileName == selfTex && index.colorData.x == Color.x && index.colorData.y == Color.y &&
-			index.colorData.z == Color.z && index.colorData.w == Color.w) {
+		if (index_.fileName_ == selfTex && index_.colorData_.x == Color.x && index_.colorData_.y == Color.y &&
+			index_.colorData_.z == Color.z && index_.colorData_.w == Color.w) {
 
 			// すでに生成してあるテクスチャなのでSRVヒープの番号を返す
 			return counter;
@@ -120,11 +120,11 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 Color)
 	std::array<DirectX::XMFLOAT4, texWidth> imageData;
 
 	// 全ピクセルの色を初期化
-	for (auto& index : imageData) {
-		index.x = Color.x;
-		index.y = Color.y;
-		index.z = Color.z;
-		index.w = Color.w;
+	for (auto& index_ : imageData) {
+		index_.x = Color.x;
+		index_.y = Color.y;
+		index_.z = Color.z;
+		index_.w = Color.w;
 	}
 
 	// リソース設定
@@ -138,7 +138,7 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 Color)
 	// テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
 	CD3DX12_HEAP_PROPERTIES texHeapPropBuff = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
-	HRESULT result = DirectXBase::Ins()->dev->CreateCommittedResource(&texHeapPropBuff,
+	HRESULT result = DirectXBase::Ins()->dev_->CreateCommittedResource(&texHeapPropBuff,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -156,17 +156,17 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 Color)
 
 	// テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
 	Texture proTexture{};
-	proTexture.fileName = L"SelfTexture";
-	proTexture.metadata = {};
-	proTexture.scratchImg = {};
-	proTexture.texBuff = texbuff;
-	proTexture.colorData = Color;
-	texture.push_back(proTexture);
-	descriptorHeadMgrIndex.emplace_back(DescriptorHeapMgr::Ins()->GetHead());
+	proTexture.fileName_ = L"SelfTexture";
+	proTexture.metadata_ = {};
+	proTexture.scratchImg_ = {};
+	proTexture.texBuff_ = texbuff;
+	proTexture.colorData_ = Color;
+	texture_.push_back(proTexture);
+	descriptorHeadMgrIndex_.emplace_back(DescriptorHeapMgr::Ins()->GetHead());
 
 	// ディスクリプタヒープのアドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	// シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -174,7 +174,7 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 Color)
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	srvDesc.Texture2D.MipLevels = 1;
 	// ヒープにシェーダーリソースビュー生成
-	DirectXBase::Ins()->dev->CreateShaderResourceView(
+	DirectXBase::Ins()->dev_->CreateShaderResourceView(
 		texbuff.Get(),
 		&srvDesc,
 		basicHeapHandle
@@ -193,7 +193,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSRV(int IDNum) {
 	// 消費した分だけアドレスをずらす。
 	for (int i = 0; i < IDNum; ++i) {
 
-		basicHeapHandle.ptr += DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		basicHeapHandle.ptr += DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	}
 
@@ -202,5 +202,5 @@ D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSRV(int IDNum) {
 
 Texture TextureManager::GetTexture(int ID)
 {
-	return texture[ID];
+	return texture_[ID];
 }

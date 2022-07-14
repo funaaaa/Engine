@@ -23,30 +23,30 @@ void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& C
 	inputUAVIndex = UAVIndex;
 
 	// ルートシグネチャを生成。
-	rootSignature = std::make_shared<RayRootsignature>();
+	rootSignature_ = std::make_shared<RayRootsignature>();
 
 	// ルートシグネチャパラメーターを設定。
-	for (int index = 0; index < SRVCount; ++index) {
-		rootSignature->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index);
+	for (int index_ = 0; index_ < SRVCount; ++index_) {
+		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index_);
 	}
-	for (int index = 0; index < CBVCount; ++index) {
-		rootSignature->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
+	for (int index_ = 0; index_ < CBVCount; ++index_) {
+		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index_);
 	}
-	for (int index = 0; index < UAVCount + 1; ++index) {	// +1しているのは出力用のデータがUAVだから
-		rootSignature->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index);
+	for (int index_ = 0; index_ < UAVCount + 1; ++index_) {	// +1しているのは出力用のデータがUAVだから
+		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index_);
 	}
 
 	// ルートシグネチャを生成。
-	rootSignature->Create(false, L"RayComputeShader");
+	rootSignature_->Create(false, L"RayComputeShader");
 
 	// パイプラインを設定。
 	D3D12_COMPUTE_PIPELINE_STATE_DESC  psoDesc = { 0 };
-	psoDesc.pRootSignature = rootSignature->GetRootSig().Get();
+	psoDesc.pRootSignature = rootSignature_->GetRootSig().Get();
 	psoDesc.CS = CD3DX12_SHADER_BYTECODE(csBlob.Get());
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.NodeMask = 0;
 
-	auto hr = DirectXBase::Ins()->dev->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipline_));
+	auto hr = DirectXBase::Ins()->dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipline_));
 	if (FAILED(hr)) {
 		//生成に失敗した
 		assert(0);
@@ -60,16 +60,16 @@ void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& Threa
 	/*===== 実行処理 =====*/
 
 	// ルートシグネチャをセット。
-	DirectXBase::Ins()->cmdList->SetComputeRootSignature(rootSignature->GetRootSig().Get());
+	DirectXBase::Ins()->cmdList_->SetComputeRootSignature(rootSignature_->GetRootSig().Get());
 
 	// パイプラインをセット。
-	DirectXBase::Ins()->cmdList->SetPipelineState(pipline_.Get());
+	DirectXBase::Ins()->cmdList_->SetPipelineState(pipline_.Get());
 
 	// 一応UAVをセット。
 	int counter = 0;
-	for (auto& index : inputUAVIndex) {
+	for (auto& index_ : inputUAVIndex) {
 
-		DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(counter + inputCBVCount, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index));
+		DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(counter + inputCBVCount, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
 
 		++counter;
 
@@ -80,19 +80,19 @@ void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& Threa
 
 	// CBVをセット。
 	counter = 0;
-	for (auto& index : InputCBV) {
+	for (auto& index_ : InputCBV) {
 
-		DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(counter, index);
+		DirectXBase::Ins()->cmdList_->SetComputeRootConstantBufferView(counter, index_);
 
 		++counter;
 
 	}
 
 	// 出力用UAVをセット。
-	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(inputUAVCount + inputCBVCount, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
+	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(inputUAVCount + inputCBVCount, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
 
 	// ディスパッチ。
-	DirectXBase::Ins()->cmdList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
+	DirectXBase::Ins()->cmdList_->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 
 }
 

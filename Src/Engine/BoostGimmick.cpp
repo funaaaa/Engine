@@ -39,110 +39,110 @@ ModelDataManager::ObjectData BoostGimmick::GenerateVertex(OBB Obb)
 	ModelDataManager::ObjectData objectData;
 
 	// 頂点を生成。 前面右上
-	ModelDataManager::Vertex vertex;
-	vertex.pos_ = Vec3(Obb.length.x_, Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(1, 0);
-	objectData.vertex.emplace_back(vertex);
+	ModelDataManager::Vertex vertex_;
+	vertex_.pos_ = Vec3(Obb.length.x_, Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 0);
+	objectData.vertex_.emplace_back(vertex_);
 	// 前面右下
-	vertex.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(1, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 前面左下
-	vertex.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(0, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 前面左上
-	vertex.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(0, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 0);
+	objectData.vertex_.emplace_back(vertex_);
 
 	// 背面右上
-	vertex.pos_ = Vec3(Obb.length.x_, Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(1, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 0);
+	objectData.vertex_.emplace_back(vertex_);
 	// 背面右下
-	vertex.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(1, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 背面左下
-	vertex.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(0, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 背面左上
-	vertex.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(0, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 0);
+	objectData.vertex_.emplace_back(vertex_);
 
 	// 右面右上
-	vertex.pos_ = Vec3(Obb.length.x_, Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(1, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 0);
+	objectData.vertex_.emplace_back(vertex_);
 	// 右面右下
-	vertex.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(1, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 右面左下
-	vertex.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(0, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 右面左上
-	vertex.pos_ = Vec3(Obb.length.x_, Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(0, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 0);
+	objectData.vertex_.emplace_back(vertex_);
 
 	// 左面右上
-	vertex.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(1, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 0);
+	objectData.vertex_.emplace_back(vertex_);
 	// 左面右下
-	vertex.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(1, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 左面左下
-	vertex.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(0, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 左面左上
-	vertex.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(0, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 0);
+	objectData.vertex_.emplace_back(vertex_);
 
 	// 上面右上
-	vertex.pos_ = Vec3(Obb.length.x_, Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(1, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 0);
+	objectData.vertex_.emplace_back(vertex_);
 	// 上面右下
-	vertex.pos_ = Vec3(Obb.length.x_, Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(1, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 上面左下
-	vertex.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(0, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 上面左上
-	vertex.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(0, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 0);
+	objectData.vertex_.emplace_back(vertex_);
 
 	// 下面右上
-	vertex.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(1, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 0);
+	objectData.vertex_.emplace_back(vertex_);
 	// 下面右下
-	vertex.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(1, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(Obb.length.x_, -Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(1, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 下面左下
-	vertex.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, Obb.length.z_);
-	vertex.uv = Vec2(0, 1);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 1);
+	objectData.vertex_.emplace_back(vertex_);
 	// 下面左上
-	vertex.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
-	vertex.uv = Vec2(0, 0);
-	objectData.vertex.emplace_back(vertex);
+	vertex_.pos_ = Vec3(-Obb.length.x_, -Obb.length.y_, -Obb.length.z_);
+	vertex_.uv_ = Vec2(0, 0);
+	objectData.vertex_.emplace_back(vertex_);
 
 	// インデックスを設定。
-	objectData.index = {
+	objectData.index_ = {
 		// 前面
 		0,1,3,
 		1,2,3,

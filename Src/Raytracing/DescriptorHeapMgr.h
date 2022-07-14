@@ -31,7 +31,7 @@ public:
 		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
 		descHeapDesc.NumDescriptors = CBV_SRV_UAV_COUNT;
 		// ディスクリプタヒープの生成。
-		DirectXBase::Ins()->dev->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descriptorHeap));
+		DirectXBase::Ins()->dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descriptorHeap));
 		descriptorHeap->SetName(L"DescriptorHeapMgr");
 
 		// 先頭を初期化
@@ -52,7 +52,7 @@ public:
 	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(const int& Index){
 
 	return CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		descriptorHeap.Get()->GetGPUDescriptorHandleForHeapStart(), Index, DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		descriptorHeap.Get()->GetGPUDescriptorHandleForHeapStart(), Index, DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	}
 

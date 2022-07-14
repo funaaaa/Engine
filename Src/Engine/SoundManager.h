@@ -12,27 +12,27 @@ public:
 	// サウンド関係の構造体
 	// チャンクヘッダ
 	struct ChunkHeader {
-		std::array<char, 4> id;		// チャンク毎のID
-		int32_t size;				// チャンクサイズ
+		std::array<char, 4> id_;		// チャンク毎のID
+		int32_t size_;				// チャンクサイズ
 	};
 	// RIFFヘッダチャンク
 	struct RiffHeader {
-		ChunkHeader chunk;			// "RIFF"
-		std::array<char, 4> type;	//"WAVE
+		ChunkHeader chunk_;			// "RIFF"
+		std::array<char, 4> type_;	//"WAVE
 	};
 	// FMTチャンク
 	struct FormatChunk {
-		ChunkHeader chunk;			// "fmt"
-		WAVEFORMATEX fmt;			// 波形フォーマット
+		ChunkHeader chunk_;			// "fmt"
+		WAVEFORMATEX fmt_;			// 波形フォーマット
 	};
 
 	// 音声データ
 	struct SoundData {
-		WAVEFORMATEX wfex;			// 波形フォーマット
-		BYTE* pBuffer;				// バッファの先頭アドレス
-		unsigned int bufferSize;	// バッファのサイズ
-		IXAudio2SourceVoice* source;
-		float volume;
+		WAVEFORMATEX wfex_;			// 波形フォーマット
+		BYTE* pBuffer_;				// バッファの先頭アドレス
+		unsigned int bufferSize_;	// バッファのサイズ
+		IXAudio2SourceVoice* source_;
+		float volume_;
 	};
 
 
@@ -41,8 +41,8 @@ private:
 	SoundManager() {};
 
 public:
-	Microsoft::WRL::ComPtr<IXAudio2> xAudio2;
-	IXAudio2MasteringVoice* masterVoice;
+	Microsoft::WRL::ComPtr<IXAudio2> xAudio2_;
+	IXAudio2MasteringVoice* masterVoice_;
 
 	void SettingSoundManager();
 	// サウンド再生

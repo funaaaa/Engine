@@ -131,13 +131,13 @@ IDxcLibrary : public IUnknown {
     LPCWSTR pFileName, _In_opt_ UINT32* codePage,
     _COM_Outptr_ IDxcBlobEncoding **pBlobEncoding) = 0;
   virtual HRESULT STDMETHODCALLTYPE CreateBlobWithEncodingFromPinned(
-    _In_bytecount_(size) LPCVOID pText, UINT32 size, UINT32 codePage,
+    _In_bytecount_(size_) LPCVOID pText, UINT32 size_, UINT32 codePage,
     _COM_Outptr_ IDxcBlobEncoding **pBlobEncoding) = 0;
   virtual HRESULT STDMETHODCALLTYPE CreateBlobWithEncodingOnHeapCopy(
-       _In_bytecount_(size) LPCVOID pText, UINT32 size, UINT32 codePage,
+       _In_bytecount_(size_) LPCVOID pText, UINT32 size_, UINT32 codePage,
       _COM_Outptr_ IDxcBlobEncoding **pBlobEncoding) = 0;
   virtual HRESULT STDMETHODCALLTYPE CreateBlobWithEncodingOnMalloc(
-    _In_bytecount_(size) LPCVOID pText, IMalloc *pIMalloc, UINT32 size, UINT32 codePage,
+    _In_bytecount_(size_) LPCVOID pText, IMalloc *pIMalloc, UINT32 size_, UINT32 codePage,
     _COM_Outptr_ IDxcBlobEncoding **pBlobEncoding) = 0;
   virtual HRESULT STDMETHODCALLTYPE CreateIncludeHandler(
       _COM_Outptr_ IDxcIncludeHandler **ppResult) = 0;
@@ -325,7 +325,7 @@ IDxcOptimizerPass : public IUnknown {
 struct __declspec(uuid("25740E2E-9CBA-401B-9119-4FB42F39F270"))
 IDxcOptimizer : public IUnknown {
   virtual HRESULT STDMETHODCALLTYPE GetAvailablePassCount(_Out_ UINT32 *pCount) = 0;
-  virtual HRESULT STDMETHODCALLTYPE GetAvailablePass(UINT32 index, _COM_Outptr_ IDxcOptimizerPass** ppResult) = 0;
+  virtual HRESULT STDMETHODCALLTYPE GetAvailablePass(UINT32 index_, _COM_Outptr_ IDxcOptimizerPass** ppResult) = 0;
   virtual HRESULT STDMETHODCALLTYPE RunOptimizer(IDxcBlob *pBlob,
     _In_count_(optionCount) LPCWSTR *ppOptions, UINT32 optionCount,
     _COM_Outptr_ IDxcBlob **pOutputModule,

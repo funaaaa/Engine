@@ -19,47 +19,47 @@ public:
 	struct Vertex {
 
 		Vec3 pos_;
-		Vec3 normal;
-		Vec2 uv;
+		Vec3 normal_;
+		Vec2 uv_;
 
 	};
 
 	// マテリアル
 	struct Material {
-		Vec3 ambient = { 0.3f,0.3f,0.3f };	//アンビエント影響度
-		float pad1;
-		Vec3 diffuse = { 0.3f,0.3f,0.3f };	//ディフューズ影響度
-		float pad2;
+		Vec3 ambient_ = { 0.3f,0.3f,0.3f };	//アンビエント影響度
+		float pad1_;
+		Vec3 diffuse_ = { 0.3f,0.3f,0.3f };	//ディフューズ影響度
+		float pad2_;
 		Vec3 specular = { 0.3f,0.3f,0.3f };//スペキュラー影響度
-		float alpha;									//アルファ
+		float alpha_;									//アルファ
 	};
 
 	// データを渡す構造体
 	struct ObjectData {
 
-		std::vector<Vertex> vertex;
-		std::vector<UINT> index;
-		Material material;
-		Vec3 vertexMax;	// 頂点における各軸の最大の位置
-		Vec3 vertexMin;	// 頂点における各軸の最小の位置
+		std::vector<Vertex> vertex_;
+		std::vector<UINT> index_;
+		Material material_;
+		Vec3 vertexMax_;	// 頂点における各軸の最大の位置
+		Vec3 vertexMin_;	// 頂点における各軸の最小の位置
 
 	};
 
 	// modelのデータ構造体
 	struct ModelData {
-		std::string modelName;				//モデルファイル名
-		Material material;					//マテリアル
-		std::vector<unsigned short> index;	//頂点インデックス
-		std::vector<Vertex> vertex;			//頂点
-		Vec3 vertexMax;	// 頂点における各軸の最大の位置
-		Vec3 vertexMin;	// 頂点における各軸の最小の位置
-		bool isSmoothing;					//法線をスムーズにするかどうか
+		std::string modelName_;				//モデルファイル名
+		Material material_;					//マテリアル
+		std::vector<unsigned short> index_;	//頂点インデックス
+		std::vector<Vertex> vertex_;			//頂点
+		Vec3 vertexMax_;	// 頂点における各軸の最大の位置
+		Vec3 vertexMin_;	// 頂点における各軸の最小の位置
+		bool isSmoothing_;					//法線をスムーズにするかどうか
 	};
 
 private:
 
 
-	std::vector<ModelData> modelData;			//モデルデータを保存しておく配列
+	std::vector<ModelData> modelData_;			//モデルデータを保存しておく配列
 
 public:
 
@@ -72,8 +72,8 @@ public:
 	// 法線の平均を求める関数
 	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);
 
-	int GetModelCount() { return static_cast<int>(modelData.size()); }
-	const ModelData& GetModelData(const int& Index) { return modelData[Index]; }
+	int GetModelCount() { return static_cast<int>(modelData_.size()); }
+	const ModelData& GetModelData(const int& Index) { return modelData_[Index]; }
 
 private:
 

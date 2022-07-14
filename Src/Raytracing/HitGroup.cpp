@@ -24,21 +24,21 @@ void HitGroup::Generate(const HitGroupInitData& InputData, const int& RegisterSp
 	localRootSig = std::make_shared<RayRootsignature>();
 
 	// SRVについて追加。
-	for (int index = 0; index < SRVcount; ++index) {
+	for (int index_ = 0; index_ < SRVcount; ++index_) {
 
-		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index, registerSpace);
+		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index_, registerSpace);
 
 	}
 	// UAVについて追加。
-	for (int index = 0; index < UAVcount; ++index) {
+	for (int index_ = 0; index_ < UAVcount; ++index_) {
 
-		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index, registerSpace);
+		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index_, registerSpace);
 
 	}
 	// CBVについて追加。
-	for (int index = 0; index < CBVcount; ++index) {
+	for (int index_ = 0; index_ < CBVcount; ++index_) {
 
-		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index, registerSpace);
+		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index_, registerSpace);
 
 	}
 	// サンプラーを追加。

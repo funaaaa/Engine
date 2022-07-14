@@ -11,12 +11,12 @@ private:
 
 	/*-- メンバ変数 --*/
 
-	Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;	// シェーダーのデータ
-	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlobDxc;	// シェーダーのデータ dxc用
-	std::vector<char> shaderBin;					// dxcでコンパイルした際に出力される謎の文字列
-	std::string entryPoint;							// シェーダーのエントリーポイント
-	std::string shaderModel;						// シェーダーモデル
-	std::string shaderPath;							// シェーダーのファイルパス これを使ってシェーダーを判断する。
+	Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob_;	// シェーダーのデータ
+	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlobDxc_;	// シェーダーのデータ dxc用
+	std::vector<char> shaderBin_;					// dxcでコンパイルした際に出力される謎の文字列
+	std::string entryPoint_;							// シェーダーのエントリーポイント
+	std::string shaderModel_;						// シェーダーモデル
+	std::string shaderPath_;							// シェーダーのファイルパス これを使ってシェーダーを判断する。
 
 
 public:
@@ -31,11 +31,11 @@ public:
 	void LoadShaderDXC();
 
 	// シェーダーのファイルパスを取得する処理
-	const std::string& GetShaderPath() { return shaderPath; }
+	const std::string& GetShaderPath() { return shaderPath_; }
 	// シェーダーのデータを取得する処理
-	const Microsoft::WRL::ComPtr<ID3DBlob>& GetShaderBlob() { return shaderBlob; }
-	const Microsoft::WRL::ComPtr<IDxcBlob>& GetShaderBlobDXC() { return shaderBlobDxc; }
-	std::vector<char>& GetShaderBin() { return shaderBin; }
+	const Microsoft::WRL::ComPtr<ID3DBlob>& GetShaderBlob() { return shaderBlob_; }
+	const Microsoft::WRL::ComPtr<IDxcBlob>& GetShaderBlobDXC() { return shaderBlobDxc_; }
+	std::vector<char>& GetShaderBin() { return shaderBin_; }
 
 
 private:

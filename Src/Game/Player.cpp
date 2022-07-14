@@ -588,18 +588,18 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 	{
 
 		const int BLAS_COUNT = static_cast<int>(stageModelData_.stageOrnamentInsIndex_.size());
-		for (int index = 0; index < BLAS_COUNT; ++index) {
+		for (int index_ = 0; index_ < BLAS_COUNT; ++index_) {
 
 			// 当たり判定に使用するデータ
 			FHelper::RayToModelCollisionData collistionData;
-			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexPos();
-			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexNormal();
-			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexIndex();
+			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index_]]->GetVertexPos();
+			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index_]]->GetVertexNormal();
+			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index_]]->GetVertexIndex();
 			collistionData.rayPos = prevPos_;
 			collistionData.rayDir = (pos_ - prevPos_).GetNormal();
-			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageOrnamentInsIndex_[index]);
-			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageOrnamentInsIndex_[index]);
-			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageOrnamentInsIndex_[index]);
+			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageOrnamentInsIndex_[index_]);
+			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageOrnamentInsIndex_[index_]);
+			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageOrnamentInsIndex_[index_]);
 
 			// 当たり判定を行う。
 			bool isHit = false;
@@ -631,13 +631,13 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 	{
 
 		std::vector<std::shared_ptr<BaseGimmick>> gimmics = GimmickMgr::Ins()->GetGimmickData();
-		for (auto& index : gimmics) {
+		for (auto& index_ : gimmics) {
 
 			// フラグが立っていなかったら処理を続ける。
-			if (!index->GetIsActive()) continue;
+			if (!index_->GetIsActive()) continue;
 
 			// 当たり判定を行う。
-			bool isHit = obb_.CheckHitOBB(index->GetOBB());
+			bool isHit = obb_.CheckHitOBB(index_->GetOBB());
 
 			// 当たっていなかったら処理を飛ばす。
 			if (!isHit) continue;
@@ -695,8 +695,8 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, quaternionMat);
 
 		// 上ベクトルを基準としたクォータニオンを求める。
-		Vec3 normal = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY_);
+		Vec3 normal_ = HitNormal;
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
 
 		// クォータニオンを行列に治す。
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
@@ -711,7 +711,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 		// 上ベクトルを更新。
-		upVec_ = normal;
+		upVec_ = normal_;
 
 		//正面ベクトルを更新。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
@@ -725,8 +725,8 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, DirectX::XMMatrixIdentity());
 
 		// 上ベクトルを基準としたクォータニオンを求める。
-		Vec3 normal = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY_);
+		Vec3 normal_ = HitNormal;
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
 
 		// クォータニオンを行列に治す。
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
@@ -741,7 +741,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 		// 上ベクトルを更新。
-		upVec_ = normal;
+		upVec_ = normal_;
 
 		//正面ベクトルを更新。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);

@@ -17,8 +17,8 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	DXGI_FORMAT DxgiFormat)
 {
 	//すでに生成してあるリストの中からパイプラインIDが重複していなかったら生成する。
-	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines[i].GetPiplineID() == PiplineID) {
+	for (int i = 0; i < piplines_.size(); ++i) {
+		if (piplines_[i].GetPiplineID() == PiplineID) {
 
 			OutputDebugString(L"\nError すでに生成してあるパイプラインを生成しようとしました。\n");
 			exit(true);
@@ -28,7 +28,7 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	}
 
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines.emplace_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
+	piplines_.emplace_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
@@ -46,8 +46,8 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	DXGI_FORMAT DxgiFormat)
 {
 	//すでに生成してあるリストの中からパイプラインIDが重複していなかったら生成する
-	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines[i].GetPiplineID() == PiplineID) {
+	for (int i = 0; i < piplines_.size(); ++i) {
+		if (piplines_[i].GetPiplineID() == PiplineID) {
 
 			OutputDebugString(L"\nError すでに生成してあるパイプラインを生成しようとしました。\n");
 			exit(true);
@@ -57,7 +57,7 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	}
 
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
+	piplines_.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
@@ -75,8 +75,8 @@ void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID PiplineID,
 	DXGI_FORMAT DxgiFormat2)
 {
 	//すでに生成してあるリストの中からパイプラインIDが重複していなかったら生成する
-	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines[i].GetPiplineID() == PiplineID) {
+	for (int i = 0; i < piplines_.size(); ++i) {
+		if (piplines_[i].GetPiplineID() == PiplineID) {
 
 			OutputDebugString(L"\nError すでに生成してあるパイプラインを生成しようとしました。\n");
 			exit(true);
@@ -86,15 +86,15 @@ void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID PiplineID,
 	}
 	DxgiFormat2;
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
+	piplines_.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
 void PiplineManager::SetPipline(int PiplineID)
 {
-	for (int i = 0; i < piplines.size(); ++i) {
-		if (piplines.at(i).GetPiplineID() == PiplineID) {
-			piplines.at(i).SetPipline();
+	for (int i = 0; i < piplines_.size(); ++i) {
+		if (piplines_.at(i).GetPiplineID() == PiplineID) {
+			piplines_.at(i).SetPipline();
 			return;
 		}
 	}

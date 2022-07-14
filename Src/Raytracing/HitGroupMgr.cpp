@@ -57,13 +57,13 @@ int HitGroupMgr::GetHitGroupID(const LPCWSTR& HitGroupName)
 
 	int hitGroupID = -1;
 
-	for (int index = 0; index < MAX_HIT_GROUP; ++index) {
+	for (int index_ = 0; index_ < MAX_HIT_GROUP; ++index_) {
 
 		// “¯‚¶–¼‘O‚¾‚Á‚½‚çB
-		if (HitGroupName != hitGroupNames[index]) continue;
+		if (HitGroupName != hitGroupNames[index_]) continue;
 
 		// ID‚ð•Û‘¶B
-		hitGroupID = index;
+		hitGroupID = index_;
 
 	}
 

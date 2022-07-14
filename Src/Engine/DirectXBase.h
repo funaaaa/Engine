@@ -18,31 +18,31 @@ class DirectXBase : public Singleton<DirectXBase> {
 
 public:
 
-	std::shared_ptr<WindowsAPI> windowsAPI;						//WindowsAPIクラス
-	Microsoft::WRL::ComPtr<ID3D12Debug> debugController;
-	Microsoft::WRL::ComPtr<ID3D12Debug1> shaderDebugController;
-	Microsoft::WRL::ComPtr<ID3D12Device5> dev;
-	Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory;
-	std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters;//アダプターの列挙用
-	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter;			//特定の名前を持つアダプターオブジェクトを入れる
-	std::vector<D3D_FEATURE_LEVEL> levels;						//対応レベルの配列
-	D3D_FEATURE_LEVEL featureLevel;
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps;
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers;
-	D3D12_DESCRIPTOR_HEAP_DESC heapDesc;
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer;			//深度バッファ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap;		//深度バッファ用ディスクリプタヒープ
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence;
-	UINT64 fenceVal;
-	IDirectInput8* dinput;										//DirectInputオブジェクト
-	IDirectInputDevice8* devkeybord;							//キーボードオブジェクト
-	IDirectInputDevice8* devmouse;								//マウスオブジェクト
+	std::shared_ptr<WindowsAPI> windowsAPI_;						//WindowsAPIクラス
+	Microsoft::WRL::ComPtr<ID3D12Debug> debugController_;
+	Microsoft::WRL::ComPtr<ID3D12Debug1> shaderDebugController_;
+	Microsoft::WRL::ComPtr<ID3D12Device5> dev_;
+	Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory_;
+	std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters_;//アダプターの列挙用
+	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter_;			//特定の名前を持つアダプターオブジェクトを入れる
+	std::vector<D3D_FEATURE_LEVEL> levels_;						//対応レベルの配列
+	D3D_FEATURE_LEVEL featureLevel_;
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain_;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList_;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue_;
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps_;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
+	D3D12_DESCRIPTOR_HEAP_DESC heapDesc_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;			//深度バッファ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;		//深度バッファ用ディスクリプタヒープ
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
+	UINT64 fenceVal_;
+	IDirectInput8* dinput_;										//DirectInputオブジェクト
+	IDirectInputDevice8* devkeybord_;							//キーボードオブジェクト
+	IDirectInputDevice8* devmouse_;								//マウスオブジェクト
 
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heapForImgui;	//imgui用ディスクリプタヒープ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heapForImgui_;	//imgui用ディスクリプタヒープ
 
 
 public:

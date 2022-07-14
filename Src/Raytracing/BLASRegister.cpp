@@ -9,22 +9,22 @@ int BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string
 	// すでにロード済みかをチェックする。
 	bool isLoaded = false;
 	int blasIndex_ = 0;
-	for (auto& index : blas) {
+	for (auto& index_ : blas) {
 
 		if (isLoaded) break;
 
 		// モデルの名前が同じかどうかをチェックする。
-		if (!(index->GetModelPath() == DirectryPath + ModelName)) continue;
+		if (!(index_->GetModelPath() == DirectryPath + ModelName)) continue;
 
 		// テクスチャ名が同じかどうかをチェックする。
-		std::vector<LPCWSTR> blasTexture = index->GetTexturePath();
+		std::vector<LPCWSTR> blasTexture = index_->GetTexturePath();
 		for (auto& textureIndex : TexturePath) {
 
 			// テクスチャ名が同じかどうかをチェックする。
 			if (!(textureIndex == blasTexture[&textureIndex - &TexturePath[0]])) continue;
 
 			isLoaded = true;
-			blasIndex_ = static_cast<int>(&index - &blas[0]);
+			blasIndex_ = static_cast<int>(&index_ - &blas[0]);
 
 		}
 

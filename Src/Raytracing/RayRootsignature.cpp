@@ -83,12 +83,12 @@ void RayRootsignature::Create(const bool& IsLocal, const wchar_t* Name)
 		std::string a = static_cast<char*>(errBlob->GetBufferPointer());
 		_RPTF0(_CRT_WARN, a.c_str());
 	}
-	DirectXBase::Ins()->dev->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
-		IID_PPV_ARGS(&rootsignature));
+	DirectXBase::Ins()->dev_->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
+		IID_PPV_ARGS(&rootsignature_));
 
 	// –¼‘O‚ðÝ’è
 	if (Name != nullptr) {
-		rootsignature->SetName(Name);
+		rootsignature_->SetName(Name);
 	}
 
 }

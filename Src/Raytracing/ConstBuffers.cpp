@@ -16,7 +16,7 @@ void CameraConstBufferData::Init()
 		0.1f, 1000000.0f							//前端、奥端
 	);
 	mtxProjInv = XMMatrixInverse(nullptr, mtxProj);
-	mtxView = DirectX::XMMatrixLookAtLH(Camera::Ins()->eye.ConvertXMVECTOR(), Camera::Ins()->target.ConvertXMVECTOR(), Camera::Ins()->up.ConvertXMVECTOR());
+	mtxView = DirectX::XMMatrixLookAtLH(Camera::Ins()->eye_.ConvertXMVECTOR(), Camera::Ins()->target_.ConvertXMVECTOR(), Camera::Ins()->up_.ConvertXMVECTOR());
 	mtxViewInv = XMMatrixInverse(nullptr, mtxView);
 
 }
@@ -27,12 +27,12 @@ void RayLightConstBufferData::Init()
 	/*===== ライト用定数バッファを初期化 =====*/
 
 	// 点光源をセッティング
-	for (auto& index : pointLight) {
-		index.lightPos = Vec3(0, 300, 0);
-		index.lightSize = 5.0f;
-		index.lightPower = 10.0f;
-		index.isActive_ = false;
-		index.isShadow = true;
+	for (auto& index_ : pointLight) {
+		index_.lightPos = Vec3(0, 300, 0);
+		index_.lightSize = 5.0f;
+		index_.lightPower = 10.0f;
+		index_.isActive_ = false;
+		index_.isShadow = true;
 	}
 
 	// 並行光源をセッティング

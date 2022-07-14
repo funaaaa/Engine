@@ -35,7 +35,7 @@ public:
 	/// <returns></returns>
 	bool IsInited() const
 	{
-		return isInited;
+		return isInited_;
 	}
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetD3DResoruce();
@@ -43,10 +43,10 @@ public:
 
 public:
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> buffersOnGPU;
-	void* buffersOnCPU;	// CPU側からアクセスできるするストラクチャバッファのアドレス。
-	int numElement;		// 要素数。
-	int sizeOfElement;	// エレメントのサイズ。
-	bool isInited;		// 初期化済み？
+	Microsoft::WRL::ComPtr<ID3D12Resource> buffersOnGPU_;
+	void* buffersOnCPU_;	// CPU側からアクセスできるするストラクチャバッファのアドレス。
+	int numElement_;		// 要素数。
+	int sizeOfElement_;	// エレメントのサイズ。
+	bool isInited_;		// 初期化済み？
 
 };

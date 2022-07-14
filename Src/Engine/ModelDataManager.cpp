@@ -18,11 +18,11 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 	// ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
 	int dataNumber = 0;
 
-	const int MODELDATA_SIZE = static_cast<int>(modelData.size());
-	for (int index = 0; index < MODELDATA_SIZE; ++index) {
-		if (modelData[index].modelName == DirectryPath + FileName && modelData[index].isSmoothing == IsSmoothing) {
+	const int MODELDATA_SIZE = static_cast<int>(modelData_.size());
+	for (int index_ = 0; index_ < MODELDATA_SIZE; ++index_) {
+		if (modelData_[index_].modelName_ == DirectryPath + FileName && modelData_[index_].isSmoothing_ == IsSmoothing) {
 			isLoad = true;
-			dataNumber = index;
+			dataNumber = index_;
 			break;
 		}
 	}
@@ -32,13 +32,13 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		// 同じ頂点を指し示している頂点インデックスを保存しておくためのマップ
 		std::map<unsigned short, std::vector<unsigned short>> smoothData;
 
-		modelData.push_back({});
-		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).modelName = DirectryPath + FileName;
-		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).isSmoothing = IsSmoothing;
+		modelData_.push_back({});
+		ModelDataManager::modelData_.at(ModelDataManager::modelData_.size() - 1).modelName_ = DirectryPath + FileName;
+		ModelDataManager::modelData_.at(ModelDataManager::modelData_.size() - 1).isSmoothing_ = IsSmoothing;
 
 		// 変数を初期化。
-		ObjectBuffer.vertexMax = Vec3();
-		ObjectBuffer.vertexMin = Vec3();
+		ObjectBuffer.vertexMax_ = Vec3();
+		ObjectBuffer.vertexMin_ = Vec3();
 
 		// フィルストリーム
 		std::ifstream file;
@@ -51,9 +51,9 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		// 一行ずつ読み込む
 		std::string line;
 		std::vector<Vec3> position;			// 座標を保存しておく
-		std::vector<Vec2> uv;				// uvを保存しておく
-		std::vector<Vec3> normal;			// 法線ベクトルを保存しておく
-		std::vector<unsigned short> index;
+		std::vector<Vec2> uv_;				// uvを保存しておく
+		std::vector<Vec3> normal_;			// 法線ベクトルを保存しておく
+		std::vector<unsigned short> index_;
 		while (getline(file, line)) {
 			// 1行分の文字列をストリームに変換して解析しやすくする
 			std::istringstream lineStream(line);
@@ -72,8 +72,8 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				position.push_back(pos_);
 				// 頂点の最大最小要素を保存。
 				SaveVertexMinMaxInfo(ObjectBuffer, pos_);
-				modelData[(static_cast<int>(modelData.size()) - 1)].vertexMin = ObjectBuffer.vertexMin;
-				modelData[(static_cast<int>(modelData.size()) - 1)].vertexMax = ObjectBuffer.vertexMax;
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertexMin_ = ObjectBuffer.vertexMin_;
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertexMax_ = ObjectBuffer.vertexMax_;
 			}
 			// 先頭文字がvtならテクスチャ
 			if (key == "vt") {
@@ -84,7 +84,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				// V方向反転
 				texcoord.y_ = 1.0f - texcoord.y_;
 				// テクスチャ座標データに追加
-				uv.push_back(texcoord);
+				uv_.push_back(texcoord);
 			}
 			// 先頭文字がvnなら法線ベクトル
 			if (key == "vn") {
@@ -94,7 +94,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				lineStream >> norm.y_;
 				lineStream >> norm.z_;
 				// 法線ベクトルデータに追加
-				normal.push_back(norm);
+				normal_.push_back(norm);
 			}
 			// 先頭文字がfならポリゴン(三角形)
 			if (key == "f") {
@@ -114,17 +114,17 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 					// 頂点データの追加
 					Vertex vert{};
 					vert.pos_ = position[indexPosition - 1];
-					vert.normal = normal[indexNormal - 1];
-					vert.uv = uv[indexTexcoord - 1];
+					vert.normal_ = normal_[indexNormal - 1];
+					vert.uv_ = uv_[indexTexcoord - 1];
 					// モデルデータに追加
-					modelData[(static_cast<int>(modelData.size()) - 1)].vertex.push_back(vert);
-					modelData[(static_cast<int>(modelData.size()) - 1)].index.push_back(static_cast<unsigned short>(modelData[(static_cast<int>(modelData.size())) - 1].index.size()));
+					modelData_[(static_cast<int>(modelData_.size()) - 1)].vertex_.push_back(vert);
+					modelData_[(static_cast<int>(modelData_.size()) - 1)].index_.push_back(static_cast<unsigned short>(modelData_[(static_cast<int>(modelData_.size())) - 1].index_.size()));
 					// proSpriteにも追加
-					ObjectBuffer.vertex.push_back(vert);
-					ObjectBuffer.index.push_back(static_cast<int>(ObjectBuffer.index.size()));
+					ObjectBuffer.vertex_.push_back(vert);
+					ObjectBuffer.index_.push_back(static_cast<int>(ObjectBuffer.index_.size()));
 					// isSmoothingがtrueなら頂点情報を追加する
 					if (IsSmoothing == true) {
-						smoothData[indexPosition].push_back(static_cast<unsigned short>(ObjectBuffer.vertex.size()) - 1);
+						smoothData[indexPosition].push_back(static_cast<unsigned short>(ObjectBuffer.vertex_.size()) - 1);
 					}
 				}
 			}
@@ -134,8 +134,8 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				std::string materialFileName;
 				lineStream >> materialFileName;
 				// マテリアルの読み込み
-				LoadObjMaterial(DirectryPath + materialFileName, modelData.at(modelData.size() - 1));
-				ObjectBuffer.material = modelData[modelData.size() - 1].material;
+				LoadObjMaterial(DirectryPath + materialFileName, modelData_.at(modelData_.size() - 1));
+				ObjectBuffer.material_ = modelData_[modelData_.size() - 1].material_;
 
 			}
 		}
@@ -144,22 +144,22 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 
 		// isSmoothingがtrueだったら法線情報をなめらかにする
 		if (IsSmoothing) {
-			CalculateSmoothedVertexNormals(smoothData, ObjectBuffer, modelData.at(modelData.size() - 1));
+			CalculateSmoothedVertexNormals(smoothData, ObjectBuffer, modelData_.at(modelData_.size() - 1));
 		}
 
 		return;
 	}
 
 	// objのデータをObjectDataに入れる
-	for (auto& index : modelData[dataNumber].index) {
-		ObjectBuffer.index.push_back(index);
+	for (auto& index_ : modelData_[dataNumber].index_) {
+		ObjectBuffer.index_.push_back(index_);
 	}
-	for (auto& index : modelData[dataNumber].vertex) {
-		ObjectBuffer.vertex.push_back(index);
+	for (auto& index_ : modelData_[dataNumber].vertex_) {
+		ObjectBuffer.vertex_.push_back(index_);
 	}
-	ObjectBuffer.material = modelData[dataNumber].material;
-	ObjectBuffer.vertexMin = modelData[dataNumber].vertexMin;
-	ObjectBuffer.vertexMax = modelData[dataNumber].vertexMax;
+	ObjectBuffer.material_ = modelData_[dataNumber].material_;
+	ObjectBuffer.vertexMin_ = modelData_[dataNumber].vertexMin_;
+	ObjectBuffer.vertexMax_ = modelData_[dataNumber].vertexMax_;
 
 }
 
@@ -193,21 +193,21 @@ void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, Mode
 		}
 		// 先頭文字列がKaならアンビエント色
 		if (key == "Ka") {
-			lineStream >> ModelData.material.ambient.x_;
-			lineStream >> ModelData.material.ambient.y_;
-			lineStream >> ModelData.material.ambient.z_;
+			lineStream >> ModelData.material_.ambient_.x_;
+			lineStream >> ModelData.material_.ambient_.y_;
+			lineStream >> ModelData.material_.ambient_.z_;
 		}
 		// 先頭文字列がKdならディフューズ色
 		if (key == "Kd") {
-			lineStream >> ModelData.material.diffuse.x_;
-			lineStream >> ModelData.material.diffuse.y_;
-			lineStream >> ModelData.material.diffuse.z_;
+			lineStream >> ModelData.material_.diffuse_.x_;
+			lineStream >> ModelData.material_.diffuse_.y_;
+			lineStream >> ModelData.material_.diffuse_.z_;
 		}
 		// 先頭文字がKsならスペキュラー色
 		if (key == "Ks") {
-			lineStream >> ModelData.material.specular.x_;
-			lineStream >> ModelData.material.specular.y_;
-			lineStream >> ModelData.material.specular.z_;
+			lineStream >> ModelData.material_.specular.x_;
+			lineStream >> ModelData.material_.specular.y_;
+			lineStream >> ModelData.material_.specular.z_;
 		}
 	}
 }
@@ -219,16 +219,16 @@ void ModelDataManager::CalculateSmoothedVertexNormals(std::map<unsigned short, s
 		// 各面用の共通頂点コレクション
 		std::vector<unsigned short>& v = itr->second;
 		// 全頂点の法線を平均する
-		Vec3 normal = {};
-		for (unsigned short index : v) {
-			normal += ObjectData.vertex[index].normal;
+		Vec3 normal_ = {};
+		for (unsigned short index_ : v) {
+			normal_ += ObjectData.vertex_[index_].normal_;
 		}
-		normal = normal / (float)v.size();
-		normal.Normalize();
+		normal_ = normal_ / (float)v.size();
+		normal_.Normalize();
 
-		for (unsigned short index : v) {
-			ObjectData.vertex[index].normal = normal;
-			ModelData.vertex[index].normal = normal;
+		for (unsigned short index_ : v) {
+			ObjectData.vertex_[index_].normal_ = normal_;
+			ModelData.vertex_[index_].normal_ = normal_;
 		}
 	}
 }
@@ -241,25 +241,25 @@ void ModelDataManager::SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3
 	// 最大を保存。
 
 	// Posの各成分が保存されている値よりも大きかったら。
-	if (ObjectBuffer.vertexMax.x_ < Pos.x_) {
-		ObjectBuffer.vertexMax.x_ = Pos.x_;
+	if (ObjectBuffer.vertexMax_.x_ < Pos.x_) {
+		ObjectBuffer.vertexMax_.x_ = Pos.x_;
 	}
-	if (ObjectBuffer.vertexMax.y_ < Pos.y_) {
-		ObjectBuffer.vertexMax.y_ = Pos.y_;
+	if (ObjectBuffer.vertexMax_.y_ < Pos.y_) {
+		ObjectBuffer.vertexMax_.y_ = Pos.y_;
 	}
-	if (ObjectBuffer.vertexMax.z_ < Pos.z_) {
-		ObjectBuffer.vertexMax.z_ = Pos.z_;
+	if (ObjectBuffer.vertexMax_.z_ < Pos.z_) {
+		ObjectBuffer.vertexMax_.z_ = Pos.z_;
 	}
 
 	// Posの各成分が保存されている値よりも小さかったら。
-	if (Pos.x_ < ObjectBuffer.vertexMin.x_) {
-		ObjectBuffer.vertexMin.x_ = Pos.x_;
+	if (Pos.x_ < ObjectBuffer.vertexMin_.x_) {
+		ObjectBuffer.vertexMin_.x_ = Pos.x_;
 	}
-	if (Pos.y_ < ObjectBuffer.vertexMin.y_) {
-		ObjectBuffer.vertexMin.y_ = Pos.y_;
+	if (Pos.y_ < ObjectBuffer.vertexMin_.y_) {
+		ObjectBuffer.vertexMin_.y_ = Pos.y_;
 	}
-	if (Pos.z_ < ObjectBuffer.vertexMin.z_) {
-		ObjectBuffer.vertexMin.z_ = Pos.z_;
+	if (Pos.z_ < ObjectBuffer.vertexMin_.z_) {
+		ObjectBuffer.vertexMin_.z_ = Pos.z_;
 	}
 
 }

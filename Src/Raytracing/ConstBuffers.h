@@ -26,7 +26,7 @@ struct RayLightConstBufferData {
 		Vec3 lihgtDir;		// ライトの方向
 		int isActive_;		// 有効化するかどうかのフラグ
 		Vec3 lightColor;	// ライトの色
-		float pad;			// パディング
+		float pad_;			// パディング
 
 	};
 
@@ -39,7 +39,7 @@ struct RayLightConstBufferData {
 		float lightPower;		// ライトの強さ
 		int isActive_;			// 有効化するかどうかのフラグ
 		int isShadow;			// 影を出さないフラグ
-		DirectX::XMFLOAT2 pad;	// パディング
+		DirectX::XMFLOAT2 pad_;	// パディング
 
 	};
 

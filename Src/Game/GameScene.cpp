@@ -27,7 +27,7 @@ GameScene::GameScene()
 	constBufferData_.Init();
 	constBuffer_ = std::make_shared<DynamicConstBuffer>();
 	constBuffer_->Generate(sizeof(RayConstBufferData), L"CameraConstBuffer");
-	constBuffer_->Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(RayConstBufferData));
+	constBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(RayConstBufferData));
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
@@ -80,9 +80,9 @@ GameScene::GameScene()
 		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "goalSideObj.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/gray.png" }));
 		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::DEF));
 	}
-	for (auto& index : stageOrnamentIns_) {
+	for (auto& index_ : stageOrnamentIns_) {
 
-		PolygonInstanceRegister::Ins()->AddScale(index, Vec3(200, 200, 200));
+		PolygonInstanceRegister::Ins()->AddScale(index_, Vec3(200, 200, 200));
 
 	}
 
@@ -105,23 +105,23 @@ GameScene::GameScene()
 
 	// ゴール前のふわふわしているオブジェクトのBLASをロード
 	beforeTheGoalObjectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
-	for (int index = 0; index < 4; ++index) {
+	for (int index_ = 0; index_ < 4; ++index_) {
 
 		std::pair<int, int> buff;
 		std::pair<Vec3, Vec3> defPosBuff;
 		buff.first = PolygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas_, PolygonInstanceRegister::DEF);
-		defPosBuff.first = Vec3(250, 200, 1000 * index + 1500.0f);
+		defPosBuff.first = Vec3(250, 200, 1000 * index_ + 1500.0f);
 		PolygonInstanceRegister::Ins()->AddTrans(buff.first, defPosBuff.first);
 		PolygonInstanceRegister::Ins()->AddScale(buff.first, Vec3(40.0f, 40.0f, 40.0f));
-		PolygonInstanceRegister::Ins()->AddRotate(buff.first, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(buff.first, Vec3(DirectX::XM_2PI / 2.0f * index_, DirectX::XM_2PI / 2.0f * index_, 0));
 		buff.second = PolygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas_, PolygonInstanceRegister::DEF);
-		defPosBuff.second = Vec3(-250, 200, 1000 * index + 1500.0f);
+		defPosBuff.second = Vec3(-250, 200, 1000 * index_ + 1500.0f);
 		PolygonInstanceRegister::Ins()->AddTrans(buff.second, defPosBuff.second);
 		PolygonInstanceRegister::Ins()->AddScale(buff.second, Vec3(40.0f, 40.0f, 40.0f));
-		PolygonInstanceRegister::Ins()->AddRotate(buff.second, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(buff.second, Vec3(DirectX::XM_2PI / 2.0f * index_, DirectX::XM_2PI / 2.0f * index_, 0));
 		beforeTheGoalObjectIns_.emplace_back(buff);
 		beforeTheGoalObjectDefPos_.emplace_back(defPosBuff);
-		beforeTheGoalObjectTimer_.push_back(1.0f * index);
+		beforeTheGoalObjectTimer_.push_back(1.0f * index_);
 
 	}
 
@@ -234,7 +234,7 @@ void GameScene::Update()
 	}
 	else {
 
-		SetWindowText(DirectXBase::Ins()->windowsAPI->hwnd, L"LE3A_21_フナクラベ_タクミ");
+		SetWindowText(DirectXBase::Ins()->windowsAPI_->hwnd, L"LE3A_21_フナクラベ_タクミ");
 
 	}
 
@@ -287,16 +287,16 @@ void GameScene::Update()
 
 	// ゴール前のオブジェクトを回転させる。
 	static const int BEFORE_THE_GOAL_OBJECT_COUNT = 4;
-	for (int index = 0; index < BEFORE_THE_GOAL_OBJECT_COUNT; ++index) {
+	for (int index_ = 0; index_ < BEFORE_THE_GOAL_OBJECT_COUNT; ++index_) {
 
 		const float SIN_WAVE_MOVE = 50.0f;
 
-		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].first, Vec3(0.01f, 0.01f, 0));
-		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].second, Vec3(0.01f, 0.01f, 0));
-		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].first, beforeTheGoalObjectDefPos_[index].first + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
-		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].second, beforeTheGoalObjectDefPos_[index].second + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index_].first, Vec3(0.01f, 0.01f, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index_].second, Vec3(0.01f, 0.01f, 0));
+		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index_].first, beforeTheGoalObjectDefPos_[index_].first + Vec3(0, sinf(beforeTheGoalObjectTimer_[index_]) * SIN_WAVE_MOVE, 0));
+		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index_].second, beforeTheGoalObjectDefPos_[index_].second + Vec3(0, sinf(beforeTheGoalObjectTimer_[index_]) * SIN_WAVE_MOVE, 0));
 
-		beforeTheGoalObjectTimer_[index] += 0.05f;
+		beforeTheGoalObjectTimer_[index_] += 0.05f;
 
 	}
 
@@ -322,26 +322,26 @@ void GameScene::Draw()
 	/*===== 描画処理 =====*/
 
 	// カメラ行列を更新。
-	auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
-	constBufferData_.camera.mtxView = Camera::Ins()->matView;
+	auto frameIndex = DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
+	constBufferData_.camera.mtxView = Camera::Ins()->matView_;
 	constBufferData_.camera.mtxViewInv = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera.mtxView);
-	constBufferData_.camera.mtxProj = Camera::Ins()->matPerspective;
+	constBufferData_.camera.mtxProj = Camera::Ins()->matPerspective_;
 	constBufferData_.camera.mtxProjInv = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera.mtxProj);
 
 	// 定数バッファをセット。
-	constBuffer_->Write(DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
+	constBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
 
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-	DirectXBase::Ins()->cmdList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	DirectXBase::Ins()->cmdList->SetComputeRootSignature(pipline_->GetGlobalRootSig()->GetRootSig().Get());
+	DirectXBase::Ins()->cmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	DirectXBase::Ins()->cmdList_->SetComputeRootSignature(pipline_->GetGlobalRootSig()->GetRootSig().Get());
 
 	// TLASを設定。
-	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas_->GetDescriptorHeapIndex()));
+	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas_->GetDescriptorHeapIndex()));
 
 	// 定数バッファをセット
-	DirectXBase::Ins()->cmdList->SetComputeRootConstantBufferView(1, constBuffer_->GetBuffer(frameIndex)->GetGPUVirtualAddress());
+	DirectXBase::Ins()->cmdList_->SetComputeRootConstantBufferView(1, constBuffer_->GetBuffer(frameIndex)->GetGPUVirtualAddress());
 
 	// バリアを設定し各リソースの状態を遷移させる.
 	aoOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -361,11 +361,11 @@ void GameScene::Draw()
 	denoiseMaskOutput_->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
-	DirectXBase::Ins()->cmdList->SetPipelineState1(pipline_->GetStateObject().Get());
+	DirectXBase::Ins()->cmdList_->SetPipelineState1(pipline_->GetStateObject().Get());
 
 	// レイトレーシングを実行。
 	D3D12_DISPATCH_RAYS_DESC rayDesc = pipline_->GetDispatchRayDesc();
-	DirectXBase::Ins()->cmdList->DispatchRays(&rayDesc);
+	DirectXBase::Ins()->cmdList_->DispatchRays(&rayDesc);
 
 	// [ノイズを描画]のときはデノイズをかけない。
 	if (!constBufferData_.debug.isNoiseScene) {
@@ -379,7 +379,7 @@ void GameScene::Draw()
 				denoiseMaskOutput_->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList->ResourceBarrier(3, barrierToUAV);
+			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// ライトにデノイズをかける。
 			Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1, 1);
@@ -394,7 +394,7 @@ void GameScene::Draw()
 				denoiseMaskOutput_->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList->ResourceBarrier(3, barrierToUAV);
+			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
 			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 6);
@@ -409,7 +409,7 @@ void GameScene::Draw()
 				denoiseMaskOutput_->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList->ResourceBarrier(3, barrierToUAV);
+			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// GIにデノイズをかける。
 			Denoiser::Ins()->Denoise(giOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 1);
@@ -426,7 +426,7 @@ void GameScene::Draw()
 			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
 		};
 
-		DirectXBase::Ins()->cmdList->ResourceBarrier(5, barrierToUAV);
+		DirectXBase::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
@@ -447,7 +447,7 @@ void GameScene::Draw()
 			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
 		};
 
-		DirectXBase::Ins()->cmdList->ResourceBarrier(5, barrierToUAV);
+		DirectXBase::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), aoOutput_->GetUAVIndex(), lightOutput_->GetUAVIndex(), giOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
@@ -457,28 +457,28 @@ void GameScene::Draw()
 
 
 	// バックバッファのインデックスを取得する。
-	UINT backBufferIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+	UINT backBufferIndex = DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
 
 	D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
+		DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_COPY_DEST),
 	};
-	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(barriers), barriers);
+	DirectXBase::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
 
 	// デバッグ情報によって描画するデータを変える。
 	if (constBufferData_.debug.isLightHitScene || constBufferData_.debug.isMeshScene || constBufferData_.debug.isNormalScene) {
 
 		// デノイズされた通常の描画
 		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), lightOutput_->GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList_->CopyResource(DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(), lightOutput_->GetRaytracingOutput().Get());
 		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	}
 	else {
 
-		DirectXBase::Ins()->cmdList->CopyResource(DirectXBase::Ins()->backBuffers[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
+		DirectXBase::Ins()->cmdList_->CopyResource(DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
 
 	}
 
@@ -486,13 +486,13 @@ void GameScene::Draw()
 	D3D12_RESOURCE_BARRIER endBarriers[] = {
 
 	CD3DX12_RESOURCE_BARRIER::Transition(
-	DirectXBase::Ins()->backBuffers[backBufferIndex].Get(),
+	DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(),
 	D3D12_RESOURCE_STATE_COPY_DEST,
 	D3D12_RESOURCE_STATE_RENDER_TARGET)
 
 	};
 
-	DirectXBase::Ins()->cmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
+	DirectXBase::Ins()->cmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
 
 	// バリアを設定し各リソースの状態を遷移させる.
 	aoOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -531,7 +531,7 @@ void GameScene::FPS()
 		_itow_s(frame_count, fps, 10);
 		wchar_t moji[] = L"FPS";
 		wcscat_s(fps, moji);
-		SetWindowText(DirectXBase::Ins()->windowsAPI->hwnd, fps);
+		SetWindowText(DirectXBase::Ins()->windowsAPI_->hwnd, fps);
 		//OutputDebugString(fps);
 
 		prev_time = now_time;

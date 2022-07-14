@@ -9,16 +9,16 @@
 
 #pragma comment(lib, "dxcompiler.lib")
 
-ShaderData::ShaderData(const std::string& shaderPath, const std::string& entryPoint, const std::string& shaderModel, const bool& isDXC)
+ShaderData::ShaderData(const std::string& shaderPath_, const std::string& entryPoint_, const std::string& shaderModel_, const bool& isDXC)
 {
 
 	/*-- コンストラクタ --*/
 
 	// 引数を保存。
-	this->shaderPath = shaderPath;
-	this->entryPoint = entryPoint;
-	this->shaderModel = shaderModel;
-	this->shaderBlob = nullptr;
+	this->shaderPath_ = shaderPath_;
+	this->entryPoint_ = entryPoint_;
+	this->shaderModel_ = shaderModel_;
+	this->shaderBlob_ = nullptr;
 
 	if (isDXC) {
 
@@ -41,7 +41,7 @@ void ShaderData::LoadShader()
 	/*-- シェーダーをロードする処理 --*/
 
 	std::array<wchar_t, 128> shaderPathBuff;
-	FString::ConvertStringToWchar_t(shaderPath, shaderPathBuff.data(), 128);
+	FString::ConvertStringToWchar_t(shaderPath_, shaderPathBuff.data(), 128);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 
@@ -49,10 +49,10 @@ void ShaderData::LoadShader()
 		shaderPathBuff.data(),								//シェーダファイル名
 		nullptr,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,					//インクルード可能にする
-		entryPoint.c_str(), shaderModel.c_str(),			//エントリーポイント名、シェーダーモデル指定
+		entryPoint_.c_str(), shaderModel_.c_str(),			//エントリーポイント名、シェーダーモデル指定
 		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,	//デバッグ用設定
 		0,
-		&shaderBlob, &errorBlob);
+		&shaderBlob_, &errorBlob);
 
 	// シェーダーのエラーチェック
 	if (FAILED(result)) {
@@ -78,13 +78,13 @@ void ShaderData::LoadShader()
 void ShaderData::LoadShaderDXC()
 {
 	HRESULT hr;
-	std::ifstream infile(shaderPath, std::ifstream::binary);
+	std::ifstream infile(shaderPath_, std::ifstream::binary);
 	if (!infile) {
 		throw std::runtime_error("failed shader compile.");
 	}
 
 	// 型変換。
-	std::wstring fileName = StringToWString(shaderPath);
+	std::wstring fileName_ = StringToWString(shaderPath_);
 	std::stringstream strstream;
 
 	strstream << infile.rdbuf();
@@ -94,10 +94,10 @@ void ShaderData::LoadShaderDXC()
 	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
 	Microsoft::WRL::ComPtr<IDxcCompiler> compiler;
 	DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&compiler));
-	Microsoft::WRL::ComPtr<IDxcBlobEncoding> source;
+	Microsoft::WRL::ComPtr<IDxcBlobEncoding> source_;
 
 	library->CreateBlobWithEncodingFromPinned(
-		(LPBYTE)shaderCode.c_str(), static_cast<UINT32>(shaderCode.size()), CP_UTF8, &source);
+		(LPBYTE)shaderCode.c_str(), static_cast<UINT32>(shaderCode.size()), CP_UTF8, &source_);
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler;
 
 	// インクルードを使う場合には適切に設定すること
@@ -110,11 +110,11 @@ void ShaderData::LoadShaderDXC()
 	//arguments.emplace_back(L"-Qembed_debug");	// PDBをシェーダーコンテナーに埋め込む。これを指定する場合はZiは必須らしい。
 
 	// シェーダーモデルは一旦これで固定する。
-	const auto target = L"lib_6_4";
+	const auto target_ = L"lib_6_4";
 
 	Microsoft::WRL::ComPtr<IDxcOperationResult> dxcResult;
-	hr = compiler->Compile(source.Get(), fileName.c_str(),
-		L"", target, arguments.data(), static_cast<UINT>(arguments.size()),
+	hr = compiler->Compile(source_.Get(), fileName_.c_str(),
+		L"", target_, arguments.data(), static_cast<UINT>(arguments.size()),
 		nullptr, 0, includeHandler.Get(), &dxcResult);
 
 	if (FAILED(hr)) {
@@ -131,13 +131,13 @@ void ShaderData::LoadShaderDXC()
 	Microsoft::WRL::ComPtr<IDxcBlob> blob;
 	dxcResult->GetResult(&blob);
 
-	shaderBlobDxc = blob;
+	shaderBlobDxc_ = blob;
 
 	std::vector<char> result;
-	auto size = blob->GetBufferSize();
-	result.resize(size);
-	memcpy(result.data(), blob->GetBufferPointer(), size);
-	shaderBin = result;
+	auto size_ = blob->GetBufferSize();
+	result.resize(size_);
+	memcpy(result.data(), blob->GetBufferPointer(), size_);
+	shaderBin_ = result;
 
 }
 

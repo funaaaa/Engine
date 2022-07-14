@@ -51,15 +51,15 @@ protected:
 	/*-- メンバ変数 --*/
 
 	// 基本データ
-	bool isDisplay = true;			// 描画するかどうか
-	std::vector<int> textureID;		// テクスチャのIDナンバー
-	int projectionID;				// どの投影をするかのID
-	int piplineID;					// 使用するパイプラインの名前
+	bool isDisplay_ = true;			// 描画するかどうか
+	std::vector<int> textureID_;		// テクスチャのIDナンバー
+	int projectionID_;				// どの投影をするかのID
+	int piplineID_;					// 使用するパイプラインの名前
 
 	// 各種行列
-	DirectX::XMMATRIX scaleMat;		// スケーリング行列
-	DirectX::XMMATRIX rotationMat;	// 回転行列(集積値)
-	DirectX::XMMATRIX positionMat;	// 座標行列
+	DirectX::XMMATRIX scaleMat_;		// スケーリング行列
+	DirectX::XMMATRIX rotationMat_;	// 回転行列(集積値)
+	DirectX::XMMATRIX positionMat_;	// 座標行列
 
 	// デバッグ用の座標
 	Vec3 pos_;						// 座標
@@ -74,26 +74,26 @@ public:
 	// 頂点データ構造体
 	struct Vertex {
 		Vec3 pos_;			// xyz座標
-		Vec3 normal;		// 法線
-		Vec2 uv;			// uv座標
+		Vec3 normal_;		// 法線
+		Vec2 uv_;			// uv座標
 	};
 
 	// 行列用アクセッタ
-	inline DirectX::XMMATRIX GetScaleMat() { return scaleMat; }
-	inline DirectX::XMMATRIX GetRotationMat() { return rotationMat; }
-	inline DirectX::XMMATRIX GetPositionMat() { return positionMat; }
+	inline DirectX::XMMATRIX GetScaleMat() { return scaleMat_; }
+	inline DirectX::XMMATRIX GetRotationMat() { return rotationMat_; }
+	inline DirectX::XMMATRIX GetPositionMat() { return positionMat_; }
 
 	// 座標データを取得
 	inline Vec3 GetPos() { return pos_; }
 
 	// テクスチャIDを取得
-	inline int GetTextureID(int Index) { return textureID[Index]; }
+	inline int GetTextureID(int Index) { return textureID_[Index]; }
 
 protected:
 
 	// シェーダーに渡す行列のデータ
 	struct MatrixData {
-		DirectX::XMMATRIX world;		// 回転させたり移動させたりする行列
+		DirectX::XMMATRIX world_;		// 回転させたり移動させたりする行列
 		DirectX::XMMATRIX viewproj;		// ビューとプロジェクション合成行列
 	};
 
@@ -101,8 +101,8 @@ protected:
 	struct ConstBufferDataB0 {
 		MatrixData mat;					// 行列
 		DirectX::XMFLOAT4 color = { 1,1,1,1 };			// 色データ
-		Vec3 eye;						// カメラ座標
-		float pad1;
+		Vec3 eye_;						// カメラ座標
+		float pad1_;
 	};
 
 

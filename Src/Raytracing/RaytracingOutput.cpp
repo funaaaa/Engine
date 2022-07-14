@@ -18,11 +18,11 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName)
 
 	// 先頭ハンドルを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	// ディスクリプタヒープにUAVを確保
 	uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-	DirectXBase::Ins()->dev->CreateUnorderedAccessView(
+	DirectXBase::Ins()->dev_->CreateUnorderedAccessView(
 		rayTracingOutput.Get(), nullptr, &uavDesc, basicHeapHandle);
 
 	// UAVのディスクリプタヒープのインデックスを取得
@@ -38,7 +38,7 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName)
 void RaytracingOutput::SetComputeRootDescriptorTalbe(const int& RootParamIndex)
 {
 
-	DirectXBase::Ins()->cmdList->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex));
+	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex));
 
 }
 
@@ -53,7 +53,7 @@ void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOU
 			Src)
 	};
 
-	DirectXBase::Ins()->cmdList->ResourceBarrier(1, barrierToUAV);
+	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, barrierToUAV);
 
 }
 
@@ -84,7 +84,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT Wi
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = Flags;
 
-	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

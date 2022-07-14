@@ -10,10 +10,10 @@ class RayRootsignature;
 
 // HitGroupを生成する際に渡すデータ構造体
 struct EntryPoint {
-	LPCWSTR entryPoint;
+	LPCWSTR entryPoint_;
 	bool isActive;
 	EntryPoint() {};
-	EntryPoint(LPCWSTR Entry, bool Flag) :entryPoint(Entry), isActive(Flag) {};
+	EntryPoint(LPCWSTR Entry, bool Flag) :entryPoint_(Entry), isActive(Flag) {};
 };
 struct HitGroupInitData {
 
@@ -58,9 +58,9 @@ public:
 	void Generate(const HitGroupInitData& InputData, const int& RegisterSpace, const LPCWSTR& HitGroupName);
 
 	// 各種ゲッタ
-	const LPCWSTR& GetCH() { return CH.entryPoint; }
-	const LPCWSTR& GetAH() { return AH.entryPoint; }
-	const LPCWSTR& GetIS() { return IS.entryPoint; }
+	const LPCWSTR& GetCH() { return CH.entryPoint_; }
+	const LPCWSTR& GetAH() { return AH.entryPoint_; }
+	const LPCWSTR& GetIS() { return IS.entryPoint_; }
 	const bool& GetCHFlag() { return CH.isActive; }
 	const bool& GetAHFlag() { return AH.isActive; }
 	const bool& GetISFlag() { return IS.isActive; }

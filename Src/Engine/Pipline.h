@@ -33,10 +33,10 @@ public:
 	};
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelinestate;		// パイプラインステート
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootsignature;		// ルートシグネチャ
-	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive;		// プリミティブ
-	PIPLINE_ID piplineID;							// パイプラインのID
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipelinestate_;		// パイプラインステート
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootsignature_;		// ルートシグネチャ
+	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_;		// プリミティブ
+	PIPLINE_ID piplineID_;							// パイプラインのID
 
 	using string = std::string;
 
@@ -54,27 +54,27 @@ public:
 	///<param name="primitive"><プリミティブ形状param>
 	///<param name="blendID"><どのブレンドをするかのID/param>
 	Pipline(
-		PIPLINE_ID piplineID,
+		PIPLINE_ID piplineID_,
 		string PSname,
 		string VSname,
 		int inputLayoutCount,
 		D3D12_INPUT_ELEMENT_DESC* inputLayout,
 		int rootparamCount,
 		CD3DX12_ROOT_PARAMETER* rootparam,
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 		BLEND_ID blendID,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 
 	Pipline(
-		PIPLINE_ID piplineID,
+		PIPLINE_ID piplineID_,
 		string PSname,
 		string VSname,
 		int inputLayoutCount,
 		D3D12_INPUT_ELEMENT_DESC* inputLayout,
 		int rootparamCount,
 		CD3DX12_ROOT_PARAMETER* rootparam,
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 		BLEND_ID blendID,
 		bool isMRT,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
@@ -82,7 +82,7 @@ public:
 		DXGI_FORMAT dxgiFormat2 = DXGI_FORMAT_R8_UNORM);
 
 	Pipline(
-		PIPLINE_ID piplineID,
+		PIPLINE_ID piplineID_,
 		string PSname,
 		string VSname,
 		string GSname,
@@ -90,7 +90,7 @@ public:
 		D3D12_INPUT_ELEMENT_DESC* inputLayout,
 		int rootparamCount,
 		CD3DX12_ROOT_PARAMETER* rootparam,
-		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive,
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 		BLEND_ID blendID,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
@@ -99,7 +99,7 @@ public:
 	void SetPipline();
 
 	// パイプラインIDを取得
-	PIPLINE_ID GetPiplineID() { return piplineID; }
+	PIPLINE_ID GetPiplineID() { return piplineID_; }
 
 	// パイプライン設定
 	void SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam, int rootparamCount, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat);

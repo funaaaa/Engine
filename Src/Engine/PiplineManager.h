@@ -12,7 +12,7 @@
 class PiplineManager :public Singleton<PiplineManager> {
 public:
 
-	std::vector<Pipline> piplines;	// パイプライン
+	std::vector<Pipline> piplines_;	// パイプライン
 	// コンストラクタ
 	PiplineManager() {};
 

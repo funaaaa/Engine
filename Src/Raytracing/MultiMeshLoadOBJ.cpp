@@ -40,8 +40,8 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 	// データを一次保存しておくためのコンテナ達。
 	std::vector<Vec3> position;
-	std::vector<DirectX::XMFLOAT2> uv;
-	std::vector<Vec3> normal;
+	std::vector<DirectX::XMFLOAT2> uv_;
+	std::vector<Vec3> normal_;
 	std::vector<int> textureHandle;
 
 	// 使用するマテリアル名とマテリアルファイル名の両方を取得したらマテリアルファイルを読み込むようにするために変数。
@@ -96,7 +96,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 			texcoord.y_ = 1.0f - texcoord.y_;
 
 			// テクスチャ座標データに追加。
-			uv.emplace_back(texcoord.ConvertXMFLOAT2());
+			uv_.emplace_back(texcoord.ConvertXMFLOAT2());
 
 		}
 		// 先頭文字がvnなら法線ベクトル。
@@ -109,7 +109,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 			lineStream >> norm.z_;
 
 			// 法線ベクトルデータに追加。
-			normal.emplace_back(norm);
+			normal_.emplace_back(norm);
 
 		}
 		// 先頭文字がfならポリゴン(三角形)。
@@ -136,12 +136,12 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				// 頂点データの追加。
 				ModelDataManager::Vertex vert{};
 				vert.pos_ = position[indexPosition - 1].ConvertXMFLOAT3();
-				vert.normal = normal[indexNormal - 1].ConvertXMFLOAT3();
-				vert.uv = uv[indexTexcoord - 1];
+				vert.normal_ = normal_[indexNormal - 1].ConvertXMFLOAT3();
+				vert.uv_ = uv_[indexTexcoord - 1];
 
 				// BLASのデータに追加。
-				blasData.vertex.emplace_back(vert);
-				blasData.index.emplace_back(static_cast<UINT>(blasData.index.size()));
+				blasData.vertex_.emplace_back(vert);
+				blasData.index_.emplace_back(static_cast<UINT>(blasData.index_.size()));
 
 			}
 		}
@@ -187,8 +187,8 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				InstanceID.emplace_back(idBuff);
 
 				// その他データを初期化する。
-				blasData.index.clear();
-				blasData.vertex.clear();
+				blasData.index_.clear();
+				blasData.vertex_.clear();
 				isLoadTexture = false;
 				isLoadMaterialName = false;
 				textureHandle.clear();
@@ -314,9 +314,9 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 				// 既に生成済みかをチェックする。
 				const int TEXPATH_COUNT = static_cast<int>(texturePath.size());
 				bool isLoad = false;
-				for (int index = 0; index < TEXPATH_COUNT; ++index) {
+				for (int index_ = 0; index_ < TEXPATH_COUNT; ++index_) {
 
-					if (buff == texturePath[index]) {
+					if (buff == texturePath[index_]) {
 
 						isLoad = true;
 
@@ -335,7 +335,7 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 						}
 
 						// テクスチャを読み込む。
-						TextureHandle.emplace_back(TextureManager::Ins()->LoadTexture(texturePath[index].c_str()));
+						TextureHandle.emplace_back(TextureManager::Ins()->LoadTexture(texturePath[index_].c_str()));
 
 
 					}

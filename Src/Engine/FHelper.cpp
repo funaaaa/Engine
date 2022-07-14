@@ -8,7 +8,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 	{
 		Vec3 pos_;
 		float distance;
-		Vec3 normal;
+		Vec3 normal_;
 	};
 
 	std::vector<HitPorygonData> hitPorygon{};
@@ -18,7 +18,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 	struct CheckHitVertex {
 
 		Vec3 pos_;
-		Vec3 normal;
+		Vec3 normal_;
 
 	};
 
@@ -37,19 +37,19 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 
 	// ポリゴンの中身を代入
 	int targetPorygonSize = static_cast<int>(targetPorygon.size());
-	for (int index = 0; index < targetPorygonSize; ++index) {
+	for (int index_ = 0; index_ < targetPorygonSize; ++index_) {
 
 		// 頂点1
-		targetPorygon[index].p1.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3)])];
-		targetPorygon[index].p1.normal = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3)])];
+		targetPorygon[index_].p1.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index_ * 3)])];
+		targetPorygon[index_].p1.normal_ = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index_ * 3)])];
 		// 頂点2
-		targetPorygon[index].p2.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 1)])];
-		targetPorygon[index].p2.normal = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 1)])];
+		targetPorygon[index_].p2.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index_ * 3 + 1)])];
+		targetPorygon[index_].p2.normal_ = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index_ * 3 + 1)])];
 		// 頂点3
-		targetPorygon[index].p3.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 2)])];
-		targetPorygon[index].p3.normal = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 2)])];
+		targetPorygon[index_].p3.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index_ * 3 + 2)])];
+		targetPorygon[index_].p3.normal_ = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index_ * 3 + 2)])];
 		// 有効化フラグ
-		targetPorygon[index].isActive_ = true;
+		targetPorygon[index_].isActive_ = true;
 	}
 
 	/*----- 保存したポリゴンの頂点座標にワールド変換行列をかける -----*/
@@ -59,26 +59,26 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 	matWorld *= CollisionData.matRot;
 	matWorld *= CollisionData.matTrans;
 	targetPorygonSize = static_cast<int>(targetPorygon.size());
-	for (int index = 0; index < targetPorygonSize; ++index) {
+	for (int index_ = 0; index_ < targetPorygonSize; ++index_) {
 		// 頂点を変換
-		targetPorygon[index].p1.pos_ = DirectX::XMVector3Transform(targetPorygon[index].p1.pos_.ConvertXMVECTOR(), matWorld);
-		targetPorygon[index].p2.pos_ = DirectX::XMVector3Transform(targetPorygon[index].p2.pos_.ConvertXMVECTOR(), matWorld);
-		targetPorygon[index].p3.pos_ = DirectX::XMVector3Transform(targetPorygon[index].p3.pos_.ConvertXMVECTOR(), matWorld);
+		targetPorygon[index_].p1.pos_ = DirectX::XMVector3Transform(targetPorygon[index_].p1.pos_.ConvertXMVECTOR(), matWorld);
+		targetPorygon[index_].p2.pos_ = DirectX::XMVector3Transform(targetPorygon[index_].p2.pos_.ConvertXMVECTOR(), matWorld);
+		targetPorygon[index_].p3.pos_ = DirectX::XMVector3Transform(targetPorygon[index_].p3.pos_.ConvertXMVECTOR(), matWorld);
 		// 法線を回転行列分だけ変換
-		targetPorygon[index].p1.normal = XMVector3Transform(targetPorygon[index].p1.normal.ConvertXMVECTOR(), CollisionData.matRot);
-		targetPorygon[index].p1.normal.Normalize();
-		targetPorygon[index].p2.normal = XMVector3Transform(targetPorygon[index].p2.normal.ConvertXMVECTOR(), CollisionData.matRot);
-		targetPorygon[index].p2.normal.Normalize();
-		targetPorygon[index].p3.normal = XMVector3Transform(targetPorygon[index].p3.normal.ConvertXMVECTOR(), CollisionData.matRot);
-		targetPorygon[index].p3.normal.Normalize();
+		targetPorygon[index_].p1.normal_ = XMVector3Transform(targetPorygon[index_].p1.normal_.ConvertXMVECTOR(), CollisionData.matRot);
+		targetPorygon[index_].p1.normal_.Normalize();
+		targetPorygon[index_].p2.normal_ = XMVector3Transform(targetPorygon[index_].p2.normal_.ConvertXMVECTOR(), CollisionData.matRot);
+		targetPorygon[index_].p2.normal_.Normalize();
+		targetPorygon[index_].p3.normal_ = XMVector3Transform(targetPorygon[index_].p3.normal_.ConvertXMVECTOR(), CollisionData.matRot);
+		targetPorygon[index_].p3.normal_.Normalize();
 	}
 
 	/*----- レイの方向と法線が同じ方向なら除外 -----*/
-	for (int index = 0; index < targetPorygonSize; ++index) {
+	for (int index_ = 0; index_ < targetPorygonSize; ++index_) {
 		// まずは1つ目の頂点をチェック
-		if (-0.0001f < targetPorygon[index].p1.normal.Dot(CollisionData.rayDir)) {
+		if (-0.0001f < targetPorygon[index_].p1.normal_.Dot(CollisionData.rayDir)) {
 			// ここまで来たら完全に反対側を向いているので、削除フラグを建てる
-			targetPorygon[index].isActive_ = false;
+			targetPorygon[index_].isActive_ = false;
 			continue;
 		}
 	}
@@ -87,16 +87,16 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 
 	/*----- ポリゴンごとに当たり判定 -----*/
 	// 此処から先はポリゴンごとに計算する
-	for (int index = 0; index < targetPorygonSize; ++index) {
+	for (int index_ = 0; index_ < targetPorygonSize; ++index_) {
 		/*----- レイと平面の衝突点を計算する -----*/
 
 		// ポリゴンが無効化されていたら次の処理へ
-		if (!targetPorygon[index].isActive_) continue;
+		if (!targetPorygon[index_].isActive_) continue;
 
 		// レイの開始地点から平面におろした垂線の長さを求める
-		Vec3 planeNorm = -targetPorygon[index].p1.normal;
+		Vec3 planeNorm = -targetPorygon[index_].p1.normal_;
 		float rayToOriginLength = CollisionData.rayPos.Dot(planeNorm);
-		float planeToOriginLength = targetPorygon[index].p1.pos_.Dot(planeNorm);
+		float planeToOriginLength = targetPorygon[index_].p1.pos_.Dot(planeNorm);
 		// 視点から平面におろした垂線の長さ
 		float perpendicularLine = rayToOriginLength - planeToOriginLength;
 
@@ -111,9 +111,9 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 		Vec3 m;
 
 		/* 辺1本目 */
-		Vec3 P1ToImpactPos = (impactPoint - targetPorygon[index].p1.pos_).GetNormal();
-		Vec3 P1ToP2 = (targetPorygon[index].p2.pos_ - targetPorygon[index].p1.pos_).GetNormal();
-		Vec3 P1ToP3 = (targetPorygon[index].p3.pos_ - targetPorygon[index].p1.pos_).GetNormal();
+		Vec3 P1ToImpactPos = (impactPoint - targetPorygon[index_].p1.pos_).GetNormal();
+		Vec3 P1ToP2 = (targetPorygon[index_].p2.pos_ - targetPorygon[index_].p1.pos_).GetNormal();
+		Vec3 P1ToP3 = (targetPorygon[index_].p3.pos_ - targetPorygon[index_].p1.pos_).GetNormal();
 
 		// 衝突点と辺1の内積
 		float impactDot = P1ToImpactPos.Dot(P1ToP2);
@@ -122,14 +122,14 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 
 		// 衝突点と辺1の内積が点1と点3の内積より小さかったらアウト
 		if (impactDot < P1Dot) {
-			targetPorygon.at(index).isActive_ = false;
+			targetPorygon.at(index_).isActive_ = false;
 			continue;
 		}
 
 		/* 辺2本目 */
-		Vec3 P2ToImpactPos = (impactPoint - targetPorygon[index].p2.pos_).GetNormal();
-		Vec3 P2ToP3 = (targetPorygon[index].p3.pos_ - targetPorygon[index].p2.pos_).GetNormal();
-		Vec3 P2ToP1 = (targetPorygon[index].p1.pos_ - targetPorygon[index].p2.pos_).GetNormal();
+		Vec3 P2ToImpactPos = (impactPoint - targetPorygon[index_].p2.pos_).GetNormal();
+		Vec3 P2ToP3 = (targetPorygon[index_].p3.pos_ - targetPorygon[index_].p2.pos_).GetNormal();
+		Vec3 P2ToP1 = (targetPorygon[index_].p1.pos_ - targetPorygon[index_].p2.pos_).GetNormal();
 
 		// 衝突点と辺2の内積
 		impactDot = P2ToImpactPos.Dot(P2ToP3);
@@ -138,14 +138,14 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 
 		// 衝突点と辺2の内積が点2と点1の内積より小さかったらアウト
 		if (impactDot < P2Dot) {
-			targetPorygon.at(index).isActive_ = false;
+			targetPorygon.at(index_).isActive_ = false;
 			continue;
 		}
 
 		/* 辺3本目 */
-		Vec3 P3ToImpactPos = (impactPoint - targetPorygon[index].p3.pos_).GetNormal();
-		Vec3 P3ToP1 = (targetPorygon[index].p1.pos_ - targetPorygon[index].p3.pos_).GetNormal();
-		Vec3 P3ToP2 = (targetPorygon[index].p2.pos_ - targetPorygon[index].p3.pos_).GetNormal();
+		Vec3 P3ToImpactPos = (impactPoint - targetPorygon[index_].p3.pos_).GetNormal();
+		Vec3 P3ToP1 = (targetPorygon[index_].p1.pos_ - targetPorygon[index_].p3.pos_).GetNormal();
+		Vec3 P3ToP2 = (targetPorygon[index_].p2.pos_ - targetPorygon[index_].p3.pos_).GetNormal();
 
 		// 衝突点と辺3の内積
 		impactDot = P3ToImpactPos.Dot(P3ToP1);
@@ -154,7 +154,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 
 		// 衝突点と辺3の内積が点3と点2の内積より小さかったらアウト
 		if (impactDot < P3Dot) {
-			targetPorygon.at(index).isActive_ = false;
+			targetPorygon.at(index_).isActive_ = false;
 			continue;
 		}
 
@@ -162,7 +162,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 		HitPorygonData hitPorygonData;
 		hitPorygonData.pos_ = impactPoint;
 		hitPorygonData.distance = impDistance;
-		hitPorygonData.normal = targetPorygon[index].p1.normal;
+		hitPorygonData.normal_ = targetPorygon[index_].p1.normal_;
 		hitPorygon.push_back(hitPorygonData);
 	}
 
@@ -172,9 +172,9 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 		int min = 0;
 		float minDistance = 100000;
 		int counter = 0;
-		for (auto& index : hitPorygon) {
-			if (fabs(index.distance) < fabs(minDistance)) {
-				minDistance = index.distance;
+		for (auto& index_ : hitPorygon) {
+			if (fabs(index_.distance) < fabs(minDistance)) {
+				minDistance = index_.distance;
 				min = counter;
 				++counter;
 			}
@@ -183,7 +183,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 		//検索した最小値を代入してreturn
 		ImpactPos = hitPorygon[min].pos_;
 		Distance = hitPorygon[min].distance;
-		HitNormal = hitPorygon[min].normal;
+		HitNormal = hitPorygon[min].normal_;
 		return true;
 	}
 	else {
