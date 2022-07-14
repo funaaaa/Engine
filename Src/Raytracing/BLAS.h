@@ -11,7 +11,7 @@
 // レイトレ用頂点構造体
 struct RayVertex {
 
-	Vec3 position;
+	Vec3 position_;
 	Vec3 normal_;
 	Vec2 uv_;
 
@@ -24,51 +24,51 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer;	// 頂点バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer;		// 頂点インデックスバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer;	// 頂点インデックスバッファ
-	RayDescriptor vertexDescriptor;			// 頂点ディスクリプタ
-	RayDescriptor indexDescriptor;			// 頂点インデックスディスクリプタ
-	RayDescriptor materialDescriptor;		// マテリアル情報用ディスクリプタ
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer_;	// 頂点バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer_;		// 頂点インデックスバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer_;	// 頂点インデックスバッファ
+	RayDescriptor vertexDescriptor_;			// 頂点ディスクリプタ
+	RayDescriptor indexDescriptor_;			// 頂点インデックスディスクリプタ
+	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
 
 	// マテリアル情報用定数バッファ
 	ModelDataManager::Material material_;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer;		// BLAS用バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer;	// スクラッチバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> updateBuffer;	// 更新用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer_;		// BLAS用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;	// スクラッチバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> updateBuffer_;	// 更新用バッファ
 
-	UINT vertexCount;						// 頂点の数
-	UINT indexCount;						// 頂点インデックスの数
-	UINT vertexStride;						// 1頂点のデータサイズ
-	UINT indexStride;						// 1頂点インデックスのデータサイズ
+	UINT vertexCount_;						// 頂点の数
+	UINT indexCount_;						// 頂点インデックスの数
+	UINT vertexStride_;						// 1頂点のデータサイズ
+	UINT indexStride_;						// 1頂点インデックスのデータサイズ
 
 	Vec3 vertexMax_;							// 頂点の各成分の最大値
 	Vec3 vertexMin_;							// 頂点の各成分の最小値
 
-	std::wstring hitGroupName;				// 使用するヒットグループの名前
-	std::string modelPath;					// 使用するモデルのパス
-	std::vector<LPCWSTR> texturePath;		// 使用するテクスチャのパス
+	std::wstring hitGroupName_;				// 使用するヒットグループの名前
+	std::string modelPath_;					// 使用するモデルのパス
+	std::vector<LPCWSTR> texturePath_;		// 使用するテクスチャのパス
 
-	int modelIndex;							// モデルのインデックス
+	int modelIndex_;							// モデルのインデックス
 
-	bool isOpaque;							// 不透明フラグ
+	bool isOpaque_;							// 不透明フラグ
 
-	std::vector<int> textureHandle;			// 使用するテクスチャのハンドル
+	std::vector<int> textureHandle_;			// 使用するテクスチャのハンドル
 
-	ComputeShader skinComput;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
+	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
 
 	// デバッグ用
-	std::vector<RayVertex> defVertex;	// 生成した時点の頂点
+	std::vector<RayVertex> defVertex_;	// 生成した時点の頂点
 	std::vector<RayVertex> vertex_;		// 現在の頂点 頂点を書き換える場合があるのでその時用
-	std::vector<Vec3> vertexPos;
-	std::vector<Vec3> vertexNormal;
-	std::vector<UINT> vertIndex;
+	std::vector<Vec3> vertexPos_;
+	std::vector<Vec3> vertexNormal_;
+	std::vector<UINT> vertIndex_;
 
 
 private:
 
-	std::vector<FbxLoader::SkinComputeInput> skinComputeInput;
+	std::vector<FbxLoader::SkinComputeInput> skinComputeInput_;
 
 
 public:
@@ -92,7 +92,7 @@ public:
 	void StopAnimation();	// 停止
 
 	// テクスチャを追加。
-	inline void AddTex(const int& Index) { textureHandle.emplace_back(Index); }
+	inline void AddTex(const int& Index) { textureHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
@@ -104,22 +104,22 @@ public:
 	void MulVec3Vertex(Vec3 Vec);
 
 	// アクセッタ
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer; }
-	std::wstring& GetHitGroupName() { return hitGroupName; }
-	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor; }
-	RayDescriptor& GetIndexDescriptor() { return indexDescriptor; }
-	const std::string& GetModelPath() { return modelPath; }
-	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer_; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer_; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer_; }
+	std::wstring& GetHitGroupName() { return hitGroupName_; }
+	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor_; }
+	RayDescriptor& GetIndexDescriptor() { return indexDescriptor_; }
+	const std::string& GetModelPath() { return modelPath_; }
+	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath_; }
 	const Vec3& GetVertexMin() { return vertexMin_; }
 	const Vec3& GetVertexMax() { return vertexMax_; }
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex_; }
-	std::vector<Vec3> GetVertexPos() { return vertexPos; }
-	std::vector<Vec3> GetVertexNormal() { return vertexNormal; }
-	std::vector<UINT> GetVertexIndex() { return vertIndex; }
+	std::vector<Vec3> GetVertexPos() { return vertexPos_; }
+	std::vector<Vec3> GetVertexNormal() { return vertexNormal_; }
+	std::vector<UINT> GetVertexIndex() { return vertIndex_; }
 
 private:
 

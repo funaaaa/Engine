@@ -11,40 +11,40 @@ void HitGroup::Generate(const HitGroupInitData& InputData, const int& RegisterSp
 	/*===== 生成処理 =====*/
 
 	// 入力されたデータの値を保存する。
-	CH = InputData.CH;
-	AH = InputData.AH;
-	IS = InputData.IS;
-	SRVcount = InputData.SRVcount;
-	CBVcount = InputData.CBVcount;
-	UAVcount = InputData.UAVcount;
-	registerSpace = RegisterSpace;
-	hitGroupName = HitGroupName;
+	CH_ = InputData.CH_;
+	AH_ = InputData.AH_;
+	IS_ = InputData.IS_;
+	SRVcount_ = InputData.SRVcount_;
+	CBVcount_ = InputData.CBVcount_;
+	UAVcount_ = InputData.UAVcount_;
+	registerSpace_ = RegisterSpace;
+	hitGroupName_ = HitGroupName;
 
 	// ローカルルートシグネチャを生成する。
-	localRootSig = std::make_shared<RayRootsignature>();
+	localRootSig_ = std::make_shared<RayRootsignature>();
 
 	// SRVについて追加。
-	for (int index_ = 0; index_ < SRVcount; ++index_) {
+	for (int index = 0; index < SRVcount_; ++index) {
 
-		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index_, registerSpace);
+		localRootSig_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index, registerSpace_);
 
 	}
 	// UAVについて追加。
-	for (int index_ = 0; index_ < UAVcount; ++index_) {
+	for (int index = 0; index < UAVcount_; ++index) {
 
-		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index_, registerSpace);
+		localRootSig_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index, registerSpace_);
 
 	}
 	// CBVについて追加。
-	for (int index_ = 0; index_ < CBVcount; ++index_) {
+	for (int index = 0; index < CBVcount_; ++index) {
 
-		localRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index_, registerSpace);
+		localRootSig_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index, registerSpace_);
 
 	}
 	// サンプラーを追加。
-	localRootSig->AddStaticSampler(registerSpace);
+	localRootSig_->AddStaticSampler(registerSpace_);
 
 	// ローカルルートシグネチャを生成。
-	localRootSig->Create(true, hitGroupName);
+	localRootSig_->Create(true, hitGroupName_);
 
 }

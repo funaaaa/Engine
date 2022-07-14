@@ -202,7 +202,7 @@ void TLAS::SettingAccelerationStructure()
 	/*-- TLASバッファとスクラッチバッファを生成する --*/
 
 	// スクラッチメモリ(バッファ)を確保。
-	scratchBuffer = CreateBuffer(
+	scratchBuffer_ = CreateBuffer(
 		tlasPrebuild.ScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
@@ -228,7 +228,7 @@ void TLAS::SettingAccelerationStructure()
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 
 	// AccelerationStructure構築。
-	buildASDesc.ScratchAccelerationStructureData = scratchBuffer->GetGPUVirtualAddress();
+	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
 	buildASDesc.DestAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積んで実行する。

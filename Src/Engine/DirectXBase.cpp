@@ -146,8 +146,8 @@ void DirectXBase::Init() {
 	// リソース生成
 	CD3DX12_RESOURCE_DESC depthResDesc = CD3DX12_RESOURCE_DESC::Tex2D(
 		DXGI_FORMAT_D32_FLOAT,
-		window_width,
-		window_height,
+		WINDOW_WIDTH,
+		WINDOW_HEIGHT,
 		1, 0,
 		1, 0,
 		D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
@@ -263,11 +263,11 @@ void DirectXBase::ProcessBeforeDrawing() {
 	cmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// ビューポート設定
-	CD3DX12_VIEWPORT viewportData = CD3DX12_VIEWPORT(0.0f, 0.0f, window_width, window_height);
+	CD3DX12_VIEWPORT viewportData = CD3DX12_VIEWPORT(0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT);
 	cmdList_->RSSetViewports(1, &viewportData);
 
 	// シザリング矩形設定
-	CD3DX12_RECT rectData = CD3DX12_RECT(0, 0, window_width, window_height);
+	CD3DX12_RECT rectData = CD3DX12_RECT(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	cmdList_->RSSetScissorRects(1, &rectData);
 
 	// imgui描画前処理

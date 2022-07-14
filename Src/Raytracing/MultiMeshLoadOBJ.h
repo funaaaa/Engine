@@ -13,14 +13,14 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::wstring> texturePath;
+	std::vector<std::wstring> texturePath_;
 
-	std::vector<std::pair<std::vector<int>, int>> blasID;	// テクスチャのハンドルと、それを使用したBLASのIDを保存するコンテナ
+	std::vector<std::pair<std::vector<int>, int>> blasID_;	// テクスチャのハンドルと、それを使用したBLASのIDを保存するコンテナ
 
 	using string = std::string;
 
-	bool isOpaque;		// SPONZA読み込み用のデバッグ機能 不透明フラグ
-	bool isFloor;		// SPONZA読み込み用のデバッグ機能 GIを床のみに使用するため。
+	bool isOpaque_;		// SPONZA読み込み用のデバッグ機能 不透明フラグ
+	bool isFloor_;		// SPONZA読み込み用のデバッグ機能 GIを床のみに使用するため。
 
 
 public:

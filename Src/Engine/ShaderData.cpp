@@ -89,7 +89,7 @@ void ShaderData::LoadShaderDXC()
 
 	strstream << infile.rdbuf();
 
-	std::string shaderCode = strstream.str();
+	std::string shaderCode_ = strstream.str();
 	Microsoft::WRL::ComPtr<IDxcLibrary> library;
 	DxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&library));
 	Microsoft::WRL::ComPtr<IDxcCompiler> compiler;
@@ -97,7 +97,7 @@ void ShaderData::LoadShaderDXC()
 	Microsoft::WRL::ComPtr<IDxcBlobEncoding> source_;
 
 	library->CreateBlobWithEncodingFromPinned(
-		(LPBYTE)shaderCode.c_str(), static_cast<UINT32>(shaderCode.size()), CP_UTF8, &source_);
+		(LPBYTE)shaderCode_.c_str(), static_cast<UINT32>(shaderCode_.size()), CP_UTF8, &source_);
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler;
 
 	// インクルードを使う場合には適切に設定すること

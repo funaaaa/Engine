@@ -73,10 +73,10 @@ void DriftParticle::Generate(const Vec3& Pos, const Vec3& DriftVec, const Direct
 	pos_ += rotForwardVec * randomAmount;
 
 	// 座標とスケールを実装。
-	ConstBufferData.light.pointLight[constBufferIndex_].lightPos = pos_ + DriftVec * 10.0f;
-	ConstBufferData.light.pointLight[constBufferIndex_].isActive_ = true;
-	ConstBufferData.light.pointLight[constBufferIndex_].lightSize = scale_;
-	ConstBufferData.light.pointLight[constBufferIndex_].lightPower = 30.0f;
+	ConstBufferData.light_.pointLight_[constBufferIndex_].lightPos_ = pos_ + DriftVec * 10.0f;
+	ConstBufferData.light_.pointLight_[constBufferIndex_].isActive_ = true;
+	ConstBufferData.light_.pointLight_[constBufferIndex_].lightSize_ = scale_;
+	ConstBufferData.light_.pointLight_[constBufferIndex_].lightPower_ = 30.0f;
 
 }
 
@@ -86,8 +86,8 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	/*===== 更新処理 =====*/
 
 	if (scale_ <= SCALE - SUB_SCALE * 2.0f) {
-		ConstBufferData.light.pointLight[constBufferIndex_].lightPos = Vec3(-1000, -1000, -1000);
-		ConstBufferData.light.pointLight[constBufferIndex_].isActive_ = false;
+		ConstBufferData.light_.pointLight_[constBufferIndex_].lightPos_ = Vec3(-1000, -1000, -1000);
+		ConstBufferData.light_.pointLight_[constBufferIndex_].isActive_ = false;
 	}
 
 	// パーティクルを動かす。

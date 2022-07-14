@@ -184,22 +184,22 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			}
 
 			// タイヤを回転させる。
-			Vec3 rot = Vec3(0.0f, 0.5f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
+			Vec3 rot_ = Vec3(0.0f, 0.5f, 0.0f);
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_ * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_ * static_cast<float>(inputADKey));
 
 		}
 		// ドリフト状態じゃなかったら。
 		else {
 
 			// タイヤを回転させる。
-			Vec3 rot = Vec3(0.0f, 0.3f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
+			Vec3 rot_ = Vec3(0.0f, 0.3f, 0.0f);
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_ * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_ * static_cast<float>(inputADKey));
 
 		}
 
@@ -221,11 +221,11 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	else {
 
 		// タイヤの回転をデフォルトに戻す。
-		Vec3 rot = Vec3(0.0f, 0.0f, 0.0f);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot);
+		Vec3 rot_ = Vec3(0.0f, 0.0f, 0.0f);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_);
 
 	}
 
@@ -369,9 +369,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
 		collistionData.rayPos = pos_;
 		collistionData.rayDir = bottomVec;
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
+		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
 		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
+		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -421,9 +421,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexIndex();
 			collistionData.rayPos = pos_;
 			collistionData.rayDir = bottomVec;
-			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageGrassInsIndex_);
+			collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageGrassInsIndex_);
 			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageGrassInsIndex_);
-			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageGrassInsIndex_);
+			collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageGrassInsIndex_);
 
 			// 当たり判定の結果保存用変数。
 			isHit = false;
@@ -482,9 +482,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
 		collistionData.rayPos = prevPos_;
 		collistionData.rayDir = (pos_ - prevPos_).GetNormal();
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
+		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
 		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
+		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
 
 		// 当たり判定を行う。
 		isHit = false;
@@ -519,9 +519,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexIndex();
 		collistionData.rayPos = prevPos_;
 		collistionData.rayDir = forwardVec_;
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.middlePointInsIndex_);
+		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.middlePointInsIndex_);
 		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.middlePointInsIndex_);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.middlePointInsIndex_);
+		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.middlePointInsIndex_);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -555,9 +555,9 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexIndex();
 		collistionData.rayPos = prevPos_;
 		collistionData.rayDir = forwardVec_;
-		collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.goalInsIndex_);
+		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.goalInsIndex_);
 		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.goalInsIndex_);
-		collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.goalInsIndex_);
+		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.goalInsIndex_);
 
 		// 当たり判定の結果保存用変数。
 		bool isHit = false;
@@ -588,18 +588,18 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 	{
 
 		const int BLAS_COUNT = static_cast<int>(stageModelData_.stageOrnamentInsIndex_.size());
-		for (int index_ = 0; index_ < BLAS_COUNT; ++index_) {
+		for (int index = 0; index < BLAS_COUNT; ++index) {
 
 			// 当たり判定に使用するデータ
 			FHelper::RayToModelCollisionData collistionData;
-			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index_]]->GetVertexPos();
-			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index_]]->GetVertexNormal();
-			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index_]]->GetVertexIndex();
+			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexPos();
+			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexNormal();
+			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexIndex();
 			collistionData.rayPos = prevPos_;
 			collistionData.rayDir = (pos_ - prevPos_).GetNormal();
-			collistionData.matTrans = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageOrnamentInsIndex_[index_]);
-			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageOrnamentInsIndex_[index_]);
-			collistionData.matRot = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageOrnamentInsIndex_[index_]);
+			collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageOrnamentInsIndex_[index]);
+			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageOrnamentInsIndex_[index]);
+			collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageOrnamentInsIndex_[index]);
 
 			// 当たり判定を行う。
 			bool isHit = false;

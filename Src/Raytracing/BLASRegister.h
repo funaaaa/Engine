@@ -1,9 +1,6 @@
 #pragma once
 #include <vector>
-#pragma warning(push)
-#pragma warning(disable:4267)
 #include <memory>
-#pragma warning(pop)
 #include <string>
 #include <wrl.h>
 #include <d3d12.h>
@@ -18,7 +15,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<BLAS>> blas;	// 加速構造体
+	std::vector<std::shared_ptr<BLAS>> blas_;	// 加速構造体
 
 
 public:
@@ -48,10 +45,10 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(const int& Index);
 
 	// BLASの数を取得。
-	int GetBLASCount() { return static_cast<int>(blas.size()); }
+	int GetBLASCount() { return static_cast<int>(blas_.size()); }
 
 	// BLASを取得。
-	std::vector<std::shared_ptr<BLAS>>& GetBLAS() { return blas; }
+	std::vector<std::shared_ptr<BLAS>>& GetBLAS() { return blas_; }
 
 	// すべての頂点情報にVec3情報をかける。 重い処理なのでたくさん呼ばない。
 	void MulVec3Vertex(const int& Index, Vec3 Vec);

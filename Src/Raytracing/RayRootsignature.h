@@ -18,12 +18,12 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<CD3DX12_ROOT_PARAMETER, MAX_ROOTPARAM> rootparam;	// ルートパラメーター
-	std::array<CD3DX12_DESCRIPTOR_RANGE, MAX_ROOTPARAM> descRange;	// ディスクリプタテーブル
+	std::array<CD3DX12_ROOT_PARAMETER, MAX_ROOTPARAM> rootparam_;	// ルートパラメーター
+	std::array<CD3DX12_DESCRIPTOR_RANGE, MAX_ROOTPARAM> descRange_;	// ディスクリプタテーブル
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootsignature_;		// ルートシグネチャ
-	std::array<CD3DX12_STATIC_SAMPLER_DESC, MAX_SAMPLER> sampler;	// スタティックサンプラー
-	UINT rootparamCount;											// ルートパラメーター数
-	UINT samplerCount;												// サンプラーの数
+	std::array<CD3DX12_STATIC_SAMPLER_DESC, MAX_SAMPLER> sampler_;	// スタティックサンプラー
+	UINT rootparamCount_;											// ルートパラメーター数
+	UINT samplerCount_;												// サンプラーの数
 
 
 public:
@@ -32,8 +32,8 @@ public:
 
 	// コンストラクタ
 	RayRootsignature() {
-		rootparamCount = 0;
-		samplerCount = 0;
+		rootparamCount_ = 0;
+		samplerCount_ = 0;
 	}
 
 	// ルートパラメーター追加処理

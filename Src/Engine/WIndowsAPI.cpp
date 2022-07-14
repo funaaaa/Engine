@@ -34,7 +34,7 @@ void WindowsAPI::Init()
 	// ウィンドウクラスをOSに登録
 	RegisterClassEx(&windowClass);
 	// ウィンドウサイズ{ X座標 Y座標 横幅 縦幅 }
-	wrc = { 0, 0, window_width, window_height };
+	wrc = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);	// 自動でサイズ補正
 
 	// ウィンドウオブジェクトの生成

@@ -9,8 +9,8 @@ Pipline::Pipline(
 	string VSname,
 	int inputLayoutCount,
 	D3D12_INPUT_ELEMENT_DESC* inputLayout,
-	int rootparamCount,
-	CD3DX12_ROOT_PARAMETER* rootparam,
+	int rootparamCount_,
+	CD3DX12_ROOT_PARAMETER* rootparam_,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 	BLEND_ID blendID,
 	D3D12_CULL_MODE cullMode,
@@ -35,7 +35,7 @@ Pipline::Pipline(
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline{};
 	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
-	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat);
+	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
 	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
@@ -46,8 +46,8 @@ Pipline::Pipline(
 	string VSname,
 	int inputLayoutCount,
 	D3D12_INPUT_ELEMENT_DESC* inputLayout,
-	int rootparamCount,
-	CD3DX12_ROOT_PARAMETER* rootparam,
+	int rootparamCount_,
+	CD3DX12_ROOT_PARAMETER* rootparam_,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 	BLEND_ID blendID,
 	bool isMRT,
@@ -73,7 +73,7 @@ Pipline::Pipline(
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC gpipeline{};
 	gpipeline.VS = CD3DX12_SHADER_BYTECODE(vsBlob.Get());
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
-	SetPiplineDescDepth(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat, dxgiFormat2);
+	SetPiplineDescDepth(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat, dxgiFormat2);
 	isMRT;
 	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
@@ -85,8 +85,8 @@ Pipline::Pipline(
 	string GSname,
 	int inputLayoutCount,
 	D3D12_INPUT_ELEMENT_DESC* inputLayout,
-	int rootparamCount,
-	CD3DX12_ROOT_PARAMETER* rootparam,
+	int rootparamCount_,
+	CD3DX12_ROOT_PARAMETER* rootparam_,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 	BLEND_ID blendID,
 	D3D12_CULL_MODE cullMode,
@@ -117,7 +117,7 @@ Pipline::Pipline(
 	gpipeline.GS = CD3DX12_SHADER_BYTECODE(gsBlob.Get());
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 
-	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam, rootparamCount, blendID, cullMode, dxgiFormat);
+	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
 	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
@@ -142,7 +142,7 @@ void Pipline::SetPipline()
 	}
 }
 
-void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam, int rootparamCount, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat)
+void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat)
 {
 	gpipelineDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;						//標準設定
 	gpipelineDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);		//背面カリング,ポリゴン内塗りつぶし,深度クリッピングを有効に
@@ -193,7 +193,7 @@ void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, 
 
 	//ルートシグネチャの設定
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init_1_0(rootparamCount, rootparam, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSignatureDesc.Init_1_0(rootparamCount_, rootparam_, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> rootSigBlob = {};
 	//バージョン自動判定でのシリアライズ
@@ -206,7 +206,7 @@ void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, 
 	gpipelineDesc.pRootSignature = rootsignature_.Get();
 }
 
-void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam, int rootparamCount, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat, DXGI_FORMAT dxgiFormat2)
+void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat, DXGI_FORMAT dxgiFormat2)
 {
 	gpipelineDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;						//標準設定
 	gpipelineDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);		//背面カリング,ポリゴン内塗りつぶし,深度クリッピングを有効に
@@ -258,7 +258,7 @@ void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineD
 
 	//ルートシグネチャの設定
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init_1_0(rootparamCount, rootparam, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	rootSignatureDesc.Init_1_0(rootparamCount_, rootparam_, 1, &samplerDesc, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> rootSigBlob = {};
 	//バージョン自動判定でのシリアライズ

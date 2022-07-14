@@ -19,11 +19,11 @@ private:
 
 	std::shared_ptr<RayRootsignature> rootSignature_;			// ルートシグネチャ
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipline_;		// パイプライン
-	int inputCBVCount;					// 入力するCBVの数
-	int inputSRVCount;					// 入力するSRVの数
-	int inputUAVCount;					// 入力するUAVの数
-	std::vector<int> inputUAVIndex;		// 入力UAVデータのディスクリプタヒープ上でのインデックス
-	int outputIndex;					// 出力データのディスクリプタヒープ上でのインデックス
+	int inputCBVCount_;					// 入力するCBVの数
+	int inputSRVCount_;					// 入力するSRVの数
+	int inputUAVCount_;					// 入力するUAVの数
+	std::vector<int> inputUAVIndex_;		// 入力UAVデータのディスクリプタヒープ上でのインデックス
+	int outputIndex_;					// 出力データのディスクリプタヒープ上でのインデックス
 
 
 public:
@@ -37,7 +37,7 @@ public:
 	void Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV);
 
 	// 入力用UAVを変更。
-	void ChangeInputUAVIndex(const std::vector<int>& NewInputUAV) { inputUAVIndex = NewInputUAV; }
+	void ChangeInputUAVIndex(const std::vector<int>& NewInputUAV) { inputUAVIndex_ = NewInputUAV; }
 
 private:
 

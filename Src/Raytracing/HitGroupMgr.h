@@ -1,8 +1,5 @@
 #pragma once
-#pragma warning(push)
-#pragma warning(disable:4267)
 #include <memory>
-#pragma warning(pop)
 #include <vector>
 #include <string>
 #include <array>
@@ -18,7 +15,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<HitGroup>> hitGroup;	// ヒットグループ
+	std::vector<std::shared_ptr<HitGroup>> hitGroup_;	// ヒットグループ
 
 
 public:
@@ -43,7 +40,7 @@ public:
 	void Setting();
 
 	// 配列数のゲッタ
-	int GetHitGroupCount() { return static_cast<int>(hitGroup.size()); }
+	int GetHitGroupCount() { return static_cast<int>(hitGroup_.size()); }
 	// CHのゲッタ
 	const LPCWSTR& GetCH(const int& Index);
 	const bool& GetCHFlag(const int& Index);

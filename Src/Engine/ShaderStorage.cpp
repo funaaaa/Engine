@@ -12,13 +12,13 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderStorage::LoadShader(const std::string& Sh
 	const int SHADER_COUNT = static_cast<int>(shaderData_.size());
 
 	// シェーダーの数分ループして、ロード済みのシェーダーかをチェックする。
-	for (int index_ = 0; index_ < SHADER_COUNT; ++index_) {
+	for (int index = 0; index < SHADER_COUNT; ++index) {
 
 		// シェーダの名前が違っていたら次へ。
-		if (shaderData_[index_]->GetShaderPath() != ShaderPath) continue;
+		if (shaderData_[index]->GetShaderPath() != ShaderPath) continue;
 
 		// このindexのシェーダーをリターンする。
-		return shaderData_[index_]->GetShaderBlob();
+		return shaderData_[index]->GetShaderBlob();
 
 	}
 
@@ -37,13 +37,13 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderStorage::LoadShaderForDXC(const std::stri
 	const int SHADER_COUNT = static_cast<int>(shaderData_.size());
 
 	// シェーダーの数分ループして、ロード済みのシェーダーかをチェックする。
-	for (int index_ = 0; index_ < SHADER_COUNT; ++index_) {
+	for (int index = 0; index < SHADER_COUNT; ++index) {
 
 		// シェーダの名前が違っていたら次へ。
-		if (shaderData_[index_]->GetShaderPath() != ShaderPath) continue;
+		if (shaderData_[index]->GetShaderPath() != ShaderPath) continue;
 
 		// このindexのシェーダーをリターンする。
-		return shaderData_[index_]->GetShaderBlob();
+		return shaderData_[index]->GetShaderBlob();
 
 	}
 
@@ -63,12 +63,12 @@ Microsoft::WRL::ComPtr<ID3DBlob> ShaderStorage::GetShaderData(const std::string&
 	const int SHADER_COUNT = static_cast<int>(shaderData_.size());
 
 	// 全てのシェーダーデータを検索する。
-	for (int index_ = 0; index_ < SHADER_COUNT; ++index_) {
+	for (int index = 0; index < SHADER_COUNT; ++index) {
 
 		// 引数の要素が合っているかをチェックする。
-		if (!(shaderData_[index_]->GetShaderPath() == ShaderPath)) continue;
+		if (!(shaderData_[index]->GetShaderPath() == ShaderPath)) continue;
 
-		return shaderData_[index_]->GetShaderBlob();
+		return shaderData_[index]->GetShaderBlob();
 
 	}
 
@@ -82,12 +82,12 @@ Microsoft::WRL::ComPtr<IDxcBlob> ShaderStorage::GetShaderDataForDXC(const std::s
 	const int SHADER_COUNT = static_cast<int>(shaderData_.size());
 
 	// 全てのシェーダーデータを検索する。
-	for (int index_ = 0; index_ < SHADER_COUNT; ++index_) {
+	for (int index = 0; index < SHADER_COUNT; ++index) {
 
 		// 引数の要素が合っているかをチェックする。
-		if (!(shaderData_[index_]->GetShaderPath() == ShaderPath)) continue;
+		if (!(shaderData_[index]->GetShaderPath() == ShaderPath)) continue;
 
-		return shaderData_[index_]->GetShaderBlobDXC();
+		return shaderData_[index]->GetShaderBlobDXC();
 
 	}
 
@@ -101,12 +101,12 @@ std::vector<char>& ShaderStorage::GetShaderBin(const std::string& ShaderPath)
 	const int SHADER_COUNT = static_cast<int>(shaderData_.size());
 
 	// 全てのシェーダーデータを検索する。
-	for (int index_ = 0; index_ < SHADER_COUNT; ++index_) {
+	for (int index = 0; index < SHADER_COUNT; ++index) {
 
 		// 引数の要素が合っているかをチェックする。
-		if (!(shaderData_[index_]->GetShaderPath() == ShaderPath)) continue;
+		if (!(shaderData_[index]->GetShaderPath() == ShaderPath)) continue;
 
-		return shaderData_[index_]->GetShaderBin();
+		return shaderData_[index]->GetShaderBin();
 
 	}
 

@@ -105,23 +105,23 @@ GameScene::GameScene()
 
 	// ゴール前のふわふわしているオブジェクトのBLASをロード
 	beforeTheGoalObjectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
-	for (int index_ = 0; index_ < 4; ++index_) {
+	for (int index = 0; index < 4; ++index) {
 
 		std::pair<int, int> buff;
 		std::pair<Vec3, Vec3> defPosBuff;
 		buff.first = PolygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas_, PolygonInstanceRegister::DEF);
-		defPosBuff.first = Vec3(250, 200, 1000 * index_ + 1500.0f);
+		defPosBuff.first = Vec3(250, 200, 1000 * index + 1500.0f);
 		PolygonInstanceRegister::Ins()->AddTrans(buff.first, defPosBuff.first);
 		PolygonInstanceRegister::Ins()->AddScale(buff.first, Vec3(40.0f, 40.0f, 40.0f));
-		PolygonInstanceRegister::Ins()->AddRotate(buff.first, Vec3(DirectX::XM_2PI / 2.0f * index_, DirectX::XM_2PI / 2.0f * index_, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(buff.first, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
 		buff.second = PolygonInstanceRegister::Ins()->CreateInstance(beforeTheGoalObjectBlas_, PolygonInstanceRegister::DEF);
-		defPosBuff.second = Vec3(-250, 200, 1000 * index_ + 1500.0f);
+		defPosBuff.second = Vec3(-250, 200, 1000 * index + 1500.0f);
 		PolygonInstanceRegister::Ins()->AddTrans(buff.second, defPosBuff.second);
 		PolygonInstanceRegister::Ins()->AddScale(buff.second, Vec3(40.0f, 40.0f, 40.0f));
-		PolygonInstanceRegister::Ins()->AddRotate(buff.second, Vec3(DirectX::XM_2PI / 2.0f * index_, DirectX::XM_2PI / 2.0f * index_, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(buff.second, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
 		beforeTheGoalObjectIns_.emplace_back(buff);
 		beforeTheGoalObjectDefPos_.emplace_back(defPosBuff);
-		beforeTheGoalObjectTimer_.push_back(1.0f * index_);
+		beforeTheGoalObjectTimer_.push_back(1.0f * index);
 
 	}
 
@@ -246,7 +246,7 @@ void GameScene::Update()
 	player_->Update(constBufferData_, isPassedMiddlePoint_, rapCount_);
 
 	// 乱数の種を更新。
-	constBufferData_.debug.seed = FHelper::GetRand(0, 1000);
+	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
 	Camera::Ins()->Update(player_->GetPos(), player_->GetForwardVec(), player_->GetUpVec(), player_->GetNowSpeedPer());
@@ -287,16 +287,16 @@ void GameScene::Update()
 
 	// ゴール前のオブジェクトを回転させる。
 	static const int BEFORE_THE_GOAL_OBJECT_COUNT = 4;
-	for (int index_ = 0; index_ < BEFORE_THE_GOAL_OBJECT_COUNT; ++index_) {
+	for (int index = 0; index < BEFORE_THE_GOAL_OBJECT_COUNT; ++index) {
 
 		const float SIN_WAVE_MOVE = 50.0f;
 
-		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index_].first, Vec3(0.01f, 0.01f, 0));
-		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index_].second, Vec3(0.01f, 0.01f, 0));
-		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index_].first, beforeTheGoalObjectDefPos_[index_].first + Vec3(0, sinf(beforeTheGoalObjectTimer_[index_]) * SIN_WAVE_MOVE, 0));
-		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index_].second, beforeTheGoalObjectDefPos_[index_].second + Vec3(0, sinf(beforeTheGoalObjectTimer_[index_]) * SIN_WAVE_MOVE, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].first, Vec3(0.01f, 0.01f, 0));
+		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].second, Vec3(0.01f, 0.01f, 0));
+		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].first, beforeTheGoalObjectDefPos_[index].first + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
+		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].second, beforeTheGoalObjectDefPos_[index].second + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
 
-		beforeTheGoalObjectTimer_[index_] += 0.05f;
+		beforeTheGoalObjectTimer_[index] += 0.05f;
 
 	}
 
@@ -309,8 +309,8 @@ void GameScene::Update()
 
 	// 太陽の角度を更新。
 	sunAngle_ += sunSpeed_;
-	constBufferData_.light.dirLight.lihgtDir = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
-	constBufferData_.light.dirLight.lihgtDir.Normalize();
+	constBufferData_.light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
+	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
 	PolygonInstanceRegister::Ins()->AddRotate(skyDomeIns_, Vec3(0.001f, 0, 0));
 
@@ -323,10 +323,10 @@ void GameScene::Draw()
 
 	// カメラ行列を更新。
 	auto frameIndex = DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
-	constBufferData_.camera.mtxView = Camera::Ins()->matView_;
-	constBufferData_.camera.mtxViewInv = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera.mtxView);
-	constBufferData_.camera.mtxProj = Camera::Ins()->matPerspective_;
-	constBufferData_.camera.mtxProjInv = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera.mtxProj);
+	constBufferData_.camera_.mtxView_ = Camera::Ins()->matView_;
+	constBufferData_.camera_.mtxViewInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxView_);
+	constBufferData_.camera_.mtxProj_ = Camera::Ins()->matPerspective_;
+	constBufferData_.camera_.mtxProjInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxProj_);
 
 	// 定数バッファをセット。
 	constBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
@@ -368,10 +368,10 @@ void GameScene::Draw()
 	DirectXBase::Ins()->cmdList_->DispatchRays(&rayDesc);
 
 	// [ノイズを描画]のときはデノイズをかけない。
-	if (!constBufferData_.debug.isNoiseScene) {
+	if (!constBufferData_.debug_.isNoiseScene_) {
 
 		// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
-		if (!constBufferData_.debug.isMeshScene && !constBufferData_.debug.isNormalScene && !constBufferData_.debug.isLightHitScene) {
+		if (!constBufferData_.debug_.isMeshScene_ && !constBufferData_.debug_.isNormalScene_ && !constBufferData_.debug_.isLightHitScene_) {
 
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
 				lightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
@@ -468,7 +468,7 @@ void GameScene::Draw()
 	DirectXBase::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
 
 	// デバッグ情報によって描画するデータを変える。
-	if (constBufferData_.debug.isLightHitScene || constBufferData_.debug.isMeshScene || constBufferData_.debug.isNormalScene) {
+	if (constBufferData_.debug_.isLightHitScene_ || constBufferData_.debug_.isMeshScene_ || constBufferData_.debug_.isNormalScene_) {
 
 		// デノイズされた通常の描画
 		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -564,39 +564,39 @@ void GameScene::InputImGUI()
 	ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
 
 	// メッシュを表示する。
-	bool isMesh = constBufferData_.debug.isMeshScene;
+	bool isMesh = constBufferData_.debug_.isMeshScene_;
 	ImGui::Checkbox("Mesh Scene", &isMesh);
-	constBufferData_.debug.isMeshScene = isMesh;
+	constBufferData_.debug_.isMeshScene_ = isMesh;
 
 	// 法線を表示する。
-	bool isNormal = constBufferData_.debug.isNormalScene;
+	bool isNormal = constBufferData_.debug_.isNormalScene_;
 	ImGui::Checkbox("Normal Scene", &isNormal);
-	constBufferData_.debug.isNormalScene = isNormal;
+	constBufferData_.debug_.isNormalScene_ = isNormal;
 
 	// ライトがあたった面だけ表示するフラグを更新。
-	bool isLightHit = constBufferData_.debug.isLightHitScene;
+	bool isLightHit = constBufferData_.debug_.isLightHitScene_;
 	ImGui::Checkbox("LightHit Scene", &isLightHit);
-	constBufferData_.debug.isLightHitScene = isLightHit;
+	constBufferData_.debug_.isLightHitScene_ = isLightHit;
 
 	// デバッグ用でノイズ画面を出すためのフラグをセット。
-	bool isNoise = constBufferData_.debug.isNoiseScene;
+	bool isNoise = constBufferData_.debug_.isNoiseScene_;
 	ImGui::Checkbox("Noise Scene", &isNoise);
-	constBufferData_.debug.isNoiseScene = isNoise;
+	constBufferData_.debug_.isNoiseScene_ = isNoise;
 
 	// AOを行うかのフラグをセット。
-	bool isNoAO = constBufferData_.debug.isNoAO;
-	ImGui::Checkbox("NoAO Scene", &isNoAO);
-	constBufferData_.debug.isNoAO = isNoAO;
+	bool isNoAO_ = constBufferData_.debug_.isNoAO_;
+	ImGui::Checkbox("NoAO Scene", &isNoAO_);
+	constBufferData_.debug_.isNoAO_ = isNoAO_;
 
 	// GIを行うかのフラグをセット。
-	bool isNoGI = constBufferData_.debug.isNoGI;
-	ImGui::Checkbox("NoGI Scene", &isNoGI);
-	constBufferData_.debug.isNoGI = isNoGI;
+	bool isNoGI_ = constBufferData_.debug_.isNoGI_;
+	ImGui::Checkbox("NoGI Scene", &isNoGI_);
+	constBufferData_.debug_.isNoGI_ = isNoGI_;
 
 	// GIのみを描画するかのフラグをセット。
-	bool isGIOnlyScene = constBufferData_.debug.isGIOnlyScene;
-	ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene);
-	constBufferData_.debug.isGIOnlyScene = isGIOnlyScene;
+	bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
+	ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
+	constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
 
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);

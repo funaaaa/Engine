@@ -22,9 +22,9 @@ public:
 
 private:
 
-	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance;
+	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance_;
 
-	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc;
+	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc_;
 
 	using XMMATRIX = DirectX::XMMATRIX;
 
@@ -86,10 +86,10 @@ public:
 	void DestroyInstance(const int& Index);
 
 	// レジスターのDataを取得する関数。
-	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc.data(); };
+	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc_.data(); };
 
 	// レジスターのサイズを取得する関数。
-	UINT GetRegisterSize() { return UINT(instance.size()); }
+	UINT GetRegisterSize() { return UINT(instance_.size()); }
 
 	// hlsl側での動きを判断する用の識別子
 	enum SHADER_ID {

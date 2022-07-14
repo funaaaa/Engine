@@ -10,14 +10,14 @@ void CameraConstBufferData::Init()
 
 	Camera::Ins()->GenerateMatView();
 
-	mtxProj = DirectX::XMMatrixPerspectiveFovLH(
+	mtxProj_ = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(60.0f),				//画角(60度)
-		(float)window_width / window_height,	//アスペクト比
+		(float)WINDOW_WIDTH / WINDOW_HEIGHT,	//アスペクト比
 		0.1f, 1000000.0f							//前端、奥端
 	);
-	mtxProjInv = XMMatrixInverse(nullptr, mtxProj);
-	mtxView = DirectX::XMMatrixLookAtLH(Camera::Ins()->eye_.ConvertXMVECTOR(), Camera::Ins()->target_.ConvertXMVECTOR(), Camera::Ins()->up_.ConvertXMVECTOR());
-	mtxViewInv = XMMatrixInverse(nullptr, mtxView);
+	mtxProjInv_ = XMMatrixInverse(nullptr, mtxProj_);
+	mtxView_ = DirectX::XMMatrixLookAtLH(Camera::Ins()->eye_.ConvertXMVECTOR(), Camera::Ins()->target_.ConvertXMVECTOR(), Camera::Ins()->up_.ConvertXMVECTOR());
+	mtxViewInv_ = XMMatrixInverse(nullptr, mtxView_);
 
 }
 
@@ -27,19 +27,19 @@ void RayLightConstBufferData::Init()
 	/*===== ライト用定数バッファを初期化 =====*/
 
 	// 点光源をセッティング
-	for (auto& index_ : pointLight) {
-		index_.lightPos = Vec3(0, 300, 0);
-		index_.lightSize = 5.0f;
-		index_.lightPower = 10.0f;
+	for (auto& index_ : pointLight_) {
+		index_.lightPos_ = Vec3(0, 300, 0);
+		index_.lightSize_ = 5.0f;
+		index_.lightPower_ = 10.0f;
 		index_.isActive_ = false;
-		index_.isShadow = true;
+		index_.isShadow_ = true;
 	}
 
 	// 並行光源をセッティング
-	dirLight.isActive_ = true;
-	dirLight.lightColor = Vec3{ 0,0,0 };
-	dirLight.lihgtDir = Vec3{ -0.5f,-0.01f,0 };
-	dirLight.lihgtDir.Normalize();
+	dirLight_.isActive_ = true;
+	dirLight_.lightColor_ = Vec3{ 0,0,0 };
+	dirLight_.lihgtDir_ = Vec3{ -0.5f,-0.01f,0 };
+	dirLight_.lihgtDir_.Normalize();
 
 }
 
@@ -48,14 +48,14 @@ void AtmosphericScatteringConstBufferData::Init()
 
 	/*===== 大気散乱用定数バッファを初期化 =====*/
 
-	eSun = 20.0f;
-	g = -0.999f;
-	innerRadius = 10000.0f;
-	outerRadius = 10250.0f;
-	km = 0.005f;
-	kr = 0.0025f;
-	samples = 2.0f;
-	aveHeight = 0.35f;
+	eSun_ = 20.0f;
+	g_ = -0.999f;
+	innerRadius_ = 10000.0f;
+	outerRadius_ = 10250.0f;
+	km_ = 0.005f;
+	kr_ = 0.0025f;
+	samples_ = 2.0f;
+	aveHeight_ = 0.35f;
 
 }
 
@@ -64,14 +64,14 @@ void DebugConstBufferData::Init()
 
 	/*===== デバッグ用定数バッファを初期化 =====*/
 
-	seed = FHelper::GetRand(0, 1000);
-	isLightHitScene = false;
-	isNormalScene = false;
-	isMeshScene = false;
-	isNoAO = false;
-	isNoGI = false;
-	isGIOnlyScene = false;
-	isNoiseScene = false;
+	seed_ = FHelper::GetRand(0, 1000);
+	isLightHitScene_ = false;
+	isNormalScene_ = false;
+	isMeshScene_ = false;
+	isNoAO_ = false;
+	isNoGI_ = false;
+	isGIOnlyScene_ = false;
+	isNoiseScene_ = false;
 
 }
 
@@ -80,9 +80,9 @@ void RayConstBufferData::Init()
 
 	/*===== 初期化処理 =====*/
 
-	camera.Init();
-	light.Init();
-	as.Init();
-	debug.Init();
+	camera_.Init();
+	light_.Init();
+	as_.Init();
+	debug_.Init();
 
 }

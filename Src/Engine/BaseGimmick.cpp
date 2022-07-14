@@ -46,7 +46,7 @@ void BaseGimmick::AddScale(const Vec3& Scale)
 #endif
 
 	// OBBの大きさも変える。
-	collider_.length = FHelper::MulMat(collider_.defLength, PolygonInstanceRegister::Ins()->GetScale(insIndex_));
+	collider_.length_ = FHelper::MulMat(collider_.defLength_, PolygonInstanceRegister::Ins()->GetScale(insIndex_));
 
 }
 
@@ -62,7 +62,7 @@ void BaseGimmick::ChangeScale(const Vec3& Scale)
 #endif
 
 	// OBBの大きさも変える。
-	collider_.length = FHelper::MulMat(collider_.defLength, PolygonInstanceRegister::Ins()->GetScale(insIndex_));
+	collider_.length_ = FHelper::MulMat(collider_.defLength_, PolygonInstanceRegister::Ins()->GetScale(insIndex_));
 
 }
 
@@ -78,10 +78,10 @@ void BaseGimmick::AddRotate(const Vec3& Rotate)
 #endif
 
 	// OBBのベクトルを回転させる。
-	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(insIndex_);
-	collider_.dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
-	collider_.dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
-	collider_.dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
+	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(insIndex_);
+	collider_.dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
+	collider_.dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
+	collider_.dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
 }
 
@@ -97,9 +97,9 @@ void BaseGimmick::ChangeRotate(const Vec3& Rotate)
 #endif
 
 	// OBBのベクトルを回転させる。
-	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(insIndex_);
-	collider_.dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
-	collider_.dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
-	collider_.dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
+	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(insIndex_);
+	collider_.dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
+	collider_.dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
+	collider_.dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
 }

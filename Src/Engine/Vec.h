@@ -45,18 +45,18 @@ public:
 	}
 	// ³‹K‰»
 	inline void Normalize() {
-		float length = this->Length();
-		x_ /= length;
-		y_ /= length;
-		z_ /= length;
+		float length_ = this->Length();
+		x_ /= length_;
+		y_ /= length_;
+		z_ /= length_;
 	}
 	// ³‹K‰»‚µ‚½’l‚ðŽæ“¾
 	inline Vec3 GetNormal() {
-		float length = this->Length();
+		float length_ = this->Length();
 		Vec3 buff = *this;
-		buff.x_ /= length;
-		buff.y_ /= length;
-		buff.z_ /= length;
+		buff.x_ /= length_;
+		buff.y_ /= length_;
+		buff.z_ /= length_;
 		return buff;
 	}
 	// XMFLOAT3‚Ö•ÏŠ·
@@ -305,16 +305,16 @@ public:
 	}
 	// ³‹K‰»
 	inline void Normalize() {
-		float length = this->Length();
-		x_ /= length;
-		y_ /= length;
+		float length_ = this->Length();
+		x_ /= length_;
+		y_ /= length_;
 	}
 	// ³‹K‰»‚µ‚½’l‚ðŽæ“¾
 	inline Vec2 GetNormal() {
-		float length = this->Length();
+		float length_ = this->Length();
 		Vec2 buff = *this;
-		buff.x_ /= length;
-		buff.y_ /= length;
+		buff.x_ /= length_;
+		buff.y_ /= length_;
 		return buff;
 	}
 	// XMFLOAT2‚Ö•ÏŠ·

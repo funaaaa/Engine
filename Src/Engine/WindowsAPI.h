@@ -20,8 +20,8 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND,UINT,WPARAM,LPARAM);
 #pragma warning(pop)
 
 // ウィンドウサイズ
-const int window_width = 1280;  // 横幅
-const int window_height = 720;  // 縦幅
+const int WINDOW_WIDTH = 1280;  // 横幅
+const int WINDOW_HEIGHT = 720;  // 縦幅
 
 class WindowsAPI {
 

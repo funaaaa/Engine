@@ -8,8 +8,8 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	D3D12_CPU_DESCRIPTOR_HANDLE hCpu;	// CPUハンドル
-	D3D12_GPU_DESCRIPTOR_HANDLE hGpu;	// GPUハンドル
+	D3D12_CPU_DESCRIPTOR_HANDLE hCpu_;	// CPUハンドル
+	D3D12_GPU_DESCRIPTOR_HANDLE hGpu_;	// GPUハンドル
 
 
 public:
@@ -20,7 +20,7 @@ public:
 	void CreateStructuredSRV(Microsoft::WRL::ComPtr<ID3D12Resource> Resource, UINT NumElements, UINT FirstElement, UINT Stride, Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DescHeap, UINT Index);
 
 	// アクセッタ
-	inline D3D12_CPU_DESCRIPTOR_HANDLE& GetCPUHandle() { return hCpu; }
-	inline D3D12_GPU_DESCRIPTOR_HANDLE& GetGPUHandle() { return hGpu; }
+	inline D3D12_CPU_DESCRIPTOR_HANDLE& GetCPUHandle() { return hCpu_; }
+	inline D3D12_GPU_DESCRIPTOR_HANDLE& GetGPUHandle() { return hGpu_; }
 
 };

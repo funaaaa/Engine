@@ -126,7 +126,7 @@ struct __declspec(uuid("e5204dc7-d18c-4c3c-bdfb-851673980fe7"))
 IDxcLibrary : public IUnknown {
   virtual HRESULT STDMETHODCALLTYPE SetMalloc(_In_opt_ IMalloc *pMalloc) = 0;
   virtual HRESULT STDMETHODCALLTYPE CreateBlobFromBlob(
-    _In_ IDxcBlob *pBlob, UINT32 offset, UINT32 length, _COM_Outptr_ IDxcBlob **ppResult) = 0;
+    _In_ IDxcBlob *pBlob, UINT32 offset, UINT32 length_, _COM_Outptr_ IDxcBlob **ppResult) = 0;
   virtual HRESULT STDMETHODCALLTYPE CreateBlobFromFile(
     LPCWSTR pFileName, _In_opt_ UINT32* codePage,
     _COM_Outptr_ IDxcBlobEncoding **pBlobEncoding) = 0;

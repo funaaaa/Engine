@@ -17,23 +17,23 @@ void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& C
 	csBlob = LoadShader(CsPath, "main", "cs_5_0", csBlob.Get(), errorBlob.Get());
 
 	// 引数で渡された情報を保存。
-	inputSRVCount = SRVCount;
-	inputCBVCount = CBVCount;
-	inputUAVCount = UAVCount;
-	inputUAVIndex = UAVIndex;
+	inputSRVCount_ = SRVCount;
+	inputCBVCount_ = CBVCount;
+	inputUAVCount_ = UAVCount;
+	inputUAVIndex_ = UAVIndex;
 
 	// ルートシグネチャを生成。
 	rootSignature_ = std::make_shared<RayRootsignature>();
 
 	// ルートシグネチャパラメーターを設定。
-	for (int index_ = 0; index_ < SRVCount; ++index_) {
-		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index_);
+	for (int index = 0; index < SRVCount; ++index) {
+		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index);
 	}
-	for (int index_ = 0; index_ < CBVCount; ++index_) {
-		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index_);
+	for (int index = 0; index < CBVCount; ++index) {
+		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
 	}
-	for (int index_ = 0; index_ < UAVCount + 1; ++index_) {	// +1しているのは出力用のデータがUAVだから
-		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index_);
+	for (int index = 0; index < UAVCount + 1; ++index) {	// +1しているのは出力用のデータがUAVだから
+		rootSignature_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index);
 	}
 
 	// ルートシグネチャを生成。
@@ -67,9 +67,9 @@ void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& Threa
 
 	// 一応UAVをセット。
 	int counter = 0;
-	for (auto& index_ : inputUAVIndex) {
+	for (auto& index_ : inputUAVIndex_) {
 
-		DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(counter + inputCBVCount, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
+		DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(counter + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
 
 		++counter;
 
@@ -89,7 +89,7 @@ void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& Threa
 	}
 
 	// 出力用UAVをセット。
-	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(inputUAVCount + inputCBVCount, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
+	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(inputUAVCount_ + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
 
 	// ディスパッチ。
 	DirectXBase::Ins()->cmdList_->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);

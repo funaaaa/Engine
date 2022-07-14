@@ -9,9 +9,9 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;					// UAVの設定
-	Microsoft::WRL::ComPtr<ID3D12Resource> rayTracingOutput;	// UAV
-	int uavDescriptorIndex;										// ディスクリプタヒープ上のこのUAVのインデックス
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc_;					// UAVの設定
+	Microsoft::WRL::ComPtr<ID3D12Resource> rayTracingOutput_;	// UAV
+	int uavDescriptorIndex_;										// ディスクリプタヒープ上のこのUAVのインデックス
 
 
 public:
@@ -28,8 +28,8 @@ public:
 	void SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src);
 
 	// ゲッタ
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput; }
-	const int& GetUAVIndex() { return uavDescriptorIndex; }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput_; }
+	const int& GetUAVIndex() { return uavDescriptorIndex_; }
 
 private:
 

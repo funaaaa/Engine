@@ -19,10 +19,10 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 	int dataNumber = 0;
 
 	const int MODELDATA_SIZE = static_cast<int>(modelData_.size());
-	for (int index_ = 0; index_ < MODELDATA_SIZE; ++index_) {
-		if (modelData_[index_].modelName_ == DirectryPath + FileName && modelData_[index_].isSmoothing_ == IsSmoothing) {
+	for (int index = 0; index < MODELDATA_SIZE; ++index) {
+		if (modelData_[index].modelName_ == DirectryPath + FileName && modelData_[index].isSmoothing_ == IsSmoothing) {
 			isLoad = true;
-			dataNumber = index_;
+			dataNumber = index;
 			break;
 		}
 	}
@@ -50,7 +50,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		}
 		// 一行ずつ読み込む
 		std::string line;
-		std::vector<Vec3> position;			// 座標を保存しておく
+		std::vector<Vec3> position_;			// 座標を保存しておく
 		std::vector<Vec2> uv_;				// uvを保存しておく
 		std::vector<Vec3> normal_;			// 法線ベクトルを保存しておく
 		std::vector<unsigned short> index_;
@@ -69,7 +69,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				lineStream >> pos_.y_;
 				lineStream >> pos_.z_;
 				// 座標を一旦保存
-				position.push_back(pos_);
+				position_.push_back(pos_);
 				// 頂点の最大最小要素を保存。
 				SaveVertexMinMaxInfo(ObjectBuffer, pos_);
 				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertexMin_ = ObjectBuffer.vertexMin_;
@@ -113,7 +113,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 					indexStream >> indexNormal;
 					// 頂点データの追加
 					Vertex vert{};
-					vert.pos_ = position[indexPosition - 1];
+					vert.pos_ = position_[indexPosition - 1];
 					vert.normal_ = normal_[indexNormal - 1];
 					vert.uv_ = uv_[indexTexcoord - 1];
 					// モデルデータに追加

@@ -123,20 +123,20 @@ void ComputeShader::GenerateRootSignature()
 {
 
 	/*-- サンプラーの設定 --*/
-	D3D12_STATIC_SAMPLER_DESC sampler = {};
-	sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-	sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-	sampler.MipLODBias = 0;
-	sampler.MaxAnisotropy = 0;
-	sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-	sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
-	sampler.MinLOD = 0.0f;
-	sampler.MaxLOD = D3D12_FLOAT32_MAX;
-	sampler.ShaderRegister = 0;
-	sampler.RegisterSpace = 0;
-	sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+	D3D12_STATIC_SAMPLER_DESC sampler_ = {};
+	sampler_.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler_.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	sampler_.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	sampler_.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	sampler_.MipLODBias = 0;
+	sampler_.MaxAnisotropy = 0;
+	sampler_.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+	sampler_.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	sampler_.MinLOD = 0.0f;
+	sampler_.MaxLOD = D3D12_FLOAT32_MAX;
+	sampler_.ShaderRegister = 0;
+	sampler_.RegisterSpace = 0;
+	sampler_.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 
 	/*-- ルートシグネチャの設定 --*/
@@ -160,7 +160,7 @@ void ComputeShader::GenerateRootSignature()
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-	rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, rootSignatureFlags);
+	rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler_, rootSignatureFlags);
 	Microsoft::WRL::ComPtr<ID3DBlob> signature;
 	Microsoft::WRL::ComPtr<ID3DBlob> error;
 	D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error);

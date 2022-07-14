@@ -1,5 +1,6 @@
 #pragma once
-#include "DirectXBase.h"
+#include <d3d12.h>
+#include <wrl.h>
 #include "DescriptorHeapMgr.h"
 
 // 動的な定数バッファクラス
@@ -9,8 +10,8 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> buffer;
-	int descHeapIndex;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> buffer_;
+	int descHeapIndex_;
 
 
 public:
@@ -27,8 +28,8 @@ public:
 	void Write(UINT BufferIndex, const void* Data, UINT Size);
 
 	// アクセッタ
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetBuffer(UINT BufferIndex) const { return buffer[BufferIndex]; }
-	const int& GetDescHeapIndex() { return descHeapIndex; }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetBuffer(UINT BufferIndex) const { return buffer_[BufferIndex]; }
+	const int& GetDescHeapIndex() { return descHeapIndex_; }
 
 
 private:

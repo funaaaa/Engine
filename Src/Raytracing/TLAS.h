@@ -9,7 +9,7 @@ private:
 	/*===== メンバ変数 =====*/
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> tlasBuffer;			// TLAS用バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer;		// スクラッチバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;		// スクラッチバッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> instanceDescBuffer;	// インスタンスバッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> tlasUpdateBuffer;	// TLAS更新用バッファ
 

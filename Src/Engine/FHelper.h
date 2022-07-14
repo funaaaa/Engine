@@ -83,12 +83,12 @@ namespace FHelper {
 
 	// 画面中央
 	inline Vec3 WindowCenterPos() {
-		return Vec3(static_cast<float>(window_width) / 2.0f, static_cast<float>(window_height) / 2.0f, 0);
+		return Vec3(static_cast<float>(WINDOW_WIDTH) / 2.0f, static_cast<float>(WINDOW_HEIGHT) / 2.0f, 0);
 	}
 
 	// 画面サイズの半分
 	inline Vec2 WindowHalfSize() {
-		return Vec2(static_cast<float>(window_width) / 2.0f, static_cast<float>(window_height) / 2.0f);
+		return Vec2(static_cast<float>(WINDOW_WIDTH) / 2.0f, static_cast<float>(WINDOW_HEIGHT) / 2.0f);
 	}
 
 	// ベクトルに回転行列をかけたを値を正規化して返す
@@ -117,8 +117,8 @@ namespace FHelper {
 
 	// 画面内に収まっているかを判定
 	inline bool CheckInScreen(const Vec3& CheckPos, const float& VirtualWidth, const float& VirtualHeight, const DirectX::XMMATRIX& MatView, const DirectX::XMMATRIX& MatPerspective) {
-		float w = window_width / 2.0f;
-		float h = window_height / 2.0f;
+		float w = WINDOW_WIDTH / 2.0f;
+		float h = WINDOW_HEIGHT / 2.0f;
 		DirectX::XMMATRIX viewport = {
 		w, 0, 0, 0,
 		0, -h, 0, 0,
@@ -140,7 +140,7 @@ namespace FHelper {
 		Vec3 pos_ = viewVec;
 
 
-		if (-VirtualWidth < pos_.x_ && pos_.x_ < window_width + VirtualWidth && -VirtualHeight < pos_.y_ && pos_.y_ < window_height + VirtualHeight) {
+		if (-VirtualWidth < pos_.x_ && pos_.x_ < WINDOW_WIDTH + VirtualWidth && -VirtualHeight < pos_.y_ && pos_.y_ < WINDOW_HEIGHT + VirtualHeight) {
 
 			return true;
 		}
@@ -157,9 +157,9 @@ namespace FHelper {
 		std::vector<Vec3> targetVertex;
 		std::vector<UINT> targetIndex;
 		std::vector<Vec3> targetNormal;
-		DirectX::XMMATRIX matRot;
+		DirectX::XMMATRIX matRot_;
 		DirectX::XMMATRIX matScale;
-		DirectX::XMMATRIX matTrans;
+		DirectX::XMMATRIX matTrans_;
 		Vec3 rayPos;
 		Vec3 rayDir;
 

@@ -498,7 +498,9 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
         ShootRay(CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION, worldPos, reflect(WorldRayDirection(), worldNormal), payload, gRtScene);
         
         // êFÇè≠ÇµÇæÇØñæÇÈÇ≠Ç∑ÇÈÅB
-        payload.color += 0.1f;
+        //payload.color += 0.1f;
+        
+        payload.color = saturate(payload.color);
         
         return;
         

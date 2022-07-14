@@ -12,23 +12,23 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	UINT instanceID;								// このインスタンスのID
+	UINT instanceID_;								// このインスタンスのID
 
-	DirectX::XMMATRIX worldMat;						// ワールド行列
+	DirectX::XMMATRIX worldMat_;						// ワールド行列
 
-	DirectX::XMMATRIX matTrans;
-	DirectX::XMMATRIX matRot;
+	DirectX::XMMATRIX matTrans_;
+	DirectX::XMMATRIX matRot_;
 	DirectX::XMMATRIX scaleMat_;
 
-	bool isActive;	// このインスタンスが有効化されているかどうか。
+	bool isActive_;	// このインスタンスが有効化されているかどうか。
 
-	int childCount;	// このインスタンスと親子関係を結んでいる子供の数。
+	int childCount_;	// このインスタンスと親子関係を結んでいる子供の数。
 
 	// 親Instanceのポインタ
-	std::weak_ptr<PolygonMeshInstance> parentInstance;
+	std::weak_ptr<PolygonMeshInstance> parentInstance_;
 
 	Vec3 pos_;
-	Vec3 rot;		// デバッグ用 ギミックを配置するときの調整用に使用したもので、この値が正確な回転量を持っている前提でデバッグしてはいけない。 (Matrixを直接代入する場合の回転量は取得できていないため)
+	Vec3 rot_;		// デバッグ用 ギミックを配置するときの調整用に使用したもので、この値が正確な回転量を持っている前提でデバッグしてはいけない。 (Matrixを直接代入する場合の回転量は取得できていないため)
 	Vec3 scale_;
 
 	UINT blasIndex_;
@@ -43,7 +43,7 @@ public:
 
 	// 移動(引数を加算)関数
 	void AddTrans(const Vec3& Pos);
-	DirectX::XMMATRIX GetTrans() { return matTrans; }
+	DirectX::XMMATRIX GetTrans() { return matTrans_; }
 
 	// 移動(引数に移動)関数
 	void ChangeTrans(const Vec3& Pos);
@@ -52,7 +52,7 @@ public:
 	// 回転(ラジアン、引数を加算)関数
 	void AddRotate(const Vec3& Rot);
 	void AddRotate(const DirectX::XMMATRIX& Rot);
-	DirectX::XMMATRIX GetRotate() { return matRot; }
+	DirectX::XMMATRIX GetRotate() { return matRot_; }
 
 	// 回転(ラジアン、引数を代入)関数
 	void ChangeRotate(const Vec3& Rot);
@@ -77,7 +77,7 @@ public:
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos_; }
-	inline const Vec3& GetRotVec3() { return rot; }
+	inline const Vec3& GetRotVec3() { return rot_; }
 	inline const Vec3& GetScaleVec3() { return scale_; }
 
 	// BLASインデックスを取得。
@@ -85,7 +85,7 @@ public:
 
 	// instanceを無効化する。
 	void Disable();
-	inline const bool GetIsActive() { return isActive; }
+	inline const bool GetIsActive() { return isActive_; }
 
 
 private:

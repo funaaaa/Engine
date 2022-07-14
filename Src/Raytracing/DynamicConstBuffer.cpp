@@ -5,7 +5,7 @@ DynamicConstBuffer::DynamicConstBuffer()
 
 	/*===== コンストラクタ =====*/
 
-	buffer.clear();
+	buffer_.clear();
 
 }
 
@@ -17,19 +17,19 @@ void DynamicConstBuffer::Generate(UINT BufferSize, const wchar_t* Name)
 	// バックバッファの数分バッファを生成する。
 	BufferSize = RoundUp(BufferSize, 256);
 	UINT count = 2;
-	buffer.resize(count);
+	buffer_.resize(count);
 
 	// バッファを生成する。
 	for (UINT i = 0; i < count; ++i) {
-		buffer[i] = CreateBuffer(
+		buffer_[i] = CreateBuffer(
 			BufferSize,
 			D3D12_RESOURCE_FLAG_NONE,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			D3D12_HEAP_TYPE_UPLOAD);
 
 		// 名前をセットする。
-		if (buffer[i]) {
-			buffer[i]->SetName(Name);
+		if (buffer_[i]) {
+			buffer_[i]->SetName(Name);
 		}
 	}
 
@@ -40,7 +40,7 @@ void DynamicConstBuffer::Write(UINT BufferIndex, const void* Data, UINT Size)
 
 	/*===== データ書き込み処理 =====*/
 
-	auto& buff = buffer[BufferIndex];
+	auto& buff = buffer_[BufferIndex];
 	void* dst = nullptr;
 	buff->Map(0, nullptr, &dst);
 	if (dst) {
@@ -94,10 +94,10 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DynamicConstBuffer::CreateBuffer(size_t S
 	);
 
 	// ディスクリプタヒープの生成
-	descHeapIndex = DescriptorHeapMgr::Ins()->GetHead();
+	descHeapIndex_ = DescriptorHeapMgr::Ins()->GetHead();
 
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), descHeapIndex, DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), descHeapIndex_, DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 	cbvDesc.BufferLocation = resource->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = (UINT)Size;

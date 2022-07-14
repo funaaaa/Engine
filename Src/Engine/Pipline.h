@@ -59,8 +59,8 @@ public:
 		string VSname,
 		int inputLayoutCount,
 		D3D12_INPUT_ELEMENT_DESC* inputLayout,
-		int rootparamCount,
-		CD3DX12_ROOT_PARAMETER* rootparam,
+		int rootparamCount_,
+		CD3DX12_ROOT_PARAMETER* rootparam_,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 		BLEND_ID blendID,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
@@ -72,8 +72,8 @@ public:
 		string VSname,
 		int inputLayoutCount,
 		D3D12_INPUT_ELEMENT_DESC* inputLayout,
-		int rootparamCount,
-		CD3DX12_ROOT_PARAMETER* rootparam,
+		int rootparamCount_,
+		CD3DX12_ROOT_PARAMETER* rootparam_,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 		BLEND_ID blendID,
 		bool isMRT,
@@ -88,8 +88,8 @@ public:
 		string GSname,
 		int inputLayoutCount,
 		D3D12_INPUT_ELEMENT_DESC* inputLayout,
-		int rootparamCount,
-		CD3DX12_ROOT_PARAMETER* rootparam,
+		int rootparamCount_,
+		CD3DX12_ROOT_PARAMETER* rootparam_,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_,
 		BLEND_ID blendID,
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
@@ -102,6 +102,6 @@ public:
 	PIPLINE_ID GetPiplineID() { return piplineID_; }
 
 	// パイプライン設定
-	void SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam, int rootparamCount, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat);
-	void SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam, int rootparamCount, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat, DXGI_FORMAT dxgiFormat2);
+	void SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat);
+	void SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat, DXGI_FORMAT dxgiFormat2);
 };

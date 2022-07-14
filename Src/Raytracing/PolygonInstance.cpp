@@ -7,35 +7,35 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 
 	/*===== インスタンスを生成する処理 =====*/
 
-	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc;
+	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc_;
 
 	// 移動行列を初期化。
-	worldMat = DirectX::XMMatrixIdentity();
-	matTrans = DirectX::XMMatrixIdentity();
+	worldMat_ = DirectX::XMMatrixIdentity();
+	matTrans_ = DirectX::XMMatrixIdentity();
 	scaleMat_ = DirectX::XMMatrixIdentity();
-	matRot = DirectX::XMMatrixIdentity();
+	matRot_ = DirectX::XMMatrixIdentity();
 
 	// 行列を設定。
 	XMStoreFloat3x4(
-		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc.Transform),
-		worldMat);
+		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc_.Transform),
+		worldMat_);
 
 	scale_ = Vec3(1, 1, 1);
 
 	// インスタンスの詳細を設定。
-	instanceDesc.InstanceID = InstanceID;
-	instanceDesc.InstanceMask = 0xFF;
-	instanceDesc.InstanceContributionToHitGroupIndex = BlasIndex;
-	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
+	instanceDesc_.InstanceID = InstanceID;
+	instanceDesc_.InstanceMask = 0xFF;
+	instanceDesc_.InstanceContributionToHitGroupIndex = BlasIndex;
+	instanceDesc_.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+	instanceDesc_.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
 
 	// BLASのIndexを保存。
 	blasIndex_ = BlasIndex;
 
-	isActive = true;
-	childCount = 0;
+	isActive_ = true;
+	childCount_ = 0;
 
-	return instanceDesc;
+	return instanceDesc_;
 
 }
 
@@ -44,8 +44,8 @@ void PolygonMeshInstance::AddTrans(const Vec3& Pos)
 
 	/*===== 移動関数 =====*/
 
-	matTrans *= DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
-	pos_ = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
+	matTrans_ *= DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
+	pos_ = Vec3(matTrans_.r[3].m128_f32[0], matTrans_.r[3].m128_f32[1], matTrans_.r[3].m128_f32[2]);
 
 }
 
@@ -54,15 +54,15 @@ void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
 
 	/*===== 移動関数 =====*/
 
-	matTrans = DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
-	pos_ = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
+	matTrans_ = DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
+	pos_ = Vec3(matTrans_.r[3].m128_f32[0], matTrans_.r[3].m128_f32[1], matTrans_.r[3].m128_f32[2]);
 
 }
 
 void PolygonMeshInstance::ChangeTrans(const DirectX::XMMATRIX& Trans)
 {
 
-	matTrans = Trans;
+	matTrans_ = Trans;
 
 }
 
@@ -77,17 +77,17 @@ void PolygonMeshInstance::AddRotate(const Vec3& Rot)
 	buff *= DirectX::XMMatrixRotationX(Rot.x_);
 	buff *= DirectX::XMMatrixRotationY(Rot.y_);
 
-	matRot = buff * matRot;
+	matRot_ = buff * matRot_;
 
 	// デバッグ用の回転を保存。
-	rot += Rot;
+	rot_ += Rot;
 
 }
 
 void PolygonMeshInstance::AddRotate(const DirectX::XMMATRIX& Rot)
 {
 
-	matRot = matRot * Rot;
+	matRot_ = matRot_ * Rot;
 
 }
 
@@ -96,14 +96,14 @@ void PolygonMeshInstance::ChangeRotate(const Vec3& Rot)
 
 	/*===== 回転関数 =====*/
 
-	matRot = DirectX::XMMatrixIdentity();
+	matRot_ = DirectX::XMMatrixIdentity();
 
-	matRot *= DirectX::XMMatrixRotationZ(Rot.z_);
-	matRot *= DirectX::XMMatrixRotationX(Rot.x_);
-	matRot *= DirectX::XMMatrixRotationY(Rot.y_);
+	matRot_ *= DirectX::XMMatrixRotationZ(Rot.z_);
+	matRot_ *= DirectX::XMMatrixRotationX(Rot.x_);
+	matRot_ *= DirectX::XMMatrixRotationY(Rot.y_);
 
 	// デバッグ用の回転を保存。
-	rot = Rot;
+	rot_ = Rot;
 
 }
 
@@ -112,7 +112,7 @@ void PolygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)
 
 	/*===== 回転関数 =====*/
 
-	matRot = Rot;
+	matRot_ = Rot;
 
 }
 
@@ -158,23 +158,23 @@ void PolygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 
 	/*===== ワールド行列を計算 =====*/
 
-	worldMat = DirectX::XMMatrixIdentity();
+	worldMat_ = DirectX::XMMatrixIdentity();
 
-	worldMat *= scaleMat_;
-	worldMat *= matRot;
-	worldMat *= matTrans;
+	worldMat_ *= scaleMat_;
+	worldMat_ *= matRot_;
+	worldMat_ *= matTrans_;
 
 	// 親行列が存在していたらだったら。
-	if (!parentInstance.expired()) {
+	if (!parentInstance_.expired()) {
 
-		worldMat *= parentInstance.lock()->GetWorldMat();
+		worldMat_ *= parentInstance_.lock()->GetWorldMat();
 
 	}
 
 	// 設定の行列を更新する。
 	DirectX::XMStoreFloat3x4(
 		reinterpret_cast<DirectX::XMFLOAT3X4*>(&Input.Transform),
-		worldMat);
+		worldMat_);
 
 }
 
@@ -183,20 +183,20 @@ DirectX::XMMATRIX PolygonMeshInstance::GetWorldMat()
 
 	/*===== ワールド行列を取得 =====*/
 
-	DirectX::XMMATRIX worldMat = DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX worldMat_ = DirectX::XMMatrixIdentity();
 
-	worldMat *= scaleMat_;
-	worldMat *= matRot;
-	worldMat *= matTrans;
+	worldMat_ *= scaleMat_;
+	worldMat_ *= matRot_;
+	worldMat_ *= matTrans_;
 
 	// 親行列が存在していたらだったら。
-	if (!parentInstance.expired()) {
+	if (!parentInstance_.expired()) {
 
-		worldMat *= parentInstance.lock()->GetWorldMat();
+		worldMat_ *= parentInstance_.lock()->GetWorldMat();
 
 	}
 
-	return worldMat;
+	return worldMat_;
 
 }
 
@@ -205,8 +205,8 @@ void PolygonMeshInstance::SetParentInstance(std::weak_ptr<PolygonMeshInstance> P
 
 	/*===== 親行列を設定 =====*/
 
-	parentInstance = ParentInstance;
-	++parentInstance.lock()->childCount;
+	parentInstance_ = ParentInstance;
+	++parentInstance_.lock()->childCount_;
 
 }
 
@@ -216,15 +216,15 @@ void PolygonMeshInstance::Disable()
 	/*===== インスタンスを無効化 =====*/
 
 	// 親子関係の子供がいたら。
-	if (0 < childCount) {
+	if (0 < childCount_) {
 
 		// 親子関係の親を解放しようとしています。子供の挙動が意図しないものになる可能性があります。子供を先に開放してください。
 		assert(0);
 
 	}
 
-	isActive = false;
-	--parentInstance.lock()->childCount;
+	isActive_ = false;
+	--parentInstance_.lock()->childCount_;
 
 }
 

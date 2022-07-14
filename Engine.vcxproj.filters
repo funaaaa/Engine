@@ -523,4 +523,9 @@
       <Filter>エンジン\アイコン</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+      <Filter>レイトレーシング\シェーダー</Filter>
+    </FxCompile>
+  </ItemGroup>
 </Project>

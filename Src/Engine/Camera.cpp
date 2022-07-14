@@ -4,8 +4,8 @@
 #include <d3d12.h>
 
 Camera::Camera() {
-	eye_ = DirectX::XMFLOAT3(window_width / 2, window_height / 2, 500);		// 視点座標		ゲームワールド内でのカメラ座標
-	target_ = DirectX::XMFLOAT3(window_width / 2 + 1, window_height / 2, 0);	// 注視点座標		ゲームワールド内でカメラが見ている座標
+	eye_ = DirectX::XMFLOAT3(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2, 500);		// 視点座標		ゲームワールド内でのカメラ座標
+	target_ = DirectX::XMFLOAT3(WINDOW_WIDTH / 2 + 1, WINDOW_HEIGHT / 2, 0);	// 注視点座標		ゲームワールド内でカメラが見ている座標
 	up_ = DirectX::XMFLOAT3(0, 1, 0);										// 上方向ベクトル	ゲームワールド内でカメラから見て上方向を指すベクトル
 	matView_ = DirectX::XMMatrixLookAtLH(eye_.ConvertXMVECTOR(), target_.ConvertXMVECTOR(), up_.ConvertXMVECTOR());
 	angleOfView_ = 60.0f;
@@ -17,11 +17,11 @@ void Camera::GenerateMatView()
 	//透視投影変換行列
 	matPerspective_ = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(60.0f),		// 画角(60度)
-		(float)window_width / window_height,	// アスペクト比
+		(float)WINDOW_WIDTH / WINDOW_HEIGHT,	// アスペクト比
 		0.1f, 1000000.0f						// 前端、奥端
 	);
 	//射影変換行列
-	matProjection_ = DirectX::XMMatrixOrthographicOffCenterLH(0, window_width, window_height, 0, 0.01f, 100000.0f);
+	matProjection_ = DirectX::XMMatrixOrthographicOffCenterLH(0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0.01f, 100000.0f);
 }
 
 void Camera::Init()
@@ -75,10 +75,10 @@ void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec
 	//透視投影変換行列
 	matPerspective_ = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(angleOfView_),				//画角(60度)
-		(float)window_width / window_height,	//アスペクト比
+		(float)WINDOW_WIDTH / WINDOW_HEIGHT,	//アスペクト比
 		0.1f, 1000000.0f							//前端、奥端
 	);
 	//射影変換行列
-	matProjection_ = DirectX::XMMatrixOrthographicOffCenterLH(0, window_width, window_height, 0, 0.01f, 100000.0f);
+	matProjection_ = DirectX::XMMatrixOrthographicOffCenterLH(0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0.01f, 100000.0f);
 
 }

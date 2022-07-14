@@ -11,12 +11,12 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 
 	// OBBをセット。
 	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
-	defLength = BLASRegister::Ins()->GetVertexLengthMax(BlasIndex);
-	length = defLength;
-	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
-	dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
-	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
-	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
+	defLength_ = BLASRegister::Ins()->GetVertexLengthMax(BlasIndex);
+	length_ = defLength_;
+	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
+	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
+	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
 #ifdef DEBUG
 
@@ -40,11 +40,11 @@ void OBB::SetMat(const int& InsIndex)
 	/*===== InstanceIDを指定して行列を生成 =====*/
 
 	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
-	length = FHelper::MulMat(defLength, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
-	DirectX::XMMATRIX matRot = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
-	dir[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot);
-	dir[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot);
-	dir[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot);
+	length_ = FHelper::MulMat(defLength_, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
+	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
+	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
+	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
 #ifdef DEBUG
 
@@ -63,9 +63,9 @@ bool OBB::CheckHitOBB(OBB TargetOBB)
 
 	// 各方向ベクトルの確保
 	// N***:標準化方向ベクトル）
-	Vec3 NAe1 = dir[0], Ae1 = NAe1 * length.x_;
-	Vec3 NAe2 = dir[1], Ae2 = NAe2 * length.y_;
-	Vec3 NAe3 = dir[2], Ae3 = NAe3 * length.z_;
+	Vec3 NAe1 = dir_[0], Ae1 = NAe1 * length_.x_;
+	Vec3 NAe2 = dir_[1], Ae2 = NAe2 * length_.y_;
+	Vec3 NAe3 = dir_[2], Ae3 = NAe3 * length_.z_;
 	Vec3 NBe1 = TargetOBB.GetDir()[0], Be1 = NBe1 * TargetOBB.GetLength().x_;
 	Vec3 NBe2 = TargetOBB.GetDir()[1], Be2 = NBe2 * TargetOBB.GetLength().y_;
 	Vec3 NBe3 = TargetOBB.GetDir()[2], Be3 = NBe3 * TargetOBB.GetLength().z_;
