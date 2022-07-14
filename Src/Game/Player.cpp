@@ -35,7 +35,7 @@ Player::Player(const StageData& StageObjectData)
 	isGrass_ = false;
 
 	// OBBを生成。
-	obb_.Setting(playerModel_.carBodyBlasIndex, playerModel_.carBodyInsIndex);
+	obb_.Setting(playerModel_.carBodyBlasIndex_, playerModel_.carBodyInsIndex_);
 
 }
 
@@ -58,7 +58,7 @@ void Player::Init()
 	isDrift_ = false;
 	isGround_ = true;
 	isGrass_ = false;
-	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
+	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 
 }
 
@@ -77,7 +77,7 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 	CheckHit(IsPassedMiddlePoint, RapCount);
 
 	// 座標を更新。
-	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex, pos_);
+	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
 
 	// 座標を保存。
 	prevPos_ = pos_;
@@ -95,8 +95,8 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
 
 			pos_ = PLAYER_DEF_POS;
-			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
+			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 			forwardVec_ = Vec3(0, 0, -1);
 			rotY_ = 0;
 			upVec_ = Vec3(0, 1, 0);
@@ -107,7 +107,7 @@ void Player::Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoi
 	}
 
 	// OBBを更新。
-	obb_.SetMat(playerModel_.carBodyInsIndex);
+	obb_.SetMat(playerModel_.carBodyInsIndex_);
 
 }
 
@@ -185,10 +185,10 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 			// タイヤを回転させる。
 			Vec3 rot = Vec3(0.0f, 0.5f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
 
 		}
 		// ドリフト状態じゃなかったら。
@@ -196,10 +196,10 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 			// タイヤを回転させる。
 			Vec3 rot = Vec3(0.0f, 0.3f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
 
 		}
 
@@ -210,22 +210,22 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転を加算する。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex, quaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, quaternionMat);
 		rotY_ += handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
 		nowFrameInputLeftStickHori = inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
 
 		// 正面ベクトルを車の回転行列分回転させる。
-		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 	}
 	else {
 
 		// タイヤの回転をデフォルトに戻す。
 		Vec3 rot = Vec3(0.0f, 0.0f, 0.0f);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex, rot);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot);
 
 	}
 
@@ -242,12 +242,12 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		Vec3 driftVec = Vec3();
 		if (nowFrameInputLeftStickHori < 0) {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 		}
 		else {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 		}
 
@@ -279,8 +279,8 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {
 
 		pos_ = PLAYER_DEF_POS;
-		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, Vec3(0, 0, 0));
+		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 		forwardVec_ = Vec3(0, 0, -1);
 		rotY_ = 0;
 		upVec_ = Vec3(0, 1, 0);
@@ -347,7 +347,7 @@ void Player::Move()
 	pos_ += Vec3(0, -1, 0) * gravity_;
 
 	// 下ベクトルを車の回転行列分回転させる。
-	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex));
+	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 }
 
@@ -692,7 +692,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, quaternionMat);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, quaternionMat);
 
 		// 上ベクトルを基準としたクォータニオンを求める。
 		Vec3 normal = HitNormal;
@@ -702,13 +702,13 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 		// 上ベクトルを更新。
 		upVec_ = normal;
@@ -722,7 +722,7 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 	if (HitNormal == Vec3(0, 1, 0)) {
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex, DirectX::XMMatrixIdentity());
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, DirectX::XMMatrixIdentity());
 
 		// 上ベクトルを基準としたクォータニオンを求める。
 		Vec3 normal = HitNormal;
@@ -732,13 +732,13 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 		// 上ベクトルを更新。
 		upVec_ = normal;

@@ -13,9 +13,9 @@ int GimmickMgr::AddGimmick(const BaseGimmick::ID& GimmickID, const std::string& 
 	}
 
 	// Blas‚ðƒ[ƒh
-	int blasIndex_ = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
+	int blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
 	// instance‚ð¶¬B
-	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, ShaderID);
+	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID);
 
 	gimmicks_.back()->Setting(GimmickID, instanceIndex);
 

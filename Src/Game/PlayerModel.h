@@ -7,41 +7,41 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// 車体
-	int carBodyBlasIndex;		// 車のモデルのBLASのインデックス
-	int carBodyInsIndex;		// 車のモデルのインスタンスのインデックス
+	int carBodyBlasIndex_;		// 車のモデルのBLASのインデックス
+	int carBodyInsIndex_;		// 車のモデルのインスタンスのインデックス
 	// バンパー
-	int carBumperBlasIndex;
-	int carBumperInsIndex;
+	int carBumperBlasIndex_;
+	int carBumperInsIndex_;
 	// ライト
-	int carLightBlasIndex;
-	int carLightInsIndex;
+	int carLightBlasIndex_;
+	int carLightInsIndex_;
 	// 後ろタイヤ
-	int carBehindTireBlasIndex;
-	int carBehindTireInsIndex;
+	int carBehindTireBlasIndex_;
+	int carBehindTireInsIndex_;
 	// 後ろタイヤのフレーム
-	int carBehindTireFrameBlasIndex;
-	int carBehindTireFrameInsIndex;
+	int carBehindTireFrameBlasIndex_;
+	int carBehindTireFrameInsIndex_;
 	// 右前タイヤ
-	int carRightTireBlasIndex;
-	int carRightTireInsIndex;
+	int carRightTireBlasIndex_;
+	int carRightTireInsIndex_;
 	// 右前タイヤのフレーム
-	int carRightTireFrameBlasIndex;
-	int carRightTireFrameInsIndex;
+	int carRightTireFrameBlasIndex_;
+	int carRightTireFrameInsIndex_;
 	// 左前タイヤ
-	int carLeftTireBlasIndex;
-	int carLeftTireInsIndex;
+	int carLeftTireBlasIndex_;
+	int carLeftTireInsIndex_;
 	// 左前タイヤのフレーム
-	int carLeftTireFrameBlasIndex;
-	int carLeftTireFrameInsIndex;
+	int carLeftTireFrameBlasIndex_;
+	int carLeftTireFrameInsIndex_;
 	// 鏡
-	int carMirrorBlasIndex;
-	int carMirrorInsIndex;
+	int carMirrorBlasIndex_;
+	int carMirrorInsIndex_;
 	// 鏡のカバー
-	int carMirrorCoverBlasIndex;
-	int carMirrorCoverInsIndex;
+	int carMirrorCoverBlasIndex_;
+	int carMirrorCoverInsIndex_;
 	// 窓
-	int carWindowBlasIndex;
-	int carWindowInsIndex;
+	int carWindowBlasIndex_;
+	int carWindowInsIndex_;
 
 public:
 
