@@ -19,16 +19,16 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 
 	// 頂点バッファの生成
 	Vertex vertexBuff;
-	vertexBuff.pos_ = Vec3(-Size.x, Size.y, 10);		// 左下
+	vertexBuff.pos_ = Vec3(-Size.x_, Size.y_, 10);		// 左下
 	vertexBuff.uv = Vec2(0, 1);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos_ = Vec3(-Size.x, -Size.y, 10);	// 左上
+	vertexBuff.pos_ = Vec3(-Size.x_, -Size.y_, 10);	// 左上
 	vertexBuff.uv = Vec2(0, 0);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos_ = Vec3(Size.x, Size.y, 10);		// 右下
+	vertexBuff.pos_ = Vec3(Size.x_, Size.y_, 10);		// 右下
 	vertexBuff.uv = Vec2(1, 1);
 	vertex.push_back(vertexBuff);
-	vertexBuff.pos_ = Vec3(Size.x, -Size.y, 10);		// 右上
+	vertexBuff.pos_ = Vec3(Size.x_, -Size.y_, 10);		// 右上
 	vertexBuff.uv = Vec2(1, 0);
 	vertex.push_back(vertexBuff);
 
@@ -65,7 +65,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	projectionID = ProjectionID;
 	rotationMat = DirectX::XMMatrixIdentity();
 	scaleMat = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
-	positionMat = DirectX::XMMatrixTranslation(CenterPos.x, CenterPos.y, CenterPos.z);
+	positionMat = DirectX::XMMatrixTranslation(CenterPos.x_, CenterPos.y_, CenterPos.z_);
 	pos_ = CenterPos;
 
 	// マップ処理を行う

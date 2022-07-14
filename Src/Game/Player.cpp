@@ -383,7 +383,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size_.y) < 0;
+		isHit &= (hitDistance - size_.y_) < 0;
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら押し戻す。
@@ -393,7 +393,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			const float PUSH_BACK_OFFSET = 1.0f;
 
 			// 法線方向に当たった分押し戻す。
-			pos_ += hitNormal * (size_.y - (hitDistance + PUSH_BACK_OFFSET));
+			pos_ += hitNormal * (size_.y_ - (hitDistance + PUSH_BACK_OFFSET));
 
 			// 地上にいる判定。
 			isGround_ = true;
@@ -435,7 +435,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 			isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
 			// 当たった距離がY軸のサイズよりも小さかったら。
-			isHit &= (hitDistance - size_.y) < 0;
+			isHit &= (hitDistance - size_.y_) < 0;
 			isHit &= 0 < hitDistance;
 
 			// 当たっていたら押し戻す。
@@ -445,7 +445,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 				const float PUSH_BACK_OFFSET = 1.0f;
 
 				// 法線方向に当たった分押し戻す。
-				pos_ += hitNormal * (size_.y - (hitDistance + PUSH_BACK_OFFSET));
+				pos_ += hitNormal * (size_.y_ - (hitDistance + PUSH_BACK_OFFSET));
 
 				// 地上にいる判定。
 				isGround_ = true;

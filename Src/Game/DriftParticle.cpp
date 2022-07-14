@@ -61,7 +61,7 @@ void DriftParticle::Generate(const Vec3& Pos, const Vec3& DriftVec, const Direct
 	Vec3 rotUpVec = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), CarMatRot);
 
 	// 回転させた上ベクトルの方向に乱数を求めて進行方向ベクトルを上下に動かす。
-	forwardVec_ += Vec3(FHelper::GetRand(rotUpVec.x / 2.0f), FHelper::GetRand(rotUpVec.y / 2.0f), FHelper::GetRand(rotUpVec.z / 2.0f));
+	forwardVec_ += Vec3(FHelper::GetRand(rotUpVec.x_ / 2.0f), FHelper::GetRand(rotUpVec.y_ / 2.0f), FHelper::GetRand(rotUpVec.z_ / 2.0f));
 	forwardVec_.Normalize();
 
 	// デフォルトの正面ベクトルを回転させる。
@@ -94,7 +94,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	pos_ += forwardVec_ * speed_;
 
 	// パーティクルの進行方向に重力を加算する。
-	forwardVec_.y -= 0.08f;
+	forwardVec_.y_ -= 0.08f;
 	forwardVec_.Normalize();
 
 	// 移動速度を下げる。

@@ -627,25 +627,25 @@ Vec3 BLAS::GetVertexLengthMax()
 
 	Vec3 vertexLength;
 
-	if (fabs(vertexMin.x) < fabs(vertexMax.x)) {
-		vertexLength.x = fabs(vertexMax.x);
+	if (fabs(vertexMin.x_) < fabs(vertexMax.x_)) {
+		vertexLength.x_ = fabs(vertexMax.x_);
 	}
 	else {
-		vertexLength.x = fabs(vertexMin.x);
+		vertexLength.x_ = fabs(vertexMin.x_);
 	}
 
-	if (fabs(vertexMin.y) < fabs(vertexMax.y)) {
-		vertexLength.y = fabs(vertexMax.y);
+	if (fabs(vertexMin.y_) < fabs(vertexMax.y_)) {
+		vertexLength.y_ = fabs(vertexMax.y_);
 	}
 	else {
-		vertexLength.y = fabs(vertexMin.y);
+		vertexLength.y_ = fabs(vertexMin.y_);
 	}
 
-	if (fabs(vertexMin.z) < fabs(vertexMax.z)) {
-		vertexLength.z = fabs(vertexMax.z);
+	if (fabs(vertexMin.z_) < fabs(vertexMax.z_)) {
+		vertexLength.z_ = fabs(vertexMax.z_);
 	}
 	else {
-		vertexLength.z = fabs(vertexMin.z);
+		vertexLength.z_ = fabs(vertexMin.z_);
 	}
 
 	return vertexLength;

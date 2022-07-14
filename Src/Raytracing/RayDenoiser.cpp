@@ -145,10 +145,10 @@ void Denoiser::CalcWeightsTableFromGaussian(float Power)
 
 	// ここからガウス関数を用いて重みを計算している。
 	// ループ変数のxが基準テクセルからの距離。
-	for (int x = 0; x < GAUSSIAN_WEIGHTS_COUNT; x++)
+	for (int x_ = 0; x_ < GAUSSIAN_WEIGHTS_COUNT; x_++)
 	{
-		gaussianWeights[x] = expf(-0.5f * static_cast<float>(x * x) / Power);
-		total += 2.0f * gaussianWeights.at(x);
+		gaussianWeights[x_] = expf(-0.5f * static_cast<float>(x_ * x_) / Power);
+		total += 2.0f * gaussianWeights.at(x_);
 	}
 
 	// 重みの合計で除算することで、重みの合計を1にしている。

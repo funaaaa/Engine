@@ -109,9 +109,9 @@ namespace FHelper {
 	// 回転行列を生成する
 	inline DirectX::XMMATRIX CalRotationMat(const Vec3& Value) {
 		DirectX::XMMATRIX returnBuff = DirectX::XMMatrixIdentity();
-		returnBuff *= DirectX::XMMatrixRotationZ(Value.z);
-		returnBuff *= DirectX::XMMatrixRotationX(Value.x);
-		returnBuff *= DirectX::XMMatrixRotationY(Value.y);
+		returnBuff *= DirectX::XMMatrixRotationZ(Value.z_);
+		returnBuff *= DirectX::XMMatrixRotationX(Value.x_);
+		returnBuff *= DirectX::XMMatrixRotationY(Value.y_);
 		return returnBuff;
 	};
 
@@ -135,12 +135,12 @@ namespace FHelper {
 		tmp = worldPos;
 		// zで割って-1~1の範囲に収める
 		// スクリーン変換
-		Vec3 viewVec = DirectX::XMVectorSet(tmp.x / tmp.z, tmp.y / tmp.z, 1.0f, 1.0f);
+		Vec3 viewVec = DirectX::XMVectorSet(tmp.x_ / tmp.z_, tmp.y_ / tmp.z_, 1.0f, 1.0f);
 		viewVec = DirectX::XMVector3Transform(viewVec.ConvertXMVECTOR(), viewport);
 		Vec3 pos_ = viewVec;
 
 
-		if (-VirtualWidth < pos_.x && pos_.x < window_width + VirtualWidth && -VirtualHeight < pos_.y && pos_.y < window_height + VirtualHeight) {
+		if (-VirtualWidth < pos_.x_ && pos_.x_ < window_width + VirtualWidth && -VirtualHeight < pos_.y_ && pos_.y_ < window_height + VirtualHeight) {
 
 			return true;
 		}

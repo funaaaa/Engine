@@ -44,7 +44,7 @@ void PolygonMeshInstance::AddTrans(const Vec3& Pos)
 
 	/*===== 移動関数 =====*/
 
-	matTrans *= DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
+	matTrans *= DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
 	pos_ = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
 
 }
@@ -54,7 +54,7 @@ void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
 
 	/*===== 移動関数 =====*/
 
-	matTrans = DirectX::XMMatrixTranslation(Pos.x, Pos.y, Pos.z);
+	matTrans = DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
 	pos_ = Vec3(matTrans.r[3].m128_f32[0], matTrans.r[3].m128_f32[1], matTrans.r[3].m128_f32[2]);
 
 }
@@ -73,9 +73,9 @@ void PolygonMeshInstance::AddRotate(const Vec3& Rot)
 
 	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
 
-	buff *= DirectX::XMMatrixRotationZ(Rot.z);
-	buff *= DirectX::XMMatrixRotationX(Rot.x);
-	buff *= DirectX::XMMatrixRotationY(Rot.y);
+	buff *= DirectX::XMMatrixRotationZ(Rot.z_);
+	buff *= DirectX::XMMatrixRotationX(Rot.x_);
+	buff *= DirectX::XMMatrixRotationY(Rot.y_);
 
 	matRot = buff * matRot;
 
@@ -98,9 +98,9 @@ void PolygonMeshInstance::ChangeRotate(const Vec3& Rot)
 
 	matRot = DirectX::XMMatrixIdentity();
 
-	matRot *= DirectX::XMMatrixRotationZ(Rot.z);
-	matRot *= DirectX::XMMatrixRotationX(Rot.x);
-	matRot *= DirectX::XMMatrixRotationY(Rot.y);
+	matRot *= DirectX::XMMatrixRotationZ(Rot.z_);
+	matRot *= DirectX::XMMatrixRotationX(Rot.x_);
+	matRot *= DirectX::XMMatrixRotationY(Rot.y_);
 
 	// デバッグ用の回転を保存。
 	rot = Rot;
@@ -123,7 +123,7 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
 
-	buff = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
+	buff = DirectX::XMMatrixScaling(Scale.x_, Scale.y_, Scale.z_);
 
 	scaleMat *= buff;
 
@@ -138,7 +138,7 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 
 	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
 
-	buff = DirectX::XMMatrixScaling(Scale.x, Scale.y, Scale.z);
+	buff = DirectX::XMMatrixScaling(Scale.x_, Scale.y_, Scale.z_);
 
 	scaleMat = buff;
 

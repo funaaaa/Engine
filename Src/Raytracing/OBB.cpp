@@ -63,12 +63,12 @@ bool OBB::CheckHitOBB(OBB TargetOBB)
 
 	// 各方向ベクトルの確保
 	// N***:標準化方向ベクトル）
-	Vec3 NAe1 = dir[0], Ae1 = NAe1 * length.x;
-	Vec3 NAe2 = dir[1], Ae2 = NAe2 * length.y;
-	Vec3 NAe3 = dir[2], Ae3 = NAe3 * length.z;
-	Vec3 NBe1 = TargetOBB.GetDir()[0], Be1 = NBe1 * TargetOBB.GetLength().x;
-	Vec3 NBe2 = TargetOBB.GetDir()[1], Be2 = NBe2 * TargetOBB.GetLength().y;
-	Vec3 NBe3 = TargetOBB.GetDir()[2], Be3 = NBe3 * TargetOBB.GetLength().z;
+	Vec3 NAe1 = dir[0], Ae1 = NAe1 * length.x_;
+	Vec3 NAe2 = dir[1], Ae2 = NAe2 * length.y_;
+	Vec3 NAe3 = dir[2], Ae3 = NAe3 * length.z_;
+	Vec3 NBe1 = TargetOBB.GetDir()[0], Be1 = NBe1 * TargetOBB.GetLength().x_;
+	Vec3 NBe2 = TargetOBB.GetDir()[1], Be2 = NBe2 * TargetOBB.GetLength().y_;
+	Vec3 NBe3 = TargetOBB.GetDir()[2], Be3 = NBe3 * TargetOBB.GetLength().z_;
 	Vec3 Interval = pos_ - TargetOBB.GetPos();
 
 	// 分離軸 : Ae1

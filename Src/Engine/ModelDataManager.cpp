@@ -65,9 +65,9 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 			if (key == "v") {
 				// X,Y,Z座標読み込み
 				Vec3 pos_{};
-				lineStream >> pos_.x;
-				lineStream >> pos_.y;
-				lineStream >> pos_.z;
+				lineStream >> pos_.x_;
+				lineStream >> pos_.y_;
+				lineStream >> pos_.z_;
 				// 座標を一旦保存
 				position.push_back(pos_);
 				// 頂点の最大最小要素を保存。
@@ -79,10 +79,10 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 			if (key == "vt") {
 				// U,V成分読み込み
 				Vec2 texcoord{};
-				lineStream >> texcoord.x;
-				lineStream >> texcoord.y;
+				lineStream >> texcoord.x_;
+				lineStream >> texcoord.y_;
 				// V方向反転
-				texcoord.y = 1.0f - texcoord.y;
+				texcoord.y_ = 1.0f - texcoord.y_;
 				// テクスチャ座標データに追加
 				uv.push_back(texcoord);
 			}
@@ -90,9 +90,9 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 			if (key == "vn") {
 				// X,Y,Z成分読み込み
 				Vec3 norm{};
-				lineStream >> norm.x;
-				lineStream >> norm.y;
-				lineStream >> norm.z;
+				lineStream >> norm.x_;
+				lineStream >> norm.y_;
+				lineStream >> norm.z_;
 				// 法線ベクトルデータに追加
 				normal.push_back(norm);
 			}
@@ -193,21 +193,21 @@ void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, Mode
 		}
 		// 先頭文字列がKaならアンビエント色
 		if (key == "Ka") {
-			lineStream >> ModelData.material.ambient.x;
-			lineStream >> ModelData.material.ambient.y;
-			lineStream >> ModelData.material.ambient.z;
+			lineStream >> ModelData.material.ambient.x_;
+			lineStream >> ModelData.material.ambient.y_;
+			lineStream >> ModelData.material.ambient.z_;
 		}
 		// 先頭文字列がKdならディフューズ色
 		if (key == "Kd") {
-			lineStream >> ModelData.material.diffuse.x;
-			lineStream >> ModelData.material.diffuse.y;
-			lineStream >> ModelData.material.diffuse.z;
+			lineStream >> ModelData.material.diffuse.x_;
+			lineStream >> ModelData.material.diffuse.y_;
+			lineStream >> ModelData.material.diffuse.z_;
 		}
 		// 先頭文字がKsならスペキュラー色
 		if (key == "Ks") {
-			lineStream >> ModelData.material.specular.x;
-			lineStream >> ModelData.material.specular.y;
-			lineStream >> ModelData.material.specular.z;
+			lineStream >> ModelData.material.specular.x_;
+			lineStream >> ModelData.material.specular.y_;
+			lineStream >> ModelData.material.specular.z_;
 		}
 	}
 }
@@ -241,25 +241,25 @@ void ModelDataManager::SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3
 	// 最大を保存。
 
 	// Posの各成分が保存されている値よりも大きかったら。
-	if (ObjectBuffer.vertexMax.x < Pos.x) {
-		ObjectBuffer.vertexMax.x = Pos.x;
+	if (ObjectBuffer.vertexMax.x_ < Pos.x_) {
+		ObjectBuffer.vertexMax.x_ = Pos.x_;
 	}
-	if (ObjectBuffer.vertexMax.y < Pos.y) {
-		ObjectBuffer.vertexMax.y = Pos.y;
+	if (ObjectBuffer.vertexMax.y_ < Pos.y_) {
+		ObjectBuffer.vertexMax.y_ = Pos.y_;
 	}
-	if (ObjectBuffer.vertexMax.z < Pos.z) {
-		ObjectBuffer.vertexMax.z = Pos.z;
+	if (ObjectBuffer.vertexMax.z_ < Pos.z_) {
+		ObjectBuffer.vertexMax.z_ = Pos.z_;
 	}
 
 	// Posの各成分が保存されている値よりも小さかったら。
-	if (Pos.x < ObjectBuffer.vertexMin.x) {
-		ObjectBuffer.vertexMin.x = Pos.x;
+	if (Pos.x_ < ObjectBuffer.vertexMin.x_) {
+		ObjectBuffer.vertexMin.x_ = Pos.x_;
 	}
-	if (Pos.y < ObjectBuffer.vertexMin.y) {
-		ObjectBuffer.vertexMin.y = Pos.y;
+	if (Pos.y_ < ObjectBuffer.vertexMin.y_) {
+		ObjectBuffer.vertexMin.y_ = Pos.y_;
 	}
-	if (Pos.z < ObjectBuffer.vertexMin.z) {
-		ObjectBuffer.vertexMin.z = Pos.z;
+	if (Pos.z_ < ObjectBuffer.vertexMin.z_) {
+		ObjectBuffer.vertexMin.z_ = Pos.z_;
 	}
 
 }

@@ -294,9 +294,9 @@ void FbxLoader::ParseMeshVertices(FbxModel& Model, FbxMesh* InputFbxMesh)
 		FbxModel::VertexPosNormalUvSkin& vertex = vertices[index];
 
 		// 座標のコピー
-		vertex.pos_.x = (float)pCoord[index][0];
-		vertex.pos_.y = (float)pCoord[index][1];
-		vertex.pos_.z = (float)pCoord[index][2];
+		vertex.pos_.x_ = (float)pCoord[index][0];
+		vertex.pos_.y_ = (float)pCoord[index][1];
+		vertex.pos_.z_ = (float)pCoord[index][2];
 
 	}
 
@@ -341,9 +341,9 @@ void FbxLoader::ParseMeshFaces(FbxModel& Model, FbxMesh* InputFbxMesh)
 			FbxModel::VertexPosNormalUvSkin& vertex = vertices[fbxIndex];
 			FbxVector4 normal;
 			if (InputFbxMesh->GetPolygonVertexNormal(index, porygonIndex, normal)) {
-				vertex.normal.x = static_cast<float>(normal[0]);
-				vertex.normal.y = static_cast<float>(normal[1]);
-				vertex.normal.z = static_cast<float>(normal[2]);
+				vertex.normal.x_ = static_cast<float>(normal[0]);
+				vertex.normal.y_ = static_cast<float>(normal[1]);
+				vertex.normal.z_ = static_cast<float>(normal[2]);
 			}
 
 			// テクスチャUV読み込み
@@ -352,8 +352,8 @@ void FbxLoader::ParseMeshFaces(FbxModel& Model, FbxMesh* InputFbxMesh)
 				bool lUnmappedUV;
 				// 0版決め打ちで読み込み
 				if (InputFbxMesh->GetPolygonVertexUV(index, porygonIndex, uvNames[0], uvs, lUnmappedUV)) {
-					vertex.uv.x = static_cast<float>(uvs[0]);
-					vertex.uv.y = static_cast<float>(uvs[1]);
+					vertex.uv.x_ = static_cast<float>(uvs[0]);
+					vertex.uv.y_ = static_cast<float>(uvs[1]);
 				}
 			}
 
@@ -408,15 +408,15 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 
 				// 環境光係数
 				FbxPropertyT<FbxDouble3> ambient = lambert->Ambient;
-				Model.ambient.x = static_cast<float>(ambient.Get()[0]);
-				Model.ambient.y = static_cast<float>(ambient.Get()[1]);
-				Model.ambient.z = static_cast<float>(ambient.Get()[2]);
+				Model.ambient.x_ = static_cast<float>(ambient.Get()[0]);
+				Model.ambient.y_ = static_cast<float>(ambient.Get()[1]);
+				Model.ambient.z_ = static_cast<float>(ambient.Get()[2]);
 
 				// 拡散反射光係数
 				FbxPropertyT<FbxDouble3> diffuse = lambert->Diffuse;
-				Model.diffuse.x = static_cast<float>(diffuse.Get()[0]);
-				Model.diffuse.y = static_cast<float>(diffuse.Get()[1]);
-				Model.diffuse.z = static_cast<float>(diffuse.Get()[2]);
+				Model.diffuse.x_ = static_cast<float>(diffuse.Get()[0]);
+				Model.diffuse.y_ = static_cast<float>(diffuse.Get()[1]);
+				Model.diffuse.z_ = static_cast<float>(diffuse.Get()[2]);
 
 			}
 

@@ -76,9 +76,9 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 			// X,Y,Z座標読み込み。
 			Vec3 pos_{};
-			lineStream >> pos_.x;
-			lineStream >> pos_.y;
-			lineStream >> pos_.z;
+			lineStream >> pos_.x_;
+			lineStream >> pos_.y_;
+			lineStream >> pos_.z_;
 
 			// 座標を一旦保存。
 			position.emplace_back(pos_);
@@ -88,15 +88,15 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 		if (key == "vt") {
 
 			// UV成分読み込み。
-			DirectX::XMFLOAT2 texcoord{};
-			lineStream >> texcoord.x;
-			lineStream >> texcoord.y;
+			Vec2 texcoord{};
+			lineStream >> texcoord.x_;
+			lineStream >> texcoord.y_;
 
 			// V方向反転。
-			texcoord.y = 1.0f - texcoord.y;
+			texcoord.y_ = 1.0f - texcoord.y_;
 
 			// テクスチャ座標データに追加。
-			uv.emplace_back(texcoord);
+			uv.emplace_back(texcoord.ConvertXMFLOAT2());
 
 		}
 		// 先頭文字がvnなら法線ベクトル。
@@ -104,9 +104,9 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 			// X,Y,Z成分読み込み。
 			Vec3 norm{};
-			lineStream >> norm.x;
-			lineStream >> norm.y;
-			lineStream >> norm.z;
+			lineStream >> norm.x_;
+			lineStream >> norm.y_;
+			lineStream >> norm.z_;
 
 			// 法線ベクトルデータに追加。
 			normal.emplace_back(norm);
