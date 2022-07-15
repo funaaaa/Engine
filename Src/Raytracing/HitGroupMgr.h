@@ -23,7 +23,7 @@ public:
 	// ヒットグループ識別ID
 	enum HITGROUP_ID {
 
-		DENOISE_AO_HIT_GROUP,
+		DEF,
 		MAX_HIT_GROUP,
 
 	};

@@ -49,7 +49,7 @@ public:
 
 	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID) = 0;
 	virtual void Destroy() = 0;
-	virtual void Update(const float& Timer) = 0;
+	virtual void Update(const int& Timer) = 0;
 
 	// óLå¯âªÅB
 	inline void Activate() { isActive_ = true; }

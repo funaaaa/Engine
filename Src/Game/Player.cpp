@@ -7,17 +7,14 @@
 #include "DriftParticleMgr.h"
 #include "Camera.h"
 #include "HitGroupMgr.h"
-#include "GimmickMgr.h"
 
-Player::Player(const StageData& StageObjectData)
+Player::Player()
 {
 
 	/*===== 初期化処理 =====*/
 
 	// 車のモデルをロード
 	playerModel_.Load();
-
-	stageModelData_ = StageObjectData;
 
 	pos_ = PLAYER_DEF_POS;
 	prevPos_ = pos_;
@@ -354,301 +351,301 @@ void Player::Move()
 void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 {
 
-	/*===== 当たり判定 =====*/
+	///*===== 当たり判定 =====*/
 
-	{
+	//{
 
-		/*-- ステージとの当たり判定 --*/
+	//	/*-- ステージとの当たり判定 --*/
 
-		// 当たり判定に使用するデータ
-		FHelper::RayToModelCollisionData collistionData;
+	//	// 当たり判定に使用するデータ
+	//	FHelper::RayToModelCollisionData collistionData;
 
-		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
-		collistionData.rayPos = pos_;
-		collistionData.rayDir = bottomVec;
-		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
-		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
+	//	// 当たり判定に必要なデータを埋めていく。
+	//	collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexPos();
+	//	collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexNormal();
+	//	collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
+	//	collistionData.rayPos = pos_;
+	//	collistionData.rayDir = bottomVec;
+	//	collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
+	//	collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
+	//	collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
 
-		// 当たり判定の結果保存用変数。
-		bool isHit = false;
-		Vec3 impactPos;
-		float hitDistance;
-		Vec3 hitNormal;
+	//	// 当たり判定の結果保存用変数。
+	//	bool isHit = false;
+	//	Vec3 impactPos;
+	//	float hitDistance;
+	//	Vec3 hitNormal;
 
-		// 当たり判定を行う。
-		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+	//	// 当たり判定を行う。
+	//	isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
-		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size_.y_) < 0;
-		isHit &= 0 < hitDistance;
+	//	// 当たった距離がY軸のサイズよりも小さかったら。
+	//	isHit &= (hitDistance - size_.y_) < 0;
+	//	isHit &= 0 < hitDistance;
 
-		// 当たっていたら押し戻す。
-		if (isHit) {
+	//	// 当たっていたら押し戻す。
+	//	if (isHit) {
 
-			// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
-			const float PUSH_BACK_OFFSET = 1.0f;
+	//		// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
+	//		const float PUSH_BACK_OFFSET = 1.0f;
 
-			// 法線方向に当たった分押し戻す。
-			pos_ += hitNormal * (size_.y_ - (hitDistance + PUSH_BACK_OFFSET));
+	//		// 法線方向に当たった分押し戻す。
+	//		pos_ += hitNormal * (size_.y_ - (hitDistance + PUSH_BACK_OFFSET));
 
-			// 地上にいる判定。
-			isGround_ = true;
+	//		// 地上にいる判定。
+	//		isGround_ = true;
 
-			// 斜め床の回転処理。
-			RotObliqueFloor(hitNormal);
+	//		// 斜め床の回転処理。
+	//		RotObliqueFloor(hitNormal);
 
-		}
-		else {
+	//	}
+	//	else {
 
-			// 空中にいる判定。
-			isGround_ = false;
+	//		// 空中にいる判定。
+	//		isGround_ = false;
 
-		}
+	//	}
 
 
-		/*-- 草との当たり判定 --*/
+	//	/*-- 草との当たり判定 --*/
 
-		// 当たっていなかったら当たり判定を行う。
-		if (!isHit) {
+	//	// 当たっていなかったら当たり判定を行う。
+	//	if (!isHit) {
 
-			// 当たり判定に必要なデータを埋めていく。
-			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexPos();
-			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexNormal();
-			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexIndex();
-			collistionData.rayPos = pos_;
-			collistionData.rayDir = bottomVec;
-			collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageGrassInsIndex_);
-			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageGrassInsIndex_);
-			collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageGrassInsIndex_);
+	//		// 当たり判定に必要なデータを埋めていく。
+	//		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexPos();
+	//		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexNormal();
+	//		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageGrassBlasIndex_]->GetVertexIndex();
+	//		collistionData.rayPos = pos_;
+	//		collistionData.rayDir = bottomVec;
+	//		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageGrassInsIndex_);
+	//		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageGrassInsIndex_);
+	//		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageGrassInsIndex_);
 
-			// 当たり判定の結果保存用変数。
-			isHit = false;
-			impactPos = Vec3();
-			hitDistance = 0;
-			hitNormal = Vec3();
+	//		// 当たり判定の結果保存用変数。
+	//		isHit = false;
+	//		impactPos = Vec3();
+	//		hitDistance = 0;
+	//		hitNormal = Vec3();
 
-			// 当たり判定を行う。
-			isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+	//		// 当たり判定を行う。
+	//		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
-			// 当たった距離がY軸のサイズよりも小さかったら。
-			isHit &= (hitDistance - size_.y_) < 0;
-			isHit &= 0 < hitDistance;
+	//		// 当たった距離がY軸のサイズよりも小さかったら。
+	//		isHit &= (hitDistance - size_.y_) < 0;
+	//		isHit &= 0 < hitDistance;
 
-			// 当たっていたら押し戻す。
-			if (isHit) {
+	//		// 当たっていたら押し戻す。
+	//		if (isHit) {
 
-				// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
-				const float PUSH_BACK_OFFSET = 1.0f;
+	//			// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
+	//			const float PUSH_BACK_OFFSET = 1.0f;
 
-				// 法線方向に当たった分押し戻す。
-				pos_ += hitNormal * (size_.y_ - (hitDistance + PUSH_BACK_OFFSET));
+	//			// 法線方向に当たった分押し戻す。
+	//			pos_ += hitNormal * (size_.y_ - (hitDistance + PUSH_BACK_OFFSET));
 
-				// 地上にいる判定。
-				isGround_ = true;
+	//			// 地上にいる判定。
+	//			isGround_ = true;
 
-				// 斜め床の回転処理。
-				RotObliqueFloor(hitNormal);
+	//			// 斜め床の回転処理。
+	//			RotObliqueFloor(hitNormal);
 
-				// 草の上にいる判定。
-				isGrass_ = true;
+	//			// 草の上にいる判定。
+	//			isGrass_ = true;
 
-			}
-			else {
+	//		}
+	//		else {
 
-				// 空中にいる判定。
-				isGround_ = false;
+	//			// 空中にいる判定。
+	//			isGround_ = false;
 
-				// 草の上にいない判定。
-				isGrass_ = false;
+	//			// 草の上にいない判定。
+	//			isGrass_ = false;
 
-			}
+	//		}
 
-		}
-		// 通常の床で当たっているということは草の上にはいないということなので、falseにする。
-		else {
+	//	}
+	//	// 通常の床で当たっているということは草の上にはいないということなので、falseにする。
+	//	else {
 
-			isGrass_ = false;
+	//		isGrass_ = false;
 
-		}
+	//	}
 
 
-		// 正面方向の当たり判定を行うため、レイの飛ばす方向を変える。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
-		collistionData.rayPos = prevPos_;
-		collistionData.rayDir = (pos_ - prevPos_).GetNormal();
-		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
-		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
+	//	// 正面方向の当たり判定を行うため、レイの飛ばす方向を変える。
+	//	collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexPos();
+	//	collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexNormal();
+	//	collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageBlasIndex_]->GetVertexIndex();
+	//	collistionData.rayPos = prevPos_;
+	//	collistionData.rayDir = (pos_ - prevPos_).GetNormal();
+	//	collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageInsIndex_);
+	//	collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageInsIndex_);
+	//	collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageInsIndex_);
 
-		// 当たり判定を行う。
-		isHit = false;
-		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+	//	// 当たり判定を行う。
+	//	isHit = false;
+	//	isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
-		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= fabs(hitDistance) < (pos_ - prevPos_).Length();
+	//	// 当たった距離がY軸のサイズよりも小さかったら。
+	//	isHit &= fabs(hitDistance) < (pos_ - prevPos_).Length();
 
-		// 当たっていたら押し戻す。
-		if (isHit) {
+	//	// 当たっていたら押し戻す。
+	//	if (isHit) {
 
-			// 法線方向に当たった分押し戻す。
-			pos_ = impactPos + hitNormal * hitDistance;
+	//		// 法線方向に当たった分押し戻す。
+	//		pos_ = impactPos + hitNormal * hitDistance;
 
-		}
+	//	}
 
 
-	}
+	//}
 
 
-	/*-- 中心地点とゴール地点との当たり判定 --*/
+	///*-- 中心地点とゴール地点との当たり判定 --*/
 
-	// 中間地点に達していなかったら中間地点との当たり判定を行う。
-	if (!IsPassedMiddlePoint) {
+	//// 中間地点に達していなかったら中間地点との当たり判定を行う。
+	//if (!IsPassedMiddlePoint) {
 
-		// 当たり判定に使用するデータ
-		FHelper::RayToModelCollisionData collistionData;
+	//	// 当たり判定に使用するデータ
+	//	FHelper::RayToModelCollisionData collistionData;
 
-		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexIndex();
-		collistionData.rayPos = prevPos_;
-		collistionData.rayDir = forwardVec_;
-		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.middlePointInsIndex_);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.middlePointInsIndex_);
-		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.middlePointInsIndex_);
+	//	// 当たり判定に必要なデータを埋めていく。
+	//	collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexPos();
+	//	collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexNormal();
+	//	collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.middlePointBlasIndex_]->GetVertexIndex();
+	//	collistionData.rayPos = prevPos_;
+	//	collistionData.rayDir = forwardVec_;
+	//	collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.middlePointInsIndex_);
+	//	collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.middlePointInsIndex_);
+	//	collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.middlePointInsIndex_);
 
-		// 当たり判定の結果保存用変数。
-		bool isHit = false;
-		Vec3 impactPos;
-		float hitDistance;
-		Vec3 hitNormal;
+	//	// 当たり判定の結果保存用変数。
+	//	bool isHit = false;
+	//	Vec3 impactPos;
+	//	float hitDistance;
+	//	Vec3 hitNormal;
 
-		// 当たり判定を行う。
-		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+	//	// 当たり判定を行う。
+	//	isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
-		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= hitDistance < (pos_ - prevPos_).Length();
-		isHit &= 0 < hitDistance;
+	//	// 当たった距離がY軸のサイズよりも小さかったら。
+	//	isHit &= hitDistance < (pos_ - prevPos_).Length();
+	//	isHit &= 0 < hitDistance;
 
-		// 当たっていたら。
-		if (isHit) {
+	//	// 当たっていたら。
+	//	if (isHit) {
 
-			IsPassedMiddlePoint = true;
+	//		IsPassedMiddlePoint = true;
 
-		}
+	//	}
 
-	}
-	else {
+	//}
+	//else {
 
-		// 当たり判定に使用するデータ
-		FHelper::RayToModelCollisionData collistionData;
+	//	// 当たり判定に使用するデータ
+	//	FHelper::RayToModelCollisionData collistionData;
 
-		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexIndex();
-		collistionData.rayPos = prevPos_;
-		collistionData.rayDir = forwardVec_;
-		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.goalInsIndex_);
-		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.goalInsIndex_);
-		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.goalInsIndex_);
+	//	// 当たり判定に必要なデータを埋めていく。
+	//	collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexPos();
+	//	collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexNormal();
+	//	collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.goalBlasIndex_]->GetVertexIndex();
+	//	collistionData.rayPos = prevPos_;
+	//	collistionData.rayDir = forwardVec_;
+	//	collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.goalInsIndex_);
+	//	collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.goalInsIndex_);
+	//	collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.goalInsIndex_);
 
-		// 当たり判定の結果保存用変数。
-		bool isHit = false;
-		Vec3 impactPos;
-		float hitDistance;
-		Vec3 hitNormal;
+	//	// 当たり判定の結果保存用変数。
+	//	bool isHit = false;
+	//	Vec3 impactPos;
+	//	float hitDistance;
+	//	Vec3 hitNormal;
 
-		// 当たり判定を行う。
-		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+	//	// 当たり判定を行う。
+	//	isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
-		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= hitDistance < (pos_ - prevPos_).Length();
-		isHit &= 0 < hitDistance;
+	//	// 当たった距離がY軸のサイズよりも小さかったら。
+	//	isHit &= hitDistance < (pos_ - prevPos_).Length();
+	//	isHit &= 0 < hitDistance;
 
-		// 当たっていたら。
-		if (isHit) {
+	//	// 当たっていたら。
+	//	if (isHit) {
 
-			IsPassedMiddlePoint = false;
-			++RapCount;
+	//		IsPassedMiddlePoint = false;
+	//		++RapCount;
 
-		}
+	//	}
 
-	}
+	//}
 
 
-	/*===== 装飾オブジェクトとの当たり判定 =====*/
+	///*===== 装飾オブジェクトとの当たり判定 =====*/
 
-	{
+	//{
 
-		const int BLAS_COUNT = static_cast<int>(stageModelData_.stageOrnamentInsIndex_.size());
-		for (int index = 0; index < BLAS_COUNT; ++index) {
+	//	const int BLAS_COUNT = static_cast<int>(stageModelData_.stageOrnamentInsIndex_.size());
+	//	for (int index = 0; index < BLAS_COUNT; ++index) {
 
-			// 当たり判定に使用するデータ
-			FHelper::RayToModelCollisionData collistionData;
-			collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexPos();
-			collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexNormal();
-			collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexIndex();
-			collistionData.rayPos = prevPos_;
-			collistionData.rayDir = (pos_ - prevPos_).GetNormal();
-			collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageOrnamentInsIndex_[index]);
-			collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageOrnamentInsIndex_[index]);
-			collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageOrnamentInsIndex_[index]);
+	//		// 当たり判定に使用するデータ
+	//		FHelper::RayToModelCollisionData collistionData;
+	//		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexPos();
+	//		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexNormal();
+	//		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageModelData_.stageOrnamentBlasIndex_[index]]->GetVertexIndex();
+	//		collistionData.rayPos = prevPos_;
+	//		collistionData.rayDir = (pos_ - prevPos_).GetNormal();
+	//		collistionData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stageModelData_.stageOrnamentInsIndex_[index]);
+	//		collistionData.matScale = PolygonInstanceRegister::Ins()->GetScale(stageModelData_.stageOrnamentInsIndex_[index]);
+	//		collistionData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stageModelData_.stageOrnamentInsIndex_[index]);
 
-			// 当たり判定を行う。
-			bool isHit = false;
-			Vec3 impactPos;
-			float hitDistance;
-			Vec3 hitNormal;
-			isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+	//		// 当たり判定を行う。
+	//		bool isHit = false;
+	//		Vec3 impactPos;
+	//		float hitDistance;
+	//		Vec3 hitNormal;
+	//		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
 
-			// 当たった距離がY軸のサイズよりも小さかったら。
-			isHit &= fabs(hitDistance) < (pos_ - prevPos_).Length();
+	//		// 当たった距離がY軸のサイズよりも小さかったら。
+	//		isHit &= fabs(hitDistance) < (pos_ - prevPos_).Length();
 
-			// 当たっていたら押し戻す。
-			if (isHit) {
+	//		// 当たっていたら押し戻す。
+	//		if (isHit) {
 
-				// 法線方向に当たった分押し戻す。
-				pos_ = impactPos + hitNormal * hitDistance;
-				speed_ = 0;
-				boostSpeed_ = 0;
+	//			// 法線方向に当たった分押し戻す。
+	//			pos_ = impactPos + hitNormal * hitDistance;
+	//			speed_ = 0;
+	//			boostSpeed_ = 0;
 
-			}
+	//		}
 
-		}
+	//	}
 
-	}
+	//}
 
 
-	/*===== ギミックとの当たり判定 =====*/
+	///*===== ギミックとの当たり判定 =====*/
 
-	{
+	//{
 
-		std::vector<std::shared_ptr<BaseStageObject>> gimmics = GimmickMgr::Ins()->GetGimmickData();
-		for (auto& index_ : gimmics) {
+	//	std::vector<std::shared_ptr<BaseStageObject>> gimmics = GimmickMgr::Ins()->GetGimmickData();
+	//	for (auto& index_ : gimmics) {
 
-			// フラグが立っていなかったら処理を続ける。
-			if (!index_->GetIsActive()) continue;
+	//		// フラグが立っていなかったら処理を続ける。
+	//		if (!index_->GetIsActive()) continue;
 
-			// 当たり判定を行う。
-			bool isHit = obb_.CheckHitOBB(index_->GetOBB());
+	//		// 当たり判定を行う。
+	//		bool isHit = obb_.CheckHitOBB(index_->GetOBB());
 
-			// 当たっていなかったら処理を飛ばす。
-			if (!isHit) continue;
+	//		// 当たっていなかったら処理を飛ばす。
+	//		if (!isHit) continue;
 
-			// ブーストをマックスにする。
-			boostSpeed_ = MAX_BOOST_SPEED;
+	//		// ブーストをマックスにする。
+	//		boostSpeed_ = MAX_BOOST_SPEED;
 
-		}
+	//	}
 
 
-	}
+	//}
 
 
 }

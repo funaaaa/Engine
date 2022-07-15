@@ -8,6 +8,9 @@ void CircuitStage::Setting()
 
 	/*===== セッティング処理 =====*/
 
+	// ステージオブジェクト管理クラスをセット。
+	stageObjectMgr_ = std::make_shared<StageObjectMgr>();
+
 	// ステージをセット。
 	int indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/", "stage3.obj", { L"Resource/Game/white.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
@@ -83,11 +86,16 @@ void CircuitStage::Setting()
 
 	// ゴール前のふわふわオブジェクトをセット。
 	for (int index = 0; index < 4; ++index) {
-		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::OBB,
+		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
 			"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-		stageObjectMgr_->ChangeTrans(indexBuff, Vec3(100, -15, 1400));
-		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(250, 200, 1000 * index + 1500.0f));
-		stageObjectMgr_->ChangeScale(indexBuff, Vec3(40.0f, 40.0f, 40.0f));
+		stageObjectMgr_->ChangeTrans(indexBuff, Vec3(250, 200, 1000 * index + 1500.0f));
+		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
+		stageObjectMgr_->ChangeScale(indexBuff, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
+		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+			"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-250, 200, 1000 * index + 1500.0f));
+		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
+		stageObjectMgr_->ChangeScale(indexBuff, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
 	}
 
 }

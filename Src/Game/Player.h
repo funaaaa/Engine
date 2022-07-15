@@ -8,25 +8,6 @@
 
 class Player {
 
-
-public:
-
-	// ステージのモデルデータ
-	struct StageData {
-
-		int stageBlasIndex_;
-		int stageInsIndex_;
-		int stageGrassBlasIndex_;
-		int stageGrassInsIndex_;
-		int goalBlasIndex_;
-		int goalInsIndex_;
-		int middlePointBlasIndex_;
-		int middlePointInsIndex_;
-		std::vector<int> stageOrnamentBlasIndex_;
-		std::vector<int> stageOrnamentInsIndex_;
-
-	};
-
 private:
 
 	/*===== メンバ変数 =====*/
@@ -61,8 +42,6 @@ public:
 
 	PlayerModel playerModel_;
 
-	StageData stageModelData_;	// ステージのモデルデータ
-
 
 	/*-- ドリフトに関する変数 --*/
 
@@ -81,7 +60,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	Player(const StageData& StageObjectData);
+	Player();
 	void Init();
 
 	// 更新処理

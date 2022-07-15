@@ -9,7 +9,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<int> floatingObjIndex_;
+	int timer_;	// 各オブジェクトで使用するタイマー。セッティングされてからインクリメントし続ける。
 
 
 public:

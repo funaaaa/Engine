@@ -10,66 +10,66 @@ void PlayerModel::Load()
 	/*===== モデルをロード =====*/
 
 	// 車のボディをロード
-	carBodyBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBody.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }, true);
+	carBodyBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBody.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" }, true);
 	carBodyInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carBodyBlasIndex_, PolygonInstanceRegister::SHADER_ID::REFLECTION);
 	PolygonInstanceRegister::Ins()->AddScale(carBodyInsIndex_, Vec3(25, 25, 25));
 
 	// 車のバンパーをロード
-	carBumperBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBumper.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
+	carBumperBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBumper.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" });
 	carBumperInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carBumperBlasIndex_, PolygonInstanceRegister::SHADER_ID::REFLECTION);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carBumperInsIndex_, carBodyInsIndex_);
 
 	// 車のライトをロード
-	carLightBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carLight.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/white.png" });
+	carLightBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carLight.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/white.png" });
 	carLightInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carLightBlasIndex_, PolygonInstanceRegister::SHADER_ID::TEXCOLOR);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carLightInsIndex_, carBodyInsIndex_);
 
 	// 車の後ろタイヤをロード
-	carBehindTireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBehindTire.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/car/tireColor.png" }, true);
+	carBehindTireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBehindTire.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/car/tireColor.png" }, true);
 	carBehindTireInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carBehindTireBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carBehindTireInsIndex_, carBodyInsIndex_);
 
 	// 車の後ろタイヤのフレームをロード
-	carBehindTireFrameBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBehindTireFrame.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
+	carBehindTireFrameBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBehindTireFrame.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" });
 	carBehindTireFrameInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carBehindTireFrameBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carBehindTireFrameInsIndex_, carBodyInsIndex_);
 
 	// 右前タイヤをロード
-	carRightTireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carRightTire.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/car/tireColor.png" }, true);
+	carRightTireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carRightTire.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/car/tireColor.png" }, true);
 	carRightTireInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carRightTireBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carRightTireInsIndex_, carBodyInsIndex_);
 	PolygonInstanceRegister::Ins()->AddTrans(carRightTireInsIndex_, Vec3(0.84f, -0.87f, -1.55f));
 
 	// 右前タイヤのフレームをロード
-	carRightTireFrameBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carRightTireFrame.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
+	carRightTireFrameBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carRightTireFrame.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" });
 	carRightTireFrameInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carRightTireFrameBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carRightTireFrameInsIndex_, carBodyInsIndex_);
 	PolygonInstanceRegister::Ins()->AddTrans(carRightTireFrameInsIndex_, Vec3(0.87f, -0.32f, -1.55f));
 
 	// 左前タイヤをロード
-	carLeftTireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carLeftTire.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/car/tireColor.png" }, true);
+	carLeftTireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carLeftTire.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/car/tireColor.png" }, true);
 	carLeftTireInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carLeftTireBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carLeftTireInsIndex_, carBodyInsIndex_);
 	PolygonInstanceRegister::Ins()->AddTrans(carLeftTireInsIndex_, Vec3(-0.94f, -0.86f, -1.57f));
 
 	// 左前タイヤのフレームをロード
-	carLeftTireFrameBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carLeftTireFrame.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
+	carLeftTireFrameBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carLeftTireFrame.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" });
 	carLeftTireFrameInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carLeftTireFrameBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carLeftTireFrameInsIndex_, carBodyInsIndex_);
 	PolygonInstanceRegister::Ins()->AddTrans(carLeftTireFrameInsIndex_, Vec3(-0.91f, -0.3f, -1.53f));
 
 	// 車の鏡をロード
-	carMirrorBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carMirror.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/car/tireColor.png" }, true);
+	carMirrorBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carMirror.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/car/tireColor.png" }, true);
 	carMirrorInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carMirrorBlasIndex_, PolygonInstanceRegister::SHADER_ID::COMPLETE_REFLECTION);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carMirrorInsIndex_, carBodyInsIndex_);
 
 	// 車の鏡のカバーをロード
-	carMirrorCoverBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carMirrorCover.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/car/tireColor.png" }, true);
+	carMirrorCoverBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carMirrorCover.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/car/tireColor.png" }, true);
 	carMirrorCoverInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carMirrorBlasIndex_, PolygonInstanceRegister::SHADER_ID::COMPLETE_REFLECTION);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carMirrorCoverInsIndex_, carBodyInsIndex_);
 
 	// 車のウィンドウをロード
-	carWindowBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/car/windowColor.png" });
+	carWindowBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/car/windowColor.png" });
 	carWindowInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carWindowBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carWindowInsIndex_, carBodyInsIndex_);
 

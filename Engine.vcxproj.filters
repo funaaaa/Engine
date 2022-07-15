@@ -151,20 +151,26 @@
     <ClCompile Include="Src\Engine\Input.cpp">
       <Filter>エンジン\入力関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\BoostGimmick.cpp">
-      <Filter>アプリケーション\ステージオブジェクト</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Engine\GimmickMgr.cpp">
-      <Filter>アプリケーション\ステージオブジェクト</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Raytracing\OBB.cpp">
       <Filter>レイトレーシング\当たり判定</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\BaseStageObject.cpp">
-      <Filter>アプリケーション\ステージオブジェクト</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Game\PlayerModel.cpp">
       <Filter>アプリケーション\プレイヤー</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\BaseStageObject.cpp">
+      <Filter>アプリケーション\ステージオブジェクト\規定クラス</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\BasicStageObject.cpp">
+      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\StageObjectMgr.cpp">
+      <Filter>アプリケーション\ステージオブジェクト\管理クラス</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\FloatingStageObject.cpp">
+      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CircuitStage.cpp">
+      <Filter>アプリケーション\ステージ\各ステージ</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -336,15 +342,6 @@
     <ClInclude Include="Src\Game\Player.h">
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Engine\BaseStageObject.h">
-      <Filter>アプリケーション\ステージオブジェクト</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Engine\BoostGimmick.h">
-      <Filter>アプリケーション\ステージオブジェクト</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Engine\GimmickMgr.h">
-      <Filter>アプリケーション\ステージオブジェクト</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Raytracing\OBB.h">
       <Filter>レイトレーシング\当たり判定</Filter>
     </ClInclude>
@@ -354,8 +351,23 @@
     <ClInclude Include="Src\Game\PlayerModel.h">
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Engine\BaseStageObject.h">
+      <Filter>アプリケーション\ステージオブジェクト\規定クラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\BasicStageObject.h">
+      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\FloatingStageObject.h">
+      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\StageObjectMgr.h">
+      <Filter>アプリケーション\ステージオブジェクト\管理クラス</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Game\BaseStage.h">
-      <Filter>アプリケーション\ステージ</Filter>
+      <Filter>アプリケーション\ステージ\基底クラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CircuitStage.h">
+      <Filter>アプリケーション\ステージ\各ステージ</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -507,6 +519,21 @@
     </Filter>
     <Filter Include="アプリケーション\ステージオブジェクト">
       <UniqueIdentifier>{b3447770-dcbf-4489-9a65-3f85b704bd85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージオブジェクト\規定クラス">
+      <UniqueIdentifier>{06a7671d-6332-42d7-a94b-c92b82f504cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージオブジェクト\オブジェクトクラス">
+      <UniqueIdentifier>{6e4a9fc4-559d-4639-bd31-2733e6973ced}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージオブジェクト\管理クラス">
+      <UniqueIdentifier>{3b5ea490-9c2f-4e86-b4a9-54a2310ba018}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージ\基底クラス">
+      <UniqueIdentifier>{c2662c27-c581-4089-af21-ea3496b6a089}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージ\各ステージ">
+      <UniqueIdentifier>{782b87f3-9ad1-4808-a877-0b550c36a17a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

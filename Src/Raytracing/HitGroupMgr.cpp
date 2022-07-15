@@ -115,6 +115,6 @@ void HitGroupMgr::Setting()
 	initData.UAVcount_ = 0;
 	initData.CBVcount_ = 0;
 	hitGroup_.push_back(std::make_shared<HitGroup>());
-	hitGroup_[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
+	hitGroup_[DEF]->Generate(initData, 1, hitGroupNames[DEF]);
 
 }

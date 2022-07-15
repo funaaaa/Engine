@@ -11,7 +11,7 @@ void DriftParticleMgr::Setting(const int& ConstBufferIndex)
 	particleGenerateDelay_ = 0;
 
 	// パーティクル用のスフィアのBLASを生成する。
-	int particleSphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" });
+	int particleSphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/red.png" });
 
 
 	int counter = ConstBufferIndex;

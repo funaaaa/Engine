@@ -167,13 +167,12 @@
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Src\Engine\BaseDrawData.cpp" />
     <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
-    <ClCompile Include="Src\Engine\BoostGimmick.cpp" />
     <ClCompile Include="Src\Engine\Camera.cpp" />
     <ClCompile Include="Src\Engine\ComputeShader.cpp" />
     <ClCompile Include="Src\Engine\DirectXBase.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
-    <ClCompile Include="Src\Engine\GimmickMgr.cpp" />
+    <ClCompile Include="Src\Engine\StageObjectMgr.cpp" />
     <ClCompile Include="Src\Engine\Input.cpp" />
     <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
@@ -187,8 +186,11 @@
     <ClCompile Include="Src\Engine\StructuredBuffer.cpp" />
     <ClCompile Include="Src\Engine\TextureManager.cpp" />
     <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
+    <ClCompile Include="Src\Game\BasicStageObject.cpp" />
+    <ClCompile Include="Src\Game\CircuitStage.cpp" />
     <ClCompile Include="Src\Game\DriftParticle.cpp" />
     <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
+    <ClCompile Include="Src\Game\FloatingStageObject.cpp" />
     <ClCompile Include="Src\Game\GameScene.cpp" />
     <ClCompile Include="Src\Game\Player.cpp" />
     <ClCompile Include="Src\Game\PlayerModel.cpp" />
@@ -226,7 +228,6 @@
     <ClInclude Include="Src\Engine\BaseDrawData.h" />
     <ClInclude Include="Src\Engine\BaseStageObject.h" />
     <ClInclude Include="Src\Engine\BaseSprite.h" />
-    <ClInclude Include="Src\Engine\BoostGimmick.h" />
     <ClInclude Include="Src\Engine\Camera.h" />
     <ClInclude Include="Src\Engine\ComputeShader.h" />
     <ClInclude Include="Src\Engine\DirectXBase.h" />
@@ -234,7 +235,7 @@
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />
     <ClInclude Include="Src\Engine\FString.h" />
-    <ClInclude Include="Src\Engine\GimmickMgr.h" />
+    <ClInclude Include="Src\Engine\StageObjectMgr.h" />
     <ClInclude Include="Src\Engine\Input.h" />
     <ClInclude Include="Src\Engine\Joycon.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
@@ -252,8 +253,11 @@
     <ClInclude Include="Src\Engine\WindowsAPI.h" />
     <ClInclude Include="Src\Game\BaseScene.h" />
     <ClInclude Include="Src\Game\BaseStage.h" />
+    <ClInclude Include="Src\Game\BasicStageObject.h" />
+    <ClInclude Include="Src\Game\CircuitStage.h" />
     <ClInclude Include="Src\Game\DriftParticle.h" />
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />
+    <ClInclude Include="Src\Game\FloatingStageObject.h" />
     <ClInclude Include="Src\Game\GameScene.h" />
     <ClInclude Include="Src\Game\Player.h" />
     <ClInclude Include="Src\Game\PlayerModel.h" />

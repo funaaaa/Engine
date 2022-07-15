@@ -32,7 +32,7 @@ GameScene::GameScene()
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	pipline_ = std::make_shared<RaytracingPipline>();
-	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2), 6);
+	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2), 6);
 
 
 	// ステージをセッティングする。
@@ -43,76 +43,76 @@ GameScene::GameScene()
 
 
 	// 天球用のスフィアを生成する。
-	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/skydome.jpg" });
+	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/skydome.jpg" });
 	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
 	PolygonInstanceRegister::Ins()->AddScale(skyDomeIns_, Vec3(1000, 1000, 1000));
 
-	// ステージを読み込む。
-	stageBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/white.png" });
-	stageIns_ = PolygonInstanceRegister::Ins()->CreateInstance(stageBlas_, PolygonInstanceRegister::DEF_GI);
-	PolygonInstanceRegister::Ins()->AddScale(stageIns_, Vec3(200, 200, 200));
-	stageGrassBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/green.png",L"Resource/Game/grassNormal.png" });
-	stageGrassIns_ = PolygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas_, PolygonInstanceRegister::DEF_GI);
-	PolygonInstanceRegister::Ins()->AddScale(stageGrassIns_, Vec3(200, 200, 200));
+	//// ステージを読み込む。
+	//stageBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "stage3.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/white.png" });
+	//stageIns_ = PolygonInstanceRegister::Ins()->CreateInstance(stageBlas_, PolygonInstanceRegister::DEF_GI);
+	//PolygonInstanceRegister::Ins()->AddScale(stageIns_, Vec3(200, 200, 200));
+	//stageGrassBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "grass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/green.png",L"Resource/Game/grassNormal.png" });
+	//stageGrassIns_ = PolygonInstanceRegister::Ins()->CreateInstance(stageGrassBlas_, PolygonInstanceRegister::DEF_GI);
+	//PolygonInstanceRegister::Ins()->AddScale(stageGrassIns_, Vec3(200, 200, 200));
 
 
 
-	// ゴール用のオブジェクトを読み込む。
-	goalBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
-	goalIns_ = PolygonInstanceRegister::Ins()->CreateInstance(goalBlas_, PolygonInstanceRegister::SHADER_ID::REFRACTION);
-	PolygonInstanceRegister::Ins()->AddScale(goalIns_, Vec3(200, 200, 200));
-	PolygonInstanceRegister::Ins()->AddTrans(goalIns_, GOAL_DEF_POS);
+	//// ゴール用のオブジェクトを読み込む。
+	//goalBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" });
+	//goalIns_ = PolygonInstanceRegister::Ins()->CreateInstance(goalBlas_, PolygonInstanceRegister::SHADER_ID::REFRACTION);
+	//PolygonInstanceRegister::Ins()->AddScale(goalIns_, Vec3(200, 200, 200));
+	//PolygonInstanceRegister::Ins()->AddTrans(goalIns_, GOAL_DEF_POS);
 
-	goalCollisionBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/inv.png" }, false, false);
-	goalCollisionIns_ = PolygonInstanceRegister::Ins()->CreateInstance(goalCollisionBlas_, PolygonInstanceRegister::SHADER_ID::INVISIBILITY);
-	PolygonInstanceRegister::Ins()->AddScale(goalCollisionIns_, Vec3(200, 200, 200));
+	//goalCollisionBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "goalCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/inv.png" }, false, false);
+	//goalCollisionIns_ = PolygonInstanceRegister::Ins()->CreateInstance(goalCollisionBlas_, PolygonInstanceRegister::SHADER_ID::INVISIBILITY);
+	//PolygonInstanceRegister::Ins()->AddScale(goalCollisionIns_, Vec3(200, 200, 200));
 
-	middlePointCollisionBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/inv.png" }, false, false);
-	middlePointCollisionIns_ = PolygonInstanceRegister::Ins()->CreateInstance(middlePointCollisionBlas_, PolygonInstanceRegister::SHADER_ID::INVISIBILITY);
-	PolygonInstanceRegister::Ins()->AddScale(middlePointCollisionIns_, Vec3(200, 200, 200));
+	//middlePointCollisionBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "middlePointCollision.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/inv.png" }, false, false);
+	//middlePointCollisionIns_ = PolygonInstanceRegister::Ins()->CreateInstance(middlePointCollisionBlas_, PolygonInstanceRegister::SHADER_ID::INVISIBILITY);
+	//PolygonInstanceRegister::Ins()->AddScale(middlePointCollisionIns_, Vec3(200, 200, 200));
 
 	// ステージの装飾オブジェクトをロード
-	{
-		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockA.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/gray.png" }));
-		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFLECTION));
-		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockB.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/gray.png" }));
-		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFLECTION));
-		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockC.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/green.png" }));
-		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
-		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
-		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockE.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/green.png" }));
-		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
-		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockF.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" }));
-		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::DEF));
-		stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "goalSideObj.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/gray.png" }));
-		stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::DEF));
-	}
-	for (auto& index_ : stageOrnamentIns_) {
+	//{
+	//	stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockA.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/gray.png" }));
+	//	stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFLECTION));
+	//	stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockB.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/gray.png" }));
+	//	stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFLECTION));
+	//	stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockC.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/green.png" }));
+	//	stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
+	//	stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockD.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" }));
+	//	stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
+	//	stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockE.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/green.png" }));
+	//	stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::REFRACTION));
+	//	stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "blockF.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" }));
+	//	stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::DEF));
+	//	stageOrnamentBlas_.emplace_back(BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "goalSideObj.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/gray.png" }));
+	//	stageOrnamentIns_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(stageOrnamentBlas_[static_cast<int>(stageOrnamentBlas_.size()) - 1], PolygonInstanceRegister::SHADER_ID::DEF));
+	//}
+	//for (auto& index_ : stageOrnamentIns_) {
 
-		PolygonInstanceRegister::Ins()->AddScale(index_, Vec3(200, 200, 200));
+	//	PolygonInstanceRegister::Ins()->AddScale(index_, Vec3(200, 200, 200));
 
-	}
+	//}
 
 	// ギミックをロード。
-	GenerateGimmick();
+	//GenerateGimmick();
 
-	// プレイヤーを初期化。
-	Player::StageData stageData;
-	stageData.stageBlasIndex_ = stageBlas_;
-	stageData.stageInsIndex_ = stageIns_;
-	stageData.stageGrassBlasIndex_ = stageGrassBlas_;
-	stageData.stageGrassInsIndex_ = stageGrassIns_;
-	stageData.middlePointBlasIndex_ = middlePointCollisionBlas_;
-	stageData.middlePointInsIndex_ = middlePointCollisionIns_;
-	stageData.goalBlasIndex_ = goalCollisionBlas_;
-	stageData.goalInsIndex_ = goalCollisionIns_;
-	stageData.stageOrnamentBlasIndex_ = stageOrnamentBlas_;
-	stageData.stageOrnamentInsIndex_ = stageOrnamentIns_;
-	player_ = std::make_shared<Player>(stageData);
+	//// プレイヤーを初期化。
+	//Player::StageData stageData;
+	//stageData.stageBlasIndex_ = stageBlas_;
+	//stageData.stageInsIndex_ = stageIns_;
+	//stageData.stageGrassBlasIndex_ = stageGrassBlas_;
+	//stageData.stageGrassInsIndex_ = stageGrassIns_;
+	//stageData.middlePointBlasIndex_ = middlePointCollisionBlas_;
+	//stageData.middlePointInsIndex_ = middlePointCollisionIns_;
+	//stageData.goalBlasIndex_ = goalCollisionBlas_;
+	//stageData.goalInsIndex_ = goalCollisionIns_;
+	//stageData.stageOrnamentBlasIndex_ = stageOrnamentBlas_;
+	//stageData.stageOrnamentInsIndex_ = stageOrnamentIns_;
+	player_ = std::make_shared<Player>();
 
 	// ゴール前のふわふわしているオブジェクトのBLASをロード
-	beforeTheGoalObjectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/red.png" });
+	/*beforeTheGoalObjectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" });
 	for (int index = 0; index < 4; ++index) {
 
 		std::pair<int, int> buff;
@@ -131,7 +131,7 @@ GameScene::GameScene()
 		beforeTheGoalObjectDefPos_.emplace_back(defPosBuff);
 		beforeTheGoalObjectTimer_.push_back(1.0f * index);
 
-	}
+	}*/
 
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
@@ -247,8 +247,8 @@ void GameScene::Update()
 	}
 
 	// 中間地点のオブジェクトを元の大きさに戻す。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
-	PolygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns_, Vec3(200, 200, 200));
-	PolygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns_, Vec3(0, 0, 0));
+	/*PolygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns_, Vec3(200, 200, 200));
+	PolygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns_, Vec3(0, 0, 0));*/
 
 	// プレイヤーを更新。
 	player_->Update(constBufferData_, isPassedMiddlePoint_, rapCount_);
@@ -261,22 +261,22 @@ void GameScene::Update()
 
 
 	// 中間地点に達していたらゴールを定位置に出す。
-	if (isPassedMiddlePoint_) {
+	//if (isPassedMiddlePoint_) {
 
-		PolygonInstanceRegister::Ins()->ChangeTrans(goalIns_, GOAL_DEF_POS);
-		PolygonInstanceRegister::Ins()->ChangeScale(goalIns_, Vec3(200, 200, 200));
-		PolygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns_, GOAL_DEF_POS);
-		PolygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns_, Vec3(200, 200, 200));
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(goalIns_, GOAL_DEF_POS);
+	//	PolygonInstanceRegister::Ins()->ChangeScale(goalIns_, Vec3(200, 200, 200));
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns_, GOAL_DEF_POS);
+	//	PolygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns_, Vec3(200, 200, 200));
 
-	}
-	else {
+	//}
+	//else {
 
-		PolygonInstanceRegister::Ins()->ChangeTrans(goalIns_, Vec3(0, -100, 0));
-		PolygonInstanceRegister::Ins()->ChangeScale(goalIns_, Vec3(0, 0, 0));
-		PolygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns_, Vec3(0, -100, 0));
-		PolygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns_, Vec3(0, 0, 0));
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(goalIns_, Vec3(0, -100, 0));
+	//	PolygonInstanceRegister::Ins()->ChangeScale(goalIns_, Vec3(0, 0, 0));
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(goalCollisionIns_, Vec3(0, -100, 0));
+	//	PolygonInstanceRegister::Ins()->ChangeScale(goalCollisionIns_, Vec3(0, 0, 0));
 
-	}
+	//}
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {
@@ -290,27 +290,27 @@ void GameScene::Update()
 	nowRapCountSprite_->ChangeTextureID(numFontHandle_[rapCount_], 0);
 	rapSlashSprite_->ChangeTextureID(numFontHandle_[10], 0);
 
-	// ゴールオブジェクトを回転させる。
-	PolygonInstanceRegister::Ins()->AddRotate(goalIns_, Vec3(0.01f, 0, 0));
+	//// ゴールオブジェクトを回転させる。
+	//PolygonInstanceRegister::Ins()->AddRotate(goalIns_, Vec3(0.01f, 0, 0));
 
-	// ゴール前のオブジェクトを回転させる。
-	static const int BEFORE_THE_GOAL_OBJECT_COUNT = 4;
-	for (int index = 0; index < BEFORE_THE_GOAL_OBJECT_COUNT; ++index) {
+	//// ゴール前のオブジェクトを回転させる。
+	//static const int BEFORE_THE_GOAL_OBJECT_COUNT = 4;
+	//for (int index = 0; index < BEFORE_THE_GOAL_OBJECT_COUNT; ++index) {
 
-		const float SIN_WAVE_MOVE = 50.0f;
+	//	const float SIN_WAVE_MOVE = 50.0f;
 
-		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].first, Vec3(0.01f, 0.01f, 0));
-		PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].second, Vec3(0.01f, 0.01f, 0));
-		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].first, beforeTheGoalObjectDefPos_[index].first + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
-		PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].second, beforeTheGoalObjectDefPos_[index].second + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
+	//	PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].first, Vec3(0.01f, 0.01f, 0));
+	//	PolygonInstanceRegister::Ins()->AddRotate(beforeTheGoalObjectIns_[index].second, Vec3(0.01f, 0.01f, 0));
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].first, beforeTheGoalObjectDefPos_[index].first + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(beforeTheGoalObjectIns_[index].second, beforeTheGoalObjectDefPos_[index].second + Vec3(0, sinf(beforeTheGoalObjectTimer_[index]) * SIN_WAVE_MOVE, 0));
 
-		beforeTheGoalObjectTimer_[index] += 0.05f;
+	//	beforeTheGoalObjectTimer_[index] += 0.05f;
 
-	}
+	//}
 
-	// 中間地点のオブジェクトを小さくする。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時で小さくしています！
-	PolygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns_, Vec3(0, 0, 0));
-	PolygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns_, Vec3(0, -100, 0));
+	//// 中間地点のオブジェクトを小さくする。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時で小さくしています！
+	//PolygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns_, Vec3(0, 0, 0));
+	//PolygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns_, Vec3(0, -100, 0));
 
 
 	tlas_->Update();
@@ -609,30 +609,30 @@ void GameScene::InputImGUI()
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
-	// 1個目
-	GimmickMgr::Ins()->ChangeTrans(0, Vec3(100, -15, 1400));
-	GimmickMgr::Ins()->ChangeRotate(0, Vec3(0, 0, 0));
-	GimmickMgr::Ins()->ChangeScale(0, Vec3(100, 200, 200));
+	//// 1個目
+	//GimmickMgr::Ins()->ChangeTrans(0, Vec3(100, -15, 1400));
+	//GimmickMgr::Ins()->ChangeRotate(0, Vec3(0, 0, 0));
+	//GimmickMgr::Ins()->ChangeScale(0, Vec3(100, 200, 200));
 
-	// 2個目
-	GimmickMgr::Ins()->ChangeTrans(1, Vec3(-80, -15, 3000));
-	GimmickMgr::Ins()->ChangeRotate(1, Vec3(0, 0, 0));
-	GimmickMgr::Ins()->ChangeScale(1, Vec3(100, 200, 200));
+	//// 2個目
+	//GimmickMgr::Ins()->ChangeTrans(1, Vec3(-80, -15, 3000));
+	//GimmickMgr::Ins()->ChangeRotate(1, Vec3(0, 0, 0));
+	//GimmickMgr::Ins()->ChangeScale(1, Vec3(100, 200, 200));
 
-	// 3個目
-	GimmickMgr::Ins()->ChangeTrans(2, Vec3(100, -15, 4000));
-	GimmickMgr::Ins()->ChangeRotate(2, Vec3(0, 0, 0));
-	GimmickMgr::Ins()->ChangeScale(2, Vec3(100, 200, 200));
+	//// 3個目
+	//GimmickMgr::Ins()->ChangeTrans(2, Vec3(100, -15, 4000));
+	//GimmickMgr::Ins()->ChangeRotate(2, Vec3(0, 0, 0));
+	//GimmickMgr::Ins()->ChangeScale(2, Vec3(100, 200, 200));
 
-	// 4個目
-	GimmickMgr::Ins()->ChangeTrans(3, Vec3(-5842, -29, -167));
-	GimmickMgr::Ins()->ChangeRotate(3, Vec3(0, 1.48f, 0));
-	GimmickMgr::Ins()->ChangeScale(3, Vec3(200, 200, 200));
+	//// 4個目
+	//GimmickMgr::Ins()->ChangeTrans(3, Vec3(-5842, -29, -167));
+	//GimmickMgr::Ins()->ChangeRotate(3, Vec3(0, 1.48f, 0));
+	//GimmickMgr::Ins()->ChangeScale(3, Vec3(200, 200, 200));
 
-	// 5個目
-	GimmickMgr::Ins()->ChangeTrans(4, Vec3(-2352, -18, 6336));
-	GimmickMgr::Ins()->ChangeRotate(4, Vec3(0, 1.58f, 0));
-	GimmickMgr::Ins()->ChangeScale(4, Vec3(190, 200, 200));
+	//// 5個目
+	//GimmickMgr::Ins()->ChangeTrans(4, Vec3(-2352, -18, 6336));
+	//GimmickMgr::Ins()->ChangeRotate(4, Vec3(0, 1.58f, 0));
+	//GimmickMgr::Ins()->ChangeScale(4, Vec3(190, 200, 200));
 
 
 }
@@ -640,19 +640,19 @@ void GameScene::InputImGUI()
 void GameScene::GenerateGimmick()
 {
 
-	// 1個目
-	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	//// 1個目
+	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
-	// 2個目
-	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	//// 2個目
+	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
-	// 3個目
-	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	//// 3個目
+	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
-	// 4個目
-	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	//// 4個目
+	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
-	// 5個目
-	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	//// 5個目
+	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }
