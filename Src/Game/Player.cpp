@@ -184,22 +184,22 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			}
 
 			// タイヤを回転させる。
-			Vec3 rot_ = Vec3(0.0f, 0.5f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_ * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_ * static_cast<float>(inputADKey));
+			Vec3 rot = Vec3(0.0f, 0.5f, 0.0f);
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
 
 		}
 		// ドリフト状態じゃなかったら。
 		else {
 
 			// タイヤを回転させる。
-			Vec3 rot_ = Vec3(0.0f, 0.3f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_ * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_ * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_ * static_cast<float>(inputADKey));
+			Vec3 rot = Vec3(0.0f, 0.3f, 0.0f);
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
 
 		}
 
@@ -630,7 +630,7 @@ void Player::CheckHit(bool& IsPassedMiddlePoint, int& RapCount)
 
 	{
 
-		std::vector<std::shared_ptr<BaseGimmick>> gimmics = GimmickMgr::Ins()->GetGimmickData();
+		std::vector<std::shared_ptr<BaseStageObject>> gimmics = GimmickMgr::Ins()->GetGimmickData();
 		for (auto& index_ : gimmics) {
 
 			// フラグが立っていなかったら処理を続ける。

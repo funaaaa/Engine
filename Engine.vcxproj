@@ -166,7 +166,7 @@
     <ClCompile Include="lib\imgui\imgui_tables.cpp" />
     <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Src\Engine\BaseDrawData.cpp" />
-    <ClCompile Include="Src\Engine\BaseGimmick.cpp" />
+    <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
     <ClCompile Include="Src\Engine\BoostGimmick.cpp" />
     <ClCompile Include="Src\Engine\Camera.cpp" />
     <ClCompile Include="Src\Engine\ComputeShader.cpp" />
@@ -224,7 +224,7 @@
     <ClInclude Include="lib\imgui\imstb_textedit.h" />
     <ClInclude Include="lib\imgui\imstb_truetype.h" />
     <ClInclude Include="Src\Engine\BaseDrawData.h" />
-    <ClInclude Include="Src\Engine\BaseGimmick.h" />
+    <ClInclude Include="Src\Engine\BaseStageObject.h" />
     <ClInclude Include="Src\Engine\BaseSprite.h" />
     <ClInclude Include="Src\Engine\BoostGimmick.h" />
     <ClInclude Include="Src\Engine\Camera.h" />
@@ -251,6 +251,7 @@
     <ClInclude Include="Src\Engine\Vec.h" />
     <ClInclude Include="Src\Engine\WindowsAPI.h" />
     <ClInclude Include="Src\Game\BaseScene.h" />
+    <ClInclude Include="Src\Game\BaseStage.h" />
     <ClInclude Include="Src\Game\DriftParticle.h" />
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />
     <ClInclude Include="Src\Game\GameScene.h" />

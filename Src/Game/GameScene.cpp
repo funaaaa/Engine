@@ -16,7 +16,7 @@
 #include "Sprite.h"
 #include "Pipline.h"
 #include "WindowsAPI.h"
-#include "GimmickMgr.h"
+#include "CircuitStage.h"
 
 GameScene::GameScene()
 {
@@ -33,6 +33,14 @@ GameScene::GameScene()
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	pipline_ = std::make_shared<RaytracingPipline>();
 	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DENOISE_AO_HIT_GROUP, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2), 6);
+
+
+	// ステージをセッティングする。
+	stages.emplace_back(std::make_shared<CircuitStage>());
+
+	// 一旦サーキットステージを有効化する。
+	stages[STAGE_ID::CIRCUIT]->Setting();
+
 
 	// 天球用のスフィアを生成する。
 	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/Game/skydome.jpg" });
@@ -633,18 +641,18 @@ void GameScene::GenerateGimmick()
 {
 
 	// 1個目
-	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
 
 	// 2個目
-	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
 
 	// 3個目
-	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
 
 	// 4個目
-	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
 
 	// 5個目
-	GimmickMgr::Ins()->AddGimmick(BaseGimmick::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
+	GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }

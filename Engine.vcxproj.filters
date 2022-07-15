@@ -152,16 +152,16 @@
       <Filter>エンジン\入力関係</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\BoostGimmick.cpp">
-      <Filter>アプリケーション\ギミック</Filter>
+      <Filter>アプリケーション\ステージオブジェクト</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\GimmickMgr.cpp">
-      <Filter>アプリケーション\ギミック</Filter>
+      <Filter>アプリケーション\ステージオブジェクト</Filter>
     </ClCompile>
     <ClCompile Include="Src\Raytracing\OBB.cpp">
       <Filter>レイトレーシング\当たり判定</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\BaseGimmick.cpp">
-      <Filter>アプリケーション\ギミック</Filter>
+    <ClCompile Include="Src\Engine\BaseStageObject.cpp">
+      <Filter>アプリケーション\ステージオブジェクト</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\PlayerModel.cpp">
       <Filter>アプリケーション\プレイヤー</Filter>
@@ -336,14 +336,14 @@
     <ClInclude Include="Src\Game\Player.h">
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Engine\BaseGimmick.h">
-      <Filter>アプリケーション\ギミック</Filter>
+    <ClInclude Include="Src\Engine\BaseStageObject.h">
+      <Filter>アプリケーション\ステージオブジェクト</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\BoostGimmick.h">
-      <Filter>アプリケーション\ギミック</Filter>
+      <Filter>アプリケーション\ステージオブジェクト</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\GimmickMgr.h">
-      <Filter>アプリケーション\ギミック</Filter>
+      <Filter>アプリケーション\ステージオブジェクト</Filter>
     </ClInclude>
     <ClInclude Include="Src\Raytracing\OBB.h">
       <Filter>レイトレーシング\当たり判定</Filter>
@@ -353,6 +353,9 @@
     </ClInclude>
     <ClInclude Include="Src\Game\PlayerModel.h">
       <Filter>アプリケーション\プレイヤー</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\BaseStage.h">
+      <Filter>アプリケーション\ステージ</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -496,11 +499,14 @@
     <Filter Include="エンジン\描画データ">
       <UniqueIdentifier>{b8f3580e-6dd8-4cd5-bf78-7b6739a6c9e8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="アプリケーション\ギミック">
-      <UniqueIdentifier>{b3447770-dcbf-4489-9a65-3f85b704bd85}</UniqueIdentifier>
-    </Filter>
     <Filter Include="レイトレーシング\当たり判定">
       <UniqueIdentifier>{d66ca974-3a97-4a18-8660-f3a0d8a50e06}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージ">
+      <UniqueIdentifier>{739526a6-044e-4290-a524-863aafa4bbc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージオブジェクト">
+      <UniqueIdentifier>{b3447770-dcbf-4489-9a65-3f85b704bd85}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

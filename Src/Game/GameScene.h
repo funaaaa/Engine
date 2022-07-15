@@ -12,6 +12,7 @@ class RaytracingPipline;
 class TLAS;
 class RaytracingOutput;
 class Sprite;
+class BaseStage;
 
 // ゲームシーン
 class GameScene : public BaseScene {
@@ -37,6 +38,14 @@ private:
 	// 天球用のスフィア
 	int skyDomeBlas_;
 	int skyDomeIns_;
+
+	// ステージ関係。
+	std::vector<std::shared_ptr<BaseStage>> stages;
+	enum STAGE_ID {
+		CIRCUIT,	// サーキット
+		MAX_STAGE,	// ステージの最大数
+	};
+	STAGE_ID nowStageID;
 
 	// ステージ
 	int stageBlas_;

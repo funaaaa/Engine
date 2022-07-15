@@ -8,10 +8,10 @@ void PolygonInstanceRegister::Setting()
 
 	/*===== インスタンスをセッティング =====*/
 
-	for (auto& index_ : instance_) {
+	for (auto& index : instance_) {
 
-		index_ = std::make_shared<PolygonMeshInstance>();
-		instanceDesc_[&index_ - &instance_[0]] = {};
+		index = std::make_shared<PolygonMeshInstance>();
+		instanceDesc_[&index - &instance_[0]] = {};
 
 	}
 
@@ -24,11 +24,11 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 
 	// 生成するインスタンスのインデックスを求める。
 	int instanceIndex = -1;
-	for (auto& index_ : instance_) {
+	for (auto& index : instance_) {
 
-		if (index_->GetIsActive()) continue;
+		if (index->GetIsActive()) continue;
 
-		instanceIndex = static_cast<int>(&index_ - &instance_[0]);
+		instanceIndex = static_cast<int>(&index - &instance_[0]);
 
 		break;
 
@@ -39,9 +39,9 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 	// いずれ処理を変えたい。
 	if (instanceIndex == 0) {
 
-		for (auto& index_ : instanceDesc_) {
+		for (auto& index : instanceDesc_) {
 
-			index_.AccelerationStructure = BLASRegister::Ins()->GetBLASBuffer(0)->GetGPUVirtualAddress();
+			index.AccelerationStructure = BLASRegister::Ins()->GetBLASBuffer(0)->GetGPUVirtualAddress();
 
 		}
 
