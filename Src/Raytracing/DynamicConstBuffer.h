@@ -1,5 +1,6 @@
 #pragma once
-#include "DirectXBase.h"
+#include <d3d12.h>
+#include <wrl.h>
 #include "DescriptorHeapMgr.h"
 
 // 動的な定数バッファクラス
@@ -9,8 +10,8 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> buffer;
-	int descHeapIndex;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> buffer_;
+	int descHeapIndex_;
 
 
 public:
@@ -21,21 +22,22 @@ public:
 	DynamicConstBuffer();
 
 	// 生成処理
-	void Generate(UINT bufferSize, const wchar_t* name = L"");
+	void Generate(UINT BufferSize, const wchar_t* Name = L"");
 
 	// データ書き込み処理
-	void Write(UINT bufferIndex, const void* data, UINT size);
+	void Write(UINT BufferIndex, const void* Data, UINT Size);
 
 	// アクセッタ
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetBuffer(UINT bufferIndex) const { return buffer[bufferIndex]; }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetBuffer(UINT BufferIndex) const { return buffer_[BufferIndex]; }
+	const int& GetDescHeapIndex() { return descHeapIndex_; }
 
 
 private:
 
 	// バッファ全般を生成する処理
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType);
 
 	// アラインメント用
-	inline UINT RoundUp(size_t size, UINT align) { return UINT(size + align - 1) & ~(align - 1); }
+	inline UINT RoundUp(size_t Size, UINT Align) { return UINT(Size + Align - 1) & ~(Align - 1); }
 
 };

@@ -4,50 +4,50 @@
 
 const LPCWSTR& HitGroupMgr::GetCH(const int& Index)
 {
-	return hitGroup[Index]->GetCH();
+	return hitGroup_[Index]->GetCH();
 }
 
 const LPCWSTR& HitGroupMgr::GetAH(const int& Index)
 {
-	return hitGroup[Index]->GetAH();
+	return hitGroup_[Index]->GetAH();
 }
 
 const LPCWSTR& HitGroupMgr::GetIS(const int& Index)
 {
-	return hitGroup[Index]->GetIS();
+	return hitGroup_[Index]->GetIS();
 }
 const bool& HitGroupMgr::GetCHFlag(const int& Index)
 {
-	return hitGroup[Index]->GetCHFlag();
+	return hitGroup_[Index]->GetCHFlag();
 }
 const bool& HitGroupMgr::GetAHFlag(const int& Index)
 {
-	return hitGroup[Index]->GetAHFlag();
+	return hitGroup_[Index]->GetAHFlag();
 }
 
 const bool& HitGroupMgr::GetISFlag(const int& Index)
 {
-	return hitGroup[Index]->GetISFlag();
+	return hitGroup_[Index]->GetISFlag();
 }
 
 const int& HitGroupMgr::GetSRVCount(const int& Index)
 {
-	return hitGroup[Index]->GetSRVCount();
+	return hitGroup_[Index]->GetSRVCount();
 }
 
 const int& HitGroupMgr::GetCBVCount(const int& Index)
 {
-	return hitGroup[Index]->GetCBVCount();
+	return hitGroup_[Index]->GetCBVCount();
 }
 
 const int& HitGroupMgr::GetUAVCount(const int& Index)
 {
-	return hitGroup[Index]->GetUAVCount();
+	return hitGroup_[Index]->GetUAVCount();
 }
 
 const std::shared_ptr<RayRootsignature> HitGroupMgr::GetLocalRootSig(const int& Index)
 {
-	return hitGroup[Index]->GetLoacalRootSig();
+	return hitGroup_[Index]->GetLoacalRootSig();
 }
 
 int HitGroupMgr::GetHitGroupID(const LPCWSTR& HitGroupName)
@@ -83,7 +83,7 @@ int HitGroupMgr::GetHitGroupSRVCount(const int& HitGroupID)
 
 	/*===== ヒットグループのSRVの数を取得 =====*/
 
-	return hitGroup[HitGroupID]->GetSRVCount();
+	return hitGroup_[HitGroupID]->GetSRVCount();
 
 }
 
@@ -92,7 +92,7 @@ int HitGroupMgr::GetHitGroupUAVCount(const int& HitGroupID)
 
 	/*===== ヒットグループのSRVの数を取得 =====*/
 
-	return hitGroup[HitGroupID]->GetUAVCount();
+	return hitGroup_[HitGroupID]->GetUAVCount();
 
 }
 
@@ -108,13 +108,13 @@ void HitGroupMgr::Setting()
 	HitGroupInitData initData;
 
 	// 第一要素
-	initData.CH = { L"mainCHS",true };
-	initData.AH = { L"mainAnyHit",true };
-	initData.IS = { L"",false };
-	initData.SRVcount = 3;
-	initData.CBVcount = 0;
-	initData.UAVcount = 0;
-	hitGroup.push_back(std::make_shared<HitGroup>());
-	hitGroup[DENOISE_AO_HIT_GROUP]->Generate(initData, 1, hitGroupNames[DENOISE_AO_HIT_GROUP]);
+	initData.CH_ = { L"mainCHS",true };
+	initData.AH_ = { L"mainAnyHit",true };
+	initData.IS_ = { L"",false };
+	initData.SRVcount_ = 5;
+	initData.UAVcount_ = 0;
+	initData.CBVcount_ = 0;
+	hitGroup_.push_back(std::make_shared<HitGroup>());
+	hitGroup_[DEF]->Generate(initData, 1, hitGroupNames[DEF]);
 
 }

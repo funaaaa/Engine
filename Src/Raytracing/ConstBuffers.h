@@ -8,10 +8,10 @@
 // カメラ用定数バッファ
 struct CameraConstBufferData {
 
-	DirectX::XMMATRIX mtxView;			// ビュー行列。
-	DirectX::XMMATRIX mtxProj;			// プロジェクション行列。
-	DirectX::XMMATRIX mtxViewInv;		// ビュー逆行列。
-	DirectX::XMMATRIX mtxProjInv;		// プロジェクション逆行列。
+	DirectX::XMMATRIX mtxView_;			// ビュー行列。
+	DirectX::XMMATRIX mtxProj_;			// プロジェクション行列。
+	DirectX::XMMATRIX mtxViewInv_;		// ビュー逆行列。
+	DirectX::XMMATRIX mtxProjInv_;		// プロジェクション逆行列。
 
 	// 初期化処理
 	void Init();
@@ -23,29 +23,30 @@ struct RayLightConstBufferData {
 	// ディレクショナルライト用定数バッファ
 	struct RayDirLightConstBufferData {
 
-		Vec3 lihgtDir;		// ライトの方向
-		int isActive;		// 有効化するかどうかのフラグ
-		Vec3 lightColor;	// ライトの色
-		float pad;			// パディング
+		Vec3 lihgtDir_;		// ライトの方向
+		int isActive_;		// 有効化するかどうかのフラグ
+		Vec3 lightColor_;	// ライトの色
+		float pad_;			// パディング
 
 	};
 
 	// 点光源用定数バッファ
 	struct RayPointLightData {
 
-		Vec3 lightPos;		// ライトの座標
-		float lightSize;	// ライトのサイズ
-		Vec3 lightColor;	// ライトの色
-		float lightPower;	// ライトの強さ
-		int isActive;		// 有効化するかどうかのフラグ
-		Vec3 pad;			// パディング
+		Vec3 lightPos_;			// ライトの座標
+		float lightSize_;		// ライトのサイズ
+		Vec3 lightColor_;		// ライトの色
+		float lightPower_;		// ライトの強さ
+		int isActive_;			// 有効化するかどうかのフラグ
+		int isShadow_;			// 影を出さないフラグ
+		DirectX::XMFLOAT2 pad_;	// パディング
 
 	};
 
-	static const int POINT_LIGHT_COUNT = 10;
+	static const int POINT_LIGHT_COUNT = 30;
 
-	RayDirLightConstBufferData dirLight;						// 並行光源
-	std::array<RayPointLightData, POINT_LIGHT_COUNT> pointLight;// 点光源
+	RayDirLightConstBufferData dirLight_;						// 並行光源
+	std::array<RayPointLightData, POINT_LIGHT_COUNT> pointLight_;// 点光源
 
 	// 初期化処理
 	void Init();
@@ -55,14 +56,14 @@ struct RayLightConstBufferData {
 // 大気散乱用定数バッファ
 struct AtmosphericScatteringConstBufferData {
 
-	float kr;				// レイリー散乱定数
-	float km;				// ミー散乱定数
-	float samples;			// 大気散乱サンプル数
-	float outerRadius;		// 大気圏の最頂点の高さ
-	float innerRadius;		// 地上の高さ
-	float eSun;				// 太陽の強さ
-	float g;				// 散乱定数を求める際に使用する値
-	float aveHeight;		// 平均大気密度を求めるための高さ
+	float kr_;				// レイリー散乱定数
+	float km_;				// ミー散乱定数
+	float samples_;			// 大気散乱サンプル数
+	float outerRadius_;		// 大気圏の最頂点の高さ
+	float innerRadius_;		// 地上の高さ
+	float eSun_;				// 太陽の強さ
+	float g_;				// 散乱定数を求める際に使用する値
+	float aveHeight_;		// 平均大気密度を求めるための高さ
 
 	// 初期化処理
 	void Init();
@@ -72,18 +73,14 @@ struct AtmosphericScatteringConstBufferData {
 // デバッグ用定数バッファ
 struct DebugConstBufferData {
 
-	int seed;			// 乱数の種
-	int counter;		// 累積デノイズ用のサンプル数
-	int aoSampleCount;	// AOで何回サンプルするかの数
-	int isNoiseScene;	// ノイズのみの画面を描画するか
-	int isLightHitScene;// ライトに当たった場所のみを描画するか
-	int isNormalScene;	// 法線情報のみを描画するか
-	int isMeshScene;	// メッシュ情報のみを描画するか
-	int isNoAO;			// AOを行わないか
-	int isNoGI;			// GIを行わないか
-	int isGIOnlyScene;	// GIのみを行うか
-	float pad1;			// パディング
-	float pad2;			// パディング
+	int seed_;			// 乱数の種
+	int isNoiseScene_;	// ノイズのみの画面を描画するか
+	int isLightHitScene_;// ライトに当たった場所のみを描画するか
+	int isNormalScene_;	// 法線情報のみを描画するか
+	int isMeshScene_;	// メッシュ情報のみを描画するか
+	int isNoAO_;			// AOを行わないか
+	int isNoGI_;			// GIを行わないか
+	int isGIOnlyScene_;	// GIのみを行うか
 
 	// 初期化処理
 	void Init();
@@ -94,13 +91,13 @@ struct DebugConstBufferData {
 struct RayConstBufferData {
 
 	// カメラ
-	CameraConstBufferData camera;
+	CameraConstBufferData camera_;
 	// ライト
-	RayLightConstBufferData light;
+	RayLightConstBufferData light_;
 	// AS用
-	AtmosphericScatteringConstBufferData as;
+	AtmosphericScatteringConstBufferData as_;
 	// デバッグ用
-	DebugConstBufferData debug;
+	DebugConstBufferData debug_;
 
 	// 初期化処理
 	void Init();

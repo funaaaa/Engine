@@ -11,340 +11,204 @@
 #include <memory>
 #pragma warning(pop)
 
-void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, ObjectData& ObjectData, bool IsSmoothing)
+void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing)
 {
-	//objファイルがロード済みかどうか
+	// objファイルがロード済みかどうか
 	bool isLoad = false;
-	//ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
+	// ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
 	int dataNumber = 0;
 
-	for (int i = 0; i < ModelDataManager::modelData.size(); ++i) {
-		if (modelData.at(i).modelName == DirectryPath + FileName && modelData.at(i).isSmoothing == IsSmoothing) {
+	const int MODELDATA_SIZE = static_cast<int>(modelData_.size());
+	for (int index = 0; index < MODELDATA_SIZE; ++index) {
+		if (modelData_[index].modelName_ == DirectryPath + FileName && modelData_[index].isSmoothing_ == IsSmoothing) {
 			isLoad = true;
-			dataNumber = i;
+			dataNumber = index;
 			break;
 		}
 	}
 
-	//objファイルが未ロードだったらロードする
-	if (isLoad == false) {
-		//同じ頂点を指し示している頂点インデックスを保存しておくためのマップ
+	// objファイルが未ロードだったらロードする
+	if (!isLoad) {
+		// 同じ頂点を指し示している頂点インデックスを保存しておくためのマップ
 		std::map<unsigned short, std::vector<unsigned short>> smoothData;
 
-		modelData.push_back({});
-		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).modelName = DirectryPath + FileName;
-		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).isSmoothing = IsSmoothing;
+		modelData_.push_back({});
+		ModelDataManager::modelData_.at(ModelDataManager::modelData_.size() - 1).modelName_ = DirectryPath + FileName;
+		ModelDataManager::modelData_.at(ModelDataManager::modelData_.size() - 1).isSmoothing_ = IsSmoothing;
 
-		//フィルストリーム
+		// 変数を初期化。
+		ObjectBuffer.vertexMax_ = Vec3();
+		ObjectBuffer.vertexMin_ = Vec3();
+
+		// フィルストリーム
 		std::ifstream file;
-		//.objファイルを開く
+		// .objファイルを開く
 		file.open(DirectryPath + FileName);
-		//ファイルオープン失敗をチェック
+		// ファイルオープン失敗をチェック
 		if (file.fail()) {
 			assert(0);
 		}
-		//一行ずつ読み込む
+		// 一行ずつ読み込む
 		std::string line;
-		std::vector<Vec3> position;	//座標を保存しておく
-		std::vector<DirectX::XMFLOAT2> uv;		//uvを保存しておく
-		std::vector<Vec3> normal;	//法線ベクトルを保存しておく
-		std::vector<unsigned short> index;
+		std::vector<Vec3> position_;			// 座標を保存しておく
+		std::vector<Vec2> uv_;				// uvを保存しておく
+		std::vector<Vec3> normal_;			// 法線ベクトルを保存しておく
+		std::vector<unsigned short> index_;
 		while (getline(file, line)) {
-			//1行分の文字列をストリームに変換して解析しやすくする
+			// 1行分の文字列をストリームに変換して解析しやすくする
 			std::istringstream lineStream(line);
-			//半角スペース区切りで行の先頭文字を取得
+			// 半角スペース区切りで行の先頭文字を取得
 			std::string key;
 			std::getline(lineStream, key, ' ');
 
-			//先頭文字がvなら頂点座標
+			// 先頭文字がvなら頂点座標
 			if (key == "v") {
-				//X,Y,Z座標読み込み
-				Vec3 pos{};
-				lineStream >> pos.x;
-				lineStream >> pos.y;
-				lineStream >> pos.z;
-				//座標を一旦保存
-				position.push_back(pos);
+				// X,Y,Z座標読み込み
+				Vec3 pos_{};
+				lineStream >> pos_.x_;
+				lineStream >> pos_.y_;
+				lineStream >> pos_.z_;
+				// 座標を一旦保存
+				position_.push_back(pos_);
+				// 頂点の最大最小要素を保存。
+				SaveVertexMinMaxInfo(ObjectBuffer, pos_);
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertexMin_ = ObjectBuffer.vertexMin_;
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertexMax_ = ObjectBuffer.vertexMax_;
 			}
-			//先頭文字がvtならテクスチャ
+			// 先頭文字がvtならテクスチャ
 			if (key == "vt") {
-				//U,V成分読み込み
-				DirectX::XMFLOAT2 texcoord{};
-				lineStream >> texcoord.x;
-				lineStream >> texcoord.y;
-				//V方向反転
-				texcoord.y = 1.0f - texcoord.y;
-				//テクスチャ座標データに追加
-				uv.push_back(texcoord);
+				// U,V成分読み込み
+				Vec2 texcoord{};
+				lineStream >> texcoord.x_;
+				lineStream >> texcoord.y_;
+				// V方向反転
+				texcoord.y_ = 1.0f - texcoord.y_;
+				// テクスチャ座標データに追加
+				uv_.push_back(texcoord);
 			}
-			//先頭文字がvnなら法線ベクトル
+			// 先頭文字がvnなら法線ベクトル
 			if (key == "vn") {
-				//X,Y,Z成分読み込み
+				// X,Y,Z成分読み込み
 				Vec3 norm{};
-				lineStream >> norm.x;
-				lineStream >> norm.y;
-				lineStream >> norm.z;
-				//法線ベクトルデータに追加
-				normal.push_back(norm);
+				lineStream >> norm.x_;
+				lineStream >> norm.y_;
+				lineStream >> norm.z_;
+				// 法線ベクトルデータに追加
+				normal_.push_back(norm);
 			}
-			//先頭文字がfならポリゴン(三角形)
+			// 先頭文字がfならポリゴン(三角形)
 			if (key == "f") {
-				//半角スペース区切りで行の続きを読み込む
+				// 半角スペース区切りで行の続きを読み込む
 				std::string indexString;
-				unsigned short indexPosition;		//受け皿
-				unsigned short indexNormal;			//受け皿
-				unsigned short indexTexcoord;		//受け皿
+				unsigned short indexPosition;		// 受け皿
+				unsigned short indexNormal;			// 受け皿
+				unsigned short indexTexcoord;		// 受け皿
 				while (std::getline(lineStream, indexString, ' ')) {
-					//頂点インデックス一個分の文字列をストリームに変換して解析しやすくする
+					// 頂点インデックス一個分の文字列をストリームに変換して解析しやすくする
 					std::istringstream indexStream(indexString);
 					indexStream >> indexPosition;
-					indexStream.seekg(1, std::ios_base::cur);	//スラッシュを飛ばす
+					indexStream.seekg(1, std::ios_base::cur);	// スラッシュを飛ばす
 					indexStream >> indexTexcoord;
-					indexStream.seekg(1, std::ios_base::cur);	//スラッシュを飛ばす
+					indexStream.seekg(1, std::ios_base::cur);	// スラッシュを飛ばす
 					indexStream >> indexNormal;
-					//頂点データの追加
+					// 頂点データの追加
 					Vertex vert{};
-					vert.pos = position[indexPosition - 1];
-					vert.normal = normal[indexNormal - 1];
-					vert.uv = uv[indexTexcoord - 1];
-					//モデルデータに追加
-					modelData[(static_cast<int>(modelData.size()) - 1)].vertex.push_back(vert);
-					modelData[(static_cast<int>(modelData.size()) - 1)].index.push_back(static_cast<unsigned short>(modelData[(static_cast<int>(modelData.size())) - 1].index.size()));
-					//proSpriteにも追加
-					ObjectData.vertex.push_back(vert);
-					ObjectData.index.push_back(static_cast<int>(ObjectData.index.size()));
-					//isSmoothingがtrueなら頂点情報を追加する
+					vert.pos_ = position_[indexPosition - 1];
+					vert.normal_ = normal_[indexNormal - 1];
+					vert.uv_ = uv_[indexTexcoord - 1];
+					// モデルデータに追加
+					modelData_[(static_cast<int>(modelData_.size()) - 1)].vertex_.push_back(vert);
+					modelData_[(static_cast<int>(modelData_.size()) - 1)].index_.push_back(static_cast<unsigned short>(modelData_[(static_cast<int>(modelData_.size())) - 1].index_.size()));
+					// proSpriteにも追加
+					ObjectBuffer.vertex_.push_back(vert);
+					ObjectBuffer.index_.push_back(static_cast<int>(ObjectBuffer.index_.size()));
+					// isSmoothingがtrueなら頂点情報を追加する
 					if (IsSmoothing == true) {
-						smoothData[indexPosition].push_back(static_cast<unsigned short>(ObjectData.vertex.size()) - 1);
+						smoothData[indexPosition].push_back(static_cast<unsigned short>(ObjectBuffer.vertex_.size()) - 1);
 					}
 				}
 			}
-			//先頭文字列がmtllibならマテリアル
+			// 先頭文字列がmtllibならマテリアル
 			if (key == "mtllib") {
-				//マテリアルのファイル名読み込み
+				// マテリアルのファイル名読み込み
 				std::string materialFileName;
 				lineStream >> materialFileName;
-				//マテリアルの読み込み
-				LoadObjMaterial(DirectryPath + materialFileName, modelData.at(modelData.size() - 1));
+				// マテリアルの読み込み
+				LoadObjMaterial(DirectryPath + materialFileName, modelData_.at(modelData_.size() - 1));
+				ObjectBuffer.material_ = modelData_[modelData_.size() - 1].material_;
+
 			}
 		}
-		//ファイルを閉じる
+		// ファイルを閉じる
 		file.close();
 
-		//isSmoothingがtrueだったら法線情報をなめらかにする
-		if (IsSmoothing == true) {
-			CalculateSmoothedVertexNormals(smoothData, ObjectData, modelData.at(modelData.size() - 1));
+		// isSmoothingがtrueだったら法線情報をなめらかにする
+		if (IsSmoothing) {
+			CalculateSmoothedVertexNormals(smoothData, ObjectBuffer, modelData_.at(modelData_.size() - 1));
 		}
 
 		return;
 	}
 
-	//objのデータをproSpriteに入れる
-	for (int i = 0; i < modelData.at(dataNumber).index.size(); ++i) {
-		ObjectData.index.push_back(modelData.at(dataNumber).index.at(i));
+	// objのデータをObjectDataに入れる
+	for (auto& index_ : modelData_[dataNumber].index_) {
+		ObjectBuffer.index_.push_back(index_);
 	}
-	for (int i = 0; i < modelData.at(dataNumber).vertex.size(); ++i) {
-		ObjectData.vertex.push_back(modelData.at(dataNumber).vertex.at(i));
+	for (auto& index_ : modelData_[dataNumber].vertex_) {
+		ObjectBuffer.vertex_.push_back(index_);
 	}
+	ObjectBuffer.material_ = modelData_[dataNumber].material_;
+	ObjectBuffer.vertexMin_ = modelData_[dataNumber].vertexMin_;
+	ObjectBuffer.vertexMax_ = modelData_[dataNumber].vertexMax_;
 
 }
-
-//void ModelDataManager::LoadObj(string directoryPath, string fileName, Object3DShadow& objectBuffer, bool isSmoothing)
-//{
-//	//objファイルがロード済みかどうか
-//	bool isLoad = false;
-//	//ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
-//	int dataNumber = 0;
-//
-//	for (int i = 0; i < ModelDataManager::modelData.size(); ++i) {
-//		if (modelData.at(i).modelName == directoryPath + fileName && modelData.at(i).isSmoothing == isSmoothing) {
-//			isLoad = true;
-//			dataNumber = i;
-//			break;
-//		}
-//	}
-//
-//	//objファイルが未ロードだったらロードする
-//	if (isLoad == false) {
-//		//同じ頂点を指し示している頂点インデックスを保存しておくためのマップ
-//		map<unsigned short, vector<unsigned short>> smoothData;
-//
-//		modelData.push_back({});
-//		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).modelName = directoryPath + fileName;
-//		ModelDataManager::modelData.at(ModelDataManager::modelData.size() - 1).isSmoothing = isSmoothing;
-//
-//		//フィルストリーム
-//		ifstream file;
-//		//.objファイルを開く
-//		file.open(directoryPath + fileName);
-//		//ファイルオープン失敗をチェック
-//		if (file.fail()) {
-//			assert(0);
-//		}
-//		//一行ずつ読み込む
-//		string line;
-//		vector<XMFLOAT3> position;	//座標を保存しておく
-//		vector<XMFLOAT2> uv;		//uvを保存しておく
-//		vector<XMFLOAT3> normal;	//法線ベクトルを保存しておく
-//		vector<unsigned short> index;
-//		while (getline(file, line)) {
-//			//1行分の文字列をストリームに変換して解析しやすくする
-//			istringstream lineStream(line);
-//			//半角スペース区切りで行の先頭文字を取得
-//			string key;
-//			getline(lineStream, key, ' ');
-//
-//			//先頭文字がvなら頂点座標
-//			if (key == "v") {
-//				//X,Y,Z座標読み込み
-//				XMFLOAT3 pos{};
-//				lineStream >> pos.x;
-//				lineStream >> pos.y;
-//				lineStream >> pos.z;
-//				//座標を一旦保存
-//				position.push_back(pos);
-//			}
-//			//先頭文字がvtならテクスチャ
-//			if (key == "vt") {
-//				//U,V成分読み込み
-//				XMFLOAT2 texcoord{};
-//				lineStream >> texcoord.x;
-//				lineStream >> texcoord.y;
-//				//V方向反転
-//				texcoord.y = 1.0f - texcoord.y;
-//				//テクスチャ座標データに追加
-//				uv.push_back(texcoord);
-//			}
-//			//先頭文字がvnなら法線ベクトル
-//			if (key == "vn") {
-//				//X,Y,Z成分読み込み
-//				XMFLOAT3 norm{};
-//				lineStream >> norm.x;
-//				lineStream >> norm.y;
-//				lineStream >> norm.z;
-//				//法線ベクトルデータに追加
-//				normal.push_back(norm);
-//			}
-//			//先頭文字がfならポリゴン(三角形)
-//			if (key == "f") {
-//				//半角スペース区切りで行の続きを読み込む
-//				string indexString;
-//				unsigned short indexPosition;		//受け皿
-//				unsigned short indexNormal;			//受け皿
-//				unsigned short indexTexcoord;		//受け皿
-//				while (getline(lineStream, indexString, ' ')) {
-//					//頂点インデックス一個分の文字列をストリームに変換して解析しやすくする
-//					istringstream indexStream(indexString);
-//					indexStream >> indexPosition;
-//					indexStream.seekg(1, ios_base::cur);	//スラッシュを飛ばす
-//					indexStream >> indexTexcoord;
-//					indexStream.seekg(1, ios_base::cur);	//スラッシュを飛ばす
-//					indexStream >> indexNormal;
-//					//頂点データの追加
-//					Vertex vert{};
-//					vert.pos = position[indexPosition - 1];
-//					vert.normal = normal[indexNormal - 1];
-//					vert.uv = uv[indexTexcoord - 1];
-//					//モデルデータに追加
-//					modelData.at(modelData.size() - 1).vertex.push_back(vert);
-//					modelData.at(modelData.size() - 1).index.push_back(modelData.at(modelData.size() - 1).index.size());
-//					//proSpriteにも追加
-//					objectBuffer.vertex.push_back(vert);
-//					objectBuffer.index.push_back(objectBuffer.index.size());
-//					//isSmoothingがtrueなら頂点情報を追加する
-//					if (isSmoothing == true) {
-//						smoothData[indexPosition].push_back(objectBuffer.vertex.size() - 1);
-//					}
-//				}
-//			}
-//			//先頭文字列がmtllibならマテリアル
-//			if (key == "mtllib") {
-//				//マテリアルのファイル名読み込み
-//				string materialFileName;
-//				lineStream >> materialFileName;
-//				//マテリアルの読み込み
-//				LoadObjMaterial(directoryPath + materialFileName, modelData.at(modelData.size() - 1), objectBuffer);
-//			}
-//		}
-//		//ファイルを閉じる
-//		file.close();
-//
-//		//isSmoothingがtrueだったら法線情報をなめらかにする
-//		if (isSmoothing == true) {
-//			CalculateSmoothedVertexNormals(smoothData, objectBuffer, modelData.at(modelData.size() - 1));
-//		}
-//
-//		return;
-//	}
-//
-//	//objのデータをproSpriteに入れる
-//	for (int i = 0; i < modelData.at(dataNumber).index.size(); ++i) {
-//		objectBuffer.index.push_back(modelData.at(dataNumber).index.at(i));
-//	}
-//	for (int i = 0; i < modelData.at(dataNumber).vertex.size(); ++i) {
-//		objectBuffer.vertex.push_back(modelData.at(dataNumber).vertex.at(i));
-//	}
-//	objectBuffer.constBuffDataB1.alpha = 1;
-//	objectBuffer.constBuffDataB1.ambient = modelData.at(dataNumber).material.ambient;
-//	objectBuffer.constBuffDataB1.diffuse = modelData.at(dataNumber).material.diffuse;
-//	objectBuffer.constBuffDataB1.specular = modelData.at(dataNumber).material.specular;
-//}
 
 void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData)
 {
 
-	//ファイルストリーム
+	// ファイルストリーム
 	std::ifstream file;
-	//マテリアルファイルを開く
+	// マテリアルファイルを開く
 	file.open(MaterialFileName);
-	//ファイルオープン失敗をチェック
+	// ファイルオープン失敗をチェック
 	if (file.fail()) {
 		assert(0);
 	}
-	//一行ずつ読み込む
+	// 一行ずつ読み込む
 	std::string line;
 	while (getline(file, line)) {
-		//位置行分の文字列をストリームに変換
+		// 位置行分の文字列をストリームに変換
 		std::istringstream lineStream(line);
-		//半角スペース区切りで行の先頭文字列を取得
+		// 半角スペース区切りで行の先頭文字列を取得
 		std::string key;
 		std::getline(lineStream, key, ' ');
-		//先頭のタブ文字は無視する
+		// 先頭のタブ文字は無視する
 		if (key[0] == '\t') {
-			key.erase(key.begin());	//先頭の文字を削除
+			key.erase(key.begin());	// 先頭の文字を削除
 		}
-		//先頭文字列がnewmtlならマテリアル名
+		// 先頭文字列がnewmtlならマテリアル名
 		if (key == "newmtl") {
-			//マテリアル名の読み込み
-			lineStream >> ModelData.material.name;
+			// マテリアル名の読み込み
+			// lineStream >> ModelData.material.name;
 		}
-		////先頭文字列がKaならアンビエント色
-		//if (key == "Ka") {
-		//	lineStream >> modelData.material.ambient.x;
-		//	lineStream >> modelData.material.ambient.y;
-		//	lineStream >> modelData.material.ambient.z;
-		//	objectBuffer.constBufferDataB1.ambient.x = modelData.material.ambient.x;
-		//	objectBuffer.constBufferDataB1.ambient.y = modelData.material.ambient.y;
-		//	objectBuffer.constBufferDataB1.ambient.z = modelData.material.ambient.z;
-		//}
-		////先頭文字列がKdならディフューズ色
-		//if (key == "Kd") {
-		//	lineStream >> modelData.material.diffuse.x;
-		//	lineStream >> modelData.material.diffuse.y;
-		//	lineStream >> modelData.material.diffuse.z;
-		//	objectBuffer.constBufferDataB1.diffuse.x = modelData.material.diffuse.x;
-		//	objectBuffer.constBufferDataB1.diffuse.y = modelData.material.diffuse.y;
-		//	objectBuffer.constBufferDataB1.diffuse.z = modelData.material.diffuse.z;
-		//}
-		////先頭文字がKsならスペキュラー色
-		//if (key == "Ks") {
-		//	lineStream >> modelData.material.specular.x;
-		//	lineStream >> modelData.material.specular.y;
-		//	lineStream >> modelData.material.specular.z;
-		//	objectBuffer.constBufferDataB1.specular.x = modelData.material.specular.x;
-		//	objectBuffer.constBufferDataB1.specular.y = modelData.material.specular.y;
-		//	objectBuffer.constBufferDataB1.specular.z = modelData.material.specular.z;
-		//}
+		// 先頭文字列がKaならアンビエント色
+		if (key == "Ka") {
+			lineStream >> ModelData.material_.ambient_.x_;
+			lineStream >> ModelData.material_.ambient_.y_;
+			lineStream >> ModelData.material_.ambient_.z_;
+		}
+		// 先頭文字列がKdならディフューズ色
+		if (key == "Kd") {
+			lineStream >> ModelData.material_.diffuse_.x_;
+			lineStream >> ModelData.material_.diffuse_.y_;
+			lineStream >> ModelData.material_.diffuse_.z_;
+		}
+		// 先頭文字がKsならスペキュラー色
+		if (key == "Ks") {
+			lineStream >> ModelData.material_.specular.x_;
+			lineStream >> ModelData.material_.specular.y_;
+			lineStream >> ModelData.material_.specular.z_;
+		}
 	}
 }
 
@@ -355,16 +219,47 @@ void ModelDataManager::CalculateSmoothedVertexNormals(std::map<unsigned short, s
 		// 各面用の共通頂点コレクション
 		std::vector<unsigned short>& v = itr->second;
 		// 全頂点の法線を平均する
-		Vec3 normal = {};
-		for (unsigned short index : v) {
-			normal += ObjectData.vertex[index].normal;
+		Vec3 normal_ = {};
+		for (unsigned short index_ : v) {
+			normal_ += ObjectData.vertex_[index_].normal_;
 		}
-		normal = normal / (float)v.size();
-		normal.Normalize();
+		normal_ = normal_ / (float)v.size();
+		normal_.Normalize();
 
-		for (unsigned short index : v) {
-			ObjectData.vertex[index].normal = normal;
-			ModelData.vertex[index].normal = normal;
+		for (unsigned short index_ : v) {
+			ObjectData.vertex_[index_].normal_ = normal_;
+			ModelData.vertex_[index_].normal_ = normal_;
 		}
 	}
+}
+
+void ModelDataManager::SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3& Pos)
+{
+
+	/*===== 頂点の最大最小の情報を保存 =====*/
+
+	// 最大を保存。
+
+	// Posの各成分が保存されている値よりも大きかったら。
+	if (ObjectBuffer.vertexMax_.x_ < Pos.x_) {
+		ObjectBuffer.vertexMax_.x_ = Pos.x_;
+	}
+	if (ObjectBuffer.vertexMax_.y_ < Pos.y_) {
+		ObjectBuffer.vertexMax_.y_ = Pos.y_;
+	}
+	if (ObjectBuffer.vertexMax_.z_ < Pos.z_) {
+		ObjectBuffer.vertexMax_.z_ = Pos.z_;
+	}
+
+	// Posの各成分が保存されている値よりも小さかったら。
+	if (Pos.x_ < ObjectBuffer.vertexMin_.x_) {
+		ObjectBuffer.vertexMin_.x_ = Pos.x_;
+	}
+	if (Pos.y_ < ObjectBuffer.vertexMin_.y_) {
+		ObjectBuffer.vertexMin_.y_ = Pos.y_;
+	}
+	if (Pos.z_ < ObjectBuffer.vertexMin_.z_) {
+		ObjectBuffer.vertexMin_.z_ = Pos.z_;
+	}
+
 }

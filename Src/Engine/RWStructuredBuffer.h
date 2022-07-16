@@ -1,10 +1,11 @@
 #pragma once
 #include <DirectXTex/d3dx12.h>
+#include <wrl.h>
 
 /// <summary>
 /// 構造化バッファ
 /// </summary>
-class RWStructuredBuffer{
+class RWStructuredBuffer {
 public:
 
 	/// <summary>
@@ -35,7 +36,7 @@ public:
 	/// <returns></returns>
 	bool IsInited() const
 	{
-		return isInited;
+		return isInited_;
 	}
 
 	/// <summary>
@@ -45,15 +46,15 @@ public:
 	void* GetResourceOnCPU();
 
 
-	ID3D12Resource* GetD3DResoruce() ;
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetD3DResoruce();
 
 
 public:
 
-	ID3D12Resource* buffersOnGPU = {nullptr};
-	void* buffersOnCPU = { nullptr };			//CPU側からアクセスできるするストラクチャバッファのアドレス。
-	int numElement = 0;								//要素数。
-	int sizeOfElement = 0;							//エレメントのサイズ。
-	bool isInited = false;							//初期化済み？
+	Microsoft::WRL::ComPtr<ID3D12Resource> buffersOnGPU_;
+	void* buffersOnCPU_;			// CPU側からアクセスできるするストラクチャバッファのアドレス。
+	int numElement_;				// 要素数。
+	int sizeOfElement_;			// エレメントのサイズ。
+	bool isInited_;				// 初期化済み
 
 };

@@ -1,117 +1,88 @@
 
-// 入力情報
-RWTexture2D<float4> InputImg : register(u1);
+// デノイズをかける際にライトリーク等の対策をするためのマスク用テクスチャ
+RWTexture2D<float4> InputImg : register(u0);
 
-// 出力先UAV  
+// デノイズをかける際にライトリーク等の対策をするためのマスク用テクスチャ
+RWTexture2D<float4> InputMaskImg : register(u1);
+
+// 出力先UAV
 RWTexture2D<float4> OutputImg : register(u2);
 
-// 重みテーブル
+// ガウシアンブラーの重み
 cbuffer GaussianWeight : register(b0)
 {
     float4 weights[2];
 };
 
-float4 GetPixelColor(int x, int y, int2 texSize)
+// テクスチャの色を取得
+float4 GetPixelColor(int x, int y)
 {
-    x = clamp(0, texSize.x, x);
-    y = clamp(0, texSize.y, y);
+    uint2 texSize = uint2(1280 / 1, 720);
+    
+    x = clamp(x, 0, texSize.x);
+    y = clamp(y, 0, texSize.y);
 
     return InputImg[uint2(x, y)];
 }
-
-// ライトリーク対策
-float4 LightLeakageCountermeasures(float4 baseColor, float4 targetColor, float weight, inout int differenColorCount, inout bool isDrawBaseColor)
+// マスクテクスチャの色を取得
+float4 GetMaskColor(int x, int y)
 {
-    return targetColor * weight;
+    uint2 texSize = uint2(1280 / 1, 720);
     
-    // チェックする。
-    const int COLOR_LENGTH = 0.5f;
-    const int DIRREFECT_COLOR_COUNT = 2;
-    if (COLOR_LENGTH <= abs(baseColor.x - targetColor.x))
-    {
-        
-        // 色が一定以上離れている。
-        ++differenColorCount;
-        
-        //return baseColor * weight;
-        
-    }
+    x = clamp(x, 0, texSize.x);
+    y = clamp(y, 0, texSize.y);
+
+    return InputMaskImg[uint2(x, y)];
+}
+
+// ライトリーク対策用のサンプリング関数
+float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor, float4 baseColor, float4 targetColor, float weight)
+{
     
-    // 色が規定以上離れていたら、基盤の色をそのまま返すようにする。
-    if (DIRREFECT_COLOR_COUNT < differenColorCount)
+    // ある程度ならマスクの色の違いを許容するようにする。
+    float subR = abs(baseMaskColor.x - targetMaskColor.x);
+    float subG = abs(baseMaskColor.y - targetMaskColor.y);
+    float subB = abs(baseMaskColor.z - targetMaskColor.z);
+    const float SUB_NEAR = 0.1f;
+    if (subR < SUB_NEAR && subG < SUB_NEAR && subB < SUB_NEAR)
     {
-        
-        isDrawBaseColor = true;
-        
-    }
-    
-    // 基盤の色を返すモードだったら。
-    if (isDrawBaseColor)
-    {
-        
-        return baseColor * weight;
-        
+        return targetColor * weight;
     }
     else
     {
-        
-        return targetColor * weight;
-        
+        return baseColor * weight;
     }
-    
     
 }
 
-[numthreads(4, 4, 1)]
+[numthreads(32, 32, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
-    uint2 basepos = uint2(DTid.x, DTid.y * 2);
+    uint2 basepos = uint2(DTid.x, DTid.y * 1);
     
-    float4 color;
+    float4 color = float4(0, 0, 0, 0);
     
-    ////基準テクセルからプラス方向に8テクセル、重み付きでサンプリング
-    //color = gaussianWeight[0].r * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y, 0, 720))];
-    //color += gaussianWeight[0].g * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y + 1, 0, 720))];
-    //color += gaussianWeight[0].b * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y + 2, 0, 720))];
-    //color += gaussianWeight[0].a * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y + 3, 0, 720))];
-    //color += gaussianWeight[1].r * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y + 4, 0, 720))];
-    //color += gaussianWeight[1].g * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y + 5, 0, 720))];
-    //color += gaussianWeight[1].b * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y + 6, 0, 720))];
-    //color += gaussianWeight[1].a * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y + 7, 0, 720))];
+    // ガウシアンブラーをかける際の基準の色
+    float4 baseColor = GetPixelColor(basepos.x, basepos.y);
+    float4 baseMaskColor = GetMaskColor(basepos.x, basepos.y);
     
-    ////基準テクセルにマイナス方向に8テクセル、重み付きでサンプリング
-    //color += gaussianWeight[0].r * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y, 0, 720))];
-    //color += gaussianWeight[0].g * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 1, 0, 720))];
-    //color += gaussianWeight[0].b * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 2, 0, 720))];
-    //color += gaussianWeight[0].a * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 3, 0, 720))];
-    //color += gaussianWeight[1].r * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 4, 0, 720))];
-    //color += gaussianWeight[1].g * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 5, 0, 720))];
-    //color += gaussianWeight[1].b * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 6, 0, 720))];
-    //color += gaussianWeight[1].a * InputImg[uint2(clamp(basePos.x, 0, 1280), clamp(basePos.y - 7, 0, 720))];
-    
-    float4 baseColor = GetPixelColor(basepos.x, basepos.y, float2(1280, 720));
-    
-    // 基盤の色から違う色がでた回数。
-    int differenColorCount = 0;
-    bool isDrawBaseColor = false;
-    
-    color = LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y, float2(1280 / 2.0f, 720)), weights[0].x, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y + 1, float2(1280 / 2.0f, 720)), weights[0].y, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y + 2, float2(1280 / 2.0f, 720)), weights[0].z, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y + 3, float2(1280 / 2.0f, 720)), weights[0].w, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y + 4, float2(1280 / 2.0f, 720)), weights[1].x, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y + 5, float2(1280 / 2.0f, 720)), weights[1].y, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y + 6, float2(1280 / 2.0f, 720)), weights[1].z, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y + 7, float2(1280 / 2.0f, 720)), weights[1].w, differenColorCount, isDrawBaseColor);
+    color = LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y), baseColor, GetPixelColor(basepos.x, basepos.y), weights[0].x);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y + 1), baseColor, GetPixelColor(basepos.x, basepos.y + 1), weights[0].y);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y + 2), baseColor, GetPixelColor(basepos.x, basepos.y + 2), weights[0].z);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y + 3), baseColor, GetPixelColor(basepos.x, basepos.y + 3), weights[0].w);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y + 4), baseColor, GetPixelColor(basepos.x, basepos.y + 4), weights[1].x);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y + 5), baseColor, GetPixelColor(basepos.x, basepos.y + 5), weights[1].y);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y + 6), baseColor, GetPixelColor(basepos.x, basepos.y + 6), weights[1].z);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y + 7), baseColor, GetPixelColor(basepos.x, basepos.y + 7), weights[1].w);
 
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y - 1, float2(1280 / 2.0f, 720)), weights[0].y, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y - 2, float2(1280 / 2.0f, 720)), weights[0].z, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y - 3, float2(1280 / 2.0f, 720)), weights[0].w, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y - 4, float2(1280 / 2.0f, 720)), weights[1].x, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y - 5, float2(1280 / 2.0f, 720)), weights[1].y, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y - 6, float2(1280 / 2.0f, 720)), weights[1].z, differenColorCount, isDrawBaseColor);
-    color += LightLeakageCountermeasures(baseColor, GetPixelColor(basepos.x, basepos.y - 7, float2(1280 / 2.0f, 720)), weights[1].w, differenColorCount, isDrawBaseColor);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y - 1), baseColor, GetPixelColor(basepos.x, basepos.y - 1), weights[0].y);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y - 2), baseColor, GetPixelColor(basepos.x, basepos.y - 2), weights[0].z);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y - 3), baseColor, GetPixelColor(basepos.x, basepos.y - 3), weights[0].w);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y - 4), baseColor, GetPixelColor(basepos.x, basepos.y - 4), weights[1].x);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y - 5), baseColor, GetPixelColor(basepos.x, basepos.y - 5), weights[1].y);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y - 6), baseColor, GetPixelColor(basepos.x, basepos.y - 6), weights[1].z);
+    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y - 7), baseColor, GetPixelColor(basepos.x, basepos.y - 7), weights[1].w);
     
     
     color = saturate(color);

@@ -13,7 +13,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	/*===== セッティング処理 =====*/
 
 	// ヒットグループ名を保存。
-	hitGroupName = HitGroupMgr::Ins()->hitGroupNames[UseHitGroup];
+	hitGroupName_ = HitGroupMgr::Ins()->hitGroupNames[UseHitGroup];
 
 	// 入力されたデータを保存する。
 	const int INPUT_COUNT = static_cast<int>(InputData.size());
@@ -23,48 +23,48 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 		RayPiplineShaderData buff;
 
 		// 保存する。
-		buff.shaderPath = InputData[index].shaderPath;
+		buff.shaderPath_ = InputData[index].shaderPath_;
 
 		// 保存されているエントリポイントを保存。
-		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint.size());
+		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < RG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			buff.rayGenEnteryPoint.push_back(InputData[index].rayGenEnteryPoint[entryPointIndex]);
+			buff.rayGenEnteryPoint_.push_back(InputData[index].rayGenEnteryPoint_[entryPointIndex]);
 
 		}
-		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint.size());
+		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < MS_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			buff.missEntryPoint.push_back(InputData[index].missEntryPoint[entryPointIndex]);
+			buff.missEntryPoint_.push_back(InputData[index].missEntryPoint_[entryPointIndex]);
 
 		}
 
 		// 保存する。
-		const int HS_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint.size());
+		const int HS_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < HS_ENTRY_COUNT; ++entryPointIndex) {
-			buff.hitgroupEntryPoint.push_back(InputData[index].hitgroupEntryPoint[entryPointIndex]);
+			buff.hitgroupEntryPoint_.push_back(InputData[index].hitgroupEntryPoint_[entryPointIndex]);
 		}
 
 		// 保存する。
-		shaderData.push_back(buff);
+		shaderData_.push_back(buff);
 
 	}
 
 	// グローバルルートシグネチャを設定。
-	globalRootSig = std::make_shared<RayRootsignature>();
+	globalRootSig_ = std::make_shared<RayRootsignature>();
 	// パラメーターt0にTLAS(SRV)を設定。
-	for (int index = 0; index < SRVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index);
+	for (int index = 0; index < SRVCount; ++index)globalRootSig_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, index);
 	// パラメーターb0にカメラ用バッファを設定。
 	for (int index = 0; index < CBVCount; ++index) {
-		globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
+		globalRootSig_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, index);
 	}
 	// パラメーターu0に出力用バッファを設定。
-	for (int index = 0; index < UAVCount; ++index)globalRootSig->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index);
+	for (int index = 0; index < UAVCount; ++index)globalRootSig_->AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, index);
 
 	// ルートシグネチャを生成。
-	globalRootSig->Create(false, L"GlobalRootSig");
+	globalRootSig_->Create(false, L"GlobalRootSig");
 
 	// ステートオブジェクトの設定を保存しておくようの構造体。
 	CD3DX12_STATE_OBJECT_DESC subobjects;
@@ -72,69 +72,69 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	subobjects.SetStateObjectType(D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE);
 
 	// シェーダーを読み込む。
-	const int SHADER_COUNT = static_cast<int>(shaderData.size());
+	const int SHADER_COUNT = static_cast<int>(shaderData_.size());
 	for (int index = 0; index < SHADER_COUNT; ++index) {
 
-		shaderCode.emplace_back();
+		shaderCode_.emplace_back();
 
 		// シェーダーをコンパイルする。
-		ShaderStorage::Ins()->LoadShaderForDXC(shaderData[index].shaderPath, "lib_6_4", "");
+		ShaderStorage::Ins()->LoadShaderForDXC(shaderData_[index].shaderPath_, "lib_6_4", "");
 
 		// シェーダーを読み込む。
-		shaderCode[index].BytecodeLength = static_cast<SIZE_T>(ShaderStorage::Ins()->GetShaderBin(shaderData[index].shaderPath).size());
-		shaderCode[index].pShaderBytecode = ShaderStorage::Ins()->GetShaderBin(shaderData[index].shaderPath).data();
+		shaderCode_[index].BytecodeLength = static_cast<SIZE_T>(ShaderStorage::Ins()->GetShaderBin(shaderData_[index].shaderPath_).size());
+		shaderCode_[index].pShaderBytecode = ShaderStorage::Ins()->GetShaderBin(shaderData_[index].shaderPath_).data();
 
 		// シェーダーの各関数レコードの登録。
 		auto dxilLib = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
-		dxilLib->SetDXILLibrary(&shaderCode[index]);
+		dxilLib->SetDXILLibrary(&shaderCode_[index]);
 
 		// シェーダーのエントリポイントを登録。
-		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint.size());
+		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < RG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			dxilLib->DefineExport(shaderData[index].rayGenEnteryPoint[entryPointIndex]);
+			dxilLib->DefineExport(shaderData_[index].rayGenEnteryPoint_[entryPointIndex]);
 
 		}
-		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint.size());
+		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < MS_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			dxilLib->DefineExport(shaderData[index].missEntryPoint[entryPointIndex]);
+			dxilLib->DefineExport(shaderData_[index].missEntryPoint_[entryPointIndex]);
 
 		}
-		const int HG_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint.size());
+		const int HG_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < HG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			dxilLib->DefineExport(shaderData[index].hitgroupEntryPoint[entryPointIndex]);
+			dxilLib->DefineExport(shaderData_[index].hitgroupEntryPoint_[entryPointIndex]);
 
 		}
 
 	}
 
 	// ヒットグループの設定。
-	auto hitGroup = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
-	hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
+	auto hitGroup_ = subobjects.CreateSubobject<CD3DX12_HIT_GROUP_SUBOBJECT>();
+	hitGroup_->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
 
 	// ClosestHitShaderをエントリポイントを保存。
 	if (HitGroupMgr::Ins()->GetCHFlag(UseHitGroup)) {
-		hitGroup->SetClosestHitShaderImport(HitGroupMgr::Ins()->GetCH(UseHitGroup));
+		hitGroup_->SetClosestHitShaderImport(HitGroupMgr::Ins()->GetCH(UseHitGroup));
 	}
 	// AnyHitShaderのエントリポイントを保存。
 	if (HitGroupMgr::Ins()->GetAHFlag(UseHitGroup)) {
-		hitGroup->SetAnyHitShaderImport(HitGroupMgr::Ins()->GetAH(UseHitGroup));
+		hitGroup_->SetAnyHitShaderImport(HitGroupMgr::Ins()->GetAH(UseHitGroup));
 	}
 	// IntersectShaderのエントリポイントを保存。
 	if (HitGroupMgr::Ins()->GetISFlag(UseHitGroup)) {
-		hitGroup->SetIntersectionShaderImport(HitGroupMgr::Ins()->GetIS(UseHitGroup));
+		hitGroup_->SetIntersectionShaderImport(HitGroupMgr::Ins()->GetIS(UseHitGroup));
 	}
 	// ヒットグループ名を保存。
-	hitGroup->SetHitGroupExport(HitGroupMgr::Ins()->hitGroupNames[UseHitGroup]);
+	hitGroup_->SetHitGroupExport(HitGroupMgr::Ins()->hitGroupNames[UseHitGroup]);
 
 	// グローバルルートシグネチャの設定。
 	auto rootSig = subobjects.CreateSubobject<CD3DX12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
-	rootSig->SetRootSignature(globalRootSig->GetRootSig().Get());
+	rootSig->SetRootSignature(globalRootSig_->GetRootSig().Get());
 
 	// HitGroupのローカルルートシグネチャを設定。
 	auto chLocalRootSig = subobjects.CreateSubobject<CD3DX12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
@@ -152,11 +152,11 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	pipelineConfig->Config(ReflectionCount);
 
 	// 生成する。
-	DirectXBase::Ins()->dev->CreateStateObject(
-		subobjects, IID_PPV_ARGS(stateObject.ReleaseAndGetAddressOf())
+	DirectXBase::Ins()->dev_->CreateStateObject(
+		subobjects, IID_PPV_ARGS(stateObject_.ReleaseAndGetAddressOf())
 	);
 
-	stateObject->SetName(L"StateObject");
+	stateObject_->SetName(L"StateObject");
 
 }
 
@@ -205,17 +205,17 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	/*========== シェーダーテーブルの構築 ==========*/
 
 	// シェーダーテーブル確保。
-	shaderTable = CreateBuffer(
+	shaderTable_ = CreateBuffer(
 		tableSize, D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD,
 		L"ShaderTable");
 
-	stateObject.As(&rtsoProps);
+	stateObject_.As(&rtsoProps_);
 
 	// 各シェーダーレコードを書き込んでいく。
 	void* mapped = nullptr;
-	shaderTable->Map(0, nullptr, &mapped);
+	shaderTable_->Map(0, nullptr, &mapped);
 	uint8_t* pStart = static_cast<uint8_t*>(mapped);
 
 	// RayGeneration 用のシェーダーレコードを書き込み。
@@ -223,14 +223,14 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	{
 		uint8_t* p = rgsStart;
 
-		const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
+		const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 		for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-			const int RG_COUNT = static_cast<int>(shaderData[index].rayGenEnteryPoint.size());
+			const int RG_COUNT = static_cast<int>(shaderData_[index].rayGenEnteryPoint_.size());
 			for (int rgIndex = 0; rgIndex < RG_COUNT; ++rgIndex) {
 
-				void* id = rtsoProps->GetShaderIdentifier(shaderData[index].rayGenEnteryPoint[rgIndex]);
-				p += WriteShaderIdentifier(p, id);
+				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index].rayGenEnteryPoint_[rgIndex]);
+				p += WriteShaderIdentifier(p, id_);
 
 			}
 
@@ -243,14 +243,14 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	{
 		uint8_t* p = missStart;
 
-		const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
+		const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 		for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-			const int MS_COUNT = static_cast<int>(shaderData[index].missEntryPoint.size());
+			const int MS_COUNT = static_cast<int>(shaderData_[index].missEntryPoint_.size());
 			for (int msIndex = 0; msIndex < MS_COUNT; ++msIndex) {
 
-				void* id = rtsoProps->GetShaderIdentifier(shaderData[index].missEntryPoint[msIndex]);
-				p += WriteShaderIdentifier(p, id);
+				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index].missEntryPoint_[msIndex]);
+				p += WriteShaderIdentifier(p, id_);
 
 			}
 
@@ -267,38 +267,38 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
 		for (int index = 0; index < BLAS_COUNT; ++index) {
 
-			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject, hitGroupName);
+			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject_, hitGroupName_);
 
 		}
 
 	}
-	shaderTable->Unmap(0, nullptr);
+	shaderTable_->Unmap(0, nullptr);
 
 	// レイ発射時の設定を設定。
 
 	// DispatchRays のために情報をセットしておく.
-	auto startAddress = shaderTable->GetGPUVirtualAddress();
+	auto startAddress = shaderTable_->GetGPUVirtualAddress();
 	// RayGenerationシェーダーの情報
-	auto& shaderRecordRG = dispatchRayDesc.RayGenerationShaderRecord;
+	auto& shaderRecordRG = dispatchRayDesc_.RayGenerationShaderRecord;
 	shaderRecordRG.StartAddress = startAddress;
 	shaderRecordRG.SizeInBytes = raygenSize;
 	startAddress += raygenRegion;
 	// Missシェーダーの情報
-	auto& shaderRecordMS = dispatchRayDesc.MissShaderTable;
+	auto& shaderRecordMS = dispatchRayDesc_.MissShaderTable;
 	shaderRecordMS.StartAddress = startAddress;
 	shaderRecordMS.SizeInBytes = missSize;
 	shaderRecordMS.StrideInBytes = missRecordSize;
 	startAddress += missRegion;
 	// HitGroupの情報
-	auto& shaderRecordHG = dispatchRayDesc.HitGroupTable;
+	auto& shaderRecordHG = dispatchRayDesc_.HitGroupTable;
 	shaderRecordHG.StartAddress = startAddress;
 	shaderRecordHG.SizeInBytes = hitGroupSize;
 	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
 	startAddress += hitgroupRegion;
 	// レイの情報
-	dispatchRayDesc.Width = DispatchX;
-	dispatchRayDesc.Height = DispatchY;
-	dispatchRayDesc.Depth = 1;
+	dispatchRayDesc_.Width = DispatchX;
+	dispatchRayDesc_.Height = DispatchY;
+	dispatchRayDesc_.Depth = 1;
 
 }
 
@@ -314,9 +314,8 @@ UINT RaytracingPipline::GetLargestDataSizeInHitGroup()
 
 		// データサイズを取得。
 		UINT dataSize = 0;
-		const UINT CONST_DATA_SIZE = 4;
 		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetSRVCount(index);
-		dataSize += CONST_DATA_SIZE * HitGroupMgr::Ins()->GetCBVCount(index);
+		dataSize += sizeof(D3D12_GPU_VIRTUAL_ADDRESS) * HitGroupMgr::Ins()->GetCBVCount(index);
 		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetUAVCount(index);
 
 		// 取得したデータサイズが保存されているデータサイズより小さかったら処理を飛ばす。
@@ -331,7 +330,7 @@ UINT RaytracingPipline::GetLargestDataSizeInHitGroup()
 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType, const wchar_t* name)
+Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType, const wchar_t* name_)
 {
 	D3D12_HEAP_PROPERTIES heapProps{};
 	if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
@@ -349,7 +348,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t si
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;
-	resDesc.Width = size;
+	resDesc.Width = size_;
 	resDesc.Height = 1;
 	resDesc.DepthOrArraySize = 1;
 	resDesc.MipLevels = 1;
@@ -358,7 +357,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t si
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resDesc.Flags = flags;
 
-	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -369,8 +368,8 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t si
 	if (FAILED(hr)) {
 		OutputDebugStringA("CreateBuffer failed.\n");
 	}
-	if (resource != nullptr && name != nullptr) {
-		resource->SetName(name);
+	if (resource != nullptr && name_ != nullptr) {
+		resource->SetName(name_);
 	}
 	return resource;
 }
@@ -385,10 +384,10 @@ int RaytracingPipline::GetRayGenerationCount()
 {
 	int count = 0;
 
-	const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
+	const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 	for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-		count += static_cast<int>(shaderData[index].rayGenEnteryPoint.size());
+		count += static_cast<int>(shaderData_[index].rayGenEnteryPoint_.size());
 
 	}
 
@@ -400,10 +399,10 @@ int RaytracingPipline::GetMissCount()
 {
 	int count = 0;
 
-	const int SHADER_DATA_COUNT = static_cast<int>(shaderData.size());
+	const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 	for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-		count += static_cast<int>(shaderData[index].missEntryPoint.size());
+		count += static_cast<int>(shaderData_[index].missEntryPoint_.size());
 
 	}
 

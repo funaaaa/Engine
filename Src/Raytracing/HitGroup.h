@@ -10,19 +10,19 @@ class RayRootsignature;
 
 // HitGroupを生成する際に渡すデータ構造体
 struct EntryPoint {
-	LPCWSTR entryPoint;
-	bool isActive;
+	LPCWSTR entryPoint_;
+	bool isActive_;
 	EntryPoint() {};
-	EntryPoint(LPCWSTR Entry, bool Flag) :entryPoint(Entry), isActive(Flag) {};
+	EntryPoint(LPCWSTR Entry, bool Flag) :entryPoint_(Entry), isActive_(Flag) {};
 };
 struct HitGroupInitData {
 
-	EntryPoint CH;		// ClosestHitShader
-	EntryPoint AH;		// AnyHitShader
-	EntryPoint IS;		// IntersectShader
-	int SRVcount;		// SRVの数
-	int CBVcount;		// CBVの数
-	int UAVcount;		// UAVの数
+	EntryPoint CH_;		// ClosestHitShader
+	EntryPoint AH_;		// AnyHitShader
+	EntryPoint IS_;		// IntersectShader
+	int SRVcount_;		// SRVの数
+	int CBVcount_;		// CBVの数
+	int UAVcount_;		// UAVの数
 	HitGroupInitData() {};
 };
 
@@ -33,18 +33,18 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	EntryPoint CH;		// ClosestHitShader
-	EntryPoint AH;		// AnyHitShader
-	EntryPoint IS;		// IntersectShader
-	int SRVcount;		// SRVの数
-	int CBVcount;		// CBVの数
-	int UAVcount;		// UAVの数
+	EntryPoint CH_;		// ClosestHitShader
+	EntryPoint AH_;		// AnyHitShader
+	EntryPoint IS_;		// IntersectShader
+	int SRVcount_;		// SRVの数
+	int CBVcount_;		// CBVの数
+	int UAVcount_;		// UAVの数
 
-	int registerSpace;	// シェーダーレジスターのレジスタースペース番号
+	int registerSpace_;	// シェーダーレジスターのレジスタースペース番号
 
-	LPCWSTR hitGroupName;	// このヒットグループの名前
+	LPCWSTR hitGroupName_;	// このヒットグループの名前
 
-	std::shared_ptr<RayRootsignature> localRootSig;	// このヒットグループで使用するローカルルートシグネチャ
+	std::shared_ptr<RayRootsignature> localRootSig_;	// このヒットグループで使用するローカルルートシグネチャ
 
 
 public:
@@ -58,15 +58,15 @@ public:
 	void Generate(const HitGroupInitData& InputData, const int& RegisterSpace, const LPCWSTR& HitGroupName);
 
 	// 各種ゲッタ
-	const LPCWSTR& GetCH() { return CH.entryPoint; }
-	const LPCWSTR& GetAH() { return AH.entryPoint; }
-	const LPCWSTR& GetIS() { return IS.entryPoint; }
-	const bool& GetCHFlag() { return CH.isActive; }
-	const bool& GetAHFlag() { return AH.isActive; }
-	const bool& GetISFlag() { return IS.isActive; }
-	const int& GetSRVCount() { return SRVcount; }
-	const int& GetCBVCount() { return CBVcount; }
-	const int& GetUAVCount() { return UAVcount; }
-	const std::shared_ptr<RayRootsignature> GetLoacalRootSig() {return localRootSig; };
+	const LPCWSTR& GetCH() { return CH_.entryPoint_; }
+	const LPCWSTR& GetAH() { return AH_.entryPoint_; }
+	const LPCWSTR& GetIS() { return IS_.entryPoint_; }
+	const bool& GetCHFlag() { return CH_.isActive_; }
+	const bool& GetAHFlag() { return AH_.isActive_; }
+	const bool& GetISFlag() { return IS_.isActive_; }
+	const int& GetSRVCount() { return SRVcount_; }
+	const int& GetCBVCount() { return CBVcount_; }
+	const int& GetUAVCount() { return UAVcount_; }
+	const std::shared_ptr<RayRootsignature> GetLoacalRootSig() {return localRootSig_; };
 
 };

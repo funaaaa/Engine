@@ -18,12 +18,12 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<CD3DX12_ROOT_PARAMETER, MAX_ROOTPARAM> rootparam;	// ルートパラメーター
-	std::array<CD3DX12_DESCRIPTOR_RANGE, MAX_ROOTPARAM> descRange;	// ディスクリプタテーブル
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootsignature;		// ルートシグネチャ
-	std::array<CD3DX12_STATIC_SAMPLER_DESC, MAX_SAMPLER> sampler;	// スタティックサンプラー
-	UINT rootparamCount;											// ルートパラメーター数
-	UINT samplerCount;												// サンプラーの数
+	std::array<CD3DX12_ROOT_PARAMETER, MAX_ROOTPARAM> rootparam_;	// ルートパラメーター
+	std::array<CD3DX12_DESCRIPTOR_RANGE, MAX_ROOTPARAM> descRange_;	// ディスクリプタテーブル
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootsignature_;		// ルートシグネチャ
+	std::array<CD3DX12_STATIC_SAMPLER_DESC, MAX_SAMPLER> sampler_;	// スタティックサンプラー
+	UINT rootparamCount_;											// ルートパラメーター数
+	UINT samplerCount_;												// サンプラーの数
 
 
 public:
@@ -32,20 +32,20 @@ public:
 
 	// コンストラクタ
 	RayRootsignature() {
-		rootparamCount = 0;
-		samplerCount = 0;
+		rootparamCount_ = 0;
+		samplerCount_ = 0;
 	}
 
 	// ルートパラメーター追加処理
-	void AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE type, UINT shaderRegister, UINT registerSpace = 0);
+	void AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT ShaderRegister, UINT RegisterSpace = 0);
 
 	// スタティックサンプラー追加処理
-	void AddStaticSampler(const int& registerSpace = 0);
+	void AddStaticSampler(const int& RegisterSpace = 0);
 
 	// ルートシグネチャの生成
-	void Create(const bool& isLocal, const wchar_t* name = nullptr);
+	void Create(const bool& IsLocal, const wchar_t* Name = nullptr);
 
 	// アクセッタ
-	inline Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSig() { return rootsignature; }
+	inline Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSig() { return rootsignature_; }
 
 };

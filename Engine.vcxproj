@@ -78,13 +78,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\Dxcompiler;$(ProjectDir)lib\fbx_sdk\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(WindowsSdkDir)Redist\D3D\$(PlatformTarget)\dxil.dll;C:\Program Files\Autodesk\FBX\FBX SDK\2020.2.1\lib\vs2019\x64\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\fbx_sdk\lib;$(ProjectDir)lib\Dxcompiler;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -116,442 +116,176 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)hid;$(SolutionDir)DirectXTex</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4099 /ignore:4820 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\Dxcompiler\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)hid;$(SolutionDir)DirectXTex</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\Dxcompiler</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk.lib;libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk-mt.lib;libxml2-mt.lib;zlib-mt.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4099 /ignore:4820 %(AdditionalOptions)</AdditionalOptions>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\Dxcompiler\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BaseDrawData.cpp" />
-    <ClCompile Include="BaseObject3D.cpp" />
-    <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ComputeShader.cpp" />
-    <ClCompile Include="DebugText.cpp" />
-    <ClCompile Include="DirectXBase.cpp" />
-    <ClCompile Include="DynamicConstBuffer.cpp" />
-    <ClCompile Include="FHelper.cpp" />
-    <ClCompile Include="GSParticle.cpp" />
-    <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\imgui_demo.cpp" />
-    <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_dx12.cpp" />
-    <ClCompile Include="imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="imgui\imgui_tables.cpp" />
-    <ClCompile Include="imgui\imgui_widgets.cpp" />
-    <ClCompile Include="Input.cpp" />
-    <ClCompile Include="Joycon.cpp" />
-    <ClCompile Include="LightCamera.cpp" />
-    <ClCompile Include="LightManager.cpp" />
-    <ClCompile Include="Line.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="ModelDataManager.cpp" />
-    <ClCompile Include="MultiPathFunction.cpp" />
-    <ClCompile Include="Object3D.cpp" />
-    <ClCompile Include="ObjectManager.cpp" />
-    <ClCompile Include="Pipline.cpp" />
-    <ClCompile Include="PiplineManager.cpp" />
-    <ClCompile Include="PorygonInstance.cpp" />
-    <ClCompile Include="PorygonInstanceRegister.cpp" />
-    <ClCompile Include="PorygonMeshBLAS.cpp" />
-    <ClCompile Include="RayDescriptor.cpp" />
-    <ClCompile Include="RayRootsignature.cpp" />
-    <ClCompile Include="RenderTarget.cpp" />
-    <ClCompile Include="RWStructuredBuffer.cpp" />
-    <ClCompile Include="ShaderData.cpp" />
-    <ClCompile Include="ShaderStorage.cpp" />
-    <ClCompile Include="ShapeManager.cpp" />
-    <ClCompile Include="SoundManager.cpp" />
-    <ClCompile Include="Sprite.cpp" />
-    <ClCompile Include="SpriteGaussian.cpp" />
-    <ClCompile Include="StructuredBuffer.cpp" />
-    <ClCompile Include="TextureManager.cpp" />
-    <ClCompile Include="TLAS.cpp" />
-    <ClCompile Include="WIndowsAPI.cpp" />
+    <ClCompile Include="lib\imgui\imgui.cpp" />
+    <ClCompile Include="lib\imgui\imgui_demo.cpp" />
+    <ClCompile Include="lib\imgui\imgui_draw.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="lib\imgui\imgui_tables.cpp" />
+    <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Src\Engine\BaseDrawData.cpp" />
+    <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
+    <ClCompile Include="Src\Engine\Camera.cpp" />
+    <ClCompile Include="Src\Engine\ComputeShader.cpp" />
+    <ClCompile Include="Src\Engine\DirectXBase.cpp" />
+    <ClCompile Include="Src\Engine\FbxLoader.cpp" />
+    <ClCompile Include="Src\Engine\FHelper.cpp" />
+    <ClCompile Include="Src\Engine\StageObjectMgr.cpp" />
+    <ClCompile Include="Src\Engine\Input.cpp" />
+    <ClCompile Include="Src\Engine\Joycon.cpp" />
+    <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
+    <ClCompile Include="Src\Engine\Pipline.cpp" />
+    <ClCompile Include="Src\Engine\PiplineManager.cpp" />
+    <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp" />
+    <ClCompile Include="Src\Engine\ShaderData.cpp" />
+    <ClCompile Include="Src\Engine\ShaderStorage.cpp" />
+    <ClCompile Include="Src\Engine\SoundManager.cpp" />
+    <ClCompile Include="Src\Engine\Sprite.cpp" />
+    <ClCompile Include="Src\Engine\StructuredBuffer.cpp" />
+    <ClCompile Include="Src\Engine\TextureManager.cpp" />
+    <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
+    <ClCompile Include="Src\Game\BasicStageObject.cpp" />
+    <ClCompile Include="Src\Game\CircuitStage.cpp" />
+    <ClCompile Include="Src\Game\DriftParticle.cpp" />
+    <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
+    <ClCompile Include="Src\Game\FloatingStageObject.cpp" />
+    <ClCompile Include="Src\Game\GameScene.cpp" />
+    <ClCompile Include="Src\Game\Player.cpp" />
+    <ClCompile Include="Src\Game\PlayerModel.cpp" />
+    <ClCompile Include="Src\Game\ResultScene.cpp" />
+    <ClCompile Include="Src\Game\SceneMgr.cpp" />
+    <ClCompile Include="Src\Game\TitleScene.cpp" />
+    <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Raytracing\BLAS.cpp" />
+    <ClCompile Include="Src\Raytracing\BLASRegister.cpp" />
+    <ClCompile Include="Src\Raytracing\ConstBuffers.cpp" />
+    <ClCompile Include="Src\Raytracing\DynamicConstBuffer.cpp" />
+    <ClCompile Include="Src\Raytracing\HitGroup.cpp" />
+    <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp" />
+    <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp" />
+    <ClCompile Include="Src\Raytracing\OBB.cpp" />
+    <ClCompile Include="Src\Raytracing\PolygonInstance.cpp" />
+    <ClCompile Include="Src\Raytracing\PolygonInstanceRegister.cpp" />
+    <ClCompile Include="Src\Raytracing\RayComputeShader.cpp" />
+    <ClCompile Include="Src\Raytracing\RayDenoiser.cpp" />
+    <ClCompile Include="Src\Raytracing\RayDescriptor.cpp" />
+    <ClCompile Include="Src\Raytracing\RayRootsignature.cpp" />
+    <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
+    <ClCompile Include="Src\Raytracing\RaytracingPipline.cpp" />
+    <ClCompile Include="Src\Raytracing\TLAS.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BaseDrawData.h" />
-    <ClInclude Include="BaseGSParticle.h" />
-    <ClInclude Include="BaseLine.h" />
-    <ClInclude Include="BaseObject3D.h" />
-    <ClInclude Include="BaseSprite.h" />
-    <ClInclude Include="Camera.h" />
-    <ClInclude Include="CircleShadow.h" />
-    <ClInclude Include="ComputeShader.h" />
-    <ClInclude Include="ConstBufferData.h" />
-    <ClInclude Include="DebugText.h" />
-    <ClInclude Include="DirectXBase.h" />
-    <ClInclude Include="DynamicConstBuffer.h" />
-    <ClInclude Include="Engine.h" />
-    <ClInclude Include="Enum.h" />
-    <ClInclude Include="FHelper.h" />
-    <ClInclude Include="FString.h" />
-    <ClInclude Include="GSParticle.h" />
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_impl_dx12.h" />
-    <ClInclude Include="imgui\imgui_impl_win32.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui\imstb_truetype.h" />
-    <ClInclude Include="Input.h" />
-    <ClInclude Include="InstanceIDMgr.h" />
-    <ClInclude Include="Joycon.h" />
-    <ClInclude Include="LightCamera.h" />
-    <ClInclude Include="LightManager.h" />
-    <ClInclude Include="Line.h" />
-    <ClInclude Include="ModelDataManager.h" />
-    <ClInclude Include="MultiPathFunction.h" />
-    <ClInclude Include="Object3D.h" />
-    <ClInclude Include="ObjectManager.h" />
-    <ClInclude Include="Pipline.h" />
-    <ClInclude Include="PiplineManager.h" />
-    <ClInclude Include="PorygonInstance.h" />
-    <ClInclude Include="PorygonInstanceRegister.h" />
-    <ClInclude Include="PorygonMeshBLAS.h" />
-    <ClInclude Include="RayDescriptor.h" />
-    <ClInclude Include="RayRootsignature.h" />
-    <ClInclude Include="RenderTarget.h" />
-    <ClInclude Include="RWStructuredBuffer.h" />
-    <ClInclude Include="ShaderData.h" />
-    <ClInclude Include="ShaderStorage.h" />
-    <ClInclude Include="ShapeManager.h" />
-    <ClInclude Include="Singleton.h" />
-    <ClInclude Include="SoundManager.h" />
-    <ClInclude Include="Sprite.h" />
-    <ClInclude Include="SpriteGaussian.h" />
-    <ClInclude Include="Struct.h" />
-    <ClInclude Include="StructuredBuffer.h" />
-    <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="TLAS.h" />
-    <ClInclude Include="WindowsAPI.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <FxCompile Include="Resource\ShaderFiles\GaussXPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GaussXVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GaussYPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GaussYVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSInstanceGS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSInstancePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSInstanceVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSParticleGS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSParticlePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\GSParticleVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\LinePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\LineVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathBlurPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathMonochromePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathNormalPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\MultiPathNormalVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectBumpPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectGetShadowMapPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectGetShadowMapVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceLightPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceNoLightPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceOutlineVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceToonShaderPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectInstanceVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightFogBumpPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightFogPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectLightShadowMapPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectMRTDepthVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectNoLightPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectOutlineVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectShadowMapVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderShadowFogPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderShadowPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\OBJGS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Geometry</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\triangleShaderHeader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.3</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.3</ShaderModel>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).dxlib</ObjectFileOutput>
-      <ObjectFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).dxlib</ObjectFileOutput>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </EntryPointName>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </EntryPointName>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\Sampling2TexturePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\Sampling8TexturePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SamplingLuminancePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\Sampling8TexturePSTitle.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SpritePS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\SpriteVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderPS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\ObjectToonShaderVS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\TestCS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-    </FxCompile>
+    <ClInclude Include="lib\imgui\imconfig.h" />
+    <ClInclude Include="lib\imgui\imgui.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="lib\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\imgui\imstb_rectpack.h" />
+    <ClInclude Include="lib\imgui\imstb_textedit.h" />
+    <ClInclude Include="lib\imgui\imstb_truetype.h" />
+    <ClInclude Include="Src\Engine\BaseDrawData.h" />
+    <ClInclude Include="Src\Engine\BaseStageObject.h" />
+    <ClInclude Include="Src\Engine\BaseSprite.h" />
+    <ClInclude Include="Src\Engine\Camera.h" />
+    <ClInclude Include="Src\Engine\ComputeShader.h" />
+    <ClInclude Include="Src\Engine\DirectXBase.h" />
+    <ClInclude Include="Src\Engine\dxcapi.h" />
+    <ClInclude Include="Src\Engine\FbxLoader.h" />
+    <ClInclude Include="Src\Engine\FHelper.h" />
+    <ClInclude Include="Src\Engine\FString.h" />
+    <ClInclude Include="Src\Engine\StageObjectMgr.h" />
+    <ClInclude Include="Src\Engine\Input.h" />
+    <ClInclude Include="Src\Engine\Joycon.h" />
+    <ClInclude Include="Src\Engine\ModelDataManager.h" />
+    <ClInclude Include="Src\Engine\Pipline.h" />
+    <ClInclude Include="Src\Engine\PiplineManager.h" />
+    <ClInclude Include="Src\Engine\RWStructuredBuffer.h" />
+    <ClInclude Include="Src\Engine\ShaderData.h" />
+    <ClInclude Include="Src\Engine\ShaderStorage.h" />
+    <ClInclude Include="Src\Engine\Singleton.h" />
+    <ClInclude Include="Src\Engine\SoundManager.h" />
+    <ClInclude Include="Src\Engine\Sprite.h" />
+    <ClInclude Include="Src\Engine\StructuredBuffer.h" />
+    <ClInclude Include="Src\Engine\TextureManager.h" />
+    <ClInclude Include="Src\Engine\Vec.h" />
+    <ClInclude Include="Src\Engine\WindowsAPI.h" />
+    <ClInclude Include="Src\Game\BaseScene.h" />
+    <ClInclude Include="Src\Game\BaseStage.h" />
+    <ClInclude Include="Src\Game\BasicStageObject.h" />
+    <ClInclude Include="Src\Game\CircuitStage.h" />
+    <ClInclude Include="Src\Game\DriftParticle.h" />
+    <ClInclude Include="Src\Game\DriftParticleMgr.h" />
+    <ClInclude Include="Src\Game\FloatingStageObject.h" />
+    <ClInclude Include="Src\Game\GameScene.h" />
+    <ClInclude Include="Src\Game\Player.h" />
+    <ClInclude Include="Src\Game\PlayerModel.h" />
+    <ClInclude Include="Src\Game\ResultScene.h" />
+    <ClInclude Include="Src\Game\SceneMgr.h" />
+    <ClInclude Include="Src\Game\TitleScene.h" />
+    <ClInclude Include="Src\Raytracing\BLAS.h" />
+    <ClInclude Include="Src\Raytracing\BLASRegister.h" />
+    <ClInclude Include="Src\Raytracing\ConstBuffers.h" />
+    <ClInclude Include="Src\Raytracing\DescriptorHeapMgr.h" />
+    <ClInclude Include="Src\Raytracing\DynamicConstBuffer.h" />
+    <ClInclude Include="Src\Raytracing\HitGroup.h" />
+    <ClInclude Include="Src\Raytracing\HitGroupMgr.h" />
+    <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h" />
+    <ClInclude Include="Src\Raytracing\OBB.h" />
+    <ClInclude Include="Src\Raytracing\PolygonInstance.h" />
+    <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />
+    <ClInclude Include="Src\Raytracing\RayDescriptor.h" />
+    <ClInclude Include="Src\Raytracing\RayDenoiser.h" />
+    <ClInclude Include="Src\Raytracing\RayRootsignature.h" />
+    <ClInclude Include="Src\Raytracing\RayComputeShader.h" />
+    <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />
+    <ClInclude Include="Src\Raytracing\RaytracingPipline.h" />
+    <ClInclude Include="Src\Raytracing\TLAS.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hid.dll" />
-    <None Include="imgui.ini" />
-    <None Include="Resource\ShaderFiles\GSInstanceShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\GSParticleShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\LineShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\MultiPathShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\ObjectGetShadowMapShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\ObjectInstanceShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\ObjectMRTShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\ObjectShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\ObjectShadowMapShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\ObjectToonShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\ObjectToonShadowShaderHeader.hlsli" />
-    <None Include="Resource\ShaderFiles\SpriteShaderHeader.hlsli" />
+    <None Include="lib\imgui\imgui.ini" />
     <None Include="setupapi.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -561,15 +295,27 @@
     <Library Include="SetupAPI.Lib" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="DirectXTex\DirectXTex\DirectXTex_Desktop_2019_Win10.vcxproj">
-      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="lib\DirectXTex\DirectXTex\DirectXTex_Desktop_2019_Win10.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.4</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.4</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

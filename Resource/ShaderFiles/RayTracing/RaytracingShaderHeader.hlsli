@@ -2,28 +2,33 @@
 // 円周率
 static const float PI = 3.141592653589f;
 
-// CHS内での識別用
-static const int CHS_IDENTIFICATION_INSTANCE_DEF = 0; // InstanceID 通常のレイ
-static const int CHS_IDENTIFICATION_INSTNACE_AS = 1; // InstanceID 大気散乱用のレイ
-static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR = 2; // InstanceID テクスチャの色をそのまま返す。用のレイ
-static const int CHS_IDENTIFICATION_ISNTANCE_REFLECTION = 3; // InstanceID 反射させる。
-static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // InstanceID 完全反射させる。
-static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ライト用のオブジェクト。テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
+// CHSでの識別用変数
+static const int CHS_IDENTIFICATION_INSTANCE_DEF = 0; // InstanceID 通常のオブジェクト
+static const int CHS_IDENTIFICATION_INSTNACE_AS = 1; // InstanceID 大気散乱用のオブジェクト
+static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR = 2; // InstanceID テクスチャの色をそのまま返すオブジェクト
+static const int CHS_IDENTIFICATION_ISNTANCE_REFLECTION = 3; // InstanceID 反射のオブジェクト
+static const int CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION = 4; // InstanceID 完全反射のオブジェクト
+static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ライト用オブジェクト テクスチャの色をそのまま返す。MissShaderで当たり判定を棄却する為にも使用する。
+static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID 屈折の処理
+static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ライティングも描画も行わないオブジェクト
+static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID 通常の処理 + GIも行う。
 
-static const int CHS_IDENTIFICATION_RAYID_GI = 100; // グローバルイルミネーション
-static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 101; // 反射レイ
-static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 102; // 完全反射反射レイ
+static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // デフォルトのレイ
+static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI用のレイ
+static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 102; // 反射用のレイ
+static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 103; // 完全反射のレイ
+static const int CHS_IDENTIFICATION_RAYID_REFRACTION = 104; // 屈折のレイ
 
-// カメラ用定数バッファ
+// カメラ用の定数バッファ
 struct CameraConstBufferData
 {
-    matrix mtxView; // ビュー行列.
-    matrix mtxProj; // プロジェクション行列.
-    matrix mtxViewInv; // ビュー逆行列.
-    matrix mtxProjInv; // プロジェクション逆行列.
+    matrix mtxView; // ビュー行列
+    matrix mtxProj; // プロジェクション行列
+    matrix mtxViewInv; // 逆ビュー行列
+    matrix mtxProjInv; // 逆プロジェクション行列
 };
 
-// 並行光源の情報
+// ディレクショナルライト用定数バッファ
 struct DirLightData
 {
     float3 lightDir;
@@ -31,8 +36,8 @@ struct DirLightData
     float3 lightColor;
     float pad;
 };
-static const int POINT_LIGHT_COUNT = 10;
-// 点光源の情報
+static const int POINT_LIGHT_COUNT = 30;
+// ポイントライト用定数バッファ
 struct PointLightData
 {
     float3 lightPos;
@@ -40,7 +45,8 @@ struct PointLightData
     float3 lightColor;
     float lightPower;
     int isActive;
-    float3 pad;
+    int isShadow;
+    float2 pad;
 };
 // ライト用定数バッファ
 struct LightConstBufferData
@@ -54,36 +60,44 @@ struct ASConstBufferData
 {
     float kr; // レイリー散乱定数
     float km; // ミー散乱定数
-    float samples; // 大気散乱サンプル数
-    float outerRadius; // 大気圏の最頂点の高さ
-    float innerRadius; // 地上の高さ
-    float eSun; // 太陽の強さ
-    float g; // 散乱定数を求める際に使用する値
-    float aveHeight; // 平均大気密度を求めるための高さ
+    float samples; // サンプル数
+    float outerRadius; // 大気の外周
+    float innerRadius; // 地上の外周
+    float eSun; // 太陽光線の強さ
+    float g; // 散乱定数
+    float aveHeight; // 平均大気密度を取得する高さ
 };
-// デバッグ用定数バッファ
+// デバッグ用のパラメーター定数バッファ
 struct DebugConstBufferData
 {
     int seed;
-    int counter;
-    int aoSampleCount;
-    int isNoiseScene; // ノイズを描画するフラグ
-    int isLightHitScene; // ライトにあたった面だけ描画するフラグ
+    int isNoiseScene; // ノイズのみのシーンを描画するかのフラグ
+    int isLightHitScene; // ライトに当たった面のみを描画するフラグ
     int isNormalScene; // 法線情報を描画するフラグ
-    int isMeshScene; // ポリゴン情報を描画するフラグ
+    int isMeshScene; // メッシュ情報を描画するフラグ
     int isNoAO;
-    int isNoGI; // GIを行わないフラグ
+    int isNoGI; // GIの処理を行わないフラグ
     int isGIOnlyScene;
-    float2 pad;
 };
 
-// すべての定数バッファを纏めたもの
+// 定数バッファ
 struct ConstBufferData
 {
     CameraConstBufferData camera;
     LightConstBufferData light;
     ASConstBufferData as;
     DebugConstBufferData debug;
+};
+
+// マテリアル情報
+struct Material
+{
+    float3 ambient;
+    float pad1;
+    float3 diffuse;
+    float pad2;
+    float3 specular;
+    float alpha;
 };
 
 // 頂点情報
@@ -94,101 +108,49 @@ struct Vertex
     float2 uv;
 };
 
-// ペイロード 色情報を取得するための構造体
-struct Payload
-{
-    float3 color;
-    uint recursive;
-};
-// ペイロード AOデノイザ用
+// ペイロード
 struct DenoisePayload
 {
     float3 color;
     float3 aoLuminance;
     float3 lightLuminance;
     float3 giColor;
+    float3 denoiseMask;
     uint recursive;
     uint rayID;
 };
-// ペイロード 影情報を取得するための構造体
+// 影取得用ペイロード
 struct ShadowPayload
 {
     bool isShadow;
 };
-// アトリビュート 当たった位置を取得するための構造体
 struct MyAttribute
 {
     float2 barys;
 };
 
-// 当たった位置を計算する関数
-inline float3 CalcBarycentrics(float2 barys)
+// barysを計算
+inline float3 CalcBarycentrics(float2 Barys)
 {
-    return float3(1.0 - barys.x - barys.y, barys.x, barys.y);
+    return float3(1.0 - Barys.x - Barys.y, Barys.x, Barys.y);
 }
 
-// 当たった位置を特定
-inline float2 CalcHitAttribute2(float2 vertexAttribute[3], float2 barycentrics)
+// 乱数の種を更新
+float NextRand(inout uint S)
 {
-    float2 ret;
-    ret = vertexAttribute[0];
-    ret += barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]);
-    ret += barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-    return ret;
-}
-inline float3 CalcHitAttribute3(float3 vertexAttribute[3], float2 barycentrics)
-{
-    float3 ret;
-    ret = vertexAttribute[0];
-    ret += barycentrics.x * (vertexAttribute[1] - vertexAttribute[0]);
-    ret += barycentrics.y * (vertexAttribute[2] - vertexAttribute[0]);
-    return ret;
+    S = (1664525u * S + 1013904223u);
+    return float(S & 0x00FFFFFF) / float(0x01000000);
 }
 
-
-// 制限以上トレースしないようにする
-inline bool checkRecursiveLimit(inout Payload payload, int max)
-{
-    ++payload.recursive;
-    if (max < payload.recursive)
-    {
-        //payload.color = float3(0, 0, 0);
-        return true;
-    }
-    return false;
-}
-inline bool checkRecursiveLimitDenoiseAO(inout DenoisePayload payload)
-{
-    ++payload.recursive;
-    if (1 < payload.recursive)
-    {
-        //payload.color = float3(0, 0, 0);
-        return true;
-    }
-    return false;
-}
-
-// 乱数生成
-uint randomU(float2 uv)
-{
-    float r = dot(uv, float2(127.1, 311.7));
-    return uint(12345 * frac(sin(r) * 43758.5453123));
-}
-float nextRand(inout uint s)
-{
-    s = (1664525u * s + 1013904223u);
-    return float(s & 0x00FFFFFF) / float(0x01000000);
-}
-
-float3x3 angleAxis3x3(float angle, float3 axis)
+float3x3 AngleAxis3x3(float Angle, float3 Axis)
 {
     float c, s;
-    sincos(angle, s, c);
+    sincos(Angle, s, c);
 
     float t = 1 - c;
-    float x = axis.x;
-    float y = axis.y;
-    float z = axis.z;
+    float x = Axis.x;
+    float y = Axis.y;
+    float z = Axis.z;
 
     return float3x3(
         t * x * x + c, t * x * y - s * z, t * x * z + s * y,
@@ -197,86 +159,58 @@ float3x3 angleAxis3x3(float angle, float3 axis)
         );
 }
 
-// ソフトシャドウ用に臨時で持ってきた処理。
+// 円錐状にベクトルをサンプリング
 float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
 {
     float cosAngle = cos(coneAngle);
     const float PI = 3.1415926535;
-
-    // Generate points on the spherical cap around the north pole [1].
-    // [1] See https://math.stackexchange.com/a/205589/81266
-    float z = nextRand(randSeed) * (1.0f - cosAngle) + cosAngle;
-    float phi = nextRand(randSeed) * 2.0f * PI;
+    
+    float z = NextRand(randSeed) * (1.0f - cosAngle) + cosAngle;
+    float phi = NextRand(randSeed) * 2.0f * PI;
 
     float x = sqrt(1.0f - z * z) * cos(phi);
     float y = sqrt(1.0f - z * z) * sin(phi);
     float3 north = float3(0.f, 0.f, 1.f);
-
-    // Find the rotation axis `u` and rotation angle `rot` [1]
+    
     float3 axis = normalize(cross(north, normalize(direction)));
     float angle = acos(dot(normalize(direction), north));
-
-    // Convert rotation axis and angle to 3x3 rotation matrix [2]
-    float3x3 R = angleAxis3x3(angle, axis);
+    
+    float3x3 R = AngleAxis3x3(angle, axis);
 
     return mul(R, float3(x, y, z));
 }
 
-float3 GetPerpendicularVector(float3 u)
+float3 GetPerpendicularVector(float3 U)
 {
-    float3 a = abs(u);
+    float3 a = abs(U);
     uint xm = ((a.x - a.y) < 0 && (a.x - a.z) < 0) ? 1 : 0;
     uint ym = (a.y - a.z) < 0 ? (1 ^ xm) : 0;
     uint zm = 1 ^ (xm | ym);
-    return cross(u, float3(xm, ym, zm));
+    return cross(U, float3(xm, ym, zm));
 }
 
-// 法線基準で半球状のランダムなベクトルを生成。
-float3 GetCosHemisphereSample(uint randSeed, float3 hitNorm)
+float3 GetUniformHemisphereSample(inout uint RandSeed, float3 HitNorm)
 {
-    // 2つのランダムな数値を取得
-    float2 randVal = float2(nextRand(randSeed), nextRand(randSeed));
-    // 法線に垂直なベクトルを取る（最後に利用する）
-    float3 bitangent = GetPerpendicularVector(hitNorm);
-    float3 tangent = cross(bitangent, hitNorm);
-    // ディスク上に一様にサンプリング
-    float r = sqrt(randVal.x);
-    float phi = 2.0f * 3.14f * randVal.y;
-    // 半球に射影する
-    float x = r * cos(phi);
-    float z = r * sin(phi);
-    float y = sqrt(1.0 - randVal.x); // 1- r2
-    // 法線ベクトルの座標系に射影
-    return x * tangent + y * hitNorm.xyz + z * bitangent;
-}
-
-float3 GetUniformHemisphereSample(inout uint randSeed, float3 hitNorm)
-{
-    // 2つのランダムな数値を取得
-    float2 randVal = float2(nextRand(randSeed), nextRand(randSeed));
-    // 法線に垂直なベクトルを取る（最後に利用する）
-    float3 bitangent = GetPerpendicularVector(hitNorm);
-    float3 tangent = cross(bitangent, hitNorm);
-    // θ、Φを決める
+    float2 randVal = float2(NextRand(RandSeed), NextRand(RandSeed));
+    float3 bitangent = GetPerpendicularVector(HitNorm);
+    float3 tangent = cross(bitangent, HitNorm);
     float cosTheta = randVal.x;
     float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
     float phi = 2.0f * 3.14f * randVal.y;
-    // 半球に射影する
     float x = sinTheta * cos(phi);
     float z = sinTheta * sin(phi);
     float y = cosTheta;
-    // 法線ベクトルの座標系に射影
-    return x * tangent + y * hitNorm.xyz + z * bitangent;
+    return x * tangent + y * HitNorm.xyz + z * bitangent;
 }
 
-// シャドウレイ発射
-bool ShootShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
+// 影のレイを照射
+bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
+    rayDesc.Origin = Origin;
+    rayDesc.Direction = Direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = tMax;
+    rayDesc.TMax = TMax;
 
     ShadowPayload payload;
     payload.isShadow = false;
@@ -284,30 +218,30 @@ bool ShootShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccel
     RAY_FLAG flags = RAY_FLAG_NONE;
     flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderスキップしない
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderをスキップ
     
-    // ライトは除外。
+    // ???C?g????O?B
     uint rayMask = ~(0x08);
 
     TraceRay(
-    gRtScene,
+    GRtScene,
     flags,
     rayMask,
     0,
     1,
-    1, // MISSシェーダーのインデックス
+    1, // Missシェーダーのインデックスを指定する。
     rayDesc,
     payload);
 
     return payload.isShadow;
 }
-bool ShootShadowRayNoAH(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
+bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
+    rayDesc.Origin = Origin;
+    rayDesc.Direction = Direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = tMax;
+    rayDesc.TMax = TMax;
 
     ShadowPayload payload;
     payload.isShadow = false;
@@ -315,125 +249,95 @@ bool ShootShadowRayNoAH(float3 origin, float3 direction, float tMax, RaytracingA
     RAY_FLAG flags = RAY_FLAG_NONE;
     flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderスキップ
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     
-    // ライトは除外。
+    // ???C?g????O?B
     uint rayMask = ~(0x08);
 
     TraceRay(
-    gRtScene,
+    GRtScene,
     flags,
     rayMask,
     0,
     1,
-    1, // MISSシェーダーのインデックス
+    1, // Missシェーダーのインデックスを指定する。
     rayDesc,
     payload);
 
     return payload.isShadow;
 }
 
-// シャドウレイ発射
-bool ShootAOShadowRay(float3 origin, float3 direction, float tMax, RaytracingAccelerationStructure gRtScene)
+// AO用の影レイを射出
+bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
+    rayDesc.Origin = Origin;
+    rayDesc.Direction = Direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = tMax;
+    rayDesc.TMax = TMax;
 
     ShadowPayload payload;
     payload.isShadow = false;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     
-    // ライトは除外。
+    // ???C?g????O?B
     uint rayMask = ~(0x08);
 
     TraceRay(
-    gRtScene,
+    GRtScene,
     flags,
     rayMask,
     0,
     1,
-    1, // MISSシェーダーのインデックス
+    1, // Missシェーダーのインデックスを指定する。
     rayDesc,
     payload);
 
     return payload.isShadow;
 }
 
-// 反射レイ射出
-void ShootReflectionRay(float3 origin, float3 direction, inout DenoisePayload payload, RaytracingAccelerationStructure gRtScene)
+// 値を設定してレイを発射。
+void ShootRay(uint RayID, float3 Origin, float3 Direction, inout DenoisePayload Payload, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
+    rayDesc.Origin = Origin;
+    rayDesc.Direction = Direction;
     rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 30000.0f;
+    rayDesc.TMax = 300000.0f;
 
-    // レイのIDを反射用レイに設定。
-    payload.rayID = CHS_IDENTIFICATION_RAYID_RECLECTION;
+    // ???C??ID???p???C????B
+    Payload.rayID = RayID;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
+    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     
-    // ライトは除外。
+    // ???C?g????O?B
     uint rayMask = ~(0x08);
 
     TraceRay(
-    gRtScene,
+    GRtScene,
     flags,
     rayMask,
     0,
     1,
-    0, // MISSシェーダーのインデックス
+    0, // Missシェーダーのインデックスを指定する。
     rayDesc,
-    payload);
-    
-}
-void ShootCompleteReflectionRay(float3 origin, float3 direction, inout DenoisePayload payload, RaytracingAccelerationStructure gRtScene)
-{
-    RayDesc rayDesc;
-    rayDesc.Origin = origin;
-    rayDesc.Direction = direction;
-    rayDesc.TMin = 0.1f;
-    rayDesc.TMax = 20000.0f;
-
-    // レイのIDを反射用レイに設定。
-    payload.rayID = CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION;
-
-    RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderスキップ
-    
-    // ライトは除外。
-    uint rayMask = ~(0x08);
-
-    TraceRay(
-    gRtScene,
-    flags,
-    rayMask,
-    0,
-    1,
-    0, // MISSシェーダーのインデックス
-    rayDesc,
-    payload);
+    Payload);
     
 }
 
-uint initRand(uint val0, uint val1, uint backoff = 16)
+uint InitRand(uint Val0, uint Val1, uint Backoff = 16)
 {
-    uint v0 = val0, v1 = val1, s0 = 0;
+    uint v0 = Val0, v1 = Val1, s0 = 0;
 
 	[unroll]
-    for (uint n = 0; n < backoff; n++)
+    for (uint n = 0; n < Backoff; n++)
     {
         s0 += 0x9e3779b9;
         v0 += ((v1 << 4) + 0xa341316c) ^ (v1 + s0) ^ ((v1 >> 5) + 0xc8013ea4);
@@ -443,18 +347,47 @@ uint initRand(uint val0, uint val1, uint backoff = 16)
 }
 
 
-// サンプルコードからそのまま持ってきたやつ。
-float scale(float fCos)
+
+// 当たった位置の情報を取得する関数
+Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
 {
-    float x = 1.0 - fCos;
+    Vertex v = (Vertex) 0;
+    float3 barycentrics = CalcBarycentrics(attrib.barys);
+    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
+
+    float weights[3] =
+    {
+        barycentrics.x, barycentrics.y, barycentrics.z
+    };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        uint index = indexBuffer[vertexId + i];
+        float w = weights[i];
+        v.Position += vertexBuffer[index].Position * w;
+        v.Normal += vertexBuffer[index].Normal * w;
+        v.uv += vertexBuffer[index].uv * w;
+    }
+    v.Normal = normalize(v.Normal);
+
+    return v;
+}
+
+
+
+
+// 資料から持ってきた関数。
+float Scale(float FCos)
+{
+    float x = 1.0 - FCos;
     return 0.25f * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
 }
 
-float3 IntersectionPos(float3 dir, float3 a, float radius)
+float3 IntersectionPos(float3 Dir, float3 A, float Radius)
 {
-    float b = dot(a, dir);
-    float c = dot(a, a) - radius * radius;
+    float b = dot(A, Dir);
+    float c = dot(A, A) - Radius * Radius;
     float d = max(b * b - c, 0.0);
 
-    return a + dir * (-b + sqrt(d));
+    return A + Dir * (-b + sqrt(d));
 }

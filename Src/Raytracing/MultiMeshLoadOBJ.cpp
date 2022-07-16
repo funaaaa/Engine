@@ -3,7 +3,7 @@
 #include "Vec.h"
 #include "BLASRegister.h"
 #include "TextureManager.h"
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 #include <DirectXMath.h>
 #include <fstream>
 #include <sstream>
@@ -39,10 +39,10 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	string line;
 
 	// データを一次保存しておくためのコンテナ達。
-	std::vector<Vec3> position;
-	std::vector<DirectX::XMFLOAT2> uv;
-	std::vector<Vec3> normal;
-	std::vector<int> textureHandle;
+	std::vector<Vec3> position_;
+	std::vector<DirectX::XMFLOAT2> uv_;
+	std::vector<Vec3> normal_;
+	std::vector<int> textureHandle_;
 
 	// 使用するマテリアル名とマテリアルファイル名の両方を取得したらマテリアルファイルを読み込むようにするために変数。
 	bool isLoadMaterialFile = false;
@@ -57,10 +57,10 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	bool isFirst = true;
 
 	// 不透明フラグを初期化。
-	isOpaque = true;
+	isOpaque_ = true;
 
 	// 床のみにGIを適応させるためのフラグ。
-	isFloor = false;
+	isFloor_ = false;
 
 	while (std::getline(file, line)) {
 
@@ -75,28 +75,28 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 		if (key == "v") {
 
 			// X,Y,Z座標読み込み。
-			Vec3 pos{};
-			lineStream >> pos.x;
-			lineStream >> pos.y;
-			lineStream >> pos.z;
+			Vec3 pos_{};
+			lineStream >> pos_.x_;
+			lineStream >> pos_.y_;
+			lineStream >> pos_.z_;
 
 			// 座標を一旦保存。
-			position.emplace_back(pos);
+			position_.emplace_back(pos_);
 
 		}
 		// 先頭文字がvtならテクスチャ。
 		if (key == "vt") {
 
 			// UV成分読み込み。
-			DirectX::XMFLOAT2 texcoord{};
-			lineStream >> texcoord.x;
-			lineStream >> texcoord.y;
+			Vec2 texcoord{};
+			lineStream >> texcoord.x_;
+			lineStream >> texcoord.y_;
 
 			// V方向反転。
-			texcoord.y = 1.0f - texcoord.y;
+			texcoord.y_ = 1.0f - texcoord.y_;
 
 			// テクスチャ座標データに追加。
-			uv.emplace_back(texcoord);
+			uv_.emplace_back(texcoord.ConvertXMFLOAT2());
 
 		}
 		// 先頭文字がvnなら法線ベクトル。
@@ -104,12 +104,12 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 			// X,Y,Z成分読み込み。
 			Vec3 norm{};
-			lineStream >> norm.x;
-			lineStream >> norm.y;
-			lineStream >> norm.z;
+			lineStream >> norm.x_;
+			lineStream >> norm.y_;
+			lineStream >> norm.z_;
 
 			// 法線ベクトルデータに追加。
-			normal.emplace_back(norm);
+			normal_.emplace_back(norm);
 
 		}
 		// 先頭文字がfならポリゴン(三角形)。
@@ -135,13 +135,13 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 
 				// 頂点データの追加。
 				ModelDataManager::Vertex vert{};
-				vert.pos = position[indexPosition - 1].ConvertXMFLOAT3();
-				vert.normal = normal[indexNormal - 1].ConvertXMFLOAT3();
-				vert.uv = uv[indexTexcoord - 1];
+				vert.pos_ = position_[indexPosition - 1].ConvertXMFLOAT3();
+				vert.normal_ = normal_[indexNormal - 1].ConvertXMFLOAT3();
+				vert.uv_ = uv_[indexTexcoord - 1];
 
 				// BLASのデータに追加。
-				blasData.vertex.emplace_back(vert);
-				blasData.index.emplace_back(static_cast<UINT>(blasData.index.size()));
+				blasData.vertex_.emplace_back(vert);
+				blasData.index_.emplace_back(static_cast<UINT>(blasData.index_.size()));
 
 			}
 		}
@@ -178,25 +178,25 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 			else {
 
 				// BLASを生成する。
-				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle, isOpaque);
-				std::pair<std::vector<int>, int> buff = { textureHandle,blasIDBuff };
-				blasID.emplace_back(buff);
+				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle_, isOpaque_);
+				std::pair<std::vector<int>, int> buff = { textureHandle_,blasIDBuff };
+				blasID_.emplace_back(buff);
 
 				// 保存されているBLASIDでインスタンスを生成する。
-				int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, isFloor ? 10 : 0);
+				int idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, isFloor_ ? 10 : 0);
 				InstanceID.emplace_back(idBuff);
 
 				// その他データを初期化する。
-				blasData.index.clear();
-				blasData.vertex.clear();
+				blasData.index_.clear();
+				blasData.vertex_.clear();
 				isLoadTexture = false;
 				isLoadMaterialName = false;
-				textureHandle.clear();
-				textureHandle.shrink_to_fit();
+				textureHandle_.clear();
+				textureHandle_.shrink_to_fit();
 
-				isFloor = false;
+				isFloor_ = false;
 
-				isOpaque = true;
+				isOpaque_ = true;
 
 			}
 
@@ -206,7 +206,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 		if ((!isLoadTexture) && isLoadMaterialFile && isLoadMaterialName) {
 
 			// テクスチャを読み込む。
-			LoadMaterial(DirectryPath, materialFile, materialName, textureHandle);
+			LoadMaterial(DirectryPath, materialFile, materialName, textureHandle_);
 
 			// テクスチャをロード済みにする。
 			isLoadTexture = true;
@@ -216,12 +216,12 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	}
 
 	// 一番最後のBLASを生成。
-	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle, isOpaque);
-	std::pair<std::vector<int>, int> buff = { textureHandle,blasIDBuff };
-	blasID.emplace_back(buff);
+	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle_, isOpaque_);
+	std::pair<std::vector<int>, int> buff = { textureHandle_,blasIDBuff };
+	blasID_.emplace_back(buff);
 
 	// 保存されているBLASIDでインスタンスを生成する。
-	int idBuff = PorygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 0);
+	int idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 0);
 	InstanceID.emplace_back(idBuff);
 
 	// ファイルを閉じる。
@@ -312,30 +312,30 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 				std::wstring buff = StringToWString(DirectryPath + textureNameBuff);
 
 				// 既に生成済みかをチェックする。
-				const int TEXPATH_COUNT = static_cast<int>(texturePath.size());
+				const int TEXPATH_COUNT = static_cast<int>(texturePath_.size());
 				bool isLoad = false;
 				for (int index = 0; index < TEXPATH_COUNT; ++index) {
 
-					if (buff == texturePath[index]) {
+					if (buff == texturePath_[index]) {
 
 						isLoad = true;
 
 						// 草テクスチャだったら不透明フラグを折る。
 						if (textureNameBuff == "sponzaTextures/vase_plant.png") {
 
-							isOpaque = false;
+							isOpaque_ = false;
 
 						}
 
 						// 床テクスチャだったらGIを折る。
 						if (textureNameBuff == "sponzaTextures/sponza_floor_a_diff.png") {
 
-							isFloor = true;
+							isFloor_ = true;
 
 						}
 
 						// テクスチャを読み込む。
-						TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str()));
+						TextureHandle.emplace_back(TextureManager::Ins()->LoadTexture(texturePath_[index].c_str()));
 
 
 					}
@@ -345,22 +345,22 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 				// ロードしていなかったら。
 				if (!isLoad) {
 
-					texturePath.emplace_back();
-					texturePath[texturePath.size() - 1] = buff;
+					texturePath_.emplace_back();
+					texturePath_[texturePath_.size() - 1] = buff;
 
 					// テクスチャを読み込む。
-					TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
+					TextureHandle.emplace_back(TextureManager::Ins()->LoadTexture(texturePath_[texturePath_.size() - 1].c_str()));
 
 					// 草テクスチャだったら不透明フラグを折る。
 					if (textureNameBuff == "sponzaTextures/vase_plant.png") {
 
-						isOpaque = false;
+						isOpaque_ = false;
 
 					}
 					// 床テクスチャだったらGIを折る。
 					if (textureNameBuff == "sponzaTextures/sponza_floor_a_diff.png") {
 
-						isFloor = true;
+						isFloor_ = true;
 
 					}
 
@@ -379,16 +379,16 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 			//	wstring buff = StringToWString(DirectryPath + textureNameBuff);
 
 			//	// 既に生成済みかをチェックする。
-			//	const int TEXPATH_COUNT = texturePath.size();
+			//	const int TEXPATH_COUNT = texturePath_.size();
 			//	bool isLoad = false;
 			//	for (int index = 0; index < TEXPATH_COUNT; ++index) {
 
-			//		if (buff == texturePath[index]) {
+			//		if (buff == texturePath_[index]) {
 
 			//			isLoad = true;
 
 			//			// テクスチャを読み込む。
-			//			TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[index].c_str()));
+			//			TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath_[index].c_str()));
 
 
 			//		}
@@ -398,11 +398,11 @@ void MultiMeshLoadOBJ::LoadMaterial(const string& DirectryPath, const string& Ma
 			//	// ロードしていなかったら。
 			//	if (!isLoad) {
 
-			//		texturePath.emplace_back();
-			//		texturePath[texturePath.size() - 1] = buff;
+			//		texturePath_.emplace_back();
+			//		texturePath_[texturePath_.size() - 1] = buff;
 
 			//		// テクスチャを読み込む。
-			//		TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath[texturePath.size() - 1].c_str()));
+			//		TextureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(texturePath_[texturePath_.size() - 1].c_str()));
 
 			//	}
 

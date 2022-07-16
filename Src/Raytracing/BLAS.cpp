@@ -6,17 +6,22 @@
 #include "RWStructuredBuffer.h"
 #include "StructuredBuffer.h"
 #include "TextureManager.h"
+#include "FHelper.h"
 
-void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing)
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
+	// パスを保存。
+	texturePath_ = TexturePath;
+	modelPath_ = DirectryPath + ModelName;
+
 	// テクスチャを読み込む。
 	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
-	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
+	for (auto& index_ : TexturePath) {
 
-		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
+		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(index_));
 
 	}
 
@@ -29,85 +34,109 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	// モデルをロード。
 	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, IsSmoothing);
 
+	// 各成分の値を保存。
+	vertexMax_ = dataBuff.vertexMax_;
+	vertexMin_ = dataBuff.vertexMin_;
+
+	// マテリアル情報を保存。
+	material_ = dataBuff.material_;
+
+	// マテリアル用定数バッファを生成。
+	materialBuffer_ = CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
 	// 頂点数を求める。
-	vertexCount = static_cast<UINT>(dataBuff.vertex.size());
+	vertexCount_ = static_cast<UINT>(dataBuff.vertex_.size());
 
 	// 頂点インデックス数を求める。
-	indexCount = static_cast<UINT>(dataBuff.index.size());
+	indexCount_ = static_cast<UINT>(dataBuff.index_.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount); ++index) {
+	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
 
 		RayVertex buff{};
-		buff.normal = dataBuff.vertex[index].normal;
-		buff.position = dataBuff.vertex[index].pos;
-		buff.uv = dataBuff.vertex[index].uv;
+		buff.normal_ = dataBuff.vertex_[index].normal_;
+		buff.position_ = dataBuff.vertex_[index].pos_;
+		buff.uv_ = dataBuff.vertex_[index].uv_;
 
 		// データを保存。
-		vertex.push_back(buff);
+		vertex_.push_back(buff);
 
 	}
 
 	// 頂点インデックスデータを保存。
-	vertIndex = dataBuff.index;
+	vertIndex_ = dataBuff.index_;
 
 	// 頂点サイズを求める。
-	vertexStride = sizeof(RayVertex);
+	vertexStride_ = sizeof(RayVertex);
 
 	// 頂点インデックスサイズを求める。
-	indexStride = sizeof(UINT);
+	indexStride_ = sizeof(UINT);
 
 	// 頂点バッファを生成する。
-	vertexBuffer = CreateBuffer(
-		vertexStride * vertexCount,
+	vertexBuffer_ = CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 	// 頂点インデックスバッファを生成する。
-	indexBuffer = CreateBuffer(
-		indexStride * indexCount,
+	indexBuffer_ = CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
-	isOpaque = true;
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
+	isOpaque_ = IsOpaque;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
 
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName = HitGroupName;
+	this->hitGroupName_ = HitGroupName;
 
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos.resize(static_cast<unsigned __int64>(vertex.size()));
-	vertexNormal.resize(static_cast<unsigned __int64>(vertex.size()));
+	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
-	for (auto& index : vertex) {
-		vertexPos[counter] = index.position;
-		vertexNormal[counter] = index.normal;
+	for (auto& index_ : vertex_) {
+		vertexPos_[counter] = index_.position_;
+		vertexNormal_[counter] = index_.normal_;
 		++counter;
 	}
+
+	// 頂点を保存。
+	defVertex_ = vertex_;
 
 }
 
@@ -120,7 +149,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
 	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
 
-		textureHandle.emplace_back(TextureManager::Ins()->LoadTextureInDescriptorHeapMgr(TexturePath[index]));
+		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(TexturePath[index]));
 
 	}
 
@@ -131,64 +160,78 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	std::vector<UINT> modelIndexData;
 
 	// モデルをロード。
-	modelIndex = FbxLoader::Ins()->LoadModelFromFile(DirectryPath, ModelName);
+	modelIndex_ = FbxLoader::Ins()->LoadModelFromFile(DirectryPath, ModelName);
 
-	FbxLoader::Ins()->GetFbxData(modelIndex, modelVertexData, modelIndexData);
+	FbxLoader::Ins()->GetFbxData(modelIndex_, modelVertexData, modelIndexData);
+
+	// マテリアル用定数バッファを生成。
+	materialBuffer_ = CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点数を求める。
-	vertexCount = static_cast<UINT>(modelVertexData.size());
+	vertexCount_ = static_cast<UINT>(modelVertexData.size());
 
 	// 頂点インデックス数を求める。
-	indexCount = static_cast<UINT>(modelIndexData.size());
+	indexCount_ = static_cast<UINT>(modelIndexData.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount); ++index) {
+	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
 
 		RayVertex buff{};
-		buff.normal = modelVertexData[index].normal;
-		buff.position = modelVertexData[index].pos;
-		buff.uv = modelVertexData[index].uv;
+		buff.normal_ = modelVertexData[index].normal_;
+		buff.position_ = modelVertexData[index].pos_;
+		buff.uv_ = modelVertexData[index].uv_;
 
 		// データを保存。
-		vertex.push_back(buff);
+		vertex_.push_back(buff);
 
 	}
 
 	// 頂点インデックスデータを保存。
-	vertIndex = modelIndexData;
+	vertIndex_ = modelIndexData;
 
 	// 頂点サイズを求める。
-	vertexStride = sizeof(RayVertex);
+	vertexStride_ = sizeof(RayVertex);
 
 	// 頂点インデックスサイズを求める。
-	indexStride = sizeof(UINT);
+	indexStride_ = sizeof(UINT);
 
 	// 頂点バッファを生成する。
-	vertexBuffer = CreateBuffer(
-		vertexStride * vertexCount,
+	vertexBuffer_ = CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 	// 頂点インデックスバッファを生成する。
-	indexBuffer = CreateBuffer(
-		indexStride * indexCount,
+	indexBuffer_ = CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
@@ -196,35 +239,35 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 	// 形状を設定する用の構造体を設定。
 	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
-	isOpaque = true;
+	isOpaque_ = true;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName = HitGroupName;
+	this->hitGroupName_ = HitGroupName;
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
 
 		// 入力用構造体をリサイズ。
-		skinComputeInput.resize(vertex.size());
+		skinComputeInput_.resize(vertex_.size());
 
 		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-		FbxLoader::Ins()->GetSkinComputeInput(modelIndex, skinComputeInput);
+		FbxLoader::Ins()->GetSkinComputeInput(modelIndex_, skinComputeInput_);
 
 		// スキニングアニメーションで使用するコンピュートシェーダーをロードしておく。
-		skinComput.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), static_cast<int>(skinComputeInput.size()), skinComputeInput.data(), sizeof(RayVertex), static_cast<int>(vertex.size()), vertex.data());
+		skinComput_.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), static_cast<int>(skinComputeInput_.size()), skinComputeInput_.data(), sizeof(RayVertex), static_cast<int>(vertex_.size()), vertex_.data());
 
 	}
 
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos.resize(static_cast<unsigned __int64>(vertex.size()));
-	vertexNormal.resize(static_cast<unsigned __int64>(vertex.size()));
+	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
-	for (auto& index : vertex) {
-		vertexPos[counter] = index.position;
-		vertexNormal[counter] = index.normal;
+	for (auto& index_ : vertex_) {
+		vertexPos_[counter] = index_.position_;
+		vertexNormal_[counter] = index_.normal_;
 		++counter;
 	}
 
@@ -236,87 +279,101 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
-	textureHandle = TextureHandle;
+	textureHandle_ = TextureHandle;
 
 	/*-- 形状データを読み込む --*/
 
+	// マテリアル用定数バッファを生成。
+	materialBuffer_ = CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
 	// 頂点数を求める。
-	vertexCount = static_cast<UINT>(Data.vertex.size());
+	vertexCount_ = static_cast<UINT>(Data.vertex_.size());
 
 	// 頂点インデックス数を求める。
-	indexCount = static_cast<UINT>(Data.index.size());
+	indexCount_ = static_cast<UINT>(Data.index_.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount); ++index) {
+	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
 
 		RayVertex buff{};
-		buff.normal = Data.vertex[index].normal;
-		buff.position = Data.vertex[index].pos;
-		buff.uv = Data.vertex[index].uv;
+		buff.normal_ = Data.vertex_[index].normal_;
+		buff.position_ = Data.vertex_[index].pos_;
+		buff.uv_ = Data.vertex_[index].uv_;
 
 		// データを保存。
-		vertex.push_back(buff);
+		vertex_.push_back(buff);
 
 	}
 
 	// 頂点インデックスデータを保存。
-	vertIndex = Data.index;
+	vertIndex_ = Data.index_;
 
 	// 頂点サイズを求める。
-	vertexStride = sizeof(RayVertex);
+	vertexStride_ = sizeof(RayVertex);
 
 	// 頂点インデックスサイズを求める。
-	indexStride = sizeof(UINT);
+	indexStride_ = sizeof(UINT);
 
 	// 頂点バッファを生成する。
-	vertexBuffer = CreateBuffer(
-		vertexStride * vertexCount,
+	vertexBuffer_ = CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 	// 頂点インデックスバッファを生成する。
-	indexBuffer = CreateBuffer(
-		indexStride * indexCount,
+	indexBuffer_ = CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer, vertIndex.data(), indexStride * indexCount);
+	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor.CreateStructuredSRV(indexBuffer, indexCount, 0, indexStride, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor.CreateStructuredSRV(vertexBuffer, vertexCount, 0, vertexStride, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	isOpaque = IsOpaque;
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque);
+	isOpaque_ = IsOpaque;
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_);
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
 
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName = HitGroupName;
+	this->hitGroupName_ = HitGroupName;
 
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos.resize(static_cast<unsigned __int64>(vertex.size()));
-	vertexNormal.resize(static_cast<unsigned __int64>(vertex.size()));
+	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
-	for (auto& index : vertex) {
-		vertexPos[counter] = index.position;
-		vertexNormal[counter] = index.normal;
+	for (auto& index_ : vertex_) {
+		vertexPos_[counter] = index_.position_;
+		vertexNormal_[counter] = index_.normal_;
 		++counter;
 	}
 
@@ -327,34 +384,34 @@ void BLAS::Update()
 
 	/*===== BLASの更新 =====*/
 
-	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
+	//// モデルがアニメーションを持っていたら。
+	//if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation) {
 
-		// アニメーションの更新処理
-		auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex);
-		if (model.isPlay) {
+	//	// アニメーションの更新処理
+	//	auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex_);
+	//	if (model.isPlay) {
 
-			model.currentTime += model.frameTime;
+	//		model.currentTime += model.frameTime;
 
-			// 最後まで再生したら先頭に戻す。
-			if (model.endTime < model.currentTime) {
+	//		// 最後まで再生したら先頭に戻す。
+	//		if (model.endTime < model.currentTime) {
 
-				model.currentTime = model.startTime;
+	//			model.currentTime = model.startTime;
 
-			}
+	//		}
 
-			// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-			FbxLoader::Ins()->GetSkinComputeInput(modelIndex, skinComputeInput);
+	//		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
+	//		FbxLoader::Ins()->GetSkinComputeInput(modelIndex_, skinComputeInput_);
 
-		}
+	//	}
 
-	};
+	//};
 
 	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
-	WriteToMemory(vertexBuffer, vertex.data(), vertexStride * vertexCount);
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 	// 更新のための値を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque);
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_);
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
@@ -368,13 +425,13 @@ void BLAS::Update()
 
 
 	// インプレース更新を実行する。
-	asDesc.SourceAccelerationStructureData = blasBuffer->GetGPUVirtualAddress();
-	asDesc.DestAccelerationStructureData = blasBuffer->GetGPUVirtualAddress();
+	asDesc.SourceAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
+	asDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
 	// 更新用の作業バッファを設定する。
-	asDesc.ScratchAccelerationStructureData = updateBuffer->GetGPUVirtualAddress();
+	asDesc.ScratchAccelerationStructureData = updateBuffer_->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -388,16 +445,16 @@ void BLAS::ComputeSkin()
 	/*===== 頂点データをスキニング行列を元に書き換える処理 =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
 
 		// 入力構造体を更新。
-		skinComput.UpdateInputSB(skinComputeInput.data());
+		skinComput_.UpdateInputSB(skinComputeInput_.data());
 
 		// 計算開始。
-		skinComput.Dispatch(1, 1, 1);
+		skinComput_.Dispatch(1, 1, 1);
 
 		// 結果を代入。
-		memcpy(vertex.data(), skinComput.outputSB->buffersOnCPU, sizeof(RayVertex) * vertex.size());
+		memcpy(vertex_.data(), skinComput_.outputSB_->buffersOnCPU_, sizeof(RayVertex) * vertex_.size());
 
 	}
 
@@ -406,9 +463,9 @@ void BLAS::ComputeSkin()
 void BLAS::InitAnimation()
 {
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
 
-		FbxLoader::Ins()->GetFbxModel(modelIndex).InitAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelIndex_).InitAnimation();
 
 	}
 }
@@ -419,9 +476,9 @@ void BLAS::PlayAnimation()
 	/*===== アニメーションさせる =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
 
-		FbxLoader::Ins()->GetFbxModel(modelIndex).PlayAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelIndex_).PlayAnimation();
 
 	}
 
@@ -433,9 +490,9 @@ void BLAS::StopAnimation()
 	/*===== アニメーションを停止させる =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex).hasAnimation) {
+	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
 
-		FbxLoader::Ins()->GetFbxModel(modelIndex).StopAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelIndex_).StopAnimation();
 
 	}
 
@@ -447,189 +504,167 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 	/*===== シェーダーレコードを書き込む =====*/
 
-	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps;
-	StateObject.As(&rtsoProps);
+	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps_;
+	StateObject.As(&rtsoProps_);
 	auto entryBegin = Dst;
 	auto shader = GetHitGroupName();
 
 	// 保存されているヒットグループ名と違っていたら書き込まない。
-	if (HitGroupName == shader) {
+	//if (HitGroupName == shader) {
 
-		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
-		if (id == nullptr) {
-			throw std::logic_error("Not found ShaderIdentifier");
-		}
-
-		// シェーダー識別子を書き込む。
-		memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-
-		// ヒットグループ名からヒットグループ名IDを取得する。
-		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
-
-		// ヒットグループIDからSRVの数を取得。
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
-
-		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
-		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-		for (int index = 0; index < srvCount; ++index) {
-
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle.size() <= index) {
-
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-				WriteGPUDescriptor(Dst, &texDescHandle);
-
-			}
-			else {
-
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
-				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-
-			}
-		}
-
-		Dst = entryBegin + recordSize;
-		return Dst;
-
+	auto id_ = rtsoProps_->GetShaderIdentifier(shader.c_str());
+	if (id_ == nullptr) {
+		throw std::logic_error("Not found ShaderIdentifier");
 	}
-	else {
 
-		// シェーダー識別子を書き込む。
-		auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
-		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	// シェーダー識別子を書き込む。
+	memcpy(Dst, id_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+	// 今回のプログラムでは以下の順序でディスクリプタを記録。
+	// [0] : インデックスバッファ
+	// [1] : 頂点バッファ
+	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+	Dst += WriteGPUDescriptor(Dst, &indexDescriptor_.GetGPUHandle());
+	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor_.GetGPUHandle());
 
-		// ヒットグループ名からヒットグループ名IDを取得する。
-		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+	// マテリアル用のバッファをセット。
+	Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
 
-		// ヒットグループIDからSRVの数を取得。
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;	// -2は頂点と頂点インデックスを抜くという意味
+	// ヒットグループ名からヒットグループ名IDを取得する。
+	int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
 
-		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
-		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-		for (int index = 0; index < srvCount; ++index) {
+	// 頂点、インデックス、マテリアルのオフセット
+	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
 
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle.size() <= index) {
+	// ヒットグループIDからSRVの数を取得。
+	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-				WriteGPUDescriptor(Dst, &texHandle);
+	// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
+	// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
+	for (int index = 0; index < srvCount; ++index) {
 
-			}
-			else {
+		// このインデックスのテクスチャが存在していなかったら
+		if (textureHandle_.size() <= index) {
 
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
-				Dst += WriteGPUDescriptor(Dst, &texHandle);
+			// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
+			WriteGPUDescriptor(Dst, &texDescHandle);
 
-			}
 		}
+		else {
 
-		Dst = entryBegin + recordSize;
-		return Dst;
+			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
+			Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
+		}
 	}
+
+	Dst = entryBegin + recordSize;
+	return Dst;
+
+	//}
+
+
+	// ヒットグループが複数あったときの処理。今は一つしか無いので消す。
+	//else {
+
+	//	// シェーダー識別子を書き込む。
+	//	auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
+	//	memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+	//	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+	//	// 今回のプログラムでは以下の順序でディスクリプタを記録。
+	//	// [0] : インデックスバッファ
+	//	// [1] : 頂点バッファ
+	//	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+	//	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
+	//	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+
+	//	// マテリアル用のバッファをセット。
+	//	Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
+
+	//	// ヒットグループ名からヒットグループ名IDを取得する。
+	//	int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+
+	//	// 頂点、インデックス、マテリアルのオフセット
+	//	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
+
+	//	// ヒットグループIDからSRVの数を取得。
+	//	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
+
+	//	// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
+	//	// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
+	//	for (int index = 0; index < srvCount; ++index) {
+
+	//		// このインデックスのテクスチャが存在していなかったら
+	//		if (textureHandle_.size() <= index) {
+
+	//			// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
+	//			WriteGPUDescriptor(Dst, &texHandle);
+
+	//		}
+	//		else {
+
+	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
+	//			Dst += WriteGPUDescriptor(Dst, &texHandle);
+
+	//		}
+	//	}
+
+	//	Dst = entryBegin + recordSize;
+	//	return Dst;
+
+	//}
 
 }
 
-uint8_t* BLAS::WriteShaderRecordSpecifyUAV(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, const int& SpecifyIndex)
+Vec3 BLAS::GetVertexLengthMax()
 {
-	/*===== シェーダーレコードを書き込む =====*/
 
-	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps;
-	StateObject.As(&rtsoProps);
-	auto entryBegin = Dst;
-	auto shader = GetHitGroupName();
+	/*===== 各成分の最大の長さを返す =====*/
 
-	// 保存されているヒットグループ名と違っていたら書き込まない。
-	if (HitGroupName == shader) {
+	Vec3 vertexLength;
 
-		auto id = rtsoProps->GetShaderIdentifier(shader.c_str());
-		if (id == nullptr) {
-			throw std::logic_error("Not found ShaderIdentifier");
-		}
-
-		// シェーダー識別子を書き込む。
-		memcpy(Dst, id, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-		// デバッグ用でテクスチャを書き込む。
-		CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-		WriteGPUDescriptor(Dst, &texHandle);
-		texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-		WriteGPUDescriptor(Dst, &texHandle);
-
-		// 指定されたUAVを書き込む。
-		CD3DX12_GPU_DESCRIPTOR_HANDLE uavHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(SpecifyIndex);
-		WriteGPUDescriptor(Dst, &uavHandle);
-
-		Dst = entryBegin + recordSize;
-		return Dst;
-
+	if (fabs(vertexMin_.x_) < fabs(vertexMax_.x_)) {
+		vertexLength.x_ = fabs(vertexMax_.x_);
 	}
 	else {
+		vertexLength.x_ = fabs(vertexMin_.x_);
+	}
 
-		// シェーダー識別子を書き込む。
-		auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
-		memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	if (fabs(vertexMin_.y_) < fabs(vertexMax_.y_)) {
+		vertexLength.y_ = fabs(vertexMax_.y_);
+	}
+	else {
+		vertexLength.y_ = fabs(vertexMin_.y_);
+	}
 
-		// ヒットグループ名からヒットグループ名IDを取得する。
-		int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
+	if (fabs(vertexMin_.z_) < fabs(vertexMax_.z_)) {
+		vertexLength.z_ = fabs(vertexMax_.z_);
+	}
+	else {
+		vertexLength.z_ = fabs(vertexMin_.z_);
+	}
 
-		int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - 2;
+	return vertexLength;
+}
 
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
+void BLAS::MulVec3Vertex(Vec3 Vec)
+{
 
-		for (int index = 0; index < srvCount; ++index) {
+	/*===== すべての頂点に行列情報をかける ====*/
 
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle.size() <= index) {
+	for (auto& index_ : vertex_) {
 
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[0]);
-				WriteGPUDescriptor(Dst, &texHandle);
-
-			}
-			else {
-
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle[index]);
-				Dst += WriteGPUDescriptor(Dst, &texHandle);
-
-			}
-		}
-
-		Dst = entryBegin + recordSize;
-		return Dst;
+		index_.position_ = defVertex_[&index_ - &vertex_[0]].position_ * Vec;
 
 	}
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
 }
 
 void BLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* pData, size_t DataSize)
@@ -689,7 +724,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -715,6 +750,7 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(const bool& IsOpaque)
 	// 形状データのフラグを設定。
 	auto geometryDesc = D3D12_RAYTRACING_GEOMETRY_DESC{};
 	geometryDesc.Type = D3D12_RAYTRACING_GEOMETRY_TYPE_TRIANGLES;
+	// 不透明フラグ。ここで不透明にするとシェーダー側でAnyHitShaderをOnにしていても呼ばれなくなるらしい！
 	if (IsOpaque) {
 		geometryDesc.Flags = D3D12_RAYTRACING_GEOMETRY_FLAG_OPAQUE;
 	}
@@ -724,11 +760,11 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(const bool& IsOpaque)
 
 	// 形状データの細かい項目を設定。
 	auto& triangles = geometryDesc.Triangles;
-	triangles.VertexBuffer.StartAddress = vertexBuffer->GetGPUVirtualAddress();
-	triangles.VertexBuffer.StrideInBytes = vertexStride;
-	triangles.VertexCount = vertexCount;
-	triangles.IndexBuffer = indexBuffer->GetGPUVirtualAddress();
-	triangles.IndexCount = indexCount;
+	triangles.VertexBuffer.StartAddress = vertexBuffer_->GetGPUVirtualAddress();
+	triangles.VertexBuffer.StrideInBytes = vertexStride_;
+	triangles.VertexCount = vertexCount_;
+	triangles.IndexBuffer = indexBuffer_->GetGPUVirtualAddress();
+	triangles.IndexCount = indexCount_;
 	triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 	triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
 
@@ -752,12 +788,12 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 
 	// 関数を使って必要なメモリ量を求める.
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
-	DirectXBase::Ins()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
+	DirectXBase::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &blasPrebuild
 	);
 
 	// スクラッチバッファを生成する。
-	scratchBuffer = CreateBuffer(
+	scratchBuffer_ = CreateBuffer(
 		blasPrebuild.ScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
@@ -765,7 +801,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	);
 
 	// BLASのバッファを生成する。
-	blasBuffer = CreateBuffer(
+	blasBuffer_ = CreateBuffer(
 		blasPrebuild.ResultDataMaxSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
@@ -773,7 +809,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	);
 
 	// 更新用バッファを生成する。
-	updateBuffer = CreateBuffer(
+	updateBuffer_ = CreateBuffer(
 		blasPrebuild.UpdateScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
@@ -781,10 +817,10 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	);
 
 	// AccelerationStructureの構築。
-	buildASDesc.ScratchAccelerationStructureData = scratchBuffer->GetGPUVirtualAddress();
-	buildASDesc.DestAccelerationStructureData = blasBuffer->GetGPUVirtualAddress();
+	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
+	buildASDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
-	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
 
@@ -801,42 +837,29 @@ void BLAS::CreateAccelerationStructure()
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-	uavBarrier.UAV.pResource = blasBuffer.Get();
-	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &uavBarrier);
-	DirectXBase::Ins()->cmdList->Close();
+	uavBarrier.UAV.pResource = blasBuffer_.Get();
+	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
+	DirectXBase::Ins()->cmdList_->Close();
 
 	// BLASを構築。
 	//ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };
-	DirectXBase::Ins()->cmdQueue->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList_.Get() };
+	DirectXBase::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
 
-	//グラフィックコマンドリストの完了待ち
-	DirectXBase::Ins()->cmdQueue->Signal(DirectXBase::Ins()->fence.Get(), ++DirectXBase::Ins()->fenceVal);
-	if (DirectXBase::Ins()->fence->GetCompletedValue() != DirectXBase::Ins()->fenceVal) {
+	// グラフィックコマンドリストの完了待ち
+	DirectXBase::Ins()->cmdQueue_->Signal(DirectXBase::Ins()->fence_.Get(), ++DirectXBase::Ins()->fenceVal_);
+	if (DirectXBase::Ins()->fence_->GetCompletedValue() != DirectXBase::Ins()->fenceVal_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		DirectXBase::Ins()->fence->SetEventOnCompletion(DirectXBase::Ins()->fenceVal, event);
+		DirectXBase::Ins()->fence_->SetEventOnCompletion(DirectXBase::Ins()->fenceVal_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
-	//コマンドアロケータのリセット
-	DirectXBase::Ins()->cmdAllocator->Reset();						//キューをクリア
+	// コマンドアロケータのリセット
+	DirectXBase::Ins()->cmdAllocator_->Reset();	//キューをクリア
 
-	//コマンドリストのリセット
-	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
+	// コマンドリストのリセット
+	DirectXBase::Ins()->cmdList_->Reset(DirectXBase::Ins()->cmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
 
 }
-
-/*
-
-◯メモ
-・資料の実装を一通り終えた。
-・コンピュートシェーダーから値ちゃんと送られてるっぽい？
-・しかし形がおかしい。でも資料の最後の方に直し方があるから、ワンちゃんsoleで治るかも。
- →FbxLoader.cppでsortで出てくる条件式を逆にすると形はそれっぽくなる。アニメーションは反映されない。
-・アニメーションが再生されない。
-　→タイマーは変わっているので、ウェイト等の変数も正しく変わっているかを調べる。
-　→形は後回し、まずはタイマーを反映させる。
-
-*/

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d3d12.h>
+#include <wrl.h>
 
 //読み取り専用構造化バッファ
 
@@ -34,18 +35,18 @@ public:
 	/// <returns></returns>
 	bool IsInited() const
 	{
-		return isInited;
+		return isInited_;
 	}
 
-	ID3D12Resource* GetD3DResoruce() ;
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetD3DResoruce();
 
 
 public:
 
-	ID3D12Resource* buffersOnGPU = {nullptr};
-	void* buffersOnCPU = { nullptr };			//CPU側からアクセスできるするストラクチャバッファのアドレス。
-	int numElement = 0;								//要素数。
-	int sizeOfElement = 0;							//エレメントのサイズ。
-	bool isInited = false;							//初期化済み？
+	Microsoft::WRL::ComPtr<ID3D12Resource> buffersOnGPU_;
+	void* buffersOnCPU_;	// CPU側からアクセスできるするストラクチャバッファのアドレス。
+	int numElement_;		// 要素数。
+	int sizeOfElement_;	// エレメントのサイズ。
+	bool isInited_;		// 初期化済み？
 
 };

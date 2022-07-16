@@ -9,9 +9,9 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;					// UAVの設定
-	Microsoft::WRL::ComPtr<ID3D12Resource> rayTracingOutput;	// UAV
-	int uavDescriptorIndex;										// ディスクリプタヒープ上のこのUAVのインデックス
+	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc_;					// UAVの設定
+	Microsoft::WRL::ComPtr<ID3D12Resource> rayTracingOutput_;	// UAV
+	int uavDescriptorIndex_;										// ディスクリプタヒープ上のこのUAVのインデックス
 
 
 public:
@@ -19,7 +19,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// セッティング
-	void Setting(DXGI_FORMAT Format);
+	void Setting(DXGI_FORMAT Format, LPCWSTR BufferName);
 
 	// ディスクリプタをセット。
 	void SetComputeRootDescriptorTalbe(const int& RootParamIndex);
@@ -28,11 +28,11 @@ public:
 	void SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src);
 
 	// ゲッタ
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput; }
-	const int& GetUAVIndex() { return uavDescriptorIndex; }
+	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput_; }
+	const int& GetUAVIndex() { return uavDescriptorIndex_; }
 
 private:
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTexture2D(UINT width, UINT height, DXGI_FORMAT format, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTexture2D(UINT Width, UINT Height, DXGI_FORMAT Format, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES IinitialState, D3D12_HEAP_TYPE HeapType);
 
 };

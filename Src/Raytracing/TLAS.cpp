@@ -1,5 +1,5 @@
 #include "TLAS.h"
-#include "PorygonInstanceRegister.h"
+#include "PolygonInstanceRegister.h"
 #include "DescriptorHeapMgr.h"
 
 void TLAS::GenerateTLAS()
@@ -8,7 +8,7 @@ void TLAS::GenerateTLAS()
 	/*===== TLAS生成処理 =====*/
 
 	// インスタンスの行列を計算。
-	PorygonInstanceRegister::Ins()->CalWorldMat();
+	PolygonInstanceRegister::Ins()->CalWorldMat();
 
 
 	/*-- 加速構造体を設定 --*/
@@ -26,8 +26,8 @@ void TLAS::GenerateTLAS()
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.RaytracingAccelerationStructure.Location = tlasBuffer->GetGPUVirtualAddress();
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-	DirectXBase::Ins()->dev->CreateShaderResourceView(nullptr, &srvDesc,
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	DirectXBase::Ins()->dev_->CreateShaderResourceView(nullptr, &srvDesc,
 		basicHeapHandle);
 
 	// ディスクリプタヒープをインクリメント
@@ -39,10 +39,10 @@ void TLAS::GenerateTLAS()
 //{
 //
 //	// インスタンスの情報を記録したバッファを準備する。
-//	size_t sizeofinstancedescs = porygoninstanceregister::instance()->getregistersize() * sizeof(d3d12_raytracing_instance_desc);
+//	size_t sizeofinstancedescs = PolygonInstanceRegister::instance()->getregistersize() * sizeof(d3d12_raytracing_instance_desc);
 //
 //	// 生成したバッファにデータを書き込む。
-//	writetomemory(instancedescbuffer, porygoninstanceregister::instance()->getdata(), sizeofinstancedescs);
+//	writetomemory(instancedescbuffer, PolygonInstanceRegister::instance()->getdata(), sizeofinstancedescs);
 //
 //}
 
@@ -52,21 +52,21 @@ void TLAS::Update()
 	/*===== TLASの更新処理 =====*/
 
 	// インスタンスの行列を計算。
-	PorygonInstanceRegister::Ins()->CalWorldMat();
+	PolygonInstanceRegister::Ins()->CalWorldMat();
 
 	// Instanceのサイズを取得。
-	auto sizeOfInstanceDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
+	auto sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
 	// CPU から書き込み可能なバッファに書き込む。
-	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescBuffer, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// 更新のための値を設定。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
+	inputs.NumDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	// TLAS の更新処理を行うためのフラグを設定する。
 	inputs.Flags =
@@ -81,7 +81,7 @@ void TLAS::Update()
 	asDesc.ScratchAccelerationStructureData = tlasUpdateBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -90,42 +90,42 @@ void TLAS::Update()
 
 }
 
-void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize)
+void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
 
 	// nullチェック。
-	if (resource == nullptr) return;
+	if (Resource == nullptr) return;
 
 	// マップ処理を行う。
 	void* mapped = nullptr;
-	D3D12_RANGE range{ 0, dataSize };
-	HRESULT hr = resource->Map(0, nullptr, (void**)&mapped);
+	D3D12_RANGE range{ 0, DataSize };
+	HRESULT hr = Resource->Map(0, nullptr, (void**)&mapped);
 
 	// マップが成功したら値を書き込む。
 	if (SUCCEEDED(hr)) {
 
-		memcpy(mapped, pData, dataSize);
-		resource->Unmap(0, nullptr);
+		memcpy(mapped, PData, DataSize);
+		Resource->Unmap(0, nullptr);
 
 	}
 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType)
+Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
 {
 
 	/*===== バッファ全般を生成する処理 =====*/
 
 	// 引数から設定用構造体を設定する。
 	D3D12_HEAP_PROPERTIES heapProps{};
-	if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
+	if (HeapType == D3D12_HEAP_TYPE_DEFAULT) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
 	}
-	if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
+	if (HeapType == D3D12_HEAP_TYPE_UPLOAD) {
 		heapProps = D3D12_HEAP_PROPERTIES{
 		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
 		};
@@ -137,21 +137,21 @@ Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t size, D3D12_RES
 	D3D12_RESOURCE_DESC resDesc{};
 	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 	resDesc.Alignment = 0;
-	resDesc.Width = size;
+	resDesc.Width = Size;
 	resDesc.Height = 1;
 	resDesc.DepthOrArraySize = 1;
 	resDesc.MipLevels = 1;
 	resDesc.Format = DXGI_FORMAT_UNKNOWN;
 	resDesc.SampleDesc = { 1, 0 };
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	resDesc.Flags = flags;
+	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Ins()->dev->CreateCommittedResource(
+	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
-		initialState,
+		InitialState,
 		nullptr,
 		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
 	);
@@ -174,7 +174,7 @@ void TLAS::SettingAccelerationStructure()
 	/*-- TLASの生成に必要なメモリ量を求める --*/
 
 	// インスタンスの情報を記録したバッファを準備する。
-	size_t sizeOfInstanceDescs = PorygonInstanceRegister::Ins()->GetRegisterSize() * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	size_t sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 	instanceDescBuffer = CreateBuffer(
 		sizeOfInstanceDescs,
 		D3D12_RESOURCE_FLAG_NONE,
@@ -182,27 +182,27 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_HEAP_TYPE_UPLOAD);
 
 	// 生成したバッファにデータを書き込む。
-	WriteToMemory(instanceDescBuffer, PorygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescBuffer, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// メモリ量を求めるための設定を行う。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};
 	auto& inputs = buildASDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
-	inputs.NumDescs = PorygonInstanceRegister::Ins()->GetRegisterSize();
+	inputs.NumDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	inputs.InstanceDescs = instanceDescBuffer->GetGPUVirtualAddress();
 	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
 
 	// メモリ量を求める関数を実行する。
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO tlasPrebuild{};
-	DirectXBase::Ins()->dev->GetRaytracingAccelerationStructurePrebuildInfo(
+	DirectXBase::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &tlasPrebuild
 	);
 
 	/*-- TLASバッファとスクラッチバッファを生成する --*/
 
 	// スクラッチメモリ(バッファ)を確保。
-	scratchBuffer = CreateBuffer(
+	scratchBuffer_ = CreateBuffer(
 		tlasPrebuild.ScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
@@ -228,11 +228,11 @@ void TLAS::SettingAccelerationStructure()
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 
 	// AccelerationStructure構築。
-	buildASDesc.ScratchAccelerationStructureData = scratchBuffer->GetGPUVirtualAddress();
+	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
 	buildASDesc.DestAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積んで実行する。
-	DirectXBase::Ins()->cmdList->BuildRaytracingAccelerationStructure(
+	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr
 	);
 
@@ -250,32 +250,32 @@ void TLAS::CreateAccelerationStructure()
 
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer.Get());
-	DirectXBase::Ins()->cmdList->ResourceBarrier(1, &uavBarrier);
-	DirectXBase::Ins()->cmdList->Close();
+	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
+	DirectXBase::Ins()->cmdList_->Close();
 
 	// TLASを構築。
 	//ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
 
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList.Get() };
-	DirectXBase::Ins()->cmdQueue->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList_.Get() };
+	DirectXBase::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
 
 
 	/*-- リソースバリアを設定して書き込めないようにする --*/
 
 	//グラフィックコマンドリストの完了待ち
-	DirectXBase::Ins()->cmdQueue->Signal(DirectXBase::Ins()->fence.Get(), ++DirectXBase::Ins()->fenceVal);
-	if (DirectXBase::Ins()->fence->GetCompletedValue() != DirectXBase::Ins()->fenceVal) {
+	DirectXBase::Ins()->cmdQueue_->Signal(DirectXBase::Ins()->fence_.Get(), ++DirectXBase::Ins()->fenceVal_);
+	if (DirectXBase::Ins()->fence_->GetCompletedValue() != DirectXBase::Ins()->fenceVal_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		DirectXBase::Ins()->fence->SetEventOnCompletion(DirectXBase::Ins()->fenceVal, event);
+		DirectXBase::Ins()->fence_->SetEventOnCompletion(DirectXBase::Ins()->fenceVal_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	//コマンドアロケータのリセット
-	DirectXBase::Ins()->cmdAllocator->Reset();						//キューをクリア
+	DirectXBase::Ins()->cmdAllocator_->Reset();						//キューをクリア
 
 	//コマンドリストのリセット
-	DirectXBase::Ins()->cmdList->Reset(DirectXBase::Ins()->cmdAllocator.Get(), nullptr);		//再びコマンドリストを貯める準備
+	DirectXBase::Ins()->cmdList_->Reset(DirectXBase::Ins()->cmdAllocator_.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }

@@ -1,54 +1,113 @@
 #include "Player.h"
 #include "BLASRegister.h"
-#include "PorygonInstanceRegister.h"
-#include "HitGroupMgr.h"
+#include "PolygonInstanceRegister.h"
 #include "Input.h"
 #include "FHelper.h"
 #include "BLAS.h"
 #include "DriftParticleMgr.h"
+#include "Camera.h"
+#include "HitGroupMgr.h"
+#include "OBB.h"
+#include "CircuitStage.h"
 
-void Player::Init(const int& StageBlasIndex, const int& StageInstanceIndex)
+Player::Player()
 {
 
 	/*===== 初期化処理 =====*/
 
-	carBlasIndex = BLASRegister::Ins()->GenerateObj("Resource/", "car.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DENOISE_AO_HIT_GROUP], { L"Resource/red.png" }, true);
-	carInstanceIndex = PorygonInstanceRegister::Ins()->CreateInstance(carBlasIndex, PorygonInstanceRegister::SHADER_ID_REFLECTION);
-	PorygonInstanceRegister::Ins()->AddScale(carInstanceIndex, Vec3(10, 10, 10));
+	// 車のモデルをロード
+	playerModel_.Load();
 
-	stageBlasIndex = StageBlasIndex;
-	stageInstanceIndex = StageInstanceIndex;
-
-	pos = Vec3(0, 30, 0);
-	forwardVec = Vec3(0, 0, 1);
+	pos_ = PLAYER_DEF_POS;
+	prevPos_ = pos_;
+	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
-	upVec = Vec3(0, 1, 0);
-	size = Vec3(10, 10, 10);
-	rotY = 0;
-	speed = 0;
-	gravity = 0;
-	boostSpeed = 0;
-	isDrift = false;
-	isGround = true;
+	upVec_ = Vec3(0, 1, 0);
+	size_ = Vec3(15, 15, 15);
+	rotY_ = 0;
+	speed_ = 0;
+	gravity_ = 0;
+	boostSpeed_ = 0;
+	returnDefPosTimer_ = 0;
+	isDrift_ = false;
+	isGround_ = true;
+	isGrass_ = false;
+
+	// OBBを生成。
+	obb_ = std::make_shared<OBB>();
+	obb_->Setting(playerModel_.carBodyBlasIndex_, playerModel_.carBodyInsIndex_);
 
 }
 
-void Player::Update()
+void Player::Init()
+{
+
+	/*===== 初期化処理 =====*/
+
+	pos_ = PLAYER_DEF_POS;
+	prevPos_ = pos_;
+	forwardVec_ = Vec3(0, 0, -1);
+	bottomVec = Vec3(0, -1, 0);
+	upVec_ = Vec3(0, 1, 0);
+	size_ = Vec3(30, 30, 30);
+	returnDefPosTimer_ = 0;
+	rotY_ = 0;
+	speed_ = 0;
+	gravity_ = 0;
+	boostSpeed_ = 0;
+	isDrift_ = false;
+	isGround_ = true;
+	isGrass_ = false;
+	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+
+}
+
+void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount)
 {
 
 	/*===== 更新処理 =====*/
 
 	// 入力処理
-	Input();
+	Input(ConstBufferData);
 
 	// 移動処理
 	Move();
 
 	// 当たり判定
-	CheckHit();
+	CheckHit(StageData, IsPassedMiddlePoint, RapCount);
 
 	// 座標を更新。
-	PorygonInstanceRegister::Ins()->ChangeTrans(carInstanceIndex, pos);
+	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
+
+	// 座標を保存。
+	prevPos_ = pos_;
+
+	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
+	if (isGround_) {
+
+		returnDefPosTimer_ = 0;
+
+	}
+	else {
+
+		++returnDefPosTimer_;
+
+		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
+
+			pos_ = PLAYER_DEF_POS;
+			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+			forwardVec_ = Vec3(0, 0, -1);
+			rotY_ = 0;
+			upVec_ = Vec3(0, 1, 0);
+			returnDefPosTimer_ = 0;
+
+		}
+
+	}
+
+	// OBBを更新。
+	obb_->SetMat(playerModel_.carBodyInsIndex_);
 
 }
 
@@ -64,35 +123,40 @@ float Player::GetNowSpeedPer()
 
 	/*====== 移動速度の割合を計算 =====*/
 
-	float per = (speed + boostSpeed) / (MAX_SPEED + MAX_BOOST_SPEED);
+	float per = (speed_ + boostSpeed_) / (MAX_SPEED + MAX_BOOST_SPEED);
 
 	return per;
 
 }
 
-void Player::Input()
+void Player::Input(RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 入力処理 =====*/
 
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
-	float inputRightTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_RIGHT);
-	if (INPUT_DEADLINE_TRI < inputRightTriValue && isGround) {
+	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
+	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && isGround_) {
 
-		speed += inputRightTriValue * ADD_SPEED;
+		speed_ += inputRightTriValue * ADD_SPEED;
 
 	}
-	else if (isGround) {
+	else if (Input::Ins()->IsKey(DIK_W) && isGround_) {
+
+		speed_ += ADD_SPEED;
+
+	}
+	else if (isGround_) {
 
 		// 移動していなくて地上にいたら移動量を0に近づける。
-		speed -= speed / 10.0f;
+		speed_ -= speed_ / 10.0f;
 
 	}
 	else {
 
 		// 移動していなくて空中にいたら移動量を0に近づける。
-		speed -= speed / 200.0f;
+		speed_ -= speed_ / 200.0f;
 
 	}
 
@@ -100,88 +164,126 @@ void Player::Input()
 	float nowFrameInputLeftStickHori = 0;
 
 	// 右スティックの横の傾き量でキャラを回転させる。
-	float inputLeftStickHori = Input::Ins()->isPadThumb(XINPUT_THUMB_LEFTSIDE);
+	float inputLeftStickHori = Input::Ins()->PadStick(XINPUT_THUMB_LEFTSIDE);
 	const float LEFT_STICK_INPUT_DEADLINE = 0.2f;
-	if (LEFT_STICK_INPUT_DEADLINE < std::fabs(inputLeftStickHori)) {
+	int inputADKey = Input::Ins()->IsKey(DIK_D) - Input::Ins()->IsKey(DIK_A);
+	if (LEFT_STICK_INPUT_DEADLINE < std::fabs(inputLeftStickHori) || inputADKey != 0) {
 
 		// 回転量 通常状態とドリフト状態で違う。
 		float handleAmount = HANDLE_NORMAL;
 
 		// ドリフト状態だったら回転量を多い方にする。
-		if (isDrift) {
+		if (isDrift_) {
 
 			handleAmount = HANDLE_DRIFT;
 
 			// ついでにドリフト状態の時のブーストするまでのタイマーを更新する。
-			++driftBoostTimer;
-			if (DRIFT_BOOST_TIMER < driftBoostTimer) driftBoostTimer = DRIFT_BOOST_TIMER;
+			if (isGround_) {
+				++driftBoostTimer_;
+				if (DRIFT_BOOST_TIMER < driftBoostTimer_) driftBoostTimer_ = DRIFT_BOOST_TIMER;
+			}
+
+			// タイヤを回転させる。
+			Vec3 rot = Vec3(0.0f, 0.5f, 0.0f);
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
+
+		}
+		// ドリフト状態じゃなかったら。
+		else {
+
+			// タイヤを回転させる。
+			Vec3 rot = Vec3(0.0f, 0.3f, 0.0f);
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
+			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
 
 		}
 
 		// クォータニオンを求める。
-		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec.ConvertXMVECTOR(), handleAmount * inputLeftStickHori);
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec_.ConvertXMVECTOR(), handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount);
 
 		// 求めたクォータニオンを行列に治す。
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転を加算する。
-		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, quaternionMat);
-		rotY += handleAmount * inputLeftStickHori;
-		nowFrameInputLeftStickHori = inputLeftStickHori;
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, quaternionMat);
+		rotY_ += handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
+		nowFrameInputLeftStickHori = inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
 
 		// 正面ベクトルを車の回転行列分回転させる。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+	}
+	else {
+
+		// タイヤの回転をデフォルトに戻す。
+		Vec3 rot_ = Vec3(0.0f, 0.0f, 0.0f);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_);
 
 	}
 
 	// LTが引かれていたらドリフト状態にする。
 	const float INPUT_DEADLINE_DRIFT = 0.9f;
-	float inputLeftTriValue = Input::Ins()->isPadTri(XINPUT_TRIGGER_LEFT);
-	bool isInputNowFrameLeftStrick = LEFT_STICK_INPUT_DEADLINE < fabs(nowFrameInputLeftStickHori);
-	if (INPUT_DEADLINE_DRIFT < inputLeftTriValue && isInputNowFrameLeftStrick) {
+	float inputLeftTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_LEFT);
+	bool isInputNowFrameLeftStrick = LEFT_STICK_INPUT_DEADLINE < fabs(nowFrameInputLeftStickHori) || inputADKey != 0;
+	bool isInputLShift = Input::Ins()->IsKey(DIK_LSHIFT);
+	if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isInputNowFrameLeftStrick) {
 
-		isDrift = true;
+		isDrift_ = true;
 
 		// ドリフトのベクトルを求める。
 		Vec3 driftVec = Vec3();
 		if (nowFrameInputLeftStickHori < 0) {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 		}
 		else {
 
-			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 		}
 
 		// ドリフト時のパーティクルを生成。
-		DriftParticleMgr::Ins()->Generate(pos, driftVec, PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+		//DriftParticleMgr::Ins()->Generate(pos, driftVec, PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex), ConstBufferData);
+		ConstBufferData;
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。
-	else if (INPUT_DEADLINE_DRIFT < inputLeftTriValue && isDrift) {
+	else if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isDrift_) {
 	}
 	else {
 
 		// ドリストのブーストするまでのタイマーが規定値以上だったらブーストする。
-		if (DRIFT_BOOST_TIMER <= driftBoostTimer) {
+		if (DRIFT_BOOST_TIMER <= driftBoostTimer_) {
 
-			boostSpeed = MAX_BOOST_SPEED;
+			boostSpeed_ = MAX_BOOST_SPEED;
 
 		}
 
 		// ドリフトのブーストするまでのタイマーを初期化する。
-		driftBoostTimer = 0;
+		driftBoostTimer_ = 0;
 
-		isDrift = false;
+		isDrift_ = false;
 
 	}
 
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
-	if (Input::Ins()->isPad(XINPUT_GAMEPAD_B)) {
+	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {
 
-		pos = Vec3(0, 30, 0);
+		pos_ = PLAYER_DEF_POS;
+		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+		forwardVec_ = Vec3(0, 0, -1);
+		rotY_ = 0;
+		upVec_ = Vec3(0, 1, 0);
 
 	}
 
@@ -193,133 +295,142 @@ void Player::Move()
 	/*===== 移動処理 =====*/
 
 	// 移動速度が限界を超えないようにする。
-	if (MAX_SPEED < speed) {
+	if (MAX_SPEED < speed_) {
 
-		speed = MAX_SPEED;
+		speed_ = MAX_SPEED;
+
+	}
+
+	// 草の上にいたら移動速度の限界値を下げる。
+	if (isGrass_ && MAX_SPEED_ON_GRASS < speed_) {
+
+		speed_ = MAX_SPEED_ON_GRASS;
 
 	}
 
 	// 座標移動させる。
-	pos += forwardVec * (speed + boostSpeed);
+	pos_ += forwardVec_ * (speed_ + boostSpeed_);
 
 	// ドリフト時のブースト移動量を0に近づける。
-	if (0 < boostSpeed) {
+	if (0 < boostSpeed_) {
 
-		boostSpeed -= SUB_BOOST_SPEED;
+		boostSpeed_ -= SUB_BOOST_SPEED;
 
 	}
 	else {
 
-		boostSpeed = 0;
+		boostSpeed_ = 0;
 
 	}
 
 	// 地上にいたら重力を無効化する。
-	if (isGround) {
+	if (isGround_) {
 
-		gravity = 0;
+		gravity_ = 0;
 
 	}
 	// 空中にいたら重力を加算する。
 	else {
 
-		gravity += ADD_GRAV;
+		gravity_ += ADD_GRAV;
 
 		// 重力量が限界を超えないようにする。
-		if (MAX_GRAV < gravity) {
+		if (MAX_GRAV < gravity_) {
 
-			gravity = MAX_GRAV;
+			gravity_ = MAX_GRAV;
 
 		}
 
 	}
 
 	// 座標に重力を加算する。
-	pos += Vec3(0, -1, 0) * gravity;
+	pos_ += Vec3(0, -1, 0) * gravity_;
 
 	// 下ベクトルを車の回転行列分回転させる。
-	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex));
+	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 }
 
-void Player::CheckHit()
+void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount)
 {
 
 	/*===== 当たり判定 =====*/
 
-	{
+	// 当たり判定関数に入れる値を設定。
+	BaseStage::ColliderInput input;
+	input.targetInsIndex_ = playerModel_.carBodyInsIndex_;
+	input.targetOBB_ = obb_;
+	input.targetPos_ = pos_;
+	input.targetPrevPos_ = prevPos_;
+	input.targetRotY_ = rotY_;
+	input.targetSize_ = size_;
 
-		/*-- ステージとの当たり判定 --*/
+	// 当たり判定関数から返ってくる値。
+	BaseStage::ColliderOutput output;
 
-		// 当たり判定に使用するデータ
-		FHelper::RayToModelCollisionData collistionData;
+	// 当たり判定を行う。
+	output = StageData.lock()->Collider(input);
 
-		// 当たり判定に必要なデータを埋めていく。
-		collistionData.targetVertex = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexPos();
-		collistionData.targetNormal = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexNormal();
-		collistionData.targetIndex = BLASRegister::Ins()->GetBLAS()[stageBlasIndex]->GetVertexIndex();
-		collistionData.rayPos = pos;
-		collistionData.rayDir = bottomVec;
-		collistionData.matTrans = PorygonInstanceRegister::Ins()->GetTrans(stageInstanceIndex);
-		collistionData.matScale = PorygonInstanceRegister::Ins()->GetScale(stageInstanceIndex);
-		collistionData.matRot = PorygonInstanceRegister::Ins()->GetRotate(stageInstanceIndex);
+	// 当たり判定の結果から処理を行う。
+	if (output.isHitBoostGimmick_) {
 
-		// 当たり判定の結果保存用変数。
-		bool isHit = false;
-		Vec3 impactPos;
-		float hitDistance;
-		Vec3 hitNormal;
+		// ブーストをマックスにする。
+		boostSpeed_ = MAX_BOOST_SPEED;
 
-		// 当たり判定を行う。
-		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
+	}
+	if (output.isHitGoal_) {
 
-		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y) < 0;
-		isHit &= 0 < hitDistance;
-
-		// 当たっていたら押し戻す。
-		if (isHit) {
-
-			// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
-			const float PUSH_BACK_OFFSET = 1.0f;
-
-			// 法線方向に当たった分押し戻す。
-			pos += hitNormal * (size.y - (hitDistance + PUSH_BACK_OFFSET));
-
-			// 地上にいる判定。
-			isGround = true;
-
-			// 斜め床の回転処理。
-			RotObliqueFloor(hitNormal);
-
-		}
-		else {
-
-			// 空中にいる判定。
-			isGround = false;
-
-		}
-
-		// 正面方向の当たり判定を行うため、レイの飛ばす方向を変える。
-		collistionData.rayDir = forwardVec;
-
-		// 当たり判定を行う。
-		isHit = false;
-		isHit = FHelper::RayToModelCollision(collistionData, impactPos, hitDistance, hitNormal);
-
-		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - size.y) < 0;
-		isHit &= 0 < hitDistance;
-
-		// 当たっていたら押し戻す。
-		if (isHit) {
-
-			// 法線方向に当たった分押し戻す。
-			pos += hitNormal * (size.x - hitDistance);
+		// ゴール
+		if (IsPassedMiddlePoint) {
+			IsPassedMiddlePoint = false;
+			++RapCount;
 
 		}
 
 	}
+	if (output.isHitMiddlePoint_) {
+
+		// 中間地点との当たり判定
+		IsPassedMiddlePoint = true;
+
+	}
+	if (output.isHitOrnament_) {
+
+		// 装飾オブジェクトとの当たった判定
+		speed_ = 0;
+		boostSpeed_ = 0;
+
+	}
+	// 設置判定を初期化。
+	isGround_ = false;
+	isGrass_ = false;
+	if (output.isHitStage_) {
+
+		// ステージとの当たり判定
+		isGround_ = true;
+
+		forwardVec_ = output.forwardVec_;
+		upVec_ = output.upVec_;
+
+	}
+	if (output.isHitStageGrass_) {
+
+		// ステージと当たっていなかったら
+		if (!isGround_) {
+
+			// 草とあたった判定
+			isGround_ = true;
+			isGrass_ = true;
+
+			forwardVec_ = output.forwardVec_;
+			upVec_ = output.upVec_;
+
+		}
+
+	}
+
+	// その他の変数を初期化。
+	pos_ = output.resultPos_;
 
 }
 
@@ -362,29 +473,29 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, quaternionMat);
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, quaternionMat);
 
 		// 上ベクトルを基準としたクォータニオンを求める。
-		Vec3 normal = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY);
+		Vec3 normal_ = HitNormal;
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
 
 		// クォータニオンを行列に治す。
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 		// 上ベクトルを更新。
-		upVec = normal;
+		upVec_ = normal_;
 
 		//正面ベクトルを更新。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), rotationMatBuff);
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
 
 	}
 
@@ -392,29 +503,29 @@ void Player::RotObliqueFloor(const Vec3& HitNormal)
 	if (HitNormal == Vec3(0, 1, 0)) {
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->ChangeRotate(carInstanceIndex, DirectX::XMMatrixIdentity());
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, DirectX::XMMatrixIdentity());
 
 		// 上ベクトルを基準としたクォータニオンを求める。
-		Vec3 normal = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal.ConvertXMVECTOR(), rotY);
+		Vec3 normal_ = HitNormal;
+		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
 
 		// クォータニオンを行列に治す。
 		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 		// プレイヤーを回転させる。
-		PorygonInstanceRegister::Ins()->AddRotate(carInstanceIndex, upQuaternionMat);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PorygonInstanceRegister::Ins()->GetRotate(carInstanceIndex);
+		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 		// 上ベクトルを更新。
-		upVec = normal;
+		upVec_ = normal_;
 
 		//正面ベクトルを更新。
-		forwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), rotationMatBuff);
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
 
 	}
 
