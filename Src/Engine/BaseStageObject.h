@@ -56,11 +56,17 @@ public:
 	// 無効化。
 	inline void Invalidate() { isActive_ = false; }
 
+	// 表示、非表示
+	void Display();
+	void NonDisplay();
+
 	// ゲッタ
 	inline const int& GetBLASIndex() { return blasIndex_; }
 	inline const int& GetINSTANCEIndex() { return insIndex_; }
 	inline const bool& GetIsActive() { return isActive_; }
 	inline std::shared_ptr<OBB> GetOBB() { return obb_; }
+	inline const COLLISION_ID GetCollisionID() { return collisionID_; }
+	inline const OBJECT_ID GetObjectID() { return objID_; }
 
 	// 移動関係
 	void AddTrans(const Vec3& Trans);

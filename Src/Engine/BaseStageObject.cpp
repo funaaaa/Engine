@@ -3,6 +3,24 @@
 #include "FHelper.h"
 #include "OBB.h"
 
+void BaseStageObject::Display()
+{
+
+	/*===== 表示 =====*/
+
+	PolygonInstanceRegister::Ins()->Display(insIndex_);
+
+}
+
+void BaseStageObject::NonDisplay()
+{
+
+	/*===== 非表示 =====*/
+
+	PolygonInstanceRegister::Ins()->NonDisplay(insIndex_);
+
+}
+
 void BaseStageObject::AddTrans(const Vec3& Trans)
 {
 
@@ -23,7 +41,7 @@ void BaseStageObject::AddTrans(const Vec3& Trans)
 #endif
 
 		// OBBも移動させる。
-		obb_->pos_ = PolygonInstanceRegister::Ins()->GetPos(insIndex_);
+		obb_->pos_ += Trans;
 
 	}
 
@@ -75,7 +93,7 @@ void BaseStageObject::AddScale(const Vec3& Scale)
 #endif
 
 		// OBBの大きさも変える。
-		obb_->length_ = FHelper::MulMat(obb_->defLength_, PolygonInstanceRegister::Ins()->GetScale(insIndex_));
+		obb_->length_ = FHelper::MulMat(obb_->defLength_, FHelper::CalScaleMat(Scale));
 
 	}
 

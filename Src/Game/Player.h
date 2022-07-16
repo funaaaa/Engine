@@ -2,9 +2,11 @@
 #include "Vec.h"
 #include "ConstBuffers.h"
 #include <vector>
-#include "OBB.h"
 #include "PlayerModel.h"
+#include <memory>
 
+class BaseStage;
+class OBB;
 
 class Player {
 
@@ -27,7 +29,7 @@ public:
 	bool isGround_;			// 地上にいるか t=地上 f=空中
 	bool isGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 
-	OBB obb_;	// 当たり判定用OBB
+	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
@@ -64,7 +66,7 @@ public:
 	void Init();
 
 	// 更新処理
-	void Update(RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount);
+	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount);
 
 	// 描画処理
 	void Draw();
@@ -83,7 +85,7 @@ private:
 	void Move();
 
 	// 当たり判定
-	void CheckHit(bool& IsPassedMiddlePoint, int& RapCount);
+	void CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount);
 
 	// 斜め床の回転
 	void RotObliqueFloor(const Vec3& HitNormal);

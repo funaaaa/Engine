@@ -33,10 +33,13 @@ void FloatingStageObject::Update(const int& Timer)
 	// 前フレームの移動をかき消す。
 	AddTrans(-floatingMove_);
 
-	// 新たに移動量を求める。 Timerがint型なので10.0fで割って少数にする。
-	floatingMove_.y_ = sinf(static_cast<float>(Timer) / 10.0f + timerOffset_);
+	// 新たに移動量を求める。 Timerがint型なので20.0fで割って少数にする。
+	floatingMove_.y_ = sinf(static_cast<float>(Timer) / 20.0f + timerOffset_) * FLOATING_MOVE;
 
 	// 移動させる。
 	AddTrans(floatingMove_);
+
+	// 回転させる。
+	AddRotate(Vec3(0.01f, 0.01f, 0));
 
 }

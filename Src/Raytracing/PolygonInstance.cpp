@@ -2,7 +2,7 @@
 #include "DirectXBase.h"
 #include <assert.h>
 
-D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& InstanceID)
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
@@ -20,10 +20,10 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc_.Transform),
 		worldMat_);
 
-	scale_ = Vec3(1, 1, 1);
+	shaderID = ShaderID;
 
 	// インスタンスの詳細を設定。
-	instanceDesc_.InstanceID = InstanceID;
+	instanceDesc_.InstanceID = ShaderID;
 	instanceDesc_.InstanceMask = 0xFF;
 	instanceDesc_.InstanceContributionToHitGroupIndex = BlasIndex;
 	instanceDesc_.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
@@ -79,9 +79,6 @@ void PolygonMeshInstance::AddRotate(const Vec3& Rot)
 
 	matRot_ = buff * matRot_;
 
-	// デバッグ用の回転を保存。
-	rot_ += Rot;
-
 }
 
 void PolygonMeshInstance::AddRotate(const DirectX::XMMATRIX& Rot)
@@ -101,9 +98,6 @@ void PolygonMeshInstance::ChangeRotate(const Vec3& Rot)
 	matRot_ *= DirectX::XMMatrixRotationZ(Rot.z_);
 	matRot_ *= DirectX::XMMatrixRotationX(Rot.x_);
 	matRot_ *= DirectX::XMMatrixRotationY(Rot.y_);
-
-	// デバッグ用の回転を保存。
-	rot_ = Rot;
 
 }
 
@@ -127,8 +121,6 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 	scaleMat_ *= buff;
 
-	scale_ += Scale;
-
 }
 
 void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
@@ -141,8 +133,6 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 	buff = DirectX::XMMatrixScaling(Scale.x_, Scale.y_, Scale.z_);
 
 	scaleMat_ = buff;
-
-	scale_ = Scale;
 
 }
 
@@ -224,7 +214,9 @@ void PolygonMeshInstance::Disable()
 	}
 
 	isActive_ = false;
-	--parentInstance_.lock()->childCount_;
+	if (!parentInstance_.expired()) {
+		--parentInstance_.lock()->childCount_;
+	}
 
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "Vec.h"
 #include <array>
+#include <memory>
 
 class OBB
 {
@@ -31,6 +32,7 @@ public:
 
 	// OBBとの当たり判定
 	bool CheckHitOBB(OBB TargetOBB);
+	bool CheckHitOBB(std::weak_ptr<OBB> TargetOBB);
 
 	inline const std::array<Vec3, 3>& GetDir() { return dir_; };		// 指定軸番号の方向ベクトルを取得
 	inline const Vec3 GetLength() { return length_; };				// 指定軸方向の長さを取得

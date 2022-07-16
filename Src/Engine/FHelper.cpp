@@ -33,21 +33,21 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 	std::vector<CheckHitPorygon> targetPorygon;		//ポリゴン保存用コンテナ
 
 	// targetのポリゴン数に合わせてリサイズ
-	targetPorygon.resize(static_cast<unsigned __int64>(static_cast<float>(CollisionData.targetVertex.size()) / 3.0f));
+	targetPorygon.resize(static_cast<unsigned __int64>(static_cast<float>(CollisionData.targetVertex_.size()) / 3.0f));
 
 	// ポリゴンの中身を代入
 	int targetPorygonSize = static_cast<int>(targetPorygon.size());
 	for (int index = 0; index < targetPorygonSize; ++index) {
 
 		// 頂点1
-		targetPorygon[index].p1.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3)])];
-		targetPorygon[index].p1.normal_ = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3)])];
+		targetPorygon[index].p1.pos_ = CollisionData.targetVertex_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>(index * 3)])];
+		targetPorygon[index].p1.normal_ = CollisionData.targetNormal_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>(index * 3)])];
 		// 頂点2
-		targetPorygon[index].p2.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 1)])];
-		targetPorygon[index].p2.normal_ = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 1)])];
+		targetPorygon[index].p2.pos_ = CollisionData.targetVertex_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>(index * 3 + 1)])];
+		targetPorygon[index].p2.normal_ = CollisionData.targetNormal_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>(index * 3 + 1)])];
 		// 頂点3
-		targetPorygon[index].p3.pos_ = CollisionData.targetVertex[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 2)])];
-		targetPorygon[index].p3.normal_ = CollisionData.targetNormal[static_cast<UINT>(CollisionData.targetIndex[static_cast<UINT>(index * 3 + 2)])];
+		targetPorygon[index].p3.pos_ = CollisionData.targetVertex_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>(index * 3 + 2)])];
+		targetPorygon[index].p3.normal_ = CollisionData.targetNormal_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>(index * 3 + 2)])];
 		// 有効化フラグ
 		targetPorygon[index].isActive_ = true;
 	}
@@ -55,7 +55,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 	/*----- 保存したポリゴンの頂点座標にワールド変換行列をかける -----*/
 	// ワールド行列
 	DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
-	matWorld *= CollisionData.matScale;
+	matWorld *= CollisionData.matScale_;
 	matWorld *= CollisionData.matRot_;
 	matWorld *= CollisionData.matTrans_;
 	targetPorygonSize = static_cast<int>(targetPorygon.size());
@@ -76,7 +76,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 	/*----- レイの方向と法線が同じ方向なら除外 -----*/
 	for (int index = 0; index < targetPorygonSize; ++index) {
 		// まずは1つ目の頂点をチェック
-		if (-0.0001f < targetPorygon[index].p1.normal_.Dot(CollisionData.rayDir)) {
+		if (-0.0001f < targetPorygon[index].p1.normal_.Dot(CollisionData.rayDir_)) {
 			// ここまで来たら完全に反対側を向いているので、削除フラグを建てる
 			targetPorygon[index].isActive_ = false;
 			continue;
@@ -95,17 +95,17 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 
 		// レイの開始地点から平面におろした垂線の長さを求める
 		Vec3 planeNorm = -targetPorygon[index].p1.normal_;
-		float rayToOriginLength = CollisionData.rayPos.Dot(planeNorm);
+		float rayToOriginLength = CollisionData.rayPos_.Dot(planeNorm);
 		float planeToOriginLength = targetPorygon[index].p1.pos_.Dot(planeNorm);
 		// 視点から平面におろした垂線の長さ
 		float perpendicularLine = rayToOriginLength - planeToOriginLength;
 
 		// 三角関数を利用して視点から衝突店までの距離を求める
-		float dist = planeNorm.Dot(CollisionData.rayDir);
+		float dist = planeNorm.Dot(CollisionData.rayDir_);
 		float impDistance = perpendicularLine / -dist;
 
 		// 衝突地点
-		Vec3 impactPoint = CollisionData.rayPos + CollisionData.rayDir * impDistance;
+		Vec3 impactPoint = CollisionData.rayPos_ + CollisionData.rayDir_ * impDistance;
 
 		/*----- 衝突点がポリゴンの内側にあるかを調べる -----*/
 		Vec3 m;

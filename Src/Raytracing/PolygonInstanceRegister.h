@@ -37,7 +37,7 @@ public:
 	void Setting();
 
 	// Insを生成する。
-	int CreateInstance(const int& BlasIndex, const UINT& InstanceID);
+	int CreateInstance(const int& BlasIndex, const UINT& ShaderID);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);
@@ -55,7 +55,6 @@ public:
 	void AddRotate(const int& Index, const Vec3& Rot);
 	void AddRotate(const int& Index, const DirectX::XMMATRIX& Rot);
 	DirectX::XMMATRIX GetRotate(const int& Index);
-	Vec3 GetRotVec3(const int& Index);
 
 	// 回転(ラジアン、引数を代入)関数
 	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);
@@ -66,7 +65,6 @@ public:
 	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
 	void AddScale(const int& Index, const Vec3& Scale);
 	DirectX::XMMATRIX GetScale(const int& Index);
-	Vec3 GetScaleVec3(const int& Index);
 
 	// 拡縮(引数を代入)関数
 	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
@@ -84,6 +82,12 @@ public:
 
 	// インスタンスを破棄。
 	void DestroyInstance(const int& Index);
+
+	// インスタンスを表示
+	void Display(const int& Index);
+
+	// インスタンスを非表示
+	void NonDisplay(const int& Index);
 
 	// レジスターのDataを取得する関数。
 	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc_.data(); };

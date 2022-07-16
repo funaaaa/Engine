@@ -14,6 +14,8 @@ private:
 
 	UINT instanceID_;								// このインスタンスのID
 
+	UINT shaderID;
+
 	DirectX::XMMATRIX worldMat_;						// ワールド行列
 
 	DirectX::XMMATRIX matTrans_;
@@ -28,8 +30,6 @@ private:
 	std::weak_ptr<PolygonMeshInstance> parentInstance_;
 
 	Vec3 pos_;
-	Vec3 rot_;		// デバッグ用 ギミックを配置するときの調整用に使用したもので、この値が正確な回転量を持っている前提でデバッグしてはいけない。 (Matrixを直接代入する場合の回転量は取得できていないため)
-	Vec3 scale_;
 
 	UINT blasIndex_;
 
@@ -39,7 +39,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// Ins生成関数
-	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& InstanceID);
+	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const Vec3& Pos);
@@ -77,8 +77,7 @@ public:
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos_; }
-	inline const Vec3& GetRotVec3() { return rot_; }
-	inline const Vec3& GetScaleVec3() { return scale_; }
+	inline const UINT GetShaderID() { return shaderID; }
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex_; }

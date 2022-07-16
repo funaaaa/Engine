@@ -40,41 +40,12 @@ private:
 	int skyDomeIns_;
 
 	// ステージ関係。
-	std::vector<std::shared_ptr<BaseStage>> stages;
+	std::vector<std::shared_ptr<BaseStage>> stages_;
 	enum STAGE_ID {
 		CIRCUIT,	// サーキット
 		MAX_STAGE,	// ステージの最大数
 	};
 	STAGE_ID nowStageID;
-
-	// ステージ
-	int stageBlas_;
-	int stageIns_;
-	int stageGrassBlas_;
-	int stageGrassIns_;
-
-	// ゴール
-	int goalBlas_;
-	int goalIns_;
-
-	// ゴールとかの当たり判定用
-	int goalCollisionBlas_;
-	int goalCollisionIns_;
-	int middlePointCollisionBlas_;
-	int middlePointCollisionIns_;
-
-	// ブーストのギミック
-	int boostGimmickTest_;
-
-	// 装飾のブロックのインデックス
-	std::vector<int> stageOrnamentBlas_;
-	std::vector<int> stageOrnamentIns_;
-
-	// ゴール前でふわふわしているオブジェクトのインデックス。
-	int beforeTheGoalObjectBlas_;
-	std::vector<std::pair<int, int>> beforeTheGoalObjectIns_;
-	std::vector<std::pair<Vec3, Vec3>> beforeTheGoalObjectDefPos_;
-	std::vector<float> beforeTheGoalObjectTimer_;
 
 	// UI関係
 	std::shared_ptr<Sprite> nowRapCountSprite_;

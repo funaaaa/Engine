@@ -158,7 +158,7 @@
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\BaseStageObject.cpp">
-      <Filter>アプリケーション\ステージオブジェクト\規定クラス</Filter>
+      <Filter>アプリケーション\ステージオブジェクト\基底クラス</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\BasicStageObject.cpp">
       <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
@@ -352,7 +352,7 @@
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\BaseStageObject.h">
-      <Filter>アプリケーション\ステージオブジェクト\規定クラス</Filter>
+      <Filter>アプリケーション\ステージオブジェクト\基底クラス</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\BasicStageObject.h">
       <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
@@ -520,9 +520,6 @@
     <Filter Include="アプリケーション\ステージオブジェクト">
       <UniqueIdentifier>{b3447770-dcbf-4489-9a65-3f85b704bd85}</UniqueIdentifier>
     </Filter>
-    <Filter Include="アプリケーション\ステージオブジェクト\規定クラス">
-      <UniqueIdentifier>{06a7671d-6332-42d7-a94b-c92b82f504cc}</UniqueIdentifier>
-    </Filter>
     <Filter Include="アプリケーション\ステージオブジェクト\オブジェクトクラス">
       <UniqueIdentifier>{6e4a9fc4-559d-4639-bd31-2733e6973ced}</UniqueIdentifier>
     </Filter>
@@ -534,6 +531,9 @@
     </Filter>
     <Filter Include="アプリケーション\ステージ\各ステージ">
       <UniqueIdentifier>{782b87f3-9ad1-4808-a877-0b550c36a17a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージオブジェクト\基底クラス">
+      <UniqueIdentifier>{06a7671d-6332-42d7-a94b-c92b82f504cc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

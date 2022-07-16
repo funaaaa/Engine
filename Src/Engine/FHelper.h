@@ -115,6 +115,13 @@ namespace FHelper {
 		return returnBuff;
 	};
 
+	// スケール行列を生成する
+	inline DirectX::XMMATRIX CalScaleMat(const Vec3& Value) {
+		DirectX::XMMATRIX returnBuff = DirectX::XMMatrixIdentity();
+		returnBuff *= DirectX::XMMatrixScaling(Value.x_, Value.y_, Value.z_);
+		return returnBuff;
+	};
+
 	// 画面内に収まっているかを判定
 	inline bool CheckInScreen(const Vec3& CheckPos, const float& VirtualWidth, const float& VirtualHeight, const DirectX::XMMATRIX& MatView, const DirectX::XMMATRIX& MatPerspective) {
 		float w = WINDOW_WIDTH / 2.0f;
@@ -154,14 +161,14 @@ namespace FHelper {
 	// レイとオブジェクトの当たり判定
 	struct RayToModelCollisionData {
 
-		std::vector<Vec3> targetVertex;
-		std::vector<UINT> targetIndex;
-		std::vector<Vec3> targetNormal;
+		std::vector<Vec3> targetVertex_;
+		std::vector<UINT> targetIndex_;
+		std::vector<Vec3> targetNormal_;
 		DirectX::XMMATRIX matRot_;
-		DirectX::XMMATRIX matScale;
+		DirectX::XMMATRIX matScale_;
 		DirectX::XMMATRIX matTrans_;
-		Vec3 rayPos;
-		Vec3 rayDir;
+		Vec3 rayPos_;
+		Vec3 rayDir_;
 
 	};
 	bool RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& ImpactPos, float& Distance, Vec3& HitNormal);

@@ -10,7 +10,7 @@ private:
 
 	Vec3 floatingMove_;		// ふわふわ動いた量
 	float timerOffset_;		// タイマーのオフセット ふわふわを波のように動かすために使用する。
-	const Vec3 FLOATING_MOVE = 10.0f;	// ふわふわ動く量
+	const float FLOATING_MOVE = 50.0f;	// ふわふわ動く量
 
 
 public:

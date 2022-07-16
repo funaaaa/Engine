@@ -17,7 +17,7 @@ void PolygonInstanceRegister::Setting()
 
 }
 
-int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& InstanceID)
+int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& ShaderID)
 {
 
 	/*===== インスタンスを生成する =====*/
@@ -55,7 +55,7 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& In
 	}
 
 	// 最後尾のやつを生成する。
-	D3D12_RAYTRACING_INSTANCE_DESC buff = instance_[instanceIndex]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, InstanceID);
+	D3D12_RAYTRACING_INSTANCE_DESC buff = instance_[instanceIndex]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, ShaderID);
 
 	instanceDesc_[instanceIndex] = buff;
 
@@ -130,11 +130,6 @@ DirectX::XMMATRIX PolygonInstanceRegister::GetRotate(const int& Index)
 	return instance_[Index]->GetRotate();
 }
 
-Vec3 PolygonInstanceRegister::GetRotVec3(const int& Index)
-{
-	return instance_[Index]->GetRotVec3();
-}
-
 void PolygonInstanceRegister::ChangeRotate(const int& Index, const float& X, const float& Y, const float Z)
 {
 	instance_[Index]->ChangeRotate(Vec3(X, Y, Z));
@@ -168,12 +163,6 @@ DirectX::XMMATRIX PolygonInstanceRegister::GetScale(const int& Index)
 {
 	return instance_[Index]->GetScale();
 }
-
-Vec3 PolygonInstanceRegister::GetScaleVec3(const int& Index)
-{
-	return instance_[Index]->GetScaleVec3();
-}
-
 void PolygonInstanceRegister::ChangeScale(const int& Index, const float& X, const float& Y, const float Z)
 {
 
@@ -231,6 +220,36 @@ void PolygonInstanceRegister::DestroyInstance(const int& Index)
 	if (Index < 0 || MAX_INSTANCE < Index) assert(0);
 
 	instance_[Index]->Disable();
+	instanceDesc_[Index] = {};
+
+}
+
+void PolygonInstanceRegister::Display(const int& Index)
+{
+
+	/*====== 非表示 ======*/
+
+	// 行列を保存しておく。
+	DirectX::XMMATRIX matRot = instance_[Index]->GetRotate();
+	DirectX::XMMATRIX matScale = instance_[Index]->GetScale();
+	DirectX::XMMATRIX matTrans = instance_[Index]->GetTrans();
+
+	instanceDesc_[Index] = instance_[Index]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(instance_[Index]->GetBLASIndex()), instance_[Index]->GetBLASIndex(), instance_[Index]->GetShaderID());
+
+	// 保存していた行列をセット。
+	ChangeRotate(Index, matRot);
+	ChangeScale(Index, matScale);
+	ChangeTrans(Index, matTrans);
+
+	instance_[Index]->CalWorldMat(instanceDesc_[Index]);
+
+}
+
+void PolygonInstanceRegister::NonDisplay(const int& Index)
+{
+
+	/*====== 非表示 ======*/
+
 	instanceDesc_[Index] = {};
 
 }

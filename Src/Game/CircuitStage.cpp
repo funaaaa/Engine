@@ -2,6 +2,7 @@
 #include "StageObjectMgr.h"
 #include "HitGroupMgr.h"
 #include "PolygonInstanceRegister.h"
+#include "FHelper.h"
 
 void CircuitStage::Setting()
 {
@@ -24,18 +25,18 @@ void CircuitStage::Setting()
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
 
 	// ゴールをセット。
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
+	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
 	// ゴールのパラメーターを設定。
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
-	stageObjectMgr_->AddTrans(indexBuff, Vec3(10, -30, 0));
+	stageObjectMgr_->AddScale(goalInsIndex, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->AddTrans(goalInsIndex, Vec3(10, -30, 0));
 
-	//// 中間地点をセット。
-	//indexBuff = stageObjectMgr_->AddObject(StageObjectMgr::MOVE_ID::NOMOVE, BaseStageObject::OBJECT_ID::MIDDLE_POINT, BaseStageObject::COLLISION_ID::OBB,
-	//	"Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
-	//// ゴールのパラメーターを設定。
-	//stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
-	//stageObjectMgr_->AddTrans(indexBuff, Vec3(10, -30, 0));
+	// 中間地点をセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::MIDDLE_POINT, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "middlePointCollision.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
+	// 中間地点を設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->AddTrans(indexBuff, Vec3(-8000, 1000, 2800));
 
 	// 装飾オブジェクトをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
@@ -55,6 +56,9 @@ void CircuitStage::Setting()
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "blockF.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/stageOrnament/", "goalSideObj.obj", { L"Resource/Game/gray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
 
 	// 加速ギミックをセット。
@@ -87,16 +91,19 @@ void CircuitStage::Setting()
 	// ゴール前のふわふわオブジェクトをセット。
 	for (int index = 0; index < 4; ++index) {
 		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+			"Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 		stageObjectMgr_->ChangeTrans(indexBuff, Vec3(250, 200, 1000 * index + 1500.0f));
-		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-		stageObjectMgr_->ChangeScale(indexBuff, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
+		stageObjectMgr_->ChangeScale(indexBuff, Vec3(40.0f, 40.0f, 40.0f));
+		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
 		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+			"Resource/Game/stageOrnament/", "beforeTheGoalBox.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 		stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-250, 200, 1000 * index + 1500.0f));
-		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-		stageObjectMgr_->ChangeScale(indexBuff, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
+		stageObjectMgr_->ChangeScale(indexBuff, Vec3(40.0f, 40.0f, 40.0f));
+		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(DirectX::XM_2PI / 2.0f * index, DirectX::XM_2PI / 2.0f * index, 0));
 	}
+
+	// 各変数を初期化。
+	timer_ = 0;
 
 }
 
@@ -111,5 +118,40 @@ void CircuitStage::Update()
 {
 
 	/*===== 更新処理 =====*/
+
+	++timer_;
+
+	stageObjectMgr_->Update(timer_);
+
+}
+
+BaseStage::ColliderOutput CircuitStage::Collider(BaseStage::ColliderInput Input)
+{
+
+	/*===== 当たり判定 =====*/
+
+	BaseStage::ColliderOutput output;
+
+	output = stageObjectMgr_->Collider(Input);
+
+	return output;
+
+}
+
+void CircuitStage::DisplayGoal()
+{
+
+	/*===== ゴールの表示 =====*/
+
+	PolygonInstanceRegister::Ins()->Display(goalInsIndex);
+
+}
+
+void CircuitStage::NonDisplayGoal()
+{
+
+	/*===== ゴールの非表示 =====*/
+
+	PolygonInstanceRegister::Ins()->NonDisplay(goalInsIndex);
 
 }
