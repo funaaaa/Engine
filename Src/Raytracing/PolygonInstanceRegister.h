@@ -80,6 +80,9 @@ public:
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
 
+	// 親子関係も考慮したワールド座標系での座標を取得。
+	Vec3 GetWorldPos(const int& Index);
+
 	// インスタンスを破棄。
 	void DestroyInstance(const int& Index);
 

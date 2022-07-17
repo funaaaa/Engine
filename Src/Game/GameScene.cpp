@@ -163,10 +163,6 @@ void GameScene::Update()
 
 	}
 
-	// 中間地点のオブジェクトを元の大きさに戻す。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
-	/*PolygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns_, Vec3(200, 200, 200));
-	PolygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns_, Vec3(0, 0, 0));*/
-
 	// プレイヤーを更新。
 	player_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isPassedMiddlePoint_, rapCount_);
 
@@ -192,9 +188,10 @@ void GameScene::Update()
 	stages_[STAGE_ID::CIRCUIT]->Update();
 
 	// ゴールの表示非表示を切り替え。
-	if(isPassedMiddlePoint_){
+	if (isPassedMiddlePoint_) {
 		stages_[STAGE_ID::CIRCUIT]->DisplayGoal();
-	}else{
+	}
+	else {
 		stages_[STAGE_ID::CIRCUIT]->NonDisplayGoal();
 	}
 
@@ -493,6 +490,20 @@ void GameScene::InputImGUI()
 
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
+
+
+	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(player_->playerModel_.carBehindTireInsIndex_);
+
+	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
+
+	//ImGui::DragFloat3("Pos", posArray, 0.001f);
+
+	//pos.x_ = posArray[0];
+	//pos.y_ = posArray[1];
+	//pos.z_ = posArray[2];
+
+	//PolygonInstanceRegister::Ins()->ChangeTrans(player_->playerModel_.carBehindTireInsIndex_, pos);
+
 
 	//// 1個目
 	//GimmickMgr::Ins()->ChangeTrans(0, Vec3(100, -15, 1400));

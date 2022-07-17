@@ -172,6 +172,9 @@
     <ClCompile Include="Src\Game\CircuitStage.cpp">
       <Filter>アプリケーション\ステージ\各ステージ</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\PlayerTire.cpp">
+      <Filter>アプリケーション\プレイヤー</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -368,6 +371,9 @@
     </ClInclude>
     <ClInclude Include="Src\Game\CircuitStage.h">
       <Filter>アプリケーション\ステージ\各ステージ</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\PlayerTire.h">
+      <Filter>アプリケーション\プレイヤー</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

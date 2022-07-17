@@ -7,6 +7,7 @@
 
 class BaseStage;
 class OBB;
+class PlayerTire;
 
 class Player {
 
@@ -19,7 +20,7 @@ public:
 	Vec3 prevPos_;			// 車の前フレームの座標
 	Vec3 forwardVec_;		// 進行方向ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
-	Vec3 upVec_;				// 上方向ベクトル
+	Vec3 upVec_;			// 上方向ベクトル
 	Vec3 size_;				// サイズ
 	float speed_;			// 移動速度
 	float gravity_;			// 重力
@@ -30,6 +31,8 @@ public:
 	bool isGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
+
+	std::vector<std::shared_ptr<PlayerTire>> tires_;
 
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度

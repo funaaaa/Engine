@@ -66,6 +66,9 @@ public:
 	void ChangeScale(const Vec3& Scale);
 	void ChangeScale(const DirectX::XMMATRIX& Scale);
 
+	// 親子関係も考慮したワールド座標系での座標を取得。
+	Vec3 GetWorldPos();
+
 	// ワールド行列を加算。
 	void CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input);
 

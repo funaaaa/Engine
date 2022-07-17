@@ -9,6 +9,7 @@
 #include "HitGroupMgr.h"
 #include "OBB.h"
 #include "CircuitStage.h"
+#include "PlayerTire.h"
 
 Player::Player()
 {
@@ -17,6 +18,14 @@ Player::Player()
 
 	// 車のモデルをロード
 	playerModel_.Load();
+
+	// タイヤをセット。
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireFrameInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireFrameInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInsIndex_, true));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInsIndex_, true));
 
 	pos_ = PLAYER_DEF_POS;
 	prevPos_ = pos_;
@@ -79,9 +88,6 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 	// 座標を更新。
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
 
-	// 座標を保存。
-	prevPos_ = pos_;
-
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
 	if (isGround_) {
 
@@ -108,6 +114,16 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 
 	// OBBを更新。
 	obb_->SetMat(playerModel_.carBodyInsIndex_);
+
+	// 座標を保存。
+	prevPos_ = pos_;
+
+	// タイヤを更新する。
+	for (auto& index : tires_) {
+
+		index->Update();
+
+	}
 
 }
 
@@ -184,22 +200,22 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			}
 
 			// タイヤを回転させる。
-			Vec3 rot = Vec3(0.0f, 0.5f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
+			for (auto& index : tires_) {
+
+				index->Rot(true, inputADKey);
+
+			}
 
 		}
 		// ドリフト状態じゃなかったら。
 		else {
 
 			// タイヤを回転させる。
-			Vec3 rot = Vec3(0.0f, 0.3f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
+			for (auto& index : tires_) {
+
+				index->Rot(false, inputADKey);
+
+			}
 
 		}
 
@@ -216,16 +232,6 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-	}
-	else {
-
-		// タイヤの回転をデフォルトに戻す。
-		Vec3 rot_ = Vec3(0.0f, 0.0f, 0.0f);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_);
 
 	}
 

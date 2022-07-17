@@ -143,6 +143,31 @@ void PolygonMeshInstance::ChangeScale(const DirectX::XMMATRIX& Scale)
 
 }
 
+Vec3 PolygonMeshInstance::GetWorldPos()
+{
+
+	/*===== 親子関係も考慮したワールド座標系での座標を取得 =====*/
+
+	// ワールド行列を取得。
+	worldMat_ = DirectX::XMMatrixIdentity();
+
+	worldMat_ *= scaleMat_;
+	worldMat_ *= matRot_;
+	worldMat_ *= matTrans_;
+
+	// 親行列が存在していたらだったら。
+	if (!parentInstance_.expired()) {
+
+		worldMat_ *= parentInstance_.lock()->GetWorldMat();
+
+	}
+
+	// 座標を抜き取る。
+	Vec3 pos = { worldMat_.r[3].m128_f32[0], worldMat_.r[3].m128_f32[1],worldMat_.r[3].m128_f32[2] };
+
+	return pos;
+}
+
 void PolygonMeshInstance::CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input)
 {
 

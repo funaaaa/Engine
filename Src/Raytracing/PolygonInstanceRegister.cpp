@@ -211,6 +211,15 @@ void PolygonInstanceRegister::CalWorldMat()
 
 }
 
+Vec3 PolygonInstanceRegister::GetWorldPos(const int& Index)
+{
+
+	/*===== 親子関係も考慮したワールド座標系での座標を取得 =====*/
+
+	return instance_[Index]->GetWorldPos();
+
+}
+
 void PolygonInstanceRegister::DestroyInstance(const int& Index)
 {
 
