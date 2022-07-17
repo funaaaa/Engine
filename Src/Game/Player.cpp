@@ -9,6 +9,7 @@
 #include "HitGroupMgr.h"
 #include "OBB.h"
 #include "CircuitStage.h"
+#include "TextureManager.h"
 #include "PlayerTire.h"
 
 Player::Player()
@@ -41,6 +42,8 @@ Player::Player()
 	isDrift_ = false;
 	isGround_ = true;
 	isGrass_ = false;
+	IsTurningIndicatorRed_ = false;
+	turningIndicatorTimer_ = 0;
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -64,9 +67,11 @@ void Player::Init()
 	speed_ = 0;
 	gravity_ = 0;
 	boostSpeed_ = 0;
+	turningIndicatorTimer_ = 0;
 	isDrift_ = false;
 	isGround_ = true;
 	isGrass_ = false;
+	IsTurningIndicatorRed_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 
 }
@@ -232,6 +237,52 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+
+		// ウインカーの色を変えるタイマーを更新。
+		++turningIndicatorTimer_;
+		if (TURNING_INDICATOR_TIMER < turningIndicatorTimer_) {
+
+			turningIndicatorTimer_ = 0;
+			IsTurningIndicatorRed_ = IsTurningIndicatorRed_ ? false : true;
+
+		}
+
+		// ウインカーの色を変える。
+		if (IsTurningIndicatorRed_) {
+
+			// 曲がっているのが右だったら。
+			if (0 < inputADKey) {
+
+				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
+				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+			}
+			else {
+
+				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
+				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+			}
+
+		}
+		else {
+
+			BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+			BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+		}
+
+	}
+	else {
+
+		// 車のライトの色を元に戻す。
+		BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+		BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+		// 各変数を初期化。
+		IsTurningIndicatorRed_ = false;
+		turningIndicatorTimer_ = 100;
 
 	}
 

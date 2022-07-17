@@ -54,6 +54,9 @@ private:
 
 	bool isOpaque_;							// 不透明フラグ
 
+	bool isChangeTexture;
+	bool isChangeVertex;
+
 	std::vector<int> textureHandle_;			// 使用するテクスチャのハンドル
 
 	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
@@ -93,6 +96,9 @@ public:
 
 	// テクスチャを追加。
 	inline void AddTex(const int& Index) { textureHandle_.emplace_back(Index); }
+
+	// テクスチャを変更。
+	void ChangeTex(const int& Index, const int& TextureHandle);
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);

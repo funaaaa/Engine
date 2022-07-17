@@ -37,6 +37,10 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps_;
 	LPCWSTR hitGroupName_;
 
+	UINT raygenRegion_;
+	UINT missRegion_;
+	UINT hitgroupRecordSize_;
+
 
 public:
 
@@ -47,6 +51,9 @@ public:
 
 	// シェーダーテーブルを構築
 	void ConstructionShaderTable(const int& DispatchX = WINDOW_WIDTH, const int& DispatchY = WINDOW_HEIGHT);
+
+	// HitGroupの情報を転送。
+	void MapHitGroupInfo();
 
 	// ゲッタ
 	Microsoft::WRL::ComPtr<ID3D12StateObject> GetStateObject() { return stateObject_; }

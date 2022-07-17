@@ -195,6 +195,10 @@ void GameScene::Update()
 		stages_[STAGE_ID::CIRCUIT]->NonDisplayGoal();
 	}
 
+
+	// BLASの情報を変更。いずれは変更した箇所のみ書き換えられるようにしたい。
+	pipline_->MapHitGroupInfo();
+
 	tlas_->Update();
 
 	// 太陽の角度を更新。

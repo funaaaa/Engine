@@ -34,6 +34,10 @@ public:
 
 	std::vector<std::shared_ptr<PlayerTire>> tires_;
 
+	bool IsTurningIndicatorRed_;// ウインカーの色が赤かどうか。
+	int turningIndicatorTimer_;	// ウインカーがチカチカするタイマー
+	const int TURNING_INDICATOR_TIMER = 30;
+
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
