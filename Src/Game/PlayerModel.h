@@ -18,6 +18,9 @@ public:
 	// ライト
 	int carRightLightBlasIndex_;
 	int carRightLightInsIndex_;
+	// ライト
+	int carFrontLightBlasIndex_;
+	int carFrontLightInsIndex_;
 	// 後ろタイヤ
 	int carBehindTireBlasIndex_;
 	int carBehindTireInsIndex_;

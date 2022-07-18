@@ -29,6 +29,11 @@ void PlayerModel::Load()
 	carRightLightInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carRightLightBlasIndex_, PolygonInstanceRegister::SHADER_ID::TEXCOLOR);
 	PolygonInstanceRegister::Ins()->SetParentInstance(carRightLightInsIndex_, carBodyInsIndex_);
 
+	// 車のライトをロード
+	carFrontLightBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carFrontLight.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/white.png" });
+	carFrontLightInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carFrontLightBlasIndex_, PolygonInstanceRegister::SHADER_ID::TEXCOLOR);
+	PolygonInstanceRegister::Ins()->SetParentInstance(carFrontLightInsIndex_, carBodyInsIndex_);
+
 	// 車の後ろタイヤをロード
 	carBehindTireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBehindTire.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/car/tireColor.png" }, true);
 	carBehindTireInsIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(carBehindTireBlasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
