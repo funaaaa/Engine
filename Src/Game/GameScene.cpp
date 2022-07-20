@@ -289,7 +289,7 @@ void GameScene::Draw()
 	InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
 
 	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carLeftTireInsIndex_);
-	InputRayData.rayDir_ = Vec3(0, -1, 0);
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
 
 	Vec3 ImpactPos;
 	Vec3 HitNormal;
@@ -303,7 +303,7 @@ void GameScene::Draw()
 
 	// UAVを書き込む。
 	tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV_, sizeof(TireMaskUV));
-	tireMaskComputeShader_->Dispatch(2048 / 32, 2048 / 32, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	tireMaskComputeShader_->Dispatch(1,1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	{
 		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
 					tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
@@ -552,6 +552,9 @@ void GameScene::InputImGUI()
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
+	float uv[2] = {tireMaskUV_.uv[0].x_,tireMaskUV_.uv[0].y_};
+	ImGui::DragFloat2("UV", uv, 0.01f);
+
 
 	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(player_->playerModel_.carBehindTireInsIndex_);
 
@@ -624,6 +627,7 @@ void GameScene::GenerateGimmick()
 　→PIXで見ると何故かセットされていないので確認する。
 　→UAVを設定していない場合と見比べてみる。
 
+・コンピュートシェーダーで書き込むときに変な感じになってる？
 
 
 */

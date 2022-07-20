@@ -109,6 +109,8 @@ private:
 	int testIns_;
 
 
+
+
 public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/

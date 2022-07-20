@@ -573,7 +573,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
 				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
-				WriteGPUDescriptor(Dst, &texDescHandle);
+				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
 			else {
@@ -585,6 +585,11 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		}
 
 		isChangeTexture = false;
+
+	}
+	else {
+
+		Dst += static_cast<UINT>(sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)) * static_cast<UINT>(srvCount);
 
 	}
 
