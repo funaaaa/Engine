@@ -21,6 +21,26 @@
 #include "StageObjectMgr.h"
 #include "BLAS.h"
 
+// グラフィックス用の変数
+int PIXEL_PER_LENGTH = 200; // 長さとピクセルの変換係数
+
+// モデルの性質を表すパラメータ変数
+float gAcc = 9.8f; // 重力加速度
+float deltaT = 0.01f; // 瞬間の時間
+float L1 = 0.f; // 振り子1の長さ
+float L2 = 0.f; // 振り子2の長さ
+float M1 = 0.f; // 振り子1の重さ
+float M2 = 0.f; // 振り子2の重さ
+
+// モデルの状態を表す自由度変数
+float th1 = 0; // 振り子1の角度
+float th2 = 0; // 振り子2の角度
+float th1Dot = 0.0; // 振り子1の角速度
+float th2Dot = 0.0; // 振り子2の角速度
+
+bool _disp_trail1 = 0;
+bool _disp_trail2 = 0;
+
 GameScene::GameScene()
 {
 
@@ -60,6 +80,28 @@ GameScene::GameScene()
 
 	// プレイヤーを生成。
 	player_ = std::make_shared<Player>();
+
+
+
+
+	// MT4用の処理
+	mt4sphereBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/red.png" });
+	sphere1Ins_ = PolygonInstanceRegister::Ins()->CreateInstance(mt4sphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
+	sphere2Ins_ = PolygonInstanceRegister::Ins()->CreateInstance(mt4sphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
+	PolygonInstanceRegister::Ins()->AddScale(sphere1Ins_, Vec3(30, 30, 30));
+	PolygonInstanceRegister::Ins()->AddScale(sphere2Ins_, Vec3(30, 30, 30));
+
+	    L1 = (float)((rand() % 100) + 50) / 100.0f;  //1.4; // 振り子1の長さ
+    L2 = (float)((rand() % 100) + 50) / 100.0f;  //1.2; // 振り子2の長さ
+    M1 = 1.2f; // 振り子1の重さ
+    M2 = 0.6f; // 振り子2の重さ
+
+    th1 = (float)(rand() % 1000) / 10.0f; //3.1; // 振り子1の角度
+    th2 = (float)(rand() % 1000) / 10.0f; //-2.0; // 振り子2の角度
+    th1Dot = 0.f; // 振り子1の角速度
+    th2Dot = 0.f; // 振り子2の角速度
+
+
 
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
@@ -218,6 +260,52 @@ void GameScene::Update()
 	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
 	PolygonInstanceRegister::Ins()->AddRotate(skyDomeIns_, Vec3(0.001f, 0, 0));
+
+
+
+
+
+	// MT4用
+	float th1DotDot, th2DotDot;
+	float a1, a2, b, d1, d2;
+
+	// A1,A2の計算
+	a1 = (M1 + M2) * L1 * L1;
+	a2 = M2 * L2 * L2;
+
+	// アニメーションの1フレームあたりの処理
+	b = M2 * L1 * L2 * cosf(th1 - th2);
+	d1 = -M2 * L1 * L2 * th2Dot * th2Dot * sinf(th1 - th2) - (M1 + M2) * gAcc * L1 * sinf(th1);
+	d2 = M2 * L1 * L2 * th1Dot * th1Dot * sinf(th1 - th2) - M2 * gAcc * L2 * sinf(th2);
+
+	// 角加速度
+	th1DotDot = (a2 * d1 - b * d2) / (a1 * a2 - b * b);
+	th2DotDot = (a1 * d2 - b * d1) / (a1 * a2 - b * b);
+
+	// 角速度
+	th1Dot += th1DotDot * deltaT;
+	th2Dot += th2DotDot * deltaT;
+
+	// 角度
+	th1 += th1Dot * deltaT;
+	th2 += th2Dot * deltaT;
+
+
+	// ボールの座標を求める
+    int centerX = 0;
+    int centerY = 100;
+
+    // 青い球と赤い球の座標を計算
+    // そのまま計算するとX軸の正方向を地面にした運動になるので
+    // 時計回りに90°回転させるためにsinとcosを逆にしている
+    int point1X = (int)(PIXEL_PER_LENGTH * L1 * sin(th1) + centerX);
+    int point1Y = (int)(PIXEL_PER_LENGTH * L1 * cos(th1) + centerY);
+    int point2X = (int)(PIXEL_PER_LENGTH * L2 * sin(th2) + point1X);
+    int point2Y = (int)(PIXEL_PER_LENGTH * L2 * cos(th2) + point1Y);
+
+	PolygonInstanceRegister::Ins()->ChangeTrans(sphere1Ins_, Vec3(point1X, 600 - point1Y, 0));
+	PolygonInstanceRegister::Ins()->ChangeTrans(sphere2Ins_, Vec3(point2X, 600 - point2Y, 0));
+
 
 }
 

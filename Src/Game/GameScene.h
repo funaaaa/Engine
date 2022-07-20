@@ -108,6 +108,10 @@ private:
 
 	int testIns_;
 
+	int mt4sphereBlas_;
+	int sphere1Ins_;
+	int sphere2Ins_;
+
 
 public:
 
