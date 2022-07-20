@@ -58,6 +58,7 @@ private:
 	bool isChangeVertex;
 
 	std::vector<int> textureHandle_;			// 使用するテクスチャのハンドル
+	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
 	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
 
@@ -66,6 +67,7 @@ private:
 	std::vector<RayVertex> vertex_;		// 現在の頂点 頂点を書き換える場合があるのでその時用
 	std::vector<Vec3> vertexPos_;
 	std::vector<Vec3> vertexNormal_;
+	std::vector<Vec2> vertexUV_;
 	std::vector<UINT> vertIndex_;
 
 
@@ -96,6 +98,7 @@ public:
 
 	// テクスチャを追加。
 	inline void AddTex(const int& Index) { textureHandle_.emplace_back(Index); }
+	inline void AddUAVTex(const int& Index) { uavHandle_.emplace_back(Index); }
 
 	// テクスチャを変更。
 	void ChangeTex(const int& Index, const int& TextureHandle);
@@ -126,6 +129,7 @@ public:
 	std::vector<Vec3> GetVertexPos() { return vertexPos_; }
 	std::vector<Vec3> GetVertexNormal() { return vertexNormal_; }
 	std::vector<UINT> GetVertexIndex() { return vertIndex_; }
+	std::vector<Vec2> GetVertexUV() { return vertexUV_; }
 
 private:
 

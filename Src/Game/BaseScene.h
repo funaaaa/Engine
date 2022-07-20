@@ -18,18 +18,18 @@ public:
 protected:
 
 	SCENE_ID nextScene_;	// 次のシーン
-	bool isTransition;	// 遷移するかどうかのフラグ
+	bool isTransition_;	// 遷移するかどうかのフラグ
 
 public:
 
 	BaseScene() {
 		nextScene_ = SCENE_ID::GAME;
-		isTransition = false;
+		isTransition_ = false;
 	}
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
-	const bool& GetIsTransition() { return isTransition; }
+	const bool& GetIsTransition() { return isTransition_; }
 	const SCENE_ID& GetNextScene() { return nextScene_; }
 
 };

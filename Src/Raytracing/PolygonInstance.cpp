@@ -7,7 +7,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 
 	/*===== インスタンスを生成する処理 =====*/
 
-	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc_;
+	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc;
 
 	// 移動行列を初期化。
 	worldMat_ = DirectX::XMMatrixIdentity();
@@ -17,17 +17,18 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 
 	// 行列を設定。
 	XMStoreFloat3x4(
-		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc_.Transform),
+		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc.Transform),
 		worldMat_);
 
-	shaderID = ShaderID;
+	shaderID_ = ShaderID;
 
 	// インスタンスの詳細を設定。
-	instanceDesc_.InstanceID = ShaderID;
-	instanceDesc_.InstanceMask = 0xFF;
-	instanceDesc_.InstanceContributionToHitGroupIndex = BlasIndex;
-	instanceDesc_.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc_.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
+	instanceDesc.InstanceID = ShaderID;
+	instanceDesc.InstanceMask = 0xFF;
+	instanceDesc.InstanceContributionToHitGroupIndex = BlasIndex;
+	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+	instanceDesc.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
+
 
 	// BLASのIndexを保存。
 	blasIndex_ = BlasIndex;
@@ -35,7 +36,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 	isActive_ = true;
 	childCount_ = 0;
 
-	return instanceDesc_;
+	return instanceDesc;
 
 }
 
@@ -198,20 +199,20 @@ DirectX::XMMATRIX PolygonMeshInstance::GetWorldMat()
 
 	/*===== ワールド行列を取得 =====*/
 
-	DirectX::XMMATRIX worldMat_ = DirectX::XMMatrixIdentity();
+	DirectX::XMMATRIX worldMat = DirectX::XMMatrixIdentity();
 
-	worldMat_ *= scaleMat_;
-	worldMat_ *= matRot_;
-	worldMat_ *= matTrans_;
+	worldMat *= scaleMat_;
+	worldMat *= matRot_;
+	worldMat *= matTrans_;
 
 	// 親行列が存在していたらだったら。
 	if (!parentInstance_.expired()) {
 
-		worldMat_ *= parentInstance_.lock()->GetWorldMat();
+		worldMat *= parentInstance_.lock()->GetWorldMat();
 
 	}
 
-	return worldMat_;
+	return worldMat;
 
 }
 

@@ -84,7 +84,7 @@ void ShaderData::LoadShaderDXC()
 	}
 
 	// å^ïœä∑ÅB
-	std::wstring fileName_ = StringToWString(shaderPath_);
+	std::wstring fileName = StringToWString(shaderPath_);
 	std::stringstream strstream;
 
 	strstream << infile.rdbuf();
@@ -113,7 +113,7 @@ void ShaderData::LoadShaderDXC()
 	const auto target_ = L"lib_6_4";
 
 	Microsoft::WRL::ComPtr<IDxcOperationResult> dxcResult;
-	hr = compiler->Compile(source_.Get(), fileName_.c_str(),
+	hr = compiler->Compile(source_.Get(), fileName.c_str(),
 		L"", target_, arguments.data(), static_cast<UINT>(arguments.size()),
 		nullptr, 0, includeHandler.Get(), &dxcResult);
 
@@ -134,9 +134,9 @@ void ShaderData::LoadShaderDXC()
 	shaderBlobDxc_ = blob;
 
 	std::vector<char> result;
-	auto size_ = blob->GetBufferSize();
-	result.resize(size_);
-	memcpy(result.data(), blob->GetBufferPointer(), size_);
+	auto size = blob->GetBufferSize();
+	result.resize(size);
+	memcpy(result.data(), blob->GetBufferPointer(), size);
 	shaderBin_ = result;
 
 }

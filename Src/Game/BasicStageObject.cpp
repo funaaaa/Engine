@@ -26,4 +26,6 @@ void BasicStageObject::Update(const int& Timer)
 
 	/*===== XVˆ— =====*/
 
+	Timer;
+
 }

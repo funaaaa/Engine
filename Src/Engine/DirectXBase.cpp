@@ -20,9 +20,9 @@ void DirectXBase::Init() {
 	{
 		debugController_->EnableDebugLayer();
 	}
-	/*if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController))))
+	/*if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController_))))
 	{
-		shaderDebugController->SetEnableGPUBasedValidation(true);
+		shaderDebugController_->SetEnableGPUBasedValidation(true);
 	}*/
 #endif
 
@@ -115,7 +115,7 @@ void DirectXBase::Init() {
 	swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	result = dxgiFactory_->CreateSwapChainForHwnd(
 		cmdQueue_.Get(),
-		windowsAPI_->hwnd,
+		windowsAPI_->hwnd_,
 		&swapchainDesc,
 		nullptr,
 		nullptr,
@@ -183,7 +183,7 @@ void DirectXBase::Init() {
 
 	// DirectInputオブジェクトの生成
 	result = DirectInput8Create(
-		windowsAPI_->windowClass.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dinput_, nullptr);
+		windowsAPI_->windowClass_.hInstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&dinput_, nullptr);
 
 	// キーボードデバイスの生成
 	result = dinput_->CreateDevice(GUID_SysKeyboard, &devkeybord_, NULL);
@@ -193,7 +193,7 @@ void DirectXBase::Init() {
 
 	// 排他制御レベルのセット
 	result = devkeybord_->SetCooperativeLevel(
-		windowsAPI_->hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+		windowsAPI_->hwnd_, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 
 	// マウスデバイスの生成
 	result = dinput_->CreateDevice(GUID_SysMouse, &devmouse_, NULL);
@@ -203,7 +203,7 @@ void DirectXBase::Init() {
 
 	// 排他制御レベルのセット
 	result = devmouse_->SetCooperativeLevel(
-		windowsAPI_->hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+		windowsAPI_->hwnd_, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 
 
 	// imguiの生成
@@ -213,7 +213,7 @@ void DirectXBase::Init() {
 		assert(0);
 	}
 	// windows用の初期化
-	bool blnResult = ImGui_ImplWin32_Init(windowsAPI_->hwnd);
+	bool blnResult = ImGui_ImplWin32_Init(windowsAPI_->hwnd_);
 	if (!blnResult) {
 		assert(0);
 	}
@@ -225,12 +225,12 @@ void DirectXBase::Init() {
 
 void DirectXBase::ProcessBeforeDrawing() {
 	// メッセージ確認
-	if (PeekMessage(&windowsAPI_->msg, nullptr, 0, 0, PM_REMOVE)) {
-		TranslateMessage(&windowsAPI_->msg);	// キー入力メッセージの処理
-		DispatchMessage(&windowsAPI_->msg);	// プロシージャにメッセージを送る
+	if (PeekMessage(&windowsAPI_->msg_, nullptr, 0, 0, PM_REMOVE)) {
+		TranslateMessage(&windowsAPI_->msg_);	// キー入力メッセージの処理
+		DispatchMessage(&windowsAPI_->msg_);	// プロシージャにメッセージを送る
 	}
 	// ?ボタンで終了メッセージが来たらゲームループを抜ける
-	if (windowsAPI_->msg.message == WM_QUIT) {
+	if (windowsAPI_->msg_.message == WM_QUIT) {
 		exit(true);
 	}
 

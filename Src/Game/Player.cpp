@@ -130,6 +130,16 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 
 	}
 
+
+
+
+
+
+
+
+
+
+
 }
 
 void Player::Draw()
@@ -207,7 +217,8 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			// タイヤを回転させる。
 			for (auto& index : tires_) {
 
-				index->Rot(true, inputADKey);
+				index->Rot(true, static_cast<float>(inputADKey));
+				index->Rot(true, static_cast<float>(inputLeftStickHori));
 
 			}
 
@@ -218,7 +229,8 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			// タイヤを回転させる。
 			for (auto& index : tires_) {
 
-				index->Rot(false, inputADKey);
+				index->Rot(false, static_cast<float>(inputADKey));
+				index->Rot(false, static_cast<float>(inputLeftStickHori));
 
 			}
 
@@ -252,7 +264,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		if (IsTurningIndicatorRed_) {
 
 			// 曲がっているのが右だったら。
-			if (0 < inputADKey) {
+			if (0 < inputADKey || 0 < inputLeftStickHori) {
 
 				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
 				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));

@@ -104,6 +104,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexPos();
 			InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexNormal();
 			InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexIndex();
+			InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexUV();
 			InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(index->GetINSTANCEIndex());
 			InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(index->GetINSTANCEIndex());
 			InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(index->GetINSTANCEIndex());
@@ -216,9 +217,10 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	Vec3 impactPos;
 	float hitDistance;
 	Vec3 hitNormal;
+	Vec2 hitUV;
 
 	// 当たり判定を行う。
-	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal);
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
 	// 当たった距離がY軸のサイズよりも小さかったら。
 	isHit &= (hitDistance - Input.targetSize_.y_) <= 0;
@@ -259,7 +261,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 
 		// 当たり判定を行う。
 		isHit = false;
-		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal);
+		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
 		isHit &= fabs(hitDistance) < (Input.targetPos_ - Input.targetPrevPos_).Length();
@@ -292,7 +294,8 @@ BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::Collid
 	Vec3 impactPos;
 	float hitDistance;
 	Vec3 hitNormal;
-	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal);
+	Vec2 hitUV;
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
 	// 当たった距離がY軸のサイズよりも小さかったら。
 	isHit &= fabs(hitDistance) < (Input.targetPos_ - Input.targetPrevPos_).Length();

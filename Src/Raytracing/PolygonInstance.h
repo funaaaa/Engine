@@ -14,7 +14,7 @@ private:
 
 	UINT instanceID_;								// このインスタンスのID
 
-	UINT shaderID;
+	UINT shaderID_;
 
 	DirectX::XMMATRIX worldMat_;						// ワールド行列
 
@@ -80,7 +80,7 @@ public:
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos_; }
-	inline const UINT GetShaderID() { return shaderID; }
+	inline const UINT GetShaderID() { return shaderID_; }
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex_; }

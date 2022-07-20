@@ -3,16 +3,16 @@
 #include "DirectXBase.h"
 #include "WindowsAPI.h"
 
-void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName)
+void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 TextureSize, D3D12_RESOURCE_STATES ResourceState)
 {
 
 	/*===== ê›íË =====*/
 
 	// UAVÇê›íË
 	rayTracingOutput_ = CreateTexture2D(
-		WINDOW_WIDTH, WINDOW_HEIGHT, Format,
+		TextureSize.x_, TextureSize.y_, Format,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COPY_SOURCE,
+		ResourceState,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
 

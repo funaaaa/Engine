@@ -13,6 +13,7 @@ class TLAS;
 class RaytracingOutput;
 class Sprite;
 class BaseStage;
+class RayComputeShader;
 
 // ゲームシーン
 class GameScene : public BaseScene {
@@ -82,6 +83,18 @@ private:
 
 	// デノイズの結果出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput_;
+
+	// タイヤ痕出力用クラス
+	std::shared_ptr<RaytracingOutput> tireMaskTexture_;
+
+	// タイヤ痕出テスト用クラス
+	std::shared_ptr<RaytracingOutput> tireMaskTextureOutput_;
+	std::shared_ptr<RayComputeShader> tireMaskComputeShader_;
+	std::shared_ptr<DynamicConstBuffer> tireMaskConstBuffer_;
+	struct TireMaskUV {
+		std::array<Vec2, 4> uv;
+	};
+	TireMaskUV tireMaskUV_;
 
 	// FPS表示をするか否か
 	bool isDisplayFPS_;

@@ -1,6 +1,7 @@
 #pragma once
 #include <d3d12.h>
 #include <wrl.h>
+#include "Vec.h"
 
 // レイトレ出力UAVクラス
 class RaytracingOutput {
@@ -19,7 +20,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// セッティング
-	void Setting(DXGI_FORMAT Format, LPCWSTR BufferName);
+	void Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 TextureSize = Vec2(1280, 720), D3D12_RESOURCE_STATES ResourceState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// ディスクリプタをセット。
 	void SetComputeRootDescriptorTalbe(const int& RootParamIndex);

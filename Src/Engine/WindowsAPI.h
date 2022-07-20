@@ -27,10 +27,10 @@ class WindowsAPI {
 
 public:
 
-	WNDCLASSEX windowClass;		// ウィンドウクラス
-	RECT wrc;					// ウィンドウサイズ
-	HWND hwnd;					// ウィンドウオブジェクト
-	MSG msg;					// メッセージ
+	WNDCLASSEX windowClass_;	// ウィンドウクラス
+	RECT wrc_;					// ウィンドウサイズ
+	HWND hwnd_;					// ウィンドウオブジェクト
+	MSG msg_;					// メッセージ
 
 	// コンストラクタ
 	WindowsAPI();

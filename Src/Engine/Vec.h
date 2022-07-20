@@ -296,7 +296,7 @@ public:
 		return x_ * Rhs.x_ + y_ * Rhs.y_;
 	}
 	// ŠOÏ
-	inline Vec2 Cross(const Vec2& Rhs) {
+	inline float Cross(const Vec2& Rhs) {
 		return x_ * Rhs.y_ - y_ * Rhs.x_;
 	}
 	// ’·‚³

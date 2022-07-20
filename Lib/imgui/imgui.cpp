@@ -202,7 +202,7 @@ CODE
      // TODO: Load TTF/OTF fonts if you don't want to use the default font.
 
      // Initialize helper Platform and Renderer backends (here we are using imgui_impl_win32.cpp and imgui_impl_dx11.cpp)
-     ImGui_ImplWin32_Init(hwnd);
+     ImGui_ImplWin32_Init(hwnd_);
      ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
 
      // Application main loop
@@ -17476,17 +17476,17 @@ static void SetClipboardTextFn_DefaultImpl(void*, const char* text)
 static void SetPlatformImeDataFn_DefaultImpl(ImGuiViewport* viewport, ImGuiPlatformImeData* data)
 {
     // Notify OS Input Method Editor of text input position
-    HWND hwnd = (HWND)viewport->PlatformHandleRaw;
+    HWND hwnd_ = (HWND)viewport->PlatformHandleRaw;
 #ifndef IMGUI_DISABLE_OBSOLETE_FUNCTIONS
-    if (hwnd == 0)
-        hwnd = (HWND)ImGui::GetIO().ImeWindowHandle;
+    if (hwnd_ == 0)
+        hwnd_ = (HWND)ImGui::GetIO().ImeWindowHandle;
 #endif
-    if (hwnd == 0)
+    if (hwnd_ == 0)
         return;
 
-    ::ImmAssociateContextEx(hwnd, NULL, data->WantVisible ? IACE_DEFAULT : 0);
+    ::ImmAssociateContextEx(hwnd_, NULL, data->WantVisible ? IACE_DEFAULT : 0);
 
-    if (HIMC himc = ::ImmGetContext(hwnd))
+    if (HIMC himc = ::ImmGetContext(hwnd_))
     {
         COMPOSITIONFORM composition_form = {};
         composition_form.ptCurrentPos.x = (LONG)(data->InputPos.x - viewport->Pos.x);
@@ -17498,7 +17498,7 @@ static void SetPlatformImeDataFn_DefaultImpl(ImGuiViewport* viewport, ImGuiPlatf
         candidate_form.ptCurrentPos.x = (LONG)(data->InputPos.x - viewport->Pos.x);
         candidate_form.ptCurrentPos.y = (LONG)(data->InputPos.y - viewport->Pos.y);
         ::ImmSetCandidateWindow(himc, &candidate_form);
-        ::ImmReleaseContext(hwnd, himc);
+        ::ImmReleaseContext(hwnd_, himc);
     }
 }
 

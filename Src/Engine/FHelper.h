@@ -158,12 +158,16 @@ namespace FHelper {
 		}
 	}
 
+	// 三角形の重心座標を求める。
+	Vec3 CalBary(const Vec3& PosA, const Vec3& PosB, const Vec3& PosC, const Vec3& TargetPos);
+
 	// レイとオブジェクトの当たり判定
 	struct RayToModelCollisionData {
 
 		std::vector<Vec3> targetVertex_;
 		std::vector<UINT> targetIndex_;
 		std::vector<Vec3> targetNormal_;
+		std::vector<Vec2> targetUV_;
 		DirectX::XMMATRIX matRot_;
 		DirectX::XMMATRIX matScale_;
 		DirectX::XMMATRIX matTrans_;
@@ -171,7 +175,7 @@ namespace FHelper {
 		Vec3 rayDir_;
 
 	};
-	bool RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& ImpactPos, float& Distance, Vec3& HitNormal);
+	bool RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& ImpactPos, float& Distance, Vec3& HitNormal, Vec2& HitUV);
 
 }
 

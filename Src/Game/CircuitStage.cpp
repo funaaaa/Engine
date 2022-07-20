@@ -3,8 +3,10 @@
 #include "HitGroupMgr.h"
 #include "PolygonInstanceRegister.h"
 #include "FHelper.h"
+#include "BLASRegister.h"
+#include "BLAS.h"
 
-void CircuitStage::Setting()
+void CircuitStage::Setting(const int& TireMaskIndex)
 {
 
 	/*===== セッティング処理 =====*/
@@ -14,9 +16,12 @@ void CircuitStage::Setting()
 
 	// ステージをセット。
 	int indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/", "stage3.obj", { L"Resource/Game/white.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
+		"Resource/Game/", "stage3.obj", { L"Resource/Game/white.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+
+	// ステージにタイヤ痕用マスクをセット。
+	BLASRegister::Ins()->GetBLAS()[stageObjectMgr_->GetBlasIndex(indexBuff)]->AddUAVTex(TireMaskIndex);
 
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,

@@ -7,7 +7,7 @@ class OBB;
 
 class BaseStage {
 
-protected:
+public:
 
 	/*====== ƒƒ“ƒo•Ï” =====*/
 
@@ -42,7 +42,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	virtual void Setting() = 0;
+	virtual void Setting(const int& TireMaskIndex) = 0;
 	virtual void Destroy() = 0;
 	virtual void Update() = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;

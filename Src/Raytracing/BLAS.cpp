@@ -128,10 +128,12 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
 	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
 	for (auto& index_ : vertex_) {
 		vertexPos_[counter] = index_.position_;
 		vertexNormal_[counter] = index_.normal_;
+		vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
 
@@ -557,7 +559,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
 
 	// ヒットグループIDからSRVの数を取得。
-	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
+	int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
 	// テクスチャ関係が変更されていたら。
 	if (isChangeTexture) {
@@ -583,6 +585,20 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		}
 
 		isChangeTexture = false;
+
+	}
+
+	// 使用するUAVの数を取得。
+	int uavCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID);
+	for (int index = 0; index < uavCount; ++index) {
+
+		// テクスチャが存在していたら。
+		if (0 < uavHandle_.size()) {
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavHandle_[index]);
+			Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+		}
 
 	}
 

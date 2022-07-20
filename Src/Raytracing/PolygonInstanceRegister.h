@@ -110,6 +110,7 @@ public:
 		REFRACTION = 6,	// 屈折用のレイ
 		INVISIBILITY = 7,	// 不可視のオブジェクト
 		DEF_GI = 8,		// 通常のレイ GIも行う。
+		DEF_GI_TIREMASK = 9,		// 通常のレイ GI タイヤ痕
 
 	};
 

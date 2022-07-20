@@ -13,6 +13,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 StructuredBuffer<Material> material : register(t2, space1);
 Texture2D<float4> texture : register(t3, space1);
 Texture2D<float4> normalTexture : register(t4, space1);
+RWTexture2D<float4> tireMaskTexture : register(u0, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
 
@@ -387,7 +388,6 @@ void shadowMS(inout ShadowPayload payload)
 void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
 {
 
-
     // 呼び出し回数が制限を超えないようにする。
     ++payload.recursive;
     if (3 < payload.recursive)
@@ -413,6 +413,12 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
     {
         worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
+    }
+    
+    // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
+    {
+        texColor = tireMaskTexture[vtx.uv];
     }
     
     // 今発射されているレイのIDがGI用だったら
@@ -709,7 +715,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     payload.aoLuminance += aoVisibility;
     
     // 当たったオブジェクトがGIを行うオブジェクトで、GIを行うフラグが立っていたら。
-    if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI && !gSceneParam.debug.isNoGI)
+    if ((instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK) && !gSceneParam.debug.isNoGI)
     {
         payload.giColor += ShootGIRay(vtx, 300) * (material[0].specular / 2.0f);
         payload.giColor = saturate(payload.giColor);
