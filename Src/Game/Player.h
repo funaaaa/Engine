@@ -57,6 +57,7 @@ public:
 	float boostSpeed_;					// ブーストされているときの移動速度
 	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
 	bool isDrift_;						// ドリフト状態かどうか。
+	bool isTireMask_;
 
 	const float HANDLE_DRIFT = 0.06f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値

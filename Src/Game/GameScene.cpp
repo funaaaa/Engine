@@ -39,13 +39,13 @@ GameScene::GameScene()
 
 	// タイヤ痕用クラスをセット。
 	tireMaskTexture_ = std::make_shared<RaytracingOutput>();
-	tireMaskTexture_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(2048, 2048), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	tireMaskTexture_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	tireMaskTextureOutput_ = std::make_shared<RaytracingOutput>();
-	tireMaskTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(2048, 2048), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	tireMaskTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
 	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
 	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
-	tireMaskConstBuffer_->Generate(sizeof(TireMaskUV), L"TireMaskUV");
+	tireMaskConstBuffer_->Generate(sizeof(Vec2) * 8, L"TireMaskUV");
 
 	// ステージをセッティングする。
 	stages_.emplace_back(std::make_shared<CircuitStage>());
@@ -277,40 +277,87 @@ void GameScene::Draw()
 
 
 
+	// タイヤ痕位置検出テスト用
+
+	if (player_->isTireMask_) {
+
+		FHelper::RayToModelCollisionData InputRayData;
+		InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexPos();
+		InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexNormal();
+		InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexIndex();
+		InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexUV();
+		InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
+		InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
+		InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
+
+		// 戻り地保存用
+		Vec3 ImpactPos;
+		Vec3 HitNormal;
+		Vec2 HitUV;
+		float HitDistance;
+
+		// 左前タイヤ
+		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carLeftTireInsIndex_);
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
+
+		// タイヤ痕の位置を検出
+		bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+		// 当たり判定が正しいかどうかをチェック。
+		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+			tireMaskUV_.prevUV_[0] = Vec2(0, 0);
+			tireMaskUV_.uv_[0] = Vec2(0, 0);
+
+		}
+		else {
+
+			tireMaskUV_.prevUV_[0] = tireMaskUV_.uv_[0];
+			tireMaskUV_.uv_[0] = HitUV;
+
+		}
+
+		// 右前タイヤ
+		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carRightTireInsIndex_);
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
+
+		// タイヤ痕の位置を検出
+		isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+			tireMaskUV_.prevUV_[1] = Vec2(0, 0);
+			tireMaskUV_.uv_[1] = Vec2(0, 0);
+
+		}
+		else {
+
+			tireMaskUV_.prevUV_[1] = tireMaskUV_.uv_[1];
+			tireMaskUV_.uv_[1] = HitUV;
+
+		}
 
 
-	FHelper::RayToModelCollisionData InputRayData;
-	InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexPos();
-	InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexNormal();
-	InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexIndex();
-	InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexUV();
-	InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-	InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-	InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
+		// UAVを書き込む。
+		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV_, sizeof(Vec2) * 8);
+		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+		{
+			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+						tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+						tireMaskTextureOutput_->GetRaytracingOutput().Get())
+			};
 
-	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carLeftTireInsIndex_);
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
+			DirectXBase::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
+		}
 
-	Vec3 ImpactPos;
-	Vec3 HitNormal;
-	Vec2 HitUV;
-	float HitDistance;
+	}
+	else {
 
-	FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+		tireMaskUV_.prevUV_[0] = Vec2(0, 0);
+		tireMaskUV_.uv_[0] = Vec2(0, 0);
+		tireMaskUV_.prevUV_[1] = Vec2(0, 0);
+		tireMaskUV_.uv_[1] = Vec2(0, 0);
 
-	tireMaskUV_.uv[0] = HitUV;
-
-
-	// UAVを書き込む。
-	tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV_, sizeof(TireMaskUV));
-	tireMaskComputeShader_->Dispatch(1,1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	{
-		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-					tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-					tireMaskTextureOutput_->GetRaytracingOutput().Get())
-		};
-
-		DirectXBase::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
 	}
 
 
@@ -552,8 +599,11 @@ void GameScene::InputImGUI()
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
-	float uv[2] = {tireMaskUV_.uv[0].x_,tireMaskUV_.uv[0].y_};
-	ImGui::DragFloat2("UV", uv, 0.01f);
+	float uv[2] = { tireMaskUV_.prevUV_[0].x_, tireMaskUV_.prevUV_[0].y_ };
+	ImGui::DragFloat2("UV1", uv);
+	uv[0] = tireMaskUV_.prevUV_[1].x_;
+	uv[1] = tireMaskUV_.prevUV_[1].y_;
+	ImGui::DragFloat2("UV2", uv);
 
 
 	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(player_->playerModel_.carBehindTireInsIndex_);
@@ -616,18 +666,3 @@ void GameScene::GenerateGimmick()
 	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }
-
-
-/*
-
-○タイヤ痕実装メモ
-・EXEを閉じるときに解放後のヒープに書き込まれてしまうエラーが起きる。
-　→UAVに書き込むときにすべての要素を回すのではなく、1スレッドだけにする。
-・SRVとUAVが何故かセットされていない。
-　→PIXで見ると何故かセットされていないので確認する。
-　→UAVを設定していない場合と見比べてみる。
-
-・コンピュートシェーダーで書き込むときに変な感じになってる？
-
-
-*/

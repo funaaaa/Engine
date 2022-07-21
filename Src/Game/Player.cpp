@@ -42,6 +42,7 @@ Player::Player()
 	isDrift_ = false;
 	isGround_ = true;
 	isGrass_ = false;
+	isTireMask_ = false;
 	IsTurningIndicatorRed_ = false;
 	turningIndicatorTimer_ = 0;
 
@@ -72,6 +73,7 @@ void Player::Init()
 	isGround_ = true;
 	isGrass_ = false;
 	IsTurningIndicatorRed_ = false;
+	isTireMask_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 
 }
@@ -165,6 +167,8 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	/*===== 入力処理 =====*/
 
+	isTireMask_ = false;
+
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
 	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
@@ -221,6 +225,9 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 				index->Rot(true, static_cast<float>(inputLeftStickHori));
 
 			}
+
+			isTireMask_ = true;
+
 
 		}
 		// ドリフト状態じゃなかったら。

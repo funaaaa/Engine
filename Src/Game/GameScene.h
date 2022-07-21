@@ -92,7 +92,8 @@ private:
 	std::shared_ptr<RayComputeShader> tireMaskComputeShader_;
 	std::shared_ptr<DynamicConstBuffer> tireMaskConstBuffer_;
 	struct TireMaskUV {
-		std::array<Vec2, 4> uv;
+		std::array<Vec2, 4> uv_;
+		std::array<Vec2, 4> prevUV_;
 	};
 	TireMaskUV tireMaskUV_;
 
