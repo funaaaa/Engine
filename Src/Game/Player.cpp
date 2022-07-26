@@ -11,6 +11,8 @@
 #include "CircuitStage.h"
 #include "TextureManager.h"
 #include "PlayerTire.h"
+#include "BoostItem.h"
+#include "ShellItem.h"
 
 Player::Player()
 {
@@ -132,15 +134,31 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 
 	}
 
+	// アイテムテスト用
+	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
 
+		item_ = std::make_shared<BoostItem>();
+		item_->Generate(playerModel_.carBodyInsIndex_);
 
+	}
+	if (Input::Ins()->IsKeyTrigger(DIK_L)) {
 
+		item_ = std::make_shared<ShellItem>();
+		item_->Generate(playerModel_.carBodyInsIndex_);
 
+	}
 
+	if (Input::Ins()->IsKeyTrigger(DIK_P) && item_.operator bool()) {
 
+		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
+			boostSpeed_ = MAX_BOOST_SPEED;
+		}
 
+		item_->Use();
 
+		item_.reset();
 
+	}
 
 }
 
@@ -301,7 +319,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 		// 各変数を初期化。
 		IsTurningIndicatorRed_ = false;
-		turningIndicatorTimer_ = 100;
+		turningIndicatorTimer_ = 100;	// チカチカするタイマーを初期化。
 
 	}
 

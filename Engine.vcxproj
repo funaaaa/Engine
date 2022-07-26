@@ -187,6 +187,10 @@
     <ClCompile Include="Src\Engine\TextureManager.cpp" />
     <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
+    <ClCompile Include="Src\Game\BoostItem.cpp" />
+    <ClCompile Include="Src\Game\ShellItem.cpp" />
+    <ClCompile Include="Src\Game\ShellObject.cpp" />
+    <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
     <ClCompile Include="Src\Game\CircuitStage.cpp" />
     <ClCompile Include="Src\Game\DriftParticle.cpp" />
     <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
@@ -252,9 +256,14 @@
     <ClInclude Include="Src\Engine\TextureManager.h" />
     <ClInclude Include="Src\Engine\Vec.h" />
     <ClInclude Include="Src\Engine\WindowsAPI.h" />
+    <ClInclude Include="Src\Game\BaseItem.h" />
     <ClInclude Include="Src\Game\BaseScene.h" />
     <ClInclude Include="Src\Game\BaseStage.h" />
     <ClInclude Include="Src\Game\BasicStageObject.h" />
+    <ClInclude Include="Src\Game\BoostItem.h" />
+    <ClInclude Include="Src\Game\ShellItem.h" />
+    <ClInclude Include="Src\Game\ShellObject.h" />
+    <ClInclude Include="Src\Game\ShellObjectMgr.h" />
     <ClInclude Include="Src\Game\CircuitStage.h" />
     <ClInclude Include="Src\Game\DriftParticle.h" />
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />

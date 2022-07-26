@@ -20,6 +20,7 @@
 #include "RayComputeShader.h"
 #include "StageObjectMgr.h"
 #include "BLAS.h"
+#include "ShellObjectMgr.h"
 
 GameScene::GameScene()
 {
@@ -222,6 +223,10 @@ void GameScene::Update()
 	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
 	PolygonInstanceRegister::Ins()->AddRotate(skyDomeIns_, Vec3(0.001f, 0, 0));
+
+
+	// 甲羅を更新。
+	ShellObjectMgr::Ins()->Update();
 
 }
 
@@ -561,7 +566,7 @@ void GameScene::Input()
 	InputImGUI();
 
 }
-
+#include "BaseItem.h"
 void GameScene::InputImGUI()
 {
 
@@ -607,6 +612,21 @@ void GameScene::InputImGUI()
 
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
+
+	// アイテムデバッグ用。
+	bool haveItem = player_->item_.operator bool();
+
+	if (haveItem) {
+
+		bool haveBoostItem = player_->item_->GetItemID() == BaseItem::ItemID::BOOST;
+
+		ImGui::Checkbox("BoostItem", &haveBoostItem);
+
+		bool haveShellItem = player_->item_->GetItemID() == BaseItem::ItemID::SHELL;
+
+		ImGui::Checkbox("ShellItem", &haveShellItem);
+
+	}
 
 	//float uv[2] = { tireMaskUV_.prevUV_[0].x_, tireMaskUV_.prevUV_[0].y_ };
 	//ImGui::DragFloat2("UV1", uv);

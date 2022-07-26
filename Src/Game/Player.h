@@ -8,6 +8,7 @@
 class BaseStage;
 class OBB;
 class PlayerTire;
+class BaseItem;
 
 class Player {
 
@@ -33,6 +34,9 @@ public:
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
 	std::vector<std::shared_ptr<PlayerTire>> tires_;
+
+	// アイテムクラス
+	std::shared_ptr<BaseItem> item_;
 
 	bool IsTurningIndicatorRed_;// ウインカーの色が赤かどうか。
 	int turningIndicatorTimer_;	// ウインカーがチカチカするタイマー

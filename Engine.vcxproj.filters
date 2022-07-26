@@ -175,6 +175,18 @@
     <ClCompile Include="Src\Game\PlayerTire.cpp">
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\BoostItem.cpp">
+      <Filter>アプリケーション\アイテム\アイテム</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\ShellItem.cpp">
+      <Filter>アプリケーション\アイテム\アイテム</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\ShellObject.cpp">
+      <Filter>アプリケーション\アイテム\甲羅オブジェクト</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\ShellObjectMgr.cpp">
+      <Filter>アプリケーション\アイテム\甲羅オブジェクト</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -375,6 +387,21 @@
     <ClInclude Include="Src\Game\PlayerTire.h">
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\BaseItem.h">
+      <Filter>アプリケーション\アイテム\アイテム</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\BoostItem.h">
+      <Filter>アプリケーション\アイテム\アイテム</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\ShellItem.h">
+      <Filter>アプリケーション\アイテム\アイテム</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\ShellObject.h">
+      <Filter>アプリケーション\アイテム\甲羅オブジェクト</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\ShellObjectMgr.h">
+      <Filter>アプリケーション\アイテム\甲羅オブジェクト</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -540,6 +567,15 @@
     </Filter>
     <Filter Include="アプリケーション\ステージオブジェクト\基底クラス">
       <UniqueIdentifier>{06a7671d-6332-42d7-a94b-c92b82f504cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\アイテム">
+      <UniqueIdentifier>{4c9b79e1-043d-44af-b64a-16e32efdd7e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\アイテム\アイテム">
+      <UniqueIdentifier>{200287fe-e061-46eb-b4ef-466912fb4f6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\アイテム\甲羅オブジェクト">
+      <UniqueIdentifier>{40a776be-6fb4-448b-a311-5cefb581d3fe}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
