@@ -822,7 +822,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     //payload.color += mieColor * (depthRate - 0.5f);
     //payload.color = saturate(payload.color);
     
-    
+
     // RayのIDがデフォルト以外だったら(加算された分を暗くするため)
     if (!(payload.rayID == CHS_IDENTIFICATION_RAYID_DEF))
     {

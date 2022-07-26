@@ -386,9 +386,6 @@
     <None Include="lib\imgui\imgui.ini">
       <Filter>エンジン\lib</Filter>
     </None>
-    <None Include="Resource\ShaderFiles\RayTracing\RaytracingShaderHeader.hlsli">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="エンジン">
@@ -569,10 +566,7 @@
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
       <Filter>レイトレーシング\シェーダー</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurX.hlsl">
-      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
-    </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurY.hlsl">
+    <FxCompile Include="Resource\ShaderFiles\WhiteMakeUpShader.hlsl">
       <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\TireMaskComputeShader.hlsl">

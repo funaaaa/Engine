@@ -102,15 +102,15 @@ public:
 	enum SHADER_ID {
 
 		DEF = 0,			// 通常のレイ
-		AS = 1,			// 大気散乱用
+		AS = 1,				// 大気散乱用
 		TEXCOLOR = 2,		// テクスチャの色をそのまま返す
-		REFLECTION = 3,	// 反射させる。
+		REFLECTION = 3,		// 反射させる。
 		COMPLETE_REFLECTION = 4,	// 完全反射させる。
-		LIGHT = 5,		// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
-		REFRACTION = 6,	// 屈折用のレイ
+		LIGHT = 5,			// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
+		REFRACTION = 6,		// 屈折用のレイ
 		INVISIBILITY = 7,	// 不可視のオブジェクト
-		DEF_GI = 8,		// 通常のレイ GIも行う。
-		DEF_GI_TIREMASK = 9,		// 通常のレイ GI タイヤ痕
+		DEF_GI = 8,			// 通常のレイ GIも行う。
+		DEF_GI_TIREMASK = 9,// 通常のレイ GI タイヤ痕
 
 	};
 

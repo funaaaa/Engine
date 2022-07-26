@@ -10,7 +10,7 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 Text
 
 	// UAVÇê›íË
 	rayTracingOutput_ = CreateTexture2D(
-		TextureSize.x_, TextureSize.y_, Format,
+		static_cast<UINT>(TextureSize.x_), static_cast<UINT>(TextureSize.y_), Format,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		ResourceState,
 		D3D12_HEAP_TYPE_DEFAULT

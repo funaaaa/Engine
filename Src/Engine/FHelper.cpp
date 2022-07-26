@@ -196,7 +196,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 		for (auto& index : hitPolygon) {
 			if (fabs(index.distance_) < fabs(minDistance)) {
 				minDistance = index.distance_;
-				min = &index - &hitPolygon[0];
+				min = static_cast<int>(&index - &hitPolygon[0]);
 			}
 		}
 

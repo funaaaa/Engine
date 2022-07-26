@@ -47,6 +47,10 @@ GameScene::GameScene()
 	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
 	tireMaskConstBuffer_->Generate(sizeof(Vec2) * 8, L"TireMaskUV");
 
+	// 白塗りコンピュートシェーダー
+	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
+	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {});
+
 	// ステージをセッティングする。
 	stages_.emplace_back(std::make_shared<CircuitStage>());
 
@@ -273,7 +277,12 @@ void GameScene::Draw()
 	DirectXBase::Ins()->cmdList_->DispatchRays(&rayDesc);
 
 
+	// 床を白塗り
+	if (Input::Ins()->IsKeyTrigger(DIK_R)) {
 
+		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
+
+	}
 
 
 
@@ -599,11 +608,11 @@ void GameScene::InputImGUI()
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
-	float uv[2] = { tireMaskUV_.prevUV_[0].x_, tireMaskUV_.prevUV_[0].y_ };
-	ImGui::DragFloat2("UV1", uv);
-	uv[0] = tireMaskUV_.prevUV_[1].x_;
-	uv[1] = tireMaskUV_.prevUV_[1].y_;
-	ImGui::DragFloat2("UV2", uv);
+	//float uv[2] = { tireMaskUV_.prevUV_[0].x_, tireMaskUV_.prevUV_[0].y_ };
+	//ImGui::DragFloat2("UV1", uv);
+	//uv[0] = tireMaskUV_.prevUV_[1].x_;
+	//uv[1] = tireMaskUV_.prevUV_[1].y_;
+	//ImGui::DragFloat2("UV2", uv);
 
 
 	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(player_->playerModel_.carBehindTireInsIndex_);

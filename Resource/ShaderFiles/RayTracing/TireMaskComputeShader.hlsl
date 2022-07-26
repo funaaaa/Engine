@@ -22,7 +22,7 @@ cbuffer WriteUV : register(b0)
 void WriteColor(uint2 WriteUV, float4 color)
 {
     // アルファ値が1じゃなかったら
-    if (OutputImg[WriteUV].w != 1)
+    if (length(OutputImg[WriteUV].xyz) != 0)
     {
         OutputImg[WriteUV] = color;
     }
@@ -32,17 +32,17 @@ void WriteColor(uint2 WriteUV, float4 color)
 void WriteOutputImg(uint2 WriteUV)
 {
     
-    OutputImg[uint2(WriteUV.x, WriteUV.y)] = float4(1, 1, 1, 1);
+    OutputImg[uint2(WriteUV.x, WriteUV.y)] = float4(0, 0, 0, 1);
     
     // 上下左右に薄く出す。
-    WriteColor(uint2(WriteUV.x + 1, WriteUV.y + 1), float4(0.4f, 0.4f, 0.4f, 1));
-    WriteColor(uint2(WriteUV.x - 1, WriteUV.y + 1), float4(0.4f, 0.4f, 0.4f, 1));
-    WriteColor(uint2(WriteUV.x - 1, WriteUV.y - 1), float4(0.4f, 0.4f, 0.4f, 1));
-    WriteColor(uint2(WriteUV.x + 1, WriteUV.y - 1), float4(0.4f, 0.4f, 0.4f, 1));
-    WriteColor(uint2(WriteUV.x, WriteUV.y + 1), float4(0.4f, 0.4f, 0.4f, 1));
-    WriteColor(uint2(WriteUV.x, WriteUV.y - 1), float4(0.4f, 0.4f, 0.4f, 1));
-    WriteColor(uint2(WriteUV.x - 1, WriteUV.y), float4(0.4f, 0.4f, 0.4f, 1));
-    WriteColor(uint2(WriteUV.x + 1, WriteUV.y), float4(0.4f, 0.4f, 0.4f, 1));
+    WriteColor(uint2(WriteUV.x + 1, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x - 1, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x - 1, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x + 1, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x - 1, WriteUV.y), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x + 1, WriteUV.y), float4(0.6f, 0.6f, 0.6f, 1));
     
     
 };
