@@ -3,8 +3,33 @@
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
 #include "HitGroupMgr.h"
+#include "BaseStage.h"
 
-void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec)
+ShellObject::ShellObject()
+{
+
+	/*===== コンストラクタ =====*/
+
+	isDestroyed_ = true;
+	isActive_ = false;
+
+}
+
+void ShellObject::Destroy()
+{
+
+	/*===== 破棄処理 =====*/
+
+	if (!isDestroyed_) {
+
+		PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+		isDestroyed_ = true;
+
+	}
+
+}
+
+void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY)
 {
 
 	/*===== 生成処理 =====*/
@@ -13,7 +38,8 @@ void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec)
 	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Carapace/", "Carapace.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF], { L"Resource/Game/blackRed.png" });
 	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 
-	PolygonInstanceRegister::Ins()->AddScale(insIndex_, Vec3(30, 30, 30));
+	size_ = Vec3(30.0f, 30.0f, 30.0f);
+	PolygonInstanceRegister::Ins()->AddScale(insIndex_, size_);
 
 	// OBBを設定。
 	obb_ = std::make_shared<OBB>();
@@ -21,13 +47,91 @@ void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec)
 
 	// 変数を設定。
 	pos_ = Pos;
+	prevPos_ = Pos;
 	forwardVec_ = ForwardVec;
+	rotY_ = CharaRotY;
+	exitTimer_ = 0;
 	speed_ = SPEED;
 	isActive_ = true;
+	isDestroyed_ = false;
 
 }
 
-void ShellObject::Update()
+void ShellObject::CheckHit(std::weak_ptr<BaseStage> StageData)
+{
+
+	/*===== 当たり判定 =====*/
+
+	// 当たり判定関数に入れる値を設定。
+	BaseStage::ColliderInput input;
+	input.targetInsIndex_ = insIndex_;
+	input.targetOBB_ = obb_;
+	input.targetPos_ = pos_;
+	input.targetPrevPos_ = prevPos_;
+	input.targetRotY_ = rotY_;
+	input.targetSize_ = size_;
+	input.isInvalidateRotY_ = false;
+
+	// 当たり判定関数から返ってくる値。
+	BaseStage::ColliderOutput output;
+
+	// 当たり判定を行う。
+	output = StageData.lock()->Collider(input);
+
+	// 当たり判定の結果から処理を行う。
+	if (output.isHitOrnament_) {
+
+		// 装飾オブジェクトとの当たった判定
+		speed_ = 0;
+
+	}
+
+	// 設置判定を初期化。
+	onGround_ = false;
+	if (output.isHitStage_) {
+
+		// ステージとの当たり判定
+		onGround_ = true;
+
+		forwardVec_ = output.forwardVec_;
+
+	}
+	if (output.isHitStageGrass_) {
+
+		// ステージとの当たり判定
+		onGround_ = true;
+
+		forwardVec_ = output.forwardVec_;
+
+	}
+
+	// 装飾オブジェクトと衝突していたら。
+	if (output.isHitOrnament_) {
+
+		// ベクトルを反射させる。
+		Vec3 reflectVec = forwardVec_.Reflection(output.ornamentHitNormal_);
+
+		// ベクトル間の角度を求める。
+		float vecDot = forwardVec_.Dot(reflectVec);
+		vecDot = acosf(vecDot);
+
+		// 左右判定用
+		Vec3 cross = forwardVec_.Cross(reflectVec);
+
+		// RotYを回転させる。
+		rotY_ += vecDot * (cross.y_ < 0 ? -1.0f : 1.0f);
+
+		// 反射ベクトルを代入
+		forwardVec_ = reflectVec;
+
+	}
+
+	// その他の変数を初期化。
+	pos_ = output.resultPos_;
+
+}
+
+void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 {
 
 	/*===== 更新処理 =====*/
@@ -35,7 +139,56 @@ void ShellObject::Update()
 	// 移動させる。
 	pos_ += forwardVec_ * SPEED;
 
+	// 重力の処理
+	if (!onGround_) {
+
+		// 重力を更新
+		gravity_ += ADD_GRAV;
+		if (MAX_GRAV < gravity_) {
+
+			gravity_ = MAX_GRAV;
+
+		}
+
+		// 消滅までの時間を更新。
+		++exitTimer_;
+		if (EXIT_TIMER < exitTimer_) {
+
+			isActive_ = false;
+
+		}
+
+	}
+	else {
+
+		gravity_ = 0;
+		exitTimer_ = 0;
+
+	}
+
+	// 重力を加算。
+	pos_.y_ -= gravity_;
+
+	// 当たり判定を行う。
+	CheckHit(StageData);
+
 	// インスタンスも移動させる。
 	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex_, pos_);
 
+	// OBBを追従させる。
+	obb_->SetMat(insIndex_);
+
+	// 座標を保存
+	prevPos_ = pos_;
+
 }
+
+
+/*
+
+・反射ベクトル自体は取ることが出来るが、斜め床の処理を入れることで求めた反射ベクトルが無効化されてしまう。
+→RotYを回転させないと回転床のクォータニオンに打ち消されてしまう。
+→RotYを回転させないとだめ。
+→でも
+
+*/

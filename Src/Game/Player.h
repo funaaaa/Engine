@@ -28,8 +28,8 @@ public:
 	float rotY_;				// ハンドル操作によって変わるY軸の回転量
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
 	const int RETURN_DEFPOS_TIMER = 600;
-	bool isGround_;			// 地上にいるか t=地上 f=空中
-	bool isGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
+	bool onGround_;			// 地上にいるか t=地上 f=空中
+	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 

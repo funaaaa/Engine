@@ -62,6 +62,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitOrnament_ = false;
 	output.isHitStageGrass_ = false;
 	output.isHitStage_ = false;
+	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
 
 	for (auto& index : objects_) {
 
@@ -306,6 +307,7 @@ BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::Collid
 		// 法線方向に当たった分押し戻す。
 		Input.targetPos_ = impactPos + hitNormal * hitDistance;
 		Output.isHitOrnament_ = true;
+		Output.ornamentHitNormal_ = hitNormal;
 
 	}
 
@@ -351,18 +353,24 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 		// 求めたクォータニオンを行列に治す。
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
-		// プレイヤーを回転させる。
+		// 回転させる。
 		PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, quaternionMat);
 
-		// 上ベクトルを基準としたクォータニオンを求める。
+		// 法線ベクトル
 		Vec3 normal_ = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
 
-		// クォータニオンを行列に治す。
-		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+		if (!Input.isInvalidateRotY_) {
 
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+			// 上ベクトルを基準としたクォータニオンを求める。
+			DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
+
+			// クォータニオンを行列に治す。
+			DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+
+			// プレイヤーを回転させる。
+			PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+
+		}
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
@@ -384,18 +392,24 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 		// プレイヤーを回転させる。
 		PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, DirectX::XMMatrixIdentity());
 
-		// 上ベクトルを基準としたクォータニオンを求める。
+		// 法線ベクトル
 		Vec3 normal_ = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
 
-		// クォータニオンを行列に治す。
-		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+		if (!Input.isInvalidateRotY_) {
 
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+			// 上ベクトルを基準としたクォータニオンを求める。
+			DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
+
+			// クォータニオンを行列に治す。
+			DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+
+			// 回転させる。
+			PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+
+		}
 
 
-		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
+		/*-- 回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
 		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_);

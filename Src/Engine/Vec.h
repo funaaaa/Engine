@@ -43,6 +43,10 @@ public:
 	inline float Length() {
 		return sqrtf(Dot(*this));
 	}
+	// îΩéÀ
+	inline Vec3 Reflection(Vec3 Rhs) {
+		return Vec3(*this + Rhs * 2.0f).GetNormal();
+	}
 	// ê≥ãKâª
 	inline void Normalize() {
 		float length_ = this->Length();
@@ -289,7 +293,7 @@ public:
 	Vec2() :x_(0), y_(0) {};
 	Vec2(const float& X, const float& Y) : x_(X), y_(Y) {};
 	Vec2(const float& X) :x_(X), y_(X) {};
-	Vec2(const XMFLOAT2& Rhs) :x_(Rhs.x), y_(Rhs.y){};
+	Vec2(const XMFLOAT2& Rhs) :x_(Rhs.x), y_(Rhs.y) {};
 
 	// ì‡êœ
 	inline float Dot(const Vec2& Rhs) {

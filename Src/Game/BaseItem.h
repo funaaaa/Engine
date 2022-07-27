@@ -17,7 +17,7 @@ public:
 
 protected:
 
-	ItemID itemID_;	// アイテム識別用ID
+	ItemID itemID_;		// アイテム識別用ID
 	int charaInsIndex_;	// キャラのインスタンスのインデックス
 
 
@@ -27,7 +27,7 @@ public:
 
 	virtual void Generate(const int& CharaInsIndex) = 0;
 	virtual void Update() = 0;
-	virtual void Use() = 0;
+	virtual void Use(const float& CharaRotY = 0) = 0;
 
 	ItemID GetItemID() { return itemID_; }
 	int GetCharaInsIndex() { return charaInsIndex_; }

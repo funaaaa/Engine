@@ -27,6 +27,9 @@ GameScene::GameScene()
 
 	/*===== 初期化処理 =====*/
 
+	// 甲羅オブジェクトをセッティング。
+	ShellObjectMgr::Ins()->Setting();
+
 	// 定数バッファを生成。
 	constBufferData_.Init();
 	constBuffer_ = std::make_shared<DynamicConstBuffer>();
@@ -224,9 +227,8 @@ void GameScene::Update()
 	// 天球自体も回転させる。
 	PolygonInstanceRegister::Ins()->AddRotate(skyDomeIns_, Vec3(0.001f, 0, 0));
 
-
 	// 甲羅を更新。
-	ShellObjectMgr::Ins()->Update();
+	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::CIRCUIT]);
 
 }
 

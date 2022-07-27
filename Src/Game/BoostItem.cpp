@@ -17,11 +17,12 @@ void BoostItem::Update()
 
 }
 
-void BoostItem::Use()
+void BoostItem::Use(const float& CharaRotY)
 {
 
 	/*===== 使用処理 =====*/
 
 	// きのこアイテム自体では使用されたときは何もしない。
+	CharaRotY;
 
 }

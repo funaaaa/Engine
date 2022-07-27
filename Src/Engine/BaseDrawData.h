@@ -78,7 +78,7 @@ public:
 		Vec2 uv_;			// uv座標
 	};
 
-	// 行列用アクセッタ
+	// 行列用アクセッサ
 	inline DirectX::XMMATRIX GetScaleMat() { return scaleMat_; }
 	inline DirectX::XMMATRIX GetRotationMat() { return rotationMat_; }
 	inline DirectX::XMMATRIX GetPositionMat() { return positionMat_; }

@@ -112,7 +112,7 @@ public:
 	// 全ての頂点にVec3情報をかける。 重い処理なので動的には呼ばない。
 	void MulVec3Vertex(Vec3 Vec);
 
-	// アクセッタ
+	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer_; }
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer_; }
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer_; }

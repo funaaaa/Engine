@@ -42,8 +42,8 @@ Player::Player()
 	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
 	isDrift_ = false;
-	isGround_ = true;
-	isGrass_ = false;
+	onGround_ = true;
+	onGrass_ = false;
 	isTireMask_ = false;
 	IsTurningIndicatorRed_ = false;
 	turningIndicatorTimer_ = 0;
@@ -72,8 +72,8 @@ void Player::Init()
 	boostSpeed_ = 0;
 	turningIndicatorTimer_ = 0;
 	isDrift_ = false;
-	isGround_ = true;
-	isGrass_ = false;
+	onGround_ = true;
+	onGrass_ = false;
 	IsTurningIndicatorRed_ = false;
 	isTireMask_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
@@ -98,7 +98,7 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
 
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
-	if (isGround_) {
+	if (onGround_) {
 
 		returnDefPosTimer_ = 0;
 
@@ -154,7 +154,7 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 			boostSpeed_ = MAX_BOOST_SPEED;
 		}
 
-		item_->Use();
+		item_->Use(rotY_);
 
 		item_.reset();
 
@@ -190,17 +190,17 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
 	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
-	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && isGround_) {
+	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && onGround_) {
 
 		speed_ += inputRightTriValue * ADD_SPEED;
 
 	}
-	else if (Input::Ins()->IsKey(DIK_W) && isGround_) {
+	else if (Input::Ins()->IsKey(DIK_W) && onGround_) {
 
 		speed_ += ADD_SPEED;
 
 	}
-	else if (isGround_) {
+	else if (onGround_) {
 
 		// 移動していなくて地上にいたら移動量を0に近づける。
 		speed_ -= speed_ / 10.0f;
@@ -231,7 +231,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			handleAmount = HANDLE_DRIFT;
 
 			// ついでにドリフト状態の時のブーストするまでのタイマーを更新する。
-			if (isGround_) {
+			if (onGround_) {
 				++driftBoostTimer_;
 				if (DRIFT_BOOST_TIMER < driftBoostTimer_) driftBoostTimer_ = DRIFT_BOOST_TIMER;
 			}
@@ -396,7 +396,7 @@ void Player::Move()
 	}
 
 	// 草の上にいたら移動速度の限界値を下げる。
-	if (isGrass_ && MAX_SPEED_ON_GRASS < speed_) {
+	if (onGrass_ && MAX_SPEED_ON_GRASS < speed_) {
 
 		speed_ = MAX_SPEED_ON_GRASS;
 
@@ -418,7 +418,7 @@ void Player::Move()
 	}
 
 	// 地上にいたら重力を無効化する。
-	if (isGround_) {
+	if (onGround_) {
 
 		gravity_ = 0;
 
@@ -458,6 +458,7 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 	input.targetPrevPos_ = prevPos_;
 	input.targetRotY_ = rotY_;
 	input.targetSize_ = size_;
+	input.isInvalidateRotY_ = false;
 
 	// 当たり判定関数から返ってくる値。
 	BaseStage::ColliderOutput output;
@@ -496,12 +497,12 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 
 	}
 	// 設置判定を初期化。
-	isGround_ = false;
-	isGrass_ = false;
+	onGround_ = false;
+	onGrass_ = false;
 	if (output.isHitStage_) {
 
 		// ステージとの当たり判定
-		isGround_ = true;
+		onGround_ = true;
 
 		forwardVec_ = output.forwardVec_;
 		upVec_ = output.upVec_;
@@ -510,11 +511,11 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 	if (output.isHitStageGrass_) {
 
 		// ステージと当たっていなかったら
-		if (!isGround_) {
+		if (!onGround_) {
 
 			// 草とあたった判定
-			isGround_ = true;
-			isGrass_ = true;
+			onGround_ = true;
+			onGrass_ = true;
 
 			forwardVec_ = output.forwardVec_;
 			upVec_ = output.upVec_;

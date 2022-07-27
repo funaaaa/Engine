@@ -14,6 +14,6 @@ public:
 
 	void Generate(const int& CharaInsIndex)override;
 	void Update()override;
-	void Use()override;
+	void Use(const float& CharaRotY = 0)override;
 
 };

@@ -27,7 +27,7 @@ public:
 	// データ書き込み処理
 	void Write(UINT BufferIndex, const void* Data, UINT Size);
 
-	// アクセッタ
+	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetBuffer(UINT BufferIndex) const { return buffer_[BufferIndex]; }
 	const int& GetDescHeapIndex() { return descHeapIndex_; }
 

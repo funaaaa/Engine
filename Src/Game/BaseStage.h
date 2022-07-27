@@ -23,12 +23,14 @@ public:
 		std::weak_ptr<OBB> targetOBB_;	// 当たり判定を行うオブジェクトのOBB
 		float targetRotY_;				// 当たり判定を行うオブジェクトのY軸の回転量
 		int targetInsIndex_;			// 当たり判定を行うオブジェクトのインスタンスのインデックス
+		bool isInvalidateRotY_;			// 回転行列を求める際にY軸回転を無効化するフラグ
 	};
 	// 当たり判定出力構造体
 	struct ColliderOutput {
 		Vec3 resultPos_;			// 当たり判定結果の座標
 		Vec3 forwardVec_;			// 正面ベクトル
 		Vec3 upVec_;				// 上ベクトル
+		Vec3 ornamentHitNormal_;	// 装飾簿ジェクトの当たった面の法線
 		bool isHitStage_;			// ステージと当たった判定
 		bool isHitStageGrass_;		// ステージの草と当たった判定
 		bool isHitGoal_;			// ゴールと当たった判定

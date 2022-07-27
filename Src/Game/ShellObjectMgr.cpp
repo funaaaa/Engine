@@ -6,36 +6,49 @@ void ShellObjectMgr::Setting()
 
 	/*===== 事前準備処理 ======*/
 
+	for (auto& index : shell_) {
 
+		index = std::make_shared<ShellObject>();
+
+	}
 
 }
 
-void ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec)
+void ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY)
 {
 
 	/*===== オブジェクト追加 =====*/
 
-	carapace_.emplace_back(std::make_shared<ShellObject>());
-	carapace_.back()->Generate(Pos, ForwardVec);
+	for (auto& index : shell_) {
+
+		if (index->GetIsActive()) continue;
+
+		index->Generate(Pos, ForwardVec, CharaRotY);
+
+		break;
+
+	}
 
 }
 
-void ShellObjectMgr::Update()
+void ShellObjectMgr::Update(std::weak_ptr<BaseStage> StageData)
 {
 
 	/*===== 更新処理 =====*/
 
-	for (auto& index : carapace_) {
+	for (auto& index : shell_) {
 
-		index->Update();
+		// 有効化されていたら
+		if (index->GetIsActive()) {
 
-	}
+			index->Update(StageData);
 
-	for (auto& index : carapace_) {
+		}
+		else {
 
-		if (index->GetIsActive()) continue;
+			index->Destroy();
 
-		carapace_.erase(carapace_.begin(), carapace_.begin() + (&index - &carapace_[0]));
+		}
 
 	}
 

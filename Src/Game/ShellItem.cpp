@@ -22,7 +22,7 @@ void ShellItem::Update()
 
 }
 
-void ShellItem::Use()
+void ShellItem::Use(const float& CharaRotY)
 {
 
 	/*===== 使用処理 =====*/
@@ -32,6 +32,6 @@ void ShellItem::Use()
 	Vec3 shellVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(charaInsIndex_));
 
 	// 甲羅アイテムを生成する。
-	ShellObjectMgr::Ins()->AddObject(shellPos, shellVec);
+	ShellObjectMgr::Ins()->AddObject(shellPos, shellVec, CharaRotY);
 
 }

@@ -39,7 +39,7 @@ public:
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);
 
-	// アクセッタ
+	// アクセッサ
 	const bool& GetIsActive() { return isActive_; }
 
 };
