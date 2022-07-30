@@ -76,6 +76,10 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 		// 当たり判定がOBBだったら。
 		if (indexCollisionID == BaseStageObject::COLLISION_ID::OBB) {
 
+			// 一定以上離れていたら。
+			float distance = Vec3(Input.targetOBB_.lock()->pos_ - index->GetOBB()->pos_).Length();
+			if (Vec3(Input.targetOBB_.lock()->length_ - index->GetOBB()->length_).Length() < distance) continue;
+
 			// OBBの当たり判定を行う。
 			bool isHit = Input.targetOBB_.lock()->CheckHitOBB(index->GetOBB());
 
@@ -118,6 +122,12 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 				output = StageMeshCollider(Input, InputRayData, output, indexObjID == BaseStageObject::OBJECT_ID::STAGE);
 			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ORNAMENT) {
+
+				// 一定以上離れていたら。 オブジェクトの配置をBlender基準でやっているため距離を頂点から持ってきているが、いずれは手動で配置して座標から距離を持ってこれるようにする
+				float distance = Vec3(Input.targetPos_ - PolygonInstanceRegister::Ins()->GetPos(index->GetINSTANCEIndex())).Length();
+				float size = Vec3(Input.targetSize_ + index->GetOBB()->length_).Length();
+				if (size < distance) continue;
+
 				output = OrnamentMeshCollider(Input, InputRayData, output);
 			}
 

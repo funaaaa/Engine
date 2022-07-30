@@ -55,6 +55,7 @@ public:
 	void AddRotate(const int& Index, const Vec3& Rot);
 	void AddRotate(const int& Index, const DirectX::XMMATRIX& Rot);
 	DirectX::XMMATRIX GetRotate(const int& Index);
+	Vec3 GetRotateVec3(const int& Index);
 
 	// ‰ñ“](ƒ‰ƒWƒAƒ“Aˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);

@@ -34,4 +34,18 @@ void ShellItem::Use(const float& CharaRotY)
 	// 甲羅アイテムを生成する。
 	ShellObjectMgr::Ins()->AddObject(shellPos, shellVec, CharaRotY);
 
+
+
+
+	/*
+	
+	
+	後ろに甲羅を置く機能を実装する際は、AddObjectを甲羅を投げる処理に変え、甲羅を持つ処理を追加する。その際はプレイヤーのInsIndexを渡して追尾させる。
+	
+	
+	*/
+
+
+
+
 }

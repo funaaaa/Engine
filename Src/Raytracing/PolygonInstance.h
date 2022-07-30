@@ -30,6 +30,7 @@ private:
 	std::weak_ptr<PolygonMeshInstance> parentInstance_;
 
 	Vec3 pos_;
+	Vec3 rotate_;		// 装飾オブジェクト配置用
 
 	UINT blasIndex_;
 
@@ -80,6 +81,7 @@ public:
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos_; }
+	inline const Vec3& GetRotateVec3() { return rotate_; }
 	inline const UINT GetShaderID() { return shaderID_; }
 
 	// BLASインデックスを取得。

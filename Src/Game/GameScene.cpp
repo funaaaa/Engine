@@ -630,24 +630,33 @@ void GameScene::InputImGUI()
 
 	}
 
-	//float uv[2] = { tireMaskUV_.prevUV_[0].x_, tireMaskUV_.prevUV_[0].y_ };
-	//ImGui::DragFloat2("UV1", uv);
-	//uv[0] = tireMaskUV_.prevUV_[1].x_;
-	//uv[1] = tireMaskUV_.prevUV_[1].y_;
-	//ImGui::DragFloat2("UV2", uv);
 
+	//int index = 8;
 
-	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(player_->playerModel_.carBehindTireInsIndex_);
+	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
 	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
 
-	//ImGui::DragFloat3("Pos", posArray, 0.001f);
+	//ImGui::DragFloat3("Pos", posArray, 0.5f);
 
 	//pos.x_ = posArray[0];
 	//pos.y_ = posArray[1];
 	//pos.z_ = posArray[2];
 
-	//PolygonInstanceRegister::Ins()->ChangeTrans(player_->playerModel_.carBehindTireInsIndex_, pos);
+	//PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
+
+
+	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
+
+	//float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
+
+	//ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
+
+	//rotate.x_ = rotateArray[0];
+	//rotate.y_ = rotateArray[1];
+	//rotate.z_ = rotateArray[2];
+
+	//PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
 
 
 	//// 1ŒÂ–Ú

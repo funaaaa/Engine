@@ -100,6 +100,8 @@ void PolygonMeshInstance::ChangeRotate(const Vec3& Rot)
 	matRot_ *= DirectX::XMMatrixRotationX(Rot.x_);
 	matRot_ *= DirectX::XMMatrixRotationY(Rot.y_);
 
+	rotate_ = Rot;
+
 }
 
 void PolygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)

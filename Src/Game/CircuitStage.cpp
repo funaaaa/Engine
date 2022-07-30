@@ -46,25 +46,31 @@ void CircuitStage::Setting(const int& TireMaskIndex)
 	// 装飾オブジェクトをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/gray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFLECTION);
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(32.5f, 66.0f, -2359.5f));
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "blockB.obj", { L"Resource/Game/gray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFLECTION);
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1870.0f, 133.5f, -2410.0f));
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "blockC.obj", { L"Resource/Game/green.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-3550.5, 71.5f, -955.5f));
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "blockD.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-2038.0f, 21.0f, 2865.0f));
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "blockE.obj", { L"Resource/Game/green.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1702.0f, 145.5f, 4905.0f));
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "blockF.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1587.5f, 80.0f, 6646.0f));
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/stageOrnament/", "goalSideObj.obj", { L"Resource/Game/gray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
 
 	// 加速ギミックをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,

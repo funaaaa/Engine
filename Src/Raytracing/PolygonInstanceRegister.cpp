@@ -130,6 +130,11 @@ DirectX::XMMATRIX PolygonInstanceRegister::GetRotate(const int& Index)
 	return instance_[Index]->GetRotate();
 }
 
+Vec3 PolygonInstanceRegister::GetRotateVec3(const int& Index)
+{
+	return instance_[Index]->GetRotateVec3();
+}
+
 void PolygonInstanceRegister::ChangeRotate(const int& Index, const float& X, const float& Y, const float Z)
 {
 	instance_[Index]->ChangeRotate(Vec3(X, Y, Z));

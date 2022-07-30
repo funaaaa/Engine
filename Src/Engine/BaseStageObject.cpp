@@ -34,7 +34,7 @@ void BaseStageObject::AddTrans(const Vec3& Trans)
 	}
 
 	// 当たり判定がOBBの時のみ処理を通す。
-	if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
+	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
 		PolygonInstanceRegister::Ins()->AddTrans(obb_->insIndex, Trans);
@@ -43,7 +43,7 @@ void BaseStageObject::AddTrans(const Vec3& Trans)
 		// OBBも移動させる。
 		obb_->pos_ += Trans;
 
-	}
+	//}
 
 }
 
@@ -60,7 +60,7 @@ void BaseStageObject::ChangeTrans(const Vec3& Trans)
 	}
 
 	// 当たり判定がOBBの時のみ処理を通す。
-	if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
+	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
 		PolygonInstanceRegister::Ins()->ChangeTrans(obb_->insIndex, Trans);
@@ -69,7 +69,7 @@ void BaseStageObject::ChangeTrans(const Vec3& Trans)
 		// OBBも移動させる。
 		obb_->pos_ = PolygonInstanceRegister::Ins()->GetPos(insIndex_);
 
-	}
+	//}
 
 }
 
@@ -86,7 +86,7 @@ void BaseStageObject::AddScale(const Vec3& Scale)
 	}
 
 	// 当たり判定がOBBの時のみ処理を通す。
-	if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
+	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
 		PolygonInstanceRegister::Ins()->AddScale(obb_->insIndex, Scale);
@@ -95,7 +95,7 @@ void BaseStageObject::AddScale(const Vec3& Scale)
 		// OBBの大きさも変える。
 		obb_->length_ = FHelper::MulMat(obb_->defLength_, FHelper::CalScaleMat(Scale));
 
-	}
+	//}
 
 }
 
@@ -112,7 +112,7 @@ void BaseStageObject::ChangeScale(const Vec3& Scale)
 	}
 
 	// 当たり判定がOBBの時のみ処理を通す。
-	if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
+	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
 		PolygonInstanceRegister::Ins()->ChangeScale(obb_->insIndex, Scale);
@@ -121,7 +121,7 @@ void BaseStageObject::ChangeScale(const Vec3& Scale)
 		// OBBの大きさも変える。
 		obb_->length_ = FHelper::MulMat(obb_->defLength_, PolygonInstanceRegister::Ins()->GetScale(insIndex_));
 
-	}
+	//}
 
 }
 
@@ -138,7 +138,7 @@ void BaseStageObject::AddRotate(const Vec3& Rotate)
 	}
 
 	// 当たり判定がOBBの時のみ処理を通す。
-	if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
+	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
 		PolygonInstanceRegister::Ins()->AddRotate(obb_->insIndex, Rotate);
@@ -150,7 +150,7 @@ void BaseStageObject::AddRotate(const Vec3& Rotate)
 		obb_->dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 		obb_->dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
-	}
+	//}
 
 }
 
@@ -167,7 +167,7 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 	}
 
 	// 当たり判定がOBBの時のみ処理を通す。
-	if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
+	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
 		PolygonInstanceRegister::Ins()->ChangeRotate(obb_->insIndex, Rotate);
@@ -179,7 +179,7 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 		obb_->dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 		obb_->dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
-}
+	//}
 
 }
 
@@ -197,14 +197,9 @@ void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, cons
 	objID_ = ObjectID;
 	isActive_ = true;
 
-	// 当たり判定のIDがOBBだったら。
-	if (CollisionID == BaseStageObject::COLLISION_ID::OBB) {
-
-		// OBBをセット。
-		obb_ = std::make_shared<OBB>();
-		obb_->Setting(blasIndex_, insIndex_);
-
-	}
+	// OBBをセット。
+	obb_ = std::make_shared<OBB>();
+	obb_->Setting(blasIndex_, insIndex_);
 
 	// オブジェクトのIDが中間地点だったら、OBBを生成した時点で描画するInstanceは不要になるので破棄する。
 	if (ObjectID == BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
