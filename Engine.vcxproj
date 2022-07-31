@@ -188,6 +188,7 @@
     <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
     <ClCompile Include="Src\Game\BoostItem.cpp" />
+    <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
     <ClCompile Include="Src\Game\ShellItem.cpp" />
     <ClCompile Include="Src\Game\ShellObject.cpp" />
     <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
@@ -261,6 +262,7 @@
     <ClInclude Include="Src\Game\BaseStage.h" />
     <ClInclude Include="Src\Game\BasicStageObject.h" />
     <ClInclude Include="Src\Game\BoostItem.h" />
+    <ClInclude Include="Src\Game\ItemBoxObject.h" />
     <ClInclude Include="Src\Game\ShellItem.h" />
     <ClInclude Include="Src\Game\ShellObject.h" />
     <ClInclude Include="Src\Game\ShellObjectMgr.h" />

@@ -14,7 +14,7 @@ private:
 
 	/*===== ƒƒ“ƒo•Ï” =====*/
 
-	static const int SHELL_COUNT = 30;
+	static const int SHELL_COUNT = 100;
 	std::array<std::shared_ptr<ShellObject>, SHELL_COUNT> shell_;
 
 

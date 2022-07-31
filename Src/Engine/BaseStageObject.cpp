@@ -37,7 +37,7 @@ void BaseStageObject::AddTrans(const Vec3& Trans)
 	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
-		PolygonInstanceRegister::Ins()->AddTrans(obb_->insIndex, Trans);
+		PolygonInstanceRegister::Ins()->AddTrans(obb_->insIndex_, Trans);
 #endif
 
 		// OBBも移動させる。
@@ -63,7 +63,7 @@ void BaseStageObject::ChangeTrans(const Vec3& Trans)
 	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
-		PolygonInstanceRegister::Ins()->ChangeTrans(obb_->insIndex, Trans);
+		PolygonInstanceRegister::Ins()->ChangeTrans(obb_->insIndex_, Trans);
 #endif
 
 		// OBBも移動させる。
@@ -89,7 +89,7 @@ void BaseStageObject::AddScale(const Vec3& Scale)
 	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
-		PolygonInstanceRegister::Ins()->AddScale(obb_->insIndex, Scale);
+		PolygonInstanceRegister::Ins()->AddScale(obb_->insIndex_, Scale);
 #endif
 
 		// OBBの大きさも変える。
@@ -115,7 +115,7 @@ void BaseStageObject::ChangeScale(const Vec3& Scale)
 	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
-		PolygonInstanceRegister::Ins()->ChangeScale(obb_->insIndex, Scale);
+		PolygonInstanceRegister::Ins()->ChangeScale(obb_->insIndex_, Scale);
 #endif
 
 		// OBBの大きさも変える。
@@ -141,7 +141,7 @@ void BaseStageObject::AddRotate(const Vec3& Rotate)
 	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
-		PolygonInstanceRegister::Ins()->AddRotate(obb_->insIndex, Rotate);
+		PolygonInstanceRegister::Ins()->AddRotate(obb_->insIndex_, Rotate);
 #endif
 
 		// OBBのベクトルを回転させる。
@@ -170,7 +170,7 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 	//if (collisionID_ == BaseStageObject::COLLISION_ID::OBB) {
 
 #ifdef DEBUG
-		PolygonInstanceRegister::Ins()->ChangeRotate(obb_->insIndex, Rotate);
+		PolygonInstanceRegister::Ins()->ChangeRotate(obb_->insIndex_, Rotate);
 #endif
 
 		// OBBのベクトルを回転させる。

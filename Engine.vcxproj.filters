@@ -187,6 +187,9 @@
     <ClCompile Include="Src\Game\ShellObjectMgr.cpp">
       <Filter>アプリケーション\アイテム\甲羅オブジェクト</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\ItemBoxObject.cpp">
+      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -401,6 +404,9 @@
     </ClInclude>
     <ClInclude Include="Src\Game\ShellObjectMgr.h">
       <Filter>アプリケーション\アイテム\甲羅オブジェクト</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\ItemBoxObject.h">
+      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

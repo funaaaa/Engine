@@ -1,6 +1,7 @@
 #include "StageObjectMgr.h"
 #include "BasicStageObject.h"
 #include "FloatingStageObject.h"
+#include "ItemBoxObject.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
 #include "OBB.h"
@@ -15,6 +16,12 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
 
 		objects_.emplace_back(std::make_shared<FloatingStageObject>());
+
+	}
+	// アイテムボックスオブジェクトだったら
+	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+
+		objects_.emplace_back(std::make_shared<ItemBoxObject>());
 
 	}
 	// それ以外の通常のオブジェクトだったら。
@@ -62,6 +69,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitOrnament_ = false;
 	output.isHitStageGrass_ = false;
 	output.isHitStage_ = false;
+	output.isHitItemBox_ = false;
 	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
 
 	for (auto& index : objects_) {
@@ -78,7 +86,8 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 
 			// 一定以上離れていたら。
 			float distance = Vec3(Input.targetOBB_.lock()->pos_ - index->GetOBB()->pos_).Length();
-			if (Vec3(Input.targetOBB_.lock()->length_ - index->GetOBB()->length_).Length() < distance) continue;
+			float size = Vec3(Input.targetOBB_.lock()->length_ + index->GetOBB()->length_).Length();
+			if (size < distance) continue;
 
 			// OBBの当たり判定を行う。
 			bool isHit = Input.targetOBB_.lock()->CheckHitOBB(index->GetOBB());
@@ -98,6 +107,15 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 				output.isHitMiddlePoint_ = true;
+			}
+			// 当たったオブジェクトがアイテムボックスだったら。
+			else if (indexObjID == BaseStageObject::OBJECT_ID::ITEM_BOX && Input.isPlayer_) {
+
+				// アイテムボックスを一時的に無効化。
+				index->Disable(180);
+
+				output.isHitItemBox_ = true;
+
 			}
 
 		}

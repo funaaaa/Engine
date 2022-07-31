@@ -22,13 +22,13 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 
 	// デバッグ用のOBB本体をロード。
 	ModelDataManager::ObjectData objectData;
-	int hitGroupID = static_cast<int>(HitGroupMgr::Ins()->DENOISE_AO_HIT_GROUP);
-	blasIndex = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[hitGroupID], { L"Resource/Game/black.png" }, false, true, true);
+	int hitGroupID = static_cast<int>(HitGroupMgr::Ins()->DEF);
+	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[hitGroupID], { L"Resource/Game/black.png" }, false, true, true);
 
-	BLASRegister::Ins()->MulVec3Vertex(blasIndex, length);
-	BLASRegister::Ins()->Update(blasIndex);
+	BLASRegister::Ins()->MulVec3Vertex(blasIndex_, length_);
+	BLASRegister::Ins()->Update(blasIndex_);
 
-	insIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, PolygonInstanceRegister::SHADER_ID::DEF);
+	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 
 #endif
 
@@ -48,9 +48,9 @@ void OBB::SetMat(const int& InsIndex)
 
 #ifdef DEBUG
 
-	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex, PolygonInstanceRegister::Ins()->GetRotate(InsIndex));
-	PolygonInstanceRegister::Ins()->ChangeScale(insIndex, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
-	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex, PolygonInstanceRegister::Ins()->GetTrans(InsIndex));
+	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex_, PolygonInstanceRegister::Ins()->GetRotate(InsIndex));
+	PolygonInstanceRegister::Ins()->ChangeScale(insIndex_, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
+	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex_, PolygonInstanceRegister::Ins()->GetTrans(InsIndex));
 
 #endif
 

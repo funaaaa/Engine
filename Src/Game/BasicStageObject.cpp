@@ -29,3 +29,10 @@ void BasicStageObject::Update(const int& Timer)
 	Timer;
 
 }
+
+void BasicStageObject::Disable(const int& TimerToActivation)
+{
+
+	/*===== –³Œø‰»‚µ‚ÄÄİ’è‚Ü‚Å‚ÌŠÔ‚ğƒZƒbƒg =====*/
+
+}

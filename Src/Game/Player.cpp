@@ -134,38 +134,35 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 
 	}
 
+
+
 	// アイテムテスト用
-	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
-
-		item_ = std::make_shared<BoostItem>();
-		item_->Generate(playerModel_.carBodyInsIndex_);
-
-	}
-	if (Input::Ins()->IsKeyTrigger(DIK_L)) {
-
-		item_ = std::make_shared<ShellItem>();
-		item_->Generate(playerModel_.carBodyInsIndex_);
-
-	}
-
 	if (Input::Ins()->IsKeyTrigger(DIK_P) && item_.operator bool()) {
 
 		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
-			boostSpeed_ = MAX_BOOST_SPEED;
-		}
 
-		item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
+			boostSpeed_ = MAX_BOOST_SPEED;
+			item_.reset();
+
+		}
+		else {
+
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
+
+		}
 
 
 	}
 
 	if (Input::Ins()->IsKeyRelease(DIK_P) && item_.operator bool()) {
 
-		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
-			boostSpeed_ = MAX_BOOST_SPEED;
+		if (isShotBehind_) {
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
 		}
-
-		item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
+		else {
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::FORWARD_THROW));
+		}
+		item_.reset();
 
 
 	}
@@ -221,6 +218,14 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		// 移動していなくて空中にいたら移動量を0に近づける。
 		speed_ -= speed_ / 200.0f;
 
+	}
+
+	// Oキーが押されていたら後ろに投げるフラグを立てる。　コントローラー用の条件式も後々入れる。
+	if (Input::Ins()->IsKey(DIK_O)) {
+		isShotBehind_ = true;
+	}
+	else {
+		isShotBehind_ = false;
 	}
 
 	// 現在のフレームの右スティックの傾き具合。
@@ -469,6 +474,7 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 	input.targetRotY_ = rotY_;
 	input.targetSize_ = size_;
 	input.isInvalidateRotY_ = false;
+	input.isPlayer_ = true;
 
 	// 当たり判定関数から返ってくる値。
 	BaseStage::ColliderOutput output;
@@ -529,6 +535,25 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 
 			forwardVec_ = output.forwardVec_;
 			upVec_ = output.upVec_;
+
+		}
+
+	}
+	if (output.isHitItemBox_) {
+
+		// ランダムでアイテムを生成する。
+		int random = FHelper::GetRand(0, 1000);
+
+		if (random % 2 == 0) {
+
+			item_ = std::make_shared<BoostItem>();
+			item_->Generate(playerModel_.carBodyInsIndex_);
+
+		}
+		else {
+
+			item_ = std::make_shared<ShellItem>();
+			item_->Generate(playerModel_.carBodyInsIndex_);
 
 		}
 

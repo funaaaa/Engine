@@ -78,6 +78,15 @@ void CircuitStage::Setting(const int& TireMaskIndex)
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(100, -15, 1400));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 200, 200));
+
+	// アイテムボックステスト用
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(100, -15, 100));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 100, 100));
+
+
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-80, -15, 3000));

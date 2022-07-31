@@ -16,5 +16,6 @@ public:
 	void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID)override;
 	void Destroy()override;
 	void Update(const int& Timer)override;
+	void Disable(const int& TimerToActivation)override;
 
 };

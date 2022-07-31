@@ -43,3 +43,10 @@ void FloatingStageObject::Update(const int& Timer)
 	AddRotate(Vec3(0.01f, 0.01f, 0));
 
 }
+
+void FloatingStageObject::Disable(const int& TimerToActivation)
+{
+
+	/*===== 無効化して再設定までのタイマーをセット =====*/
+
+}

@@ -24,6 +24,7 @@ public:
 		float targetRotY_;				// 当たり判定を行うオブジェクトのY軸の回転量
 		int targetInsIndex_;			// 当たり判定を行うオブジェクトのインスタンスのインデックス
 		bool isInvalidateRotY_;			// 回転行列を求める際にY軸回転を無効化するフラグ
+		bool isPlayer_;					// プレイヤーかどうか アイテムボックスとの判定の有無を識別するために使用する。
 	};
 	// 当たり判定出力構造体
 	struct ColliderOutput {
@@ -37,6 +38,7 @@ public:
 		bool isHitMiddlePoint_;		// 中間地点と当たった判定
 		bool isHitBoostGimmick_;	// ブーストギミックと当たった判定
 		bool isHitOrnament_;		// 装飾オブジェクトと当たった判定
+		bool isHitItemBox_;			// アイテムボックスと当たった判定
 	};
 
 

@@ -39,7 +39,7 @@ void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float&
 	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Carapace/", "Carapace.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF], { L"Resource/Game/blackRed.png" });
 	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 
-	size_ = Vec3(30.0f, 30.0f, 30.0f);
+	size_ = Vec3(20.0f, 20.0f, 20.0f);
 	PolygonInstanceRegister::Ins()->AddScale(insIndex_, size_);
 
 	// OBBを設定。
@@ -77,6 +77,7 @@ void ShellObject::CheckHit(std::weak_ptr<BaseStage> StageData)
 	input.targetRotY_ = rotY_;
 	input.targetSize_ = size_;
 	input.isInvalidateRotY_ = false;
+	input.isPlayer_ = false;
 
 	// 当たり判定関数から返ってくる値。
 	BaseStage::ColliderOutput output;
@@ -206,10 +207,18 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 		Vec3 charaBehindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(charaInsIndex_));
 
 		// キャラと甲羅の距離
-		static const float CHARA_SHELL_DISTANCE = 50.0f;
+		static const float CHARA_SHELL_DISTANCE = 70.0f;
 
 		// 甲羅を移動させる。
 		pos_ = charaPos + charaBehindVec * CHARA_SHELL_DISTANCE;
+
+		// 保持しているキャラのしたベクトル
+		Vec3 underVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(charaInsIndex_));
+
+		// 位置調整用変ぅう
+		static const float UNDER_DISTANCCE = 10.0f;
+
+		pos_ += underVec * UNDER_DISTANCCE;
 
 
 	}
@@ -224,13 +233,3 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 	prevPos_ = pos_;
 
 }
-
-
-/*
-
-・反射ベクトル自体は取ることが出来るが、斜め床の処理を入れることで求めた反射ベクトルが無効化されてしまう。
-→RotYを回転させないと回転床のクォータニオンに打ち消されてしまう。
-→RotYを回転させないとだめ。
-→でも
-
-*/

@@ -1,16 +1,16 @@
 #pragma once
 #include "BaseStageObject.h"
 
-// ふわふわ動く飾り用オブジェクトクラス
-class FloatingStageObject : public BaseStageObject{
+// アイテムボックスクラス
+class ItemBoxObject : public BaseStageObject{
 
 private:
 
 	/*===== メンバ変数 =====*/
 
-	Vec3 floatingMove_;		// ふわふわ動いた量
-	float timerOffset_;		// タイマーのオフセット ふわふわを波のように動かすために使用する。
-	const float FLOATING_MOVE = 50.0f;	// ふわふわ動く量
+	int timerToActivation_;	// 有効化までのタイマー
+	int activationTimer_;	// 有効化までのタイマー計測用
+
 
 
 public:
