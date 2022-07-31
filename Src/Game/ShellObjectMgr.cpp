@@ -14,7 +14,7 @@ void ShellObjectMgr::Setting()
 
 }
 
-void ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY)
+int ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex)
 {
 
 	/*===== オブジェクト追加 =====*/
@@ -23,11 +23,22 @@ void ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const fl
 
 		if (index->GetIsActive()) continue;
 
-		index->Generate(Pos, ForwardVec, CharaRotY);
+		index->Generate(Pos, ForwardVec, CharaRotY, ShellID, CharaInsIndex);
 
-		break;
+		return static_cast<int>(&index - &shell_[0]);
 
 	}
+
+	return -1;
+
+}
+
+void ShellObjectMgr::DestroyObject(const int& Index)
+{
+
+	/*===== オブジェクト破壊 =====*/
+
+	shell_[Index]->Destroy();
 
 }
 

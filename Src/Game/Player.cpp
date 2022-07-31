@@ -154,9 +154,19 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 			boostSpeed_ = MAX_BOOST_SPEED;
 		}
 
-		item_->Use(rotY_);
+		item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
 
-		item_.reset();
+
+	}
+
+	if (Input::Ins()->IsKeyRelease(DIK_P) && item_.operator bool()) {
+
+		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
+			boostSpeed_ = MAX_BOOST_SPEED;
+		}
+
+		item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
+
 
 	}
 

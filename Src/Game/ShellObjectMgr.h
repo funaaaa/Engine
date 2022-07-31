@@ -23,7 +23,8 @@ public:
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
 	void Setting();
-	void AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY);
+	int AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex);
+	void DestroyObject(const int& Index);
 	void Update(std::weak_ptr<BaseStage> StageData);
 
 };

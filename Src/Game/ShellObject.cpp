@@ -4,6 +4,7 @@
 #include "PolygonInstanceRegister.h"
 #include "HitGroupMgr.h"
 #include "BaseStage.h"
+#include "FHelper.h"
 
 ShellObject::ShellObject()
 {
@@ -29,7 +30,7 @@ void ShellObject::Destroy()
 
 }
 
-void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY)
+void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex)
 {
 
 	/*===== 生成処理 =====*/
@@ -50,6 +51,8 @@ void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float&
 	prevPos_ = Pos;
 	forwardVec_ = ForwardVec;
 	rotY_ = CharaRotY;
+	charaInsIndex_ = CharaInsIndex;
+	shellID_ = static_cast<SHELL_ID>(ShellID);
 	exitTimer_ = 0;
 	speed_ = SPEED;
 	isActive_ = true;
@@ -61,6 +64,9 @@ void ShellObject::CheckHit(std::weak_ptr<BaseStage> StageData)
 {
 
 	/*===== 当たり判定 =====*/
+
+	// オブジェクトの状態がTHROW以外だったら当たり判定を行わない。
+	if (shellID_ == SHELL_ID::BEHIND) return;
 
 	// 当たり判定関数に入れる値を設定。
 	BaseStage::ColliderInput input;
@@ -95,6 +101,13 @@ void ShellObject::CheckHit(std::weak_ptr<BaseStage> StageData)
 
 		forwardVec_ = output.forwardVec_;
 
+		// 後ろに飛ばしている状態だったらベクトルを逆にする。
+		if (shellID_ == SHELL_ID::BEHIND_THROW) {
+
+			forwardVec_ *= Vec3(-1, -1, -1);
+
+		}
+
 	}
 	if (output.isHitStageGrass_) {
 
@@ -102,6 +115,13 @@ void ShellObject::CheckHit(std::weak_ptr<BaseStage> StageData)
 		onGround_ = true;
 
 		forwardVec_ = output.forwardVec_;
+
+		// 後ろに飛ばしている状態だったらベクトルを逆にする。
+		if (shellID_ == SHELL_ID::BEHIND_THROW) {
+
+			forwardVec_ *= Vec3(-1, -1, -1);
+
+		}
 
 	}
 
@@ -136,41 +156,63 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 
 	/*===== 更新処理 =====*/
 
-	// 移動させる。
-	pos_ += forwardVec_ * SPEED;
+	// オブジェクトが投げられている状態だったら。
+	if (shellID_ == SHELL_ID::BEHIND_THROW || shellID_ == SHELL_ID::FORWARD_THROW) {
 
-	// 重力の処理
-	if (!onGround_) {
+		// 移動させる。
+		pos_ += forwardVec_ * SPEED;
 
-		// 重力を更新
-		gravity_ += ADD_GRAV;
-		if (MAX_GRAV < gravity_) {
+		// 重力の処理
+		if (!onGround_) {
 
-			gravity_ = MAX_GRAV;
+			// 重力を更新
+			gravity_ += ADD_GRAV;
+			if (MAX_GRAV < gravity_) {
+
+				gravity_ = MAX_GRAV;
+
+			}
+
+			// 消滅までの時間を更新。
+			++exitTimer_;
+			if (EXIT_TIMER < exitTimer_) {
+
+				isActive_ = false;
+
+			}
+
+		}
+		else {
+
+			gravity_ = 0;
+			exitTimer_ = 0;
 
 		}
 
-		// 消滅までの時間を更新。
-		++exitTimer_;
-		if (EXIT_TIMER < exitTimer_) {
+		// 重力を加算。
+		pos_.y_ -= gravity_;
 
-			isActive_ = false;
-
-		}
+		// 当たり判定を行う。
+		CheckHit(StageData);
 
 	}
-	else {
+	// オブジェクトが後ろに保持されている状態だったら。
+	else if (shellID_ == SHELL_ID::BEHIND) {
 
-		gravity_ = 0;
-		exitTimer_ = 0;
+		// 保持しているキャラの座標。
+		Vec3 charaPos = PolygonInstanceRegister::Ins()->GetPos(charaInsIndex_);
+
+		// 保持しているキャラの後ろベクトル
+		Vec3 charaBehindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(charaInsIndex_));
+
+		// キャラと甲羅の距離
+		static const float CHARA_SHELL_DISTANCE = 50.0f;
+
+		// 甲羅を移動させる。
+		pos_ = charaPos + charaBehindVec * CHARA_SHELL_DISTANCE;
+
 
 	}
-
-	// 重力を加算。
-	pos_.y_ -= gravity_;
-
-	// 当たり判定を行う。
-	CheckHit(StageData);
 
 	// インスタンスも移動させる。
 	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex_, pos_);

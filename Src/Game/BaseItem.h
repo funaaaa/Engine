@@ -27,7 +27,7 @@ public:
 
 	virtual void Generate(const int& CharaInsIndex) = 0;
 	virtual void Update() = 0;
-	virtual void Use(const float& CharaRotY = 0) = 0;
+	virtual void Use(const float& CharaRotY = 0, const int ParamID = 0) = 0;
 
 	ItemID GetItemID() { return itemID_; }
 	int GetCharaInsIndex() { return charaInsIndex_; }

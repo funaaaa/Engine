@@ -7,6 +7,16 @@ class BaseStage;
 
 class ShellObject {
 
+public:
+
+	enum class SHELL_ID {
+
+		FORWARD_THROW,	// 投げられている状態
+		BEHIND_THROW,
+		BEHIND,	// 後ろに保持されている状態
+
+	};
+
 private:
 
 	/*===== メンバ変数 =====*/
@@ -14,6 +24,7 @@ private:
 	// モデルデータ関係
 	int blasIndex_;			// BLASのインデックス
 	int insIndex_;			// INSTANCEのインデックス
+	int charaInsIndex_;		// 保持しているキャラのINSTANCEのインデックス
 
 	// オブジェクト固有のパラメーター
 	Vec3 pos_;				// 座標
@@ -28,6 +39,7 @@ private:
 	bool onGround_;			// 接地フラグ
 	bool isDestroyed_;		// インスタンスが破棄済みかどうか
 
+	SHELL_ID shellID_;		// 甲羅のID
 
 	std::shared_ptr<OBB> obb_;		// 当たり判定用OBB
 
@@ -48,7 +60,7 @@ public:
 	void Destroy();
 
 	// 生成処理
-	void Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY);
+	void Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex);
 
 	// 更新処理
 	void Update(std::weak_ptr<BaseStage> StageData);

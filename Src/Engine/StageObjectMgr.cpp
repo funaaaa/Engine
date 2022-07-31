@@ -433,3 +433,13 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 	}
 
 }
+
+
+/*
+
+・甲羅を後ろに持つ機能を追加。
+・甲羅とプレイヤーの当たり判定を追加。
+　→当たった際のエフェクトも追加。
+・アイテムボックスを追加。
+
+*/
