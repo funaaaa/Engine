@@ -43,7 +43,7 @@ private:
 
 	std::shared_ptr<OBB> obb_;		// “–‚½‚è”»’è—pOBB
 
-	const float SPEED = 30.0f;
+	const float SPEED = 50.0f;
 	const float MAX_GRAV = 10.0f;	// d—Í‚ÌÅ‘å—Ê
 	const float ADD_GRAV = 0.15f;	// d—Í‚Ì‰ÁZ—Ê
 	const int EXIT_TIMER = 180;		// Á–Å‚Ü‚Å‚ÌŠÔ
