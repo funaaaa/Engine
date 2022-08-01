@@ -40,6 +40,9 @@ void ItemBoxObject::Update(const int& Timer)
 
 	}
 
+	// ‰ñ“]‚³‚¹‚éB
+	PolygonInstanceRegister::Ins()->AddRotate(insIndex_, Vec3(0.01f, 0.02f, 0.0f));
+
 
 }
 
