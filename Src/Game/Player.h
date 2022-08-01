@@ -61,6 +61,7 @@ public:
 
 	float boostSpeed_;					// ブーストされているときの移動速度
 	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
+	int boostTimer_;					// ブーストするフレーム数
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
 

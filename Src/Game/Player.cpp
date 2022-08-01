@@ -41,6 +41,7 @@ Player::Player()
 	gravity_ = 0;
 	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
+	boostTimer_ = 0;
 	isDrift_ = false;
 	onGround_ = true;
 	onGrass_ = false;
@@ -70,6 +71,7 @@ void Player::Init()
 	speed_ = 0;
 	gravity_ = 0;
 	boostSpeed_ = 0;
+	boostTimer_ = 0;
 	turningIndicatorTimer_ = 0;
 	isDrift_ = false;
 	onGround_ = true;
@@ -142,6 +144,7 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
 
 			boostSpeed_ = MAX_BOOST_SPEED;
+			boostTimer_ = 30;
 			item_.reset();
 
 		}
@@ -164,6 +167,16 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 		}
 		item_.reset();
 
+
+	}
+
+
+	// ブーストするタイマーが一定以上だったら加速し続ける。
+	if (0 < boostTimer_) {
+
+		--boostTimer_;
+
+		boostSpeed_ = MAX_BOOST_SPEED;
 
 	}
 
@@ -374,6 +387,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		if (DRIFT_BOOST_TIMER <= driftBoostTimer_) {
 
 			boostSpeed_ = MAX_BOOST_SPEED;
+			boostTimer_ = 10;
 
 		}
 
@@ -487,6 +501,7 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 
 		// ブーストをマックスにする。
 		boostSpeed_ = MAX_BOOST_SPEED;
+		boostTimer_ = 10;
 
 	}
 	if (output.isHitGoal_) {
