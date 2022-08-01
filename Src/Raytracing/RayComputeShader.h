@@ -22,7 +22,7 @@ private:
 	int inputCBVCount_;					// 入力するCBVの数
 	int inputSRVCount_;					// 入力するSRVの数
 	int inputUAVCount_;					// 入力するUAVの数
-	std::vector<int> inputUAVIndex_;		// 入力UAVデータのディスクリプタヒープ上でのインデックス
+	std::vector<int> inputUAVIndex_;	// 入力UAVデータのディスクリプタヒープ上でのインデックス
 	int outputIndex_;					// 出力データのディスクリプタヒープ上でのインデックス
 
 
@@ -34,7 +34,7 @@ public:
 	void Setting(LPCWSTR CsPath, const int& SRVCount, const int& CVBCount, const int& UAVCount, std::vector<int> UAVIndex);
 
 	// 実行！
-	void Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV);
+	void Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV = {});
 
 	// 入力用UAVを変更。
 	void ChangeInputUAVIndex(const std::vector<int>& NewInputUAV) { inputUAVIndex_ = NewInputUAV; }

@@ -13,6 +13,7 @@ class TLAS;
 class RaytracingOutput;
 class Sprite;
 class BaseStage;
+class RayComputeShader;
 
 // ゲームシーン
 class GameScene : public BaseScene {
@@ -62,26 +63,40 @@ private:
 	// TLASを生成。
 	std::shared_ptr<TLAS> tlas_;
 
-	// アンビエントオクルージョン出力用クラスをセット。
+	// AO出力用。
 	std::shared_ptr<RaytracingOutput> aoOutput_;
 	std::shared_ptr<RaytracingOutput> denoiseAOOutput_;
 
-	// 色出力用クラスをセット。
+	// 色出力用クラス。
 	std::shared_ptr<RaytracingOutput> colorOutput_;
 
-	// デノイズするライト出力用クラスをセット。
+	// ライト出力用。
 	std::shared_ptr<RaytracingOutput> lightOutput_;
 	std::shared_ptr<RaytracingOutput> denoiseLightOutput_;
 
-	// GI出力用クラスをセット。
+	// GI出力用。
 	std::shared_ptr<RaytracingOutput> giOutput_;
 	std::shared_ptr<RaytracingOutput> denoiseGiOutput_;
 
-	// デノイズマスク用クラスをセット。
+	// デノイズマスク用。
 	std::shared_ptr<RaytracingOutput> denoiseMaskOutput_;
 
 	// デノイズの結果出力用クラスをセット。
 	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput_;
+
+	// タイヤ痕出力用クラス
+	std::shared_ptr<RaytracingOutput> tireMaskTexture_;
+
+	// タイヤ痕出テスト用クラス
+	std::shared_ptr<RaytracingOutput> tireMaskTextureOutput_;
+	std::shared_ptr<RayComputeShader> tireMaskComputeShader_;
+	std::shared_ptr<RayComputeShader> whiteOutComputeShader_;
+	std::shared_ptr<DynamicConstBuffer> tireMaskConstBuffer_;
+	struct TireMaskUV {
+		std::array<Vec2, 4> uv_;
+		std::array<Vec2, 4> prevUV_;
+	};
+	TireMaskUV tireMaskUV_;
 
 	// FPS表示をするか否か
 	bool isDisplayFPS_;
@@ -94,6 +109,8 @@ private:
 	std::shared_ptr<Player> player_;
 
 	int testIns_;
+
+
 
 
 public:

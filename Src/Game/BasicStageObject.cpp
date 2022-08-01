@@ -26,4 +26,13 @@ void BasicStageObject::Update(const int& Timer)
 
 	/*===== 更新処理 =====*/
 
+	Timer;
+
+}
+
+void BasicStageObject::Disable(const int& TimerToActivation)
+{
+
+	/*===== 無効化して再設定までの時間をセット =====*/
+
 }

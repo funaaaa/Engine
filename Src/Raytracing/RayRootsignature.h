@@ -45,7 +45,7 @@ public:
 	// ルートシグネチャの生成
 	void Create(const bool& IsLocal, const wchar_t* Name = nullptr);
 
-	// アクセッタ
+	// アクセッサ
 	inline Microsoft::WRL::ComPtr<ID3D12RootSignature>& GetRootSig() { return rootsignature_; }
 
 };

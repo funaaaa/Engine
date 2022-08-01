@@ -23,10 +23,10 @@ public:
 	// TLASの生成
 	void GenerateTLAS();
 
-	// アクセッタ
+	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetTLASBuffer() { return tlasBuffer; }
 
-	// ディスクリプタヒープのインデックスのアクセッタ
+	// ディスクリプタヒープのインデックスのアクセッサ
 	inline const int& GetDescriptorHeapIndex() { return descriptorHeapIndex; }
 
 	// インスタンスを更新

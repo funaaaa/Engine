@@ -179,28 +179,28 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	missRecordSize = RoundUp(missRecordSize, ShaderRecordAlignment);
 
 	// ヒットグループでは、保存されているヒットグループの中から最大のサイズのものでデータを確保する。。
-	UINT hitgroupRecordSize = 0;
-	hitgroupRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	hitgroupRecordSize += GetLargestDataSizeInHitGroup();
-	hitgroupRecordSize = RoundUp(hitgroupRecordSize, ShaderRecordAlignment);
+	hitgroupRecordSize_ = 0;
+	hitgroupRecordSize_ += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	hitgroupRecordSize_ += GetLargestDataSizeInHitGroup();
+	hitgroupRecordSize_ = RoundUp(hitgroupRecordSize_, ShaderRecordAlignment);
 
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
 	UINT hitgroupCount = HitGroupMgr::Ins()->GetHitGroupCount();
 	UINT raygenSize = GetRayGenerationCount() * raygenRecordSize;
 	UINT missSize = GetMissCount() * missRecordSize;
-	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize;
+	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize_;
 
 	// 各テーブルの開始位置にアライメント制約があるので調整する。
 	UINT tableAlign = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-	UINT raygenRegion = RoundUp(raygenRecordSize, tableAlign);
-	UINT missRegion = RoundUp(missSize, tableAlign);
+	raygenRegion_ = RoundUp(raygenRecordSize, tableAlign);
+	missRegion_ = RoundUp(missSize, tableAlign);
 	UINT hitgroupRegion = RoundUp(hitGroupSize, tableAlign);
 
 	// 生成されたBLASの数。
 	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
 
 	// シェーダーテーブルのサイズ。
-	UINT tableSize = raygenRegion + missRegion + hitgroupRegion * BLAS_COUNT;
+	UINT tableSize = raygenRegion_ + missRegion_ + hitgroupRegion * BLAS_COUNT;
 
 	/*========== シェーダーテーブルの構築 ==========*/
 
@@ -239,7 +239,7 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	}
 
 	// Miss Shader 用のシェーダーレコードを書き込み。
-	uint8_t* missStart = pStart + raygenRegion;
+	uint8_t* missStart = pStart + raygenRegion_;
 	{
 		uint8_t* p = missStart;
 
@@ -259,7 +259,7 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	}
 
 	// Hit Group 用のシェーダーレコードを書き込み。
-	uint8_t* hitgroupStart = pStart + raygenRegion + missRegion;
+	uint8_t* hitgroupStart = pStart + raygenRegion_ + missRegion_;
 	{
 
 		uint8_t* pRecord = hitgroupStart;
@@ -267,7 +267,7 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
 		for (int index = 0; index < BLAS_COUNT; ++index) {
 
-			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize, stateObject_, hitGroupName_);
+			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize_, stateObject_, hitGroupName_);
 
 		}
 
@@ -282,23 +282,53 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	auto& shaderRecordRG = dispatchRayDesc_.RayGenerationShaderRecord;
 	shaderRecordRG.StartAddress = startAddress;
 	shaderRecordRG.SizeInBytes = raygenSize;
-	startAddress += raygenRegion;
+	startAddress += raygenRegion_;
 	// Missシェーダーの情報
 	auto& shaderRecordMS = dispatchRayDesc_.MissShaderTable;
 	shaderRecordMS.StartAddress = startAddress;
 	shaderRecordMS.SizeInBytes = missSize;
 	shaderRecordMS.StrideInBytes = missRecordSize;
-	startAddress += missRegion;
+	startAddress += missRegion_;
 	// HitGroupの情報
 	auto& shaderRecordHG = dispatchRayDesc_.HitGroupTable;
 	shaderRecordHG.StartAddress = startAddress;
 	shaderRecordHG.SizeInBytes = hitGroupSize;
-	shaderRecordHG.StrideInBytes = hitgroupRecordSize;
+	shaderRecordHG.StrideInBytes = hitgroupRecordSize_;
 	startAddress += hitgroupRegion;
 	// レイの情報
 	dispatchRayDesc_.Width = DispatchX;
 	dispatchRayDesc_.Height = DispatchY;
 	dispatchRayDesc_.Depth = 1;
+
+}
+
+void RaytracingPipline::MapHitGroupInfo()
+{
+
+	/*===== HitGroupの情報を転送 =====*/
+
+	// 生成されたBLASの数。
+	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
+
+	void* mapped = nullptr;
+	shaderTable_->Map(0, nullptr, &mapped);
+	uint8_t* pStart = static_cast<uint8_t*>(mapped);
+
+	// Hit Group 用のシェーダーレコードを書き込み。
+	uint8_t* hitgroupStart = pStart + raygenRegion_ + missRegion_;
+	{
+
+		uint8_t* pRecord = hitgroupStart;
+
+		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
+		for (int index = 0; index < BLAS_COUNT; ++index) {
+
+			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize_, stateObject_, hitGroupName_);
+
+		}
+
+	}
+	shaderTable_->Unmap(0, nullptr);
 
 }
 

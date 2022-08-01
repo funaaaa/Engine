@@ -145,8 +145,8 @@ void Sprite::Draw()
 	DirectXBase::Ins()->cmdList_->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 
 	// シェーダーリソースビュー設定コマンド
-	for (int i = 0; i < textureID_.size(); ++i) {
-		DirectXBase::Ins()->cmdList_->SetGraphicsRootDescriptorTable(i + 1, TextureManager::Ins()->GetSRV(textureID_[i]));
+	for (int index = 0; index < textureID_.size(); ++index) {
+		DirectXBase::Ins()->cmdList_->SetGraphicsRootDescriptorTable(index + 1, TextureManager::Ins()->GetSRV(textureID_[index]));
 	}
 
 	// 頂点バッファビュー設定コマンド

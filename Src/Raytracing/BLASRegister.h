@@ -30,6 +30,9 @@ public:
 	// BLASの更新
 	void Update(const int& Index);
 
+	// テクスチャを変更。
+	void ChangeTex(const int& BlasIndex, const int& TexIndex, const int& TexHandle);
+
 	// スキニングを計算
 	void ComputeSkin(const int& Index);
 

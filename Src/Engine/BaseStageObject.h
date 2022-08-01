@@ -30,6 +30,7 @@ public:
 		ORNAMENT,		// 装飾オブジェクト
 		FLOATING_ORNAMENT,	// ふわふわ動く装飾オブジェクト
 		BOOS_GIMMICK,	// 加速ギミック
+		ITEM_BOX,		// アイテムボックス
 	};
 
 
@@ -50,6 +51,7 @@ public:
 	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID) = 0;
 	virtual void Destroy() = 0;
 	virtual void Update(const int& Timer) = 0;
+	virtual void Disable(const int& TimerToActivation) = 0;
 
 	// 有効化。
 	inline void Activate() { isActive_ = true; }

@@ -17,11 +17,18 @@
 #include "Pipline.h"
 #include "WindowsAPI.h"
 #include "CircuitStage.h"
+#include "RayComputeShader.h"
+#include "StageObjectMgr.h"
+#include "BLAS.h"
+#include "ShellObjectMgr.h"
 
 GameScene::GameScene()
 {
 
 	/*===== 初期化処理 =====*/
+
+	// 甲羅オブジェクトをセッティング。
+	ShellObjectMgr::Ins()->Setting();
 
 	// 定数バッファを生成。
 	constBufferData_.Init();
@@ -34,13 +41,25 @@ GameScene::GameScene()
 	pipline_ = std::make_shared<RaytracingPipline>();
 	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2), 6);
 
+	// タイヤ痕用クラスをセット。
+	tireMaskTexture_ = std::make_shared<RaytracingOutput>();
+	tireMaskTexture_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	tireMaskTextureOutput_ = std::make_shared<RaytracingOutput>();
+	tireMaskTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
+	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
+	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
+	tireMaskConstBuffer_->Generate(sizeof(Vec2) * 8, L"TireMaskUV");
+
+	// 白塗りコンピュートシェーダー
+	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
+	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {});
 
 	// ステージをセッティングする。
 	stages_.emplace_back(std::make_shared<CircuitStage>());
 
 	// 一旦サーキットステージを有効化する。
-	stages_[STAGE_ID::CIRCUIT]->Setting();
-
+	stages_[STAGE_ID::CIRCUIT]->Setting(tireMaskTexture_->GetUAVIndex());
 
 	// 天球用のスフィアを生成する。
 	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/skydome.jpg" });
@@ -97,7 +116,7 @@ GameScene::GameScene()
 	isDisplayFPS_ = false;
 
 	nextScene_ = SCENE_ID::RESULT;
-	isTransition = false;
+	isTransition_ = false;
 
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
@@ -133,7 +152,7 @@ void GameScene::Init()
 	/*===== 初期化処理 =====*/
 
 	nextScene_ = SCENE_ID::RESULT;
-	isTransition = false;
+	isTransition_ = false;
 	player_->Init();
 	Camera::Ins()->Init();
 
@@ -159,13 +178,9 @@ void GameScene::Update()
 	}
 	else {
 
-		SetWindowText(DirectXBase::Ins()->windowsAPI_->hwnd, L"LE3A_21_フナクラベ_タクミ");
+		SetWindowText(DirectXBase::Ins()->windowsAPI_->hwnd_, L"LE3A_21_フナクラベ_タクミ");
 
 	}
-
-	// 中間地点のオブジェクトを元の大きさに戻す。 AOの影でてしまうバグの対策用。シェーダー側で変える時間がなかったので臨時でずらしてます！
-	/*PolygonInstanceRegister::Ins()->ChangeScale(middlePointCollisionIns_, Vec3(200, 200, 200));
-	PolygonInstanceRegister::Ins()->ChangeTrans(middlePointCollisionIns_, Vec3(0, 0, 0));*/
 
 	// プレイヤーを更新。
 	player_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isPassedMiddlePoint_, rapCount_);
@@ -179,7 +194,7 @@ void GameScene::Update()
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {
 
-		isTransition = true;
+		isTransition_ = true;
 
 	}
 
@@ -192,11 +207,16 @@ void GameScene::Update()
 	stages_[STAGE_ID::CIRCUIT]->Update();
 
 	// ゴールの表示非表示を切り替え。
-	if(isPassedMiddlePoint_){
+	if (isPassedMiddlePoint_) {
 		stages_[STAGE_ID::CIRCUIT]->DisplayGoal();
-	}else{
+	}
+	else {
 		stages_[STAGE_ID::CIRCUIT]->NonDisplayGoal();
 	}
+
+
+	// BLASの情報を変更。いずれは変更した箇所のみ書き換えられるようにしたい。
+	pipline_->MapHitGroupInfo();
 
 	tlas_->Update();
 
@@ -206,6 +226,9 @@ void GameScene::Update()
 	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
 	PolygonInstanceRegister::Ins()->AddRotate(skyDomeIns_, Vec3(0.001f, 0, 0));
+
+	// 甲羅を更新。
+	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::CIRCUIT]);
 
 }
 
@@ -259,6 +282,104 @@ void GameScene::Draw()
 	// レイトレーシングを実行。
 	D3D12_DISPATCH_RAYS_DESC rayDesc = pipline_->GetDispatchRayDesc();
 	DirectXBase::Ins()->cmdList_->DispatchRays(&rayDesc);
+
+
+	// 床を白塗り
+	if (Input::Ins()->IsKeyTrigger(DIK_R)) {
+
+		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
+
+	}
+
+
+
+	// タイヤ痕位置検出テスト用
+
+	if (player_->isTireMask_) {
+
+		FHelper::RayToModelCollisionData InputRayData;
+		InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexPos();
+		InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexNormal();
+		InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexIndex();
+		InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexUV();
+		InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
+		InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
+		InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
+
+		// 戻り地保存用
+		Vec3 ImpactPos;
+		Vec3 HitNormal;
+		Vec2 HitUV;
+		float HitDistance;
+
+		// 左前タイヤ
+		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carLeftTireInsIndex_);
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
+
+		// タイヤ痕の位置を検出
+		bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+		// 当たり判定が正しいかどうかをチェック。
+		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+			tireMaskUV_.prevUV_[0] = Vec2(0, 0);
+			tireMaskUV_.uv_[0] = Vec2(0, 0);
+
+		}
+		else {
+
+			tireMaskUV_.prevUV_[0] = tireMaskUV_.uv_[0];
+			tireMaskUV_.uv_[0] = HitUV;
+
+		}
+
+		// 右前タイヤ
+		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carRightTireInsIndex_);
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
+
+		// タイヤ痕の位置を検出
+		isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+			tireMaskUV_.prevUV_[1] = Vec2(0, 0);
+			tireMaskUV_.uv_[1] = Vec2(0, 0);
+
+		}
+		else {
+
+			tireMaskUV_.prevUV_[1] = tireMaskUV_.uv_[1];
+			tireMaskUV_.uv_[1] = HitUV;
+
+		}
+
+
+		// UAVを書き込む。
+		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV_, sizeof(Vec2) * 8);
+		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+		{
+			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+						tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+						tireMaskTextureOutput_->GetRaytracingOutput().Get())
+			};
+
+			DirectXBase::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
+		}
+
+	}
+	else {
+
+		tireMaskUV_.prevUV_[0] = Vec2(0, 0);
+		tireMaskUV_.uv_[0] = Vec2(0, 0);
+		tireMaskUV_.prevUV_[1] = Vec2(0, 0);
+		tireMaskUV_.uv_[1] = Vec2(0, 0);
+
+	}
+
+
+
+
+
 
 	// [ノイズを描画]のときはデノイズをかけない。
 	if (!constBufferData_.debug_.isNoiseScene_) {
@@ -424,7 +545,7 @@ void GameScene::FPS()
 		_itow_s(frame_count, fps, 10);
 		wchar_t moji[] = L"FPS";
 		wcscat_s(fps, moji);
-		SetWindowText(DirectXBase::Ins()->windowsAPI_->hwnd, fps);
+		SetWindowText(DirectXBase::Ins()->windowsAPI_->hwnd_, fps);
 		//OutputDebugString(fps);
 
 		prev_time = now_time;
@@ -440,14 +561,14 @@ void GameScene::Input()
 
 	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
-		isTransition = true;
+		isTransition_ = true;
 
 	}
 
 	InputImGUI();
 
 }
-
+#include "BaseItem.h"
 void GameScene::InputImGUI()
 {
 
@@ -493,6 +614,50 @@ void GameScene::InputImGUI()
 
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
+
+	// アイテムデバッグ用。
+	bool haveItem = player_->item_.operator bool();
+
+	if (haveItem) {
+
+		bool haveBoostItem = player_->item_->GetItemID() == BaseItem::ItemID::BOOST;
+
+		ImGui::Checkbox("BoostItem", &haveBoostItem);
+
+		bool haveShellItem = player_->item_->GetItemID() == BaseItem::ItemID::SHELL;
+
+		ImGui::Checkbox("ShellItem", &haveShellItem);
+
+	}
+
+
+	int index = 16;
+
+	Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
+
+	float posArray[3] = { pos.x_, pos.y_, pos.z_ };
+
+	ImGui::DragFloat3("Pos", posArray, 0.5f);
+
+	pos.x_ = posArray[0];
+	pos.y_ = posArray[1];
+	pos.z_ = posArray[2];
+
+	PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
+
+
+	Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
+
+	float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
+
+	ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
+
+	rotate.x_ = rotateArray[0];
+	rotate.y_ = rotateArray[1];
+	rotate.z_ = rotateArray[2];
+
+	PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+
 
 	//// 1個目
 	//GimmickMgr::Ins()->ChangeTrans(0, Vec3(100, -15, 1400));

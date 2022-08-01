@@ -1,6 +1,7 @@
 #include "StageObjectMgr.h"
 #include "BasicStageObject.h"
 #include "FloatingStageObject.h"
+#include "ItemBoxObject.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
 #include "OBB.h"
@@ -15,6 +16,12 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
 
 		objects_.emplace_back(std::make_shared<FloatingStageObject>());
+
+	}
+	// アイテムボックスオブジェクトだったら
+	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+
+		objects_.emplace_back(std::make_shared<ItemBoxObject>());
 
 	}
 	// それ以外の通常のオブジェクトだったら。
@@ -62,6 +69,8 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitOrnament_ = false;
 	output.isHitStageGrass_ = false;
 	output.isHitStage_ = false;
+	output.isHitItemBox_ = false;
+	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
 
 	for (auto& index : objects_) {
 
@@ -74,6 +83,11 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 
 		// 当たり判定がOBBだったら。
 		if (indexCollisionID == BaseStageObject::COLLISION_ID::OBB) {
+
+			// 一定以上離れていたら。
+			float distance = Vec3(Input.targetOBB_.lock()->pos_ - index->GetOBB()->pos_).Length();
+			float size = Vec3(Input.targetOBB_.lock()->length_ + index->GetOBB()->length_).Length();
+			if (size < distance) continue;
 
 			// OBBの当たり判定を行う。
 			bool isHit = Input.targetOBB_.lock()->CheckHitOBB(index->GetOBB());
@@ -94,6 +108,15 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			else if (indexObjID == BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 				output.isHitMiddlePoint_ = true;
 			}
+			// 当たったオブジェクトがアイテムボックスだったら。
+			else if (indexObjID == BaseStageObject::OBJECT_ID::ITEM_BOX && Input.isPlayer_) {
+
+				// アイテムボックスを一時的に無効化。
+				index->Disable(180);
+
+				output.isHitItemBox_ = true;
+
+			}
 
 		}
 		// 当たり判定がMESHだったら。
@@ -104,6 +127,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexPos();
 			InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexNormal();
 			InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexIndex();
+			InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[index->GetBLASIndex()]->GetVertexUV();
 			InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(index->GetINSTANCEIndex());
 			InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(index->GetINSTANCEIndex());
 			InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(index->GetINSTANCEIndex());
@@ -116,6 +140,12 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 				output = StageMeshCollider(Input, InputRayData, output, indexObjID == BaseStageObject::OBJECT_ID::STAGE);
 			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ORNAMENT) {
+
+				// 一定以上離れていたら。 オブジェクトの配置をBlender基準でやっているため距離を頂点から持ってきているが、いずれは手動で配置して座標から距離を持ってこれるようにする
+				float distance = Vec3(Input.targetPos_ - PolygonInstanceRegister::Ins()->GetPos(index->GetINSTANCEIndex())).Length();
+				float size = Vec3(Input.targetSize_ + index->GetOBB()->length_).Length();
+				if (size < distance) continue;
+
 				output = OrnamentMeshCollider(Input, InputRayData, output);
 			}
 
@@ -216,9 +246,10 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	Vec3 impactPos;
 	float hitDistance;
 	Vec3 hitNormal;
+	Vec2 hitUV;
 
 	// 当たり判定を行う。
-	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal);
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
 	// 当たった距離がY軸のサイズよりも小さかったら。
 	isHit &= (hitDistance - Input.targetSize_.y_) <= 0;
@@ -259,7 +290,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 
 		// 当たり判定を行う。
 		isHit = false;
-		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal);
+		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
 		isHit &= fabs(hitDistance) < (Input.targetPos_ - Input.targetPrevPos_).Length();
@@ -292,7 +323,8 @@ BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::Collid
 	Vec3 impactPos;
 	float hitDistance;
 	Vec3 hitNormal;
-	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal);
+	Vec2 hitUV;
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
 	// 当たった距離がY軸のサイズよりも小さかったら。
 	isHit &= fabs(hitDistance) < (Input.targetPos_ - Input.targetPrevPos_).Length();
@@ -303,6 +335,7 @@ BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::Collid
 		// 法線方向に当たった分押し戻す。
 		Input.targetPos_ = impactPos + hitNormal * hitDistance;
 		Output.isHitOrnament_ = true;
+		Output.ornamentHitNormal_ = hitNormal;
 
 	}
 
@@ -348,18 +381,24 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 		// 求めたクォータニオンを行列に治す。
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
-		// プレイヤーを回転させる。
+		// 回転させる。
 		PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, quaternionMat);
 
-		// 上ベクトルを基準としたクォータニオンを求める。
+		// 法線ベクトル
 		Vec3 normal_ = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
 
-		// クォータニオンを行列に治す。
-		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+		if (!Input.isInvalidateRotY_) {
 
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+			// 上ベクトルを基準としたクォータニオンを求める。
+			DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
+
+			// クォータニオンを行列に治す。
+			DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+
+			// プレイヤーを回転させる。
+			PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+
+		}
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
@@ -381,18 +420,24 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 		// プレイヤーを回転させる。
 		PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, DirectX::XMMatrixIdentity());
 
-		// 上ベクトルを基準としたクォータニオンを求める。
+		// 法線ベクトル
 		Vec3 normal_ = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
 
-		// クォータニオンを行列に治す。
-		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+		if (!Input.isInvalidateRotY_) {
 
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+			// 上ベクトルを基準としたクォータニオンを求める。
+			DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), Input.targetRotY_);
+
+			// クォータニオンを行列に治す。
+			DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+
+			// 回転させる。
+			PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+
+		}
 
 
-		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
+		/*-- 回転行列をもとに各ベクトルを回転 --*/
 
 		// 回転行列を取得。
 		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_);
@@ -406,3 +451,13 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 	}
 
 }
+
+
+/*
+
+・甲羅を後ろに持つ機能を追加。
+・甲羅とプレイヤーの当たり判定を追加。
+　→当たった際のエフェクトも追加。
+・アイテムボックスを追加。
+
+*/

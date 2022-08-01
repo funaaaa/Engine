@@ -128,15 +128,21 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
 	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
 	for (auto& index_ : vertex_) {
 		vertexPos_[counter] = index_.position_;
 		vertexNormal_[counter] = index_.normal_;
+		vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
 
 	// 頂点を保存。
 	defVertex_ = vertex_;
+
+	// ダーティフラグ
+	isChangeVertex = true;
+	isChangeTexture = true;
 
 }
 
@@ -517,19 +523,34 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		throw std::logic_error("Not found ShaderIdentifier");
 	}
 
-	// シェーダー識別子を書き込む。
-	memcpy(Dst, id_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	// 頂点関係のデータが変更されていたら。
+	if (isChangeVertex) {
 
-	// 今回のプログラムでは以下の順序でディスクリプタを記録。
-	// [0] : インデックスバッファ
-	// [1] : 頂点バッファ
-	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-	Dst += WriteGPUDescriptor(Dst, &indexDescriptor_.GetGPUHandle());
-	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor_.GetGPUHandle());
+		// シェーダー識別子を書き込む。
+		memcpy(Dst, id_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
-	// マテリアル用のバッファをセット。
-	Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
+		// 今回のプログラムでは以下の順序でディスクリプタを記録。
+		// [0] : インデックスバッファ
+		// [1] : 頂点バッファ
+		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor_.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor_.GetGPUHandle());
+
+		// マテリアル用のバッファをセット。
+		Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
+
+		isChangeVertex = false;
+
+	}
+	else {
+
+		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE)));
+		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE)));
+		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE)));
+
+	}
 
 	// ヒットグループ名からヒットグループ名IDを取得する。
 	int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
@@ -538,26 +559,52 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
 
 	// ヒットグループIDからSRVの数を取得。
-	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
+	int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
-	// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
-	// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-	for (int index = 0; index < srvCount; ++index) {
+	// テクスチャ関係が変更されていたら。
+	if (isChangeTexture) {
 
-		// このインデックスのテクスチャが存在していなかったら
-		if (textureHandle_.size() <= index) {
+		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
+		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
+		for (int index = 0; index < srvCount; ++index) {
 
-			// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
-			WriteGPUDescriptor(Dst, &texDescHandle);
+			// このインデックスのテクスチャが存在していなかったら
+			if (textureHandle_.size() <= index) {
 
+				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
+				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+			}
+			else {
+
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
+				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+			}
 		}
-		else {
 
-			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
+		isChangeTexture = false;
+
+	}
+	else {
+
+		Dst += static_cast<UINT>(sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)) * static_cast<UINT>(srvCount);
+
+	}
+
+	// 使用するUAVの数を取得。
+	int uavCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID);
+	for (int index = 0; index < uavCount; ++index) {
+
+		// テクスチャが存在していたら。
+		if (0 < uavHandle_.size()) {
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavHandle_[index]);
 			Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 		}
+
 	}
 
 	Dst = entryBegin + recordSize;
@@ -617,6 +664,20 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	//	return Dst;
 
 	//}
+
+}
+
+void BLAS::ChangeTex(const int& Index, const int& TextureHandle)
+{
+
+	/*===== テクスチャを変更 =====*/
+
+	// インデックスが範囲外じゃないかを検索。
+	if (Index < 0 || textureHandle_.size() <= Index) assert(0);
+
+	textureHandle_[Index] = TextureHandle;
+
+	isChangeTexture = true;
 
 }
 

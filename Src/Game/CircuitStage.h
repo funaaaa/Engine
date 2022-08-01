@@ -17,7 +17,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	void Setting()override;
+	void Setting(const int& TireMaskIndex)override;
 	void Destroy()override;
 	void Update()override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;

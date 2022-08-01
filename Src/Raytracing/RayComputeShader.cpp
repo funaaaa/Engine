@@ -66,12 +66,9 @@ void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& Threa
 	DirectXBase::Ins()->cmdList_->SetPipelineState(pipline_.Get());
 
 	// 一応UAVをセット。
-	int counter = 0;
 	for (auto& index_ : inputUAVIndex_) {
 
-		DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(counter + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
-
-		++counter;
+		DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(static_cast<int>(&index_ - &inputUAVIndex_[0]) + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
 
 	}
 
@@ -79,12 +76,9 @@ void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& Threa
 	//auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
 
 	// CBVをセット。
-	counter = 0;
 	for (auto& index_ : InputCBV) {
 
-		DirectXBase::Ins()->cmdList_->SetComputeRootConstantBufferView(counter, index_);
-
-		++counter;
+		DirectXBase::Ins()->cmdList_->SetComputeRootConstantBufferView(static_cast<int>(&index_ - &InputCBV[0]), index_);
 
 	}
 

@@ -10,7 +10,7 @@ void FloatingStageObject::Setting(const BaseStageObject::OBJECT_ID& ObjectID, co
 	BasicInit(ObjectID, CollisionID, InstanceID);
 
 	// 移動量を初期化。
-	timerOffset_ = InstanceID;	// InstanceIDをタイマーのオフセットに使用する。これによって連続で生成したFloatingStageObjectは波のように動く。
+	timerOffset_ = static_cast<float>(InstanceID);	// InstanceIDをタイマーのオフセットに使用する。これによって連続で生成したFloatingStageObjectは波のように動く。
 	floatingMove_ = Vec3();
 
 }
@@ -41,5 +41,12 @@ void FloatingStageObject::Update(const int& Timer)
 
 	// 回転させる。
 	AddRotate(Vec3(0.01f, 0.01f, 0));
+
+}
+
+void FloatingStageObject::Disable(const int& TimerToActivation)
+{
+
+	/*===== 無効化して再設定までのタイマーをセット =====*/
 
 }

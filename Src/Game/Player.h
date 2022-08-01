@@ -7,6 +7,8 @@
 
 class BaseStage;
 class OBB;
+class PlayerTire;
+class BaseItem;
 
 class Player {
 
@@ -19,17 +21,27 @@ public:
 	Vec3 prevPos_;			// 車の前フレームの座標
 	Vec3 forwardVec_;		// 進行方向ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
-	Vec3 upVec_;				// 上方向ベクトル
+	Vec3 upVec_;			// 上方向ベクトル
 	Vec3 size_;				// サイズ
 	float speed_;			// 移動速度
 	float gravity_;			// 重力
 	float rotY_;				// ハンドル操作によって変わるY軸の回転量
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
 	const int RETURN_DEFPOS_TIMER = 600;
-	bool isGround_;			// 地上にいるか t=地上 f=空中
-	bool isGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
+	bool isShotBehind_;		// 後ろ側に甲羅を投げるかのフラグ
+	bool onGround_;			// 地上にいるか t=地上 f=空中
+	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
+
+	std::vector<std::shared_ptr<PlayerTire>> tires_;
+
+	// アイテムクラス
+	std::shared_ptr<BaseItem> item_;
+
+	bool IsTurningIndicatorRed_;// ウインカーの色が赤かどうか。
+	int turningIndicatorTimer_;	// ウインカーがチカチカするタイマー
+	const int TURNING_INDICATOR_TIMER = 30;
 
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
@@ -49,7 +61,9 @@ public:
 
 	float boostSpeed_;					// ブーストされているときの移動速度
 	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
+	int boostTimer_;					// ブーストするフレーム数
 	bool isDrift_;						// ドリフト状態かどうか。
+	bool isTireMask_;
 
 	const float HANDLE_DRIFT = 0.06f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値

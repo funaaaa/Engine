@@ -19,7 +19,7 @@ public:
 	// SRV生成処理
 	void CreateStructuredSRV(Microsoft::WRL::ComPtr<ID3D12Resource> Resource, UINT NumElements, UINT FirstElement, UINT Stride, Microsoft::WRL::ComPtr<ID3D12DescriptorHeap>& DescHeap, UINT Index);
 
-	// アクセッタ
+	// アクセッサ
 	inline D3D12_CPU_DESCRIPTOR_HANDLE& GetCPUHandle() { return hCpu_; }
 	inline D3D12_GPU_DESCRIPTOR_HANDLE& GetGPUHandle() { return hGpu_; }
 

@@ -48,6 +48,9 @@ public:
 	void NonDisplay(const int& Index);
 	void Display(const int& Index);
 
+	// ƒQƒbƒ^
+	int GetBlasIndex(const int& Index) { return objects_[Index]->GetBLASIndex(); }
+
 
 private:
 

@@ -55,6 +55,7 @@ public:
 	void AddRotate(const int& Index, const Vec3& Rot);
 	void AddRotate(const int& Index, const DirectX::XMMATRIX& Rot);
 	DirectX::XMMATRIX GetRotate(const int& Index);
+	Vec3 GetRotateVec3(const int& Index);
 
 	// 回転(ラジアン、引数を代入)関数
 	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);
@@ -80,6 +81,9 @@ public:
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
 
+	// 親子関係も考慮したワールド座標系での座標を取得。
+	Vec3 GetWorldPos(const int& Index);
+
 	// インスタンスを破棄。
 	void DestroyInstance(const int& Index);
 
@@ -99,14 +103,15 @@ public:
 	enum SHADER_ID {
 
 		DEF = 0,			// 通常のレイ
-		AS = 1,			// 大気散乱用
+		AS = 1,				// 大気散乱用
 		TEXCOLOR = 2,		// テクスチャの色をそのまま返す
-		REFLECTION = 3,	// 反射させる。
+		REFLECTION = 3,		// 反射させる。
 		COMPLETE_REFLECTION = 4,	// 完全反射させる。
-		LIGHT = 5,		// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
-		REFRACTION = 6,	// 屈折用のレイ
+		LIGHT = 5,			// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
+		REFRACTION = 6,		// 屈折用のレイ
 		INVISIBILITY = 7,	// 不可視のオブジェクト
-		DEF_GI = 8,		// 通常のレイ GIも行う。
+		DEF_GI = 8,			// 通常のレイ GIも行う。
+		DEF_GI_TIREMASK = 9,// 通常のレイ GI タイヤ痕
 
 	};
 

@@ -12,6 +12,7 @@ static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ライト用オ
 static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID 屈折の処理
 static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ライティングも描画も行わないオブジェクト
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID 通常の処理 + GIも行う。
+static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK = 9; // instanceID 通常の処理 + GI + タイヤ痕
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // デフォルトのレイ
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI用のレイ

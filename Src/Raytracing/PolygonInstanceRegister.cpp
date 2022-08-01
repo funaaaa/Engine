@@ -130,6 +130,11 @@ DirectX::XMMATRIX PolygonInstanceRegister::GetRotate(const int& Index)
 	return instance_[Index]->GetRotate();
 }
 
+Vec3 PolygonInstanceRegister::GetRotateVec3(const int& Index)
+{
+	return instance_[Index]->GetRotateVec3();
+}
+
 void PolygonInstanceRegister::ChangeRotate(const int& Index, const float& X, const float& Y, const float Z)
 {
 	instance_[Index]->ChangeRotate(Vec3(X, Y, Z));
@@ -208,6 +213,15 @@ void PolygonInstanceRegister::CalWorldMat()
 		index_->CalWorldMat(instanceDesc_[&index_ - &instance_[0]]);
 
 	}
+
+}
+
+Vec3 PolygonInstanceRegister::GetWorldPos(const int& Index)
+{
+
+	/*===== 親子関係も考慮したワールド座標系での座標を取得 =====*/
+
+	return instance_[Index]->GetWorldPos();
 
 }
 

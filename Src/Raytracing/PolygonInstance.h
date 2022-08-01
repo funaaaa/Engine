@@ -14,7 +14,7 @@ private:
 
 	UINT instanceID_;								// このインスタンスのID
 
-	UINT shaderID;
+	UINT shaderID_;
 
 	DirectX::XMMATRIX worldMat_;						// ワールド行列
 
@@ -30,6 +30,7 @@ private:
 	std::weak_ptr<PolygonMeshInstance> parentInstance_;
 
 	Vec3 pos_;
+	Vec3 rotate_;		// 装飾オブジェクト配置用
 
 	UINT blasIndex_;
 
@@ -66,6 +67,9 @@ public:
 	void ChangeScale(const Vec3& Scale);
 	void ChangeScale(const DirectX::XMMATRIX& Scale);
 
+	// 親子関係も考慮したワールド座標系での座標を取得。
+	Vec3 GetWorldPos();
+
 	// ワールド行列を加算。
 	void CalWorldMat(D3D12_RAYTRACING_INSTANCE_DESC& Input);
 
@@ -77,7 +81,8 @@ public:
 
 	// 座標を取得。
 	inline const Vec3& GetPos() { return pos_; }
-	inline const UINT GetShaderID() { return shaderID; }
+	inline const Vec3& GetRotateVec3() { return rotate_; }
+	inline const UINT GetShaderID() { return shaderID_; }
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex_; }

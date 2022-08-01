@@ -187,6 +187,11 @@
     <ClCompile Include="Src\Engine\TextureManager.cpp" />
     <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
+    <ClCompile Include="Src\Game\BoostItem.cpp" />
+    <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
+    <ClCompile Include="Src\Game\ShellItem.cpp" />
+    <ClCompile Include="Src\Game\ShellObject.cpp" />
+    <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
     <ClCompile Include="Src\Game\CircuitStage.cpp" />
     <ClCompile Include="Src\Game\DriftParticle.cpp" />
     <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
@@ -194,6 +199,7 @@
     <ClCompile Include="Src\Game\GameScene.cpp" />
     <ClCompile Include="Src\Game\Player.cpp" />
     <ClCompile Include="Src\Game\PlayerModel.cpp" />
+    <ClCompile Include="Src\Game\PlayerTire.cpp" />
     <ClCompile Include="Src\Game\ResultScene.cpp" />
     <ClCompile Include="Src\Game\SceneMgr.cpp" />
     <ClCompile Include="Src\Game\TitleScene.cpp" />
@@ -251,9 +257,15 @@
     <ClInclude Include="Src\Engine\TextureManager.h" />
     <ClInclude Include="Src\Engine\Vec.h" />
     <ClInclude Include="Src\Engine\WindowsAPI.h" />
+    <ClInclude Include="Src\Game\BaseItem.h" />
     <ClInclude Include="Src\Game\BaseScene.h" />
     <ClInclude Include="Src\Game\BaseStage.h" />
     <ClInclude Include="Src\Game\BasicStageObject.h" />
+    <ClInclude Include="Src\Game\BoostItem.h" />
+    <ClInclude Include="Src\Game\ItemBoxObject.h" />
+    <ClInclude Include="Src\Game\ShellItem.h" />
+    <ClInclude Include="Src\Game\ShellObject.h" />
+    <ClInclude Include="Src\Game\ShellObjectMgr.h" />
     <ClInclude Include="Src\Game\CircuitStage.h" />
     <ClInclude Include="Src\Game\DriftParticle.h" />
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />
@@ -261,6 +273,7 @@
     <ClInclude Include="Src\Game\GameScene.h" />
     <ClInclude Include="Src\Game\Player.h" />
     <ClInclude Include="Src\Game\PlayerModel.h" />
+    <ClInclude Include="Src\Game\PlayerTire.h" />
     <ClInclude Include="Src\Game\ResultScene.h" />
     <ClInclude Include="Src\Game\SceneMgr.h" />
     <ClInclude Include="Src\Game\TitleScene.h" />
@@ -309,12 +322,24 @@
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.4</ShaderModel>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </EntryPointName>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.4</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.4</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\TireMaskComputeShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\WhiteMakeUpShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

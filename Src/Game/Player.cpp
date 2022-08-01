@@ -9,6 +9,10 @@
 #include "HitGroupMgr.h"
 #include "OBB.h"
 #include "CircuitStage.h"
+#include "TextureManager.h"
+#include "PlayerTire.h"
+#include "BoostItem.h"
+#include "ShellItem.h"
 
 Player::Player()
 {
@@ -17,6 +21,14 @@ Player::Player()
 
 	// 車のモデルをロード
 	playerModel_.Load();
+
+	// タイヤをセット。
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireFrameInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireFrameInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireInsIndex_, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInsIndex_, true));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInsIndex_, true));
 
 	pos_ = PLAYER_DEF_POS;
 	prevPos_ = pos_;
@@ -29,9 +41,13 @@ Player::Player()
 	gravity_ = 0;
 	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
+	boostTimer_ = 0;
 	isDrift_ = false;
-	isGround_ = true;
-	isGrass_ = false;
+	onGround_ = true;
+	onGrass_ = false;
+	isTireMask_ = false;
+	IsTurningIndicatorRed_ = false;
+	turningIndicatorTimer_ = 0;
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -55,9 +71,13 @@ void Player::Init()
 	speed_ = 0;
 	gravity_ = 0;
 	boostSpeed_ = 0;
+	boostTimer_ = 0;
+	turningIndicatorTimer_ = 0;
 	isDrift_ = false;
-	isGround_ = true;
-	isGrass_ = false;
+	onGround_ = true;
+	onGrass_ = false;
+	IsTurningIndicatorRed_ = false;
+	isTireMask_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 
 }
@@ -79,11 +99,8 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 	// 座標を更新。
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
 
-	// 座標を保存。
-	prevPos_ = pos_;
-
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
-	if (isGround_) {
+	if (onGround_) {
 
 		returnDefPosTimer_ = 0;
 
@@ -108,6 +125,60 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 
 	// OBBを更新。
 	obb_->SetMat(playerModel_.carBodyInsIndex_);
+
+	// 座標を保存。
+	prevPos_ = pos_;
+
+	// タイヤを更新する。
+	for (auto& index : tires_) {
+
+		index->Update();
+
+	}
+
+
+
+	// アイテムテスト用
+	if (Input::Ins()->IsKeyTrigger(DIK_P) && item_.operator bool()) {
+
+		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
+
+			boostSpeed_ = MAX_BOOST_SPEED;
+			boostTimer_ = 30;
+			item_.reset();
+
+		}
+		else {
+
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
+
+		}
+
+
+	}
+
+	if (Input::Ins()->IsKeyRelease(DIK_P) && item_.operator bool()) {
+
+		if (isShotBehind_) {
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
+		}
+		else {
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::FORWARD_THROW));
+		}
+		item_.reset();
+
+
+	}
+
+
+	// ブーストするタイマーが一定以上だったら加速し続ける。
+	if (0 < boostTimer_) {
+
+		--boostTimer_;
+
+		boostSpeed_ = MAX_BOOST_SPEED;
+
+	}
 
 }
 
@@ -134,20 +205,22 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	/*===== 入力処理 =====*/
 
+	isTireMask_ = false;
+
 	// RTが引かれていたら加速。
 	const float INPUT_DEADLINE_TRI = 0.5f;
 	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
-	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && isGround_) {
+	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && onGround_) {
 
 		speed_ += inputRightTriValue * ADD_SPEED;
 
 	}
-	else if (Input::Ins()->IsKey(DIK_W) && isGround_) {
+	else if (Input::Ins()->IsKey(DIK_W) && onGround_) {
 
 		speed_ += ADD_SPEED;
 
 	}
-	else if (isGround_) {
+	else if (onGround_) {
 
 		// 移動していなくて地上にいたら移動量を0に近づける。
 		speed_ -= speed_ / 10.0f;
@@ -158,6 +231,14 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		// 移動していなくて空中にいたら移動量を0に近づける。
 		speed_ -= speed_ / 200.0f;
 
+	}
+
+	// Oキーが押されていたら後ろに投げるフラグを立てる。　コントローラー用の条件式も後々入れる。
+	if (Input::Ins()->IsKey(DIK_O)) {
+		isShotBehind_ = true;
+	}
+	else {
+		isShotBehind_ = false;
 	}
 
 	// 現在のフレームの右スティックの傾き具合。
@@ -178,28 +259,33 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			handleAmount = HANDLE_DRIFT;
 
 			// ついでにドリフト状態の時のブーストするまでのタイマーを更新する。
-			if (isGround_) {
+			if (onGround_) {
 				++driftBoostTimer_;
 				if (DRIFT_BOOST_TIMER < driftBoostTimer_) driftBoostTimer_ = DRIFT_BOOST_TIMER;
 			}
 
 			// タイヤを回転させる。
-			Vec3 rot = Vec3(0.0f, 0.5f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
+			for (auto& index : tires_) {
+
+				index->Rot(true, static_cast<float>(inputADKey));
+				index->Rot(true, static_cast<float>(inputLeftStickHori));
+
+			}
+
+			isTireMask_ = true;
+
 
 		}
 		// ドリフト状態じゃなかったら。
 		else {
 
 			// タイヤを回転させる。
-			Vec3 rot = Vec3(0.0f, 0.3f, 0.0f);
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot * static_cast<float>(inputADKey));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot * static_cast<float>(inputADKey));
+			for (auto& index : tires_) {
+
+				index->Rot(false, static_cast<float>(inputADKey));
+				index->Rot(false, static_cast<float>(inputLeftStickHori));
+
+			}
 
 		}
 
@@ -217,15 +303,51 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
+
+		// ウインカーの色を変えるタイマーを更新。
+		++turningIndicatorTimer_;
+		if (TURNING_INDICATOR_TIMER < turningIndicatorTimer_) {
+
+			turningIndicatorTimer_ = 0;
+			IsTurningIndicatorRed_ = IsTurningIndicatorRed_ ? false : true;
+
+		}
+
+		// ウインカーの色を変える。
+		if (IsTurningIndicatorRed_) {
+
+			// 曲がっているのが右だったら。
+			if (0 < inputADKey || 0 < inputLeftStickHori) {
+
+				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
+				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+			}
+			else {
+
+				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
+				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+			}
+
+		}
+		else {
+
+			BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+			BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+		}
+
 	}
 	else {
 
-		// タイヤの回転をデフォルトに戻す。
-		Vec3 rot_ = Vec3(0.0f, 0.0f, 0.0f);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireFrameInsIndex_, rot_);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carRightTireInsIndex_, rot_);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireFrameInsIndex_, rot_);
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carLeftTireInsIndex_, rot_);
+		// 車のライトの色を元に戻す。
+		BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+		BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+
+		// 各変数を初期化。
+		IsTurningIndicatorRed_ = false;
+		turningIndicatorTimer_ = 100;	// チカチカするタイマーを初期化。
 
 	}
 
@@ -265,6 +387,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		if (DRIFT_BOOST_TIMER <= driftBoostTimer_) {
 
 			boostSpeed_ = MAX_BOOST_SPEED;
+			boostTimer_ = 10;
 
 		}
 
@@ -302,7 +425,7 @@ void Player::Move()
 	}
 
 	// 草の上にいたら移動速度の限界値を下げる。
-	if (isGrass_ && MAX_SPEED_ON_GRASS < speed_) {
+	if (onGrass_ && MAX_SPEED_ON_GRASS < speed_) {
 
 		speed_ = MAX_SPEED_ON_GRASS;
 
@@ -324,7 +447,7 @@ void Player::Move()
 	}
 
 	// 地上にいたら重力を無効化する。
-	if (isGround_) {
+	if (onGround_) {
 
 		gravity_ = 0;
 
@@ -364,6 +487,8 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 	input.targetPrevPos_ = prevPos_;
 	input.targetRotY_ = rotY_;
 	input.targetSize_ = size_;
+	input.isInvalidateRotY_ = false;
+	input.isPlayer_ = true;
 
 	// 当たり判定関数から返ってくる値。
 	BaseStage::ColliderOutput output;
@@ -376,6 +501,7 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 
 		// ブーストをマックスにする。
 		boostSpeed_ = MAX_BOOST_SPEED;
+		boostTimer_ = 10;
 
 	}
 	if (output.isHitGoal_) {
@@ -402,12 +528,12 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 
 	}
 	// 設置判定を初期化。
-	isGround_ = false;
-	isGrass_ = false;
+	onGround_ = false;
+	onGrass_ = false;
 	if (output.isHitStage_) {
 
 		// ステージとの当たり判定
-		isGround_ = true;
+		onGround_ = true;
 
 		forwardVec_ = output.forwardVec_;
 		upVec_ = output.upVec_;
@@ -416,14 +542,33 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 	if (output.isHitStageGrass_) {
 
 		// ステージと当たっていなかったら
-		if (!isGround_) {
+		if (!onGround_) {
 
 			// 草とあたった判定
-			isGround_ = true;
-			isGrass_ = true;
+			onGround_ = true;
+			onGrass_ = true;
 
 			forwardVec_ = output.forwardVec_;
 			upVec_ = output.upVec_;
+
+		}
+
+	}
+	if (output.isHitItemBox_) {
+
+		// ランダムでアイテムを生成する。
+		int random = FHelper::GetRand(0, 1000);
+
+		if (random % 2 == 0) {
+
+			item_ = std::make_shared<BoostItem>();
+			item_->Generate(playerModel_.carBodyInsIndex_);
+
+		}
+		else {
+
+			item_ = std::make_shared<ShellItem>();
+			item_->Generate(playerModel_.carBodyInsIndex_);
 
 		}
 

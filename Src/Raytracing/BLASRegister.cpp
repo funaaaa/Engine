@@ -80,6 +80,18 @@ void BLASRegister::Update(const int& Index)
 
 }
 
+void BLASRegister::ChangeTex(const int& BlasIndex, const int& TexIndex, const int& TexHandle)
+{
+
+	/*===== テクスチャを変更 =====*/
+
+	// 範囲外じゃないかをチェック。
+	if (BlasIndex < 0 || blas_.size() <= BlasIndex) assert(0);
+
+	blas_[BlasIndex]->ChangeTex(TexIndex, TexHandle);
+
+}
+
 void BLASRegister::ComputeSkin(const int& Index)
 {
 
