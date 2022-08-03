@@ -9,8 +9,9 @@ class BaseStage;
 class OBB;
 class PlayerTire;
 class BaseItem;
+class BaseOperationObject;
 
-class Player {
+class Character {
 
 private:
 
@@ -35,6 +36,9 @@ public:
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
 	std::vector<std::shared_ptr<PlayerTire>> tires_;
+
+	// 操作オブジェクト
+	std::shared_ptr<BaseOperationObject> operationObject_;
 
 	// アイテムクラス
 	std::shared_ptr<BaseItem> item_;
@@ -73,10 +77,24 @@ public:
 
 public:
 
+	enum class CHARA_ID{
+	
+		P1,	// プレイヤー
+		AI,	// AI
+	
+	};
+
+private:
+
+	CHARA_ID charaID_;
+
+
+public:
+
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	Player();
+	Character(CHARA_ID CharaID);
 	void Init();
 
 	// 更新処理

@@ -112,9 +112,6 @@
     <ClCompile Include="Src\main.cpp">
       <Filter>アプリケーション\基本的クラス</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\Player.cpp">
-      <Filter>アプリケーション\プレイヤー</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Engine\FHelper.cpp">
       <Filter>エンジン\便利系</Filter>
     </ClCompile>
@@ -189,6 +186,12 @@
     </ClCompile>
     <ClCompile Include="Src\Game\ItemBoxObject.cpp">
       <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\Character.cpp">
+      <Filter>アプリケーション\キャラクター</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\PlayerOperationObject.cpp">
+      <Filter>アプリケーション\操作オブジェクト</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -357,9 +360,6 @@
     <ClInclude Include="Src\Engine\dxcapi.h">
       <Filter>エンジン\シェーダー管理クラス</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Game\Player.h">
-      <Filter>アプリケーション\プレイヤー</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Raytracing\OBB.h">
       <Filter>レイトレーシング\当たり判定</Filter>
     </ClInclude>
@@ -407,6 +407,15 @@
     </ClInclude>
     <ClInclude Include="Src\Game\ItemBoxObject.h">
       <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\Character.h">
+      <Filter>アプリケーション\キャラクター</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\BaseOperationObject.h">
+      <Filter>アプリケーション\操作オブジェクト</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\PlayerOperationObject.h">
+      <Filter>アプリケーション\操作オブジェクト</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -582,6 +591,12 @@
     </Filter>
     <Filter Include="アプリケーション\アイテム\甲羅オブジェクト">
       <UniqueIdentifier>{40a776be-6fb4-448b-a311-5cefb581d3fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\キャラクター">
+      <UniqueIdentifier>{a10b6b52-d2e8-42e5-9edf-0a7ebd161489}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\操作オブジェクト">
+      <UniqueIdentifier>{f0941660-7e71-487e-a6fc-39dbbbc7fcb2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -188,7 +188,9 @@
     <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
     <ClCompile Include="Src\Game\BoostItem.cpp" />
+    <ClCompile Include="Src\Game\Character.cpp" />
     <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
+    <ClCompile Include="Src\Game\PlayerOperationObject.cpp" />
     <ClCompile Include="Src\Game\ShellItem.cpp" />
     <ClCompile Include="Src\Game\ShellObject.cpp" />
     <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
@@ -197,7 +199,6 @@
     <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
     <ClCompile Include="Src\Game\FloatingStageObject.cpp" />
     <ClCompile Include="Src\Game\GameScene.cpp" />
-    <ClCompile Include="Src\Game\Player.cpp" />
     <ClCompile Include="Src\Game\PlayerModel.cpp" />
     <ClCompile Include="Src\Game\PlayerTire.cpp" />
     <ClCompile Include="Src\Game\ResultScene.cpp" />
@@ -258,11 +259,14 @@
     <ClInclude Include="Src\Engine\Vec.h" />
     <ClInclude Include="Src\Engine\WindowsAPI.h" />
     <ClInclude Include="Src\Game\BaseItem.h" />
+    <ClInclude Include="Src\Game\BaseOperationObject.h" />
     <ClInclude Include="Src\Game\BaseScene.h" />
     <ClInclude Include="Src\Game\BaseStage.h" />
     <ClInclude Include="Src\Game\BasicStageObject.h" />
     <ClInclude Include="Src\Game\BoostItem.h" />
+    <ClInclude Include="Src\Game\Character.h" />
     <ClInclude Include="Src\Game\ItemBoxObject.h" />
+    <ClInclude Include="Src\Game\PlayerOperationObject.h" />
     <ClInclude Include="Src\Game\ShellItem.h" />
     <ClInclude Include="Src\Game\ShellObject.h" />
     <ClInclude Include="Src\Game\ShellObjectMgr.h" />
@@ -271,7 +275,6 @@
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />
     <ClInclude Include="Src\Game\FloatingStageObject.h" />
     <ClInclude Include="Src\Game\GameScene.h" />
-    <ClInclude Include="Src\Game\Player.h" />
     <ClInclude Include="Src\Game\PlayerModel.h" />
     <ClInclude Include="Src\Game\PlayerTire.h" />
     <ClInclude Include="Src\Game\ResultScene.h" />

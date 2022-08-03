@@ -6,7 +6,7 @@
 
 #include "OBB.h"
 
-class Player;
+class Character;
 class DynamicConstBuffer;
 class RaytracingPipline;
 class TLAS;
@@ -106,7 +106,7 @@ private:
 	float sunSpeed_;
 
 	// ƒvƒŒƒCƒ„[
-	std::shared_ptr<Player> player_;
+	std::shared_ptr<Character> player_;
 
 	int testIns_;
 

@@ -1,4 +1,4 @@
-#include "Player.h"
+#include "Character.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
 #include "Input.h"
@@ -13,14 +13,25 @@
 #include "PlayerTire.h"
 #include "BoostItem.h"
 #include "ShellItem.h"
+#include "PlayerOperationObject.h"
 
-Player::Player()
+Character::Character(CHARA_ID CharaID)
 {
 
 	/*===== 初期化処理 =====*/
 
 	// 車のモデルをロード
 	playerModel_.Load();
+
+	// キャラのIDを保存
+	charaID_ = CharaID;
+
+	// キャラIDに応じて操作オブジェクトを生成。
+	if (charaID_ == CHARA_ID::P1) {
+
+		operationObject_ = std::make_shared<PlayerOperationObject>(0);
+
+	}
 
 	// タイヤをセット。
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireFrameInsIndex_, false));
@@ -55,7 +66,7 @@ Player::Player()
 
 }
 
-void Player::Init()
+void Character::Init()
 {
 
 	/*===== 初期化処理 =====*/
@@ -82,8 +93,9 @@ void Player::Init()
 
 }
 
-void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount)
+void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount)
 {
+
 
 	/*===== 更新処理 =====*/
 
@@ -182,14 +194,14 @@ void Player::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& Cons
 
 }
 
-void Player::Draw()
+void Character::Draw()
 {
 
 	/*===== 描画処理 =====*/
 
 }
 
-float Player::GetNowSpeedPer()
+float Character::GetNowSpeedPer()
 {
 
 	/*====== 移動速度の割合を計算 =====*/
@@ -200,24 +212,21 @@ float Player::GetNowSpeedPer()
 
 }
 
-void Player::Input(RayConstBufferData& ConstBufferData)
+void Character::Input(RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 入力処理 =====*/
 
+	// 操作オブジェクトからの入力を受け取る。
+	BaseOperationObject::Operation operation = operationObject_->Input();
+
+	// タイヤのマスクのフラグを初期化する。
 	isTireMask_ = false;
 
 	// RTが引かれていたら加速。
-	const float INPUT_DEADLINE_TRI = 0.5f;
-	float inputRightTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
-	if ((INPUT_DEADLINE_TRI < inputRightTriValue) && onGround_) {
+	if (0 < operation.accelerationRate_ && onGround_) {
 
-		speed_ += inputRightTriValue * ADD_SPEED;
-
-	}
-	else if (Input::Ins()->IsKey(DIK_W) && onGround_) {
-
-		speed_ += ADD_SPEED;
+		speed_ += operation.accelerationRate_ * ADD_SPEED;
 
 	}
 	else if (onGround_) {
@@ -233,22 +242,14 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	}
 
-	// Oキーが押されていたら後ろに投げるフラグを立てる。　コントローラー用の条件式も後々入れる。
-	if (Input::Ins()->IsKey(DIK_O)) {
-		isShotBehind_ = true;
-	}
-	else {
-		isShotBehind_ = false;
-	}
+	// アイテムを後ろに投げるフラグを更新。
+	isShotBehind_ = operation.isShotBehind_;
 
 	// 現在のフレームの右スティックの傾き具合。
 	float nowFrameInputLeftStickHori = 0;
 
 	// 右スティックの横の傾き量でキャラを回転させる。
-	float inputLeftStickHori = Input::Ins()->PadStick(XINPUT_THUMB_LEFTSIDE);
-	const float LEFT_STICK_INPUT_DEADLINE = 0.2f;
-	int inputADKey = Input::Ins()->IsKey(DIK_D) - Input::Ins()->IsKey(DIK_A);
-	if (LEFT_STICK_INPUT_DEADLINE < std::fabs(inputLeftStickHori) || inputADKey != 0) {
+	if (operation.handleDriveRate_ != 0) {
 
 		// 回転量 通常状態とドリフト状態で違う。
 		float handleAmount = HANDLE_NORMAL;
@@ -267,8 +268,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 			// タイヤを回転させる。
 			for (auto& index : tires_) {
 
-				index->Rot(true, static_cast<float>(inputADKey));
-				index->Rot(true, static_cast<float>(inputLeftStickHori));
+				index->Rot(true, static_cast<float>(operation.handleDriveRate_));
 
 			}
 
@@ -281,24 +281,23 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 			// タイヤを回転させる。
 			for (auto& index : tires_) {
-
-				index->Rot(false, static_cast<float>(inputADKey));
-				index->Rot(false, static_cast<float>(inputLeftStickHori));
+				
+				index->Rot(true, static_cast<float>(operation.handleDriveRate_));
 
 			}
 
 		}
 
 		// クォータニオンを求める。
-		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec_.ConvertXMVECTOR(), handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount);
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec_.ConvertXMVECTOR(), handleAmount * operation.handleDriveRate_);
 
 		// 求めたクォータニオンを行列に治す。
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転を加算する。
 		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, quaternionMat);
-		rotY_ += handleAmount * inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
-		nowFrameInputLeftStickHori = inputLeftStickHori + static_cast<float>(inputADKey) * handleAmount;
+		rotY_ += handleAmount * operation.handleDriveRate_;
+		nowFrameInputLeftStickHori = handleAmount * operation.handleDriveRate_;
 
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
@@ -317,7 +316,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 		if (IsTurningIndicatorRed_) {
 
 			// 曲がっているのが右だったら。
-			if (0 < inputADKey || 0 < inputLeftStickHori) {
+			if (0 < operation.handleDriveRate_) {
 
 				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
 				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
@@ -352,11 +351,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 	}
 
 	// LTが引かれていたらドリフト状態にする。
-	const float INPUT_DEADLINE_DRIFT = 0.9f;
-	float inputLeftTriValue = Input::Ins()->PadTrigger(XINPUT_TRIGGER_LEFT);
-	bool isInputNowFrameLeftStrick = LEFT_STICK_INPUT_DEADLINE < fabs(nowFrameInputLeftStickHori) || inputADKey != 0;
-	bool isInputLShift = Input::Ins()->IsKey(DIK_LSHIFT);
-	if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isInputNowFrameLeftStrick) {
+	if (operation.isDrift_ && operation.handleDriveRate_ != 0) {
 
 		isDrift_ = true;
 
@@ -379,7 +374,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。
-	else if ((INPUT_DEADLINE_DRIFT < inputLeftTriValue || isInputLShift) && isDrift_) {
+	else if (operation.isDrift_ && isDrift_) {
 	}
 	else {
 
@@ -412,7 +407,7 @@ void Player::Input(RayConstBufferData& ConstBufferData)
 
 }
 
-void Player::Move()
+void Character::Move()
 {
 
 	/*===== 移動処理 =====*/
@@ -474,7 +469,7 @@ void Player::Move()
 
 }
 
-void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount)
+void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount)
 {
 
 	/*===== 当たり判定 =====*/
@@ -579,7 +574,7 @@ void Player::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePo
 
 }
 
-void Player::RotObliqueFloor(const Vec3& HitNormal)
+void Character::RotObliqueFloor(const Vec3& HitNormal)
 {
 
 	/*===== 斜め床の回転処理 =====*/

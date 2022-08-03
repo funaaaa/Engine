@@ -2,7 +2,7 @@
 #include "HitGroupMgr.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
-#include "Player.h"
+#include "Character.h"
 #include "FHelper.h"
 #include "Camera.h"
 #include "RayDenoiser.h"
@@ -67,7 +67,7 @@ GameScene::GameScene()
 	PolygonInstanceRegister::Ins()->AddScale(skyDomeIns_, Vec3(1000, 1000, 1000));
 
 	// プレイヤーを生成。
-	player_ = std::make_shared<Player>();
+	player_ = std::make_shared<Character>(Character::CHARA_ID::P1);
 
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
@@ -159,6 +159,8 @@ void GameScene::Init()
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
 	sunAngle_ = 0;
+
+	whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
 
 }
 
