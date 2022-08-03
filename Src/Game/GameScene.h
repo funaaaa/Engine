@@ -6,6 +6,11 @@
 
 #include "OBB.h"
 
+
+#include "FirstAIWaypointMgr.h"
+#include "FirstAIWayPoint.h"
+
+
 class Character;
 class DynamicConstBuffer;
 class RaytracingPipline;
@@ -109,6 +114,15 @@ private:
 	std::shared_ptr<Character> player_;
 
 	int testIns_;
+
+	
+
+
+
+
+	FirstAIWayPointMgr testWaypointMGr_;
+
+
 
 
 

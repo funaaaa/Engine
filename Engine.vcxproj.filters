@@ -193,6 +193,15 @@
     <ClCompile Include="Src\Game\PlayerOperationObject.cpp">
       <Filter>アプリケーション\操作オブジェクト</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\FirstAIOperationObject.cpp">
+      <Filter>アプリケーション\操作オブジェクト</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\FirstAIWayPoint.cpp">
+      <Filter>アプリケーション\最初のAI</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\FirstAIWaypointMgr.cpp">
+      <Filter>アプリケーション\最初のAI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -417,6 +426,15 @@
     <ClInclude Include="Src\Game\PlayerOperationObject.h">
       <Filter>アプリケーション\操作オブジェクト</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\FirstAIOperationObject.h">
+      <Filter>アプリケーション\操作オブジェクト</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\FirstAIWayPoint.h">
+      <Filter>アプリケーション\最初のAI</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\FirstAIWaypointMgr.h">
+      <Filter>アプリケーション\最初のAI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -597,6 +615,9 @@
     </Filter>
     <Filter Include="アプリケーション\操作オブジェクト">
       <UniqueIdentifier>{f0941660-7e71-487e-a6fc-39dbbbc7fcb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\最初のAI">
+      <UniqueIdentifier>{c0c95b99-3cee-4cb3-a8da-f631fb55ca83}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -69,6 +69,15 @@ GameScene::GameScene()
 	// プレイヤーを生成。
 	player_ = std::make_shared<Character>(Character::CHARA_ID::P1);
 
+
+
+
+	testWaypointMGr_.Setting();
+
+
+
+
+
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
 
@@ -159,8 +168,6 @@ void GameScene::Init()
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
 	sunAngle_ = 0;
-
-	whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
 
 }
 
@@ -633,7 +640,7 @@ void GameScene::InputImGUI()
 	}
 
 
-	int index = 16;
+	int index = testWaypointMGr_.waypoint[0]->insIndex_;
 
 	Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
@@ -648,17 +655,17 @@ void GameScene::InputImGUI()
 	PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
 
 
-	Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
+	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
 
-	float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
+	//float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
 
-	ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
+	//ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
 
-	rotate.x_ = rotateArray[0];
-	rotate.y_ = rotateArray[1];
-	rotate.z_ = rotateArray[2];
+	//rotate.x_ = rotateArray[0];
+	//rotate.y_ = rotateArray[1];
+	//rotate.z_ = rotateArray[2];
 
-	PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+	//PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
 
 
 	//// 1個目
@@ -708,3 +715,10 @@ void GameScene::GenerateGimmick()
 	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }
+
+/*
+
+ウェイポイントを配置して、SetPositionDataでまとめて渡せるようにする。
+
+
+*/

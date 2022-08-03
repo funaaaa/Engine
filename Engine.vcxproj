@@ -189,6 +189,9 @@
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
     <ClCompile Include="Src\Game\BoostItem.cpp" />
     <ClCompile Include="Src\Game\Character.cpp" />
+    <ClCompile Include="Src\Game\FirstAIOperationObject.cpp" />
+    <ClCompile Include="Src\Game\FirstAIWayPoint.cpp" />
+    <ClCompile Include="Src\Game\FirstAIWaypointMgr.cpp" />
     <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
     <ClCompile Include="Src\Game\PlayerOperationObject.cpp" />
     <ClCompile Include="Src\Game\ShellItem.cpp" />
@@ -265,6 +268,8 @@
     <ClInclude Include="Src\Game\BasicStageObject.h" />
     <ClInclude Include="Src\Game\BoostItem.h" />
     <ClInclude Include="Src\Game\Character.h" />
+    <ClInclude Include="Src\Game\FirstAIOperationObject.h" />
+    <ClInclude Include="Src\Game\FirstAIWaypointMgr.h" />
     <ClInclude Include="Src\Game\ItemBoxObject.h" />
     <ClInclude Include="Src\Game\PlayerOperationObject.h" />
     <ClInclude Include="Src\Game\ShellItem.h" />
@@ -280,6 +285,7 @@
     <ClInclude Include="Src\Game\ResultScene.h" />
     <ClInclude Include="Src\Game\SceneMgr.h" />
     <ClInclude Include="Src\Game\TitleScene.h" />
+    <ClInclude Include="Src\Game\FirstAIWayPoint.h" />
     <ClInclude Include="Src\Raytracing\BLAS.h" />
     <ClInclude Include="Src\Raytracing\BLASRegister.h" />
     <ClInclude Include="Src\Raytracing\ConstBuffers.h" />
