@@ -10,12 +10,13 @@ PlayerOperationObject::PlayerOperationObject(const int& ControllerIndex)
 
 }
 
-BaseOperationObject::Operation PlayerOperationObject::Input()
+BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationObject::OperationInputData& InputData)
 {
 
 	/*===== “ü—Íˆ— =====*/
 
 	BaseOperationObject::Operation operation;
+	InputData;
 
 	// ‘Oi‚É‚Â‚¢‚Ä‚Ì“ü—Íˆ—
 	operation.accelerationRate_ = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
@@ -46,4 +47,8 @@ BaseOperationObject::Operation PlayerOperationObject::Input()
 
 	return operation;
 
+}
+
+void PlayerOperationObject::OnGoal()
+{
 }

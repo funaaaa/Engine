@@ -7,10 +7,6 @@
 #include "OBB.h"
 
 
-#include "FirstAIWaypointMgr.h"
-#include "FirstAIWayPoint.h"
-
-
 class Character;
 class DynamicConstBuffer;
 class RaytracingPipline;
@@ -97,11 +93,6 @@ private:
 	std::shared_ptr<RayComputeShader> tireMaskComputeShader_;
 	std::shared_ptr<RayComputeShader> whiteOutComputeShader_;
 	std::shared_ptr<DynamicConstBuffer> tireMaskConstBuffer_;
-	struct TireMaskUV {
-		std::array<Vec2, 4> uv_;
-		std::array<Vec2, 4> prevUV_;
-	};
-	TireMaskUV tireMaskUV_;
 
 	// FPS表示をするか否か
 	bool isDisplayFPS_;
@@ -113,16 +104,10 @@ private:
 	// プレイヤー
 	std::shared_ptr<Character> player_;
 
+	// AI1
+	std::shared_ptr<Character> firstAI_;
+
 	int testIns_;
-
-	
-
-
-
-
-	FirstAIWayPointMgr testWaypointMGr_;
-
-
 
 
 

@@ -53,7 +53,14 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
+	enum class COLOR{
+	
+		RED,
+		BLUE,
+	
+	};
+
 	// ƒ[ƒh
-	void Load();
+	void Load(COLOR ColorID);
 
 };

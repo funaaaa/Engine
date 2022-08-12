@@ -16,7 +16,9 @@ public:
 
 	PlayerOperationObject(const int& ControllerIndex);
 
-	BaseOperationObject::Operation Input()override;
+	BaseOperationObject::Operation Input(const BaseOperationObject::OperationInputData& InputData)override;
+
+	void OnGoal()override;
 
 
 };

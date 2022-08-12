@@ -10,6 +10,7 @@ class OBB;
 class PlayerTire;
 class BaseItem;
 class BaseOperationObject;
+class BaseStage;
 
 class Character {
 
@@ -27,7 +28,10 @@ public:
 	float speed_;			// 移動速度
 	float gravity_;			// 重力
 	float rotY_;			// ハンドル操作によって変わるY軸の回転量
+	float shellHitRot_;		// 甲羅に当たったときの回転。
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
+	int canNotMoveTimer_;	// 操作不能のタイマー
+	const int CAN_NOT_MOVE_TIMER_SHELL_HIT = 60;
 	const int RETURN_DEFPOS_TIMER = 600;
 	bool isShotBehind_;		// 後ろ側に甲羅を投げるかのフラグ
 	bool onGround_;			// 地上にいるか t=地上 f=空中
@@ -69,6 +73,25 @@ public:
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
 
+public:
+
+	struct TireUVSet {
+		Vec2 uv_;
+		Vec2 prevuv_;
+	};
+
+	// タイヤ痕書き込み用
+	struct TireMaskUV {
+		TireUVSet forwardLeftUV_;
+		TireUVSet forwardRightUV_;
+		TireUVSet behindLeftUV_;
+		TireUVSet behindRightUV_;
+	};
+
+private:
+
+	TireMaskUV tireMaskUV_;				// タイヤ痕を出す際に仕様
+
 	const float HANDLE_DRIFT = 0.06f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値
 	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
@@ -77,12 +100,13 @@ public:
 
 public:
 
-	enum class CHARA_ID{
-	
+	enum class CHARA_ID {
+
 		P1,	// プレイヤー
-		AI,	// AI
-	
+		AI1,	// AI1
+
 	};
+
 
 private:
 
@@ -102,6 +126,10 @@ public:
 
 	// 描画処理
 	void Draw();
+
+	// タイヤ痕検出
+	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV& TireMaskUVData);
+
 
 	const Vec3& GetPos() { return pos_; }
 	const Vec3& GetForwardVec() { return forwardVec_; }

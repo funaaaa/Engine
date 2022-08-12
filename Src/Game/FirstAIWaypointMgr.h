@@ -7,11 +7,22 @@ class FirstAIWayPoint;
 
 class FirstAIWayPointMgr {
 
-public:
+private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<FirstAIWayPoint>> waypoint;
+	std::vector<std::shared_ptr<FirstAIWayPoint>> waypoint_;
+
+public:
+
+	// ウェイポイントの配置のオフセット
+	enum class WAYPOINT_OFFSET {
+		LEFT_LEARNING,	// 左より
+	};
+
+private:
+
+	WAYPOINT_OFFSET waypointOffset_;
 
 
 public:
@@ -19,12 +30,11 @@ public:
 	/*===== メンバ関数 =====*/
 
 	FirstAIWayPointMgr();
-	void Setting();
+	void Setting(WAYPOINT_OFFSET Offset);
 	void Reset();
 
 	void SetPositionData(std::vector<Vec3> PositionData);
 
-
-	// ここに次のウェイポイントまでの左右判定を行う処理を書く。
+	float LeftRightCheck(const Vec3& Pos, const Vec3& ForwardVec);
 
 };

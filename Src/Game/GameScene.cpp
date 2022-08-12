@@ -49,7 +49,7 @@ GameScene::GameScene()
 	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
 	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
 	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
-	tireMaskConstBuffer_->Generate(sizeof(Vec2) * 8, L"TireMaskUV");
+	tireMaskConstBuffer_->Generate(sizeof(Character::TireMaskUV) * 2, L"TireMaskUV");
 
 	// 白塗りコンピュートシェーダー
 	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
@@ -69,14 +69,8 @@ GameScene::GameScene()
 	// プレイヤーを生成。
 	player_ = std::make_shared<Character>(Character::CHARA_ID::P1);
 
-
-
-
-	testWaypointMGr_.Setting();
-
-
-
-
+	// AIを生成。
+	firstAI_ = std::make_shared<Character>(Character::CHARA_ID::AI1);
 
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
@@ -163,6 +157,7 @@ void GameScene::Init()
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
 	player_->Init();
+	firstAI_->Init();
 	Camera::Ins()->Init();
 
 	isPassedMiddlePoint_ = false;
@@ -193,6 +188,9 @@ void GameScene::Update()
 
 	// プレイヤーを更新。
 	player_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isPassedMiddlePoint_, rapCount_);
+
+	// AIを更新。
+	firstAI_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isPassedMiddlePoint_, rapCount_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
@@ -294,77 +292,26 @@ void GameScene::Draw()
 
 
 	// 床を白塗り
-	if (Input::Ins()->IsKeyTrigger(DIK_R)) {
+	static int a = 0;
+	if (Input::Ins()->IsKeyTrigger(DIK_R) || a == 0) {
 
 		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
+		++a;
 
 	}
 
 
 
-	// タイヤ痕位置検出テスト用
+	// タイヤ痕を書き込む。
+	std::array<Character::TireMaskUV, 2> tireMaskUV;
+	bool isWriteTireMask = player_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV[0]);
 
-	if (player_->isTireMask_) {
+	isWriteTireMask |= firstAI_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV[1]);
 
-		FHelper::RayToModelCollisionData InputRayData;
-		InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexPos();
-		InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexNormal();
-		InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexIndex();
-		InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexUV();
-		InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-		InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-		InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-
-		// 戻り地保存用
-		Vec3 ImpactPos;
-		Vec3 HitNormal;
-		Vec2 HitUV;
-		float HitDistance;
-
-		// 左前タイヤ
-		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carLeftTireInsIndex_);
-		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
-
-		// タイヤ痕の位置を検出
-		bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
-
-		// 当たり判定が正しいかどうかをチェック。
-		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
-
-			tireMaskUV_.prevUV_[0] = Vec2(0, 0);
-			tireMaskUV_.uv_[0] = Vec2(0, 0);
-
-		}
-		else {
-
-			tireMaskUV_.prevUV_[0] = tireMaskUV_.uv_[0];
-			tireMaskUV_.uv_[0] = HitUV;
-
-		}
-
-		// 右前タイヤ
-		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carRightTireInsIndex_);
-		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
-
-		// タイヤ痕の位置を検出
-		isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
-
-		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
-
-			tireMaskUV_.prevUV_[1] = Vec2(0, 0);
-			tireMaskUV_.uv_[1] = Vec2(0, 0);
-
-		}
-		else {
-
-			tireMaskUV_.prevUV_[1] = tireMaskUV_.uv_[1];
-			tireMaskUV_.uv_[1] = HitUV;
-
-		}
-
+	if (isWriteTireMask) {
 
 		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV_, sizeof(Vec2) * 8);
+		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV, sizeof(Character::TireMaskUV) * 2);
 		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
@@ -376,14 +323,24 @@ void GameScene::Draw()
 		}
 
 	}
-	else {
 
-		tireMaskUV_.prevUV_[0] = Vec2(0, 0);
-		tireMaskUV_.uv_[0] = Vec2(0, 0);
-		tireMaskUV_.prevUV_[1] = Vec2(0, 0);
-		tireMaskUV_.uv_[1] = Vec2(0, 0);
+	//isWriteTireMask = firstAI_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV);
 
-	}
+	//if (isWriteTireMask) {
+
+	//	// UAVを書き込む。
+	//	tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV, sizeof(Vec2) * 8);
+	//	tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	//	{
+	//		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+	//					tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+	//					tireMaskTextureOutput_->GetRaytracingOutput().Get())
+	//		};
+
+	//		DirectXBase::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
+	//	}
+
+	//}
 
 
 
@@ -640,19 +597,22 @@ void GameScene::InputImGUI()
 	}
 
 
-	int index = testWaypointMGr_.waypoint[0]->insIndex_;
 
-	Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
-	float posArray[3] = { pos.x_, pos.y_, pos.z_ };
 
-	ImGui::DragFloat3("Pos", posArray, 0.5f);
+	//int index = 71;
 
-	pos.x_ = posArray[0];
-	pos.y_ = posArray[1];
-	pos.z_ = posArray[2];
+	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
-	PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
+	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
+
+	//ImGui::DragFloat3("Pos", posArray, 0.5f);
+
+	//pos.x_ = posArray[0];
+	//pos.y_ = posArray[1];
+	//pos.z_ = posArray[2];
+
+	//PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
 
 
 	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
@@ -715,10 +675,3 @@ void GameScene::GenerateGimmick()
 	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }
-
-/*
-
-ウェイポイントを配置して、SetPositionDataでまとめて渡せるようにする。
-
-
-*/

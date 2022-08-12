@@ -4,18 +4,25 @@ RWTexture2D<float4> InputImg : register(u0);
 // 出力先UAV
 RWTexture2D<float4> OutputImg : register(u1);
 
+struct UVSet
+{
+    float2 uv_;
+    float2 prevuv_;
+};
+
+struct CarUVSet
+{
+    UVSet forwardLeft_;
+    UVSet forwardRight_;
+    UVSet behindLeft_;
+    UVSet behindRight_;
+};
+
 // 書き換える場所指定定数バッファ
 cbuffer WriteUV : register(b0)
 {
-    float2 uv1_;
-    float2 uv2_;
-    float2 uv3_;
-    float2 uv4_;
-    
-    float2 prevuv1_;
-    float2 prevuv2_;
-    float2 prevuv3_;
-    float2 prevuv4_;
+    CarUVSet playerCar_;
+    CarUVSet aiCar_;
 };
 
 // 書き込む関数
@@ -100,16 +107,28 @@ void Interpolation(uint2 WriteUV, uint2 PrevWriteUV)
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
+    /*== プレイヤーの車 ==*/
+    
     // 一個目
-    Interpolation(uint2(uv1_.x * 4096, uv1_.y * 4096), uint2(prevuv1_.x * 4096, prevuv1_.y * 4096));
+    Interpolation(uint2(playerCar_.forwardLeft_.uv_.x * 4096, playerCar_.forwardLeft_.uv_.y * 4096), uint2(playerCar_.forwardLeft_.prevuv_.x * 4096, playerCar_.forwardLeft_.prevuv_.y * 4096));
     
     // 二個目
-    Interpolation(uint2(uv2_.x * 4096, uv2_.y * 4096), uint2(prevuv2_.x * 4096, prevuv2_.y * 4096));
+    Interpolation(uint2(playerCar_.forwardRight_.uv_.x * 4096, playerCar_.forwardRight_.uv_.y * 4096), uint2(playerCar_.forwardRight_.prevuv_.x * 4096, playerCar_.forwardRight_.prevuv_.y * 4096));
     
     //// 三個目
     //OutputImg[uint2(uv_[2].x * 4096, uv_[2].y * 4096)] = float4(1, 1, 1, 1);
     
     //// 四個目
     //OutputImg[uint2(uv_[3].x * 4096, uv_[3].y * 4096)] = float4(1, 1, 1, 1);
+    
+    
+    /*== プレイヤーの車 ==*/
+    
+    // 一個目
+    Interpolation(uint2(aiCar_.forwardLeft_.uv_.x * 4096, aiCar_.forwardLeft_.uv_.y * 4096), uint2(aiCar_.forwardLeft_.prevuv_.x * 4096, aiCar_.forwardLeft_.prevuv_.y * 4096));
+    
+    // 二個目
+    Interpolation(uint2(aiCar_.forwardRight_.uv_.x * 4096, aiCar_.forwardRight_.uv_.y * 4096), uint2(aiCar_.forwardRight_.prevuv_.x * 4096, aiCar_.forwardRight_.prevuv_.y * 4096));
+    
     
 }

@@ -13,7 +13,9 @@ public:
 	int blasIndex_;
 	bool isActive_;
 
-	const float RADIUS = 60.0f;
+public:
+
+	static const int RADIUS = 300;
 
 
 public:
@@ -25,8 +27,10 @@ public:
 	void Validation() { isActive_ = true; }
 	void Nullification() { isActive_ = false; }
 
+	bool GetIsActive() { return isActive_; }
+
 	// Imguiセット用 配置が完了次第削除予定
-	void SetPos(Vec3 Pos) { pos_ = Pos; }
+	void SetPos(Vec3 Pos);
 	Vec3 GetPos() { return pos_; }
 
 };

@@ -1,4 +1,5 @@
 #pragma once
+#include "Vec.h"
 
 // 操作オブジェクト基底クラス
 class BaseOperationObject {
@@ -28,11 +29,21 @@ public:
 
 	};
 
+	struct OperationInputData
+	{
+
+		Vec3 pos_;
+		Vec3 forwradVec_;
+
+	};
+
 
 public:
 
 	/*===== メンバ関数 =====*/
 
-	virtual Operation Input() = 0;
+	virtual Operation Input(const OperationInputData& InputData) = 0;
+
+	virtual void OnGoal() = 0;
 
 };

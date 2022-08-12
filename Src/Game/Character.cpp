@@ -14,14 +14,16 @@
 #include "BoostItem.h"
 #include "ShellItem.h"
 #include "PlayerOperationObject.h"
+#include "FirstAIOperationObject.h"
+#include "FirstAIWaypointMgr.h"
+#include "BaseStage.h"
+#include "StageObjectMgr.h"
+#include "ShellObjectMgr.h"
 
 Character::Character(CHARA_ID CharaID)
 {
 
 	/*===== 初期化処理 =====*/
-
-	// 車のモデルをロード
-	playerModel_.Load();
 
 	// キャラのIDを保存
 	charaID_ = CharaID;
@@ -30,6 +32,17 @@ Character::Character(CHARA_ID CharaID)
 	if (charaID_ == CHARA_ID::P1) {
 
 		operationObject_ = std::make_shared<PlayerOperationObject>(0);
+
+		// 車のモデルをロード
+		playerModel_.Load(PlayerModel::COLOR::RED);
+
+	}
+	else if (charaID_ == CHARA_ID::AI1) {
+
+		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::LEFT_LEARNING));
+
+		// 車のモデルをロード
+		playerModel_.Load(PlayerModel::COLOR::BLUE);
 
 	}
 
@@ -59,6 +72,7 @@ Character::Character(CHARA_ID CharaID)
 	isTireMask_ = false;
 	IsTurningIndicatorRed_ = false;
 	turningIndicatorTimer_ = 0;
+	canNotMoveTimer_ = 0;
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -84,6 +98,7 @@ void Character::Init()
 	boostSpeed_ = 0;
 	boostTimer_ = 0;
 	turningIndicatorTimer_ = 0;
+	canNotMoveTimer_ = 0;
 	isDrift_ = false;
 	onGround_ = true;
 	onGrass_ = false;
@@ -192,12 +207,111 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	}
 
+	// 移動できないタイマーを更新する。
+	if (0 < canNotMoveTimer_) {
+
+		--canNotMoveTimer_;
+
+		// イージング量を求める。
+		float easingAmount = static_cast<float>(canNotMoveTimer_) / static_cast<float>(CAN_NOT_MOVE_TIMER_SHELL_HIT);
+
+		easingAmount = easingAmount * easingAmount * easingAmount * easingAmount * easingAmount;
+
+		rotY_ = shellHitRot_ + easingAmount * DirectX::XM_2PI;
+
+	}
+
 }
 
 void Character::Draw()
 {
 
 	/*===== 描画処理 =====*/
+
+}
+
+bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV& TireMaskUVData)
+{
+
+	/*===== タイヤ痕を検出 =====*/
+
+	if (!isTireMask_) {
+
+		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
+		tireMaskUV_.forwardRightUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.forwardRightUV_.uv_ = Vec2(0, 0);
+
+		return false;
+
+	}
+
+	FHelper::RayToModelCollisionData InputRayData;
+	InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[BaseStageData.lock()->stageObjectMgr_->GetBlasIndex(0)]->GetVertexPos();
+	InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[BaseStageData.lock()->stageObjectMgr_->GetBlasIndex(0)]->GetVertexNormal();
+	InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[BaseStageData.lock()->stageObjectMgr_->GetBlasIndex(0)]->GetVertexIndex();
+	InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[BaseStageData.lock()->stageObjectMgr_->GetBlasIndex(0)]->GetVertexUV();
+	InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(BaseStageData.lock()->stageObjectMgr_->GetBlasIndex(0));
+	InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(BaseStageData.lock()->stageObjectMgr_->GetBlasIndex(0));
+	InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(BaseStageData.lock()->stageObjectMgr_->GetBlasIndex(0));
+
+	// 戻り地保存用
+	Vec3 ImpactPos;
+	Vec3 HitNormal;
+	Vec2 HitUV;
+	float HitDistance;
+
+	// 左前タイヤ
+	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+	// タイヤ痕の位置を検出
+	bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+	// 当たり判定が正しいかどうかをチェック。
+	if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
+
+		return false;
+
+	}
+	else {
+
+		tireMaskUV_.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.uv_;
+		tireMaskUV_.forwardLeftUV_.uv_ = HitUV;
+		TireMaskUVData.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.prevuv_;
+		TireMaskUVData.forwardLeftUV_.uv_ = HitUV;
+
+	}
+
+	// 右前タイヤ
+	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+	// タイヤ痕の位置を検出
+	isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+	if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+		tireMaskUV_.forwardRightUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.forwardRightUV_.uv_ = Vec2(0, 0);
+
+		return false;
+
+	}
+	else {
+
+		tireMaskUV_.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.uv_;
+		tireMaskUV_.forwardRightUV_.uv_ = HitUV;
+		TireMaskUVData.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.prevuv_;
+		TireMaskUVData.forwardRightUV_.uv_ = HitUV;
+
+	}
+
+	return true;
+
 
 }
 
@@ -218,10 +332,21 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	/*===== 入力処理 =====*/
 
 	// 操作オブジェクトからの入力を受け取る。
-	BaseOperationObject::Operation operation = operationObject_->Input();
+	BaseOperationObject::OperationInputData operationInputData;
+	operationInputData.pos_ = pos_;
+	operationInputData.forwradVec_ = forwardVec_;
+	BaseOperationObject::Operation operation = operationObject_->Input(operationInputData);
 
 	// タイヤのマスクのフラグを初期化する。
 	isTireMask_ = false;
+
+	// 動けないタイマーが動いていたら動かさない。
+	if (0 < canNotMoveTimer_) {
+
+		operation.accelerationRate_ = 0;
+		operation.handleDriveRate_ = 0;
+
+	}
 
 	// RTが引かれていたら加速。
 	if (0 < operation.accelerationRate_ && onGround_) {
@@ -281,7 +406,7 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 			// タイヤを回転させる。
 			for (auto& index : tires_) {
-				
+
 				index->Rot(true, static_cast<float>(operation.handleDriveRate_));
 
 			}
@@ -508,6 +633,8 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 
 		}
 
+		operationObject_->OnGoal();
+
 	}
 	if (output.isHitMiddlePoint_) {
 
@@ -554,23 +681,35 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 		// ランダムでアイテムを生成する。
 		int random = FHelper::GetRand(0, 1000);
 
-		if (random % 2 == 0) {
+		//if (random % 2 == 0) {
 
-			item_ = std::make_shared<BoostItem>();
-			item_->Generate(playerModel_.carBodyInsIndex_);
+		//	item_ = std::make_shared<BoostItem>();
+		//	item_->Generate(playerModel_.carBodyInsIndex_);
 
-		}
-		else {
+		//}
+		//else {
 
-			item_ = std::make_shared<ShellItem>();
-			item_->Generate(playerModel_.carBodyInsIndex_);
+		item_ = std::make_shared<ShellItem>();
+		item_->Generate(playerModel_.carBodyInsIndex_);
 
-		}
+		//}
 
 	}
 
 	// その他の変数を初期化。
 	pos_ = output.resultPos_;
+
+
+
+	// 甲羅との当たり判定
+	bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_);
+
+	if (isHitShell) {
+
+		canNotMoveTimer_ = CAN_NOT_MOVE_TIMER_SHELL_HIT;
+		shellHitRot_ = rotY_;
+
+	}
 
 }
 
