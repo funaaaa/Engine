@@ -179,6 +179,15 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1_WGHOST), true);
 
 	}
+	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::GHOST) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+
+		// ゴーストを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false);
+
+	}
 
 
 	Camera::Ins()->Init();

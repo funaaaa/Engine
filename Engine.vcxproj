@@ -193,6 +193,7 @@
     <ClCompile Include="Src\Game\FirstAIOperationObject.cpp" />
     <ClCompile Include="Src\Game\FirstAIWayPoint.cpp" />
     <ClCompile Include="Src\Game\FirstAIWaypointMgr.cpp" />
+    <ClCompile Include="Src\Game\GhostOperationObject.cpp" />
     <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
     <ClCompile Include="Src\Game\PlayerOperationObject.cpp" />
     <ClCompile Include="Src\Game\ShellItem.cpp" />
@@ -274,6 +275,7 @@
     <ClInclude Include="Src\Game\FirstAIOperationObject.h" />
     <ClInclude Include="Src\Game\FirstAIWaypointMgr.h" />
     <ClInclude Include="Src\Game\GameSceneMode.h" />
+    <ClInclude Include="Src\Game\GhostOperationObject.h" />
     <ClInclude Include="Src\Game\ItemBoxObject.h" />
     <ClInclude Include="Src\Game\PlayerOperationObject.h" />
     <ClInclude Include="Src\Game\ShellItem.h" />

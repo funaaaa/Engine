@@ -40,11 +40,11 @@ public:
 
 private:
 
-	std::wstring StringToWString( std::string OString );
+	//std::wstring StringToWString( std::string OString );
 
-	void ConvertStringToWchar_t(std::string STRING, wchar_t* WCHAR_STRING, int ARRAY_SIZE)
-	{
-		MultiByteToWideChar(CP_ACP, 0, STRING.c_str(), -1, WCHAR_STRING, ARRAY_SIZE);
-	}
+	//void ConvertStringToWchar_t(std::string STRING, wchar_t* WCHAR_STRING, int ARRAY_SIZE)
+	//{
+	//	MultiByteToWideChar(CP_ACP, 0, STRING.c_str(), -1, WCHAR_STRING, ARRAY_SIZE);
+	//}
 
 };

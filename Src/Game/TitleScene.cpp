@@ -44,6 +44,8 @@ void TitleScene::Update()
 	ImGui::RadioButton("AI", &mode, static_cast<int>(GameSceneMode::MODE_ID::AI));
 	ImGui::SameLine();
 	ImGui::RadioButton("WRITE_GHOST", &mode, static_cast<int>(GameSceneMode::MODE_ID::WRITE_GHOST));
+	ImGui::SameLine();
+	ImGui::RadioButton("GHOST", &mode, static_cast<int>(GameSceneMode::MODE_ID::GHOST));
 	GameSceneMode::Ins()->id_ = static_cast<GameSceneMode::MODE_ID>(mode);
 
 }

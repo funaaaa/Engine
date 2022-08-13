@@ -15,6 +15,7 @@ public:
 
 		P1,			// プレイヤー1P
 		NORMAL_AI,	// 通常のAI
+		GHOST,		// ゴースト
 
 	};
 
@@ -26,9 +27,10 @@ public:
 		bool isShotBehind_;			// アイテムを後ろに投げる状態か。
 		bool isUseItemTrigger_;		// アイテムを使用するか。
 		bool isUseItemRelease_;		// アイテムを使用するか。
+		bool isGetItem_;			// アイテムを取得したかどうか
 
-		Operation() : accelerationRate_(0), handleDriveRate_(0), isDrift_(false), isShotBehind_(false), isUseItemTrigger_(false), isUseItemRelease_(false) {};
-		bool CheckInput() { return accelerationRate_ != 0 || handleDriveRate_ != 0 || isDrift_ || isShotBehind_ || isUseItemTrigger_ || isUseItemRelease_; }
+		Operation() : accelerationRate_(0), handleDriveRate_(0), isDrift_(false), isShotBehind_(false), isUseItemTrigger_(false), isUseItemRelease_(false), isGetItem_(false) {};
+		bool CheckInput() { return accelerationRate_ != 0 || handleDriveRate_ != 0 || isDrift_ || isShotBehind_ || isUseItemTrigger_ || isUseItemRelease_ || isGetItem_; }
 
 	};
 

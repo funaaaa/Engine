@@ -6,7 +6,7 @@
 namespace FString {
 
 	// ãåéÆ
-	void ConvertStringToWchar_t(std::string STRING, wchar_t* WCHAR_STRING, int ARRAY_SIZE)
+	inline void ConvertStringToWchar_t(std::string STRING, wchar_t* WCHAR_STRING, int ARRAY_SIZE)
 	{
 		MultiByteToWideChar(CP_ACP, 0, STRING.c_str(), -1, WCHAR_STRING, ARRAY_SIZE);
 	}
@@ -27,7 +27,7 @@ namespace FString {
 
 	}*/
 
-	std::wstring StringToWString(std::string OString)
+	inline std::wstring StringToWString(std::string OString)
 	{
 		// SJIS Å® wstring
 		int iBufferSize = MultiByteToWideChar(CP_ACP, 0, OString.c_str()
@@ -50,7 +50,7 @@ namespace FString {
 		return(oRet);
 	}
 
-	std::string WStringToString(std::wstring OWString)
+	inline std::string WStringToString(std::wstring OWString)
 	{
 		// wstring Å® SJIS
 		int iBufferSize = WideCharToMultiByte(CP_OEMCP, 0, OWString.c_str()

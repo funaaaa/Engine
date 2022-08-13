@@ -12,13 +12,14 @@ public:
 		DEF,
 		AI,
 		WRITE_GHOST,
+		GHOST,
 
 	};
 
 	MODE_ID id_;
 
 	GameSceneMode() {
-		id_ = MODE_ID::WRITE_GHOST;
+		id_ = MODE_ID::GHOST;
 	}
 
 };

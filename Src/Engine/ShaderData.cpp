@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <array>
+#include "FString.h"
 
 #pragma comment(lib, "dxcompiler.lib")
 
@@ -40,7 +41,7 @@ void ShaderData::LoadShader()
 	/*-- シェーダーをロードする処理 --*/
 
 	std::array<wchar_t, 128> shaderPathBuff;
-	ConvertStringToWchar_t(shaderPath_, shaderPathBuff.data(), 128);
+	FString::ConvertStringToWchar_t(shaderPath_, shaderPathBuff.data(), 128);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 
@@ -83,7 +84,7 @@ void ShaderData::LoadShaderDXC()
 	}
 
 	// 型変換。
-	std::wstring fileName = StringToWString(shaderPath_);
+	std::wstring fileName = FString::StringToWString(shaderPath_);
 	std::stringstream strstream;
 
 	strstream << infile.rdbuf();
@@ -140,25 +141,25 @@ void ShaderData::LoadShaderDXC()
 
 }
 
-std::wstring ShaderData::StringToWString(std::string OString)
-{
-	// SJIS → wstring
-	int iBufferSize = MultiByteToWideChar(CP_ACP, 0, OString.c_str()
-		, -1, (wchar_t*)NULL, 0);
-
-	// バッファの取得
-	wchar_t* cpUCS2 = new wchar_t[iBufferSize];
-
-	// SJIS → wstring
-	MultiByteToWideChar(CP_ACP, 0, OString.c_str(), -1, cpUCS2
-		, iBufferSize);
-
-	// stringの生成
-	std::wstring oRet(cpUCS2, cpUCS2 + iBufferSize - 1);
-
-	// バッファの破棄
-	delete[] cpUCS2;
-
-	// 変換結果を返す
-	return(oRet);
-}
+//std::wstring ShaderData::StringToWString(std::string OString)
+//{
+//	// SJIS → wstring
+//	int iBufferSize = MultiByteToWideChar(CP_ACP, 0, OString.c_str()
+//		, -1, (wchar_t*)NULL, 0);
+//
+//	// バッファの取得
+//	wchar_t* cpUCS2 = new wchar_t[iBufferSize];
+//
+//	// SJIS → wstring
+//	MultiByteToWideChar(CP_ACP, 0, OString.c_str(), -1, cpUCS2
+//		, iBufferSize);
+//
+//	// stringの生成
+//	std::wstring oRet(cpUCS2, cpUCS2 + iBufferSize - 1);
+//
+//	// バッファの破棄
+//	delete[] cpUCS2;
+//
+//	// 変換結果を返す
+//	return(oRet);
+//}

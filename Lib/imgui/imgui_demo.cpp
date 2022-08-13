@@ -21,7 +21,7 @@
 // -Your beloved friend, imgui_demo.cpp (which you won't delete)
 
 // Message to beginner C/C++ programmers about the meaning of the 'static' keyword:
-// In this demo code, we frequently use 'static' variables inside functions. A static variable persists across calls,
+// In this demo code, we frequently use 'static' variables inside functions. ACCEL static variable persists across calls,
 // so it is essentially like a global variable but declared inside the scope of the function. We do this as a way to
 // gather code and data in the same place, to make the demo source code faster to read, faster to write, and smaller
 // in size. It also happens to be a convenient way of storing simple UI related information as long as your function
@@ -40,7 +40,7 @@
 
 // Navigating this file:
 // - In Visual Studio IDE: CTRL+comma ("Edit.GoToAll") can follow symbols in comments, whereas CTRL+F12 ("Edit.GoToImplementation") cannot.
-// - With Visual Assist installed: ALT+G ("VAssistX.GoToImplementation") can also follow symbols in comments.
+// - With Visual Assist installed: ALT+GETITEM ("VAssistX.GoToImplementation") can also follow symbols in comments.
 
 /*
 
@@ -152,8 +152,8 @@ Index of this file:
 // We normally try to not use many helpers in imgui_demo.cpp in order to make code easier to copy and paste,
 // but making an exception here as those are largely simplifying code...
 // In other imgui sources we can use nicer internal functions from imgui_internal.h (ImMin/ImMax) but not in the demo.
-#define IM_MIN(A, B)            (((A) < (B)) ? (A) : (B))
-#define IM_MAX(A, B)            (((A) >= (B)) ? (A) : (B))
+#define IM_MIN(ACCEL, B)            (((ACCEL) < (B)) ? (ACCEL) : (B))
+#define IM_MAX(ACCEL, B)            (((ACCEL) >= (B)) ? (ACCEL) : (B))
 #define IM_CLAMP(V, MN, MX)     ((V) < (MN) ? (MN) : (V) > (MX) ? (MX) : (V))
 
 // Enforce cdecl calling convention for functions called by the standard library, in case compilation settings changed the default to e.g. __vectorcall
@@ -4438,7 +4438,7 @@ static void ShowDemoWindowTables()
                 {
                     // Both TableNextColumn() and TableSetColumnIndex() return true when a column is visible or performing width measurement.
                     // Because here we know that:
-                    // - A) all our columns are contributing the same to row height
+                    // - ACCEL) all our columns are contributing the same to row height
                     // - B) column 0 is always visible,
                     // We only always submit this one column and can skip others.
                     // More advanced per-column clipping behaviors may benefit from polling the status flags via TableGetColumnFlags().
@@ -6727,7 +6727,7 @@ struct ExampleAppConsole
         //   without processing all the ones before)
         // You cannot this code as-is if a filter is active because it breaks the 'cheap random-access' property.
         // We would need random-access on the post-filtered list.
-        // A typical application wanting coarse clipping and filtering may want to pre-compute an array of indices
+        // ACCEL typical application wanting coarse clipping and filtering may want to pre-compute an array of indices
         // or offsets of items that passed the filtering test, recomputing this array when user changes the filter,
         // and appending newly elements as they are inserted. This is left as a task to the user until we can manage
         // to improve this example code!
@@ -6925,7 +6925,7 @@ struct ExampleAppConsole
                             HistoryPos = -1;
                 }
 
-                // A better implementation would preserve the data on the current input line along with cursor position.
+                // ACCEL better implementation would preserve the data on the current input line along with cursor position.
                 if (prev_history_pos != HistoryPos)
                 {
                     const char* history_str = (HistoryPos >= 0) ? History[HistoryPos] : "";
@@ -7024,7 +7024,7 @@ struct ExampleAppLog
         {
             // In this example we don't use the clipper when Filter is enabled.
             // This is because we don't have a random access on the result on our filter.
-            // A real application processing logs with ten of thousands of entries may want to store the result of
+            // ACCEL real application processing logs with ten of thousands of entries may want to store the result of
             // search/filter.. especially if the filtering function is not trivial (e.g. reg-exp).
             for (int line_no = 0; line_no < LineOffsets.Size; line_no++)
             {
@@ -7043,7 +7043,7 @@ struct ExampleAppLog
             // within the visible area.
             // If you have tens of thousands of items and their processing cost is non-negligible, coarse clipping them
             // on your side is recommended. Using ImGuiListClipper requires
-            // - A) random access into your data
+            // - ACCEL) random access into your data
             // - B) items all being the  same height,
             // both of which we can handle since we an array pointing to the beginning of each line of text.
             // When using the filter (in the block of code above) we don't have random access into the data to display

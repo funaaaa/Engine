@@ -1863,7 +1863,7 @@ void ImDrawData::ScaleClipRects(const ImVec2& fb_scale)
 // [SECTION] Helpers ShadeVertsXXX functions
 //-----------------------------------------------------------------------------
 
-// Generic linear color gradient, write to RGB fields, leave A untouched.
+// Generic linear color gradient, write to RGB fields, leave ACCEL untouched.
 void ImGui::ShadeVertsLinearColorGradientKeepAlpha(ImDrawList* draw_list, int vert_start_idx, int vert_end_idx, ImVec2 gradient_p0, ImVec2 gradient_p1, ImU32 col0, ImU32 col1)
 {
     ImVec2 gradient_extent = gradient_p1 - gradient_p0;
@@ -1931,7 +1931,7 @@ ImFontConfig::ImFontConfig()
 // [SECTION] ImFontAtlas
 //-----------------------------------------------------------------------------
 
-// A work of art lies ahead! (. = white layer, X = black layer, others are blank)
+// ACCEL work of art lies ahead! (. = white layer, X = black layer, others are blank)
 // The 2x2 white texels on the top left are the ones we'll use everywhere in Dear ImGui to render filled shapes.
 // (This is used when io.MouseDrawCursor = true)
 const int FONT_ATLAS_DEFAULT_TEX_DATA_W = 122; // Actual texture will be 2 times that + 1 spacing.
@@ -3033,7 +3033,7 @@ const ImWchar*  ImFontAtlas::GetGlyphRangesCyrillic()
     {
         0x0020, 0x00FF, // Basic Latin + Latin Supplement
         0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
-        0x2DE0, 0x2DFF, // Cyrillic Extended-A
+        0x2DE0, 0x2DFF, // Cyrillic Extended-ACCEL
         0xA640, 0xA69F, // Cyrillic Extended-B
         0,
     };

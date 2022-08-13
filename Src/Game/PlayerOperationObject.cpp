@@ -75,6 +75,11 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 		operation.isDrift_ = true;
 	}
 
+	// アイテムが入手されていたら。
+	if (character_->GetIsGetItem()) {
+		operation.isGetItem_ = true;
+	}
+
 	// ゴースト情報の書き込みが有効化されていたら。
 	if (isWriteGhostInfo_) {
 
@@ -191,6 +196,11 @@ void PlayerOperationObject::WriteGhostInfo(BaseOperationObject::Operation Operat
 	if (Operation.isDrift_) {
 
 		wfile << "D:" << std::to_string(static_cast<int>(Operation.isDrift_)) << " ";
+
+	}
+	if (Operation.isGetItem_) {
+
+		wfile << "G:" << std::to_string(static_cast<int>(Operation.isGetItem_)) << " ";
 
 	}
 	if (Operation.isUseItemTrigger_) {

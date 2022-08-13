@@ -19,6 +19,8 @@
 #include "BaseStage.h"
 #include "StageObjectMgr.h"
 #include "ShellObjectMgr.h"
+#include "GameSceneMode.h"
+#include "GhostOperationObject.h"
 
 Character::Character(CHARA_ID CharaID)
 {
@@ -48,6 +50,14 @@ Character::Character(CHARA_ID CharaID)
 	else if (charaID_ == CHARA_ID::AI1) {
 
 		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::LEFT_LEARNING));
+
+		// 車のモデルをロード
+		playerModel_.Load(PlayerModel::COLOR::BLUE);
+
+	}
+	else if (charaID_ == CHARA_ID::GHOST) {
+
+		operationObject_ = std::make_shared<GhostOperationObject>("Resource/Game/CharaGhostData/Dev_0.txt");
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::BLUE);
@@ -170,40 +180,6 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	for (auto& index : tires_) {
 
 		index->Update();
-
-	}
-
-
-
-	// アイテムテスト用
-	if (Input::Ins()->IsKeyTrigger(DIK_P) && item_.operator bool()) {
-
-		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
-
-			boostSpeed_ = MAX_BOOST_SPEED;
-			boostTimer_ = 30;
-			item_.reset();
-
-		}
-		else {
-
-			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
-
-		}
-
-
-	}
-
-	if (Input::Ins()->IsKeyRelease(DIK_P) && item_.operator bool()) {
-
-		if (isShotBehind_) {
-			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
-		}
-		else {
-			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::FORWARD_THROW));
-		}
-		item_.reset();
-
 
 	}
 
@@ -528,6 +504,46 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 	}
 
+	// このキャラがゴーストだった場合、アイテム取得命令が出たらアイテムを取得する。
+	if (charaID_ == CHARA_ID::GHOST && operation.isGetItem_) {
+
+		item_ = std::make_shared<BoostItem>();
+		item_->Generate(playerModel_.carBodyInsIndex_);
+
+	}
+
+	// アイテムを操作
+	if (operation.isUseItemTrigger_ && item_.operator bool()) {
+
+		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
+
+			boostSpeed_ = MAX_BOOST_SPEED;
+			boostTimer_ = 30;
+			item_.reset();
+
+		}
+		else {
+
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
+
+		}
+
+
+	}
+
+	if (operation.isUseItemRelease_ && item_.operator bool()) {
+
+		if (isShotBehind_) {
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
+		}
+		else {
+			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::FORWARD_THROW));
+		}
+		item_.reset();
+
+
+	}
+
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
 	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {
 
@@ -686,26 +702,37 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 		}
 
 	}
-	if (output.isHitItemBox_) {
+	// ゴーストだったら当たり判定を飛ばす。
+	if (output.isHitItemBox_ && charaID_ != CHARA_ID::GHOST) {
 
 		// アイテムを取得したフラグ
 		isGetItem_ = true;
 
-		// ランダムでアイテムを生成する。
-		int random = FHelper::GetRand(0, 1000);
+		if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::WRITE_GHOST || GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::GHOST) {
 
-		//if (random % 2 == 0) {
+			item_ = std::make_shared<BoostItem>();
+			item_->Generate(playerModel_.carBodyInsIndex_);
 
-		//	item_ = std::make_shared<BoostItem>();
-		//	item_->Generate(playerModel_.carBodyInsIndex_);
+		}
+		else {
 
-		//}
-		//else {
+			// ランダムでアイテムを生成する。
+			int random = FHelper::GetRand(0, 1000);
 
-		item_ = std::make_shared<ShellItem>();
-		item_->Generate(playerModel_.carBodyInsIndex_);
+			if (random % 2 == 0) {
 
-		//}
+				item_ = std::make_shared<BoostItem>();
+				item_->Generate(playerModel_.carBodyInsIndex_);
+
+			}
+			else {
+
+				item_ = std::make_shared<ShellItem>();
+				item_->Generate(playerModel_.carBodyInsIndex_);
+
+			}
+
+		}
 
 	}
 	else {
@@ -718,15 +745,18 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	// その他の変数を初期化。
 	pos_ = output.resultPos_;
 
+	// ゴースト以外だったら。
+	if (charaID_ != CHARA_ID::GHOST) {
 
+		// 甲羅との当たり判定
+		bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_);
 
-	// 甲羅との当たり判定
-	bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_);
+		if (isHitShell) {
 
-	if (isHitShell) {
+			canNotMoveTimer_ = CAN_NOT_MOVE_TIMER_SHELL_HIT;
+			shellHitRot_ = rotY_;
 
-		canNotMoveTimer_ = CAN_NOT_MOVE_TIMER_SHELL_HIT;
-		shellHitRot_ = rotY_;
+		}
 
 	}
 
