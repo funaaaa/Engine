@@ -1,5 +1,4 @@
 #include "ShaderData.h"
-#include "FString.h"
 #include <d3dcompiler.h>
 #include <system_error>
 #include <fstream>
@@ -41,7 +40,7 @@ void ShaderData::LoadShader()
 	/*-- シェーダーをロードする処理 --*/
 
 	std::array<wchar_t, 128> shaderPathBuff;
-	FString::ConvertStringToWchar_t(shaderPath_, shaderPathBuff.data(), 128);
+	ConvertStringToWchar_t(shaderPath_, shaderPathBuff.data(), 128);
 
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;
 

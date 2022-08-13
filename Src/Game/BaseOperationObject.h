@@ -24,8 +24,11 @@ public:
 		float handleDriveRate_;		// 左右のハンドル操作の割合 -1 ~ 1
 		bool isDrift_;				// ドリフト状態か
 		bool isShotBehind_;			// アイテムを後ろに投げる状態か。
+		bool isUseItemTrigger_;		// アイテムを使用するか。
+		bool isUseItemRelease_;		// アイテムを使用するか。
 
-		Operation() : accelerationRate_(0), handleDriveRate_(0), isDrift_(false), isShotBehind_(false) {};
+		Operation() : accelerationRate_(0), handleDriveRate_(0), isDrift_(false), isShotBehind_(false), isUseItemTrigger_(false), isUseItemRelease_(false) {};
+		bool CheckInput() { return accelerationRate_ != 0 || handleDriveRate_ != 0 || isDrift_ || isShotBehind_ || isUseItemTrigger_ || isUseItemRelease_; }
 
 	};
 

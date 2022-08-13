@@ -41,6 +41,8 @@ public:
 
 	std::vector<std::shared_ptr<PlayerTire>> tires_;
 
+	bool isGetItem_;	// アイテムを取得したフレームの判定
+
 	// 操作オブジェクト
 	std::shared_ptr<BaseOperationObject> operationObject_;
 
@@ -102,7 +104,8 @@ public:
 
 	enum class CHARA_ID {
 
-		P1,	// プレイヤー
+		P1,	// プレイヤー1
+		P1_WGHOST,	// プレイヤー1ゴースト書き込み有り
 		AI1,	// AI1
 
 	};
@@ -135,6 +138,7 @@ public:
 	const Vec3& GetForwardVec() { return forwardVec_; }
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
+	bool GetIsGetItem() { return isGetItem_; }
 
 private:
 

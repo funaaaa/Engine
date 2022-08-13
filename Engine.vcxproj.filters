@@ -444,6 +444,9 @@
     <ClInclude Include="Src\Game\CharacterMgr.h">
       <Filter>アプリケーション\キャラクター</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\FileName.h">
+      <Filter>アプリケーション\ファイル名取得</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -630,6 +633,9 @@
     </Filter>
     <Filter Include="アプリケーション\ゲームモード">
       <UniqueIdentifier>{9f95babc-79d7-4973-9201-95be54069449}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ファイル名取得">
+      <UniqueIdentifier>{357f3090-008f-4fed-9626-6e89da2d8b3b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

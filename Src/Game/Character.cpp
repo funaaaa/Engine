@@ -31,7 +31,15 @@ Character::Character(CHARA_ID CharaID)
 	// キャラIDに応じて操作オブジェクトを生成。
 	if (charaID_ == CHARA_ID::P1) {
 
-		operationObject_ = std::make_shared<PlayerOperationObject>(0);
+		operationObject_ = std::make_shared<PlayerOperationObject>(0, false, this);
+
+		// 車のモデルをロード
+		playerModel_.Load(PlayerModel::COLOR::RED);
+
+	}
+	else if (charaID_ == CHARA_ID::P1_WGHOST) {
+
+		operationObject_ = std::make_shared<PlayerOperationObject>(0, true, this);
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::RED);
@@ -69,6 +77,7 @@ Character::Character(CHARA_ID CharaID)
 	isDrift_ = false;
 	onGround_ = true;
 	onGrass_ = false;
+	isGetItem_ = false;
 	isTireMask_ = false;
 	IsTurningIndicatorRed_ = false;
 	turningIndicatorTimer_ = 0;
@@ -102,6 +111,7 @@ void Character::Init()
 	isDrift_ = false;
 	onGround_ = true;
 	onGrass_ = false;
+	isGetItem_ = false;
 	IsTurningIndicatorRed_ = false;
 	isTireMask_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
@@ -678,6 +688,9 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	}
 	if (output.isHitItemBox_) {
 
+		// アイテムを取得したフラグ
+		isGetItem_ = true;
+
 		// ランダムでアイテムを生成する。
 		int random = FHelper::GetRand(0, 1000);
 
@@ -693,6 +706,12 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 		item_->Generate(playerModel_.carBodyInsIndex_);
 
 		//}
+
+	}
+	else {
+
+		// アイテムを取得しなかった
+		isGetItem_ = false;
 
 	}
 

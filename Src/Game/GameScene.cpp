@@ -176,7 +176,7 @@ void GameScene::Init()
 	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::WRITE_GHOST) {
 
 		// プレイヤーを生成。
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1_WGHOST), true);
 
 	}
 
@@ -503,9 +503,13 @@ void GameScene::Draw()
 	denoiseMaskOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// UIを描画
-	nowRapCountSprite_->Draw();
-	maxRapCountSprite_->Draw();
-	rapSlashSprite_->Draw();
+	static int firstTime = 0;
+	if (firstTime != 0) {
+		nowRapCountSprite_->Draw();
+		maxRapCountSprite_->Draw();
+		rapSlashSprite_->Draw();
+	}
+	if (firstTime == 0) ++firstTime;
 
 }
 

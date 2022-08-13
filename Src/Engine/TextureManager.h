@@ -8,7 +8,7 @@
 #include <DirectXTex/DirectXTex.h>
 
 struct Texture {
-	LPCWSTR fileName_;								// ファイル名
+	LPCWSTR filePath_;								// ファイル名
 	Microsoft::WRL::ComPtr<ID3D12Resource> texBuff_;	// テクスチャバッファ
 	//以下は必ず必要ではないがあったら便利
 	DirectX::TexMetadata metadata_;					// 画像のサイズなど、テクスチャとしての各情報が入る
