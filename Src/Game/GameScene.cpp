@@ -351,28 +351,6 @@ void GameScene::Draw()
 
 	}
 
-	//isWriteTireMask = firstAI_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV);
-
-	//if (isWriteTireMask) {
-
-	//	// UAVを書き込む。
-	//	tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV, sizeof(Vec2) * 8);
-	//	tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-	//	{
-	//		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-	//					tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-	//					tireMaskTextureOutput_->GetRaytracingOutput().Get())
-	//		};
-
-	//		DirectXBase::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
-	//	}
-
-	//}
-
-
-
-
-
 
 	// [ノイズを描画]のときはデノイズをかけない。
 	if (!constBufferData_.debug_.isNoiseScene_) {

@@ -418,7 +418,7 @@ void mainCHS(inout DenoisePayload payload, MyAttribute attrib)
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
     if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
     {
-        texColor = tireMaskTexture[uint2(vtx.uv.x * 4096, vtx.uv.y * 4096)];
+        texColor = tireMaskTexture[uint2((uint) (vtx.uv.x * 4096.0f), (uint) (vtx.uv.y * 4096.0f))];
     }
     
     // 今発射されているレイのIDがGI用だったら

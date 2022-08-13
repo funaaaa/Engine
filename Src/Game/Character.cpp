@@ -296,6 +296,62 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 
 	}
 
+	// 右後ろタイヤ
+	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+	// 回転した後ろベクトルを求める。
+	Vec3 behindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+	InputRayData.rayPos_ += behindVec * 70.0f;
+
+	// タイヤ痕の位置を検出
+	isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+	if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+		tireMaskUV_.behindRightUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.behindRightUV_.uv_ = Vec2(0, 0);
+
+		return false;
+
+	}
+	else {
+
+		tireMaskUV_.behindRightUV_.prevuv_ = tireMaskUV_.behindRightUV_.uv_;
+		tireMaskUV_.behindRightUV_.uv_ = HitUV;
+		TireMaskUVData.behindRightUV_.prevuv_ = tireMaskUV_.behindRightUV_.prevuv_;
+		TireMaskUVData.behindRightUV_.uv_ = HitUV;
+
+	}
+
+	// 左後ろタイヤ
+	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+	// 回転した後ろベクトルを求める。
+	behindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+	InputRayData.rayPos_ += behindVec * 70.0f;
+
+	// タイヤ痕の位置を検出
+	isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+	if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+		tireMaskUV_.behindLeftUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.behindLeftUV_.uv_ = Vec2(0, 0);
+
+		return false;
+
+	}
+	else {
+
+		tireMaskUV_.behindLeftUV_.prevuv_ = tireMaskUV_.behindLeftUV_.uv_;
+		tireMaskUV_.behindLeftUV_.uv_ = HitUV;
+		TireMaskUVData.behindLeftUV_.prevuv_ = tireMaskUV_.behindLeftUV_.prevuv_;
+		TireMaskUVData.behindLeftUV_.uv_ = HitUV;
+
+	}
+
 	return true;
 
 
