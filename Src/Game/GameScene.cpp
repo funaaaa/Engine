@@ -21,6 +21,8 @@
 #include "StageObjectMgr.h"
 #include "BLAS.h"
 #include "ShellObjectMgr.h"
+#include "CharacterMgr.h"
+#include "GameSceneMode.h"
 
 GameScene::GameScene()
 {
@@ -66,11 +68,7 @@ GameScene::GameScene()
 	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
 	PolygonInstanceRegister::Ins()->AddScale(skyDomeIns_, Vec3(1000, 1000, 1000));
 
-	// プレイヤーを生成。
-	player_ = std::make_shared<Character>(Character::CHARA_ID::P1);
-
-	// AIを生成。
-	firstAI_ = std::make_shared<Character>(Character::CHARA_ID::AI1);
+	characterMgr_ = std::make_shared<CharacterMgr>();
 
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
@@ -156,8 +154,33 @@ void GameScene::Init()
 
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
-	player_->Init();
-	firstAI_->Init();
+
+
+	characterMgr_->Init();
+
+	if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::AI) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+
+		// AIを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false);
+
+	}
+	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::DEF) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+
+	}
+	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::WRITE_GHOST) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+
+	}
+
+
 	Camera::Ins()->Init();
 
 	isPassedMiddlePoint_ = false;
@@ -186,17 +209,14 @@ void GameScene::Update()
 
 	}
 
-	// プレイヤーを更新。
-	player_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isPassedMiddlePoint_, rapCount_);
-
-	// AIを更新。
-	firstAI_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isPassedMiddlePoint_, rapCount_);
+	// キャラを更新。
+	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
-	Camera::Ins()->Update(player_->GetPos(), player_->GetForwardVec(), player_->GetUpVec(), player_->GetNowSpeedPer());
+	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer());
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {
@@ -303,15 +323,13 @@ void GameScene::Draw()
 
 
 	// タイヤ痕を書き込む。
-	std::array<Character::TireMaskUV, 2> tireMaskUV;
-	bool isWriteTireMask = player_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV[0]);
-
-	isWriteTireMask |= firstAI_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV[1]);
+	std::vector<Character::TireMaskUV> tireMaskUV;
+	bool isWriteTireMask = characterMgr_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV);
 
 	if (isWriteTireMask) {
 
 		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV, sizeof(Character::TireMaskUV) * 2);
+		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
 		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
@@ -582,15 +600,15 @@ void GameScene::InputImGUI()
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
 	// アイテムデバッグ用。
-	bool haveItem = player_->item_.operator bool();
+	bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
 
 	if (haveItem) {
 
-		bool haveBoostItem = player_->item_->GetItemID() == BaseItem::ItemID::BOOST;
+		bool haveBoostItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST;
 
 		ImGui::Checkbox("BoostItem", &haveBoostItem);
 
-		bool haveShellItem = player_->item_->GetItemID() == BaseItem::ItemID::SHELL;
+		bool haveShellItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::SHELL;
 
 		ImGui::Checkbox("ShellItem", &haveShellItem);
 

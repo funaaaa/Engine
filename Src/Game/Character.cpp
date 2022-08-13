@@ -59,7 +59,7 @@ Character::Character(CHARA_ID CharaID)
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec_ = Vec3(0, 1, 0);
-	size_ = Vec3(15, 15, 15);
+	size_ = Vec3(30, 30, 30);
 	rotY_ = 0;
 	speed_ = 0;
 	gravity_ = 0;

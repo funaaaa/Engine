@@ -15,6 +15,7 @@ class RaytracingOutput;
 class Sprite;
 class BaseStage;
 class RayComputeShader;
+class CharacterMgr;
 
 // ゲームシーン
 class GameScene : public BaseScene {
@@ -101,11 +102,8 @@ private:
 	float sunAngle_;
 	float sunSpeed_;
 
-	// プレイヤー
-	std::shared_ptr<Character> player_;
-
-	// AI1
-	std::shared_ptr<Character> firstAI_;
+	// キャラ管理クラス
+	std::shared_ptr<CharacterMgr> characterMgr_;
 
 	int testIns_;
 
