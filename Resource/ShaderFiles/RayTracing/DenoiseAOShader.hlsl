@@ -396,7 +396,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
 {
     
     // デノイズ用のマスクに使用するテクスチャに法線の色とInstanceIndexをかけたものを書き込む。
-    PayloadData.rayData_[RayDataIndex].denoiseMask_ = (WorldNormal) * InstanceIndex();
+    PayloadData.rayData_[RayDataIndex].denoiseMask_ = (WorldNormal) ;
     
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
