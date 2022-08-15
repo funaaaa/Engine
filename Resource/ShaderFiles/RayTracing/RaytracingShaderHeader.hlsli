@@ -109,17 +109,26 @@ struct Vertex
     float2 uv;
 };
 
-// ペイロード
-struct DenoisePayload
+struct RayData
 {
-    float3 color;
-    float3 aoLuminance;
-    float3 lightLuminance;
-    float3 giColor;
-    float3 denoiseMask;
-    uint recursive;
-    uint rayID;
+    float impactRate_; // このレイデータの影響度0~1 この値を色情報等にかける。
+    float ao_; // AOの色
+    uint isActivate_; // 有効化されているかどうか。
+    float3 color_; // 色情報
+    float3 gi_; // GI情報
+    float3 light_; // ライティングの色情報
+    float3 denoiseMask_; // デノイズのマスクの色情報
 };
+
+// ペイロード
+struct Payload
+{
+    float impactAmount_; // 合計影響度
+    RayData rayData_[3]; // レイの色データ
+    uint recursive_; // 反復回数
+    uint rayID_; // レイのID
+};
+
 // 影取得用ペイロード
 struct ShadowPayload
 {
@@ -302,7 +311,7 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
 }
 
 // 値を設定してレイを発射。
-void ShootRay(uint RayID, float3 Origin, float3 Direction, inout DenoisePayload Payload, RaytracingAccelerationStructure GRtScene)
+void ShootRay(uint RayID, float3 Origin, float3 Direction, inout Payload PayloadData, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
     rayDesc.Origin = Origin;
@@ -311,7 +320,8 @@ void ShootRay(uint RayID, float3 Origin, float3 Direction, inout DenoisePayload 
     rayDesc.TMax = 300000.0f;
 
     // ???C??ID???p???C????B
-    Payload.rayID = RayID;
+    int rayID = PayloadData.rayID_;
+    PayloadData.rayID_ = RayID;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -329,7 +339,9 @@ void ShootRay(uint RayID, float3 Origin, float3 Direction, inout DenoisePayload 
     1,
     0, // Missシェーダーのインデックスを指定する。
     rayDesc,
-    Payload);
+    PayloadData);
+    
+    PayloadData.rayID_ = rayID;
     
 }
 
