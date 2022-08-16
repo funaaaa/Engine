@@ -127,7 +127,7 @@ void PlayerOperationObject::DecideFileName()
 			while (std::getline(commaIss, commaCutString, '.')) {
 
 				// 文字列が"Dev"だったら開発者ゴースト。
-				if (cutString == "Dev");
+				//if (cutString == "Dev");
 
 				// 文字列が数字かどうかを判定する。
 				if (std::all_of(commaCutString.cbegin(), commaCutString.cend(), isdigit)) {

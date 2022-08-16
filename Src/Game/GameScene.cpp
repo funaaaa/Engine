@@ -23,6 +23,7 @@
 #include "ShellObjectMgr.h"
 #include "CharacterMgr.h"
 #include "GameSceneMode.h"
+#include "DriftParticleMgr.h"
 
 GameScene::GameScene()
 {
@@ -73,6 +74,9 @@ GameScene::GameScene()
 
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
+
+	// 設定
+	DriftParticleMgr::Ins()->Setting();
 
 	// TLASを生成。
 	tlas_ = std::make_shared<TLAS>();
@@ -193,6 +197,8 @@ void GameScene::Init()
 
 	Camera::Ins()->Init();
 
+	DriftParticleMgr::Ins()->Init();
+
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
 	sunAngle_ = 0;
@@ -266,6 +272,15 @@ void GameScene::Update()
 
 	// 甲羅を更新。
 	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::CIRCUIT]);
+
+	// 煙を更新する。
+	DriftParticleMgr::Ins()->Update(constBufferData_);
+
+	if (Input::Ins()->IsKey(DIK_2)) {
+
+		DriftParticleMgr::Ins()->Generate(Vec3(FHelper::GetRand(-800, 800), 0, 0), constBufferData_);
+
+	}
 
 }
 

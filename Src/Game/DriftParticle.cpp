@@ -10,9 +10,7 @@ DriftParticle::DriftParticle()
 	particleIns_ = 0;
 	constBufferIndex_ = 0;
 	pos_ = Vec3();
-	forwardVec_ = Vec3();
-	speed_ = 0;
-	scale_ = 0;
+
 	isActive_ = false;
 
 }
@@ -22,12 +20,8 @@ void DriftParticle::Setting(const int& BlasIndex, const int ConstBufferIndex)
 
 	/*===== セッティング =====*/
 
-	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(BlasIndex, PolygonInstanceRegister::REFLECTION);
+	blasIndex_ = BlasIndex;
 	constBufferIndex_ = ConstBufferIndex;
-	// どこか遠くに飛ばす。
-	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, Vec3(-10000000, -10000000, -10000000));
-	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(0, 0, 0));
-
 
 }
 
@@ -36,47 +30,29 @@ void DriftParticle::Init()
 
 	/*===== 初期化処理 =====*/
 
-	isActive_ = false;
+	if (isActive_) {
 
-	// どこか遠くに飛ばす。
-	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, Vec3(-10000000, -10000000, -10000000));
-	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(0, 0, 0));
+		PolygonInstanceRegister::Ins()->DestroyInstance(particleIns_);
+
+	}
+
+	isActive_ = false;
 
 }
 
-void DriftParticle::Generate(const Vec3& Pos, const Vec3& DriftVec, const DirectX::XMMATRIX& CarMatRot, RayConstBufferData& ConstBufferData)
+void DriftParticle::Generate(const Vec3& Pos, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 生成処理 =====*/
 
 	pos_ = Pos;
-	speed_ = SPEED;
-	scale_ = SCALE;
 	isActive_ = true;
+	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
+	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, Pos);
+	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(30, 30, 30));
 
-	// 進行方向ベクトルを求める。
-	forwardVec_ = DriftVec;
-
-	// デフォルトの上ベクトルを回転させる。
-	Vec3 rotUpVec = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), CarMatRot);
-
-	// 回転させた上ベクトルの方向に乱数を求めて進行方向ベクトルを上下に動かす。
-	forwardVec_ += Vec3(FHelper::GetRand(rotUpVec.x_ / 2.0f), FHelper::GetRand(rotUpVec.y_ / 2.0f), FHelper::GetRand(rotUpVec.z_ / 2.0f));
-	forwardVec_.Normalize();
-
-	// デフォルトの正面ベクトルを回転させる。
-	Vec3 rotForwardVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), CarMatRot);
-	rotForwardVec *= Vec3(10.0f, 10.0f, 10.0f);
-
-	// 回転させた正面ベクトルの方向に座標をずらす。
-	float randomAmount = FHelper::GetRand(0, 100) % 2 == 0 ? 1.0f : -1.0f;
-	pos_ += rotForwardVec * randomAmount;
-
-	// 座標とスケールを実装。
-	ConstBufferData.light_.pointLight_[constBufferIndex_].lightPos_ = pos_ + DriftVec * 10.0f;
-	ConstBufferData.light_.pointLight_[constBufferIndex_].isActive_ = true;
-	ConstBufferData.light_.pointLight_[constBufferIndex_].lightSize_ = scale_;
-	ConstBufferData.light_.pointLight_[constBufferIndex_].lightPower_ = 30.0f;
+	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = particleIns_;
+	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
 
 }
 
@@ -85,35 +61,11 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 
 	/*===== 更新処理 =====*/
 
-	if (scale_ <= SCALE - SUB_SCALE * 2.0f) {
-		ConstBufferData.light_.pointLight_[constBufferIndex_].lightPos_ = Vec3(-1000, -1000, -1000);
-		ConstBufferData.light_.pointLight_[constBufferIndex_].isActive_ = false;
-	}
+	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= 0.05f;
 
-	// パーティクルを動かす。
-	pos_ += forwardVec_ * speed_;
+	if (ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ < 0.3f) {
 
-	// パーティクルの進行方向に重力を加算する。
-	forwardVec_.y_ -= 0.08f;
-	forwardVec_.Normalize();
-
-	// 移動速度を下げる。
-	speed_ -= SUB_SPEED;
-
-	// 大きさを小さくする。
-	scale_ -= SUB_SCALE;
-
-	// Instanceを更新。
-	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, pos_);
-	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(scale_, scale_, scale_));
-
-	// 大きさが0より小さくなったら初期化する。
-	if (scale_ < 0) {
-
-		scale_ = 0;
 		Init();
-
-		return;
 
 	}
 

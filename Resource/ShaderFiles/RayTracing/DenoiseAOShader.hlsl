@@ -396,7 +396,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
 {
     
     // デノイズ用のマスクに使用するテクスチャに法線の色とInstanceIndexをかけたものを書き込む。
-    PayloadData.rayData_[RayDataIndex].denoiseMask_ = (WorldNormal) ;
+    PayloadData.rayData_[RayDataIndex].denoiseMask_ = (WorldNormal);
     
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
@@ -751,7 +751,6 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
             
             dirLightColor = normalize(dirLightColor);
             
-
             
         }
         else
@@ -915,6 +914,40 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
 
         ShootRay(CHS_IDENTIFICATION_RAYID_REFRACTION, worldPos, rayDir, payload, gRtScene);
 
+    }
+    
+    
+    // 当たったオブジェクトのInstanceIDがアルファだったら
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA)
+    {
+        
+        // アルファ値を求める。
+        int instanceIndex = InstanceIndex();
+        float alpha = 0;
+        for (int alphaIndex = 0; alphaIndex < 30; ++alphaIndex)
+        {
+            if (gSceneParam.alphaData_.alphaData_[alphaIndex].instanceIndex_ != instanceIndex)
+            {
+                continue;
+            }
+            alpha = gSceneParam.alphaData_.alphaData_[alphaIndex].alpha_;
+        }
+        
+        if (payload.impactAmount_ < alpha)
+        {
+            payload.rayData_[rayDataIndex].impactRate_ = payload.impactAmount_;
+            payload.impactAmount_ = 0.0f;
+
+        }
+        else
+        {
+            payload.rayData_[rayDataIndex].impactRate_ = alpha;
+            payload.impactAmount_ -= alpha;
+        }
+        
+        // 反射レイを飛ばす。
+        ShootRay(CHS_IDENTIFICATION_RAYID_DEF, worldPos, WorldRayDirection(), payload, gRtScene);
+        
     }
     
     //// ?t?H?O??v?Z???s???B

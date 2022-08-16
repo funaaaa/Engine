@@ -21,6 +21,7 @@
 #include "ShellObjectMgr.h"
 #include "GameSceneMode.h"
 #include "GhostOperationObject.h"
+#include "DriftParticleMgr.h"
 
 Character::Character(CHARA_ID CharaID)
 {
@@ -528,6 +529,7 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
+
 		}
 		else {
 
@@ -535,9 +537,7 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 		}
 
-		// ドリフト時のパーティクルを生成。
-		//DriftParticleMgr::Ins()->Generate(pos, driftVec, PolygonInstanceRegister::Ins()->GetRotate(carInstanceIndex), ConstBufferData);
-		ConstBufferData;
+		//DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 10.0f, ConstBufferData);
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。

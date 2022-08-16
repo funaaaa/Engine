@@ -84,5 +84,20 @@ void RayConstBufferData::Init()
 	light_.Init();
 	as_.Init();
 	debug_.Init();
+	alphaData_.Init();
+
+}
+
+void AlphaConstBufferData::Init()
+{
+
+	/*===== ‰Šú‰»ˆ— =====*/
+
+	for (auto& index : alphaData_) {
+
+		index.alpha_ = 0;
+		index.instanceIndex_ = 0;
+
+	}
 
 }

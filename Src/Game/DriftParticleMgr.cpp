@@ -3,7 +3,7 @@
 #include "BLASRegister.h"
 #include "HitGroupMgr.h"
 
-void DriftParticleMgr::Setting(const int& ConstBufferIndex)
+void DriftParticleMgr::Setting()
 {
 
 	/*===== セッティング処理 =====*/
@@ -11,20 +11,33 @@ void DriftParticleMgr::Setting(const int& ConstBufferIndex)
 	particleGenerateDelay_ = 0;
 
 	// パーティクル用のスフィアのBLASを生成する。
-	int particleSphereBlas = BLASRegister::Ins()->GenerateObj("Resource/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/red.png" });
+	int particleSphereBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/blackRed.png" });
 
 
-	int counter = ConstBufferIndex;
-	for (auto& index_ : driftParticle_) {
+	for (auto& index : driftParticle_) {
 
-		index_ = std::make_shared<DriftParticle>();
-		index_->Setting(particleSphereBlas, counter);
-		++counter;
+		index = std::make_shared<DriftParticle>();
+		index->Setting(particleSphereBlas, &index - &driftParticle_[0]);
 
 	}
 }
 
-void DriftParticleMgr::Generate(const Vec3& Pos, const Vec3& DriftVec, const DirectX::XMMATRIX& CarMatRot, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::Init()
+{
+
+	/*===== 初期化 =====*/
+
+	particleGenerateDelay_ = 0;
+
+	for (auto& index : driftParticle_) {
+
+		index->Init();
+
+	}
+
+}
+
+void DriftParticleMgr::Generate(const Vec3& Pos, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 生成処理 =====*/
@@ -40,7 +53,7 @@ void DriftParticleMgr::Generate(const Vec3& Pos, const Vec3& DriftVec, const Dir
 
 			if (index_->GetIsActive()) continue;
 
-			index_->Generate(Pos, DriftVec, CarMatRot, ConstBufferData);
+			index_->Generate(Pos, ConstBufferData);
 
 			break;
 

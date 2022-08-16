@@ -87,6 +87,22 @@ struct DebugConstBufferData {
 
 };
 
+// アルファ用データ
+struct AlphaData {
+
+	int instanceIndex_;
+	float alpha_;
+
+};
+struct AlphaConstBufferData {
+
+	std::array<AlphaData, 30> alphaData_;
+
+	// 初期化処理
+	void Init();
+
+};
+
 // すべての定数バッファを纏めたもの。
 struct RayConstBufferData {
 
@@ -98,6 +114,8 @@ struct RayConstBufferData {
 	AtmosphericScatteringConstBufferData as_;
 	// デバッグ用
 	DebugConstBufferData debug_;
+	// アルファ用
+	AlphaConstBufferData alphaData_;
 
 	// 初期化処理
 	void Init();

@@ -13,6 +13,7 @@ static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID ‹üÜ‚
 static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ƒ‰ƒCƒeƒBƒ“ƒO‚à•`‰æ‚às‚í‚È‚¢ƒIƒuƒWƒFƒNƒg
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID ’Êí‚Ìˆ— + GI‚às‚¤B
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK = 9; // instanceID ’Êí‚Ìˆ— + GI + ƒ^ƒCƒ„­
+static const int CHS_IDENTIFICATION_INSTANCE_ALPHA = 10; // instanceID ”¼“§–¾
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // ƒfƒtƒHƒ‹ƒg‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI—p‚ÌƒŒƒC
@@ -80,6 +81,16 @@ struct DebugConstBufferData
     int isNoGI; // GI‚Ìˆ—‚ğs‚í‚È‚¢ƒtƒ‰ƒO
     int isGIOnlyScene;
 };
+// ƒAƒ‹ƒtƒ@’l“]‘——p‚Ì’è”ƒoƒbƒtƒ@
+struct AlphaData
+{
+    int instanceIndex_;
+    float alpha_;
+};
+struct AlphaConstBufferData
+{
+    AlphaData alphaData_[30];
+};
 
 // ’è”ƒoƒbƒtƒ@
 struct ConstBufferData
@@ -88,6 +99,7 @@ struct ConstBufferData
     LightConstBufferData light;
     ASConstBufferData as;
     DebugConstBufferData debug;
+    AlphaConstBufferData alphaData_;
 };
 
 // ƒ}ƒeƒŠƒAƒ‹î•ñ
