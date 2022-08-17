@@ -121,24 +121,17 @@ struct Vertex
     float2 uv;
 };
 
-struct RayData
+// ペイロード
+struct Payload
 {
-    float impactRate_; // このレイデータの影響度0~1 この値を色情報等にかける。
+    uint recursive_; // 反復回数
+    uint rayID_; // レイのID
+    float impactAmount_; // 合計影響度
     float ao_; // AOの色
-    uint isActivate_; // 有効化されているかどうか。
     float3 color_; // 色情報
     float3 gi_; // GI情報
     float3 light_; // ライティングの色情報
     float3 denoiseMask_; // デノイズのマスクの色情報
-};
-
-// ペイロード
-struct Payload
-{
-    float impactAmount_; // 合計影響度
-    RayData rayData_[3]; // レイの色データ
-    uint recursive_; // 反復回数
-    uint rayID_; // レイのID
 };
 
 // 影取得用ペイロード

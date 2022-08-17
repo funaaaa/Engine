@@ -63,7 +63,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 
 	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= 0.05f;
 
-	if (ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ < 0.3f) {
+	if (ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ < 0.0f) {
 
 		Init();
 

@@ -41,7 +41,7 @@ GameScene::GameScene()
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	int payloadSize = sizeof(float) * 3 + (sizeof(float) * 3 + sizeof(Vec3) * 4) * 3;
+	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4;
 	pipline_ = std::make_shared<RaytracingPipline>();
 	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
 
