@@ -42,14 +42,14 @@ void WriteOutputImg(uint2 WriteUV)
     OutputImg[uint2(WriteUV.x, WriteUV.y)] = float4(0, 0, 0, 1);
     
     // è„â∫ç∂âEÇ…îñÇ≠èoÇ∑ÅB
-    WriteColor(uint2(WriteUV.x + 1, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 1));
-    WriteColor(uint2(WriteUV.x - 1, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 1));
-    WriteColor(uint2(WriteUV.x - 1, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 1));
-    WriteColor(uint2(WriteUV.x + 1, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 1));
-    WriteColor(uint2(WriteUV.x, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 1));
-    WriteColor(uint2(WriteUV.x, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 1));
-    WriteColor(uint2(WriteUV.x - 1, WriteUV.y), float4(0.6f, 0.6f, 0.6f, 1));
-    WriteColor(uint2(WriteUV.x + 1, WriteUV.y), float4(0.6f, 0.6f, 0.6f, 1));
+    WriteColor(uint2(WriteUV.x + 1, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 0.6f));
+    WriteColor(uint2(WriteUV.x - 1, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 0.6f));
+    WriteColor(uint2(WriteUV.x - 1, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 0.6f));
+    WriteColor(uint2(WriteUV.x + 1, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 0.6f));
+    WriteColor(uint2(WriteUV.x, WriteUV.y + 1), float4(0.6f, 0.6f, 0.6f, 0.6f));
+    WriteColor(uint2(WriteUV.x, WriteUV.y - 1), float4(0.6f, 0.6f, 0.6f, 0.6f));
+    WriteColor(uint2(WriteUV.x - 1, WriteUV.y), float4(0.6f, 0.6f, 0.6f, 0.6f));
+    WriteColor(uint2(WriteUV.x + 1, WriteUV.y), float4(0.6f, 0.6f, 0.6f, 0.6f));
     
     
 };

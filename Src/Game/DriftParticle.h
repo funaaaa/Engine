@@ -27,7 +27,7 @@ public:
 	void Init();
 
 	// ¶¬ˆ—
-	void Generate(const Vec3& Pos, RayConstBufferData& ConstBufferData);
+	void Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
 
 	// XVˆ—
 	void Update(RayConstBufferData& ConstBufferData);

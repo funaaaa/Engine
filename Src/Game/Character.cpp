@@ -37,7 +37,7 @@ Character::Character(CHARA_ID CharaID)
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, false, this);
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::RED);
+		playerModel_.Load(PlayerModel::COLOR::RED, true);
 
 	}
 	else if (charaID_ == CHARA_ID::P1_WGHOST) {
@@ -45,7 +45,7 @@ Character::Character(CHARA_ID CharaID)
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, true, this);
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::RED);
+		playerModel_.Load(PlayerModel::COLOR::RED, false);
 
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
@@ -53,7 +53,7 @@ Character::Character(CHARA_ID CharaID)
 		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::LEFT_LEARNING));
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::BLUE);
+		playerModel_.Load(PlayerModel::COLOR::BLUE, false);
 
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
@@ -61,7 +61,7 @@ Character::Character(CHARA_ID CharaID)
 		operationObject_ = std::make_shared<GhostOperationObject>("Resource/Game/CharaGhostData/Dev_0.txt");
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::BLUE);
+		playerModel_.Load(PlayerModel::COLOR::BLUE, true);
 
 	}
 
@@ -205,6 +205,12 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		easingAmount = easingAmount * easingAmount * easingAmount * easingAmount * easingAmount;
 
 		rotY_ = shellHitRot_ + easingAmount * DirectX::XM_2PI;
+
+	}
+
+	if (Input::Ins()->IsKey(DIK_8) && charaID_ == CHARA_ID::P1) {
+
+		DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + Vec3(1,0,0) * 10.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
 
 	}
 
@@ -537,7 +543,7 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 		}
 
-		//DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 10.0f, ConstBufferData);
+		DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。

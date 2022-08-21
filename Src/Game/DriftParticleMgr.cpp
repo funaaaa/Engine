@@ -11,7 +11,7 @@ void DriftParticleMgr::Setting()
 	particleGenerateDelay_ = 0;
 
 	// パーティクル用のスフィアのBLASを生成する。
-	int particleSphereBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "sphere.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/blackRed.png" });
+	int particleSphereBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smoke.png" }, false, false);
 
 
 	for (auto& index : driftParticle_) {
@@ -37,7 +37,7 @@ void DriftParticleMgr::Init()
 
 }
 
-void DriftParticleMgr::Generate(const Vec3& Pos, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 生成処理 =====*/
@@ -53,7 +53,7 @@ void DriftParticleMgr::Generate(const Vec3& Pos, RayConstBufferData& ConstBuffer
 
 			if (index_->GetIsActive()) continue;
 
-			index_->Generate(Pos, ConstBufferData);
+			index_->Generate(Pos, MatRot, ConstBufferData);
 
 			break;
 

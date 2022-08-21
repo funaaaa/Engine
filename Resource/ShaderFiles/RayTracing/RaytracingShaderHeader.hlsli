@@ -20,6 +20,7 @@ static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI用のレイ
 static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 102; // 反射用のレイ
 static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 103; // 完全反射のレイ
 static const int CHS_IDENTIFICATION_RAYID_REFRACTION = 104; // 屈折のレイ
+static const int CHS_IDENTIFICATION_RAYID_SHADOW = 105; // 影用のレイ
 
 // カメラ用の定数バッファ
 struct CameraConstBufferData
@@ -132,13 +133,11 @@ struct Payload
     float3 gi_; // GI情報
     float3 light_; // ライティングの色情報
     float3 denoiseMask_; // デノイズのマスクの色情報
+    uint alphaCounter_; // 薄いアルファのオブジェクトに当たった数
+    uint isCullingAlpha_; // 薄いアルファのオブジェクトに一定以上当たったら次からアルファを無効化するフラグ。
+    float2 pad_;
 };
 
-// 影取得用ペイロード
-struct ShadowPayload
-{
-    bool isShadow;
-};
 struct MyAttribute
 {
     float2 barys;
@@ -227,13 +226,22 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     rayDesc.TMin = 0.1f;
     rayDesc.TMax = TMax;
 
-    ShadowPayload payload;
-    payload.isShadow = false;
+    Payload payloadData;
+    payloadData.impactAmount_ = 0.0f;
+    payloadData.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
+    payloadData.recursive_ = 0;
+    payloadData.ao_ = 0;
+    payloadData.color_ = float3(0, 0, 0);
+    payloadData.denoiseMask_ = float3(0, 0, 0);
+    payloadData.gi_ = float3(0, 0, 0);
+    payloadData.light_ = float3(0, 0, 0);
+    payloadData.isCullingAlpha_ = false;
+    payloadData.alphaCounter_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderをスキップ
+    //flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderをスキップ
     
     // ???C?g????O?B
     uint rayMask = ~(0x08);
@@ -246,9 +254,9 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     1,
     1, // Missシェーダーのインデックスを指定する。
     rayDesc,
-    payload);
+    payloadData);
 
-    return payload.isShadow;
+    return payloadData.impactAmount_;
 }
 bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
@@ -258,13 +266,22 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     rayDesc.TMin = 0.1f;
     rayDesc.TMax = TMax;
 
-    ShadowPayload payload;
-    payload.isShadow = false;
+    Payload payload;
+    payload.impactAmount_ = 0;
+    payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
+    payload.recursive_ = 0;
+    payload.ao_ = 0;
+    payload.color_ = float3(0, 0, 0);
+    payload.denoiseMask_ = float3(0, 0, 0);
+    payload.gi_ = float3(0, 0, 0);
+    payload.light_ = float3(0, 0, 0);
+    payload.isCullingAlpha_ = false;
+    payload.alphaCounter_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
+    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     
     // ???C?g????O?B
     uint rayMask = ~(0x08);
@@ -279,7 +296,7 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     rayDesc,
     payload);
 
-    return payload.isShadow;
+    return payload.impactAmount_;
 }
 
 // AO用の影レイを射出
@@ -291,13 +308,22 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     rayDesc.TMin = 0.1f;
     rayDesc.TMax = TMax;
 
-    ShadowPayload payload;
-    payload.isShadow = false;
+    Payload payload;
+    payload.impactAmount_ = 0;
+    payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
+    payload.recursive_ = 0;
+    payload.ao_ = 0;
+    payload.color_ = float3(0, 0, 0);
+    payload.denoiseMask_ = float3(0, 0, 0);
+    payload.gi_ = float3(0, 0, 0);
+    payload.light_ = float3(0, 0, 0);
+    payload.isCullingAlpha_ = false;
+    payload.alphaCounter_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     
     // ???C?g????O?B
     uint rayMask = ~(0x08);
@@ -312,7 +338,7 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     rayDesc,
     payload);
 
-    return payload.isShadow;
+    return payload.impactAmount_;
 }
 
 // 値を設定してレイを発射。
@@ -331,10 +357,10 @@ void ShootRay(uint RayID, float3 Origin, float3 Direction, inout Payload Payload
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
+    //flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderを実行
     
     // ???C?g????O?B
-    uint rayMask = ~(0x08);
+    uint rayMask = 0xFF;
 
     TraceRay(
     GRtScene,

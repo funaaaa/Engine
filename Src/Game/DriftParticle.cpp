@@ -40,7 +40,7 @@ void DriftParticle::Init()
 
 }
 
-void DriftParticle::Generate(const Vec3& Pos, RayConstBufferData& ConstBufferData)
+void DriftParticle::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== ê∂ê¨èàóù =====*/
@@ -50,6 +50,7 @@ void DriftParticle::Generate(const Vec3& Pos, RayConstBufferData& ConstBufferDat
 	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
 	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, Pos);
 	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(30, 30, 30));
+	PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, MatRot);
 
 	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = particleIns_;
 	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
@@ -62,6 +63,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	/*===== çXêVèàóù =====*/
 
 	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= 0.05f;
+	//ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
 
 	if (ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ < 0.0f) {
 

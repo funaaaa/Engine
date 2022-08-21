@@ -61,6 +61,6 @@ public:
 	};
 
 	// ÉçÅ[Éh
-	void Load(COLOR ColorID);
+	void Load(COLOR ColorID, bool IsGhost);
 
 };
