@@ -29,6 +29,9 @@ public:
 	float gravity_;			// 重力
 	float rotY_;			// ハンドル操作によって変わるY軸の回転量
 	float shellHitRot_;		// 甲羅に当たったときの回転。
+	float handleAmount_;	// ハンドル量
+	DirectX::XMVECTOR handleRot_;	// ハンドルの回転量
+	DirectX::XMMATRIX defBodyMatRot_;	// そのフレームのデフォルトの回転行列
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
 	int canNotMoveTimer_;	// 操作不能のタイマー
 	const int CAN_NOT_MOVE_TIMER_SHELL_HIT = 60;
@@ -69,6 +72,7 @@ public:
 
 	/*-- ドリフトに関する変数 --*/
 
+	DirectX::XMVECTOR forwardBoostMat_;	// 加速時の正面方向への回転の行列
 	float boostSpeed_;					// ブーストされているときの移動速度
 	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
 	int boostTimer_;					// ブーストするフレーム数
@@ -140,6 +144,9 @@ public:
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
 	bool GetIsGetItem() { return isGetItem_; }
+
+	// デバッグ用
+	bool IsP1() { return charaID_ == CHARA_ID::P1; }
 
 private:
 

@@ -37,7 +37,7 @@ Character::Character(CHARA_ID CharaID)
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, false, this);
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::RED, true);
+		playerModel_.Load(PlayerModel::COLOR::RED, false);
 
 	}
 	else if (charaID_ == CHARA_ID::P1_WGHOST) {
@@ -93,6 +93,10 @@ Character::Character(CHARA_ID CharaID)
 	IsTurningIndicatorRed_ = false;
 	turningIndicatorTimer_ = 0;
 	canNotMoveTimer_ = 0;
+	forwardBoostMat_ = DirectX::XMVECTOR();
+	handleAmount_ = 0;
+	handleRot_ = DirectX::XMVECTOR();
+	defBodyMatRot_ = DirectX::XMMatrixIdentity();
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -135,6 +139,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	/*===== 更新処理 =====*/
 
+	// ブースト時の回転を打ち消す。
+	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, defBodyMatRot_);
+
 	// 入力処理
 	Input(ConstBufferData);
 
@@ -146,6 +153,48 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	// 座標を更新。
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
+
+	// BODYの回転行列を保存。
+	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
+
+	// ブースト時の回転。
+	if (0 < boostSpeed_) {
+
+		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
+		const float MAX_ROT = 0.2f;
+
+		float rot = MAX_ROT * boostRate;
+
+		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+		// クォータニオンを求める。
+		forwardBoostMat_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), rot);
+
+		// 回転行列を求める。
+		DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(forwardBoostMat_);
+
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
+
+	}
+
+	// ドリフト時の回転。
+	if (isDrift_ && 0 != handleAmount_) {
+
+		const float MAX_ROT = 0.2f;
+
+		float rot = MAX_ROT * handleAmount_;
+
+		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+		// クォータニオンを求める。
+		handleRot_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), rot);
+
+		// 回転行列を求める。
+		DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(handleRot_);
+
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
+
+	}
 
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
 	if (onGround_) {
@@ -205,12 +254,6 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		easingAmount = easingAmount * easingAmount * easingAmount * easingAmount * easingAmount;
 
 		rotY_ = shellHitRot_ + easingAmount * DirectX::XM_2PI;
-
-	}
-
-	if (Input::Ins()->IsKey(DIK_8) && charaID_ == CHARA_ID::P1) {
-
-		DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + Vec3(1,0,0) * 10.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
 
 	}
 
@@ -605,6 +648,9 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 
 	}
+
+	// 入力を保存する。
+	handleAmount_ = operation.handleDriveRate_;
 
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
 	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {

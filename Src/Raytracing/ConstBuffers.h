@@ -96,7 +96,7 @@ struct AlphaData {
 };
 struct AlphaConstBufferData {
 
-	std::array<AlphaData, 30> alphaData_;
+	std::array<AlphaData, 60> alphaData_;
 
 	// ‰Šú‰»ˆ—
 	void Init();

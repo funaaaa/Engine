@@ -90,7 +90,7 @@ struct AlphaData
 };
 struct AlphaConstBufferData
 {
-    AlphaData alphaData_[30];
+    AlphaData alphaData_[60];
 };
 
 // 定数バッファ
