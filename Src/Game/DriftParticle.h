@@ -13,6 +13,13 @@ private:
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
 	Vec3 pos_;				// 座標
 	bool isActive_;			// 有効化フラグ
+	bool isAppearingNow_;	// 出現中フラグ アルファ値を濃くする。
+	int appearingTimer_;	// 出現してから消えるまでのタイマー
+
+	const int APPEARING_TIMER = 5;
+
+	const float APPEARING_ALPHA = 0.1f;
+	const float EXIT_ALPHA = 0.1f;
 
 
 public:
@@ -27,7 +34,7 @@ public:
 	void Init();
 
 	// 生成処理
-	void Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
+	void Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

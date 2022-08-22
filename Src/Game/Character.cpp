@@ -91,12 +91,22 @@ Character::Character(CHARA_ID CharaID)
 	isGetItem_ = false;
 	isTireMask_ = false;
 	IsTurningIndicatorRed_ = false;
+	isRotRightSide_ = false;
 	turningIndicatorTimer_ = 0;
+	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
-	forwardBoostMat_ = DirectX::XMVECTOR();
+	boostRotQ_ = DirectX::XMVECTOR();
 	handleAmount_ = 0;
-	handleRot_ = DirectX::XMVECTOR();
+	handleRotQ_ = DirectX::XMVECTOR();
+	nowBoostRotQ_ = DirectX::XMVECTOR();
+	nowHandleRotQ_ = DirectX::XMVECTOR();
 	defBodyMatRot_ = DirectX::XMMatrixIdentity();
+
+	baseDriftRot_ = 0;
+	nowDriftRot_ = 0;
+	driftRotTimer_ = 0;
+	baseBoostRot_ = 0;
+	nowBoostRot_ = 0;
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -154,47 +164,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	// 座標を更新。
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
 
-	// BODYの回転行列を保存。
-	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
+	// 車体を傾ける処理。
+	InclineCarBody();
 
-	// ブースト時の回転。
-	if (0 < boostSpeed_) {
-
-		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
-		const float MAX_ROT = 0.2f;
-
-		float rot = MAX_ROT * boostRate;
-
-		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-		// クォータニオンを求める。
-		forwardBoostMat_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), rot);
-
-		// 回転行列を求める。
-		DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(forwardBoostMat_);
-
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
-
-	}
-
-	// ドリフト時の回転。
-	if (isDrift_ && 0 != handleAmount_) {
-
-		const float MAX_ROT = 0.2f;
-
-		float rot = MAX_ROT * handleAmount_;
-
-		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-		// クォータニオンを求める。
-		handleRot_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), rot);
-
-		// 回転行列を求める。
-		DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(handleRot_);
-
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
-
-	}
 
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
 	if (onGround_) {
@@ -240,6 +212,21 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		--boostTimer_;
 
 		boostSpeed_ = MAX_BOOST_SPEED;
+
+
+		// 加速の割合を求める。
+		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
+
+		// 煙の大きさを決める。
+		bool IsSmokeBIg = 0.5f < boostRate;
+
+		// 設置していたら煙を生成。
+		if (onGround_) {
+			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
+			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
+		}
 
 	}
 
@@ -586,7 +573,14 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 		}
 
-		DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
+		// 更にブーストがかかっていたら煙を出す。
+		Vec3 random = FHelper::GetRandVec3(-1, 1);
+		if (0.0f < boostSpeed_ && onGround_) {
+			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, true);
+		}
+		else if (onGround_) {
+			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
+		}
 
 	}
 	// すでにドリフト中だったら勝手に解除しないようにする。
@@ -966,3 +960,124 @@ void Character::RotObliqueFloor(const Vec3& HitNormal)
 	}
 
 }
+
+void Character::InclineCarBody()
+{
+
+	/*===== 車体を傾ける処理 =====*/
+
+		// BODYの回転行列を保存。
+	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
+
+	// ブースト時の回転。
+	if (0 < boostSpeed_) {
+
+		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
+		const float MAX_ROT = 0.3f;
+
+		baseBoostRot_ = MAX_ROT * boostRate;
+
+		// バランスを取るタイマーを更新。
+		++forwardTireLollingTimer_;
+		if (FORWARD_TIMER_LOLLING_TIMER < forwardTireLollingTimer_) {
+
+			forwardTireLollingTimer_ = 0;
+
+			// バランスを取っている風にするためにランダムで回転量を変更する。
+			const float MAX_RANDOM = 0.4f;
+			baseBoostRot_ += FHelper::GetRand(-MAX_RANDOM * boostRate, MAX_RANDOM * boostRate);
+
+		}
+
+	}
+	else {
+
+		boostRotQ_ = DirectX::XMVECTOR();
+		forwardTireLollingTimer_ = 0;
+		baseBoostRot_ = 0;
+
+	}
+
+	{
+
+		nowBoostRot_ += (baseBoostRot_ - nowBoostRot_) / 5.0f;
+
+		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+		// クォータニオンを求める。
+		boostRotQ_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), nowBoostRot_);
+
+		// ブーストの車体のクォータニオンを補間。
+		nowBoostRotQ_ = DirectX::XMQuaternionSlerp(nowBoostRotQ_, boostRotQ_, 0.2f);
+		// 回転行列を求める。
+		DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowBoostRotQ_);
+		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
+
+	}
+
+
+	// ドリフト時の回転。
+	if (isDrift_ && 0 != handleAmount_) {
+
+		// 前フレームと回転方向が違かったら初期化する。
+		if (isRotRightSide_ && handleAmount_ < 0) {
+			handleRotQ_ = DirectX::XMVECTOR();
+			baseDriftRot_ = 0;
+			driftRotTimer_ = 0;
+		}
+
+		++driftRotTimer_;
+		if (MAX_DRIFT_ROT_TIMER < driftRotTimer_) driftRotTimer_ = MAX_DRIFT_ROT_TIMER;
+
+		float timerRate = static_cast<float>(driftRotTimer_) / static_cast<float>(MAX_DRIFT_ROT_TIMER);
+
+		// 回転量にイージングをかける。
+		baseDriftRot_ = std::fabs(FEasing::EaseInCubic(timerRate) * MAX_DRIFT_ROT) * (handleAmount_ < 0 ? -1 : 1);
+
+		// 回転方向を保存。
+		isRotRightSide_ = 0 < handleAmount_;
+
+		// バランスを取っている風にするためにランダムで回転量を変更する。
+		const float MAX_RANDOM = 0.1f;
+		tireLollingAmount_ = FHelper::GetRand(-MAX_RANDOM * timerRate, MAX_RANDOM * timerRate);
+		baseDriftRot_ += tireLollingAmount_;
+
+	}
+	else {
+
+		handleRotQ_ = DirectX::XMVECTOR();
+
+		baseDriftRot_ = 0;
+		driftRotTimer_ = 0;
+
+	}
+
+	// 回転させる。
+	{
+		nowDriftRot_ += (baseDriftRot_ - nowDriftRot_) / 10.0f;
+
+		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		Vec3 forwardVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+		// 横クォータニオンを求める。
+		handleRotQ_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), nowDriftRot_);
+		// 正面クォータニオンを求める。 横だけだと回転がちょっとだけずれているため。
+		DirectX::XMVECTOR forwardQ = DirectX::XMQuaternionRotationAxis(forwardVec.ConvertXMVECTOR(), 0.01f);
+
+		// クォータニオンをかける。
+		handleRotQ_ = DirectX::XMQuaternionMultiply(handleRotQ_, forwardQ);
+	}
+
+	// ブーストの車体のクォータニオンを補間。
+	nowHandleRotQ_ = DirectX::XMQuaternionSlerp(nowHandleRotQ_, handleRotQ_, 0.2f);
+	// 回転行列を求める。
+	DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowHandleRotQ_);
+	PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
+
+}
+
+/*
+
+・ドリフトのときの回転の動きの研究
+
+*/

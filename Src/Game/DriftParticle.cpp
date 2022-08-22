@@ -40,20 +40,28 @@ void DriftParticle::Init()
 
 }
 
-void DriftParticle::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
+void DriftParticle::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash)
 {
 
 	/*===== 生成処理 =====*/
 
 	pos_ = Pos;
 	isActive_ = true;
+	isAppearingNow_ = true;
+	appearingTimer_ = 0;
 	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
 	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, Pos);
-	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(30, 30, 30));
 	PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, MatRot);
 
+	if (IsBoost) {
+		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(30, 30, 30));
+	}
+	else {
+		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(15, 15, 15));
+	}
+
 	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = particleIns_;
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 0.1f;
 
 }
 
@@ -62,8 +70,30 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 
 	/*===== 更新処理 =====*/
 
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= 0.05f;
-	//ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+	if (isAppearingNow_) {
+
+		// アルファ値を加算。
+		ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ += APPEARING_ALPHA;
+		if (1.0f < ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_) {
+
+			ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+			++appearingTimer_;
+
+			// 出現タイマーが一定値に達したらアルファ値を下げていく。
+			if (APPEARING_TIMER < appearingTimer_) {
+
+				isAppearingNow_ = false;
+
+			}
+
+		}
+
+	}
+	else {
+
+		ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= EXIT_ALPHA;
+
+	}
 
 	if (ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ < 0.0f) {
 

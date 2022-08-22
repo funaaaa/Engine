@@ -37,25 +37,45 @@ void DriftParticleMgr::Init()
 
 }
 
-void DriftParticleMgr::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, bool IsDash)
 {
 
 	/*===== 生成処理 =====*/
 
 	// 生成する遅延タイマーを更新し、一定時間経過していたらパーティクルを生成する。
 	++particleGenerateDelay_;
-	if (GENERATE_DELAY < particleGenerateDelay_) {
+
+	// 遅延の条件式。
+	bool canGenerate = false;
+	if (IsDash) {
+		canGenerate = GENERATE_DELAY_DASH < particleGenerateDelay_;
+	}
+	else {
+		canGenerate = GENERATE_DELAY < particleGenerateDelay_;
+	}
+
+	if (canGenerate) {
 
 		particleGenerateDelay_ = 0;
+
+		// 生成する数
+		const int GCOUNT_DASH = 2;
+		const int GCOUNT_DEF = 1;
+		int generateCounter = 0;
 
 		// 生成する。
 		for (auto& index_ : driftParticle_) {
 
 			if (index_->GetIsActive()) continue;
 
-			index_->Generate(Pos, MatRot, ConstBufferData);
+			index_->Generate(Pos, MatRot, ConstBufferData, IsBoost, IsDash);
 
-			break;
+			++generateCounter;
+			if ((IsDash && GCOUNT_DASH <= generateCounter) || (!IsDash && GCOUNT_DEF <= generateCounter)) {
+
+				break;
+
+			}
 
 		}
 

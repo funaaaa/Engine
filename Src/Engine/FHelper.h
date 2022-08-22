@@ -191,6 +191,11 @@ namespace FEasing {
 		return 1.0f - cosf((Time * FHelper::F_PI_F) / 2.0f);
 
 	}
+	inline float EaseInCubic(const float& Time) {
+
+		return Time * Time * Time;
+
+	}
 
 	inline float EaseInOutSine(const float& Time) {
 		return -(cosf(FHelper::F_PI_F * Time) - 1.0f) / 2.0f;

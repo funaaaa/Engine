@@ -29,8 +29,6 @@ public:
 	float gravity_;			// 重力
 	float rotY_;			// ハンドル操作によって変わるY軸の回転量
 	float shellHitRot_;		// 甲羅に当たったときの回転。
-	float handleAmount_;	// ハンドル量
-	DirectX::XMVECTOR handleRot_;	// ハンドルの回転量
 	DirectX::XMMATRIX defBodyMatRot_;	// そのフレームのデフォルトの回転行列
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
 	int canNotMoveTimer_;	// 操作不能のタイマー
@@ -65,6 +63,26 @@ public:
 	const Vec3 PLAYER_DEF_POS = Vec3(0, 30, -30);
 
 
+	/*-- ドリフト、加速時の車体の回転に関する変数 --*/
+
+	float handleAmount_;				// ハンドル量
+	DirectX::XMVECTOR handleRotQ_;		// ハンドルの回転量
+	DirectX::XMVECTOR nowHandleRotQ_;	// ハンドルの回転量
+	DirectX::XMVECTOR boostRotQ_;		// 加速時の正面方向への回転の行列
+	DirectX::XMVECTOR nowBoostRotQ_;	// 加速時の正面方向への回転の行列
+	const float  MAX_DRIFT_ROT = 0.4f;
+	float baseDriftRot_;
+	float nowDriftRot_;
+	float baseBoostRot_;
+	float nowBoostRot_;
+	float tireLollingAmount_;
+	int forwardTireLollingTimer_;
+	const int FORWARD_TIMER_LOLLING_TIMER = 20;
+	int driftRotTimer_;
+	const int MAX_DRIFT_ROT_TIMER = 10;
+	bool isRotRightSide_ = false;
+
+
 	/*-- モデルのデータに関する変数 --*/
 
 	PlayerModel playerModel_;
@@ -72,7 +90,6 @@ public:
 
 	/*-- ドリフトに関する変数 --*/
 
-	DirectX::XMVECTOR forwardBoostMat_;	// 加速時の正面方向への回転の行列
 	float boostSpeed_;					// ブーストされているときの移動速度
 	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
 	int boostTimer_;					// ブーストするフレーム数
@@ -98,7 +115,7 @@ private:
 
 	TireMaskUV tireMaskUV_;				// タイヤ痕を出す際に仕様
 
-	const float HANDLE_DRIFT = 0.06f;	// ドリフト時のハンドリングの角度
+	const float HANDLE_DRIFT = 0.05f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値
 	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
 	const int DRIFT_BOOST_TIMER = 30;	// ドリフトでブーストするまでのタイマー
@@ -161,5 +178,8 @@ private:
 
 	// 斜め床の回転
 	void RotObliqueFloor(const Vec3& HitNormal);
+
+	// 車体傾けの処理
+	void InclineCarBody();
 
 };
