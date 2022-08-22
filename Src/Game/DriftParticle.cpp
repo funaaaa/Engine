@@ -40,7 +40,7 @@ void DriftParticle::Init()
 
 }
 
-void DriftParticle::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash)
+void DriftParticle::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash)
 {
 
 	/*===== 生成処理 =====*/
@@ -52,6 +52,12 @@ void DriftParticle::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, Ra
 	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
 	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, Pos);
 	PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, MatRot);
+
+	// 奥方向の回転したベクトルを求める。
+	Vec3 zRotVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), MatRot);
+	float random = FHelper::GetRand(-FHelper::F_PI_F, FHelper::F_PI_F);
+	DirectX::XMVECTOR zRotQ = DirectX::XMQuaternionRotationAxis(zRotVec.ConvertXMVECTOR(), random);
+	PolygonInstanceRegister::Ins()->AddRotate(particleIns_, DirectX::XMMatrixRotationQuaternion(zRotQ));
 
 	if (IsBoost) {
 		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(30, 30, 30));

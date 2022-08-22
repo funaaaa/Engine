@@ -187,4 +187,22 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 
 	}
 
+
+	// 車体のインデックスを保存。
+	bodyInsIndex_.emplace_back(carBodyInsIndex_);
+	bodyInsIndex_.emplace_back(carBumperInsIndex_);
+	bodyInsIndex_.emplace_back(carLeftLightInsIndex_);
+	bodyInsIndex_.emplace_back(carRightLightInsIndex_);
+	bodyInsIndex_.emplace_back(carFrontLightInsIndex_);
+	bodyInsIndex_.emplace_back(carMirrorInsIndex_);
+	bodyInsIndex_.emplace_back(carMirrorCoverInsIndex_);
+	bodyInsIndex_.emplace_back(carWindowInsIndex_);
+
+	// タイヤのインデックスを保存。
+	tireInsIndex_.emplace_back(carBehindTireInsIndex_);
+	tireInsIndex_.emplace_back(carBehindTireFrameInsIndex_);
+	tireInsIndex_.emplace_back(carRightTireInsIndex_);
+	tireInsIndex_.emplace_back(carRightTireFrameInsIndex_);
+	tireInsIndex_.emplace_back(carLeftTireInsIndex_);
+	tireInsIndex_.emplace_back(carLeftTireFrameInsIndex_);
 }

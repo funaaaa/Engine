@@ -87,6 +87,7 @@ Character::Character(CHARA_ID CharaID)
 	boostTimer_ = 0;
 	isDrift_ = false;
 	onGround_ = true;
+	onGroundPrev_ = false;
 	onGrass_ = false;
 	isGetItem_ = false;
 	isTireMask_ = false;
@@ -223,9 +224,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		// 設置していたら煙を生成。
 		if (onGround_) {
 			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
 			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
 		}
 
 	}
@@ -243,6 +244,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		rotY_ = shellHitRot_ + easingAmount * DirectX::XM_2PI;
 
 	}
+
+	// 接地フラグを保存。
+	onGroundPrev_ = onGround_;
 
 }
 
@@ -576,10 +580,10 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 		// 更にブーストがかかっていたら煙を出す。
 		Vec3 random = FHelper::GetRandVec3(-1, 1);
 		if (0.0f < boostSpeed_ && onGround_) {
-			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, true);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, true);
 		}
 		else if (onGround_) {
-			DriftParticleMgr::Ins()->Generate(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
 		}
 
 	}
@@ -966,14 +970,14 @@ void Character::InclineCarBody()
 
 	/*===== 車体を傾ける処理 =====*/
 
-		// BODYの回転行列を保存。
+	// BODYの回転行列を保存。
 	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 	// ブースト時の回転。
 	if (0 < boostSpeed_) {
 
 		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
-		const float MAX_ROT = 0.3f;
+		const float MAX_ROT = 0.4f;
 
 		baseBoostRot_ = MAX_ROT * boostRate;
 
@@ -1075,9 +1079,3 @@ void Character::InclineCarBody()
 	PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
 
 }
-
-/*
-
-・ドリフトのときの回転の動きの研究
-
-*/

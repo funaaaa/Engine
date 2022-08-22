@@ -1,0 +1,10 @@
+diff a/Src/Game/DriftParticleMgr.h b/Src/Game/DriftParticleMgr.h	(rejected hunks)
+@@ -29,7 +29,7 @@
+ 	void Init();
+ 
+ 	// ��������
+-	void Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, bool IsDash = false);
++	void GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, bool IsDash = false);
+ 
+ 	// �X�V����
+ 	void Update(RayConstBufferData& ConstBufferData);

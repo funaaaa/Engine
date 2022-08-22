@@ -884,7 +884,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         // アルファ値を求める。
         int instanceIndex = InstanceIndex();
         float alpha = 0;
-        for (int alphaIndex = 0; alphaIndex < 60; ++alphaIndex)
+        for (int alphaIndex = 0; alphaIndex < ALPHA_DATA_COUNT; ++alphaIndex)
         {
             if (gSceneParam.alphaData_.alphaData_[alphaIndex].instanceIndex_ != instanceIndex)
             {
@@ -1058,7 +1058,7 @@ void mainAnyHit(inout Payload payload, MyAttribute attrib)
         // アルファ値を求める。
         int instanceIndex = InstanceIndex();
         float alpha = 0;
-        for (int alphaIndex = 0; alphaIndex < 60; ++alphaIndex)
+        for (int alphaIndex = 0; alphaIndex < ALPHA_DATA_COUNT; ++alphaIndex)
         {
             if (gSceneParam.alphaData_.alphaData_[alphaIndex].instanceIndex_ != instanceIndex)
             {

@@ -37,7 +37,7 @@ void DriftParticleMgr::Init()
 
 }
 
-void DriftParticleMgr::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, bool IsDash)
+void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, bool IsDash)
 {
 
 	/*===== ¶¬ˆ— =====*/
@@ -68,7 +68,7 @@ void DriftParticleMgr::Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot,
 
 			if (index_->GetIsActive()) continue;
 
-			index_->Generate(Pos, MatRot, ConstBufferData, IsBoost, IsDash);
+			index_->GenerateSmoke(Pos, MatRot, ConstBufferData, IsBoost, IsDash);
 
 			++generateCounter;
 			if ((IsDash && GCOUNT_DASH <= generateCounter) || (!IsDash && GCOUNT_DEF <= generateCounter)) {

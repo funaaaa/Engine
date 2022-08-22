@@ -21,6 +21,17 @@ private:
 	const float APPEARING_ALPHA = 0.1f;
 	const float EXIT_ALPHA = 0.1f;
 
+public:
+
+	enum class ID {
+		SMOKE,
+		FIRE,
+	};
+
+private:
+
+	ID id_;
+
 
 public:
 
@@ -34,7 +45,7 @@ public:
 	void Init();
 
 	// ê∂ê¨èàóù
-	void Generate(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash);
+	void GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash);
 
 	// çXêVèàóù
 	void Update(RayConstBufferData& ConstBufferData);

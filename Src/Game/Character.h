@@ -36,6 +36,7 @@ public:
 	const int RETURN_DEFPOS_TIMER = 600;
 	bool isShotBehind_;		// 後ろ側に甲羅を投げるかのフラグ
 	bool onGround_;			// 地上にいるか t=地上 f=空中
+	bool onGroundPrev_;		// 前フレームのonGround_
 	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB

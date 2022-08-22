@@ -1817,7 +1817,7 @@ static void ShowDemoWindowWidgets()
         IMGUI_DEMO_MARKER("Widgets/Color/ColorButton (with custom Picker popup)");
         ImGui::Text("Color button with Custom Picker Popup:");
 
-        // Generate a default palette. The palette will persist and can be edited.
+        // GenerateSmoke a default palette. The palette will persist and can be edited.
         static bool saved_palette_init = true;
         static ImVec4 saved_palette[32] = {};
         if (saved_palette_init)
