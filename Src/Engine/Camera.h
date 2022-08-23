@@ -24,11 +24,11 @@ public:
 
 private:
 
-	const float EYE_PLAYER_DISTANCE = 160;			// プレイヤーと視点の距離
+	const float EYE_PLAYER_DISTANCE = 100;			// プレイヤーと視点の距離
 	const float TARGET_PLAYER_DISTNACE = 50;		// プレイヤーと注視点の距離
 	const float TARGET_UPPER = 50;					// ターゲットを上にずらす量
 	const float DEF_ANGLEOFVIEW = 60.0f;			// 画角のデフォルト値
-	const float MAX_ANGLEOFVIEW = 100.0f;			// 最大画角
+	const float MAX_ANGLEOFVIEW = 120.0f;			// 最大画角
 
 public:
 

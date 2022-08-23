@@ -208,6 +208,12 @@
     <ClCompile Include="Src\Game\GhostOperationObject.cpp">
       <Filter>アプリケーション\操作オブジェクト</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\ConcentrationLine.cpp">
+      <Filter>アプリケーション\集中線</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\ConcentrationLineMgr.cpp">
+      <Filter>アプリケーション\集中線</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -453,6 +459,12 @@
     <ClInclude Include="Src\Game\GhostOperationObject.h">
       <Filter>アプリケーション\操作オブジェクト</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\ConcentrationLine.h">
+      <Filter>アプリケーション\集中線</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\ConcentrationLineMgr.h">
+      <Filter>アプリケーション\集中線</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -642,6 +654,9 @@
     </Filter>
     <Filter Include="アプリケーション\ファイル名取得">
       <UniqueIdentifier>{357f3090-008f-4fed-9626-6e89da2d8b3b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\集中線">
+      <UniqueIdentifier>{6eabc27a-26e5-40c3-a8d0-094d6eae6fd7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

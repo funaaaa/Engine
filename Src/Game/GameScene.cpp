@@ -24,6 +24,7 @@
 #include "CharacterMgr.h"
 #include "GameSceneMode.h"
 #include "DriftParticleMgr.h"
+#include "ConcentrationLineMgr.h"
 
 GameScene::GameScene()
 {
@@ -150,6 +151,10 @@ GameScene::GameScene()
 		numFontHandle_[10] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/slash.png");
 	}
 
+	// 集中線
+	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
+
+
 }
 
 void GameScene::Init()
@@ -275,6 +280,12 @@ void GameScene::Update()
 
 	// 煙を更新する。
 	DriftParticleMgr::Ins()->Update(constBufferData_);
+
+	// 集中線を更新。
+	if (characterMgr_->GetPlayerIns().lock()->GetIdConcentrationLine()) {
+		concentrationLine_->Generate();
+	}
+	concentrationLine_->Update();
 
 }
 
@@ -502,9 +513,13 @@ void GameScene::Draw()
 	// UIを描画
 	static int firstTime = 0;
 	if (firstTime != 0) {
+
+		concentrationLine_->Draw();
+
 		nowRapCountSprite_->Draw();
 		maxRapCountSprite_->Draw();
 		rapSlashSprite_->Draw();
+
 	}
 	if (firstTime == 0) ++firstTime;
 
@@ -694,3 +709,12 @@ void GameScene::GenerateGimmick()
 	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }
+
+/*
+
+集中線を実装する。
+集中線クラスとマネージャーを作ってGameSceneに持たせる。
+P1のキャラの集中線フラグが経っていたら集中線を生成する。
+集中線はぱっと発生し、画面外にゆっくり移動しながらだんだん薄くなって消えていく。
+
+*/

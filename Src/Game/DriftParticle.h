@@ -20,6 +20,7 @@ private:
 
 	const float APPEARING_ALPHA = 0.1f;
 	const float EXIT_ALPHA = 0.1f;
+	const float FIRE_ALPHA = 0.1f;
 
 public:
 
@@ -45,7 +46,8 @@ public:
 	void Init();
 
 	// ê∂ê¨èàóù
-	void GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash);
+	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash);
+	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
 
 	// çXêVèàóù
 	void Update(RayConstBufferData& ConstBufferData);

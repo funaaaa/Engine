@@ -2,22 +2,24 @@
 #include "DriftParticle.h"
 #include "BLASRegister.h"
 #include "HitGroupMgr.h"
+#include "FHelper.h"
 
 void DriftParticleMgr::Setting()
 {
 
 	/*===== セッティング処理 =====*/
 
-	particleGenerateDelay_ = 0;
+	smokeGenerateDelay_ = 0;
+	fireGenerateDelay_ = 0;
 
 	// パーティクル用のスフィアのBLASを生成する。
-	int particleSphereBlas = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smoke.png" }, false, false);
-
+	smokeBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smoke.png" }, false, false);
+	fireBlasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/fireBall.png" }, false, false);
 
 	for (auto& index : driftParticle_) {
 
 		index = std::make_shared<DriftParticle>();
-		index->Setting(particleSphereBlas, &index - &driftParticle_[0]);
+		index->Setting(smokeBlasIndex_, &index - &driftParticle_[0]);
 
 	}
 }
@@ -27,7 +29,8 @@ void DriftParticleMgr::Init()
 
 	/*===== 初期化 =====*/
 
-	particleGenerateDelay_ = 0;
+	smokeGenerateDelay_ = 0;
+	fireGenerateDelay_ = 0;
 
 	for (auto& index : driftParticle_) {
 
@@ -43,20 +46,20 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 	/*===== 生成処理 =====*/
 
 	// 生成する遅延タイマーを更新し、一定時間経過していたらパーティクルを生成する。
-	++particleGenerateDelay_;
+	++smokeGenerateDelay_;
 
 	// 遅延の条件式。
 	bool canGenerate = false;
 	if (IsDash) {
-		canGenerate = GENERATE_DELAY_DASH < particleGenerateDelay_;
+		canGenerate = GENERATE_DELAY_DASH < smokeGenerateDelay_;
 	}
 	else {
-		canGenerate = GENERATE_DELAY < particleGenerateDelay_;
+		canGenerate = GENERATE_DELAY < smokeGenerateDelay_;
 	}
 
 	if (canGenerate) {
 
-		particleGenerateDelay_ = 0;
+		smokeGenerateDelay_ = 0;
 
 		// 生成する数
 		const int GCOUNT_DASH = 2;
@@ -68,7 +71,7 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 
 			if (index_->GetIsActive()) continue;
 
-			index_->GenerateSmoke(Pos, MatRot, ConstBufferData, IsBoost, IsDash);
+			index_->GenerateSmoke(smokeBlasIndex_, Pos, MatRot, ConstBufferData, IsBoost, IsDash);
 
 			++generateCounter;
 			if ((IsDash && GCOUNT_DASH <= generateCounter) || (!IsDash && GCOUNT_DEF <= generateCounter)) {
@@ -80,6 +83,46 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 		}
 
 	}
+
+}
+
+void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
+{
+
+	/*===== 生成処理 =====*/
+
+	//// 生成する遅延タイマーを更新し、一定時間経過していたらパーティクルを生成する。
+	//++fireGenerateDelay_;
+
+	//// 遅延の条件式。
+	//bool canGenerate = GENERATE_DELAY_FIRE < fireGenerateDelay_;
+
+	//if (canGenerate) {
+
+	//fireGenerateDelay_ = 0;
+
+	int generateCount = 0;
+
+	// 生成する。
+	for (auto& index_ : driftParticle_) {
+
+		if (index_->GetIsActive()) continue;
+
+		Vec3 random = FHelper::GetRandVec3(-500.0f, 500.0f) / 100.0f;
+
+		index_->GenerateFire(fireBlasIndex_, Pos + random, MatRot, ConstBufferData);
+
+		++generateCount;
+		if (GENERATE_COUNT_FIRE < generateCount) {
+
+			break;
+
+		}
+
+
+	}
+
+	//}
 
 }
 

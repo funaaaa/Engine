@@ -16,6 +16,7 @@ class Sprite;
 class BaseStage;
 class RayComputeShader;
 class CharacterMgr;
+class ConcentrationLineMgr;
 
 // ƒQ[ƒ€ƒV[ƒ“
 class GameScene : public BaseScene {
@@ -55,6 +56,9 @@ private:
 	std::shared_ptr<Sprite> maxRapCountSprite_;
 	std::shared_ptr<Sprite> rapSlashSprite_;
 	std::array<int, 11> numFontHandle_;
+
+	// W’†ü
+	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
 
 
 	// ƒS[ƒ‹ŠÖŒW

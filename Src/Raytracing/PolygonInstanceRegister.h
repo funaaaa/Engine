@@ -17,7 +17,7 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	static const int MAX_INSTANCE = 128;	// インスタンスの最大数。
+	static const int MAX_INSTANCE = 256;	// インスタンスの最大数。
 
 
 private:

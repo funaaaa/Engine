@@ -140,6 +140,7 @@ void Character::Init()
 	isGetItem_ = false;
 	IsTurningIndicatorRed_ = false;
 	isTireMask_ = false;
+	isConcentrationLine_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 
 }
@@ -229,6 +230,11 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
 		}
 
+		// 設置していて移動速度が一定以上だったら炎を生成。
+		if (onGround_ && 15.0f < boostSpeed_) {
+			DriftParticleMgr::Ins()->GenerateFire(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
+		}
+
 	}
 
 	// 移動できないタイマーを更新する。
@@ -244,6 +250,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		rotY_ = shellHitRot_ + easingAmount * DirectX::XM_2PI;
 
 	}
+
+	// ブースト量が一定以上だったら集中線を出す。
+	isConcentrationLine_ = MAX_BOOST_SPEED / 2.0f < boostSpeed_;
 
 	// 接地フラグを保存。
 	onGroundPrev_ = onGround_;

@@ -38,6 +38,7 @@ public:
 	bool onGround_;			// 地上にいるか t=地上 f=空中
 	bool onGroundPrev_;		// 前フレームのonGround_
 	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
+	bool isConcentrationLine_;	// 集中線を出すかフラグ。
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
@@ -162,6 +163,7 @@ public:
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
 	bool GetIsGetItem() { return isGetItem_; }
+	bool GetIdConcentrationLine() { return isConcentrationLine_; }
 
 	// デバッグ用
 	bool IsP1() { return charaID_ == CHARA_ID::P1; }

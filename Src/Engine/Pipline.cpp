@@ -151,7 +151,7 @@ void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, 
 	gpipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 	//レンダーターゲットのブレンド設定
 	D3D12_RENDER_TARGET_BLEND_DESC& blendDesc = gpipelineDesc.BlendState.RenderTarget[0];
-	gpipelineDesc.BlendState.AlphaToCoverageEnable = true;
+	gpipelineDesc.BlendState.AlphaToCoverageEnable = false;
 	blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.BlendEnable = true;											//ブレンドを有効にする
 	blendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;							//加算
@@ -215,7 +215,7 @@ void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineD
 	gpipelineDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 	//レンダーターゲットのブレンド設定
 	D3D12_RENDER_TARGET_BLEND_DESC& blendDesc = gpipelineDesc.BlendState.RenderTarget[0];
-	gpipelineDesc.BlendState.AlphaToCoverageEnable = true;
+	gpipelineDesc.BlendState.AlphaToCoverageEnable = false;
 	blendDesc.RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
 	blendDesc.BlendEnable = true;											//ブレンドを有効にする
 	blendDesc.BlendOpAlpha = D3D12_BLEND_OP_ADD;							//加算
