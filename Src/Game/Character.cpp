@@ -220,18 +220,18 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
 
 		// 煙の大きさを決める。
-		bool IsSmokeBIg = 0.5f < boostRate;
+		bool IsSmokeBig = 0.5f < boostRate;
 
 		// 設置していたら煙を生成。
 		if (onGround_) {
 			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, true);
 			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBIg, true);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, true);
 		}
 
 		// 設置していて移動速度が一定以上だったら炎を生成。
-		if (onGround_ && 15.0f < boostSpeed_) {
+		if (15.0f < boostSpeed_) {
 			DriftParticleMgr::Ins()->GenerateFire(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
 		}
 
