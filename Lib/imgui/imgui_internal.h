@@ -1438,7 +1438,7 @@ struct ImGuiOldColumns
 enum ImGuiDockNodeFlagsPrivate_
 {
     // [Internal]
-    ImGuiDockNodeFlags_DockSpace                = 1 << 10,  // Local, Saved  // A dockspace is a node that occupy space within an existing user window. Otherwise the node is floating and create its own window.
+    ImGuiDockNodeFlags_DockSpace                = 1 << 10,  // Local, Saved  // ACCEL dockspace is a node that occupy space within an existing user window. Otherwise the node is floating and create its own window.
     ImGuiDockNodeFlags_CentralNode              = 1 << 11,  // Local, Saved  // The central node has 2 main properties: stay visible when empty, only use "remaining" spaces from its neighbor.
     ImGuiDockNodeFlags_NoTabBar                 = 1 << 12,  // Local, Saved  // Tab bar is completely unavailable. No triangle in the corner to enable it back.
     ImGuiDockNodeFlags_HiddenTabBar             = 1 << 13,  // Local, Saved  // Tab bar is hidden, with a triangle in the corner to show it again (NB: actual tab-bar instance may be destroyed as this is only used for single-window tab bar)
@@ -1540,7 +1540,7 @@ struct IMGUI_API ImGuiDockNode
 
 // List of colors that are stored at the time of Begin() into Docked Windows.
 // We currently store the packed colors in a simple array window->DockStyle.Colors[].
-// A better solution may involve appending into a log of colors in ImGuiContext + store offsets into those arrays in ImGuiWindow,
+// ACCEL better solution may involve appending into a log of colors in ImGuiContext + store offsets into those arrays in ImGuiWindow,
 // but it would be more complex as we'd need to double-buffer both as e.g. drop target may refer to window from last frame.
 enum ImGuiWindowDockStyleCol
 {
@@ -1716,7 +1716,7 @@ enum ImGuiContextHookType { ImGuiContextHookType_NewFramePre, ImGuiContextHookTy
 
 struct ImGuiContextHook
 {
-    ImGuiID                     HookId;     // A unique ID assigned by AddContextHook()
+    ImGuiID                     HookId;     // ACCEL unique ID assigned by AddContextHook()
     ImGuiContextHookType        Type;
     ImGuiID                     Owner;
     ImGuiContextHookCallback    Callback;
@@ -1953,7 +1953,7 @@ struct ImGuiContext
     short                   TooltipOverrideCount;
     float                   TooltipSlowDelay;                   // Time before slow tooltips appears (FIXME: This is temporary until we merge in tooltip timer+priority work)
     ImVector<char>          ClipboardHandlerData;               // If no custom clipboard handler is defined
-    ImVector<ImGuiID>       MenusIdSubmittedThisFrame;          // A list of menu IDs that were rendered at least once
+    ImVector<ImGuiID>       MenusIdSubmittedThisFrame;          // ACCEL list of menu IDs that were rendered at least once
 
     // Platform support
     ImGuiPlatformImeData    PlatformImeData;                    // Data updated by current frame
@@ -3059,7 +3059,7 @@ namespace ImGui
     IMGUI_API void          TabItemLabelAndCloseButton(ImDrawList* draw_list, const ImRect& bb, ImGuiTabItemFlags flags, ImVec2 frame_padding, const char* label, ImGuiID tab_id, ImGuiID close_button_id, bool is_contents_visible, bool* out_just_closed, bool* out_text_clipped);
 
     // Render helpers
-    // AVOID USING OUTSIDE OF IMGUI.CPP! NOT FOR PUBLIC CONSUMPTION. THOSE FUNCTIONS ARE A MESS. THEIR SIGNATURE AND BEHAVIOR WILL CHANGE, THEY NEED TO BE REFACTORED INTO SOMETHING DECENT.
+    // AVOID USING OUTSIDE OF IMGUI.CPP! NOT FOR PUBLIC CONSUMPTION. THOSE FUNCTIONS ARE ACCEL MESS. THEIR SIGNATURE AND BEHAVIOR WILL CHANGE, THEY NEED TO BE REFACTORED INTO SOMETHING DECENT.
     // NB: All position are in absolute pixels coordinates (we are never using window coordinates internally)
     IMGUI_API void          RenderText(ImVec2 pos, const char* text, const char* text_end = NULL, bool hide_text_after_hash = true);
     IMGUI_API void          RenderTextWrapped(ImVec2 pos, const char* text, const char* text_end, float wrap_width);

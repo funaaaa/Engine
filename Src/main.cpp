@@ -7,6 +7,7 @@
 #include "DescriptorHeapMgr.h"
 #include "PiplineManager.h"
 #include "PolygonInstanceRegister.h"
+#include "Input.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -50,6 +51,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		SceneMgr::Ins()->Update();
 		SceneMgr::Ins()->Draw();
+
+		if (Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
+
+			exit(0);
+
+		}
 
 
 		// 描画後処理

@@ -25,7 +25,7 @@ Index of this file:
 
 // Navigating this file:
 // - In Visual Studio IDE: CTRL+comma ("Edit.GoToAll") can follow symbols in comments, whereas CTRL+F12 ("Edit.GoToImplementation") cannot.
-// - With Visual Assist installed: ALT+G ("VAssistX.GoToImplementation") can also follow symbols in comments.
+// - With Visual Assist installed: ALT+GETITEM ("VAssistX.GoToImplementation") can also follow symbols in comments.
 
 //-----------------------------------------------------------------------------
 // [SECTION] Commentary
@@ -163,11 +163,11 @@ Index of this file:
 //   width measurements. Otherwise, you may skip submitting the contents of a cell/column, BUT ONLY if you know
 //   it is not going to contribute to row height.
 //   In many situations, you may skip submitting contents for every column but one (e.g. the first one).
-// - Case A: column is not hidden by user, and at least partially in sight (most common case).
+// - Case ACCEL: column is not hidden by user, and at least partially in sight (most common case).
 // - Case B: column is clipped / out of sight (because of scrolling or parent ClipRect): TableNextColumn() return false as a hint but we still allow layout output.
 // - Case C: column is hidden explicitly by the user (e.g. via the context menu, or _DefaultHide column flag, etc.).
 //
-//                        [A]         [B]          [C]
+//                        [ACCEL]         [B]          [C]
 //  TableNextColumn():    true        false        false       -> [userland] when TableNextColumn() / TableSetColumnIndex() return false, user can skip submitting items but only if the column doesn't contribute to row height.
 //          SkipItems:    false       false        true        -> [internal] when SkipItems is true, most widgets will early out if submitted, resulting is no layout output.
 //           ClipRect:    normal      zero-width   zero-width  -> [internal] when ClipRect is zero, ItemAdd() will return false and most widgets will early out mid-way.
@@ -535,7 +535,7 @@ bool    ImGui::BeginTableEx(const char* name, ImGuiID id, int columns_count, ImG
     // It will also react to changing fonts with mixed results. It doesn't need to be perfect but merely provide a decent transition.
     // FIXME-DPI: Provide consistent standards for reference size. Perhaps using g.CurrentDpiScale would be more self explanatory.
     // This is will lead us to non-rounded WidthRequest in columns, which should work but is a poorly tested path.
-    const float new_ref_scale_unit = g.FontSize; // g.Font->GetCharAdvance('A') ?
+    const float new_ref_scale_unit = g.FontSize; // g.Font->GetCharAdvance('ACCEL') ?
     if (table->RefScale != 0.0f && table->RefScale != new_ref_scale_unit)
     {
         const float scale_factor = new_ref_scale_unit / table->RefScale;
@@ -619,7 +619,7 @@ void ImGui::TableBeginApplyRequests(ImGuiTable* table)
         {
             // We need to handle reordering across hidden columns.
             // In the configuration below, moving C to the right of E will lead to:
-            //    ... C [D] E  --->  ... [D] E  C   (Column name/index)
+            //    ... C [DRIFT] E  --->  ... [DRIFT] E  C   (Column name/index)
             //    ... 2  3  4        ...  2  3  4   (Display order)
             const int reorder_dir = table->ReorderColumnDir;
             IM_ASSERT(reorder_dir == -1 || reorder_dir == +1);
@@ -2263,11 +2263,11 @@ void ImGui::TablePopBackgroundChannel()
 // - We allocate 1 or 2 background draw channels. This is because we know TablePushBackgroundChannel() is only used for
 //   horizontal spanning. If we allowed vertical spanning we'd need one background draw channel per merge group (1-4).
 // Draw channel allocation (before merging):
-// - NoClip                       --> 2+D+1 channels: bg0/1 + bg2 + foreground (same clip rect == always 1 draw call)
-// - Clip                         --> 2+D+N channels
-// - FreezeRows                   --> 2+D+N*2 (unless scrolling value is zero)
-// - FreezeRows || FreezeColunns  --> 3+D+N*2 (unless scrolling value is zero)
-// Where D is 1 if any column is clipped or hidden (dummy channel) otherwise 0.
+// - NoClip                       --> 2+DRIFT+1 channels: bg0/1 + bg2 + foreground (same clip rect == always 1 draw call)
+// - Clip                         --> 2+DRIFT+N channels
+// - FreezeRows                   --> 2+DRIFT+N*2 (unless scrolling value is zero)
+// - FreezeRows || FreezeColunns  --> 3+DRIFT+N*2 (unless scrolling value is zero)
+// Where DRIFT is 1 if any column is clipped or hidden (dummy channel) otherwise 0.
 void ImGui::TableSetupDrawChannels(ImGuiTable* table)
 {
     const int freeze_row_multiplier = (table->FreezeRowsCount > 0) ? 2 : 1;

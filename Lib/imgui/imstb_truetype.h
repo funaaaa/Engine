@@ -153,15 +153,15 @@
 //
 //      Codepoint
 //         Characters are defined by unicode codepoints, e.g. 65 is
-//         uppercase A, 231 is lowercase c with a cedilla, 0x7e30 is
+//         uppercase ACCEL, 231 is lowercase c with a cedilla, 0x7e30 is
 //         the hiragana for "ma".
 //
 //      Glyph
-//         A visual character shape (every codepoint is rendered as
+//         ACCEL visual character shape (every codepoint is rendered as
 //         some glyph)
 //
 //      Glyph index
-//         A font-specific integer ID representing a glyph
+//         ACCEL font-specific integer ID representing a glyph
 //
 //      Baseline
 //         Glyph shapes are defined relative to a baseline, which is the
@@ -709,7 +709,7 @@ STBTT_DEF int stbtt_GetNumberOfFonts(const unsigned char *data);
 STBTT_DEF int stbtt_GetFontOffsetForIndex(const unsigned char *data, int index);
 // Each .ttf/.ttc file may have more than one font. Each font has a sequential
 // index number starting from 0. Call this function to get the font offset for
-// a given index; it returns -1 if the index is out of range. A regular .ttf
+// a given index; it returns -1 if the index is out of range. ACCEL regular .ttf
 // file will only define one font and it always be at offset 0, so it will
 // return '0' for index 0, and -1 for all other indices.
 
@@ -854,7 +854,7 @@ STBTT_DEF int stbtt_GetGlyphShape(const stbtt_fontinfo *info, int glyph_index, s
 //
 // The shape is a series of contours. Each one starts with
 // a STBTT_moveto, then consists of a series of mixed
-// STBTT_lineto and STBTT_curveto segments. A lineto
+// STBTT_lineto and STBTT_curveto segments. ACCEL lineto
 // draws a line from previous endpoint to its x,y; a curveto
 // draws a quadratic bezier from previous endpoint to
 // its x,y, using cx,cy as the bezier control point.
@@ -5046,7 +5046,7 @@ STBTT_DEF int stbtt_CompareUTF8toUTF16_bigendian(const char *s1, int len1, const
 ------------------------------------------------------------------------------
 This software is available under 2 licenses -- choose whichever you prefer.
 ------------------------------------------------------------------------------
-ALTERNATIVE A - MIT License
+ALTERNATIVE ACCEL - MIT License
 Copyright (c) 2017 Sean Barrett
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -5058,7 +5058,7 @@ The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR ACCEL PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
@@ -5077,7 +5077,7 @@ overt act of relinquishment in perpetuity of all present and future rights to
 this software under copyright law.
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+FITNESS FOR ACCEL PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
 ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

@@ -13,7 +13,7 @@ void BaseDrawData::ChangeScale(float X, float Y, float Z)
 	scaleMat_ = DirectX::XMMatrixScaling(X, Y, Z);
 }
 
-void BaseDrawData::ChangeRotation(Vec3 Amount)
+void BaseDrawData::AddRotation(Vec3 Amount)
 {
 	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
 	buff *= DirectX::XMMatrixRotationZ(Amount.z_);
@@ -21,13 +21,22 @@ void BaseDrawData::ChangeRotation(Vec3 Amount)
 	buff *= DirectX::XMMatrixRotationY(Amount.y_);
 	rotationMat_ = buff * rotationMat_;
 }
-void BaseDrawData::ChangeRotation(float X, float Y, float Z)
+void BaseDrawData::AddRotation(float X, float Y, float Z)
 {
 	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
 	buff *= DirectX::XMMatrixRotationZ(Z);
 	buff *= DirectX::XMMatrixRotationX(X);
 	buff *= DirectX::XMMatrixRotationY(Y);
 	rotationMat_ = buff * rotationMat_;
+}
+
+void BaseDrawData::ChangeRotation(Vec3 Amount)
+{
+	DirectX::XMMATRIX buff = DirectX::XMMatrixIdentity();
+	buff *= DirectX::XMMatrixRotationZ(Amount.z_);
+	buff *= DirectX::XMMatrixRotationX(Amount.x_);
+	buff *= DirectX::XMMatrixRotationY(Amount.y_);
+	rotationMat_ = buff;
 }
 
 void BaseDrawData::InitRotation()

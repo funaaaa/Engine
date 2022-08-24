@@ -3902,12 +3902,12 @@ static bool InputTextFilterCharacter(unsigned int* p_char, ImGuiInputTextFlags f
             if (!(c >= '0' && c <= '9') && (c != c_decimal_point) && (c != '-') && (c != '+') && (c != '*') && (c != '/') && (c != 'e') && (c != 'E'))
                 return false;
 
-        // Allow 0-9 a-F A-F
+        // Allow 0-9 a-F ACCEL-F
         if (flags & ImGuiInputTextFlags_CharsHexadecimal)
             if (!(c >= '0' && c <= '9') && !(c >= 'a' && c <= 'f') && !(c >= 'A' && c <= 'F'))
                 return false;
 
-        // Turn a-z into A-Z
+        // Turn a-z into ACCEL-Z
         if (flags & ImGuiInputTextFlags_CharsUppercase)
             if (c >= 'a' && c <= 'z')
                 *p_char = (c += (unsigned int)('A' - 'a'));
@@ -4847,7 +4847,7 @@ bool ImGui::ColorEdit3(const char* label, float col[3], ImGuiColorEditFlags flag
 
 // ColorEdit supports RGB and HSV inputs. In case of RGB input resulting color may have undefined hue and/or saturation.
 // Since widget displays both RGB and HSV values we must preserve hue and saturation to prevent these values resetting.
-static void ColorEditRestoreHS(const float* col, float* H, float* S, float* V)
+static void ColorEditRestoreHS(const float* col, float* HANDLE, float* S, float* V)
 {
     // This check is optional. Suppose we have two color widgets side by side, both widgets display different colors, but both colors have hue and/or saturation undefined.
     // With color check: hue/saturation is preserved in one widget. Editing color in one widget would reset hue/saturation in another one.
@@ -4859,10 +4859,10 @@ static void ColorEditRestoreHS(const float* col, float* H, float* S, float* V)
     if (g.ColorEditLastColor != ImGui::ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0)))
         return;
 
-    // When S == 0, H is undefined.
-    // When H == 1 it wraps around to 0.
-    if (*S == 0.0f || (*H == 0.0f && g.ColorEditLastHue == 1))
-        *H = g.ColorEditLastHue;
+    // When S == 0, HANDLE is undefined.
+    // When HANDLE == 1 it wraps around to 0.
+    if (*S == 0.0f || (*HANDLE == 0.0f && g.ColorEditLastHue == 1))
+        *HANDLE = g.ColorEditLastHue;
 
     // When V == 0, S is undefined.
     if (*V == 0.0f)
@@ -5187,17 +5187,17 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     ImVec2 triangle_pb = ImVec2(triangle_r * -0.5f, triangle_r * -0.866025f); // Black point.
     ImVec2 triangle_pc = ImVec2(triangle_r * -0.5f, triangle_r * +0.866025f); // White point.
 
-    float H = col[0], S = col[1], V = col[2];
-    float R = col[0], G = col[1], B = col[2];
+    float HANDLE = col[0], S = col[1], V = col[2];
+    float R = col[0], GETITEM = col[1], B = col[2];
     if (flags & ImGuiColorEditFlags_InputRGB)
     {
         // Hue is lost when converting from greyscale rgb (saturation=0). Restore it.
-        ColorConvertRGBtoHSV(R, G, B, H, S, V);
-        ColorEditRestoreHS(col, &H, &S, &V);
+        ColorConvertRGBtoHSV(R, GETITEM, B, HANDLE, S, V);
+        ColorEditRestoreHS(col, &HANDLE, &S, &V);
     }
     else if (flags & ImGuiColorEditFlags_InputHSV)
     {
-        ColorConvertHSVtoRGB(H, S, V, R, G, B);
+        ColorConvertHSVtoRGB(HANDLE, S, V, R, GETITEM, B);
     }
 
     bool value_changed = false, value_changed_h = false, value_changed_sv = false;
@@ -5215,13 +5215,13 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
             if (initial_dist2 >= (wheel_r_inner - 1) * (wheel_r_inner - 1) && initial_dist2 <= (wheel_r_outer + 1) * (wheel_r_outer + 1))
             {
                 // Interactive with Hue wheel
-                H = ImAtan2(current_off.y, current_off.x) / IM_PI * 0.5f;
-                if (H < 0.0f)
-                    H += 1.0f;
+                HANDLE = ImAtan2(current_off.y, current_off.x) / IM_PI * 0.5f;
+                if (HANDLE < 0.0f)
+                    HANDLE += 1.0f;
                 value_changed = value_changed_h = true;
             }
-            float cos_hue_angle = ImCos(-H * 2.0f * IM_PI);
-            float sin_hue_angle = ImSin(-H * 2.0f * IM_PI);
+            float cos_hue_angle = ImCos(-HANDLE * 2.0f * IM_PI);
+            float sin_hue_angle = ImSin(-HANDLE * 2.0f * IM_PI);
             if (ImTriangleContainsPoint(triangle_pa, triangle_pb, triangle_pc, ImRotate(initial_off, cos_hue_angle, sin_hue_angle)))
             {
                 // Interacting with SV triangle
@@ -5249,7 +5249,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
 
             // Greatly reduces hue jitter and reset to 0 when hue == 255 and color is rapidly modified using SV square.
             if (g.ColorEditLastColor == ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0)))
-                H = g.ColorEditLastHue;
+                HANDLE = g.ColorEditLastHue;
             value_changed = value_changed_sv = true;
         }
         if (!(flags & ImGuiColorEditFlags_NoOptions))
@@ -5260,7 +5260,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         InvisibleButton("hue", ImVec2(bars_width, sv_picker_size));
         if (IsItemActive())
         {
-            H = ImSaturate((io.MousePos.y - picker_pos.y) / (sv_picker_size - 1));
+            HANDLE = ImSaturate((io.MousePos.y - picker_pos.y) / (sv_picker_size - 1));
             value_changed = value_changed_h = true;
         }
     }
@@ -5323,20 +5323,20 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     {
         if (flags & ImGuiColorEditFlags_InputRGB)
         {
-            ColorConvertHSVtoRGB(H, S, V, col[0], col[1], col[2]);
-            g.ColorEditLastHue = H;
+            ColorConvertHSVtoRGB(HANDLE, S, V, col[0], col[1], col[2]);
+            g.ColorEditLastHue = HANDLE;
             g.ColorEditLastSat = S;
             g.ColorEditLastColor = ColorConvertFloat4ToU32(ImVec4(col[0], col[1], col[2], 0));
         }
         else if (flags & ImGuiColorEditFlags_InputHSV)
         {
-            col[0] = H;
+            col[0] = HANDLE;
             col[1] = S;
             col[2] = V;
         }
     }
 
-    // R,G,B and H,S,V slider color editor
+    // R,GETITEM,B and HANDLE,S,V slider color editor
     bool value_changed_fix_hue_wrap = false;
     if ((flags & ImGuiColorEditFlags_NoInputs) == 0)
     {
@@ -5363,12 +5363,12 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     {
         float new_H, new_S, new_V;
         ColorConvertRGBtoHSV(col[0], col[1], col[2], new_H, new_S, new_V);
-        if (new_H <= 0 && H > 0)
+        if (new_H <= 0 && HANDLE > 0)
         {
             if (new_V <= 0 && V != new_V)
-                ColorConvertHSVtoRGB(H, S, new_V <= 0 ? V * 0.5f : new_V, col[0], col[1], col[2]);
+                ColorConvertHSVtoRGB(HANDLE, S, new_V <= 0 ? V * 0.5f : new_V, col[0], col[1], col[2]);
             else if (new_S <= 0)
-                ColorConvertHSVtoRGB(H, new_S <= 0 ? S * 0.5f : new_S, new_V, col[0], col[1], col[2]);
+                ColorConvertHSVtoRGB(HANDLE, new_S <= 0 ? S * 0.5f : new_S, new_V, col[0], col[1], col[2]);
         }
     }
 
@@ -5377,17 +5377,17 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         if (flags & ImGuiColorEditFlags_InputRGB)
         {
             R = col[0];
-            G = col[1];
+            GETITEM = col[1];
             B = col[2];
-            ColorConvertRGBtoHSV(R, G, B, H, S, V);
-            ColorEditRestoreHS(col, &H, &S, &V);   // Fix local Hue as display below will use it immediately.
+            ColorConvertRGBtoHSV(R, GETITEM, B, HANDLE, S, V);
+            ColorEditRestoreHS(col, &HANDLE, &S, &V);   // Fix local Hue as display below will use it immediately.
         }
         else if (flags & ImGuiColorEditFlags_InputHSV)
         {
-            H = col[0];
+            HANDLE = col[0];
             S = col[1];
             V = col[2];
-            ColorConvertHSVtoRGB(H, S, V, R, G, B);
+            ColorConvertHSVtoRGB(HANDLE, S, V, R, GETITEM, B);
         }
     }
 
@@ -5397,9 +5397,9 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     const ImU32 col_midgrey = IM_COL32(128,128,128,style_alpha8);
     const ImU32 col_hues[6 + 1] = { IM_COL32(255,0,0,style_alpha8), IM_COL32(255,255,0,style_alpha8), IM_COL32(0,255,0,style_alpha8), IM_COL32(0,255,255,style_alpha8), IM_COL32(0,0,255,style_alpha8), IM_COL32(255,0,255,style_alpha8), IM_COL32(255,0,0,style_alpha8) };
 
-    ImVec4 hue_color_f(1, 1, 1, style.Alpha); ColorConvertHSVtoRGB(H, 1, 1, hue_color_f.x, hue_color_f.y, hue_color_f.z);
+    ImVec4 hue_color_f(1, 1, 1, style.Alpha); ColorConvertHSVtoRGB(HANDLE, 1, 1, hue_color_f.x, hue_color_f.y, hue_color_f.z);
     ImU32 hue_color32 = ColorConvertFloat4ToU32(hue_color_f);
-    ImU32 user_col32_striped_of_alpha = ColorConvertFloat4ToU32(ImVec4(R, G, B, style.Alpha)); // Important: this is still including the main rendering/style alpha!!
+    ImU32 user_col32_striped_of_alpha = ColorConvertFloat4ToU32(ImVec4(R, GETITEM, B, style.Alpha)); // Important: this is still including the main rendering/style alpha!!
 
     ImVec2 sv_cursor_pos;
 
@@ -5424,8 +5424,8 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         }
 
         // Render Cursor + preview on Hue Wheel
-        float cos_hue_angle = ImCos(H * 2.0f * IM_PI);
-        float sin_hue_angle = ImSin(H * 2.0f * IM_PI);
+        float cos_hue_angle = ImCos(HANDLE * 2.0f * IM_PI);
+        float sin_hue_angle = ImSin(HANDLE * 2.0f * IM_PI);
         ImVec2 hue_cursor_pos(wheel_center.x + cos_hue_angle * (wheel_r_inner + wheel_r_outer) * 0.5f, wheel_center.y + sin_hue_angle * (wheel_r_inner + wheel_r_outer) * 0.5f);
         float hue_cursor_rad = value_changed_h ? wheel_thickness * 0.65f : wheel_thickness * 0.55f;
         int hue_cursor_segments = ImClamp((int)(hue_cursor_rad / 1.4f), 9, 32);
@@ -5460,7 +5460,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
         // Render Hue Bar
         for (int i = 0; i < 6; ++i)
             draw_list->AddRectFilledMultiColor(ImVec2(bar0_pos_x, picker_pos.y + i * (sv_picker_size / 6)), ImVec2(bar0_pos_x + bars_width, picker_pos.y + (i + 1) * (sv_picker_size / 6)), col_hues[i], col_hues[i], col_hues[i + 1], col_hues[i + 1]);
-        float bar0_line_y = IM_ROUND(picker_pos.y + H * sv_picker_size);
+        float bar0_line_y = IM_ROUND(picker_pos.y + HANDLE * sv_picker_size);
         RenderFrameBorder(ImVec2(bar0_pos_x, picker_pos.y), ImVec2(bar0_pos_x + bars_width, picker_pos.y + sv_picker_size), 0.0f);
         RenderArrowsForVerticalBar(draw_list, ImVec2(bar0_pos_x - 1, bar0_line_y), ImVec2(bars_triangles_half_sz + 1, bars_triangles_half_sz), bars_width + 2.0f, style.Alpha);
     }
@@ -5495,7 +5495,7 @@ bool ImGui::ColorPicker4(const char* label, float col[4], ImGuiColorEditFlags fl
     return value_changed;
 }
 
-// A little color square. Return true when clicked.
+// ACCEL little color square. Return true when clicked.
 // FIXME: May want to display/ignore the alpha component in the color display? Yet show it in the tooltip.
 // 'desc_id' is not called 'label' because we don't display it next to the button, but only in the tooltip.
 // Note that 'col' may be encoded in HSV if ImGuiColorEditFlags_InputHSV is set.
@@ -7002,7 +7002,7 @@ bool ImGui::BeginMenuEx(const char* label, const char* icon, bool enabled)
 
         // The 'HovereWindow == window' check creates an inconsistency (e.g. moving away from menu slowly tends to hit same window, whereas moving away fast does not)
         // But we also need to not close the top-menu menu when moving over void. Perhaps we should extend the triangle check to a larger polygon.
-        // (Remember to test this on BeginPopup("A")->BeginMenu("B") sequence which behaves slightly differently as B isn't a Child of A and hovering isn't shared.)
+        // (Remember to test this on BeginPopup("ACCEL")->BeginMenu("B") sequence which behaves slightly differently as B isn't a Child of ACCEL and hovering isn't shared.)
         if (menu_is_open && !hovered && g.HoveredWindow == window && !moving_toward_child_menu)
             want_close = true;
 
@@ -7078,7 +7078,7 @@ bool ImGui::BeginMenu(const char* label, bool enabled)
 void ImGui::EndMenu()
 {
     // Nav: When a left move request _within our child menu_ failed, close ourselves (the _parent_ menu).
-    // A menu doesn't close itself because EndMenuBar() wants the catch the last Left<>Right inputs.
+    // ACCEL menu doesn't close itself because EndMenuBar() wants the catch the last Left<>Right inputs.
     // However, it means that with the current code, a BeginMenu() from outside another menu or a menu-bar won't be closable with the Left direction.
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;

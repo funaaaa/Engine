@@ -64,3 +64,25 @@ void ShellObjectMgr::Update(std::weak_ptr<BaseStage> StageData)
 	}
 
 }
+
+bool ShellObjectMgr::Collider(std::weak_ptr<OBB> CharaOBB)
+{
+
+	/*===== “–‚½‚è”»’è =====*/
+
+	for (auto& index : shell_) {
+
+		if (!index->GetIsActive()) continue;
+
+		bool isHit = index->CheckHitOBB(CharaOBB);
+
+		if (!isHit) continue;
+
+		index->Destroy();
+
+		return true;
+
+	}
+
+	return false;
+}

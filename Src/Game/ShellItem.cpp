@@ -45,6 +45,9 @@ void ShellItem::Use(const float& CharaRotY, const int ParamID)
 		// 正面方向にベクトルを生成
 		shellVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(charaInsIndex_));
 
+		// 甲羅を動かす。
+		shellPos += shellVec * 90.0f;
+
 		// 甲羅アイテムを生成する。
 		ShellObjectMgr::Ins()->AddObject(shellPos, shellVec, CharaRotY, static_cast<int>(ShellObject::SHELL_ID::FORWARD_THROW), charaInsIndex_);
 

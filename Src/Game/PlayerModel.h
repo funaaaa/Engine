@@ -1,4 +1,5 @@
 #pragma once
+#include <vector>
 
 class PlayerModel {
 
@@ -21,6 +22,15 @@ public:
 	// ライト
 	int carFrontLightBlasIndex_;
 	int carFrontLightInsIndex_;
+	// 鏡
+	int carMirrorBlasIndex_;
+	int carMirrorInsIndex_;
+	// 鏡のカバー
+	int carMirrorCoverBlasIndex_;
+	int carMirrorCoverInsIndex_;
+	// 窓
+	int carWindowBlasIndex_;
+	int carWindowInsIndex_;
 	// 後ろタイヤ
 	int carBehindTireBlasIndex_;
 	int carBehindTireInsIndex_;
@@ -39,21 +49,29 @@ public:
 	// 左前タイヤのフレーム
 	int carLeftTireFrameBlasIndex_;
 	int carLeftTireFrameInsIndex_;
-	// 鏡
-	int carMirrorBlasIndex_;
-	int carMirrorInsIndex_;
-	// 鏡のカバー
-	int carMirrorCoverBlasIndex_;
-	int carMirrorCoverInsIndex_;
-	// 窓
-	int carWindowBlasIndex_;
-	int carWindowInsIndex_;
+
+	// 車体とタイヤで処理を分けるための変数
+	std::vector<int> bodyInsIndex_;
+	std::vector<int> tireInsIndex_;
 
 public:
 
 	/*===== メンバ関数 =====*/
 
+	enum class COLOR {
+
+		RED,
+		BLUE,
+
+	};
+
 	// ロード
-	void Load();
+	void Load(COLOR ColorID, bool IsGhost);
 
 };
+
+/*
+
+・設置した瞬間に沈める処理を書く。ｗｗ
+
+*/

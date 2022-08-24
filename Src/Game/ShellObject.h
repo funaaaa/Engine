@@ -65,6 +65,9 @@ public:
 	// 更新処理
 	void Update(std::weak_ptr<BaseStage> StageData);
 
+	// OBBとの当たり判定 キャラクターとの当たり判定で使用する。
+	bool CheckHitOBB(std::weak_ptr<OBB> CharaOBB);
+
 	bool GetIsActive() { return isActive_; }
 
 private:

@@ -9,8 +9,10 @@ class BaseStage;
 class OBB;
 class PlayerTire;
 class BaseItem;
+class BaseOperationObject;
+class BaseStage;
 
-class Player {
+class Character {
 
 private:
 
@@ -25,16 +27,27 @@ public:
 	Vec3 size_;				// サイズ
 	float speed_;			// 移動速度
 	float gravity_;			// 重力
-	float rotY_;				// ハンドル操作によって変わるY軸の回転量
+	float rotY_;			// ハンドル操作によって変わるY軸の回転量
+	float shellHitRot_;		// 甲羅に当たったときの回転。
+	DirectX::XMMATRIX defBodyMatRot_;	// そのフレームのデフォルトの回転行列
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
+	int canNotMoveTimer_;	// 操作不能のタイマー
+	const int CAN_NOT_MOVE_TIMER_SHELL_HIT = 60;
 	const int RETURN_DEFPOS_TIMER = 600;
 	bool isShotBehind_;		// 後ろ側に甲羅を投げるかのフラグ
 	bool onGround_;			// 地上にいるか t=地上 f=空中
+	bool onGroundPrev_;		// 前フレームのonGround_
 	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
+	bool isConcentrationLine_;	// 集中線を出すかフラグ。
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
 	std::vector<std::shared_ptr<PlayerTire>> tires_;
+
+	bool isGetItem_;	// アイテムを取得したフレームの判定
+
+	// 操作オブジェクト
+	std::shared_ptr<BaseOperationObject> operationObject_;
 
 	// アイテムクラス
 	std::shared_ptr<BaseItem> item_;
@@ -52,6 +65,26 @@ public:
 	const Vec3 PLAYER_DEF_POS = Vec3(0, 30, -30);
 
 
+	/*-- ドリフト、加速時の車体の回転に関する変数 --*/
+
+	float handleAmount_;				// ハンドル量
+	DirectX::XMVECTOR handleRotQ_;		// ハンドルの回転量
+	DirectX::XMVECTOR nowHandleRotQ_;	// ハンドルの回転量
+	DirectX::XMVECTOR boostRotQ_;		// 加速時の正面方向への回転の行列
+	DirectX::XMVECTOR nowBoostRotQ_;	// 加速時の正面方向への回転の行列
+	const float  MAX_DRIFT_ROT = 0.4f;
+	float baseDriftRot_;
+	float nowDriftRot_;
+	float baseBoostRot_;
+	float nowBoostRot_;
+	float tireLollingAmount_;
+	int forwardTireLollingTimer_;
+	const int FORWARD_TIMER_LOLLING_TIMER = 20;
+	int driftRotTimer_;
+	const int MAX_DRIFT_ROT_TIMER = 10;
+	bool isRotRightSide_ = false;
+
+
 	/*-- モデルのデータに関する変数 --*/
 
 	PlayerModel playerModel_;
@@ -65,7 +98,26 @@ public:
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
 
-	const float HANDLE_DRIFT = 0.06f;	// ドリフト時のハンドリングの角度
+public:
+
+	struct TireUVSet {
+		Vec2 uv_;
+		Vec2 prevuv_;
+	};
+
+	// タイヤ痕書き込み用
+	struct TireMaskUV {
+		TireUVSet forwardLeftUV_;
+		TireUVSet forwardRightUV_;
+		TireUVSet behindLeftUV_;
+		TireUVSet behindRightUV_;
+	};
+
+private:
+
+	TireMaskUV tireMaskUV_;				// タイヤ痕を出す際に仕様
+
+	const float HANDLE_DRIFT = 0.05f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値
 	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
 	const int DRIFT_BOOST_TIMER = 30;	// ドリフトでブーストするまでのタイマー
@@ -73,10 +125,27 @@ public:
 
 public:
 
+	enum class CHARA_ID {
+
+		P1,	// プレイヤー1
+		P1_WGHOST,	// プレイヤー1ゴースト書き込み有り
+		AI1,	// AI1
+		GHOST,	// ゴースト
+
+	};
+
+
+private:
+
+	CHARA_ID charaID_;
+
+
+public:
+
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	Player();
+	Character(CHARA_ID CharaID);
 	void Init();
 
 	// 更新処理
@@ -85,10 +154,19 @@ public:
 	// 描画処理
 	void Draw();
 
+	// タイヤ痕検出
+	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV& TireMaskUVData);
+
+
 	const Vec3& GetPos() { return pos_; }
 	const Vec3& GetForwardVec() { return forwardVec_; }
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
+	bool GetIsGetItem() { return isGetItem_; }
+	bool GetIdConcentrationLine() { return isConcentrationLine_; }
+
+	// デバッグ用
+	bool IsP1() { return charaID_ == CHARA_ID::P1; }
 
 private:
 
@@ -103,5 +181,8 @@ private:
 
 	// 斜め床の回転
 	void RotObliqueFloor(const Vec3& HitNormal);
+
+	// 車体傾けの処理
+	void InclineCarBody();
 
 };

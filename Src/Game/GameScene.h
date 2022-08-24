@@ -6,7 +6,8 @@
 
 #include "OBB.h"
 
-class Player;
+
+class Character;
 class DynamicConstBuffer;
 class RaytracingPipline;
 class TLAS;
@@ -14,6 +15,8 @@ class RaytracingOutput;
 class Sprite;
 class BaseStage;
 class RayComputeShader;
+class CharacterMgr;
+class ConcentrationLineMgr;
 
 // ゲームシーン
 class GameScene : public BaseScene {
@@ -54,6 +57,9 @@ private:
 	std::shared_ptr<Sprite> rapSlashSprite_;
 	std::array<int, 11> numFontHandle_;
 
+	// 集中線
+	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
+
 
 	// ゴール関係
 	bool isPassedMiddlePoint_;
@@ -92,11 +98,6 @@ private:
 	std::shared_ptr<RayComputeShader> tireMaskComputeShader_;
 	std::shared_ptr<RayComputeShader> whiteOutComputeShader_;
 	std::shared_ptr<DynamicConstBuffer> tireMaskConstBuffer_;
-	struct TireMaskUV {
-		std::array<Vec2, 4> uv_;
-		std::array<Vec2, 4> prevUV_;
-	};
-	TireMaskUV tireMaskUV_;
 
 	// FPS表示をするか否か
 	bool isDisplayFPS_;
@@ -105,8 +106,8 @@ private:
 	float sunAngle_;
 	float sunSpeed_;
 
-	// プレイヤー
-	std::shared_ptr<Player> player_;
+	// キャラ管理クラス
+	std::shared_ptr<CharacterMgr> characterMgr_;
 
 	int testIns_;
 

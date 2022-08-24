@@ -42,7 +42,7 @@ struct IDxcIncludeHandler;
 /// The CLSID associated with the data and code that will be used to create the object.
 /// </param>
 /// <param name="riid">
-/// A reference to the identifier of the interface to be used to communicate 
+/// ACCEL reference to the identifier of the interface to be used to communicate 
 /// with the object.
 /// </param>
 /// <param name="ppv">
@@ -72,7 +72,7 @@ typedef HRESULT(__stdcall *DxcCreateInstance2Proc)(
 /// The CLSID associated with the data and code that will be used to create the object.
 /// </param>
 /// <param name="riid">
-/// A reference to the identifier of the interface to be used to communicate 
+/// ACCEL reference to the identifier of the interface to be used to communicate 
 /// with the object.
 /// </param>
 /// <param name="ppv">

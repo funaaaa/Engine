@@ -17,7 +17,7 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	static const int MAX_INSTANCE = 128;	// インスタンスの最大数。
+	static const int MAX_INSTANCE = 256;	// インスタンスの最大数。
 
 
 private:
@@ -112,6 +112,7 @@ public:
 		INVISIBILITY = 7,	// 不可視のオブジェクト
 		DEF_GI = 8,			// 通常のレイ GIも行う。
 		DEF_GI_TIREMASK = 9,// 通常のレイ GI タイヤ痕
+		ALPHA = 10,			// 半透明 定数バッファを登録する必要有り。
 
 	};
 

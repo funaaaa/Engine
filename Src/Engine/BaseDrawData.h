@@ -17,8 +17,10 @@ public:
 	void ChangeScale(Vec3 Amount);
 	void ChangeScale(float X, float Y, float Z);
 	// ‰ñ“]—Ê‚ğXV (w’è‚µ‚½—Ê•ª‰ñ“]—Ê‚ª‘«‚³‚ê‚éB)
+	void AddRotation(Vec3 Amount);
+	void AddRotation(float X, float Y, float Z);
+	// ‰ñ“]—Ê‚ğ‰ÁZB
 	void ChangeRotation(Vec3 Amount);
-	void ChangeRotation(float X, float Y, float Z);
 	// ‰ñ“]—Ê‚ğ‰Šú‰»
 	void InitRotation();
 	// ‰ñ“]—Ê‚ğ‘ã“ü

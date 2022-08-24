@@ -2,7 +2,7 @@
 #include "HitGroupMgr.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
-#include "Player.h"
+#include "Character.h"
 #include "FHelper.h"
 #include "Camera.h"
 #include "RayDenoiser.h"
@@ -21,6 +21,10 @@
 #include "StageObjectMgr.h"
 #include "BLAS.h"
 #include "ShellObjectMgr.h"
+#include "CharacterMgr.h"
+#include "GameSceneMode.h"
+#include "DriftParticleMgr.h"
+#include "ConcentrationLineMgr.h"
 
 GameScene::GameScene()
 {
@@ -38,8 +42,9 @@ GameScene::GameScene()
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
+	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
 	pipline_ = std::make_shared<RaytracingPipline>();
-	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, sizeof(Vec3) * 5 + sizeof(UINT) + sizeof(UINT), sizeof(Vec2), 6);
+	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
 
 	// タイヤ痕用クラスをセット。
 	tireMaskTexture_ = std::make_shared<RaytracingOutput>();
@@ -49,7 +54,7 @@ GameScene::GameScene()
 	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
 	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
 	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
-	tireMaskConstBuffer_->Generate(sizeof(Vec2) * 8, L"TireMaskUV");
+	tireMaskConstBuffer_->Generate(sizeof(Character::TireMaskUV) * 2, L"TireMaskUV");
 
 	// 白塗りコンピュートシェーダー
 	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
@@ -66,11 +71,13 @@ GameScene::GameScene()
 	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
 	PolygonInstanceRegister::Ins()->AddScale(skyDomeIns_, Vec3(1000, 1000, 1000));
 
-	// プレイヤーを生成。
-	player_ = std::make_shared<Player>();
+	characterMgr_ = std::make_shared<CharacterMgr>();
 
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
+
+	// 設定
+	DriftParticleMgr::Ins()->Setting();
 
 	// TLASを生成。
 	tlas_ = std::make_shared<TLAS>();
@@ -144,6 +151,10 @@ GameScene::GameScene()
 		numFontHandle_[10] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/slash.png");
 	}
 
+	// 集中線
+	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
+
+
 }
 
 void GameScene::Init()
@@ -153,8 +164,45 @@ void GameScene::Init()
 
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
-	player_->Init();
+
+
+	characterMgr_->Init();
+
+	if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::AI) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+
+		// AIを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false);
+
+	}
+	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::DEF) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+
+	}
+	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::WRITE_GHOST) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1_WGHOST), true);
+
+	}
+	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::GHOST) {
+
+		// プレイヤーを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
+
+		// ゴーストを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false);
+
+	}
+
+
 	Camera::Ins()->Init();
+
+	DriftParticleMgr::Ins()->Init();
 
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
@@ -182,14 +230,14 @@ void GameScene::Update()
 
 	}
 
-	// プレイヤーを更新。
-	player_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isPassedMiddlePoint_, rapCount_);
+	// キャラを更新。
+	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
-	Camera::Ins()->Update(player_->GetPos(), player_->GetForwardVec(), player_->GetUpVec(), player_->GetNowSpeedPer());
+	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer());
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {
@@ -229,6 +277,15 @@ void GameScene::Update()
 
 	// 甲羅を更新。
 	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::CIRCUIT]);
+
+	// 煙を更新する。
+	DriftParticleMgr::Ins()->Update(constBufferData_);
+
+	// 集中線を更新。
+	if (characterMgr_->GetPlayerIns().lock()->GetIdConcentrationLine()) {
+		concentrationLine_->Generate();
+	}
+	concentrationLine_->Update();
 
 }
 
@@ -285,77 +342,24 @@ void GameScene::Draw()
 
 
 	// 床を白塗り
-	if (Input::Ins()->IsKeyTrigger(DIK_R)) {
+	static int a = 0;
+	if (Input::Ins()->IsKeyTrigger(DIK_R) || a == 0) {
 
 		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
+		++a;
 
 	}
 
 
 
-	// タイヤ痕位置検出テスト用
+	// タイヤ痕を書き込む。
+	std::vector<Character::TireMaskUV> tireMaskUV;
+	bool isWriteTireMask = characterMgr_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV);
 
-	if (player_->isTireMask_) {
-
-		FHelper::RayToModelCollisionData InputRayData;
-		InputRayData.targetVertex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexPos();
-		InputRayData.targetNormal_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexNormal();
-		InputRayData.targetIndex_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexIndex();
-		InputRayData.targetUV_ = BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(0)]->GetVertexUV();
-		InputRayData.matTrans_ = PolygonInstanceRegister::Ins()->GetTrans(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-		InputRayData.matScale_ = PolygonInstanceRegister::Ins()->GetScale(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-		InputRayData.matRot_ = PolygonInstanceRegister::Ins()->GetRotate(stages_[0]->stageObjectMgr_->GetBlasIndex(0));
-
-		// 戻り地保存用
-		Vec3 ImpactPos;
-		Vec3 HitNormal;
-		Vec2 HitUV;
-		float HitDistance;
-
-		// 左前タイヤ
-		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carLeftTireInsIndex_);
-		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
-
-		// タイヤ痕の位置を検出
-		bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
-
-		// 当たり判定が正しいかどうかをチェック。
-		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
-
-			tireMaskUV_.prevUV_[0] = Vec2(0, 0);
-			tireMaskUV_.uv_[0] = Vec2(0, 0);
-
-		}
-		else {
-
-			tireMaskUV_.prevUV_[0] = tireMaskUV_.uv_[0];
-			tireMaskUV_.uv_[0] = HitUV;
-
-		}
-
-		// 右前タイヤ
-		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(player_->playerModel_.carRightTireInsIndex_);
-		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(player_->playerModel_.carBodyInsIndex_));
-
-		// タイヤ痕の位置を検出
-		isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
-
-		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
-
-			tireMaskUV_.prevUV_[1] = Vec2(0, 0);
-			tireMaskUV_.uv_[1] = Vec2(0, 0);
-
-		}
-		else {
-
-			tireMaskUV_.prevUV_[1] = tireMaskUV_.uv_[1];
-			tireMaskUV_.uv_[1] = HitUV;
-
-		}
-
+	if (isWriteTireMask) {
 
 		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &tireMaskUV_, sizeof(Vec2) * 8);
+		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
 		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
@@ -367,18 +371,6 @@ void GameScene::Draw()
 		}
 
 	}
-	else {
-
-		tireMaskUV_.prevUV_[0] = Vec2(0, 0);
-		tireMaskUV_.uv_[0] = Vec2(0, 0);
-		tireMaskUV_.prevUV_[1] = Vec2(0, 0);
-		tireMaskUV_.uv_[1] = Vec2(0, 0);
-
-	}
-
-
-
-
 
 
 	// [ノイズを描画]のときはデノイズをかけない。
@@ -519,9 +511,17 @@ void GameScene::Draw()
 	denoiseMaskOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// UIを描画
-	nowRapCountSprite_->Draw();
-	maxRapCountSprite_->Draw();
-	rapSlashSprite_->Draw();
+	static int firstTime = 0;
+	if (firstTime != 0) {
+
+		concentrationLine_->Draw();
+
+		nowRapCountSprite_->Draw();
+		maxRapCountSprite_->Draw();
+		rapSlashSprite_->Draw();
+
+	}
+	if (firstTime == 0) ++firstTime;
 
 }
 
@@ -616,47 +616,50 @@ void GameScene::InputImGUI()
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
 	// アイテムデバッグ用。
-	bool haveItem = player_->item_.operator bool();
+	bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
 
 	if (haveItem) {
 
-		bool haveBoostItem = player_->item_->GetItemID() == BaseItem::ItemID::BOOST;
+		bool haveBoostItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST;
 
 		ImGui::Checkbox("BoostItem", &haveBoostItem);
 
-		bool haveShellItem = player_->item_->GetItemID() == BaseItem::ItemID::SHELL;
+		bool haveShellItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::SHELL;
 
 		ImGui::Checkbox("ShellItem", &haveShellItem);
 
 	}
 
 
-	int index = 16;
-
-	Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
-
-	float posArray[3] = { pos.x_, pos.y_, pos.z_ };
-
-	ImGui::DragFloat3("Pos", posArray, 0.5f);
-
-	pos.x_ = posArray[0];
-	pos.y_ = posArray[1];
-	pos.z_ = posArray[2];
-
-	PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
 
 
-	Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
 
-	float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
+	//int index = 71;
 
-	ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
+	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
-	rotate.x_ = rotateArray[0];
-	rotate.y_ = rotateArray[1];
-	rotate.z_ = rotateArray[2];
+	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
 
-	PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+	//ImGui::DragFloat3("Pos", posArray, 0.5f);
+
+	//pos.x_ = posArray[0];
+	//pos.y_ = posArray[1];
+	//pos.z_ = posArray[2];
+
+	//PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
+
+
+	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
+
+	//float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
+
+	//ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
+
+	//rotate.x_ = rotateArray[0];
+	//rotate.y_ = rotateArray[1];
+	//rotate.z_ = rotateArray[2];
+
+	//PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
 
 
 	//// 1個目
@@ -706,3 +709,12 @@ void GameScene::GenerateGimmick()
 	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }
+
+/*
+
+集中線を実装する。
+集中線クラスとマネージャーを作ってGameSceneに持たせる。
+P1のキャラの集中線フラグが経っていたら集中線を生成する。
+集中線はぱっと発生し、画面外にゆっくり移動しながらだんだん薄くなって消えていく。
+
+*/

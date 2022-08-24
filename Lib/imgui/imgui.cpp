@@ -42,10 +42,10 @@ DOCUMENTATION
 - END-USER GUIDE
 - PROGRAMMER GUIDE
   - READ FIRST
-  - HOW TO UPDATE TO A NEWER VERSION OF DEAR IMGUI
+  - HOW TO UPDATE TO ACCEL NEWER VERSION OF DEAR IMGUI
   - GETTING STARTED WITH INTEGRATING DEAR IMGUI IN YOUR CODE/ENGINE
-  - HOW A SIMPLE APPLICATION MAY LOOK LIKE
-  - HOW A SIMPLE RENDERING FUNCTION MAY LOOK LIKE
+  - HOW ACCEL SIMPLE APPLICATION MAY LOOK LIKE
+  - HOW ACCEL SIMPLE RENDERING FUNCTION MAY LOOK LIKE
   - USING GAMEPAD/KEYBOARD NAVIGATION CONTROLS
 - API BREAKING CHANGES (read me when you update!)
 - FREQUENTLY ASKED QUESTIONS (FAQ)
@@ -126,7 +126,7 @@ CODE
    - Hold SHIFT or use mouse to select text.
    - CTRL+Left/Right to word jump.
    - CTRL+Shift+Left/Right to select words.
-   - CTRL+A our Double-Click to select all.
+   - CTRL+ACCEL our Double-Click to select all.
    - CTRL+X,CTRL+C,CTRL+V to use OS clipboard/
    - CTRL+Z,CTRL+Y to undo/redo.
    - ESCAPE to revert text to its original value.
@@ -161,7 +161,7 @@ CODE
  - C++: pay attention that ImVector<> manipulates plain-old-data and does not honor construction/destruction (avoid using it in your code!).
 
 
- HOW TO UPDATE TO A NEWER VERSION OF DEAR IMGUI
+ HOW TO UPDATE TO ACCEL NEWER VERSION OF DEAR IMGUI
  ----------------------------------------------
  - Overwrite all the sources files except for imconfig.h (if you have modified your copy of imconfig.h)
  - Or maintain your own branch where you have imconfig.h modified as a top-most commit which you can regularly rebase over "master".
@@ -189,7 +189,7 @@ CODE
  - If you are running over a standard OS with a common graphics API, you should be able to use unmodified imgui_impl_*** files from the examples/ folder.
 
 
- HOW A SIMPLE APPLICATION MAY LOOK LIKE
+ HOW ACCEL SIMPLE APPLICATION MAY LOOK LIKE
  --------------------------------------
  EXHIBIT 1: USING THE EXAMPLE BACKENDS (= imgui_impl_XXX.cpp files from the backends/ folder).
  The sub-folders in examples/ contain examples applications following this structure.
@@ -286,7 +286,7 @@ CODE
  Please read the FAQ and example applications for details about this!
 
 
- HOW A SIMPLE RENDERING FUNCTION MAY LOOK LIKE
+ HOW ACCEL SIMPLE RENDERING FUNCTION MAY LOOK LIKE
  ---------------------------------------------
  The backends in impl_impl_XXX.cpp files contain many working implementations of a rendering function.
 
@@ -724,11 +724,11 @@ CODE
    docs/FAQ.md
  Some answers are copied down here to facilitate searching in code.
 
- Q&A: Basics
+ Q&ACCEL: Basics
  ===========
 
  Q: Where is the documentation?
- A: This library is poorly documented at the moment and expects the user to be acquainted with C/C++.
+ ACCEL: This library is poorly documented at the moment and expects the user to be acquainted with C/C++.
     - Run the examples/ and explore them.
     - See demo code in imgui_demo.cpp and particularly the ImGui::ShowDemoWindow() function.
     - The demo covers most features of Dear ImGui, so you can read the code and see its output.
@@ -745,14 +745,14 @@ CODE
  >> This library is called "Dear ImGui", please don't call it "ImGui" :)
  >> See https://www.dearimgui.org/faq for details.
 
- Q&A: Integration
+ Q&ACCEL: Integration
  ================
 
  Q: How to get started?
- A: Read 'PROGRAMMER GUIDE' above. Read examples/README.txt.
+ ACCEL: Read 'PROGRAMMER GUIDE' above. Read examples/README.txt.
 
  Q: How can I tell whether to dispatch mouse/keyboard to Dear ImGui or my application?
- A: You should read the 'io.WantCaptureMouse', 'io.WantCaptureKeyboard' and 'io.WantTextInput' flags!
+ ACCEL: You should read the 'io.WantCaptureMouse', 'io.WantCaptureKeyboard' and 'io.WantTextInput' flags!
  >> See https://www.dearimgui.org/faq for a fully detailed answer. You really want to read this.
 
  Q. How can I enable keyboard controls?
@@ -762,7 +762,7 @@ CODE
  Q: I integrated Dear ImGui in my engine and some elements are displaying outside their expected windows boundaries...
  >> See https://www.dearimgui.org/faq
 
- Q&A: Usage
+ Q&ACCEL: Usage
  ----------
 
  Q: About the ID Stack system..
@@ -776,7 +776,7 @@ CODE
  Q: How can I display custom shapes? (using low-level ImDrawList API)
  >> See https://www.dearimgui.org/faq
 
- Q&A: Fonts, Text
+ Q&ACCEL: Fonts, Text
  ================
 
  Q: How should I handle DPI in my application?
@@ -786,7 +786,7 @@ CODE
  Q: How can I display and input non-Latin characters such as Chinese, Japanese, Korean, Cyrillic?
  >> See https://www.dearimgui.org/faq and https://github.com/ocornut/imgui/edit/master/docs/FONTS.md
 
- Q&A: Concerns
+ Q&ACCEL: Concerns
  =============
 
  Q: Who uses Dear ImGui?
@@ -795,11 +795,11 @@ CODE
  Q: Why using C++ (as opposed to C)?
  >> See https://www.dearimgui.org/faq
 
- Q&A: Community
+ Q&ACCEL: Community
  ==============
 
  Q: How can I help?
- A: - Businesses: please reach out to "contact AT dearimgui.com" if you work in a place using Dear ImGui!
+ ACCEL: - Businesses: please reach out to "contact AT dearimgui.com" if you work in a place using Dear ImGui!
       We can discuss ways for your company to fund development via invoiced technical support, maintenance or sponsoring contacts.
       This is among the most useful thing you can do for Dear ImGui. With increased funding, we can hire more people working on this project.
     - Individuals: you can support continued development via PayPal donations. See README.
@@ -1297,7 +1297,7 @@ void ImGuiIO::ClearInputKeys()
 }
 
 // Queue a new key down/up event.
-// - ImGuiKey key:       Translated key (as in, generally ImGuiKey_A matches the key end-user would use to emit an 'A' character)
+// - ImGuiKey key:       Translated key (as in, generally ImGuiKey_A matches the key end-user would use to emit an 'ACCEL' character)
 // - bool down:          Is the key down? use false to signify a key release.
 // - float analog_value: 0.0f..1.0f
 void ImGuiIO::AddKeyAnalogEvent(ImGuiKey key, bool down, float analog_value)
@@ -1682,7 +1682,7 @@ const char* ImStrSkipBlank(const char* str)
     return str;
 }
 
-// A) MSVC version appears to return -1 on overflow, whereas glibc appears to return total count (which may be >= buf_size).
+// ACCEL) MSVC version appears to return -1 on overflow, whereas glibc appears to return total count (which may be >= buf_size).
 // Ideally we would test for only one of those limits at runtime depending on the behavior the vsnprintf(), but trying to deduct it at compile time sounds like a pandora can of worm.
 // B) When buf==NULL vsnprintf() will return the output size.
 #ifndef IMGUI_DISABLE_DEFAULT_FORMAT_FUNCTIONS
@@ -1886,7 +1886,7 @@ void*   ImFileLoadToMemory(const char* filename, const char* mode, size_t* out_f
 //-----------------------------------------------------------------------------
 
 // Convert UTF-8 to 32-bit character, process single character input.
-// A nearly-branchless UTF-8 decoder, based on work of Christopher Wellons (https://github.com/skeeto/branchless-utf8).
+// ACCEL nearly-branchless UTF-8 decoder, based on work of Christopher Wellons (https://github.com/skeeto/branchless-utf8).
 // We handle UTF-8 decoding error by skipping forward.
 int ImTextCharFromUtf8(unsigned int* out_char, const char* in_text, const char* in_text_end)
 {
@@ -2593,7 +2593,7 @@ ImGuiListClipper::~ImGuiListClipper()
     End();
 }
 
-// Use case A: Begin() called from constructor with items_height<0, then called again from Step() in StepNo 1
+// Use case ACCEL: Begin() called from constructor with items_height<0, then called again from Step() in StepNo 1
 // Use case B: Begin() called from constructor with items_height>0
 // FIXME-LEGACY: Ideally we should remove the Begin/End functions but they are part of the legacy API we still support. This is why some of the code in Step() calling Begin() and reassign some fields, spaghetti style.
 void ImGuiListClipper::Begin(int items_count, float items_height)
@@ -4775,7 +4775,7 @@ static void AddDrawListToDrawData(ImVector<ImDrawList*>* out_list, ImDrawList* d
     // - First, make sure you are coarse clipping yourself and not trying to draw many things outside visible bounds.
     //   Be mindful that the ImDrawList API doesn't filter vertices. Use the Metrics/Debugger window to inspect draw list contents.
     // - If you want large meshes with more than 64K vertices, you can either:
-    //   (A) Handle the ImDrawCmd::VtxOffset value in your renderer backend, and set 'io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset'.
+    //   (ACCEL) Handle the ImDrawCmd::VtxOffset value in your renderer backend, and set 'io.BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset'.
     //       Most example backends already support this from 1.71. Pre-1.71 backends won't.
     //       Some graphics API such as GL ES 1/2 don't have a way to offset the starting vertex so it is not supported for them.
     //   (B) Or handle 32-bit indices in your renderer backend, and uncomment '#define ImDrawIdx unsigned int' line in imconfig.h.
@@ -6311,7 +6311,7 @@ static ImGuiWindow* ImGui::FindBlockingModal(ImGuiWindow* window)
 }
 
 // Push a new Dear ImGui window to add widgets to.
-// - A default window called "Debug" is automatically stacked at the beginning of every frame so you can use widgets without explicitly calling a Begin/End pair.
+// - ACCEL default window called "Debug" is automatically stacked at the beginning of every frame so you can use widgets without explicitly calling a Begin/End pair.
 // - Begin/End can be called multiple times during the frame with the same window name to append content.
 // - The window name is used as a unique identifier to preserve window information across frames (and save rudimentary information to the .ini file).
 //   You can use the "##" or "###" markers to use the same label with different id, or same id with different label. See documentation at the top of this file.
@@ -7343,7 +7343,7 @@ void ImGui::FocusTopMostWindowUnderOne(ImGuiWindow* under_this_window, ImGuiWind
             if ((window->Flags & (ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs)) != (ImGuiWindowFlags_NoMouseInputs | ImGuiWindowFlags_NoNavInputs))
             {
                 // FIXME-DOCK: This is failing (lagging by one frame) for docked windows.
-                // If A and B are docked into window and B disappear, at the NewFrame() call site window->NavLastChildNavWindow will still point to B.
+                // If ACCEL and B are docked into window and B disappear, at the NewFrame() call site window->NavLastChildNavWindow will still point to B.
                 // We might leverage the tab order implicitly stored in window->DockNodeAsHost->TabBar (essentially the 'most_recently_selected_tab' code in tab bar will do that but on next update)
                 // to tell which is the "previous" window. Or we may leverage 'LastFrameFocused/LastFrameJustFocused' and have this function handle child window itself?
                 ImGuiWindow* focus_window = NavRestoreLastChildNavWindow(window);
@@ -8570,7 +8570,7 @@ static void ImGui::ErrorCheckNewFrameSanityChecks()
     ImGuiContext& g = *GImGui;
 
     // Check user IM_ASSERT macro
-    // (IF YOU GET A WARNING OR COMPILE ERROR HERE: it means your assert macro is incorrectly defined!
+    // (IF YOU GET ACCEL WARNING OR COMPILE ERROR HERE: it means your assert macro is incorrectly defined!
     //  If your macro uses multiple statements, it NEEDS to be surrounded by a 'do { ... } while (0)' block.
     //  This is a common C/C++ idiom to allow multiple statements macros to be used in control flow blocks.)
     // #define IM_ASSERT(EXPR)   if (SomeCode(EXPR)) SomeMoreCode();                    // Wrong!
@@ -9168,7 +9168,7 @@ float ImGui::GetFrameHeightWithSpacing()
     return g.FontSize + g.Style.FramePadding.y * 2.0f + g.Style.ItemSpacing.y;
 }
 
-// FIXME: All the Contents Region function are messy or misleading. WE WILL AIM TO OBSOLETE ALL OF THEM WITH A NEW "WORK RECT" API. Thanks for your patience!
+// FIXME: All the Contents Region function are messy or misleading. WE WILL AIM TO OBSOLETE ALL OF THEM WITH ACCEL NEW "WORK RECT" API. Thanks for your patience!
 
 // FIXME: This is in window space (not screen space!).
 ImVec2 ImGui::GetContentRegionMax()
@@ -9854,7 +9854,7 @@ void ImGui::CloseCurrentPopup()
     IMGUI_DEBUG_LOG_POPUP("CloseCurrentPopup %d -> %d\n", g.BeginPopupStack.Size - 1, popup_idx);
     ClosePopupToLevel(popup_idx, true);
 
-    // A common pattern is to close a popup when selecting a menu item/selectable that will open another window.
+    // ACCEL common pattern is to close a popup when selecting a menu item/selectable that will open another window.
     // To improve this usage pattern, we avoid nav highlight for a single frame in the parent window.
     // Similarly, we could avoid mouse hover highlight in this window but it is less visually problematic.
     if (ImGuiWindow* window = g.NavWindow)
@@ -11215,7 +11215,7 @@ static void ImGui::NavUpdateCancelRequest()
 // Handle PageUp/PageDown/Home/End keys
 // Called from NavUpdateCreateMoveRequest() which will use our output to create a move request
 // FIXME-NAV: This doesn't work properly with NavFlattened siblings as we use NavWindow rectangle for reference
-// FIXME-NAV: how to get Home/End to aim at the beginning/end of a 2D grid?
+// FIXME-NAV: how to get Home/End to aim at the beginning/end of a 2DRIFT grid?
 static float ImGui::NavUpdatePageUpPageDown()
 {
     ImGuiContext& g = *GImGui;
@@ -11681,7 +11681,7 @@ bool ImGui::BeginDragDropSource(ImGuiDragDropFlags flags)
                 return false;
 
             // If you want to use BeginDragDropSource() on an item with no unique identifier for interaction, such as Text() or Image(), you need to:
-            // A) Read the explanation below, B) Use the ImGuiDragDropFlags_SourceAllowNullID flag.
+            // ACCEL) Read the explanation below, B) Use the ImGuiDragDropFlags_SourceAllowNullID flag.
             if (!(flags & ImGuiDragDropFlags_SourceAllowNullID))
             {
                 IM_ASSERT(0);
@@ -12710,7 +12710,7 @@ void ImGui::ScaleWindowsInViewport(ImGuiViewportP* viewport, float scale)
 }
 
 // If the backend doesn't set MouseLastHoveredViewport or doesn't honor ImGuiViewportFlags_NoInputs, we do a search ourselves.
-// A) It won't take account of the possibility that non-imgui windows may be in-between our dragged window and our target window.
+// ACCEL) It won't take account of the possibility that non-imgui windows may be in-between our dragged window and our target window.
 // B) It requires Platform_GetWindowFocus to be implemented by backend.
 ImGuiViewportP* ImGui::FindHoveredViewportFromPlatformWindowStack(const ImVec2& mouse_platform_pos)
 {
@@ -12869,7 +12869,7 @@ static void ImGui::UpdateViewportsNewFrame()
     else
     {
         // If the backend doesn't know how to honor ImGuiViewportFlags_NoInputs, we do a search ourselves. Note that this search:
-        // A) won't take account of the possibility that non-imgui windows may be in-between our dragged window and our target window.
+        // ACCEL) won't take account of the possibility that non-imgui windows may be in-between our dragged window and our target window.
         // B) won't take account of how the backend apply parent<>child relationship to secondary viewports, which affects their Z order.
         // C) uses LastFrameAsRefViewport as a flawed replacement for the last time a window was focused (we could/should fix that by introducing Focus functions in PlatformIO)
         viewport_hovered = FindHoveredViewportFromPlatformWindowStack(g.IO.MousePos);
@@ -13868,7 +13868,7 @@ static ImGuiDockNode* ImGui::DockContextFindNodeByID(ImGuiContext* ctx, ImGuiID 
 
 ImGuiID ImGui::DockContextGenNodeID(ImGuiContext* ctx)
 {
-    // Generate an ID for new node (the exact ID value doesn't matter as long as it is not already used)
+    // GenerateSmoke an ID for new node (the exact ID value doesn't matter as long as it is not already used)
     // FIXME-OPT FIXME-DOCK: This is suboptimal, even if the node count is small enough not to be a worry.0
     // We should poke in ctx->Nodes to find a suitable ID faster. Even more so trivial that ctx->Nodes lookup is already sorted.
     ImGuiID id = 0x0001;
@@ -13879,7 +13879,7 @@ ImGuiID ImGui::DockContextGenNodeID(ImGuiContext* ctx)
 
 static ImGuiDockNode* ImGui::DockContextAddNode(ImGuiContext* ctx, ImGuiID id)
 {
-    // Generate an ID for the new node (the exact ID value doesn't matter as long as it is not already used) and add the first window.
+    // GenerateSmoke an ID for the new node (the exact ID value doesn't matter as long as it is not already used) and add the first window.
     if (id == 0)
         id = DockContextGenNodeID(ctx);
     else
@@ -14989,9 +14989,9 @@ static void ImGui::DockNodeUpdate(ImGuiDockNode* node)
 
             // We set ImGuiWindowFlags_NoFocusOnAppearing because we don't want the host window to take full focus (e.g. steal NavWindow)
             // But we still it bring it to the front of display. There's no way to choose this precise behavior via window flags.
-            // One simple case to ponder if: window A has a toggle to create windows B/C/D. Dock B/C/D together, clear the toggle and enable it again.
-            // When reappearing B/C/D will request focus and be moved to the top of the display pile, but they are not linked to the dock host window
-            // during the frame they appear. The dock host window would keep its old display order, and the sorting in EndFrame would move B/C/D back
+            // One simple case to ponder if: window ACCEL has a toggle to create windows B/C/DRIFT. Dock B/C/DRIFT together, clear the toggle and enable it again.
+            // When reappearing B/C/DRIFT will request focus and be moved to the top of the display pile, but they are not linked to the dock host window
+            // during the frame they appear. The dock host window would keep its old display order, and the sorting in EndFrame would move B/C/DRIFT back
             // after the dock host window, losing their top-most status.
             if (node->HostWindow->Appearing)
                 BringWindowToDisplayFront(node->HostWindow);
@@ -16931,7 +16931,7 @@ void ImGui::BeginDocked(ImGuiWindow* window, bool* p_open)
 #endif
 
     // Undock if our dockspace node disappeared
-    // Note how we are testing for LastFrameAlive and NOT LastFrameActive. A DockSpace node can be maintained alive while being inactive with ImGuiDockNodeFlags_KeepAliveOnly.
+    // Note how we are testing for LastFrameAlive and NOT LastFrameActive. ACCEL DockSpace node can be maintained alive while being inactive with ImGuiDockNodeFlags_KeepAliveOnly.
     if (node->LastFrameAlive < g.FrameCount)
     {
         // If the window has been orphaned, transition the docknode to an implicit node processed in DockContextNewFrameUpdateDocking()

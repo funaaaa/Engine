@@ -15,7 +15,7 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 		for (auto& index_ : texture_) {
 
 			// ロードしてあったら識別番号を返す
-			if (index_.fileName_ == FileName) {
+			if (index_.filePath_ == FileName) {
 
 				return descriptorHeadMgrIndex_[counter];
 
@@ -26,7 +26,7 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 
 	// テクスチャデータを保存
 	Texture proTexture{};
-	proTexture.fileName_ = FileName;
+	proTexture.filePath_ = FileName;
 
 	// ロードしていなかったらロードする
 	DirectX::TexMetadata metadata_;
@@ -102,7 +102,7 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 Color)
 	int counter = 0;
 	for (auto& index_ : texture_) {
 
-		if (index_.fileName_ == selfTex && index_.colorData_.x == Color.x && index_.colorData_.y == Color.y &&
+		if (index_.filePath_ == selfTex && index_.colorData_.x == Color.x && index_.colorData_.y == Color.y &&
 			index_.colorData_.z == Color.z && index_.colorData_.w == Color.w) {
 
 			// すでに生成してあるテクスチャなのでSRVヒープの番号を返す
@@ -156,7 +156,7 @@ int TextureManager::CreateTexture(DirectX::XMFLOAT4 Color)
 
 	// テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
 	Texture proTexture{};
-	proTexture.fileName_ = L"SelfTexture";
+	proTexture.filePath_ = L"SelfTexture";
 	proTexture.metadata_ = {};
 	proTexture.scratchImg_ = {};
 	proTexture.texBuff_ = texbuff;

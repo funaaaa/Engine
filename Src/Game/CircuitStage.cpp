@@ -16,7 +16,7 @@ void CircuitStage::Setting(const int& TireMaskIndex)
 
 	// ステージをセット。
 	int indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/", "stage3.obj", { L"Resource/Game/white.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
+		"Resource/Game/", "stage3.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
 
@@ -74,55 +74,55 @@ void CircuitStage::Setting(const int& TireMaskIndex)
 
 	// アイテムボックステスト用
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1871.5f, 48.0f, -2793.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1871.5f, 48.0f, -2893.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1871.5f, 48.0f, -2693.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-7607.0f, 589.0f, 2801.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-7607.0f, 589.0f, 2951.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-7607.0f, 589.0f, 2651.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1305.0f, 48.0f, 6326.5f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1305.0f, 48.0f, 6476.5f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/stageOrnament/", "blockA.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-1305.0f, 48.0f, 6186.5f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));

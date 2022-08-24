@@ -21,12 +21,13 @@ void ShellObject::Destroy()
 
 	/*===== îjä¸èàóù =====*/
 
-	if (!isDestroyed_) {
+	isActive_ = false;
 
-		PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
-		isDestroyed_ = true;
+	if (isDestroyed_) return;
 
-	}
+	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+	isDestroyed_ = true;
+
 
 }
 
@@ -232,4 +233,16 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 	// ç¿ïWÇï€ë∂
 	prevPos_ = pos_;
 
+}
+
+bool ShellObject::CheckHitOBB(std::weak_ptr<OBB> CharaOBB)
+{
+
+	if (shellID_ == SHELL_ID::BEHIND) {
+
+		return false;
+
+	}
+
+	return obb_->CheckHitOBB(CharaOBB);
 }

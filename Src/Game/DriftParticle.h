@@ -9,17 +9,29 @@ class DriftParticle {
 private:
 
 	int particleIns_;		// パーティクルのインスタンスID
+	int blasIndex_;			// BLASのインデックス
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
 	Vec3 pos_;				// 座標
-	Vec3 forwardVec_;		// 進行方向ベクトル
-	float speed_;			// 移動速度
-	float scale_;			// 大きさ
 	bool isActive_;			// 有効化フラグ
+	bool isAppearingNow_;	// 出現中フラグ アルファ値を濃くする。
+	int appearingTimer_;	// 出現してから消えるまでのタイマー
 
-	const float SPEED = 5.0f;
-	const float SUB_SPEED = 0.1f;
-	const float SCALE = 1.0f;
-	const float SUB_SCALE = 0.05f;
+	const int APPEARING_TIMER = 5;
+
+	const float APPEARING_ALPHA = 0.1f;
+	const float EXIT_ALPHA = 0.1f;
+	const float FIRE_ALPHA = 0.1f;
+
+public:
+
+	enum class ID {
+		SMOKE,
+		FIRE,
+	};
+
+private:
+
+	ID id_;
 
 
 public:
@@ -34,7 +46,8 @@ public:
 	void Init();
 
 	// 生成処理
-	void Generate(const Vec3& Pos, const Vec3& DriftVec, const DirectX::XMMATRIX& CarMatRot, RayConstBufferData& ConstBufferData);
+	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, const bool& IsDash);
+	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

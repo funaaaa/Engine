@@ -13,12 +13,14 @@ static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID ‹üÜ‚
 static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ƒ‰ƒCƒeƒBƒ“ƒO‚à•`‰æ‚às‚í‚È‚¢ƒIƒuƒWƒFƒNƒg
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID ’Êí‚Ìˆ— + GI‚às‚¤B
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK = 9; // instanceID ’Êí‚Ìˆ— + GI + ƒ^ƒCƒ„­
+static const int CHS_IDENTIFICATION_INSTANCE_ALPHA = 10; // instanceID ”¼“§–¾
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // ƒfƒtƒHƒ‹ƒg‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI—p‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 102; // ”½Ë—p‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 103; // Š®‘S”½Ë‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_REFRACTION = 104; // ‹üÜ‚ÌƒŒƒC
+static const int CHS_IDENTIFICATION_RAYID_SHADOW = 105; // ‰e—p‚ÌƒŒƒC
 
 // ƒJƒƒ‰—p‚Ì’è”ƒoƒbƒtƒ@
 struct CameraConstBufferData
@@ -80,6 +82,17 @@ struct DebugConstBufferData
     int isNoGI; // GI‚Ìˆ—‚ğs‚í‚È‚¢ƒtƒ‰ƒO
     int isGIOnlyScene;
 };
+// ƒAƒ‹ƒtƒ@’l“]‘——p‚Ì’è”ƒoƒbƒtƒ@
+struct AlphaData
+{
+    int instanceIndex_;
+    float alpha_;
+};
+#define ALPHA_DATA_COUNT 120
+struct AlphaConstBufferData
+{
+    AlphaData alphaData_[ALPHA_DATA_COUNT];
+};
 
 // ’è”ƒoƒbƒtƒ@
 struct ConstBufferData
@@ -88,6 +101,7 @@ struct ConstBufferData
     LightConstBufferData light;
     ASConstBufferData as;
     DebugConstBufferData debug;
+    AlphaConstBufferData alphaData_;
 };
 
 // ƒ}ƒeƒŠƒAƒ‹î•ñ
@@ -110,21 +124,21 @@ struct Vertex
 };
 
 // ƒyƒCƒ[ƒh
-struct DenoisePayload
+struct Payload
 {
-    float3 color;
-    float3 aoLuminance;
-    float3 lightLuminance;
-    float3 giColor;
-    float3 denoiseMask;
-    uint recursive;
-    uint rayID;
+    uint recursive_; // ”½•œ‰ñ”
+    uint rayID_; // ƒŒƒC‚ÌID
+    float impactAmount_; // ‡Œv‰e‹¿“x
+    float ao_; // AO‚ÌF
+    float3 color_; // Fî•ñ
+    float3 gi_; // GIî•ñ
+    float3 light_; // ƒ‰ƒCƒeƒBƒ“ƒO‚ÌFî•ñ
+    float3 denoiseMask_; // ƒfƒmƒCƒY‚Ìƒ}ƒXƒN‚ÌFî•ñ
+    uint alphaCounter_; // ”–‚¢ƒAƒ‹ƒtƒ@‚ÌƒIƒuƒWƒFƒNƒg‚É“–‚½‚Á‚½”
+    uint isCullingAlpha_; // ”–‚¢ƒAƒ‹ƒtƒ@‚ÌƒIƒuƒWƒFƒNƒg‚Éˆê’èˆÈã“–‚½‚Á‚½‚çŸ‚©‚çƒAƒ‹ƒtƒ@‚ğ–³Œø‰»‚·‚éƒtƒ‰ƒOB
+    float2 pad_;
 };
-// ‰eæ“¾—pƒyƒCƒ[ƒh
-struct ShadowPayload
-{
-    bool isShadow;
-};
+
 struct MyAttribute
 {
     float2 barys;
@@ -213,13 +227,22 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     rayDesc.TMin = 0.1f;
     rayDesc.TMax = TMax;
 
-    ShadowPayload payload;
-    payload.isShadow = false;
+    Payload payloadData;
+    payloadData.impactAmount_ = 0.0f;
+    payloadData.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
+    payloadData.recursive_ = 0;
+    payloadData.ao_ = 0;
+    payloadData.color_ = float3(0, 0, 0);
+    payloadData.denoiseMask_ = float3(0, 0, 0);
+    payloadData.gi_ = float3(0, 0, 0);
+    payloadData.light_ = float3(0, 0, 0);
+    payloadData.isCullingAlpha_ = false;
+    payloadData.alphaCounter_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShader‚ğƒXƒLƒbƒv
+    //flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShader‚ğƒXƒLƒbƒv
     
     // ???C?g????O?B
     uint rayMask = ~(0x08);
@@ -232,9 +255,9 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     1,
     1, // MissƒVƒF[ƒ_[‚ÌƒCƒ“ƒfƒbƒNƒX‚ğw’è‚·‚éB
     rayDesc,
-    payload);
+    payloadData);
 
-    return payload.isShadow;
+    return payloadData.impactAmount_;
 }
 bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
@@ -244,13 +267,22 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     rayDesc.TMin = 0.1f;
     rayDesc.TMax = TMax;
 
-    ShadowPayload payload;
-    payload.isShadow = false;
+    Payload payload;
+    payload.impactAmount_ = 0;
+    payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
+    payload.recursive_ = 0;
+    payload.ao_ = 0;
+    payload.color_ = float3(0, 0, 0);
+    payload.denoiseMask_ = float3(0, 0, 0);
+    payload.gi_ = float3(0, 0, 0);
+    payload.light_ = float3(0, 0, 0);
+    payload.isCullingAlpha_ = false;
+    payload.alphaCounter_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShader‚ğƒXƒLƒbƒv
+    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShader‚ğƒXƒLƒbƒv
     
     // ???C?g????O?B
     uint rayMask = ~(0x08);
@@ -265,7 +297,7 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     rayDesc,
     payload);
 
-    return payload.isShadow;
+    return payload.impactAmount_;
 }
 
 // AO—p‚Ì‰eƒŒƒC‚ğËo
@@ -277,13 +309,22 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     rayDesc.TMin = 0.1f;
     rayDesc.TMax = TMax;
 
-    ShadowPayload payload;
-    payload.isShadow = false;
+    Payload payload;
+    payload.impactAmount_ = 0;
+    payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
+    payload.recursive_ = 0;
+    payload.ao_ = 0;
+    payload.color_ = float3(0, 0, 0);
+    payload.denoiseMask_ = float3(0, 0, 0);
+    payload.gi_ = float3(0, 0, 0);
+    payload.light_ = float3(0, 0, 0);
+    payload.isCullingAlpha_ = false;
+    payload.alphaCounter_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShader‚ğƒXƒLƒbƒv
+    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
+    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
+    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShader‚ğƒXƒLƒbƒv
     
     // ???C?g????O?B
     uint rayMask = ~(0x08);
@@ -298,11 +339,11 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     rayDesc,
     payload);
 
-    return payload.isShadow;
+    return payload.impactAmount_;
 }
 
 // ’l‚ğİ’è‚µ‚ÄƒŒƒC‚ğ”­ËB
-void ShootRay(uint RayID, float3 Origin, float3 Direction, inout DenoisePayload Payload, RaytracingAccelerationStructure GRtScene)
+void ShootRay(uint RayID, float3 Origin, float3 Direction, inout Payload PayloadData, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
     rayDesc.Origin = Origin;
@@ -311,15 +352,16 @@ void ShootRay(uint RayID, float3 Origin, float3 Direction, inout DenoisePayload 
     rayDesc.TMax = 300000.0f;
 
     // ???C??ID???p???C????B
-    Payload.rayID = RayID;
+    int rayID = PayloadData.rayID_;
+    PayloadData.rayID_ = RayID;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShader‚ğƒXƒLƒbƒv
+    //flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShader‚ğÀs
     
     // ???C?g????O?B
-    uint rayMask = ~(0x08);
+    uint rayMask = 0xFF;
 
     TraceRay(
     GRtScene,
@@ -329,7 +371,9 @@ void ShootRay(uint RayID, float3 Origin, float3 Direction, inout DenoisePayload 
     1,
     0, // MissƒVƒF[ƒ_[‚ÌƒCƒ“ƒfƒbƒNƒX‚ğw’è‚·‚éB
     rayDesc,
-    Payload);
+    PayloadData);
+    
+    PayloadData.rayID_ = rayID;
     
 }
 
