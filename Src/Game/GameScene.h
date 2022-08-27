@@ -52,10 +52,18 @@ private:
 	STAGE_ID nowStageID;
 
 	// UIä÷åW
-	std::shared_ptr<Sprite> nowRapCountSprite_;
-	std::shared_ptr<Sprite> maxRapCountSprite_;
-	std::shared_ptr<Sprite> rapSlashSprite_;
+	std::shared_ptr<Sprite> coinUI_;
+	std::shared_ptr<Sprite> rapUI_;
+	std::array<std::shared_ptr<Sprite>, 2> coinCountUI_;
+	std::shared_ptr<Sprite> nowRapCountUI_;
+	std::shared_ptr<Sprite> slashUI_;
+	std::shared_ptr<Sprite> maxRapCountUI_;
 	std::array<int, 11> numFontHandle_;
+
+	std::shared_ptr<Sprite> itemFrameUI_;
+	float itemFrameEasingTimer_;
+	const Vec3 ITEM_FRAME_OUT_POS = Vec3(128.0f, -200.0f, 1.0f);
+	const Vec3 ITEM_FRAME_IN_POS = Vec3(128.0f, 125.0f, 1.0f);
 
 	// èWíÜê¸
 	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;

@@ -214,6 +214,9 @@
     <ClCompile Include="Src\Game\ConcentrationLineMgr.cpp">
       <Filter>アプリケーション\集中線</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\MugenStage.cpp">
+      <Filter>アプリケーション\ステージ\各ステージ</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -464,6 +467,9 @@
     </ClInclude>
     <ClInclude Include="Src\Game\ConcentrationLineMgr.h">
       <Filter>アプリケーション\集中線</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\MugenStage.h">
+      <Filter>アプリケーション\ステージ\各ステージ</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

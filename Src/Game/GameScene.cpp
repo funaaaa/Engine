@@ -17,6 +17,7 @@
 #include "Pipline.h"
 #include "WindowsAPI.h"
 #include "CircuitStage.h"
+#include "MugenStage.h"
 #include "RayComputeShader.h"
 #include "StageObjectMgr.h"
 #include "BLAS.h"
@@ -61,7 +62,7 @@ GameScene::GameScene()
 	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {});
 
 	// ステージをセッティングする。
-	stages_.emplace_back(std::make_shared<CircuitStage>());
+	stages_.emplace_back(std::make_shared<MugenStage>());
 
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::CIRCUIT]->Setting(tireMaskTexture_->GetUAVIndex());
@@ -128,13 +129,7 @@ GameScene::GameScene()
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
 
-	// スプライトを生成。
-	nowRapCountSprite_ = std::make_shared<Sprite>();
-	nowRapCountSprite_->GenerateSpecifyTextureID(Vec3(95, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
-	maxRapCountSprite_ = std::make_shared<Sprite>();
-	maxRapCountSprite_->GenerateSpecifyTextureID(Vec3(180, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
-	rapSlashSprite_ = std::make_shared<Sprite>();
-	rapSlashSprite_->GenerateSpecifyTextureID(Vec3(140, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+
 
 	// フォントをロード
 	{
@@ -150,6 +145,35 @@ GameScene::GameScene()
 		numFontHandle_[9] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/9.png");
 		numFontHandle_[10] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/slash.png");
 	}
+
+
+	// スプライトを生成。
+	//nowRapCountSprite_ = std::make_shared<Sprite>();
+	//nowRapCountSprite_->GenerateSpecifyTextureID(Vec3(95, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	//maxRapCountSprite_ = std::make_shared<Sprite>();
+	//maxRapCountSprite_->GenerateSpecifyTextureID(Vec3(180, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	//rapSlashSprite_ = std::make_shared<Sprite>();
+	//rapSlashSprite_->GenerateSpecifyTextureID(Vec3(140, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	coinUI_ = std::make_shared<Sprite>();
+	coinUI_->GenerateForTexture(Vec3(140, 647, 0.1f), Vec2(192 / 2.0f, 64 / 2.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/coinUI.png");
+	rapUI_ = std::make_shared<Sprite>();
+	rapUI_->GenerateForTexture(Vec3(327, 647, 0.1f), Vec2(224 / 2.0f, 64 / 2.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/rapUI.png");
+
+	coinCountUI_[0] = std::make_shared<Sprite>();
+	coinCountUI_[0]->GenerateSpecifyTextureID(Vec3(145, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[0]);
+	coinCountUI_[1] = std::make_shared<Sprite>();
+	coinCountUI_[1]->GenerateSpecifyTextureID(Vec3(178, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[0]);
+
+	nowRapCountUI_ = std::make_shared<Sprite>();
+	nowRapCountUI_->GenerateSpecifyTextureID(Vec3(321, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[1]);
+	slashUI_ = std::make_shared<Sprite>();
+	slashUI_->GenerateSpecifyTextureID(Vec3(356, 651, 0.1f), Vec2(16.0f * 0.6f, 32.0f * 0.6f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[10]);
+	maxRapCountUI_ = std::make_shared<Sprite>();
+	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(381, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
+
+	itemFrameUI_ = std::make_shared<Sprite>();
+	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/itemFrame.png");
+	itemFrameEasingTimer_ = 1;
 
 	// 集中線
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
@@ -207,6 +231,7 @@ void GameScene::Init()
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
 	sunAngle_ = 0;
+	itemFrameEasingTimer_ = 1;
 
 }
 
@@ -247,9 +272,7 @@ void GameScene::Update()
 	}
 
 	// ラップ数のUIを更新。
-	maxRapCountSprite_->ChangeTextureID(numFontHandle_[3], 0);
-	nowRapCountSprite_->ChangeTextureID(numFontHandle_[rapCount_], 0);
-	rapSlashSprite_->ChangeTextureID(numFontHandle_[10], 0);
+	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount_ + 1], 0);
 
 	// ステージを更新。
 	stages_[STAGE_ID::CIRCUIT]->Update();
@@ -286,6 +309,33 @@ void GameScene::Update()
 		concentrationLine_->Generate();
 	}
 	concentrationLine_->Update();
+
+
+
+	// アイテムを取得した瞬間や使った瞬間にイージングタイマーを初期化。
+	if (characterMgr_->GetPlayerIns().lock()->GetIsGetItem() || characterMgr_->GetPlayerIns().lock()->GetUseItem()) {
+
+		itemFrameEasingTimer_ = 0;
+
+	}
+
+	// アイテムのフレームの位置を更新。
+	itemFrameEasingTimer_ += 0.05f;
+	if (1.0f < itemFrameEasingTimer_) itemFrameEasingTimer_ = 1.0f;
+	if (characterMgr_->GetPlayerIns().lock()->GetIsItem()) {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseOutQuint(itemFrameEasingTimer_);
+		itemFrameUI_->ChangePosition(ITEM_FRAME_OUT_POS + (ITEM_FRAME_IN_POS - ITEM_FRAME_OUT_POS) * easingAmount);
+
+	}
+	else {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseInQuint(itemFrameEasingTimer_);
+		itemFrameUI_->ChangePosition(ITEM_FRAME_IN_POS + (ITEM_FRAME_OUT_POS - ITEM_FRAME_IN_POS) * easingAmount);
+
+	}
 
 }
 
@@ -514,11 +564,21 @@ void GameScene::Draw()
 	static int firstTime = 0;
 	if (firstTime != 0) {
 
+		//nowRapCountSprite_->Draw();
+		//maxRapCountSprite_->Draw();
+		//rapSlashSprite_->Draw();
+
 		concentrationLine_->Draw();
 
-		nowRapCountSprite_->Draw();
-		maxRapCountSprite_->Draw();
-		rapSlashSprite_->Draw();
+		itemFrameUI_->Draw();
+
+		coinCountUI_[0]->Draw();
+		coinCountUI_[1]->Draw();
+		nowRapCountUI_->Draw();
+		slashUI_->Draw();
+		maxRapCountUI_->Draw();
+		coinUI_->Draw();
+		rapUI_->Draw();
 
 	}
 	if (firstTime == 0) ++firstTime;
@@ -630,7 +690,13 @@ void GameScene::InputImGUI()
 
 	}
 
+	//Vec3 position = itemFrameUI_->GetPos();
+	//float pos[3] = { position.x_, position.y_, position.z_ };
 
+	//ImGui::DragFloat3("Position", pos, 1.0f);
+
+	//position = Vec3(pos[0], pos[1], pos[2]);
+	//itemFrameUI_->ChangePosition(position);
 
 
 
@@ -712,9 +778,6 @@ void GameScene::GenerateGimmick()
 
 /*
 
-集中線を実装する。
-集中線クラスとマネージャーを作ってGameSceneに持たせる。
-P1のキャラの集中線フラグが経っていたら集中線を生成する。
-集中線はぱっと発生し、画面外にゆっくり移動しながらだんだん薄くなって消えていく。
+Spriteのアルファがいかれている。
 
 */

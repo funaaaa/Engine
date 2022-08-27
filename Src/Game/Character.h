@@ -39,6 +39,7 @@ public:
 	bool onGroundPrev_;		// 前フレームのonGround_
 	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 	bool isConcentrationLine_;	// 集中線を出すかフラグ。
+	bool isUseItem_;	// アイテムを使った瞬間。
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
@@ -60,8 +61,8 @@ public:
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
-	const float MAX_GRAV = 7.0f;		// 重力の最大量
-	const float ADD_GRAV = 0.05f;		// 重力の加算量
+	const float MAX_GRAV = 8.0f;		// 重力の最大量
+	const float ADD_GRAV = 0.2f;		// 重力の加算量
 	const Vec3 PLAYER_DEF_POS = Vec3(0, 30, -30);
 
 
@@ -98,6 +99,14 @@ public:
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
 
+
+	/*-- ジャンプのブーストに関する変数 --*/
+
+	float jumpBoostSpeed_;
+	const float JUMP_BOOST_SPEED = 10.0f;
+	const float SUB_JUMP_BOOST_SPEED = 0.2f;
+
+
 public:
 
 	struct TireUVSet {
@@ -118,9 +127,10 @@ private:
 	TireMaskUV tireMaskUV_;				// タイヤ痕を出す際に仕様
 
 	const float HANDLE_DRIFT = 0.05f;	// ドリフト時のハンドリングの角度
-	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値
-	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
+	const float MAX_BOOST_SPEED = 15.0f;// ブーストの移動量の最大値
+	const float SUB_BOOST_SPEED = 0.4f;	// ブーストの移動量の現残量
 	const int DRIFT_BOOST_TIMER = 30;	// ドリフトでブーストするまでのタイマー
+	const int DRIFT_TIMER = 20;			// ドリフト時のタイマー
 
 
 public:
@@ -162,7 +172,9 @@ public:
 	const Vec3& GetForwardVec() { return forwardVec_; }
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
-	bool GetIsGetItem() { return isGetItem_; }
+	bool GetIsGetItem() { return isGetItem_; }	// アイテムを取得した瞬間
+	bool GetIsItem();	// アイテムを持っているか。
+	bool GetUseItem() { return isUseItem_; }	// アイテムを使った瞬間。
 	bool GetIdConcentrationLine() { return isConcentrationLine_; }
 
 	// デバッグ用

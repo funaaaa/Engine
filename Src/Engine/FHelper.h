@@ -219,4 +219,20 @@ namespace FEasing {
 		return Time < 0.5f ? 16.0f * Time * Time * Time * Time * Time : 1.0f - powf(-2.0f * Time + 2.0f, 5.0f) / 2.0f;
 	}
 
+	inline float EaseInQuint(const float& Time) {
+		return Time * Time * Time * Time * Time;
+	}
+
+	inline float EaseOutQuint(const float& Time) {
+		return 1.0f - powf(1.0f - Time, 5);
+	}
+
+	//inline float EaseOutExpo(const float& Time) {
+	//	return Time == 1.0f ? 1.0f : 1.0f - powf(2.0f, -10.0f * Time);
+	//}
+
+	//inline float EaseInExpo(const float& Time) {
+	//	return Time == 0.0f ? 0.0f : 1.0f - powf(2.0f, 10.0f * Time);
+	//}
+
 }

@@ -8,7 +8,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 {
 	// パイプランの名前の保存
 	this->piplineID_ = PiplineID;
-	
+
 	// 設定構造体
 	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
 	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -19,16 +19,16 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 
 	// 頂点バッファの生成
 	Vertex vertexBuff;
-	vertexBuff.pos_ = Vec3(-Size.x_, Size.y_, 10);		// 左下
+	vertexBuff.pos_ = Vec3(-1.0f, 1.0f, 10);		// 左下
 	vertexBuff.uv_ = Vec2(0, 1);
 	vertex_.push_back(vertexBuff);
-	vertexBuff.pos_ = Vec3(-Size.x_, -Size.y_, 10);	// 左上
+	vertexBuff.pos_ = Vec3(-1.0f, -1.0f, 10);	// 左上
 	vertexBuff.uv_ = Vec2(0, 0);
 	vertex_.push_back(vertexBuff);
-	vertexBuff.pos_ = Vec3(Size.x_, Size.y_, 10);		// 右下
+	vertexBuff.pos_ = Vec3(1.0f, 1.0f, 10);		// 右下
 	vertexBuff.uv_ = Vec2(1, 1);
 	vertex_.push_back(vertexBuff);
-	vertexBuff.pos_ = Vec3(Size.x_, -Size.y_, 10);		// 右上
+	vertexBuff.pos_ = Vec3(1.0f, -1.0f, 10);		// 右上
 	vertexBuff.uv_ = Vec2(1, 0);
 	vertex_.push_back(vertexBuff);
 
@@ -64,7 +64,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	// 行列を初期化
 	projectionID_ = ProjectionID;
 	rotationMat_ = DirectX::XMMatrixIdentity();
-	scaleMat_ = DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+	scaleMat_ = DirectX::XMMatrixScaling(Size.x_, Size.y_, 1.0f);
 	positionMat_ = DirectX::XMMatrixTranslation(CenterPos.x_, CenterPos.y_, CenterPos.z_);
 	pos_ = CenterPos;
 

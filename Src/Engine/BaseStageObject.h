@@ -25,6 +25,7 @@ public:
 	enum class OBJECT_ID {
 		STAGE,			// ステージ
 		STAGE_GRASS,	// ステージの草
+		WALL,			// 壁
 		GOAL,			// ゴール
 		MIDDLE_POINT,	// 中間地点
 		ORNAMENT,		// 装飾オブジェクト

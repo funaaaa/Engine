@@ -136,8 +136,8 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			BaseStageObject::OBJECT_ID indexObjID = index->GetObjectID();
 
 			// オブジェクトごとに当たり判定を行う
-			if (indexObjID == BaseStageObject::OBJECT_ID::STAGE || indexObjID == BaseStageObject::OBJECT_ID::STAGE_GRASS) {
-				output = StageMeshCollider(Input, InputRayData, output, indexObjID == BaseStageObject::OBJECT_ID::STAGE);
+			if (indexObjID == BaseStageObject::OBJECT_ID::STAGE || indexObjID == BaseStageObject::OBJECT_ID::STAGE_GRASS || indexObjID == BaseStageObject::OBJECT_ID::WALL) {
+				output = StageMeshCollider(Input, InputRayData, output, indexObjID);
 			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ORNAMENT) {
 
@@ -232,14 +232,10 @@ void StageObjectMgr::Display(const int& Index)
 
 }
 
-BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, const bool& IsStage)
+BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID)
 {
 
 	/*===== ステージ、草とのメッシュの当たり判定 =====*/
-
-	// レイ用の設定を追加。
-	InputRayData.rayPos_ = Input.targetPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
 
 	// 当たり判定の結果保存用変数。
 	bool isHit = false;
@@ -248,61 +244,65 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	Vec3 hitNormal;
 	Vec2 hitUV;
 
-	// 当たり判定を行う。
-	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
+	if (ObjectID != BaseStageObject::OBJECT_ID::WALL) {
 
-	// 当たった距離がY軸のサイズよりも小さかったら。
-	isHit &= (hitDistance - Input.targetSize_.y_) <= 0;
-	isHit &= 0 < hitDistance;
+		// レイ用の設定を追加。
+		InputRayData.rayPos_ = Input.targetPos_;
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
 
-	// 当たっていたら押し戻す。
-	if (isHit) {
+		// 当たり判定を行う。
+		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
-		// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
-		const float PUSH_BACK_OFFSET = 1.0f;
+		// 当たった距離がY軸のサイズよりも小さかったら。
+		isHit &= (hitDistance - Input.targetSize_.y_) <= 0;
+		isHit &= 0 < hitDistance;
 
-		// 法線方向に当たった分押し戻す。
-		Input.targetPos_ += hitNormal * (Input.targetSize_.y_ - (hitDistance + PUSH_BACK_OFFSET));
+		// 当たっていたら押し戻す。
+		if (isHit) {
 
-		// 斜め床の回転処理。
-		RotObliqueFloor(Input, hitNormal, Output);
+			// ぴったり押し戻すと次のフレームで空中判定になってしまうので、若干オフセットを設ける。
+			const float PUSH_BACK_OFFSET = 1.0f;
 
-		// ステージだったら
-		if (IsStage) {
+			// 法線方向に当たった分押し戻す。
+			Input.targetPos_ += hitNormal * (Input.targetSize_.y_ - (hitDistance + PUSH_BACK_OFFSET));
 
-			Output.isHitStage_ = true;
+			// 斜め床の回転処理。
+			RotObliqueFloor(Input, hitNormal, Output);
 
-		}
-		// 草だったら
-		else {
+			// ステージだったら
+			if (ObjectID == BaseStageObject::OBJECT_ID::STAGE) {
 
-			Output.isHitStageGrass_ = true;
+				Output.isHitStage_ = true;
+
+			}
+			// 草だったら
+			else if (ObjectID == BaseStageObject::OBJECT_ID::STAGE_GRASS) {
+
+				Output.isHitStageGrass_ = true;
+
+			}
 
 		}
 
 	}
 
-	// 貫通防止で、通常のステージのときのみ正面方向にもレイを飛ばす。
-	if (IsStage) {
+	// 貫通防止で正面方向にもレイを飛ばす。
+	InputRayData.rayPos_ = Input.targetPrevPos_;
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
 
-		InputRayData.rayPos_ = Input.targetPrevPos_;
-		InputRayData.rayDir_ = (Input.targetPos_ - Input.targetPrevPos_).GetNormal();
+	// 当たり判定を行う。
+	isHit = false;
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
-		// 当たり判定を行う。
-		isHit = false;
-		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
+	// 当たった距離がY軸のサイズよりも小さかったら。
+	isHit &= (hitDistance - Input.targetSize_.x_) <= 0;
+	isHit &= 0 < hitDistance;
 
-		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= fabs(hitDistance) < (Input.targetPos_ - Input.targetPrevPos_).Length();
+	// 当たっていたら押し戻す。
+	if (isHit) {
 
-		// 当たっていたら押し戻す。
-		if (isHit) {
-
-			// 法線方向に当たった分押し戻す。
-			Input.targetPos_ = impactPos + hitNormal * hitDistance;
-
-		}
-
+		// 法線方向に当たった分押し戻す。
+		Input.targetPos_ = impactPos + hitNormal * hitDistance;
 
 	}
 
@@ -373,7 +373,7 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 	/*-- クォータニオンを使って回転 --*/
 
 	// 回転軸が{0,0,0}だったら処理を飛ばす。
-	if (axisOfRevolution.Length() != 0 && amountOfRotation != 0) {
+	if (axisOfRevolution.Length() != 0 && Vec3(HitNormal).Length() != 0) {
 
 		// クォータニオンを求める。
 		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(axisOfRevolution.ConvertXMVECTOR(), amountOfRotation);

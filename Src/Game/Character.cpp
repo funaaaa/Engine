@@ -78,10 +78,11 @@ Character::Character(CHARA_ID CharaID)
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec_ = Vec3(0, 1, 0);
-	size_ = Vec3(30, 30, 30);
+	size_ = Vec3(50, 30, 50);
 	rotY_ = 0;
 	speed_ = 0;
 	gravity_ = 0;
+	jumpBoostSpeed_ = 0;
 	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
 	boostTimer_ = 0;
@@ -91,6 +92,7 @@ Character::Character(CHARA_ID CharaID)
 	onGrass_ = false;
 	isGetItem_ = false;
 	isTireMask_ = false;
+	isUseItem_ = false;
 	IsTurningIndicatorRed_ = false;
 	isRotRightSide_ = false;
 	turningIndicatorTimer_ = 0;
@@ -125,16 +127,18 @@ void Character::Init()
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec_ = Vec3(0, 1, 0);
-	size_ = Vec3(30, 30, 30);
+	size_ = Vec3(50, 30, 50);
 	returnDefPosTimer_ = 0;
 	rotY_ = 0;
 	speed_ = 0;
 	gravity_ = 0;
 	boostSpeed_ = 0;
 	boostTimer_ = 0;
+	jumpBoostSpeed_ = 0;
 	turningIndicatorTimer_ = 0;
 	canNotMoveTimer_ = 0;
 	isDrift_ = false;
+	isUseItem_ = false;
 	onGround_ = true;
 	onGrass_ = false;
 	isGetItem_ = false;
@@ -215,7 +219,6 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 		boostSpeed_ = MAX_BOOST_SPEED;
 
-
 		// 加速の割合を求める。
 		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
 
@@ -256,6 +259,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	// 接地フラグを保存。
 	onGroundPrev_ = onGround_;
+
+
+
 
 }
 
@@ -412,10 +418,17 @@ float Character::GetNowSpeedPer()
 
 	/*====== 移動速度の割合を計算 =====*/
 
-	float per = (speed_ + boostSpeed_) / (MAX_SPEED + MAX_BOOST_SPEED);
+	float per = (speed_ + boostSpeed_ + jumpBoostSpeed_) / (MAX_SPEED + MAX_BOOST_SPEED);
+
+	if (1.0f < per) per = 1.0f;
 
 	return per;
 
+}
+
+bool Character::GetIsItem()
+{
+	return item_.operator bool();
 }
 
 void Character::Input(RayConstBufferData& ConstBufferData)
@@ -455,7 +468,7 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	else {
 
 		// 移動していなくて空中にいたら移動量を0に近づける。
-		speed_ -= speed_ / 200.0f;
+		speed_ -= speed_ / 100.0f;
 
 	}
 
@@ -605,7 +618,7 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 		if (DRIFT_BOOST_TIMER <= driftBoostTimer_) {
 
 			boostSpeed_ = MAX_BOOST_SPEED;
-			boostTimer_ = 10;
+			boostTimer_ = DRIFT_TIMER;
 
 		}
 
@@ -625,12 +638,14 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	}
 
 	// アイテムを操作
+	isUseItem_ = false;
 	if (operation.isUseItemTrigger_ && item_.operator bool()) {
 
 		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
 
 			boostSpeed_ = MAX_BOOST_SPEED;
 			boostTimer_ = 30;
+			isUseItem_ = true;
 			item_.reset();
 
 		}
@@ -644,6 +659,8 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	}
 
 	if (operation.isUseItemRelease_ && item_.operator bool()) {
+
+		isUseItem_ = true;
 
 		if (isShotBehind_) {
 			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
@@ -693,7 +710,7 @@ void Character::Move()
 	}
 
 	// 座標移動させる。
-	pos_ += forwardVec_ * (speed_ + boostSpeed_);
+	pos_ += forwardVec_ * (speed_ + boostSpeed_ + jumpBoostSpeed_);
 
 	// ドリフト時のブースト移動量を0に近づける。
 	if (0 < boostSpeed_) {
@@ -801,6 +818,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 		forwardVec_ = output.forwardVec_;
 		upVec_ = output.upVec_;
 
+
 	}
 	if (output.isHitStageGrass_) {
 
@@ -818,7 +836,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 
 	}
 	// ゴーストだったら当たり判定を飛ばす。
-	if (output.isHitItemBox_ && charaID_ != CHARA_ID::GHOST) {
+	if (output.isHitItemBox_ && charaID_ != CHARA_ID::GHOST && !item_.operator bool()) {
 
 		// アイテムを取得したフラグ
 		isGetItem_ = true;
@@ -870,6 +888,32 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 
 			canNotMoveTimer_ = CAN_NOT_MOVE_TIMER_SHELL_HIT;
 			shellHitRot_ = rotY_;
+
+		}
+
+	}
+
+
+
+
+
+	if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_1) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER))) {
+
+		jumpBoostSpeed_ = JUMP_BOOST_SPEED;
+
+	}
+	else if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_2) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_RIGHT_SHOULDER))) {
+
+		boostSpeed_ = MAX_BOOST_SPEED;
+		boostTimer_ = 10;
+
+	}
+	else {
+
+		jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
+		if (jumpBoostSpeed_ < 0) {
+
+			jumpBoostSpeed_ = 0;
 
 		}
 
@@ -937,6 +981,7 @@ void Character::RotObliqueFloor(const Vec3& HitNormal)
 		// 上ベクトルを更新。
 		upVec_ = normal_;
 
+
 		//正面ベクトルを更新。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
 
@@ -978,6 +1023,18 @@ void Character::InclineCarBody()
 {
 
 	/*===== 車体を傾ける処理 =====*/
+
+	// 空中に居たら。
+	//if (!onGround_) {
+
+	//	// 移動した方向ベクトル
+	//	Vec3 movedVec = (pos_ - prevPos_).GetNormal();
+
+	//	if (!std::isnan(movedVec.x_) && charaID_ == CHARA_ID::P1) {
+	//		RotObliqueFloor(movedVec);
+	//	}
+
+	//}
 
 	// BODYの回転行列を保存。
 	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);

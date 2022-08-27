@@ -197,6 +197,7 @@
     <ClCompile Include="Src\Game\FirstAIWaypointMgr.cpp" />
     <ClCompile Include="Src\Game\GhostOperationObject.cpp" />
     <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
+    <ClCompile Include="Src\Game\MugenStage.cpp" />
     <ClCompile Include="Src\Game\PlayerOperationObject.cpp" />
     <ClCompile Include="Src\Game\ShellItem.cpp" />
     <ClCompile Include="Src\Game\ShellObject.cpp" />
@@ -281,6 +282,7 @@
     <ClInclude Include="Src\Game\GameSceneMode.h" />
     <ClInclude Include="Src\Game\GhostOperationObject.h" />
     <ClInclude Include="Src\Game\ItemBoxObject.h" />
+    <ClInclude Include="Src\Game\MugenStage.h" />
     <ClInclude Include="Src\Game\PlayerOperationObject.h" />
     <ClInclude Include="Src\Game\ShellItem.h" />
     <ClInclude Include="Src\Game\ShellObject.h" />
