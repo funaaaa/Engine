@@ -413,6 +413,28 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 
 }
 
+Vec3 Character::GetCameraForwardVec()
+{
+	/*===== カメラ用正面ベクトル取得関数 =====*/
+
+	//Vec3 movedVec = pos_ - prevPos_;
+
+	return forwardVec_;
+
+	return FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+	//// 移動していなかったら。
+	//if (movedVec.Length() == 0) {
+
+	//	return forwardVec_;
+
+	//}
+
+	//// 移動していたら。
+	//return movedVec.GetNormal();
+
+}
+
 float Character::GetNowSpeedPer()
 {
 
@@ -1024,20 +1046,65 @@ void Character::InclineCarBody()
 
 	/*===== 車体を傾ける処理 =====*/
 
-	// 空中に居たら。
-	//if (!onGround_) {
-
-	//	// 移動した方向ベクトル
-	//	Vec3 movedVec = (pos_ - prevPos_).GetNormal();
-
-	//	if (!std::isnan(movedVec.x_) && charaID_ == CHARA_ID::P1) {
-	//		RotObliqueFloor(movedVec);
-	//	}
-
-	//}
-
 	// BODYの回転行列を保存。
 	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
+
+	// 空中に居たら。
+	if (!onGround_) {
+
+		// 移動した方向ベクトル
+		Vec3 movedVec = (pos_ - prevPos_).GetNormal();
+
+		if (!std::isnan(movedVec.x_) && charaID_ == CHARA_ID::P1) {
+
+			// デフォルトの上ベクトル。
+			Vec3 defUpVec = Vec3(0, -1, 0);
+
+			// 回転軸を求める。
+			Vec3 axisOfRevolution = defUpVec.Cross(movedVec);
+
+			// 回転軸を正規化する。
+			if (axisOfRevolution.Length() != 0) {
+				axisOfRevolution.Normalize();
+			}
+
+			/*-- 内積から回転量を取得 --*/
+
+			// 回転量を求める。
+			float amountOfRotation = defUpVec.Dot(movedVec);
+
+			// 逆余弦を求める関数を使用して求めたcosθをラジアンに変換。
+			amountOfRotation = acosf(amountOfRotation) - DirectX::XM_PIDIV2;
+
+
+			/*-- クォータニオンを使って回転 --*/
+
+			// 回転軸が{0,0,0}だったら処理を飛ばす。
+			if (axisOfRevolution.Length() != 0 && amountOfRotation != 0) {
+
+				// クォータニオンを求める。
+				DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(axisOfRevolution.ConvertXMVECTOR(), amountOfRotation);
+
+				// 求めたクォータニオンを行列に治す。
+				DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
+
+				// プレイヤーを回転させる。
+				PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, quaternionMat);
+
+				// 上ベクトルを基準としたクォータニオンを求める。
+				Vec3 normal_ = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+				DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
+
+				// クォータニオンを行列に治す。
+				DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
+
+				// プレイヤーを回転させる。
+				PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
+
+			}
+		}
+
+	}
 
 	// ブースト時の回転。
 	if (0 < boostSpeed_) {
@@ -1102,7 +1169,7 @@ void Character::InclineCarBody()
 		float timerRate = static_cast<float>(driftRotTimer_) / static_cast<float>(MAX_DRIFT_ROT_TIMER);
 
 		// 回転量にイージングをかける。
-		baseDriftRot_ = std::fabs(FEasing::EaseInCubic(timerRate) * MAX_DRIFT_ROT) * (handleAmount_ < 0 ? -1 : 1);
+		baseDriftRot_ = std::fabs(FEasing::EaseInCubic(timerRate) * MAX_DRIFT_ROT) * handleAmount_;
 
 		// 回転方向を保存。
 		isRotRightSide_ = 0 < handleAmount_;

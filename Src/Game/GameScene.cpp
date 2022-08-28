@@ -262,7 +262,7 @@ void GameScene::Update()
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
-	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer());
+	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer());
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {

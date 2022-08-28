@@ -169,6 +169,8 @@ public:
 
 
 	const Vec3& GetPos() { return pos_; }
+	const Vec3& GetPrevPos() { return prevPos_; }
+	Vec3 GetCameraForwardVec();
 	const Vec3& GetForwardVec() { return forwardVec_; }
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();

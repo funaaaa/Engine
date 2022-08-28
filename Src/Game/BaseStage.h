@@ -31,7 +31,7 @@ public:
 		Vec3 resultPos_;			// 当たり判定結果の座標
 		Vec3 forwardVec_;			// 正面ベクトル
 		Vec3 upVec_;				// 上ベクトル
-		Vec3 ornamentHitNormal_;	// 装飾簿ジェクトの当たった面の法線
+		Vec3 ornamentHitNormal_;	// 装飾オブジェクトの当たった面の法線
 		bool isHitStage_;			// ステージと当たった判定
 		bool isHitStageGrass_;		// ステージの草と当たった判定
 		bool isHitGoal_;			// ゴールと当たった判定
