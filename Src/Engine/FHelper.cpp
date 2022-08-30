@@ -18,35 +18,35 @@ Vec3 FHelper::CalBary(const Vec3& PosA, const Vec3& PosB, const Vec3& PosC, cons
 	return uvw;
 }
 
+struct CheckHitVertex {
+
+	Vec3 pos_;
+	Vec3 normal_;
+	Vec2 uv_;
+
+};
+
+// レイとの当たり判定用のポリゴン構造体
+struct CheckHitPorygon {
+	bool isActive_ = true;
+	CheckHitVertex p1_;
+	CheckHitVertex p2_;
+	CheckHitVertex p3_;
+};
+
+// あたっているポリゴンのデータを保存するよう変数	衝突地点、距離、衝突面の法線
+struct HitPorygonData
+{
+	Vec3 pos_;
+	float distance_;
+	Vec3 normal_;
+	CheckHitPorygon targetPolygon_;
+};
+
 bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& ImpactPos, float& Distance, Vec3& HitNormal, Vec2& HitUV)
 {
 
 	/*----- targetからポリゴンを抜き取る -----*/
-
-	struct CheckHitVertex {
-
-		Vec3 pos_;
-		Vec3 normal_;
-		Vec2 uv_;
-
-	};
-
-	// レイとの当たり判定用のポリゴン構造体
-	struct CheckHitPorygon {
-		bool isActive_ = true;
-		CheckHitVertex p1_;
-		CheckHitVertex p2_;
-		CheckHitVertex p3_;
-	};
-
-	// あたっているポリゴンのデータを保存するよう変数	衝突地点、距離、衝突面の法線
-	struct HitPorygonData
-	{
-		Vec3 pos_;
-		float distance_;
-		Vec3 normal_;
-		CheckHitPorygon targetPolygon_;
-	};
 
 	std::vector<HitPorygonData> hitPolygon{};
 
@@ -221,7 +221,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 		uv.x_ += hitPolygon[min].targetPolygon_.p1_.uv_.x_ * bary.x_;
 		uv.x_ += hitPolygon[min].targetPolygon_.p2_.uv_.x_ * bary.y_;
 		uv.x_ += hitPolygon[min].targetPolygon_.p3_.uv_.x_ * bary.z_;
-		
+
 		uv.y_ += hitPolygon[min].targetPolygon_.p1_.uv_.y_ * bary.x_;
 		uv.y_ += hitPolygon[min].targetPolygon_.p2_.uv_.y_ * bary.y_;
 		uv.y_ += hitPolygon[min].targetPolygon_.p3_.uv_.y_ * bary.z_;

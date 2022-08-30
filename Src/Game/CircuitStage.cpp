@@ -183,7 +183,7 @@ void CircuitStage::Destroy()
 
 }
 
-void CircuitStage::Update()
+void CircuitStage::Update(RayConstBufferData& ConstBufferData)
 {
 
 	/*===== XVˆ— =====*/
@@ -191,6 +191,8 @@ void CircuitStage::Update()
 	++timer_;
 
 	stageObjectMgr_->Update(timer_);
+
+	ConstBufferData;
 
 }
 

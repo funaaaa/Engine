@@ -223,6 +223,17 @@ void MugenStage::Setting(const int& TireMaskIndex)
 
 	}
 
+	// 点光源
+	ConvertGimmickInfoFromBlender pointLightData;
+	pointLightData.Convert("Resource/Game/Stage/", "MugenStagePointLight.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(200, 200, 200));
+
+	int pointLightCount = pointLightData.GetVertexSize();
+	for (int index = 0; index < pointLightCount; ++index) {
+
+		pointLightPos.emplace_back(pointLightData.GetVertex(index));
+
+	}
+
 	// ゴールをセット。
 	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
@@ -405,7 +416,7 @@ void MugenStage::Destroy()
 
 }
 
-void MugenStage::Update()
+void MugenStage::Update(RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 更新処理 =====*/
@@ -413,6 +424,17 @@ void MugenStage::Update()
 	++timer_;
 
 	stageObjectMgr_->Update(timer_);
+
+	// 点光源をセット。
+	for (auto& index : pointLightPos) {
+
+		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = true;
+		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isShadow_ = false;
+		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPower_ = 2000;
+		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPos_ = index;
+		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightSize_ = 1;
+
+	}
 
 }
 

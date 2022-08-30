@@ -382,7 +382,7 @@ void mainMS(inout Payload payload)
 void shadowMS(inout Payload payload)
 {
     // 何にも当たっていないということなので、影は生成しない。
-    payload.impactAmount_ = true;
+    payload.impactAmount_ = 1.0f;
 }
 
 // ライティング前処理
@@ -539,6 +539,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     
 }
 
+// ライティング処理
 bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Vertex Vtx)
 {
     

@@ -19,7 +19,7 @@ public:
 
 	void Setting(const int& TireMaskIndex)override;
 	void Destroy()override;
-	void Update()override;
+	void Update(RayConstBufferData& ConstBufferData)override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
 	
 	// ゴールの表示、非表示

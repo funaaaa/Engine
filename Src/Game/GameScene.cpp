@@ -275,7 +275,7 @@ void GameScene::Update()
 	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount_ + 1], 0);
 
 	// ステージを更新。
-	stages_[STAGE_ID::CIRCUIT]->Update();
+	stages_[STAGE_ID::CIRCUIT]->Update(constBufferData_);
 
 	// ゴールの表示非表示を切り替え。
 	if (isPassedMiddlePoint_) {
@@ -635,45 +635,45 @@ void GameScene::InputImGUI()
 	/*===== IMGUI更新 =====*/
 
 	// 太陽の移動速度を更新。
-	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
+	ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
 
-	//// メッシュを表示する。
-	//bool isMesh = constBufferData_.debug_.isMeshScene_;
-	//ImGui::Checkbox("Mesh Scene", &isMesh);
-	//constBufferData_.debug_.isMeshScene_ = isMesh;
+	// メッシュを表示する。
+	bool isMesh = constBufferData_.debug_.isMeshScene_;
+	ImGui::Checkbox("Mesh Scene", &isMesh);
+	constBufferData_.debug_.isMeshScene_ = isMesh;
 
-	//// 法線を表示する。
-	//bool isNormal = constBufferData_.debug_.isNormalScene_;
-	//ImGui::Checkbox("Normal Scene", &isNormal);
-	//constBufferData_.debug_.isNormalScene_ = isNormal;
+	// 法線を表示する。
+	bool isNormal = constBufferData_.debug_.isNormalScene_;
+	ImGui::Checkbox("Normal Scene", &isNormal);
+	constBufferData_.debug_.isNormalScene_ = isNormal;
 
-	//// ライトがあたった面だけ表示するフラグを更新。
-	//bool isLightHit = constBufferData_.debug_.isLightHitScene_;
-	//ImGui::Checkbox("LightHit Scene", &isLightHit);
-	//constBufferData_.debug_.isLightHitScene_ = isLightHit;
+	// ライトがあたった面だけ表示するフラグを更新。
+	bool isLightHit = constBufferData_.debug_.isLightHitScene_;
+	ImGui::Checkbox("LightHit Scene", &isLightHit);
+	constBufferData_.debug_.isLightHitScene_ = isLightHit;
 
-	//// デバッグ用でノイズ画面を出すためのフラグをセット。
-	//bool isNoise = constBufferData_.debug_.isNoiseScene_;
-	//ImGui::Checkbox("Noise Scene", &isNoise);
-	//constBufferData_.debug_.isNoiseScene_ = isNoise;
+	// デバッグ用でノイズ画面を出すためのフラグをセット。
+	bool isNoise = constBufferData_.debug_.isNoiseScene_;
+	ImGui::Checkbox("Noise Scene", &isNoise);
+	constBufferData_.debug_.isNoiseScene_ = isNoise;
 
-	//// AOを行うかのフラグをセット。
-	//bool isNoAO_ = constBufferData_.debug_.isNoAO_;
-	//ImGui::Checkbox("NoAO Scene", &isNoAO_);
-	//constBufferData_.debug_.isNoAO_ = isNoAO_;
+	// AOを行うかのフラグをセット。
+	bool isNoAO_ = constBufferData_.debug_.isNoAO_;
+	ImGui::Checkbox("NoAO Scene", &isNoAO_);
+	constBufferData_.debug_.isNoAO_ = isNoAO_;
 
-	//// GIを行うかのフラグをセット。
-	//bool isNoGI_ = constBufferData_.debug_.isNoGI_;
-	//ImGui::Checkbox("NoGI Scene", &isNoGI_);
-	//constBufferData_.debug_.isNoGI_ = isNoGI_;
+	// GIを行うかのフラグをセット。
+	bool isNoGI_ = constBufferData_.debug_.isNoGI_;
+	ImGui::Checkbox("NoGI Scene", &isNoGI_);
+	constBufferData_.debug_.isNoGI_ = isNoGI_;
 
-	//// GIのみを描画するかのフラグをセット。
-	//bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
-	//ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
-	//constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
+	// GIのみを描画するかのフラグをセット。
+	bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
+	ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
+	constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
 
-	//// FPSを表示するかのフラグをセット。
-	//ImGui::Checkbox("Display FPS", &isDisplayFPS_);
+	// FPSを表示するかのフラグをセット。
+	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
 	//// アイテムデバッグ用。
 	//bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
