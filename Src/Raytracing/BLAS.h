@@ -126,10 +126,10 @@ public:
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex_; }
-	std::vector<Vec3> GetVertexPos() { return vertexPos_; }
-	std::vector<Vec3> GetVertexNormal() { return vertexNormal_; }
-	std::vector<UINT> GetVertexIndex() { return vertIndex_; }
-	std::vector<Vec2> GetVertexUV() { return vertexUV_; }
+	const std::vector<Vec3>& GetVertexPos() { return vertexPos_; }
+	const std::vector<Vec3>& GetVertexNormal() { return vertexNormal_; }
+	const std::vector<UINT>& GetVertexIndex() { return vertIndex_; }
+	const std::vector<Vec2>& GetVertexUV() { return vertexUV_; }
 
 private:
 

@@ -50,6 +50,7 @@ public:
 
 	// ƒQƒbƒ^
 	int GetBlasIndex(const int& Index) { return objects_[Index]->GetBLASIndex(); }
+	int GetInstanceIndex(const int& Index) { return objects_[Index]->GetInstanceIndex(); }
 
 
 private:

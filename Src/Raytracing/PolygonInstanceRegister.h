@@ -1,6 +1,7 @@
 #pragma once
 #include "Singleton.h"
 #include "Vec.h"
+#include "FHelper.h"
 
 #include <DirectXMath.h>
 #include <array>
@@ -37,7 +38,7 @@ public:
 	void Setting();
 
 	// Insを生成する。
-	int CreateInstance(const int& BlasIndex, const UINT& ShaderID);
+	int CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData = false);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);
@@ -98,6 +99,9 @@ public:
 
 	// レジスターのサイズを取得する関数。
 	UINT GetRegisterSize() { return UINT(instance_.size()); }
+
+	// メッシュの当たり判定データを取得。
+	const std::vector<FHelper::CheckHitPorygon>& GetMeshCollisionData(const int& Index);
 
 	// hlsl側での動きを判断する用の識別子
 	enum SHADER_ID {

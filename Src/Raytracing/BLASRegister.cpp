@@ -173,3 +173,23 @@ Vec3 BLASRegister::GetVertexLengthMax(const int& Index)
 {
 	return blas_[Index]->GetVertexLengthMax();
 }
+
+const std::vector<Vec3>& BLASRegister::GetVertex(const int& Index)
+{
+	return blas_[Index]->GetVertexPos();
+}
+
+const std::vector<Vec3>& BLASRegister::GetNormal(const int& Index)
+{
+	return blas_[Index]->GetVertexNormal();
+}
+
+const std::vector<Vec2>& BLASRegister::GetUV(const int& Index)
+{
+	return blas_[Index]->GetVertexUV();
+}
+
+const std::vector<UINT>& BLASRegister::GetVertexIndex(const int& Index)
+{
+	return blas_[Index]->GetVertexIndex();
+}

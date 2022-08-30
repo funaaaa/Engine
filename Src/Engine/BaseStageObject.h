@@ -67,7 +67,7 @@ public:
 
 	// ƒQƒbƒ^
 	inline const int& GetBLASIndex() { return blasIndex_; }
-	inline const int& GetINSTANCEIndex() { return insIndex_; }
+	inline const int& GetInstanceIndex() { return insIndex_; }
 	inline const bool& GetIsActive() { return isActive_; }
 	inline std::shared_ptr<OBB> GetOBB() { return obb_; }
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }

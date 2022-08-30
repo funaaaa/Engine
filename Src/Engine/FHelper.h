@@ -162,15 +162,33 @@ namespace FHelper {
 	Vec3 CalBary(const Vec3& PosA, const Vec3& PosB, const Vec3& PosC, const Vec3& TargetPos);
 
 	// レイとオブジェクトの当たり判定
+	struct CheckHitVertex {
+
+		Vec3 pos_;
+		Vec3 normal_;
+		Vec2 uv_;
+
+	};
+
+	// レイとの当たり判定用のポリゴン構造体
+	struct CheckHitPorygon {
+		bool isActive_ = true;
+		CheckHitVertex p1_;
+		CheckHitVertex p2_;
+		CheckHitVertex p3_;
+	};
+
+	// あたっているポリゴンのデータを保存するよう変数	衝突地点、距離、衝突面の法線
+	struct HitPorygonData
+	{
+		Vec3 pos_;
+		float distance_;
+		Vec3 normal_;
+		CheckHitPorygon targetPolygon_;
+	};
 	struct RayToModelCollisionData {
 
-		std::vector<Vec3> targetVertex_;
-		std::vector<UINT> targetIndex_;
-		std::vector<Vec3> targetNormal_;
-		std::vector<Vec2> targetUV_;
-		DirectX::XMMATRIX matRot_;
-		DirectX::XMMATRIX matScale_;
-		DirectX::XMMATRIX matTrans_;
+		std::vector<FHelper::CheckHitPorygon> targetPolygonData_;
 		Vec3 rayPos_;
 		Vec3 rayDir_;
 
