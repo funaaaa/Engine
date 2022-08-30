@@ -238,6 +238,13 @@ void MugenStage::Setting(const int& TireMaskIndex)
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
 	stageObjectMgr_->AddTrans(indexBuff, Vec3(23, -1210, -2278));
 
+	// 見えない壁
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/Stage/", "MugenStageInvWall.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// 見えない壁を設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->NonDisplay(indexBuff);
+
 	// ステージの壁をセット。
 	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::WALL, BaseStageObject::COLLISION_ID::MESH,
 	//	"Resource/Game/Stage/", "MugenStageWall.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);

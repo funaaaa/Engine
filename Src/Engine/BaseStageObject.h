@@ -33,6 +33,7 @@ public:
 		BOOST_GIMMICK,	// 加速ギミック
 		ITEM_BOX,		// アイテムボックス
 		STEP_BOOST_GIMMICK,	// 段差加速ギミック
+		INV_WALL,		// 見えない壁
 	};
 
 
