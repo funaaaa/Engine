@@ -248,6 +248,81 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	Vec3 hitNormal;
 	Vec2 hitUV;
 
+	// 貫通防止で正面方向にもレイを飛ばす。
+	InputRayData.rayPos_ = Input.targetPos_;
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
+
+	// 当たり判定を行う。
+	isHit = false;
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
+
+	// 当たった距離がY軸のサイズよりも小さかったら。
+	isHit &= (hitDistance - Input.targetSize_.x_) <= 0;
+	isHit &= 0 < hitDistance;
+
+	// 当たっていたら押し戻す。
+	if (isHit) {
+
+		Vec3 pushBackVec = (Input.targetPos_ - impactPos).GetNormal();
+
+		// 法線方向に当たった分押し戻す。
+		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.z_;
+		Output.resultPos_ = Input.targetPos_;
+		Output.isHitStage_ = true;
+		Output.upVec_ = Input.targetUpVec_;
+
+	}
+
+	// 貫通防止で右方向にもレイを飛ばす。
+	InputRayData.rayPos_ = Input.targetPos_;
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
+
+	// 当たり判定を行う。
+	isHit = false;
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
+
+	// 当たった距離がY軸のサイズよりも小さかったら。
+	isHit &= (hitDistance - Input.targetSize_.x_) <= 0;
+	isHit &= 0 < hitDistance;
+
+	// 当たっていたら押し戻す。
+	if (isHit) {
+
+		Vec3 pushBackVec = (Input.targetPos_ - impactPos).GetNormal();
+
+		// 法線方向に当たった分押し戻す。
+		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.x_;
+		Output.resultPos_ = Input.targetPos_;
+		Output.isHitStage_ = true;
+		Output.upVec_ = Input.targetUpVec_;
+
+	}
+
+	// 貫通防止で左方向にもレイを飛ばす。
+	InputRayData.rayPos_ = Input.targetPos_;
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
+
+	// 当たり判定を行う。
+	isHit = false;
+	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
+
+	// 当たった距離がY軸のサイズよりも小さかったら。
+	isHit &= (hitDistance - Input.targetSize_.x_) <= 0;
+	isHit &= 0 < hitDistance;
+
+	// 当たっていたら押し戻す。
+	if (isHit) {
+
+		Vec3 pushBackVec = (Input.targetPos_ - impactPos).GetNormal();
+
+		// 法線方向に当たった分押し戻す。
+		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.x_;
+		Output.resultPos_ = Input.targetPos_;
+		Output.isHitStage_ = true;
+		Output.upVec_ = Input.targetUpVec_;
+
+	}
+
 	if (ObjectID != BaseStageObject::OBJECT_ID::WALL) {
 
 		// レイ用の設定を追加。
@@ -287,26 +362,6 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 			}
 
 		}
-
-	}
-
-	// 貫通防止で正面方向にもレイを飛ばす。
-	InputRayData.rayPos_ = Input.targetPrevPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
-
-	// 当たり判定を行う。
-	isHit = false;
-	isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
-
-	// 当たった距離がY軸のサイズよりも小さかったら。
-	isHit &= (hitDistance - Input.targetSize_.x_) <= 0;
-	isHit &= 0 < hitDistance;
-
-	// 当たっていたら押し戻す。
-	if (isHit) {
-
-		// 法線方向に当たった分押し戻す。
-		Input.targetPos_ = impactPos + hitNormal * hitDistance;
 
 	}
 

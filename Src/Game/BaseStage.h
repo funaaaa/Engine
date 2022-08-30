@@ -20,6 +20,7 @@ public:
 		Vec3 targetPrevPos_;			// 当たり判定を行うオブジェクトの前フレームの座標
 		Vec3 targetPos_;				// 当たり判定を行うオブジェクトの座標
 		Vec3 targetSize_;				// 当たり判定を行うオブジェクトのサイズ
+		Vec3 targetUpVec_;				// 上ベクトル
 		std::weak_ptr<OBB> targetOBB_;	// 当たり判定を行うオブジェクトのOBB
 		float targetRotY_;				// 当たり判定を行うオブジェクトのY軸の回転量
 		int targetInsIndex_;			// 当たり判定を行うオブジェクトのインスタンスのインデックス

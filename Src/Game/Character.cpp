@@ -788,6 +788,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	input.targetInsIndex_ = playerModel_.carBodyInsIndex_;
 	input.targetOBB_ = obb_;
 	input.targetPos_ = pos_;
+	input.targetUpVec_ = upVec_;
 	input.targetPrevPos_ = prevPos_;
 	input.targetRotY_ = rotY_;
 	input.targetSize_ = size_;
