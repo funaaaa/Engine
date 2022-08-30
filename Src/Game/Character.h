@@ -40,6 +40,7 @@ public:
 	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 	bool isConcentrationLine_;	// 集中線を出すかフラグ。
 	bool isUseItem_;	// アイテムを使った瞬間。
+	bool isJumpActionTrigger_;	// ジャンプアクションのトリガー
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
@@ -128,7 +129,7 @@ private:
 
 	const float HANDLE_DRIFT = 0.05f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 15.0f;// ブーストの移動量の最大値
-	const float SUB_BOOST_SPEED = 0.4f;	// ブーストの移動量の現残量
+	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
 	const int DRIFT_BOOST_TIMER = 30;	// ドリフトでブーストするまでのタイマー
 	const int DRIFT_TIMER = 20;			// ドリフト時のタイマー
 

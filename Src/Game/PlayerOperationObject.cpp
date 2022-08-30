@@ -80,6 +80,11 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 		operation.isGetItem_ = true;
 	}
 
+	// ジャンプアクションのトリガー判定。
+	if (Input::Ins()->IsKeyTrigger(DIK_SPACE) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_RIGHT_SHOULDER)) {
+		operation.isJumpActionTrigger_ = true;
+	}
+
 	// ゴースト情報の書き込みが有効化されていたら。
 	if (isWriteGhostInfo_) {
 

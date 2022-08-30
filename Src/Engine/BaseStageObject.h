@@ -30,8 +30,9 @@ public:
 		MIDDLE_POINT,	// 中間地点
 		ORNAMENT,		// 装飾オブジェクト
 		FLOATING_ORNAMENT,	// ふわふわ動く装飾オブジェクト
-		BOOS_GIMMICK,	// 加速ギミック
+		BOOST_GIMMICK,	// 加速ギミック
 		ITEM_BOX,		// アイテムボックス
+		STEP_BOOST_GIMMICK,	// 段差加速ギミック
 	};
 
 

@@ -70,6 +70,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitStageGrass_ = false;
 	output.isHitStage_ = false;
 	output.isHitItemBox_ = false;
+	output.isHitStepBoostGimmick_ = false;
 	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
 
 	for (auto& index : objects_) {
@@ -99,7 +100,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			BaseStageObject::OBJECT_ID indexObjID = index->GetObjectID();
 
 			// オブジェクトごとに保存。
-			if (indexObjID == BaseStageObject::OBJECT_ID::BOOS_GIMMICK) {
+			if (indexObjID == BaseStageObject::OBJECT_ID::BOOST_GIMMICK) {
 				output.isHitBoostGimmick_ = true;
 			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::GOAL) {
@@ -107,6 +108,9 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 				output.isHitMiddlePoint_ = true;
+			}
+			else if (indexObjID == BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK) {
+				output.isHitStepBoostGimmick_ = true;
 			}
 			// 当たったオブジェクトがアイテムボックスだったら。
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ITEM_BOX && Input.isPlayer_) {

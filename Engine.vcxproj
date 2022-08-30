@@ -192,6 +192,7 @@
     <ClCompile Include="Src\Game\CharacterMgr.cpp" />
     <ClCompile Include="Src\Game\ConcentrationLine.cpp" />
     <ClCompile Include="Src\Game\ConcentrationLineMgr.cpp" />
+    <ClCompile Include="Src\Game\ConvertGimmickInfoFromBlender.cpp" />
     <ClCompile Include="Src\Game\FirstAIOperationObject.cpp" />
     <ClCompile Include="Src\Game\FirstAIWayPoint.cpp" />
     <ClCompile Include="Src\Game\FirstAIWaypointMgr.cpp" />
@@ -276,6 +277,7 @@
     <ClInclude Include="Src\Game\CharacterMgr.h" />
     <ClInclude Include="Src\Game\ConcentrationLine.h" />
     <ClInclude Include="Src\Game\ConcentrationLineMgr.h" />
+    <ClInclude Include="Src\Game\ConvertGimmickInfoFromBlender.h" />
     <ClInclude Include="Src\Game\FileName.h" />
     <ClInclude Include="Src\Game\FirstAIOperationObject.h" />
     <ClInclude Include="Src\Game\FirstAIWaypointMgr.h" />

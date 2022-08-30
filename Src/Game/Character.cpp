@@ -145,6 +145,7 @@ void Character::Init()
 	IsTurningIndicatorRed_ = false;
 	isTireMask_ = false;
 	isConcentrationLine_ = false;
+	isJumpActionTrigger_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 
 }
@@ -421,7 +422,7 @@ Vec3 Character::GetCameraForwardVec()
 
 	return forwardVec_;
 
-	return FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+	//return FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 	//// 移動していなかったら。
 	//if (movedVec.Length() == 0) {
@@ -695,11 +696,14 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 	}
 
+	// ジャンプアクションのトリガー判定。
+	isJumpActionTrigger_ = operation.isJumpActionTrigger_;
+
 	// 入力を保存する。
 	handleAmount_ = operation.handleDriveRate_;
 
 	// デバッグ用 Bボタンが押されたら初期位置に戻す。
-	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_SPACE)) {
+	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_R)) {
 
 		pos_ = PLAYER_DEF_POS;
 		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
@@ -801,7 +805,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 
 		// ブーストをマックスにする。
 		boostSpeed_ = MAX_BOOST_SPEED;
-		boostTimer_ = 10;
+		boostTimer_ = 20;
 
 	}
 	if (output.isHitGoal_) {
@@ -897,6 +901,14 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 
 	}
 
+	// 段差加速オブジェクトと当たっていて、ジャンプアクションボタンを押していたら。
+	if (output.isHitStepBoostGimmick_ && isJumpActionTrigger_) {
+
+		// 加速させる。
+		jumpBoostSpeed_ = JUMP_BOOST_SPEED;
+
+	}
+
 	// その他の変数を初期化。
 	pos_ = output.resultPos_;
 
@@ -919,27 +931,27 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 
 
 
-	if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_1) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER))) {
+	/*	if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_1) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER))) {
 
-		jumpBoostSpeed_ = JUMP_BOOST_SPEED;
-
-	}
-	else if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_2) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_RIGHT_SHOULDER))) {
-
-		boostSpeed_ = MAX_BOOST_SPEED;
-		boostTimer_ = 10;
-
-	}
-	else {
-
-		jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
-		if (jumpBoostSpeed_ < 0) {
-
-			jumpBoostSpeed_ = 0;
+			jumpBoostSpeed_ = JUMP_BOOST_SPEED;
 
 		}
+		else */if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_2) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER))) {
 
-	}
+			boostSpeed_ = MAX_BOOST_SPEED;
+			boostTimer_ = 10;
+
+		}
+		else {
+
+			jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
+			if (jumpBoostSpeed_ < 0) {
+
+				jumpBoostSpeed_ = 0;
+
+			}
+
+		}
 
 }
 

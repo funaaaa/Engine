@@ -5,6 +5,7 @@
 #include "FHelper.h"
 #include "BLASRegister.h"
 #include "BLAS.h"
+#include "ConvertGimmickInfoFromBlender.h"
 
 void MugenStage::Setting(const int& TireMaskIndex)
 {
@@ -40,6 +41,202 @@ void MugenStage::Setting(const int& TireMaskIndex)
 		"Resource/Game/Stage/", "MugenStageGrass2.obj", { L"Resource/Game/green.png",L"Resource/Game/grassNormal.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+
+	// ステージの山をセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+		"Resource/Game/Stage/", "MugenStageOrnament.obj", { L"Resource/Game/green.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+
+
+	// 段差加速ギミックをセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(697, 56, -1768));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.343f, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(815, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(962, 56, -2551));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.343f, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(815, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(1399, 80, -3225));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.343f, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(698, 338, 600));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(1854, 104, -4358));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.376f, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(698, 338, 600));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(2883, 56, -6397));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.343f, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(285, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(2883, 56, -8095));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.343f, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(285, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(3585, 56, -9240));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.343f, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(575, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(8364, -612, -6995));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.959, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(206, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(7097, -914, -5374));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.959, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(206, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(5134, -1194, -5050));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -0.959, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(206, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(3258, -1228, -3264));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -1.237, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(206, 295, 431));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(380, -1228, -2275));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.165f, -1.237, 0.0f));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(206, 295, 431));
+
+	// 加速ギミックをセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(1861, 47, -4395));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, -0.395, 0));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(606, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(3593, 31, -9243));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, -0.395, 0));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(577, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(4940, 119, -12816));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.057, -0.663, -0.404));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(281, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(6732, 194, -13264));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.114, -1.724, -0.465));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(318, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(8406, 192, -12935));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.081, -1.993, -0.536));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(430, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(10002, 225, -11907));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.304, -2.160, -0.667));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(430, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(10975, 211, -10432));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.624, -2.603, -0.731));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(348, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(350, -1269, -2276));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-1.571, -3.486, -0.908));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(188, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-6632, 21, 838));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-2.508, -3.171, -1.001));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(217, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-7000, 253, 2231));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.187, -2.794, -0.836));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(309, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-6587, 213, 3629));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.262, -2.284, -0.708));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(309, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-5500, 211, 4613));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.711, -2.655, -0.880));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(309, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-4136, 235, 5001));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.553, -2.066, -0.732));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(377, 200, 200));
+
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-2450, 221, 4659));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.718, -1.312, -0.742));
+	stageObjectMgr_->ChangeScale(indexBuff, Vec3(344, 200, 200));
+
+
+	// アイテムボックス
+	ConvertGimmickInfoFromBlender itemBoxData;
+	itemBoxData.Convert("Resource/Game/Stage/", "MugenStageItemBox.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(200, 200, 200));
+
+	int itemBoxCount = itemBoxData.GetVertexSize();
+	for (int index = 0; index < itemBoxCount; ++index) {
+
+		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
+			"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		stageObjectMgr_->ChangeTrans(indexBuff, itemBoxData.GetVertex(index));
+		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
+		stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
+
+	}
+
+	// ゴールをセット。
+	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
+	// ゴールのパラメーターを設定。
+	stageObjectMgr_->AddScale(goalInsIndex, Vec3(622, 200.0f, 200.0f));
+	stageObjectMgr_->ChangeRotate(goalInsIndex, Vec3(0, -0.499, 0));
+	stageObjectMgr_->AddTrans(goalInsIndex, Vec3(-81, -30, 263));
+
+	// 中間地点をセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::MIDDLE_POINT, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "middlePointCollision.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
+	// 中間地点を設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->AddTrans(indexBuff, Vec3(23, -1210, -2278));
 
 	// ステージの壁をセット。
 	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::WALL, BaseStageObject::COLLISION_ID::MESH,
@@ -148,28 +345,28 @@ void MugenStage::Setting(const int& TireMaskIndex)
 
 
 	//// 加速ギミックをセット。
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 	//	"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	//stageObjectMgr_->ChangeTrans(indexBuff, Vec3(100, -15, 1400));
+	//stageObjectMgr_->ChangeTrans(indexBuff, Vec3(0, 0, 0));
 	//stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 200, 200));
 
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 	//	"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	//stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-80, -15, 3000));
 	//stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 200, 200));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 	//	"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	//stageObjectMgr_->ChangeTrans(indexBuff, Vec3(100, -15, 4000));
 	//stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 200, 200));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 	//	"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	//stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-5842, -29, -167));
 	//stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 1.48f, 0));
 	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(200, 200, 200));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 	//	"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	//stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-2352, -18, 6336));
 	//stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 1.58f, 0));
