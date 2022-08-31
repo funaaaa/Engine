@@ -210,7 +210,7 @@ void MugenStage::Setting(const int& TireMaskIndex)
 
 	// アイテムボックス
 	ConvertGimmickInfoFromBlender itemBoxData;
-	itemBoxData.Convert("Resource/Game/Stage/", "MugenStageItemBox.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(200, 200, 200));
+	itemBoxData.Convert("Resource/Game/Stage/", "MugenStageItemBox.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(120, 120, 120));
 
 	int itemBoxCount = itemBoxData.GetVertexSize();
 	for (int index = 0; index < itemBoxCount; ++index) {
@@ -225,7 +225,7 @@ void MugenStage::Setting(const int& TireMaskIndex)
 
 	// 点光源
 	ConvertGimmickInfoFromBlender pointLightData;
-	pointLightData.Convert("Resource/Game/Stage/", "MugenStagePointLight.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(200, 200, 200));
+	pointLightData.Convert("Resource/Game/Stage/", "MugenStagePointLight.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(120, 120, 120));
 
 	int pointLightCount = pointLightData.GetVertexSize();
 	for (int index = 0; index < pointLightCount; ++index) {
@@ -278,15 +278,15 @@ void MugenStage::Update(RayConstBufferData& ConstBufferData)
 	stageObjectMgr_->Update(timer_);
 
 	// 点光源をセット。
-	for (auto& index : pointLightPos) {
+	//for (auto& index : pointLightPos) {
 
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = true;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isShadow_ = false;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPower_ = 2000;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPos_ = index;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightSize_ = 1;
+	//	ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = true;
+	//	ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isShadow_ = false;
+	//	ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPower_ = 2000;
+	//	ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPos_ = index;
+	//	ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightSize_ = 1;
 
-	}
+	//}
 
 }
 

@@ -357,7 +357,6 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.z_;
 		Output.resultPos_ = Input.targetPos_;
 		Output.upVec_ = Input.targetUpVec_;
-		Output.isHitStage_ = true;
 
 	}
 
@@ -381,7 +380,6 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 		// 法線方向に当たった分押し戻す。
 		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.x_;
 		Output.resultPos_ = Input.targetPos_;
-		Output.isHitStage_ = true;
 		Output.upVec_ = Input.targetUpVec_;
 
 	}
@@ -401,12 +399,9 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 	// 当たっていたら押し戻す。
 	if (isHit) {
 
-		Vec3 pushBackVec = (Input.targetPos_ - impactPos).GetNormal();
-
 		// 法線方向に当たった分押し戻す。
-		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.x_;
+		Input.targetPos_ += hitNormal * (fabs(hitDistance - Input.targetSize_.x_));
 		Output.resultPos_ = Input.targetPos_;
-		Output.isHitStage_ = true;
 		Output.upVec_ = Input.targetUpVec_;
 
 	}
