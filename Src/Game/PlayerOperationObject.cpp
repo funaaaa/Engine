@@ -62,6 +62,8 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 
 	// 左右のハンドル操作についての入力処理
 	operation.handleDriveRate_ = Input::Ins()->PadStick(XINPUT_THUMB_LEFTSIDE);
+	// デッドラインを設ける。
+	if (std::fabs(operation.handleDriveRate_) < 0.1f) operation.handleDriveRate_ = 0.0f;
 	if (Input::Ins()->IsKey(DIK_D)) {
 		operation.handleDriveRate_ = 1.0f;
 	}

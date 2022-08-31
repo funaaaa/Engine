@@ -63,7 +63,7 @@ public:
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
 	const float MAX_GRAV = 8.0f;		// 重力の最大量
-	const float ADD_GRAV = 0.2f;		// 重力の加算量
+	const float ADD_GRAV = 0.4f;		// 重力の加算量
 	const Vec3 PLAYER_DEF_POS = Vec3(0, 30, -30);
 
 
@@ -94,11 +94,22 @@ public:
 
 	/*-- ドリフトに関する変数 --*/
 
+	Vec3 driftJumpVec_;
+	float driftJumpSpeed_;
+	const float DRIFT_JUMP_SPEED = 6.0f;
+	const float SUB_DRIFT_JUMP_SPEED = 0.6f;
 	float boostSpeed_;					// ブーストされているときの移動速度
-	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
+	int driftTimer_;
 	int boostTimer_;					// ブーストするフレーム数
+	bool isDriftRight_;					// ドリフトが右側かどうか。
+	bool isInputLTPrev_;				// 前フレームにLTが押されたかどうか
+	bool isInputLT_;					// LTが押されたかどうか。
+	bool isDriftJump_;					// ドリフト前のジャンプ中かどうか。
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
+
+	const std::array<int, 3> DRIFT_TIMER = { 30,60,90 };
+	const std::array<int, 3> DRIFT_BOOST = { 10,20,30 };
 
 
 	/*-- ジャンプのブーストに関する変数 --*/
@@ -130,8 +141,6 @@ private:
 	const float HANDLE_DRIFT = 0.05f;	// ドリフト時のハンドリングの角度
 	const float MAX_BOOST_SPEED = 15.0f;// ブーストの移動量の最大値
 	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
-	const int DRIFT_BOOST_TIMER = 30;	// ドリフトでブーストするまでのタイマー
-	const int DRIFT_TIMER = 20;			// ドリフト時のタイマー
 
 
 public:
@@ -190,6 +199,9 @@ private:
 
 	// 移動処理
 	void Move();
+
+	// ドリフトに関する更新処理
+	void UpdateDrift();
 
 	// 当たり判定
 	void CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount);

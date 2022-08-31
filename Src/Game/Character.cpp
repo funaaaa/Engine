@@ -98,6 +98,7 @@ Character::Character(CHARA_ID CharaID)
 	turningIndicatorTimer_ = 0;
 	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
+	driftTimer_ = 0;
 	boostRotQ_ = DirectX::XMVECTOR();
 	handleAmount_ = 0;
 	handleRotQ_ = DirectX::XMVECTOR();
@@ -137,11 +138,16 @@ void Character::Init()
 	jumpBoostSpeed_ = 0;
 	turningIndicatorTimer_ = 0;
 	canNotMoveTimer_ = 0;
+	driftJumpVec_ = Vec3();
+	driftJumpSpeed_ = 0;
+	isDriftJump_ = false;;
 	isDrift_ = false;
 	isUseItem_ = false;
 	onGround_ = true;
 	onGrass_ = false;
 	isGetItem_ = false;
+	isInputLTPrev_ = false;
+	isInputLT_ = false;
 	IsTurningIndicatorRed_ = false;
 	isTireMask_ = false;
 	isConcentrationLine_ = false;
@@ -164,6 +170,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	// 移動処理
 	Move();
+
+	// ドリフトに関する更新処理
+	UpdateDrift();
 
 	// 当たり判定
 	CheckHit(StageData, IsPassedMiddlePoint, RapCount);
@@ -238,6 +247,14 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		if (15.0f < boostSpeed_) {
 			DriftParticleMgr::Ins()->GenerateFire(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
 		}
+
+	}
+
+	// ドリフト中は煙を出す。
+	if (isDrift_ && onGround_) {
+
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1 * isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
 
 	}
 
@@ -496,9 +513,9 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	float nowFrameInputLeftStickHori = 0;
 
 	// 右スティックの横の傾き量でキャラを回転させる。
-	if (operation.handleDriveRate_ != 0) {
+	if (operation.handleDriveRate_ != 0 || isDrift_) {
 
-		// 回転量 通常状態とドリフト状態で違う。
+		// 回転量の最大値 通常状態とドリフト状態で違う。
 		float handleAmount = HANDLE_NORMAL;
 
 		// ドリフト状態だったら回転量を多い方にする。
@@ -506,10 +523,12 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 			handleAmount = HANDLE_DRIFT;
 
-			// ついでにドリフト状態の時のブーストするまでのタイマーを更新する。
-			if (onGround_) {
-				++driftBoostTimer_;
-				if (DRIFT_BOOST_TIMER < driftBoostTimer_) driftBoostTimer_ = DRIFT_BOOST_TIMER;
+			// ドリフトの向きによって回転量を変える。
+			if (isDriftRight_ && operation.handleDriveRate_ < 0.1f) {
+				operation.handleDriveRate_ = 0.1f;
+			}
+			if (!isDriftRight_ && -0.1f < operation.handleDriveRate_) {
+				operation.handleDriveRate_ = -0.1f;
 			}
 
 			// タイヤを回転させる。
@@ -597,54 +616,91 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 	}
 
-	// LTが引かれていたらドリフト状態にする。
-	if (operation.isDrift_ && operation.handleDriveRate_ != 0) {
+	// ドリフトの入力情報を保存する。
+	isInputLTPrev_ = isInputLT_;
+	isInputLT_ = operation.isDrift_;
 
-		isDrift_ = true;
+	// ドリフトボタンの入力がトリガーだったら。
+	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
+	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.0f;
+	if (triggerDriftBottom && notJump && onGround_) {
 
-		// ドリフトのベクトルを求める。
-		Vec3 driftVec = Vec3();
-		if (nowFrameInputLeftStickHori < 0) {
-
-			driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-
-		}
-		else {
-
-			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-		}
-
-		// 更にブーストがかかっていたら煙を出す。
-		Vec3 random = FHelper::GetRandVec3(-1, 1);
-		if (0.0f < boostSpeed_ && onGround_) {
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, true);
-		}
-		else if (onGround_) {
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
-		}
+		isDriftJump_ = true;
+		driftJumpVec_ = upVec_;
+		driftJumpSpeed_ = DRIFT_JUMP_SPEED;
 
 	}
-	// すでにドリフト中だったら勝手に解除しないようにする。
-	else if (operation.isDrift_ && isDrift_) {
-	}
-	else {
 
-		// ドリストのブーストするまでのタイマーが規定値以上だったらブーストする。
-		if (DRIFT_BOOST_TIMER <= driftBoostTimer_) {
-
-			boostSpeed_ = MAX_BOOST_SPEED;
-			boostTimer_ = DRIFT_TIMER;
-
-		}
-
-		// ドリフトのブーストするまでのタイマーを初期化する。
-		driftBoostTimer_ = 0;
+	// ドリフト状態でタイマーがカウントされていたら。
+	bool releaseDriftBottom = isInputLTPrev_ && !isInputLT_;
+	if (isDrift_ && 0 < driftTimer_ && releaseDriftBottom) {
 
 		isDrift_ = false;
 
+		// タイマーに応じて加速させる。
+		int driftLevel = -1;
+		for (auto& index : DRIFT_TIMER) {
+
+			if (driftTimer_ < index) break;
+
+			driftLevel = static_cast<int>(&index - &DRIFT_TIMER[0]);
+
+		}
+
+		if (driftLevel != -1) {
+			boostTimer_ = DRIFT_BOOST[driftLevel];
+		}
+
 	}
+
+
+	//if (operation.isDrift_ && operation.handleDriveRate_ != 0) {
+
+	//	isDrift_ = true;
+
+	//	// ドリフトのベクトルを求める。
+	//	Vec3 driftVec = Vec3();
+	//	if (nowFrameInputLeftStickHori < 0) {
+
+	//		driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+
+	//	}
+	//	else {
+
+	//		driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+	//	}
+
+	//	// 更にブーストがかかっていたら煙を出す。
+	//	Vec3 random = FHelper::GetRandVec3(-1, 1);
+	//	if (0.0f < boostSpeed_ && onGround_) {
+	//		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, true);
+	//	}
+	//	else if (onGround_) {
+	//		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
+	//	}
+
+	//}
+	//// すでにドリフト中だったら勝手に解除しないようにする。
+	//else if (operation.isDrift_ && isDrift_) {
+	//}
+	//else {
+
+	//	// ドリストのブーストするまでのタイマーが規定値以上だったらブーストする。
+	//	if (DRIFT_BOOST_TIMER <= driftBoostTimer_Kesuyotei) {
+
+	//		boostSpeed_ = MAX_BOOST_SPEED;
+	//		boostTimer_ = DRIFT_TIMER;
+
+	//	}
+
+	//	// ドリフトのブーストするまでのタイマーを初期化する。
+	//	driftBoostTimer_Kesuyotei = 0;
+
+	//	isDrift_ = false;
+
+	//}
 
 	// このキャラがゴーストだった場合、アイテム取得命令が出たらアイテムを取得する。
 	if (charaID_ == CHARA_ID::GHOST && operation.isGetItem_) {
@@ -769,6 +825,63 @@ void Character::Move()
 
 	// 下ベクトルを車の回転行列分回転させる。
 	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+}
+
+void Character::UpdateDrift()
+{
+
+	/*===== ドリフトに関する更新処理 =====*/
+
+	// ドリフトジャンプしていたら。
+	if (isDriftJump_) {
+
+		// 座標を移動させる。
+		pos_ += driftJumpVec_ * driftJumpSpeed_;
+		prevPos_ += driftJumpVec_ * driftJumpSpeed_;
+
+		// ドリフト量を減らす。
+		driftJumpSpeed_ -= SUB_DRIFT_JUMP_SPEED;
+		if (driftJumpSpeed_ < 0.0f) {
+
+			driftJumpSpeed_ = 0.0f;
+
+		}
+
+		// スティック入力があったら。
+		if (0.1f < std::fabs(handleAmount_)) {
+
+			isDrift_ = true;
+			isDriftRight_ = 0.0f < handleAmount_;
+
+		}
+
+
+
+	}
+
+	// ドリフト中だったら。
+	if (isDrift_) {
+
+		// ドリフトの経過時間のタイマーを更新。
+		++driftTimer_;
+
+	}
+	else {
+
+		driftTimer_ = 0;
+
+	}
+
+	// ジャンプしたFでこの処理が通らないようにするための条件
+	bool isNotTriggerLT = !(!isInputLTPrev_ && isInputLT_);
+	// 設置したらドリフトジャンプを解除する。
+	if (isDriftJump_ && onGround_ && isNotTriggerLT) {
+
+		isDriftJump_ = false;
+		driftJumpSpeed_ = 0.0f;
+
+	}
 
 }
 
@@ -1057,7 +1170,7 @@ void Character::InclineCarBody()
 	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 	// 空中に居たら。
-	if (!onGround_) {
+	if (!onGround_ && !isDriftJump_) {
 
 		// 移動した方向ベクトル
 		Vec3 movedVec = (pos_ - prevPos_).GetNormal();
