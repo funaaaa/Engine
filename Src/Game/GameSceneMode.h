@@ -19,7 +19,7 @@ public:
 	MODE_ID id_;
 
 	GameSceneMode() {
-		id_ = MODE_ID::GHOST;
+		id_ = MODE_ID::DEF;
 	}
 
 };
