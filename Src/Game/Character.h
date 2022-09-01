@@ -69,11 +69,11 @@ public:
 
 	/*-- ドリフト、加速時の車体の回転に関する変数 --*/
 
-	float handleAmount_;				// ハンドル量
 	DirectX::XMVECTOR handleRotQ_;		// ハンドルの回転量
 	DirectX::XMVECTOR nowHandleRotQ_;	// ハンドルの回転量
 	DirectX::XMVECTOR boostRotQ_;		// 加速時の正面方向への回転の行列
 	DirectX::XMVECTOR nowBoostRotQ_;	// 加速時の正面方向への回転の行列
+	float handleAmount_;				// ハンドル量
 	const float  MAX_DRIFT_ROT = 1.6f;
 	float baseDriftRot_;
 	float nowDriftRot_;

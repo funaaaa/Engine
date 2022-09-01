@@ -83,7 +83,7 @@ namespace FHelper {
 
 	// 01Ç…î[ÇﬂÇÈÅB
 	inline float Saturate(const float& Value) {
-		float value = 0;
+		float value = Value;
 		if (value < 0) value = 0;
 		if (1 < value) value = 1;
 		return value;

@@ -275,7 +275,7 @@ void PolygonMeshInstance::SetParentInstance(std::weak_ptr<PolygonMeshInstance> P
 
 }
 
-const int& PolygonMeshInstance::GetParentInstanceIndex()
+int PolygonMeshInstance::GetParentInstanceIndex()
 {
 
 	/*===== 親インスタンスのIDを取得 =====*/

@@ -88,8 +88,8 @@ public:
 	inline const Vec3& GetPos() { return pos_; }
 	inline const Vec3& GetRotateVec3() { return rotate_; }
 	inline const UINT GetShaderID() { return shaderID_; }
-	inline const int& GetInstanceIndex() { return instanceIndex_; }
-	const int& GetParentInstanceIndex();
+	inline int GetInstanceIndex() { return instanceIndex_; }
+	int GetParentInstanceIndex();
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex_; }

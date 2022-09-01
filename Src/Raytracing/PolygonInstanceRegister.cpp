@@ -198,7 +198,7 @@ void PolygonInstanceRegister::SetParentInstance(const int& Index, const int& Par
 
 }
 
-const int& PolygonInstanceRegister::GetParentInstanceIndex(const int& Index)
+ int PolygonInstanceRegister::GetParentInstanceIndex(const int& Index)
 {
 
 	/*===== 指定のインスタンスの親のIDを取得 =====*/

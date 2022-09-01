@@ -538,6 +538,8 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 	/*===== 入力処理 =====*/
 
+	ConstBufferData;
+
 	// 操作オブジェクトからの入力を受け取る。
 	BaseOperationObject::OperationInputData operationInputData;
 	operationInputData.pos_ = pos_;

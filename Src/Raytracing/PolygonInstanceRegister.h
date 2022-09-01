@@ -77,7 +77,7 @@ public:
 	void SetParentInstance(const int& Index, const int& ParentIndex);
 
 	// 指定のインスタンスの親のIDを取得。
-	const int& GetParentInstanceIndex(const int& Index);
+	int GetParentInstanceIndex(const int& Index);
 
 	// BLASのIndexをかける。
 	UINT GetBLASIndex(const int& Index);
