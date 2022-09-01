@@ -917,7 +917,9 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         // â¡éZçáê¨ÇæÇ¡ÇΩÇÁ
         else if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
         {
-            PayloadData.light_ = float3(1, 1, 1);
+            
+            PayloadData.light_ = float3(TexColor.w, TexColor.w, TexColor.w);
+            
             if (PayloadData.impactAmount_ < alpha * TexColor.w)
             {
                 PayloadData.color_.xyz += (float3) TexColor;
