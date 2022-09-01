@@ -95,6 +95,7 @@ Character::Character(CHARA_ID CharaID)
 	isUseItem_ = false;
 	IsTurningIndicatorRed_ = false;
 	isRotRightSide_ = false;
+	isDriftJumpPrev_ = false;
 	turningIndicatorTimer_ = 0;
 	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
@@ -238,9 +239,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		// 設置していたら煙を生成。
 		if (onGround_) {
 			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, true);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
 			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, true);
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
 		}
 
 		// 設置していて移動速度が一定以上だったら炎を生成。
@@ -250,11 +251,29 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	}
 
+	// 着地した瞬間だったら。
+	if ((isDriftJumpPrev_ && !isDriftJump_) || (!onGroundPrev_ && onGround_)) {
+
+		// 三回ランダムに位置をずらして生成する。
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		for (int index = 0; index < 3; ++index) {
+
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+
+		}
+		// 三回ランダムに位置をずらして生成する。
+		for (int index = 0; index < 3; ++index) {
+			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) - driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+
+		}
+
+	}
+
 	// ドリフト中は煙を出す。
 	if (isDrift_ && onGround_) {
 
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1 * isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
+		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::DEF);
 
 	}
 
@@ -620,6 +639,9 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	isInputLTPrev_ = isInputLT_;
 	isInputLT_ = operation.isDrift_;
 
+	// ドリフトジャンプのフラグを保存しておく。
+	isDriftJumpPrev_ = isDriftJump_;
+
 	// ドリフトボタンの入力がトリガーだったら。
 	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
 	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.0f;
@@ -647,60 +669,20 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 		}
 
+		// ドリフトレベルが0以上だったら加速する。
 		if (driftLevel != -1) {
 			boostTimer_ = DRIFT_BOOST[driftLevel];
 		}
 
 	}
 
+	// バグ回避でLTが押されていなかったらドリフトを解除する。 ドリフト解除の正規の処理はこの処理の上にあるので通常は問題ない。
+	if (!isInputLT_) {
 
-	//if (operation.isDrift_ && operation.handleDriveRate_ != 0) {
+		isDrift_ = false;
+		driftTimer_ = 0;
 
-	//	isDrift_ = true;
-
-	//	// ドリフトのベクトルを求める。
-	//	Vec3 driftVec = Vec3();
-	//	if (nowFrameInputLeftStickHori < 0) {
-
-	//		driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-
-	//	}
-	//	else {
-
-	//		driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-	//	}
-
-	//	// 更にブーストがかかっていたら煙を出す。
-	//	Vec3 random = FHelper::GetRandVec3(-1, 1);
-	//	if (0.0f < boostSpeed_ && onGround_) {
-	//		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, true);
-	//	}
-	//	else if (onGround_) {
-	//		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f + random, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false);
-	//	}
-
-	//}
-	//// すでにドリフト中だったら勝手に解除しないようにする。
-	//else if (operation.isDrift_ && isDrift_) {
-	//}
-	//else {
-
-	//	// ドリストのブーストするまでのタイマーが規定値以上だったらブーストする。
-	//	if (DRIFT_BOOST_TIMER <= driftBoostTimer_Kesuyotei) {
-
-	//		boostSpeed_ = MAX_BOOST_SPEED;
-	//		boostTimer_ = DRIFT_TIMER;
-
-	//	}
-
-	//	// ドリフトのブーストするまでのタイマーを初期化する。
-	//	driftBoostTimer_Kesuyotei = 0;
-
-	//	isDrift_ = false;
-
-	//}
+	}
 
 	// このキャラがゴーストだった場合、アイテム取得命令が出たらアイテムを取得する。
 	if (charaID_ == CHARA_ID::GHOST && operation.isGetItem_) {

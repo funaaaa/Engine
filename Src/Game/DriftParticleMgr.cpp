@@ -40,7 +40,7 @@ void DriftParticleMgr::Init()
 
 }
 
-void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, bool IsDash)
+void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID)
 {
 
 	/*===== ê∂ê¨èàóù =====*/
@@ -50,12 +50,7 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 
 	// íxâÑÇÃèåèéÆÅB
 	bool canGenerate = false;
-	if (IsDash) {
-		canGenerate = GENERATE_DELAY_DASH < smokeGenerateDelay_;
-	}
-	else {
-		canGenerate = GENERATE_DELAY < smokeGenerateDelay_;
-	}
+	canGenerate = static_cast<int>(DelayID) < smokeGenerateDelay_;
 
 	if (canGenerate) {
 
@@ -71,10 +66,13 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 
 			if (index_->GetIsActive()) continue;
 
-			index_->GenerateSmoke(smokeBlasIndex_, Pos, MatRot, ConstBufferData, IsBoost, IsDash);
+			index_->GenerateSmoke(smokeBlasIndex_, Pos, MatRot, ConstBufferData, IsBoost);
 
 			++generateCounter;
-			if ((IsDash && GCOUNT_DASH <= generateCounter) || (!IsDash && GCOUNT_DEF <= generateCounter)) {
+			bool isDashOverTheAmount = (DelayID == DELAY_ID::DASH && GCOUNT_DASH <= generateCounter);
+			bool isDefOverTheAmount = (DelayID == DELAY_ID::DEF && GCOUNT_DEF <= generateCounter);
+			bool isNoneDelayOverTheAmount = (DelayID == DELAY_ID::NONE_DELAY && GCOUNT_DEF <= generateCounter);
+			if (isDefOverTheAmount || isDashOverTheAmount || isNoneDelayOverTheAmount) {
 
 				break;
 

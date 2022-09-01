@@ -53,10 +53,10 @@ void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec
 	baseUp_ = CharaUpVec;
 
 	// 視点座標を補間する。
-	eye_ += (baseEye_ - eye_) / 10.0f;
+	eye_ += (baseEye_ - eye_) / 5.0f;
 
 	// 注視点座標を補間する。
-	target_ += (baseTarget_ - target_) / 10.0f;
+	target_ += (baseTarget_ - target_) / 5.0f;
 
 	// 上ベクトルを更新する。
 	up_ += (baseUp_ - up_) / 10.0f;

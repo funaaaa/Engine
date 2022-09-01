@@ -105,6 +105,7 @@ public:
 	bool isInputLTPrev_;				// 前フレームにLTが押されたかどうか
 	bool isInputLT_;					// LTが押されたかどうか。
 	bool isDriftJump_;					// ドリフト前のジャンプ中かどうか。
+	bool isDriftJumpPrev_;				// ドリフト前のジャンプ中かどうかの前Fフラグ。
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
 
