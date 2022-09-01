@@ -10,6 +10,7 @@ void DriftParticleMgr::Setting()
 	/*===== セッティング処理 =====*/
 
 	smokeGenerateDelay_ = 0;
+	particleGenerateDelay_ = 0;
 	fireGenerateDelay_ = 0;
 	bigAuraIndex_ = -1;
 	smallAuraIndex_ = -1;
@@ -20,6 +21,10 @@ void DriftParticleMgr::Setting()
 	bigAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/bigAura.png" }, false, false);
 	smallAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smallAura.png" }, false, false);
 	driftParticleBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/driftParticle.png" }, false, false);
+	bigAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/bigAuraOrange.png" }, false, false);
+	smallAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smallAuraOrange.png" }, false, false);
+	driftParticleOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/driftParticleOrange.png" }, false, false);
+
 
 	for (auto& index : driftParticle_) {
 
@@ -131,7 +136,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 }
 
-void DriftParticleMgr::GenerateAura(const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateAura(const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== オーラを生成する =====*/
@@ -143,7 +148,12 @@ void DriftParticleMgr::GenerateAura(const int& TireInsIndex_, const int& Id, con
 
 		DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
 		bool isAuraBig = id == DriftParticle::ID::AURA_BIG;
-		index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+		if (IsOrange) {
+			index->GenerateAura(isAuraBig ? bigAuraOrangeBlas_ : smallAuraOrangeBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+		}
+		else {
+			index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+		}
 
 		if (isAuraBig) {
 			bigAuraIndex_ = static_cast<int>(&index - &driftParticle_[0]);
@@ -158,21 +168,21 @@ void DriftParticleMgr::GenerateAura(const int& TireInsIndex_, const int& Id, con
 
 }
 
-void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const int& Id, const float& DriftRate, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== パーティクルを生成 =====*/
 
 	// 生成する遅延タイマーを更新し、一定時間経過していたらパーティクルを生成する。
-	++smokeGenerateDelay_;
+	++particleGenerateDelay_;
 
 	// 遅延の条件式。
 	bool canGenerate = false;
-	canGenerate = static_cast<int>(DelayID) < smokeGenerateDelay_;
+	canGenerate = static_cast<int>(DelayID) < particleGenerateDelay_;
 
 	if (canGenerate) {
 
-		smokeGenerateDelay_ = 0;
+		particleGenerateDelay_ = 0;
 
 		// 生成する数
 		const int MAX = 5;
@@ -185,7 +195,7 @@ void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const boo
 			if (index_->GetIsActive()) continue;
 
 			DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
-			index_->GenerateDriftParticle(driftParticleBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+			index_->GenerateDriftParticle(IsOrange ? driftParticleOrangeBlas_ : driftParticleBlas_, TireInsIndex_, id, IsBoostRight, IsLevelChange, ConstBufferData);
 
 			++generateCounter;
 			if (GENERATE_COUNT < generateCounter) {

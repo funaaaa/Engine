@@ -968,10 +968,10 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     if (payload.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW)
     {
         
-        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_ALPHA)
+        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_ALPHA || InstanceID() == CHS_IDENTIFICATION_INSTANCE_ADD)
         {
                 
-            payload.impactAmount_ = false;
+            payload.impactAmount_ = 1;
             
             return;
 
@@ -1066,7 +1066,7 @@ void mainAnyHit(inout Payload payload, MyAttribute attrib)
     }
     
     // 当たったオブジェクトのInstanceIDがアルファだったら
-    if (instanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA)
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA || instanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
     {
         
         // 一定以上薄いアルファ値のオブジェクトとあたっていたら。

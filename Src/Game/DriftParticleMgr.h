@@ -20,6 +20,9 @@ private:
 	int smallAuraBlas_;
 	int bigAuraBlas_;
 	int driftParticleBlas_;
+	int smallAuraOrangeBlas_;
+	int bigAuraOrangeBlas_;
+	int driftParticleOrangeBlas_;
 
 	int bigAuraIndex_;		// ドリフト二段階目以降に発生するドリフト演出の大きい方
 	int smallAuraIndex_;	// ドリフト二段階目以降二発生するドリフト演出の小さい方
@@ -28,6 +31,7 @@ private:
 
 	int smokeGenerateDelay_;		// パーティクルを生成するときの遅延
 	int fireGenerateDelay_;
+	int particleGenerateDelay_;
 
 public:
 
@@ -35,7 +39,7 @@ public:
 
 		NONE_DELAY = 0,
 		DELAY1 = 1,
-		DEF = 3,
+		DEF = 5,
 		DASH = 12,
 
 	};
@@ -52,8 +56,8 @@ public:
 	// 生成処理
 	void GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID);
 	void GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
-	void GenerateAura(const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
-	void GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const int& Id, const float& DriftRate, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData);
+	void GenerateAura(const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData);
+	void GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

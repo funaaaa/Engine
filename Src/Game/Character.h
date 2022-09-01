@@ -109,7 +109,7 @@ public:
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
 
-	const std::array<int, 3> DRIFT_TIMER = { 30,60,90 };
+	const std::array<int, 3> DRIFT_TIMER = { 30,90,160 };
 	const std::array<int, 3> DRIFT_BOOST = { 10,20,30 };
 
 

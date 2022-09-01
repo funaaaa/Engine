@@ -115,6 +115,7 @@ void DriftParticle::GenerateAura(const int& BlasIndex, const int& TireInsIndex_,
 	trackedID_ = TireInsIndex_;
 	isTrackRight_ = IsBoostRight;
 	changeScaleTimer_ = 0;
+	isAuraBig_ = true;
 
 	// 親の回転行列を求める。
 	int parentInstanceIndex = PolygonInstanceRegister::Ins()->GetParentInstanceIndex(TireInsIndex_);
@@ -135,16 +136,16 @@ void DriftParticle::GenerateAura(const int& BlasIndex, const int& TireInsIndex_,
 	// サイズを変える。
 	if (Id == ID::AURA_BIG) {
 
-		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(AURA_BIG_SCALE, AURA_BIG_SCALE, AURA_BIG_SCALE));
-		nowScale_ = 0.0f;
-		changeScale_ = 10.0f;
+		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(AURA_BIG_SCALE + AURA_ADD_SCALE, AURA_BIG_SCALE + AURA_ADD_SCALE, AURA_BIG_SCALE + AURA_ADD_SCALE));
+		nowScale_ = 0;
+		changeScale_ = AURA_BIG_SCALE;
 
 	}
 	else if (Id == ID::AURA_SMALL) {
 
-		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(AURA_SMALL_SCALE, AURA_SMALL_SCALE, AURA_SMALL_SCALE));
-		nowScale_ = 5.0f;
-		changeScale_ = 10.0f;
+		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(AURA_SMALL_SCALE + AURA_ADD_SCALE, AURA_SMALL_SCALE + AURA_ADD_SCALE, AURA_SMALL_SCALE + AURA_ADD_SCALE));
+		nowScale_ = 0;
+		changeScale_ = AURA_SMALL_SCALE;
 
 	}
 
@@ -153,7 +154,7 @@ void DriftParticle::GenerateAura(const int& BlasIndex, const int& TireInsIndex_,
 
 }
 
-void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== ドリフト時のパーティクルを生成 =====*/
@@ -183,7 +184,14 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireI
 	Vec3 parentCarUpVec = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), parentMatRot);
 	particleVec_ += parentCarUpVec * 0.5f;
 	particleVec_.Normalize();
-	particleSpeed_ = FHelper::GetRand(static_cast<int>(MAX_PARTICLE_SPEED / 0.5f) * 100, static_cast<int>(MAX_PARTICLE_SPEED) * 100) / 100.0f;
+
+	// パーティクルの移動速度を決定する。
+	if (IsLevelChange) {
+		particleSpeed_ = FHelper::GetRand(static_cast<int>(MAX_PARTICLE_SPEED_LEVEL_CHANGE / 0.5f) * 100, static_cast<int>(MAX_PARTICLE_SPEED_LEVEL_CHANGE) * 100) / 100.0f;
+	}
+	else {
+		particleSpeed_ = FHelper::GetRand(static_cast<int>(MAX_PARTICLE_SPEED / 0.5f) * 100, static_cast<int>(MAX_PARTICLE_SPEED) * 100) / 100.0f;
+	}
 
 	// 座標を求める。
 	pos_ = PolygonInstanceRegister::Ins()->GetWorldPos(trackedID_);
@@ -199,11 +207,21 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireI
 
 	// パーティクルの大きさを決める。
 	const float HUNDRED = 100.0f;
-	float random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED));
-	particleNowScale_.x_ = random / HUNDRED;
 
-	random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED));
-	particleNowScale_.y_ = random / HUNDRED;
+	if (IsLevelChange) {
+		float random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.x_ * HUNDRED));
+		particleNowScale_.x_ = random / HUNDRED;
+
+		random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.y_ * HUNDRED));
+		particleNowScale_.y_ = random / HUNDRED;
+	}
+	else {
+		float random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED));
+		particleNowScale_.x_ = random / HUNDRED;
+
+		random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED));
+		particleNowScale_.y_ = random / HUNDRED;
+	}
 
 	// サイズを変える。
 	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(particleNowScale_.x_, particleNowScale_.y_, particleNowScale_.x_));
@@ -277,22 +295,43 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, parentMatRot);
 
 		// サイズを変える。
-		++changeScaleTimer_;
-		const int MAX_CHANGE_TIMER = (id_ == ID::AURA_BIG ? CHANGE_SCALE_TIMER_BIG : CHANGE_SCALE_TIMER_SMALL);
-		if (MAX_CHANGE_TIMER < changeScaleTimer_) {
+		if (isAuraBig_) {
 
-			changeScaleTimer_ = 0;
+			float CHANGE_SCALE = (id_ == ID::AURA_BIG ? AURA_BIG_SCALE + AURA_ADD_SCALE : AURA_SMALL_SCALE + AURA_ADD_SCALE);
 
-			// 補間先のスケールをランダムで求める。
-			const float HUNDRED = 100.0f;
-			const int CHANGE_SCALE = (id_ == ID::AURA_BIG ? AURA_BIG_SCALE * HUNDRED : AURA_SMALL_SCALE * HUNDRED);
-			float random = FHelper::GetRand(CHANGE_SCALE / 2, CHANGE_SCALE);
-			changeScale_ = random / 100.0f;
+			// 補完する。
+			nowScale_ += (CHANGE_SCALE - nowScale_) / 2.0f;
+
+			// ある程度保管されたら。
+			if (fabs(nowScale_ - CHANGE_SCALE) < 0.1f) {
+
+				isAuraBig_ = false;
+
+			}
+
+		}
+		else {
+
+			++changeScaleTimer_;
+			int MAX_CHANGE_TIMER = (id_ == ID::AURA_BIG ? CHANGE_SCALE_TIMER_BIG : CHANGE_SCALE_TIMER_SMALL);
+			if (MAX_CHANGE_TIMER < changeScaleTimer_) {
+
+				changeScaleTimer_ = 0;
+
+				// 補間先のスケールをランダムで求める。
+				const float HUNDRED = 100.0f;
+				int CHANGE_SCALE = (id_ == ID::AURA_BIG ? AURA_BIG_SCALE * HUNDRED : AURA_SMALL_SCALE * HUNDRED);
+				float random = FHelper::GetRand(CHANGE_SCALE / 2, CHANGE_SCALE);
+				changeScale_ = random / 100.0f;
+
+			}
+
+			// スケールを補完する。
+			nowScale_ += (changeScale_ - nowScale_) / 2.0f;
 
 		}
 
-		// スケールを補完する。
-		nowScale_ += (changeScale_ - nowScale_) / 2.0f;
+
 		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(nowScale_, nowScale_, nowScale_));
 
 

@@ -29,10 +29,13 @@ private:
 	int changeScaleTimer_;	// スケールを変えるまでのタイマー
 	const int CHANGE_SCALE_TIMER_BIG = 7.0f;
 	const int CHANGE_SCALE_TIMER_SMALL = 3.0f;
+	const int AURA_FIRST_BIG_COUNT = 3;
+	bool isAuraBig_;
 	float nowScale_;
 	float changeScale_;
 	const float AURA_BIG_SCALE = 25.0f;
 	const float AURA_SMALL_SCALE = 15.0f;
+	const float AURA_ADD_SCALE = 20.0f;
 
 	// オーラの位置を左右にずらす量
 	const float AURA_SIDE_SIZE = 23.0f;
@@ -46,7 +49,9 @@ private:
 	Vec2 particleNowScale_;
 	float particleSpeed_;
 	const Vec2 PARTICLE_SCALE = Vec2(0.3f, 3.0f);
+	const Vec2 PARTICLE_SCALE_LEVEL_CHANGE = Vec2(0.35f, 3.5f);
 	const float MAX_PARTICLE_SPEED = 2.5f;
+	const float MAX_PARTICLE_SPEED_LEVEL_CHANGE = 5.0f;
 	float grav;
 	const float ADD_GRAV = 0.4f;
 	const float MAX_GRAV = 8.0f;
@@ -82,7 +87,7 @@ public:
 	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost);
 	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
 	void GenerateAura(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
-	void GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
+	void GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

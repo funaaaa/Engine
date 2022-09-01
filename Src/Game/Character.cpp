@@ -273,44 +273,53 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	// ドリフト中は煙を出す。
 	if (isDrift_ && onGround_) {
 
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1 * isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::DEF);
 
-		// ドリフトレベルが1だったら。
-		if (DRIFT_TIMER[0] <= driftTimer_) {
+		// 現在のレベル。
+		int nowLevel = 0;
+		for (auto& index : DRIFT_TIMER) {
+
+			if (driftTimer_ < index) continue;
+
+			nowLevel = static_cast<int>(&index - &DRIFT_TIMER[0]);
+
+		}
+
+		// 現在のドリフトレベルが1以上だったらパーティクルとオーラを出す。
+		if (1 <= nowLevel) {
 
 			if (!DriftParticleMgr::Ins()->IsAuraGenerated()) {
-				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, ConstBufferData);
-			}
-
-			// 現在のレベル。
-			int nowLevel = 0;
-			for (auto& index : DRIFT_TIMER) {
-
-				if (driftTimer_ < index) continue;
-
-				nowLevel = static_cast<int>(&index - &DRIFT_TIMER[0]);
-
-			}
-
-			// 次のレベルまでの時間を求める。
-			int nextLevelTimer = 0;
-			if (nowLevel == 1) {
-				nextLevelTimer = DRIFT_TIMER[1] - DRIFT_TIMER[0];
-			}
-			else if (nowLevel == 2) {
-				nextLevelTimer = DRIFT_TIMER[2] - DRIFT_TIMER[1];
+				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel, ConstBufferData);
 			}
 
 			// レートを求める。
 			float rate = 0;
-			rate = FHelper::Saturate(static_cast<float>(driftTimer_) / static_cast<float>(nextLevelTimer));
+			rate = FHelper::Saturate(static_cast<float>(driftTimer_) / static_cast<float>(DRIFT_TIMER[0]));
 
 			// パーティクルを生成する。
-			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, static_cast<int>(DriftParticle::ID::PARTICLE), rate, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), rate, false, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+
+			// レベルが上った瞬間だったら一気にパーティクルを生成する。
+			if (driftTimer_ == DRIFT_TIMER[0] || driftTimer_ == DRIFT_TIMER[1] || driftTimer_ == DRIFT_TIMER[2]) {
+
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+
+				// オーラを一旦破棄
+				DriftParticleMgr::Ins()->DestroyAura();
+
+			}
 
 		}
+
+		// 煙を出す。
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1 * isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, nowLevel < 1, DriftParticleMgr::DELAY_ID::DEF);
+
+
 
 	}
 	else {
