@@ -111,7 +111,7 @@ void DriftParticle::GenerateAura(const int& BlasIndex, const int& TireInsIndex_,
 	isActive_ = true;
 	isAppearingNow_ = true;
 	appearingTimer_ = 0;
-	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
+	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ADD);
 	trackedID_ = TireInsIndex_;
 	isTrackRight_ = IsBoostRight;
 	changeScaleTimer_ = 0;
@@ -164,7 +164,7 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireI
 	isAppearingNow_ = true;
 	appearingTimer_ = 0;
 	particleMatQ_ = DirectX::XMQuaternionIdentity();
-	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::TEXCOLOR);
+	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ADD);
 	trackedID_ = TireInsIndex_;
 	isTrackRight_ = IsBoostRight;
 	changeScaleTimer_ = 0;
