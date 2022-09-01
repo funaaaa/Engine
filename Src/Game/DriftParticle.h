@@ -27,25 +27,26 @@ private:
 
 	// オーラに関する変数
 	int changeScaleTimer_;	// スケールを変えるまでのタイマー
-	const int CHANGE_SCALE_TIMER_BIG = 11.0f;
-	const int CHANGE_SCALE_TIMER_SMALL = 7.0f;
+	const int CHANGE_SCALE_TIMER_BIG = 7.0f;
+	const int CHANGE_SCALE_TIMER_SMALL = 3.0f;
 	float nowScale_;
 	float changeScale_;
-	const float AURA_BIG_SCALE = 20.0f;
-	const float AURA_SMALL_SCALE = 10.0f;
+	const float AURA_BIG_SCALE = 25.0f;
+	const float AURA_SMALL_SCALE = 15.0f;
 
 	// オーラの位置を左右にずらす量
 	const float AURA_SIDE_SIZE = 23.0f;
 
 	// パーティクルに関する変数。
-	const int CHANGE_SCALE_TIMER_PARTICLE = 15;
-	const float PARTICLE_SCALE = 2.5f;
+	DirectX::XMVECTOR particleMatQ_;
 	Vec3 particlePos_;	// この値をposに加算する。
+	Vec3 particlePrevPos_;
+	Vec3 particlePrevMoveVec_;
 	Vec3 particleVec_;
 	Vec2 particleNowScale_;
-	Vec2 particleChangeScale_;
 	float particleSpeed_;
-	const float MAX_PARTICLE_SPEED = 5.0f;
+	const Vec2 PARTICLE_SCALE = Vec2(0.3f, 3.0f);
+	const float MAX_PARTICLE_SPEED = 2.5f;
 	float grav;
 	const float ADD_GRAV = 0.4f;
 	const float MAX_GRAV = 8.0f;

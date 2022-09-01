@@ -1342,14 +1342,18 @@ void Character::InclineCarBody()
 
 		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 		Vec3 forwardVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		Vec3 upVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
 		// 横クォータニオンを求める。
 		handleRotQ_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), nowDriftRot_);
 		// 正面クォータニオンを求める。 横だけだと回転がちょっとだけずれているため。
 		DirectX::XMVECTOR forwardQ = DirectX::XMQuaternionRotationAxis(forwardVec.ConvertXMVECTOR(), 0.01f);
+		// 上クォータニオンを求める。
+		DirectX::XMVECTOR upQ = DirectX::XMQuaternionRotationAxis(upVec.ConvertXMVECTOR(), -0.2f * handleAmount_);
 
 		// クォータニオンをかける。
 		handleRotQ_ = DirectX::XMQuaternionMultiply(handleRotQ_, forwardQ);
+		handleRotQ_ = DirectX::XMQuaternionMultiply(handleRotQ_, upQ);
 	}
 
 	// ブーストの車体のクォータニオンを補間。

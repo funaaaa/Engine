@@ -163,21 +163,27 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireI
 	isActive_ = true;
 	isAppearingNow_ = true;
 	appearingTimer_ = 0;
-	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
+	particleMatQ_ = DirectX::XMQuaternionIdentity();
+	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::TEXCOLOR);
 	trackedID_ = TireInsIndex_;
 	isTrackRight_ = IsBoostRight;
 	changeScaleTimer_ = 0;
 	grav = 0;
 
-	// パーティクル特有の変数を初期化。
-	particlePos_ = Vec3();
-	particleVec_ = FHelper::GetRandVec3(-100, 100) / Vec3(100.0f, 100.0f, 100.0f);
-	particleVec_.y_ = FHelper::Saturate(particleVec_.y_);
-	particleSpeed_ = FHelper::GetRand(static_cast<int>(MAX_PARTICLE_SPEED / 0.5f) * 100, static_cast<int>(MAX_PARTICLE_SPEED) * 100) / 100.0f;
-
 	// 親の回転行列を求める。
 	int parentInstanceIndex = PolygonInstanceRegister::Ins()->GetParentInstanceIndex(TireInsIndex_);
 	DirectX::XMMATRIX parentMatRot = PolygonInstanceRegister::Ins()->GetRotate(parentInstanceIndex);
+
+	// パーティクル特有の変数を初期化。
+	particlePos_ = Vec3();
+	particlePrevPos_ = Vec3();
+	particlePrevMoveVec_ = Vec3();
+	particleVec_ = FHelper::GetRandVec3(-100, 100) / Vec3(100.0f, 100.0f, 100.0f);
+	// 車体のY軸方向にベクトルを強める。
+	Vec3 parentCarUpVec = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), parentMatRot);
+	particleVec_ += parentCarUpVec * 0.5f;
+	particleVec_.Normalize();
+	particleSpeed_ = FHelper::GetRand(static_cast<int>(MAX_PARTICLE_SPEED / 0.5f) * 100, static_cast<int>(MAX_PARTICLE_SPEED) * 100) / 100.0f;
 
 	// 座標を求める。
 	pos_ = PolygonInstanceRegister::Ins()->GetWorldPos(trackedID_);
@@ -191,10 +197,16 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireI
 	// 回転させる。
 	PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, parentMatRot);
 
+	// パーティクルの大きさを決める。
+	const float HUNDRED = 100.0f;
+	float random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED));
+	particleNowScale_.x_ = random / HUNDRED;
+
+	random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED));
+	particleNowScale_.y_ = random / HUNDRED;
+
 	// サイズを変える。
-	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(PARTICLE_SCALE, PARTICLE_SCALE, PARTICLE_SCALE));
-	particleNowScale_ = Vec2(1.0f, 1.0f);
-	particleChangeScale_ = Vec2(PARTICLE_SCALE, PARTICLE_SCALE);
+	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(particleNowScale_.x_, particleNowScale_.y_, particleNowScale_.x_));
 
 	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = particleIns_;
 	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
@@ -302,9 +314,12 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		trackVec = FHelper::MulRotationMatNormal(trackVec, parentMatRot);
 		pos_ += trackVec * AURA_SIDE_SIZE;
 
+		// 前Fの座標を保存。
+		particlePrevPos_ = particlePos_;
+
 		// パーティクル特有の座標を移動させる。
 		particlePos_ += particleVec_ * particleSpeed_;
-		particleSpeed_ -= 0.1f;
+		particleSpeed_ -= 0.4f;
 		if (particleSpeed_ < 1.0f) particleSpeed_ = 1.0f;
 
 		// 重力を更新。
@@ -316,35 +331,60 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		// 移動させる。
 		PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, pos_ + particlePos_);
 
-		// 回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, parentMatRot);
+		// 今フレームの移動したベクトルを求める。
+		Vec3 nowFrameMovedVec = (particlePos_ - particlePrevPos_).GetNormal();
 
-		// サイズを変える。
-		++changeScaleTimer_;
-		const int MAX_CHANGE_TIMER = CHANGE_SCALE_TIMER_PARTICLE;
-		if (MAX_CHANGE_TIMER < changeScaleTimer_) {
+		// 親の回転行列をクォータニオンに治す。
+		DirectX::XMVECTOR parentRotQ = DirectX::XMQuaternionRotationMatrix(parentMatRot);
 
-			changeScaleTimer_ = 0;
+		// 移動ベクトルを元にパーティクルを回転させる。
+		// 回転軸を求める。
+		Vec3 axisOfRevolution = particlePrevMoveVec_.Cross(nowFrameMovedVec);
 
-			// 補間先のスケールをランダムで求める。
-			const float HUNDRED = 100.0f;
-			float random = FHelper::GetRand(PARTICLE_SCALE * HUNDRED / 2, PARTICLE_SCALE * HUNDRED);
-			particleChangeScale_.x_ = random / HUNDRED;
+		// 回転軸を正規化する。
+		if (axisOfRevolution.Length() != 0) {
+			axisOfRevolution.Normalize();
+		}
 
-			random = FHelper::GetRand(PARTICLE_SCALE * HUNDRED / 2, PARTICLE_SCALE * HUNDRED);
-			particleChangeScale_.y_ = random / HUNDRED;
+		// 回転量を求める。
+		float amountOfRotation = particlePrevMoveVec_.Dot(nowFrameMovedVec);
+
+		// 逆余弦を求める関数を使用して求めたcosθをラジアンに変換。
+		amountOfRotation = acosf(amountOfRotation);
+
+		// 回転軸が{0,0,0}だったら処理を飛ばす。
+		if (axisOfRevolution.Length() != 0 && amountOfRotation != 0) {
+
+			// クォータニオンを求める。
+			DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(axisOfRevolution.ConvertXMVECTOR(), amountOfRotation);
+
+			// パーティクルのクォータニオンにかける。
+			particleMatQ_ = DirectX::XMQuaternionMultiply(particleMatQ_, quaternion);
+
+			// クォータニオンをかける。
+			parentRotQ = DirectX::XMQuaternionMultiply(parentRotQ, particleMatQ_);
+
+			// 求めたクォータニオンを行列に治す。
+			DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(parentRotQ);
+
+			// 回転させる。
+			PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, quaternionMat);
 
 		}
 
-		// スケールを補完する。
-		particleNowScale_.x_ += (particleChangeScale_.x_ - particleNowScale_.x_) / 2.0f;
-		particleNowScale_.y_ += (particleChangeScale_.y_ - particleNowScale_.y_) / 2.0f;
-		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(particleNowScale_.x_, particleNowScale_.y_, 1.0f));
+
+		// 今フレームの移動したベクトルを保存しておく。
+		particlePrevMoveVec_ = nowFrameMovedVec;
+
+		// サイズを変える。
+		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(particleNowScale_.x_, particleNowScale_.y_, particleNowScale_.x_));
 
 		// 消えるまでのタイマーを更新。
 		++appearingTimer_;
-		if (30 < appearingTimer_) {
+		if (10 < appearingTimer_) {
 
+			particleNowScale_.y_ -= 0.5f;
+			if (particleNowScale_.y_ <= 0.1f) particleNowScale_.y_ = 0.1f;
 			ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= EXIT_ALPHA;
 
 		}
