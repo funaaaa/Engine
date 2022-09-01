@@ -81,6 +81,14 @@ namespace FHelper {
 
 	}
 
+	// 01Ç…î[ÇﬂÇÈÅB
+	inline float Saturate(const float& Value) {
+		float value = 0;
+		if (value < 0) value = 0;
+		if (1 < value) value = 1;
+		return value;
+	}
+
 	// âÊñ íÜâõ
 	inline Vec3 WindowCenterPos() {
 		return Vec3(static_cast<float>(WINDOW_WIDTH) / 2.0f, static_cast<float>(WINDOW_HEIGHT) / 2.0f, 0);

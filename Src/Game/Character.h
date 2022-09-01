@@ -74,7 +74,7 @@ public:
 	DirectX::XMVECTOR nowHandleRotQ_;	// ハンドルの回転量
 	DirectX::XMVECTOR boostRotQ_;		// 加速時の正面方向への回転の行列
 	DirectX::XMVECTOR nowBoostRotQ_;	// 加速時の正面方向への回転の行列
-	const float  MAX_DRIFT_ROT = 0.4f;
+	const float  MAX_DRIFT_ROT = 1.6f;
 	float baseDriftRot_;
 	float nowDriftRot_;
 	float baseBoostRot_;

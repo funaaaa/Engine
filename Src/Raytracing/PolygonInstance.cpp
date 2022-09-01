@@ -3,10 +3,12 @@
 #include "BLASRegister.h"
 #include <assert.h>
 
-D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData)
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
+
+	instanceIndex_ = InstanceIndex;
 
 	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc;
 
@@ -270,6 +272,24 @@ void PolygonMeshInstance::SetParentInstance(std::weak_ptr<PolygonMeshInstance> P
 
 	parentInstance_ = ParentInstance;
 	++parentInstance_.lock()->childCount_;
+
+}
+
+const int& PolygonMeshInstance::GetParentInstanceIndex()
+{
+
+	/*===== 親インスタンスのIDを取得 =====*/
+
+	// 親行列が存在していたらだったら。
+	if (!parentInstance_.expired()) {
+
+		return parentInstance_.lock()->GetInstanceIndex();
+
+	}
+
+	// 親が存在していない。
+	assert(0);
+	return -1;
 
 }
 

@@ -55,7 +55,7 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& Sh
 	}
 
 	// 最後尾のやつを生成する。
-	D3D12_RAYTRACING_INSTANCE_DESC buff = instance_[instanceIndex]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, ShaderID, HaveMeshCollisionData);
+	D3D12_RAYTRACING_INSTANCE_DESC buff = instance_[instanceIndex]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, ShaderID, HaveMeshCollisionData, instanceIndex);
 
 	instanceDesc_[instanceIndex] = buff;
 
@@ -198,6 +198,15 @@ void PolygonInstanceRegister::SetParentInstance(const int& Index, const int& Par
 
 }
 
+const int& PolygonInstanceRegister::GetParentInstanceIndex(const int& Index)
+{
+
+	/*===== 指定のインスタンスの親のIDを取得 =====*/
+
+	return instance_[Index]->GetParentInstanceIndex();
+
+}
+
 UINT PolygonInstanceRegister::GetBLASIndex(const int& Index)
 {
 	return instance_[Index]->GetBLASIndex();
@@ -249,7 +258,7 @@ void PolygonInstanceRegister::Display(const int& Index)
 	DirectX::XMMATRIX matTrans = instance_[Index]->GetTrans();
 	bool haveMeshCollisionData = instance_[Index]->GetHaveMeshCollisionData();
 
-	instanceDesc_[Index] = instance_[Index]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(instance_[Index]->GetBLASIndex()), instance_[Index]->GetBLASIndex(), instance_[Index]->GetShaderID(), haveMeshCollisionData);
+	instanceDesc_[Index] = instance_[Index]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(instance_[Index]->GetBLASIndex()), instance_[Index]->GetBLASIndex(), instance_[Index]->GetShaderID(), haveMeshCollisionData, Index);
 
 	// 保存していた行列をセット。
 	ChangeRotate(Index, matRot);

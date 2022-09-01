@@ -14,7 +14,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	UINT instanceID_;								// このインスタンスのID
+	UINT instanceIndex_;								// このインスタンスのID
 
 	UINT shaderID_;
 
@@ -45,7 +45,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// Ins生成関数
-	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData);
+	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const Vec3& Pos);
@@ -88,6 +88,8 @@ public:
 	inline const Vec3& GetPos() { return pos_; }
 	inline const Vec3& GetRotateVec3() { return rotate_; }
 	inline const UINT GetShaderID() { return shaderID_; }
+	inline const int& GetInstanceIndex() { return instanceIndex_; }
+	const int& GetParentInstanceIndex();
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex_; }

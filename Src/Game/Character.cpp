@@ -22,6 +22,7 @@
 #include "GameSceneMode.h"
 #include "GhostOperationObject.h"
 #include "DriftParticleMgr.h"
+#include "DriftParticle.h"
 
 Character::Character(CHARA_ID CharaID)
 {
@@ -275,6 +276,48 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1 * isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::DEF);
 
+		// ドリフトレベルが1だったら。
+		if (DRIFT_TIMER[0] <= driftTimer_) {
+
+			if (!DriftParticleMgr::Ins()->IsAuraGenerated()) {
+				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, ConstBufferData);
+			}
+
+			// 現在のレベル。
+			int nowLevel = 0;
+			for (auto& index : DRIFT_TIMER) {
+
+				if (driftTimer_ < index) continue;
+
+				nowLevel = static_cast<int>(&index - &DRIFT_TIMER[0]);
+
+			}
+
+			// 次のレベルまでの時間を求める。
+			int nextLevelTimer = 0;
+			if (nowLevel == 1) {
+				nextLevelTimer = DRIFT_TIMER[1] - DRIFT_TIMER[0];
+			}
+			else if (nowLevel == 2) {
+				nextLevelTimer = DRIFT_TIMER[2] - DRIFT_TIMER[1];
+			}
+
+			// レートを求める。
+			float rate = 0;
+			rate = FHelper::Saturate(static_cast<float>(driftTimer_) / static_cast<float>(nextLevelTimer));
+
+			// パーティクルを生成する。
+			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, static_cast<int>(DriftParticle::ID::PARTICLE), rate, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+
+		}
+
+	}
+	else {
+
+		// オーラを破棄 関数内に二重解放対策の条件式がある。
+		DriftParticleMgr::Ins()->DestroyAura();
+
 	}
 
 	// 移動できないタイマーを更新する。
@@ -296,9 +339,6 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	// 接地フラグを保存。
 	onGroundPrev_ = onGround_;
-
-
-
 
 }
 
@@ -1212,7 +1252,7 @@ void Character::InclineCarBody()
 	if (0 < boostSpeed_) {
 
 		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
-		const float MAX_ROT = 0.4f;
+		const float MAX_ROT = 0.7f;
 
 		baseBoostRot_ = MAX_ROT * boostRate;
 
@@ -1270,8 +1310,13 @@ void Character::InclineCarBody()
 
 		float timerRate = static_cast<float>(driftRotTimer_) / static_cast<float>(MAX_DRIFT_ROT_TIMER);
 
-		// 回転量にイージングをかける。
-		baseDriftRot_ = std::fabs(FEasing::EaseInCubic(timerRate) * MAX_DRIFT_ROT) * handleAmount_;
+		// 回転量にイージングをかける。 マジックナンバーは傾きの微調整用。
+		if (0.35f < fabs(handleAmount_)) {
+			baseDriftRot_ = 0.6f * (0 < handleAmount_ ? 1.0f : -1.0f);
+		}
+		else {
+			baseDriftRot_ = std::fabs(FEasing::EaseOutCubic(timerRate) * MAX_DRIFT_ROT) * handleAmount_;
+		}
 
 		// 回転方向を保存。
 		isRotRightSide_ = 0 < handleAmount_;
