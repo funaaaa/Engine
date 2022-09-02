@@ -121,7 +121,9 @@ private:
 	/*-- レース開始前の変数 --*/
 
 	std::shared_ptr<Sprite> countDownSprite_;
-	const Vec2 COUNT_DOWN_FONT_SIZE = Vec2(16.0f * 2.5f, 32.0f * 2.5f);
+	std::shared_ptr<Sprite> goSprite_;
+	const Vec2 COUNT_DOWN_FONT_SIZE = Vec2(16.0f * 2.1f, 32.0f * 2.1f);
+	const Vec2 GO_FONT_SIZE = Vec2(512.0f / 5.0f, 256.0f / 5.0f);
 	int countDownNumber_;		// カウントダウンでの現在の番号
 	int countDownStartTimer_;	// 開始前にカウントダウンが始まるまでのタイマー
 	const int COUNT_DOWN_TIMER = 120;
@@ -158,7 +160,7 @@ public:
 private:
 
 	// ゲーム開始前の更新処理
-	void UpdateBeforeStart();
+	void UpdateCountDown();
 
 
 };

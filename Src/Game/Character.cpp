@@ -170,6 +170,17 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	/*===== 更新処理 =====*/
 
+	if(Input::Ins()->IsKey(DIK_I)){
+	
+		rotY_ += 0.05f;
+	
+	}
+	if(Input::Ins()->IsKey(DIK_O)){
+	
+		rotY_ -= 0.05f;
+	
+	}
+
 	// ブースト時の回転を打ち消す。
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, defBodyMatRot_);
 

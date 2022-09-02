@@ -188,6 +188,9 @@ GameScene::GameScene()
 	countDownSprite_ = std::make_shared<Sprite>();
 	countDownSprite_->GenerateSpecifyTextureID(COUNT_DOWN_START_POS, COUNT_DOWN_FONT_SIZE, Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[2]);
 	countDownSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f));
+	goSprite_ = std::make_shared<Sprite>();
+	goSprite_->GenerateForTexture(WINDOW_CENTER, GO_FONT_SIZE, Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/go.png");
+	goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f));
 
 }
 
@@ -288,11 +291,7 @@ void GameScene::Update()
 	}
 
 	// 開始していなかったらカウントダウンの処理を行う。
-	if (isBeforeStart_) {
-
-		UpdateBeforeStart();
-
-	}
+	UpdateCountDown();
 
 
 	// ラップ数のUIを更新。
@@ -613,6 +612,9 @@ void GameScene::Draw()
 		// カウントダウン用のUI。
 		countDownSprite_->Draw();
 
+		// カウントダウン終了時のGOのUI。
+		goSprite_->Draw();
+
 	}
 	if (firstTime == 0) ++firstTime;
 
@@ -797,10 +799,74 @@ void GameScene::GenerateGimmick()
 
 }
 
-void GameScene::UpdateBeforeStart()
+void GameScene::UpdateCountDown()
 {
 
 	/*===== ゲーム開始前の更新処理 =====*/
+
+	// ゲームが開始していたら。
+	if (!isBeforeStart_) {
+
+		if (countDownEasingTimer_ < 1.0f) {
+
+			// UIを動かす用のタイマーを更新。
+			countDownEasingTimer_ += COUNT_DOWN_EASING_TIMER;
+
+		}
+		// タイマーがカンストしたら。
+		else {
+
+			if (!isCountDownExit_) {
+
+				isCountDownExit_ = true;
+				countDownEasingTimer_ = 0.0f;
+
+			}
+			else {
+
+				return;
+
+			}
+
+		}
+
+		// GOが出現中だったら。
+		if (!isCountDownExit_) {
+
+			// イージング量を計算。
+			float easingAmount = FEasing::EaseOutQuint(countDownEasingTimer_);
+
+			// アルファ値を変える。
+			goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, easingAmount));
+
+			// でかいバージョンのサイズ。
+			const float BIG_SIZE = 3.0f;
+			Vec3 BIG_GO_FONT_SIZE = Vec3(GO_FONT_SIZE.x_ * BIG_SIZE, GO_FONT_SIZE.y_ * BIG_SIZE, 1.0f);
+			Vec3 DEF_FONT_SIZE = Vec3(GO_FONT_SIZE.x_, GO_FONT_SIZE.y_, 1.0f);
+
+			goSprite_->ChangeScale(BIG_GO_FONT_SIZE + (DEF_FONT_SIZE - BIG_GO_FONT_SIZE) * easingAmount);
+
+		}
+		else {
+
+			// イージング量を計算。
+			float easingAmount = FEasing::EaseOutSine(countDownEasingTimer_);
+
+			// イージングに使用するフォントサイズ。
+			Vec3 DEF_FONT_SIZE = Vec3(GO_FONT_SIZE.x_, GO_FONT_SIZE.y_, 1.0f);
+			Vec3 EXIT_SIZE = DEF_FONT_SIZE + DEF_FONT_SIZE / 5.0f;
+
+			goSprite_->ChangeScale((DEF_FONT_SIZE + (EXIT_SIZE - DEF_FONT_SIZE) * easingAmount));
+
+			// イージングの値を反転させる。
+			easingAmount = 1.0f - easingAmount;
+			goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, easingAmount));
+
+		}
+
+		return;
+
+	}
 
 	// カウントダウンを始めるまでのタイマーを更新。
 	if (!isCountDown_) {
@@ -846,6 +912,10 @@ void GameScene::UpdateBeforeStart()
 
 					// ゲームを開始する。
 					isBeforeStart_ = false;
+
+					// 各変数を初期化。
+					isCountDownExit_ = false;
+					countDownSprite_->ChangePosition(WINDOW_CENTER);
 
 
 				}
