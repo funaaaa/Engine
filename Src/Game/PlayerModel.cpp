@@ -189,7 +189,6 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 
 
 	// 車体のインデックスを保存。
-	bodyInsIndex_.emplace_back(carBodyInsIndex_);
 	bodyInsIndex_.emplace_back(carBumperInsIndex_);
 	bodyInsIndex_.emplace_back(carLeftLightInsIndex_);
 	bodyInsIndex_.emplace_back(carRightLightInsIndex_);
@@ -197,6 +196,7 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 	bodyInsIndex_.emplace_back(carMirrorInsIndex_);
 	bodyInsIndex_.emplace_back(carMirrorCoverInsIndex_);
 	bodyInsIndex_.emplace_back(carWindowInsIndex_);
+	bodyInsIndex_.emplace_back(carBodyInsIndex_);
 
 	// タイヤのインデックスを保存。
 	tireInsIndex_.emplace_back(carBehindTireInsIndex_);
@@ -205,4 +205,22 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 	tireInsIndex_.emplace_back(carRightTireFrameInsIndex_);
 	tireInsIndex_.emplace_back(carLeftTireInsIndex_);
 	tireInsIndex_.emplace_back(carLeftTireFrameInsIndex_);
+}
+
+void PlayerModel::Delete()
+{
+
+	/*===== 車のインスタンスを削除 =====*/
+
+	for (auto& index : tireInsIndex_) {
+
+		PolygonInstanceRegister::Ins()->DestroyInstance(index);
+
+	}
+	for (auto& index : bodyInsIndex_) {
+
+		PolygonInstanceRegister::Ins()->DestroyInstance(index);
+
+	}
+
 }

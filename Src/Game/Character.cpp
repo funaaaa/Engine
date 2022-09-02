@@ -761,6 +761,15 @@ bool Character::GetIsItem()
 	return item_.operator bool();
 }
 
+void Character::DeleteInstance()
+{
+
+	/*===== モデルのインスタンスを削除 =====*/
+
+	playerModel_.Delete();
+
+}
+
 void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart)
 {
 
@@ -1271,8 +1280,8 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 
 			//if (random % 2 == 0) {
 
-				item_ = std::make_shared<BoostItem>();
-				item_->Generate(playerModel_.carBodyInsIndex_);
+			item_ = std::make_shared<BoostItem>();
+			item_->Generate(playerModel_.carBodyInsIndex_);
 
 			/*}
 			else {
@@ -1319,7 +1328,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	}
 
 
-	
+
 	jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
 	if (jumpBoostSpeed_ < 0) {
 

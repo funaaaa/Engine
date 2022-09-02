@@ -217,6 +217,9 @@ public:
 	bool GetUseItem() { return isUseItem_; }	// アイテムを使った瞬間。
 	bool GetIdConcentrationLine() { return isConcentrationLine_; }
 
+	// モデルを削除。
+	void DeleteInstance();
+
 	// デバッグ用
 	bool IsP1() { return charaID_ == CHARA_ID::P1; }
 

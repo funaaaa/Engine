@@ -67,11 +67,7 @@ public:
 
 	// ロード
 	void Load(COLOR ColorID, bool IsGhost);
+	// 削除
+	void Delete();
 
 };
-
-/*
-
-・設置した瞬間に沈める処理を書く。ｗｗ
-
-*/

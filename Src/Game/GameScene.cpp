@@ -203,8 +203,12 @@ void GameScene::Init()
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
 
+	concentrationLine_->Init();
 
 	characterMgr_->Init();
+
+	countDownSprite_->ChangePosition(Vec3(100000, 10000, 100));
+	goSprite_->ChangePosition(Vec3(100000, 10000, 100));
 
 	if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::AI) {
 
@@ -877,6 +881,8 @@ void GameScene::UpdateCountDown()
 			Vec3 DEF_FONT_SIZE = Vec3(GO_FONT_SIZE.x_, GO_FONT_SIZE.y_, 1.0f);
 
 			goSprite_->ChangeScale(BIG_GO_FONT_SIZE + (DEF_FONT_SIZE - BIG_GO_FONT_SIZE) * easingAmount);
+
+			goSprite_->ChangePosition(WINDOW_CENTER);
 
 		}
 		else {
