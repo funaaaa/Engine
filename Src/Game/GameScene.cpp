@@ -692,46 +692,46 @@ void GameScene::InputImGUI()
 
 	/*===== IMGUI更新 =====*/
 
-	// 太陽の移動速度を更新。
-	ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
+	//// 太陽の移動速度を更新。
+	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
 
-	// メッシュを表示する。
-	bool isMesh = constBufferData_.debug_.isMeshScene_;
-	ImGui::Checkbox("Mesh Scene", &isMesh);
-	constBufferData_.debug_.isMeshScene_ = isMesh;
+	//// メッシュを表示する。
+	//bool isMesh = constBufferData_.debug_.isMeshScene_;
+	//ImGui::Checkbox("Mesh Scene", &isMesh);
+	//constBufferData_.debug_.isMeshScene_ = isMesh;
 
-	// 法線を表示する。
-	bool isNormal = constBufferData_.debug_.isNormalScene_;
-	ImGui::Checkbox("Normal Scene", &isNormal);
-	constBufferData_.debug_.isNormalScene_ = isNormal;
+	//// 法線を表示する。
+	//bool isNormal = constBufferData_.debug_.isNormalScene_;
+	//ImGui::Checkbox("Normal Scene", &isNormal);
+	//constBufferData_.debug_.isNormalScene_ = isNormal;
 
-	// ライトがあたった面だけ表示するフラグを更新。
-	bool isLightHit = constBufferData_.debug_.isLightHitScene_;
-	ImGui::Checkbox("LightHit Scene", &isLightHit);
-	constBufferData_.debug_.isLightHitScene_ = isLightHit;
+	//// ライトがあたった面だけ表示するフラグを更新。
+	//bool isLightHit = constBufferData_.debug_.isLightHitScene_;
+	//ImGui::Checkbox("LightHit Scene", &isLightHit);
+	//constBufferData_.debug_.isLightHitScene_ = isLightHit;
 
-	// デバッグ用でノイズ画面を出すためのフラグをセット。
-	bool isNoise = constBufferData_.debug_.isNoiseScene_;
-	ImGui::Checkbox("Noise Scene", &isNoise);
-	constBufferData_.debug_.isNoiseScene_ = isNoise;
+	//// デバッグ用でノイズ画面を出すためのフラグをセット。
+	//bool isNoise = constBufferData_.debug_.isNoiseScene_;
+	//ImGui::Checkbox("Noise Scene", &isNoise);
+	//constBufferData_.debug_.isNoiseScene_ = isNoise;
 
-	// AOを行うかのフラグをセット。
-	bool isNoAO_ = constBufferData_.debug_.isNoAO_;
-	ImGui::Checkbox("NoAO Scene", &isNoAO_);
-	constBufferData_.debug_.isNoAO_ = isNoAO_;
+	//// AOを行うかのフラグをセット。
+	//bool isNoAO_ = constBufferData_.debug_.isNoAO_;
+	//ImGui::Checkbox("NoAO Scene", &isNoAO_);
+	//constBufferData_.debug_.isNoAO_ = isNoAO_;
 
-	// GIを行うかのフラグをセット。
-	bool isNoGI_ = constBufferData_.debug_.isNoGI_;
-	ImGui::Checkbox("NoGI Scene", &isNoGI_);
-	constBufferData_.debug_.isNoGI_ = isNoGI_;
+	//// GIを行うかのフラグをセット。
+	//bool isNoGI_ = constBufferData_.debug_.isNoGI_;
+	//ImGui::Checkbox("NoGI Scene", &isNoGI_);
+	//constBufferData_.debug_.isNoGI_ = isNoGI_;
 
-	// GIのみを描画するかのフラグをセット。
-	bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
-	ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
-	constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
+	//// GIのみを描画するかのフラグをセット。
+	//bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
+	//ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
+	//constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
 
-	// FPSを表示するかのフラグをセット。
-	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
+	//// FPSを表示するかのフラグをセット。
+	//ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
 	//// アイテムデバッグ用。
 	//bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
@@ -758,46 +758,55 @@ void GameScene::InputImGUI()
 
 
 
-	int index = 39;
+	//int index = 37;
 
-	Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
+	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
-	float posArray[3] = { pos.x_, pos.y_, pos.z_ };
+	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
 
-	ImGui::DragFloat3("Pos", posArray, 1.0f);
+	//ImGui::DragFloat3("Pos", posArray, 1.0f);
 
-	pos.x_ = posArray[0];
-	pos.y_ = posArray[1];
-	pos.z_ = posArray[2];
+	//pos.x_ = posArray[0];
+	//pos.y_ = posArray[1];
+	//pos.z_ = posArray[2];
 
-	PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
-
-
-	Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
-
-	float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
-
-	ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
-
-	rotate.x_ = rotateArray[0];
-	rotate.y_ = rotateArray[1];
-	rotate.z_ = rotateArray[2];
-
-	PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+	//PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
 
 
-	DirectX::XMMATRIX scale = PolygonInstanceRegister::Ins()->GetScale(index);
+	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
 
-	float scaleArray[3] = { scale.r[0].m128_f32[0], scale.r[1].m128_f32[1], scale.r[2].m128_f32[2] };
+	//float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
 
-	ImGui::DragFloat3("Scale", scaleArray, 1.0f);
+	//ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
 
-	Vec3 scaleVec3;
-	scaleVec3.x_ = scaleArray[0];
-	scaleVec3.y_ = scaleArray[1];
-	scaleVec3.z_ = scaleArray[2];
+	//rotate.x_ = rotateArray[0];
+	//rotate.y_ = rotateArray[1];
+	//rotate.z_ = rotateArray[2];
 
-	PolygonInstanceRegister::Ins()->ChangeScale(index, scaleVec3);
+	//PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+
+
+	//DirectX::XMMATRIX scale = PolygonInstanceRegister::Ins()->GetScale(index);
+
+	//float scaleArray[3] = { scale.r[0].m128_f32[0], scale.r[1].m128_f32[1], scale.r[2].m128_f32[2] };
+
+	//ImGui::DragFloat3("Scale", scaleArray, 1.0f);
+
+	//Vec3 scaleVec3;
+	//scaleVec3.x_ = scaleArray[0];
+	//scaleVec3.y_ = scaleArray[1];
+	//scaleVec3.z_ = scaleArray[2];
+
+	//PolygonInstanceRegister::Ins()->ChangeScale(index, scaleVec3);
+
+
+
+	//// デバッグ用
+	//if (Input::Ins()->IsKey(DIK_U)) {
+
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(index, characterMgr_->GetPlayerIns().lock()->GetPos());
+
+	//}
 
 
 }

@@ -1269,18 +1269,18 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 			// ランダムでアイテムを生成する。
 			int random = FHelper::GetRand(0, 1000);
 
-			if (random % 2 == 0) {
+			//if (random % 2 == 0) {
 
 				item_ = std::make_shared<BoostItem>();
 				item_->Generate(playerModel_.carBodyInsIndex_);
 
-			}
+			/*}
 			else {
 
 				item_ = std::make_shared<ShellItem>();
 				item_->Generate(playerModel_.carBodyInsIndex_);
 
-			}
+			}*/
 
 		}
 
@@ -1319,30 +1319,13 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	}
 
 
+	
+	jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
+	if (jumpBoostSpeed_ < 0) {
 
+		jumpBoostSpeed_ = 0;
 
-
-	/*	if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_1) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER))) {
-
-			jumpBoostSpeed_ = JUMP_BOOST_SPEED;
-
-		}
-		else */if (charaID_ == CHARA_ID::P1 && (Input::Ins()->IsKeyTrigger(DIK_2) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER))) {
-
-			boostSpeed_ = MAX_BOOST_SPEED;
-			boostTimer_ = 10;
-
-		}
-		else {
-
-			jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
-			if (jumpBoostSpeed_ < 0) {
-
-				jumpBoostSpeed_ = 0;
-
-			}
-
-		}
+	}
 
 }
 
