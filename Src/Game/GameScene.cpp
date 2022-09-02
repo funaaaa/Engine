@@ -128,6 +128,7 @@ GameScene::GameScene()
 
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
+	isBeforeStart_ = true;
 
 
 
@@ -229,6 +230,7 @@ void GameScene::Init()
 	DriftParticleMgr::Ins()->Init();
 
 	isPassedMiddlePoint_ = false;
+	isBeforeStart_ = true;
 	rapCount_ = 0;
 	sunAngle_ = 0.3f;
 	itemFrameEasingTimer_ = 1;
@@ -256,13 +258,13 @@ void GameScene::Update()
 	}
 
 	// キャラを更新。
-	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_);
+	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_, isBeforeStart_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
-	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer());
+	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_);
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {

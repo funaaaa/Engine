@@ -40,13 +40,14 @@ void DriftParticle::Init()
 
 }
 
-void DriftParticle::GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost)
+void DriftParticle::GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec)
 {
 
 	/*===== ¶¬ˆ— =====*/
 
 	id_ = ID::SMOKE;
 	pos_ = Pos;
+	forardVec_ = ForwardVec;
 	blasIndex_ = BlasIndex;
 	isActive_ = true;
 	isAppearingNow_ = true;
@@ -239,6 +240,12 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	switch (id_)
 	{
 	case DriftParticle::ID::SMOKE:
+
+		// ˆÚ“®‚³‚¹‚éB
+		pos_ += forardVec_ * SMOKE_SPEED;
+
+		// ˆÚ“®‚³‚¹‚éB
+		PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, pos_);
 
 		if (isAppearingNow_) {
 

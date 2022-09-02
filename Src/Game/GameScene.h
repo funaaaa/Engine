@@ -72,7 +72,7 @@ private:
 	// ゴール関係
 	bool isPassedMiddlePoint_;
 	int rapCount_;
-	const Vec3 GOAL_DEF_POS = Vec3(10, -30, 0);
+	const Vec3 GOAL_DEF_POS = Vec3(-0.00279516284f, 25.2644310f, -30.0005894f);
 
 	// TLASを生成。
 	std::shared_ptr<TLAS> tlas_;
@@ -117,8 +117,12 @@ private:
 	// キャラ管理クラス
 	std::shared_ptr<CharacterMgr> characterMgr_;
 
-	int testIns_;
 
+	/*-- レース開始前の変数 --*/
+	
+	bool isBeforeStart_;		// 開始前かどうかフラグ
+	int countDownStartTimer_;	// 開始前にカウントダウンが始まるまでのタイマー
+	const int COUNT_DOWN_TIMER = 120;
 
 
 

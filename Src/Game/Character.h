@@ -120,6 +120,16 @@ public:
 	const float SUB_JUMP_BOOST_SPEED = 0.2f;
 
 
+	/*-- 開始前用変数 --*/
+
+	bool isAccel_;
+	float beforeStartWaveTimer_;	// 開始前にサイン波の動きを指せるようのタイマー	
+	int beforeStartSmokeTimer_;
+	const int BEFORE_START_SMOKE_TIMER = 5;
+	const float BEFORE_START_WAVE_LENGTH_DEF = 0.3f;
+	const float BEFORE_START_WAVE_LENGTH_ACCELL = 1.0f;
+
+
 public:
 
 	struct TireUVSet {
@@ -170,7 +180,7 @@ public:
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount);
+	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart);
 
 	// 描画処理
 	void Draw();
@@ -196,13 +206,13 @@ public:
 private:
 
 	// 入力処理
-	void Input(RayConstBufferData& ConstBufferData);
+	void Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart);
 
 	// 移動処理
 	void Move();
 
 	// ドリフトに関する更新処理
-	void UpdateDrift();
+	void UpdateDrift(const bool& IsBeforeStart);
 
 	// 当たり判定
 	void CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount);

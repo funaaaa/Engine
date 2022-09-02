@@ -27,14 +27,14 @@ void CharacterMgr::Init()
 
 }
 
-void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, int& RapCount, bool& IsPassedMiddlePoint)
+void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, int& RapCount, bool& IsPassedMiddlePoint, const bool& IsBeforeStart)
 {
 
 	/*===== XVˆ— =====*/
 
 	for (auto& index : character_) {
 
-		index->Update(Stage, ConstBufferData, IsPassedMiddlePoint, RapCount);
+		index->Update(Stage, ConstBufferData, IsPassedMiddlePoint, RapCount, IsBeforeStart);
 
 	}
 

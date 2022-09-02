@@ -80,9 +80,10 @@ Character::Character(CHARA_ID CharaID)
 	bottomVec = Vec3(0, -1, 0);
 	upVec_ = Vec3(0, 1, 0);
 	size_ = Vec3(50, 30, 50);
-	rotY_ = 0;
+	rotY_ = -0.367411435;
 	speed_ = 0;
 	gravity_ = 0;
+	beforeStartSmokeTimer_ = 0;
 	jumpBoostSpeed_ = 0;
 	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
@@ -101,6 +102,7 @@ Character::Character(CHARA_ID CharaID)
 	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
 	driftTimer_ = 0;
+	beforeStartWaveTimer_ = 0;
 	boostRotQ_ = DirectX::XMVECTOR();
 	handleAmount_ = 0;
 	handleRotQ_ = DirectX::XMVECTOR();
@@ -132,7 +134,7 @@ void Character::Init()
 	upVec_ = Vec3(0, 1, 0);
 	size_ = Vec3(50, 30, 50);
 	returnDefPosTimer_ = 0;
-	rotY_ = 0;
+	rotY_ = -0.367411435;
 	speed_ = 0;
 	gravity_ = 0;
 	boostSpeed_ = 0;
@@ -141,6 +143,8 @@ void Character::Init()
 	turningIndicatorTimer_ = 0;
 	canNotMoveTimer_ = 0;
 	driftJumpVec_ = Vec3();
+	beforeStartWaveTimer_ = 0;
+	beforeStartSmokeTimer_ = 0;
 	driftJumpSpeed_ = 0;
 	isDriftJump_ = false;;
 	isDrift_ = false;
@@ -158,7 +162,7 @@ void Character::Init()
 
 }
 
-void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount)
+void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart)
 {
 
 
@@ -168,19 +172,44 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, defBodyMatRot_);
 
 	// 入力処理
-	Input(ConstBufferData);
+	Input(ConstBufferData, IsBeforeStart);
 
 	// 移動処理
 	Move();
 
 	// ドリフトに関する更新処理
-	UpdateDrift();
+	UpdateDrift(IsBeforeStart);
 
 	// 当たり判定
 	CheckHit(StageData, IsPassedMiddlePoint, RapCount);
 
+	// 開始前だったら
+	if (IsBeforeStart && !isDriftJump_) {
+
+		// プレイヤーの位置を初期位置に戻す。
+		pos_ = PLAYER_DEF_POS;
+
+		// サイン波用のタイマーを更新する。
+		beforeStartWaveTimer_ += 1.5f;
+
+		// サイン波を計算する。
+		float sineWave = std::sin(beforeStartWaveTimer_) * (isAccel_ ? BEFORE_START_WAVE_LENGTH_ACCELL : BEFORE_START_WAVE_LENGTH_DEF);
+
+		// 動かす。
+		pos_.y_ += sineWave;
+
+	}
+
 	// 座標を更新。
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
+
+	// 開始前だったら
+	if (IsBeforeStart && !isDriftJump_) {
+
+		// プレイヤーの位置を初期位置に戻す。
+		pos_ = PLAYER_DEF_POS;
+
+	}
 
 	// 車体を傾ける処理。
 	InclineCarBody();
@@ -252,8 +281,30 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	}
 
+	// 開始前でアクセルを踏んでいたら。
+	if (isAccel_ && IsBeforeStart) {
+
+		// 煙を出すタイマーを更新。
+		++beforeStartSmokeTimer_;
+		if (BEFORE_START_SMOKE_TIMER < beforeStartSmokeTimer_) {
+
+			beforeStartSmokeTimer_ = 0;
+
+			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+			// 左右に散らす。
+			Vec3 generatePos = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * FHelper::GetRand(-2, 2);
+			// 後ろ方向に持ってくる。
+			generatePos += -forwardVec_ * 20.0f;
+			DriftParticleMgr::Ins()->GenerateSmoke(generatePos, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY, -forwardVec_);
+
+		}
+
+	}
+
 	// 着地した瞬間だったら。
-	if ((isDriftJumpPrev_ && !isDriftJump_) || (!onGroundPrev_ && onGround_)) {
+	bool isJumpDriftRelease = (isDriftJumpPrev_ && !isDriftJump_);
+	bool onGroundTrigger = (!onGroundPrev_ && onGround_);
+	if ((isJumpDriftRelease || onGroundTrigger) && !IsBeforeStart) {
 
 		// 三回ランダムに位置をずらして生成する。
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
@@ -533,7 +584,7 @@ bool Character::GetIsItem()
 	return item_.operator bool();
 }
 
-void Character::Input(RayConstBufferData& ConstBufferData)
+void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart)
 {
 
 	/*===== 入力処理 =====*/
@@ -557,8 +608,11 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 	}
 
+	// 開始前のアクセルのフラグを更新。
+	isAccel_ = 0 < operation.accelerationRate_;
+
 	// RTが引かれていたら加速。
-	if (0 < operation.accelerationRate_ && onGround_) {
+	if (0 < operation.accelerationRate_ && onGround_ && !IsBeforeStart) {
 
 		speed_ += operation.accelerationRate_ * ADD_SPEED;
 
@@ -583,13 +637,13 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	float nowFrameInputLeftStickHori = 0;
 
 	// 右スティックの横の傾き量でキャラを回転させる。
-	if (operation.handleDriveRate_ != 0 || isDrift_) {
+	if ((operation.handleDriveRate_ != 0 || isDrift_) && !IsBeforeStart) {
 
 		// 回転量の最大値 通常状態とドリフト状態で違う。
 		float handleAmount = HANDLE_NORMAL;
 
-		// ドリフト状態だったら回転量を多い方にする。
-		if (isDrift_) {
+		// [ドリフト状態] [開始前じゃない] だったら回転量を多い方にする。
+		if (isDrift_ && !IsBeforeStart) {
 
 			handleAmount = HANDLE_DRIFT;
 
@@ -632,8 +686,8 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 
 		// 回転を加算する。
 		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, quaternionMat);
-		rotY_ += handleAmount * operation.handleDriveRate_;
 		nowFrameInputLeftStickHori = handleAmount * operation.handleDriveRate_;
+		rotY_ += handleAmount * operation.handleDriveRate_;
 
 		// 正面ベクトルを車の回転行列分回転させる。
 		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
@@ -728,7 +782,8 @@ void Character::Input(RayConstBufferData& ConstBufferData)
 	}
 
 	// バグ回避でLTが押されていなかったらドリフトを解除する。 ドリフト解除の正規の処理はこの処理の上にあるので通常は問題ない。
-	if (!isInputLT_) {
+	// 開始前の状態でもドリフトを解除する。
+	if (!isInputLT_ || IsBeforeStart) {
 
 		isDrift_ = false;
 		driftTimer_ = 0;
@@ -861,7 +916,7 @@ void Character::Move()
 
 }
 
-void Character::UpdateDrift()
+void Character::UpdateDrift(const bool& IsBeforeStart)
 {
 
 	/*===== ドリフトに関する更新処理 =====*/

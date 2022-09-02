@@ -23,7 +23,7 @@ public:
 
 	CharacterMgr();
 	void Init();
-	void Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, int& RapCount, bool& IsPassedMiddlePoint);
+	void Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, int& RapCount, bool& IsPassedMiddlePoint, const bool& IsBeforeStart);
 	void Draw();
 
 	void AddChara(const int& CharaID, const bool& IsPlayer);

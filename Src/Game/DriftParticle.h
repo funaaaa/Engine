@@ -12,6 +12,7 @@ private:
 	int blasIndex_;			// BLASのインデックス
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
 	Vec3 pos_;				// 座標
+	Vec3 forardVec_;		// 移動方向ベクトル
 	bool isActive_;			// 有効化フラグ
 	bool isAppearingNow_;	// 出現中フラグ アルファ値を濃くする。
 	int appearingTimer_;	// 出現してから消えるまでのタイマー
@@ -23,9 +24,11 @@ private:
 	const float APPEARING_ALPHA = 0.1f;
 	const float EXIT_ALPHA = 0.1f;
 	const float FIRE_ALPHA = 0.1f;
+	const float SMOKE_SPEED = 0.5f;
 
 
-	// オーラに関する変数
+	/*-- オーラに関する変数 --*/
+
 	int changeScaleTimer_;	// スケールを変えるまでのタイマー
 	const int CHANGE_SCALE_TIMER_BIG = 7.0f;
 	const int CHANGE_SCALE_TIMER_SMALL = 3.0f;
@@ -40,7 +43,9 @@ private:
 	// オーラの位置を左右にずらす量
 	const float AURA_SIDE_SIZE = 23.0f;
 
-	// パーティクルに関する変数。
+
+	/*-- パーティクルに関する変数 --*/
+
 	DirectX::XMVECTOR particleMatQ_;
 	Vec3 particlePos_;	// この値をposに加算する。
 	Vec3 particlePrevPos_;
@@ -84,7 +89,7 @@ public:
 	void Init();
 
 	// 生成処理
-	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost);
+	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec);
 	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
 	void GenerateAura(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
 	void GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
