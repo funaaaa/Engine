@@ -384,7 +384,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		}
 
 		// 煙を出す。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1 * isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, nowLevel < 1, DriftParticleMgr::DELAY_ID::DEF);
 
 
@@ -394,6 +394,18 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 		// オーラを破棄 関数内に二重解放対策の条件式がある。
 		DriftParticleMgr::Ins()->DestroyAura();
+
+	}
+
+	// ゲームが終了していたら イージングが終了していなかったら。
+	if (IsGameFinish && gameFinishEasingTimer_ < 0.9f) {
+
+		// 煙を出す。
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isGameFinishDriftLeft_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(isGameFinishDriftLeft_ ? playerModel_.carLeftTireInsIndex_ : playerModel_.carRightTireInsIndex_), gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+
 
 	}
 
@@ -433,6 +445,151 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 {
 
 	/*===== タイヤ痕を検出 =====*/
+
+	// ゲームが終了したトリガー判定だったら。
+	if (isGameFinish_ && !isPrevGameFinish_) {
+
+		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
+		tireMaskUV_.forwardRightUV_.prevuv_ = Vec2(0, 0);
+		tireMaskUV_.forwardRightUV_.uv_ = Vec2(0, 0);
+
+	}
+
+	// ゲームが終了していたら。
+	if (isGameFinish_) {
+
+		// 左側にドリフトしていたら。
+		if (!isGameFinishDriftLeft_) {
+
+			FHelper::RayToModelCollisionData InputRayData;
+			InputRayData.targetPolygonData_ = PolygonInstanceRegister::Ins()->GetMeshCollisionData(BaseStageData.lock()->stageObjectMgr_->GetInstanceIndex(0));
+
+			// 戻り地保存用
+			Vec3 ImpactPos;
+			Vec3 HitNormal;
+			Vec2 HitUV;
+			float HitDistance;
+
+			// 左前タイヤ
+			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
+			InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+			// タイヤ痕の位置を検出
+			bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+			// 当たり判定が正しいかどうかをチェック。
+			if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+				tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
+				tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
+
+				return false;
+
+			}
+			else {
+
+				tireMaskUV_.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.uv_;
+				tireMaskUV_.forwardLeftUV_.uv_ = HitUV;
+				TireMaskUVData.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.prevuv_;
+				TireMaskUVData.forwardLeftUV_.uv_ = HitUV;
+
+			}
+
+			// 右前タイヤ
+			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_);
+			InputRayData.rayPos_ += FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_)) * 20.0f;
+			InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+			// タイヤ痕の位置を検出
+			isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+			if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+				tireMaskUV_.forwardRightUV_.prevuv_ = Vec2(0, 0);
+				tireMaskUV_.forwardRightUV_.uv_ = Vec2(0, 0);
+
+				return false;
+
+			}
+			else {
+
+				tireMaskUV_.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.uv_;
+				tireMaskUV_.forwardRightUV_.uv_ = HitUV;
+				TireMaskUVData.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.prevuv_;
+				TireMaskUVData.forwardRightUV_.uv_ = HitUV;
+
+			}
+
+		}
+		else {
+
+			FHelper::RayToModelCollisionData InputRayData;
+			InputRayData.targetPolygonData_ = PolygonInstanceRegister::Ins()->GetMeshCollisionData(BaseStageData.lock()->stageObjectMgr_->GetInstanceIndex(0));
+
+			// 戻り地保存用
+			Vec3 ImpactPos;
+			Vec3 HitNormal;
+			Vec2 HitUV;
+			float HitDistance;
+
+			// 左前タイヤ
+			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
+			InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+			// タイヤ痕の位置を検出
+			bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+			// 当たり判定が正しいかどうかをチェック。
+			if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+				tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
+				tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
+
+				return false;
+
+			}
+			else {
+
+				tireMaskUV_.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.uv_;
+				tireMaskUV_.forwardLeftUV_.uv_ = HitUV;
+				TireMaskUVData.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.prevuv_;
+				TireMaskUVData.forwardLeftUV_.uv_ = HitUV;
+
+			}
+
+			// 右前タイヤ
+			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_);
+			InputRayData.rayPos_ += FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_)) * 20.0f;
+			InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+			// タイヤ痕の位置を検出
+			isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+			if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+				tireMaskUV_.forwardRightUV_.prevuv_ = Vec2(0, 0);
+				tireMaskUV_.forwardRightUV_.uv_ = Vec2(0, 0);
+
+				return false;
+
+			}
+			else {
+
+				tireMaskUV_.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.uv_;
+				tireMaskUV_.forwardRightUV_.uv_ = HitUV;
+				TireMaskUVData.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.prevuv_;
+				TireMaskUVData.forwardRightUV_.uv_ = HitUV;
+
+			}
+
+
+		}
+
+
+		return true;
+
+	}
 
 	if (!isTireMask_) {
 
@@ -1368,6 +1525,76 @@ void Character::InclineCarBody()
 	DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowHandleRotQ_);
 	PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
 
+
+	// ゲーム終了時演出用の回転
+	if (isGameFinish_) {
+
+		// イージングが終わったら。
+		if (0.7f <= gameFinishEasingTimer_) {
+
+			// 回転軸を求める。
+			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+			// クォータニオンを求める。
+			DirectX::XMVECTOR gameFinishRotQ = DirectX::XMQuaternionRotationAxis(axisOfRevolution.ConvertXMVECTOR(), gameFinishRotStopAmount_);
+
+			// クォータニオンから回転行列を求める。
+			DirectX::XMMATRIX gameFinishRotMat = DirectX::XMMatrixRotationQuaternion(gameFinishRotQ);
+
+			// 回転させる。
+			PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, gameFinishRotMat);
+
+			// 回転量を減らす。
+			if (isGameFinishDriftLeft_) {
+
+				gameFinishRotStopReturnAmount_ -= -0.02f;
+				gameFinishRotStopAmount_ += gameFinishRotStopReturnAmount_;
+				if (0 <= gameFinishRotStopAmount_) {
+
+					gameFinishRotStopAmount_ = 0.0f;
+
+				}
+
+			}
+			else {
+
+				gameFinishRotStopReturnAmount_ -= 0.02f;
+				gameFinishRotStopAmount_ += gameFinishRotStopReturnAmount_;
+				if (gameFinishRotStopAmount_ <= 0) {
+
+					gameFinishRotStopAmount_ = 0.0f;
+
+				}
+
+			}
+
+		}
+		else {
+
+			// イージング量を求める。
+			float easingAmount = FEasing::EaseInSine(gameFinishEasingTimer_) * (isGameFinishDriftLeft_ ? -1.0f : 1.0f);
+
+			if (GAME_FINISH_STOP_ROT_LIMIT < fabs(easingAmount)) easingAmount = GAME_FINISH_STOP_ROT_LIMIT * (easingAmount < 0 ? -1.0f : 1.0f);
+
+			// 回転軸を求める。
+			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+			// クォータニオンを求める。
+			DirectX::XMVECTOR gameFinishRotQ = DirectX::XMQuaternionRotationAxis(axisOfRevolution.ConvertXMVECTOR(), easingAmount);
+
+			// クォータニオンから回転行列を求める。
+			DirectX::XMMATRIX gameFinishRotMat = DirectX::XMMatrixRotationQuaternion(gameFinishRotQ);
+
+			// 回転させる。
+			PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, gameFinishRotMat);
+
+			gameFinishRotStopAmount_ = easingAmount;
+			gameFinishRotStopReturnAmount_ = 0;
+
+		}
+
+	}
+
 }
 
 void Character::EngineSineWave()
@@ -1404,6 +1631,7 @@ void Character::UpdateGameFinish()
 		gameFinishTriggerRotY_ = rotY_;
 		gameFinishEasingTimer_ = 0;
 		gameFinishTruggerForardVec_ = forwardVec_;
+		gameFinishTriggerMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
 
 		// 演出でどちらにドリフトさせるかを取得。
 		isGameFinishDriftLeft_ = handleAmount_ < 0;
