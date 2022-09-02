@@ -128,7 +128,12 @@ GameScene::GameScene()
 
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
+	countDownStartTimer_ = 0;
+	countDownNumber_ = 2;
 	isBeforeStart_ = true;
+	isCountDown_ = false;
+	countDownEasingTimer_ = 0;
+	isCountDownExit_ = false;
 
 
 
@@ -179,6 +184,10 @@ GameScene::GameScene()
 	// 集中線
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
 
+	// カウントダウン用UI
+	countDownSprite_ = std::make_shared<Sprite>();
+	countDownSprite_->GenerateSpecifyTextureID(COUNT_DOWN_START_POS, COUNT_DOWN_FONT_SIZE, Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[2]);
+	countDownSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f));
 
 }
 
@@ -231,7 +240,12 @@ void GameScene::Init()
 
 	isPassedMiddlePoint_ = false;
 	isBeforeStart_ = true;
+	isCountDown_ = false;
+	countDownEasingTimer_ = 0;
+	isCountDownExit_ = false;
 	rapCount_ = 0;
+	countDownStartTimer_ = 0;
+	countDownNumber_ = 2;
 	sunAngle_ = 0.3f;
 	itemFrameEasingTimer_ = 1;
 
@@ -272,6 +286,14 @@ void GameScene::Update()
 		isTransition_ = true;
 
 	}
+
+	// 開始していなかったらカウントダウンの処理を行う。
+	if (isBeforeStart_) {
+
+		UpdateBeforeStart();
+
+	}
+
 
 	// ラップ数のUIを更新。
 	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount_ + 1], 0);
@@ -572,15 +594,24 @@ void GameScene::Draw()
 
 		concentrationLine_->Draw();
 
+		// 左上のアイテムのUI。
 		itemFrameUI_->Draw();
 
+		// コインの取得数のUI。
 		coinCountUI_[0]->Draw();
 		coinCountUI_[1]->Draw();
+
+		// 現在のラップ数のUI。
 		nowRapCountUI_->Draw();
 		slashUI_->Draw();
 		maxRapCountUI_->Draw();
+
+		// 左下のUIのフレーム。
 		coinUI_->Draw();
 		rapUI_->Draw();
+
+		// カウントダウン用のUI。
+		countDownSprite_->Draw();
 
 	}
 	if (firstTime == 0) ++firstTime;
@@ -766,8 +797,91 @@ void GameScene::GenerateGimmick()
 
 }
 
-/*
+void GameScene::UpdateBeforeStart()
+{
 
-Spriteのアルファがいかれている。
+	/*===== ゲーム開始前の更新処理 =====*/
 
-*/
+	// カウントダウンを始めるまでのタイマーを更新。
+	if (!isCountDown_) {
+		++countDownStartTimer_;
+		if (COUNT_DOWN_TIMER < countDownStartTimer_) {
+
+			isCountDown_ = true;
+
+			// カウントダウンに使用する変数を初期化。
+			countDownEasingTimer_ = 0;
+			isCountDownExit_ = false;
+			countDownNumber_ = 3;
+			countDownSprite_->ChangeTextureID(numFontHandle_[countDownNumber_], 0);
+
+		}
+	}
+
+	// カウントダウン
+	if (isCountDown_) {
+
+		// UIを動かす用のタイマーを更新。
+		countDownEasingTimer_ += COUNT_DOWN_EASING_TIMER;
+
+		// 動かし終えたら。
+		if (1.0f <= countDownEasingTimer_) {
+
+			countDownEasingTimer_ = 0;
+
+			// 上から真ん中に来ている段階だったら、次はアルファ値を下げる。
+			if (!isCountDownExit_) {
+
+				isCountDownExit_ = true;
+
+			}
+			// アルファ値を下げる段階だったら次の数字をカウントする。
+			else {
+
+				isCountDownExit_ = false;
+
+				--countDownNumber_;
+				// カウントダウンの番号が0になったら(カウントダウンが終わったら)
+				if (countDownNumber_ < 1) {
+
+					// ゲームを開始する。
+					isBeforeStart_ = false;
+
+
+				}
+				else {
+
+					countDownSprite_->ChangeTextureID(numFontHandle_[countDownNumber_], 0);
+
+				}
+
+			}
+
+		}
+
+		// UIを更新する。
+		if (isCountDownExit_) {
+
+			// イージング量を求める。
+			float easingAmount = FEasing::EaseInQuint(countDownEasingTimer_);
+
+			// アルファ値を下げる。
+			countDownSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f - easingAmount));
+
+		}
+		else {
+
+			// イージング量を求める。
+			float easingAmount = FEasing::EaseOutQuint(countDownEasingTimer_);
+
+			// アルファ値を上げる。
+			countDownSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, easingAmount));
+
+			// 移動させる。
+			countDownSprite_->ChangePosition(COUNT_DOWN_START_POS + (WINDOW_CENTER - COUNT_DOWN_START_POS) * easingAmount);
+
+		}
+
+	}
+
+}

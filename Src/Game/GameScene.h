@@ -119,11 +119,20 @@ private:
 
 
 	/*-- レース開始前の変数 --*/
-	
-	bool isBeforeStart_;		// 開始前かどうかフラグ
+
+	std::shared_ptr<Sprite> countDownSprite_;
+	const Vec2 COUNT_DOWN_FONT_SIZE = Vec2(16.0f * 2.5f, 32.0f * 2.5f);
+	int countDownNumber_;		// カウントダウンでの現在の番号
 	int countDownStartTimer_;	// 開始前にカウントダウンが始まるまでのタイマー
 	const int COUNT_DOWN_TIMER = 120;
+	float countDownEasingTimer_;						// カウントダウンのUIが動く際の加算量
+	const float COUNT_DOWN_EASING_TIMER = 1.0f / 30.0f;	// カウントダウンのUIが動く際の加算量 値は0.5秒で画面の半分を動かさなければ行けないため、1.0fを30Fで割っている。
+	bool isCountDownExit_;		// カウントダウンの際のUIの動きで使用。 t:アルファ値を下げる f:上から真ん中
+	bool isBeforeStart_;		// 開始前かどうかフラグ
+	bool isCountDown_;			// カウントダウン中。
 
+	Vec3 WINDOW_CENTER = Vec3(1280.0f / 2.0f, 720.0f / 2.0f, 0.1f);
+	Vec3 COUNT_DOWN_START_POS = Vec3(1280.0f / 2.0f, 720.0f / 2.0f - 300.0f, 0.1f);
 
 
 public:
@@ -145,6 +154,11 @@ public:
 
 	// ギミックを生成。
 	void GenerateGimmick();
+
+private:
+
+	// ゲーム開始前の更新処理
+	void UpdateBeforeStart();
 
 
 };

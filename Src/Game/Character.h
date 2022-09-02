@@ -123,6 +123,7 @@ public:
 	/*-- 開始前用変数 --*/
 
 	bool isAccel_;
+	bool isBeforeStartPrev_;
 	float beforeStartWaveTimer_;	// 開始前にサイン波の動きを指せるようのタイマー	
 	int beforeStartSmokeTimer_;
 	const int BEFORE_START_SMOKE_TIMER = 5;
@@ -209,7 +210,7 @@ private:
 	void Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart);
 
 	// 移動処理
-	void Move();
+	void Move(const bool& IsBeforeStart);
 
 	// ドリフトに関する更新処理
 	void UpdateDrift(const bool& IsBeforeStart);

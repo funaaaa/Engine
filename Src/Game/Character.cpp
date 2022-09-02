@@ -90,6 +90,7 @@ Character::Character(CHARA_ID CharaID)
 	boostTimer_ = 0;
 	isDrift_ = false;
 	onGround_ = true;
+	isBeforeStartPrev_ = false;
 	onGroundPrev_ = false;
 	onGrass_ = false;
 	isGetItem_ = false;
@@ -154,6 +155,7 @@ void Character::Init()
 	isGetItem_ = false;
 	isInputLTPrev_ = false;
 	isInputLT_ = false;
+	isBeforeStartPrev_ = false;
 	IsTurningIndicatorRed_ = false;
 	isTireMask_ = false;
 	isConcentrationLine_ = false;
@@ -175,7 +177,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	Input(ConstBufferData, IsBeforeStart);
 
 	// 移動処理
-	Move();
+	Move(IsBeforeStart);
 
 	// ドリフトに関する更新処理
 	UpdateDrift(IsBeforeStart);
@@ -399,6 +401,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	// 接地フラグを保存。
 	onGroundPrev_ = onGround_;
+
+	// ゲーム開始前フラグを保存。
+	isBeforeStartPrev_ = IsBeforeStart;
 
 }
 
@@ -854,7 +859,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 
 }
 
-void Character::Move()
+void Character::Move(const bool& IsBeforeStart)
 {
 
 	/*===== 移動処理 =====*/
@@ -905,6 +910,15 @@ void Character::Move()
 			gravity_ = MAX_GRAV;
 
 		}
+
+	}
+
+	// ゲームが開始したトリガーのときにアクセルがふまれていたら加速。
+	bool isGameStartRelease = isBeforeStartPrev_ && !IsBeforeStart;
+	if (isGameStartRelease && isAccel_) {
+
+		boostTimer_ = 20;
+		boostSpeed_ = MAX_BOOST_SPEED;
 
 	}
 
