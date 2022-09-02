@@ -282,13 +282,8 @@ void GameScene::Update()
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
-	// ゲームが終わった場合はカメラの動きを止める。
-	if (!isGameFinish_) {
-
-		// カメラを更新。
-		Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_);
-
-	}
+	// カメラを更新。
+	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {

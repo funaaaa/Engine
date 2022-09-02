@@ -52,7 +52,7 @@ void Camera::Init()
 
 }
 
-void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec3& CharaUpVec, const float& CharaSpeedPer, const bool& IsBeforeStart)
+void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec3& CharaUpVec, const float& CharaSpeedPer, const bool& IsBeforeStart, const bool& IsGameFinish)
 {
 
 	/*===== 更新処理 =====*/
@@ -77,49 +77,70 @@ void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec
 
 	}
 
-	// 基準となる視点座標を求める。
-	baseEye_ = CharaPos + CharaForwardVec * -EYE_PLAYER_DISTANCE;
-	baseEye_ += up_ * TARGET_UPPER;
+	// ゲームが終わったら保管しない。
+	if (IsGameFinish) {
 
-	// 基準となる注視点座標を求める。
-	baseTarget_ = CharaPos + CharaForwardVec * TARGET_PLAYER_DISTNACE;
+		// 視点とキャラが離れすぎていたら。
+		float distance = Vec3(eye_ - CharaPos).Length();
+		if (EYE_PLAYER_DISTANCE < distance) {
 
-	// 基準となる上ベクトルを求める。
-	baseUp_ = CharaUpVec;
+			// 視点からプレイヤーのベクトルを求める。
+			Vec3 eyeCharaVec = Vec3(CharaPos - eye_).GetNormal();
 
-	// 補間量。
-	float interpolationAmount = 0.0f;
+			// 移動させる。
+			eye_ += eyeCharaVec * (distance - EYE_PLAYER_DISTANCE);
+			target_ += eyeCharaVec * (distance - EYE_PLAYER_DISTANCE);
 
-	// 開始前だったら補間を弱める。
-	if (IsBeforeStart) {
-
-		interpolationAmount = 20.0f;
+		}
 
 	}
-	// ゲーム中だったら規定の速度
 	else {
 
-		interpolationAmount = 5.0f;
+		// 基準となる視点座標を求める。
+		baseEye_ = CharaPos + CharaForwardVec * -EYE_PLAYER_DISTANCE;
+		baseEye_ += up_ * TARGET_UPPER;
+
+		// 基準となる注視点座標を求める。
+		baseTarget_ = CharaPos + CharaForwardVec * TARGET_PLAYER_DISTNACE;
+
+		// 基準となる上ベクトルを求める。
+		baseUp_ = CharaUpVec;
+
+		// 補間量。
+		float interpolationAmount = 0.0f;
+
+		// 開始前だったら補間を弱める。
+		if (IsBeforeStart) {
+
+			interpolationAmount = 20.0f;
+
+		}
+		// ゲーム中だったら規定の速度
+		else {
+
+			interpolationAmount = 5.0f;
+
+		}
+
+		// 視点座標を補間する。
+		eye_ += (baseEye_ - eye_) / interpolationAmount;
+
+		// 注視点座標を補間する。
+		target_ += (baseTarget_ - target_) / interpolationAmount;
+
+		// 上ベクトルを更新する。
+		up_ += (baseUp_ - up_) / interpolationAmount;
+
+		// 現在のキャラの移動速度の割合から画角に加算する量を求める。
+		float addAngleOfView = (MAX_ANGLEOFVIEW - DEF_ANGLEOFVIEW) * CharaSpeedPer;
+
+		// 基準となる画角の値を変える。
+		baseAngleOfView_ = DEF_ANGLEOFVIEW + addAngleOfView;
 
 	}
 
-	// 視点座標を補間する。
-	eye_ += (baseEye_ - eye_) / interpolationAmount;
-
-	// 注視点座標を補間する。
-	target_ += (baseTarget_ - target_) / interpolationAmount;
-
-	// 上ベクトルを更新する。
-	up_ += (baseUp_ - up_) / interpolationAmount;
-
-	// 現在のキャラの移動速度の割合から画角に加算する量を求める。
-	float addAngleOfView = (MAX_ANGLEOFVIEW - DEF_ANGLEOFVIEW) * CharaSpeedPer;
-
-	// 基準となる画角の値を変える。
-	baseAngleOfView_ = DEF_ANGLEOFVIEW + addAngleOfView;
-
 	// 画角の値を基準となる値に近づける。
-	angleOfView_ += (baseAngleOfView_ - angleOfView_) / interpolationAmount;
+	angleOfView_ += (baseAngleOfView_ - angleOfView_) / 5.0f;
 
 	// ビュー行列を生成。	
 	matView_ = DirectX::XMMatrixLookAtLH(eye_.ConvertXMVECTOR(), target_.ConvertXMVECTOR(), up_.ConvertXMVECTOR());
