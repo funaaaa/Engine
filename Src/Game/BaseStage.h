@@ -30,6 +30,7 @@ public:
 	};
 	// 当たり判定出力構造体
 	struct ColliderOutput {
+		DirectX::XMMATRIX matRot_;	// 当たり判定の結果の回転行列。
 		Vec3 resultPos_;			// 当たり判定結果の座標
 		Vec3 forwardVec_;			// 正面ベクトル
 		Vec3 upVec_;				// 上ベクトル

@@ -92,7 +92,9 @@ Character::Character(CHARA_ID CharaID)
 	onGround_ = true;
 	isBeforeStartPrev_ = false;
 	onGroundPrev_ = false;
+	isPrevGameFinish_ = false;
 	onGrass_ = false;
+	isGameFinish_ = false;
 	isGetItem_ = false;
 	isTireMask_ = false;
 	isUseItem_ = false;
@@ -149,10 +151,12 @@ void Character::Init()
 	driftJumpSpeed_ = 0;
 	isDriftJump_ = false;;
 	isDrift_ = false;
+	isPrevGameFinish_ = false;
 	isUseItem_ = false;
 	onGround_ = true;
 	onGrass_ = false;
 	isGetItem_ = false;
+	isGameFinish_ = false;
 	isInputLTPrev_ = false;
 	isInputLT_ = false;
 	isBeforeStartPrev_ = false;
@@ -164,7 +168,7 @@ void Character::Init()
 
 }
 
-void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart)
+void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart, const bool& IsGameFinish)
 {
 
 
@@ -181,17 +185,21 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	}
 
+	// ゲーム終了フラグを更新。
+	isPrevGameFinish_ = isGameFinish_;
+	isGameFinish_ = IsGameFinish;
+
 	// ブースト時の回転を打ち消す。
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, defBodyMatRot_);
 
 	// 入力処理
 	Input(ConstBufferData, IsBeforeStart);
 
-	// 移動処理
-	Move(IsBeforeStart);
-
 	// ドリフトに関する更新処理
 	UpdateDrift(IsBeforeStart);
+
+	// 移動処理
+	Move(IsBeforeStart);
 
 	// 当たり判定
 	CheckHit(StageData, IsPassedMiddlePoint, RapCount);
@@ -205,6 +213,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		EngineSineWave();
 
 	}
+
+	// ゲーム終了時の更新処理
+	UpdateGameFinish();
 
 	// 座標を更新。
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
@@ -237,7 +248,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 			forwardVec_ = Vec3(0, 0, -1);
-			rotY_ = 0;
+			rotY_ = -0.367411435;
 			upVec_ = Vec3(0, 1, 0);
 			returnDefPosTimer_ = 0;
 
@@ -310,7 +321,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	// 着地した瞬間だったら。
 	bool isJumpDriftRelease = (isDriftJumpPrev_ && !isDriftJump_);
 	bool onGroundTrigger = (!onGroundPrev_ && onGround_);
-	if ((isJumpDriftRelease || onGroundTrigger) && !IsBeforeStart) {
+	if ((isJumpDriftRelease || onGroundTrigger) && !IsBeforeStart && !isGameFinish_) {
 
 		// 三回ランダムに位置をずらして生成する。
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
@@ -598,6 +609,9 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 
 	/*===== 入力処理 =====*/
 
+	// ゲームが終了している場合は入力を無効化する。 ゲームが終了した最初のFでは入力を取る必要があるので、Prevも比較している。
+	if (isGameFinish_ && isPrevGameFinish_) return;
+
 	ConstBufferData;
 
 	// 操作オブジェクトからの入力を受け取る。
@@ -856,7 +870,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 		forwardVec_ = Vec3(0, 0, -1);
-		rotY_ = 0;
+		rotY_ = -0.367411435;
 		upVec_ = Vec3(0, 1, 0);
 
 	}
@@ -1058,6 +1072,9 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 		forwardVec_ = output.forwardVec_;
 		upVec_ = output.upVec_;
 
+		// 回転を更新。
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, output.matRot_);
+
 
 	}
 	if (output.isHitStageGrass_) {
@@ -1073,6 +1090,9 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 			upVec_ = output.upVec_;
 
 		}
+
+		// 回転を更新。
+		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, output.matRot_);
 
 	}
 	// ゴーストだったら当たり判定を飛ばす。
@@ -1166,104 +1186,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 			}
 
 		}
-
-}
-
-void Character::RotObliqueFloor(const Vec3& HitNormal)
-{
-
-	/*===== 斜め床の回転処理 =====*/
-
-	/*-- 外積から回転軸を取得 --*/
-
-	// デフォルトの上ベクトル。
-	Vec3 defUpVec = Vec3(0, 1, 0);
-
-	// 回転軸を求める。
-	Vec3 axisOfRevolution = defUpVec.Cross(HitNormal);
-
-	// 回転軸を正規化する。
-	if (axisOfRevolution.Length() != 0) {
-		axisOfRevolution.Normalize();
-	}
-
-	/*-- 内積から回転量を取得 --*/
-
-	// 回転量を求める。
-	float amountOfRotation = defUpVec.Dot(HitNormal);
-
-	// 逆余弦を求める関数を使用して求めたcosθをラジアンに変換。
-	amountOfRotation = acosf(amountOfRotation);
-
-
-	/*-- クォータニオンを使って回転 --*/
-
-	// 回転軸が{0,0,0}だったら処理を飛ばす。
-	if (axisOfRevolution.Length() != 0 && amountOfRotation != 0) {
-
-		// クォータニオンを求める。
-		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(axisOfRevolution.ConvertXMVECTOR(), amountOfRotation);
-
-		// 求めたクォータニオンを行列に治す。
-		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
-
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, quaternionMat);
-
-		// 上ベクトルを基準としたクォータニオンを求める。
-		Vec3 normal_ = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
-
-		// クォータニオンを行列に治す。
-		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
-
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
-
-
-		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
-
-		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
-
-		// 上ベクトルを更新。
-		upVec_ = normal_;
-
-
-		//正面ベクトルを更新。
-		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
-
-	}
-
-	// 当たった法線が上だった場合は行列を初期化して回転させる。
-	if (HitNormal == Vec3(0, 1, 0)) {
-
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, DirectX::XMMatrixIdentity());
-
-		// 上ベクトルを基準としたクォータニオンを求める。
-		Vec3 normal_ = HitNormal;
-		DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
-
-		// クォータニオンを行列に治す。
-		DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
-
-		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
-
-
-		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
-
-		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
-
-		// 上ベクトルを更新。
-		upVec_ = normal_;
-
-		//正面ベクトルを更新。
-		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
-
-	}
 
 }
 
@@ -1461,5 +1383,58 @@ void Character::EngineSineWave()
 
 	// 動かす。
 	pos_.y_ += sineWave;
+
+}
+
+void Character::UpdateGameFinish()
+{
+
+	/*===== ゲーム終了時の更新処理 =====*/
+
+	// ゲームが終わっていなかったら処理を飛ばす。
+	if (!isGameFinish_) return;
+
+	// ゲーム終了トリガーの場合。
+	bool isFinishTrigger = !isPrevGameFinish_ && isGameFinish_;
+	if (isFinishTrigger) {
+
+		// 各変数を設定。
+		boostTimer_ = 0;
+		speed_ = MAX_SPEED;
+		gameFinishTriggerRotY_ = rotY_;
+		gameFinishEasingTimer_ = 0;
+		gameFinishTruggerForardVec_ = forwardVec_;
+
+		// 演出でどちらにドリフトさせるかを取得。
+		isGameFinishDriftLeft_ = handleAmount_ < 0;
+		if (handleAmount_ == 0) {
+
+			isGameFinishDriftLeft_ = true;
+
+		}
+
+		return;
+
+	}
+
+
+	/*-- ゲーム終了時の更新処理本編 --*/
+
+	// 正面ベクトルを更新する。
+	forwardVec_ = gameFinishTruggerForardVec_;
+
+	// ゲーム終了時のイージングタイマーを更新してオーバーフローしないようにする。
+	gameFinishEasingTimer_ = FHelper::Saturate(gameFinishEasingTimer_ + GAME_FINISH_EASING_TIMER);
+
+	// イージング量を求める。
+	float easingAmount = FEasing::EaseOutQuint(gameFinishEasingTimer_);
+
+	// 移動量を更新する。
+	speed_ = MAX_SPEED * (1.0f - easingAmount);
+
+	// 回転を更新する。
+	const float ADD_ROT_Y = DirectX::XM_PIDIV2 * (isGameFinishDriftLeft_ ? -1.0f : 1.0f);
+	rotY_ = gameFinishTriggerRotY_;
+	rotY_ += ADD_ROT_Y * easingAmount;
 
 }

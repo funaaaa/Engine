@@ -72,6 +72,7 @@ private:
 	// ƒS[ƒ‹ŠÖŒW
 	bool isPassedMiddlePoint_;
 	int rapCount_;
+	bool isGameFinish_;
 	const Vec3 GOAL_DEF_POS = Vec3(-0.00279516284f, 25.2644310f, -30.0005894f);
 
 	// TLAS‚ğ¶¬B

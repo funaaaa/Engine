@@ -134,6 +134,7 @@ GameScene::GameScene()
 	isCountDown_ = false;
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
+	isGameFinish_ = false;
 
 
 
@@ -246,6 +247,7 @@ void GameScene::Init()
 	isCountDown_ = false;
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
+	isGameFinish_ = false;
 	rapCount_ = 0;
 	countDownStartTimer_ = 0;
 	countDownNumber_ = 2;
@@ -275,20 +277,46 @@ void GameScene::Update()
 	}
 
 	// キャラを更新。
-	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_, isBeforeStart_);
+	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_, isBeforeStart_, isGameFinish_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
-	// カメラを更新。
-	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_);
+	// ゲームが終わった場合はカメラの動きを止める。
+	if (!isGameFinish_) {
+
+		// カメラを更新。
+		Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_);
+
+	}
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {
 
+
+		//isGameFinish_ = true;
+
 		isTransition_ = true;
 
 	}
+
+
+
+	// 仮の処理
+	if (Input::Ins()->IsKeyTrigger(DIK_9)) {
+
+		isGameFinish_ = true;
+
+	}
+
+	if (Input::Ins()->IsKeyTrigger(DIK_0)) {
+
+		isGameFinish_ = false;
+
+	}
+
+
+
 
 	// 開始していなかったらカウントダウンの処理を行う。
 	UpdateCountDown();

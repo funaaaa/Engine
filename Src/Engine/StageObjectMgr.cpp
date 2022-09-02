@@ -63,6 +63,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 
 	// 当たり判定結果用
 	BaseStage::ColliderOutput output;
+	output.matRot_ = DirectX::XMMatrixIdentity();
 	output.isHitBoostGimmick_ = false;
 	output.isHitGoal_ = false;
 	output.isHitMiddlePoint_ = false;
@@ -448,7 +449,8 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, quaternionMat);
+		Output.matRot_ = quaternionMat;
+		//PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, quaternionMat);
 
 		// 法線ベクトル
 		Vec3 normal_ = HitNormal;
@@ -462,21 +464,19 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 			DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 			// プレイヤーを回転させる。
-			PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+			Output.matRot_ *= upQuaternionMat;
+			//PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
 
 		}
 
 
 		/*-- プレイヤーの回転行列をもとに各ベクトルを回転 --*/
 
-		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_);
-
 		// 上ベクトルを更新。
 		Output.upVec_ = normal_;
 
 		//正面ベクトルを更新。
-		Output.forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
+		Output.forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), Output.matRot_);
 
 	}
 
@@ -484,7 +484,8 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 	if (HitNormal == Vec3(0, 1, 0)) {
 
 		// プレイヤーを回転させる。
-		PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, DirectX::XMMatrixIdentity());
+		Output.matRot_ = DirectX::XMMatrixIdentity();
+		//PolygonInstanceRegister::Ins()->ChangeRotate(Input.targetInsIndex_, DirectX::XMMatrixIdentity());
 
 		// 法線ベクトル
 		Vec3 normal_ = HitNormal;
@@ -498,21 +499,19 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 			DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 			// 回転させる。
-			PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
+			Output.matRot_ *= upQuaternionMat;
+			//PolygonInstanceRegister::Ins()->AddRotate(Input.targetInsIndex_, upQuaternionMat);
 
 		}
 
 
 		/*-- 回転行列をもとに各ベクトルを回転 --*/
 
-		// 回転行列を取得。
-		DirectX::XMMATRIX rotationMatBuff = PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_);
-
 		// 上ベクトルを更新。
 		Output.upVec_ = normal_;
 
 		//正面ベクトルを更新。
-		Output.forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), rotationMatBuff);
+		Output.forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), Output.matRot_);
 
 	}
 

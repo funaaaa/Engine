@@ -59,7 +59,7 @@ public:
 	const int TURNING_INDICATOR_TIMER = 30;
 
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
-	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
+	const float MAX_SPEED_ON_GRASS = 12.0f;// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
 	const float MAX_GRAV = 8.0f;		// 重力の最大量
@@ -131,6 +131,17 @@ public:
 	const float BEFORE_START_WAVE_LENGTH_ACCELL = 1.0f;
 
 
+	/*-- ゴール演出用変数 --*/
+
+	Vec3 gameFinishTruggerForardVec_;// ゲーム終了時の正面ベクトル
+	float gameFinishTriggerRotY_;	// ゲームが終わった瞬間の回転量
+	float gameFinishEasingTimer_;	// ゲーム終了時演出に使用するイージングタイマー
+	const float GAME_FINISH_EASING_TIMER = 0.01f;
+	bool isGameFinish_;				// ゲームが終わったフラグ
+	bool isPrevGameFinish_;			// 前フレームのゲームが終わったフラグ
+	bool isGameFinishDriftLeft_;	// ゲーム終了演出でどちらにドリフトするか。 t:左 f:右
+
+
 public:
 
 	struct TireUVSet {
@@ -181,7 +192,7 @@ public:
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart);
+	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart, const bool& IsGameFinish);
 
 	// 描画処理
 	void Draw();
@@ -218,13 +229,13 @@ private:
 	// 当たり判定
 	void CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount);
 
-	// 斜め床の回転
-	void RotObliqueFloor(const Vec3& HitNormal);
-
 	// 車体傾けの処理
 	void InclineCarBody();
 
 	// エンジンの上下
 	void EngineSineWave();
+
+	// ゲーム終了時の更新処理
+	void UpdateGameFinish();
 
 };
