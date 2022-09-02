@@ -224,4 +224,7 @@ private:
 	// Ô‘ÌŒX‚¯‚Ìˆ—
 	void InclineCarBody();
 
+	// ƒGƒ“ƒWƒ“‚Ìã‰º
+	void EngineSineWave();
+
 };

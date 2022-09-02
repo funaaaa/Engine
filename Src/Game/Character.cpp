@@ -170,15 +170,15 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	/*===== 更新処理 =====*/
 
-	if(Input::Ins()->IsKey(DIK_I)){
-	
+	if (Input::Ins()->IsKey(DIK_I)) {
+
 		rotY_ += 0.05f;
-	
+
 	}
-	if(Input::Ins()->IsKey(DIK_O)){
-	
+	if (Input::Ins()->IsKey(DIK_O)) {
+
 		rotY_ -= 0.05f;
-	
+
 	}
 
 	// ブースト時の回転を打ち消す。
@@ -202,14 +202,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		// プレイヤーの位置を初期位置に戻す。
 		pos_ = PLAYER_DEF_POS;
 
-		// サイン波用のタイマーを更新する。
-		beforeStartWaveTimer_ += 1.5f;
-
-		// サイン波を計算する。
-		float sineWave = std::sin(beforeStartWaveTimer_) * (isAccel_ ? BEFORE_START_WAVE_LENGTH_ACCELL : BEFORE_START_WAVE_LENGTH_DEF);
-
-		// 動かす。
-		pos_.y_ += sineWave;
+		EngineSineWave();
 
 	}
 
@@ -1452,5 +1445,21 @@ void Character::InclineCarBody()
 	// 回転行列を求める。
 	DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowHandleRotQ_);
 	PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
+
+}
+
+void Character::EngineSineWave()
+{
+
+	/*===== エンジンの上下 =====*/
+
+	// サイン波用のタイマーを更新する。
+	beforeStartWaveTimer_ += 1.5f;
+
+	// サイン波を計算する。
+	float sineWave = std::sin(beforeStartWaveTimer_) * (isAccel_ ? BEFORE_START_WAVE_LENGTH_ACCELL : BEFORE_START_WAVE_LENGTH_DEF);
+
+	// 動かす。
+	pos_.y_ += sineWave;
 
 }
