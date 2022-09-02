@@ -23,79 +23,10 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 
 	/*----- targetからポリゴンを抜き取る -----*/
 
-	struct CheckHitVertex {
-
-		Vec3 pos_;
-		Vec3 normal_;
-		Vec2 uv_;
-
-	};
-
-	// レイとの当たり判定用のポリゴン構造体
-	struct CheckHitPorygon {
-		bool isActive_ = true;
-		CheckHitVertex p1_;
-		CheckHitVertex p2_;
-		CheckHitVertex p3_;
-	};
-
-	// あたっているポリゴンのデータを保存するよう変数	衝突地点、距離、衝突面の法線
-	struct HitPorygonData
-	{
-		Vec3 pos_;
-		float distance_;
-		Vec3 normal_;
-		CheckHitPorygon targetPolygon_;
-	};
-
 	std::vector<HitPorygonData> hitPolygon{};
 
-	std::vector<CheckHitPorygon> targetPolygon;		//ポリゴン保存用コンテナ
-
-	// targetのポリゴン数に合わせてリサイズ
-	targetPolygon.resize(static_cast<unsigned __int64>(static_cast<float>(CollisionData.targetVertex_.size()) / 3.0f));
-
-	// ポリゴンの中身を代入
-	for (auto& index : targetPolygon) {
-
-		// 頂点1
-		index.p1_.pos_ = CollisionData.targetVertex_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3)])];
-		index.p1_.normal_ = CollisionData.targetNormal_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3)])];
-		index.p1_.uv_ = CollisionData.targetUV_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3)])];
-		// 頂点2
-		index.p2_.pos_ = CollisionData.targetVertex_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3 + 1)])];
-		index.p2_.normal_ = CollisionData.targetNormal_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3 + 1)])];
-		index.p2_.uv_ = CollisionData.targetUV_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3 + 1)])];
-		// 頂点3
-		index.p3_.pos_ = CollisionData.targetVertex_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3 + 2)])];
-		index.p3_.normal_ = CollisionData.targetNormal_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3 + 2)])];
-		index.p3_.uv_ = CollisionData.targetUV_[static_cast<UINT>(CollisionData.targetIndex_[static_cast<UINT>((&index - &targetPolygon[0]) * 3 + 2)])];
-		// 有効化フラグ
-		index.isActive_ = true;
-	}
-
-	/*----- 保存したポリゴンの頂点座標にワールド変換行列をかける -----*/
-	// ワールド行列
-	DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
-	matWorld *= CollisionData.matScale_;
-	matWorld *= CollisionData.matRot_;
-	matWorld *= CollisionData.matTrans_;
-	for (auto& index : targetPolygon) {
-		// 頂点を変換
-		index.p1_.pos_ = DirectX::XMVector3Transform(index.p1_.pos_.ConvertXMVECTOR(), matWorld);
-		index.p2_.pos_ = DirectX::XMVector3Transform(index.p2_.pos_.ConvertXMVECTOR(), matWorld);
-		index.p3_.pos_ = DirectX::XMVector3Transform(index.p3_.pos_.ConvertXMVECTOR(), matWorld);
-		// 法線を回転行列分だけ変換
-		index.p1_.normal_ = XMVector3Transform(index.p1_.normal_.ConvertXMVECTOR(), CollisionData.matRot_);
-		index.p1_.normal_.Normalize();
-		index.p2_.normal_ = XMVector3Transform(index.p2_.normal_.ConvertXMVECTOR(), CollisionData.matRot_);
-		index.p2_.normal_.Normalize();
-		index.p3_.normal_ = XMVector3Transform(index.p3_.normal_.ConvertXMVECTOR(), CollisionData.matRot_);
-		index.p3_.normal_.Normalize();
-	}
-
 	/*----- レイの方向と法線が同じ方向なら除外 -----*/
-	for (auto& index : targetPolygon) {
+	for (auto& index : CollisionData.targetPolygonData_) {
 		// まずは1つ目の頂点をチェック
 		if (-0.0001f < index.p1_.normal_.Dot(CollisionData.rayDir_)) {
 			// ここまで来たら完全に反対側を向いているので、削除フラグを建てる
@@ -107,8 +38,8 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 	/*----- ポリゴンの3頂点と境界球の当たり判定を行い、一定以上距離があった場合は処理を飛ばす -----*/
 
 	/*----- ポリゴンごとに当たり判定 -----*/
-	// 此処から先はポリゴンごとに計算する
-	for (auto& index : targetPolygon) {
+	// ここから先はポリゴンごとに計算する
+	for (auto& index : CollisionData.targetPolygonData_) {
 		/*----- レイと平面の衝突点を計算する -----*/
 
 		// ポリゴンが無効化されていたら次の処理へ
@@ -221,7 +152,7 @@ bool FHelper::RayToModelCollision(RayToModelCollisionData CollisionData, Vec3& I
 		uv.x_ += hitPolygon[min].targetPolygon_.p1_.uv_.x_ * bary.x_;
 		uv.x_ += hitPolygon[min].targetPolygon_.p2_.uv_.x_ * bary.y_;
 		uv.x_ += hitPolygon[min].targetPolygon_.p3_.uv_.x_ * bary.z_;
-		
+
 		uv.y_ += hitPolygon[min].targetPolygon_.p1_.uv_.y_ * bary.x_;
 		uv.y_ += hitPolygon[min].targetPolygon_.p2_.uv_.y_ * bary.y_;
 		uv.y_ += hitPolygon[min].targetPolygon_.p3_.uv_.y_ * bary.z_;

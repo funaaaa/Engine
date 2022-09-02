@@ -39,6 +39,8 @@ public:
 	bool onGroundPrev_;		// 前フレームのonGround_
 	bool onGrass_;			// 草の上にいるか t=草の上 f=草の上じゃない
 	bool isConcentrationLine_;	// 集中線を出すかフラグ。
+	bool isUseItem_;	// アイテムを使った瞬間。
+	bool isJumpActionTrigger_;	// ジャンプアクションのトリガー
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
@@ -60,19 +62,19 @@ public:
 	const float MAX_SPEED_ON_GRASS = 8.0f;// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
-	const float MAX_GRAV = 7.0f;		// 重力の最大量
-	const float ADD_GRAV = 0.05f;		// 重力の加算量
+	const float MAX_GRAV = 8.0f;		// 重力の最大量
+	const float ADD_GRAV = 0.4f;		// 重力の加算量
 	const Vec3 PLAYER_DEF_POS = Vec3(0, 30, -30);
 
 
 	/*-- ドリフト、加速時の車体の回転に関する変数 --*/
 
-	float handleAmount_;				// ハンドル量
 	DirectX::XMVECTOR handleRotQ_;		// ハンドルの回転量
 	DirectX::XMVECTOR nowHandleRotQ_;	// ハンドルの回転量
 	DirectX::XMVECTOR boostRotQ_;		// 加速時の正面方向への回転の行列
 	DirectX::XMVECTOR nowBoostRotQ_;	// 加速時の正面方向への回転の行列
-	const float  MAX_DRIFT_ROT = 0.4f;
+	float handleAmount_;				// ハンドル量
+	const float  MAX_DRIFT_ROT = 1.6f;
 	float baseDriftRot_;
 	float nowDriftRot_;
 	float baseBoostRot_;
@@ -92,11 +94,42 @@ public:
 
 	/*-- ドリフトに関する変数 --*/
 
+	Vec3 driftJumpVec_;
+	float driftJumpSpeed_;
+	const float DRIFT_JUMP_SPEED = 6.0f;
+	const float SUB_DRIFT_JUMP_SPEED = 0.6f;
 	float boostSpeed_;					// ブーストされているときの移動速度
-	int driftBoostTimer_;				// ドリフトでブーストするまでのタイマー
+	int driftTimer_;
 	int boostTimer_;					// ブーストするフレーム数
+	bool isDriftRight_;					// ドリフトが右側かどうか。
+	bool isInputLTPrev_;				// 前フレームにLTが押されたかどうか
+	bool isInputLT_;					// LTが押されたかどうか。
+	bool isDriftJump_;					// ドリフト前のジャンプ中かどうか。
+	bool isDriftJumpPrev_;				// ドリフト前のジャンプ中かどうかの前Fフラグ。
 	bool isDrift_;						// ドリフト状態かどうか。
 	bool isTireMask_;
+
+	const std::array<int, 3> DRIFT_TIMER = { 30,90,160 };
+	const std::array<int, 3> DRIFT_BOOST = { 10,20,30 };
+
+
+	/*-- ジャンプのブーストに関する変数 --*/
+
+	float jumpBoostSpeed_;
+	const float JUMP_BOOST_SPEED = 10.0f;
+	const float SUB_JUMP_BOOST_SPEED = 0.2f;
+
+
+	/*-- 開始前用変数 --*/
+
+	bool isAccel_;
+	bool isBeforeStartPrev_;
+	float beforeStartWaveTimer_;	// 開始前にサイン波の動きを指せるようのタイマー	
+	int beforeStartSmokeTimer_;
+	const int BEFORE_START_SMOKE_TIMER = 5;
+	const float BEFORE_START_WAVE_LENGTH_DEF = 0.3f;
+	const float BEFORE_START_WAVE_LENGTH_ACCELL = 1.0f;
+
 
 public:
 
@@ -118,9 +151,8 @@ private:
 	TireMaskUV tireMaskUV_;				// タイヤ痕を出す際に仕様
 
 	const float HANDLE_DRIFT = 0.05f;	// ドリフト時のハンドリングの角度
-	const float MAX_BOOST_SPEED = 20.0f;// ブーストの移動量の最大値
+	const float MAX_BOOST_SPEED = 15.0f;// ブーストの移動量の最大値
 	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
-	const int DRIFT_BOOST_TIMER = 30;	// ドリフトでブーストするまでのタイマー
 
 
 public:
@@ -149,7 +181,7 @@ public:
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount);
+	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart);
 
 	// 描画処理
 	void Draw();
@@ -159,10 +191,14 @@ public:
 
 
 	const Vec3& GetPos() { return pos_; }
+	const Vec3& GetPrevPos() { return prevPos_; }
+	Vec3 GetCameraForwardVec();
 	const Vec3& GetForwardVec() { return forwardVec_; }
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
-	bool GetIsGetItem() { return isGetItem_; }
+	bool GetIsGetItem() { return isGetItem_; }	// アイテムを取得した瞬間
+	bool GetIsItem();	// アイテムを持っているか。
+	bool GetUseItem() { return isUseItem_; }	// アイテムを使った瞬間。
 	bool GetIdConcentrationLine() { return isConcentrationLine_; }
 
 	// デバッグ用
@@ -171,10 +207,13 @@ public:
 private:
 
 	// 入力処理
-	void Input(RayConstBufferData& ConstBufferData);
+	void Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart);
 
 	// 移動処理
-	void Move();
+	void Move(const bool& IsBeforeStart);
+
+	// ドリフトに関する更新処理
+	void UpdateDrift(const bool& IsBeforeStart);
 
 	// 当たり判定
 	void CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount);
@@ -184,5 +223,8 @@ private:
 
 	// 車体傾けの処理
 	void InclineCarBody();
+
+	// エンジンの上下
+	void EngineSineWave();
 
 };

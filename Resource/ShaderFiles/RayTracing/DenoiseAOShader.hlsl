@@ -382,7 +382,7 @@ void mainMS(inout Payload payload)
 void shadowMS(inout Payload payload)
 {
     // 何にも当たっていないということなので、影は生成しない。
-    payload.impactAmount_ = true;
+    payload.impactAmount_ = 1.0f;
 }
 
 // ライティング前処理
@@ -539,6 +539,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     
 }
 
+// ライティング処理
 bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Vertex Vtx)
 {
     
@@ -878,7 +879,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     
     
     // 当たったオブジェクトのInstanceIDがアルファだったら
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA)
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA || InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
     {
         
         // アルファ値を求める。
@@ -894,18 +895,44 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             break;
         }
         
-        if (PayloadData.impactAmount_ < alpha * TexColor.w)
+        // アルファブレンドだったら
+        if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA)
         {
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-            PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
-            PayloadData.impactAmount_ = 0.0f;
+        
+            if (PayloadData.impactAmount_ < alpha * TexColor.w)
+            {
+                PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+                PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
+                PayloadData.impactAmount_ = 0.0f;
 
+            }
+            else
+            {
+                PayloadData.color_.xyz += (float3) TexColor * alpha;
+                PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
+                PayloadData.impactAmount_ -= alpha * TexColor.w;
+            }
+            
         }
-        else
+        // 加算合成だったら
+        else if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
         {
-            PayloadData.color_.xyz += (float3) TexColor * alpha;
-            PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
-            PayloadData.impactAmount_ -= alpha * TexColor.w;
+            
+            PayloadData.light_ = float3(TexColor.w, TexColor.w, TexColor.w);
+            
+            if (PayloadData.impactAmount_ < alpha * TexColor.w)
+            {
+                PayloadData.color_.xyz += (float3) TexColor;
+                PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
+                PayloadData.impactAmount_ = 0.0f;
+
+            }
+            else
+            {
+                PayloadData.color_.xyz += (float3) TexColor;
+                PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
+                PayloadData.impactAmount_ -= alpha * TexColor.w;
+            }
         }
         
         // アルファが一定以下だったら。
@@ -941,10 +968,10 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     if (payload.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW)
     {
         
-        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_ALPHA)
+        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_ALPHA || InstanceID() == CHS_IDENTIFICATION_INSTANCE_ADD)
         {
                 
-            payload.impactAmount_ = false;
+            payload.impactAmount_ = 1;
             
             return;
 
@@ -1039,7 +1066,7 @@ void mainAnyHit(inout Payload payload, MyAttribute attrib)
     }
     
     // 当たったオブジェクトのInstanceIDがアルファだったら
-    if (instanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA)
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA || instanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
     {
         
         // 一定以上薄いアルファ値のオブジェクトとあたっていたら。

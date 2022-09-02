@@ -81,6 +81,14 @@ namespace FHelper {
 
 	}
 
+	// 01に納める。
+	inline float Saturate(const float& Value) {
+		float value = Value;
+		if (value < 0) value = 0;
+		if (1 < value) value = 1;
+		return value;
+	}
+
 	// 画面中央
 	inline Vec3 WindowCenterPos() {
 		return Vec3(static_cast<float>(WINDOW_WIDTH) / 2.0f, static_cast<float>(WINDOW_HEIGHT) / 2.0f, 0);
@@ -162,15 +170,33 @@ namespace FHelper {
 	Vec3 CalBary(const Vec3& PosA, const Vec3& PosB, const Vec3& PosC, const Vec3& TargetPos);
 
 	// レイとオブジェクトの当たり判定
+	struct CheckHitVertex {
+
+		Vec3 pos_;
+		Vec3 normal_;
+		Vec2 uv_;
+
+	};
+
+	// レイとの当たり判定用のポリゴン構造体
+	struct CheckHitPorygon {
+		bool isActive_ = true;
+		CheckHitVertex p1_;
+		CheckHitVertex p2_;
+		CheckHitVertex p3_;
+	};
+
+	// あたっているポリゴンのデータを保存するよう変数	衝突地点、距離、衝突面の法線
+	struct HitPorygonData
+	{
+		Vec3 pos_;
+		float distance_;
+		Vec3 normal_;
+		CheckHitPorygon targetPolygon_;
+	};
 	struct RayToModelCollisionData {
 
-		std::vector<Vec3> targetVertex_;
-		std::vector<UINT> targetIndex_;
-		std::vector<Vec3> targetNormal_;
-		std::vector<Vec2> targetUV_;
-		DirectX::XMMATRIX matRot_;
-		DirectX::XMMATRIX matScale_;
-		DirectX::XMMATRIX matTrans_;
+		std::vector<FHelper::CheckHitPorygon> targetPolygonData_;
 		Vec3 rayPos_;
 		Vec3 rayDir_;
 
@@ -218,5 +244,21 @@ namespace FEasing {
 	inline float EaseInOutQuint(const float& Time) {
 		return Time < 0.5f ? 16.0f * Time * Time * Time * Time * Time : 1.0f - powf(-2.0f * Time + 2.0f, 5.0f) / 2.0f;
 	}
+
+	inline float EaseInQuint(const float& Time) {
+		return Time * Time * Time * Time * Time;
+	}
+
+	inline float EaseOutQuint(const float& Time) {
+		return 1.0f - powf(1.0f - Time, 5);
+	}
+
+	//inline float EaseOutExpo(const float& Time) {
+	//	return Time == 1.0f ? 1.0f : 1.0f - powf(2.0f, -10.0f * Time);
+	//}
+
+	//inline float EaseInExpo(const float& Time) {
+	//	return Time == 0.0f ? 0.0f : 1.0f - powf(2.0f, 10.0f * Time);
+	//}
 
 }

@@ -25,9 +25,9 @@ private:
 	/*===== メンバ変数 =====*/
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer_;	// 頂点バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer_;		// 頂点インデックスバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer_;	// 頂点インデックスバッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer_;	// 頂点インデックスバッファ
-	RayDescriptor vertexDescriptor_;			// 頂点ディスクリプタ
+	RayDescriptor vertexDescriptor_;		// 頂点ディスクリプタ
 	RayDescriptor indexDescriptor_;			// 頂点インデックスディスクリプタ
 	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
 
@@ -126,10 +126,10 @@ public:
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex_; }
-	std::vector<Vec3> GetVertexPos() { return vertexPos_; }
-	std::vector<Vec3> GetVertexNormal() { return vertexNormal_; }
-	std::vector<UINT> GetVertexIndex() { return vertIndex_; }
-	std::vector<Vec2> GetVertexUV() { return vertexUV_; }
+	const std::vector<Vec3>& GetVertexPos() { return vertexPos_; }
+	const std::vector<Vec3>& GetVertexNormal() { return vertexNormal_; }
+	const std::vector<UINT>& GetVertexIndex() { return vertIndex_; }
+	const std::vector<Vec2>& GetVertexUV() { return vertexUV_; }
 
 private:
 

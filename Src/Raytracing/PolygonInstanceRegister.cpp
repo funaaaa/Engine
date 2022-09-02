@@ -17,7 +17,7 @@ void PolygonInstanceRegister::Setting()
 
 }
 
-int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& ShaderID)
+int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData)
 {
 
 	/*===== インスタンスを生成する =====*/
@@ -55,7 +55,7 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& Sh
 	}
 
 	// 最後尾のやつを生成する。
-	D3D12_RAYTRACING_INSTANCE_DESC buff = instance_[instanceIndex]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, ShaderID);
+	D3D12_RAYTRACING_INSTANCE_DESC buff = instance_[instanceIndex]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(BlasIndex), BlasIndex, ShaderID, HaveMeshCollisionData, instanceIndex);
 
 	instanceDesc_[instanceIndex] = buff;
 
@@ -198,6 +198,15 @@ void PolygonInstanceRegister::SetParentInstance(const int& Index, const int& Par
 
 }
 
+ int PolygonInstanceRegister::GetParentInstanceIndex(const int& Index)
+{
+
+	/*===== 指定のインスタンスの親のIDを取得 =====*/
+
+	return instance_[Index]->GetParentInstanceIndex();
+
+}
+
 UINT PolygonInstanceRegister::GetBLASIndex(const int& Index)
 {
 	return instance_[Index]->GetBLASIndex();
@@ -247,8 +256,9 @@ void PolygonInstanceRegister::Display(const int& Index)
 	DirectX::XMMATRIX matRot = instance_[Index]->GetRotate();
 	DirectX::XMMATRIX matScale = instance_[Index]->GetScale();
 	DirectX::XMMATRIX matTrans = instance_[Index]->GetTrans();
+	bool haveMeshCollisionData = instance_[Index]->GetHaveMeshCollisionData();
 
-	instanceDesc_[Index] = instance_[Index]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(instance_[Index]->GetBLASIndex()), instance_[Index]->GetBLASIndex(), instance_[Index]->GetShaderID());
+	instanceDesc_[Index] = instance_[Index]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(instance_[Index]->GetBLASIndex()), instance_[Index]->GetBLASIndex(), instance_[Index]->GetShaderID(), haveMeshCollisionData, Index);
 
 	// 保存していた行列をセット。
 	ChangeRotate(Index, matRot);
@@ -265,5 +275,17 @@ void PolygonInstanceRegister::NonDisplay(const int& Index)
 	/*====== 非表示 ======*/
 
 	instanceDesc_[Index] = {};
+
+}
+
+const std::vector<FHelper::CheckHitPorygon>& PolygonInstanceRegister::GetMeshCollisionData(const int& Index)
+{
+
+	/*===== メッシュの当たり判定データを取得 =====*/
+
+	// メッシュの当たり判定データを持っているかをチェック。
+	if (!instance_[Index]->GetHaveMeshCollisionData()) assert(0);
+
+	return instance_[Index]->GetMeshCollisionData();
 
 }

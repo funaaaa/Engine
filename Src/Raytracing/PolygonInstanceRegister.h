@@ -1,6 +1,7 @@
 #pragma once
 #include "Singleton.h"
 #include "Vec.h"
+#include "FHelper.h"
 
 #include <DirectXMath.h>
 #include <array>
@@ -37,7 +38,7 @@ public:
 	void Setting();
 
 	// Insを生成する。
-	int CreateInstance(const int& BlasIndex, const UINT& ShaderID);
+	int CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData = false);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);
@@ -75,6 +76,9 @@ public:
 	// 親行列を設定。
 	void SetParentInstance(const int& Index, const int& ParentIndex);
 
+	// 指定のインスタンスの親のIDを取得。
+	int GetParentInstanceIndex(const int& Index);
+
 	// BLASのIndexをかける。
 	UINT GetBLASIndex(const int& Index);
 
@@ -99,6 +103,9 @@ public:
 	// レジスターのサイズを取得する関数。
 	UINT GetRegisterSize() { return UINT(instance_.size()); }
 
+	// メッシュの当たり判定データを取得。
+	const std::vector<FHelper::CheckHitPorygon>& GetMeshCollisionData(const int& Index);
+
 	// hlsl側での動きを判断する用の識別子
 	enum SHADER_ID {
 
@@ -113,6 +120,7 @@ public:
 		DEF_GI = 8,			// 通常のレイ GIも行う。
 		DEF_GI_TIREMASK = 9,// 通常のレイ GI タイヤ痕
 		ALPHA = 10,			// 半透明 定数バッファを登録する必要有り。
+		ADD = 11,			// 加算合成 定数バッファを登録する必要有り。
 
 	};
 

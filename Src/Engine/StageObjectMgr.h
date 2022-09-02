@@ -50,15 +50,19 @@ public:
 
 	// ゲッタ
 	int GetBlasIndex(const int& Index) { return objects_[Index]->GetBLASIndex(); }
+	int GetInstanceIndex(const int& Index) { return objects_[Index]->GetInstanceIndex(); }
 
 
 private:
 
 	// ステージ、草との当たり判定
-	BaseStage::ColliderOutput StageMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, const bool& IsStage);
+	BaseStage::ColliderOutput StageMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID);
 
 	// 装飾オブジェクトとの当たり判定
 	BaseStage::ColliderOutput OrnamentMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output);
+
+	// 4方向に当たり判定
+	BaseStage::ColliderOutput Decision4Way(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID);
 
 	// 斜め床の回転
 	void RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3& HitNormal, BaseStage::ColliderOutput& Output);

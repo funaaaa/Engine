@@ -3,7 +3,9 @@
 #include <DirectXMath.h>
 #include <wrl.h>
 #include <memory>
+#include <vector>
 #include "Vec.h"
+#include "FHelper.h"
 
 // TLASに登録するインスタンスクラス
 class PolygonMeshInstance {
@@ -12,7 +14,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	UINT instanceID_;								// このインスタンスのID
+	UINT instanceIndex_;								// このインスタンスのID
 
 	UINT shaderID_;
 
@@ -34,13 +36,16 @@ private:
 
 	UINT blasIndex_;
 
+	bool haveMeshCollisionData_;
+	std::vector<FHelper::CheckHitPorygon> meshCollisionData_;
+
 
 public:
 
 	/*===== メンバ関数 =====*/
 
 	// Ins生成関数
-	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID);
+	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const Vec3& Pos);
@@ -83,6 +88,8 @@ public:
 	inline const Vec3& GetPos() { return pos_; }
 	inline const Vec3& GetRotateVec3() { return rotate_; }
 	inline const UINT GetShaderID() { return shaderID_; }
+	inline int GetInstanceIndex() { return instanceIndex_; }
+	int GetParentInstanceIndex();
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex_; }
@@ -90,6 +97,10 @@ public:
 	// instanceを無効化する。
 	void Disable();
 	inline const bool GetIsActive() { return isActive_; }
+
+	// メッシュの当たり判定のデータを返す。
+	const std::vector<FHelper::CheckHitPorygon>& GetMeshCollisionData() { return meshCollisionData_; }
+	const bool& GetHaveMeshCollisionData() { return haveMeshCollisionData_; }
 
 
 private:
@@ -99,5 +110,8 @@ private:
 
 	// バッファ全般を生成する処理
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType);
+
+	// メッシュの当たり判定情報を計算する。
+	void CalMeshCollisionData();
 
 };

@@ -1,11 +1,14 @@
 #include "PolygonInstance.h"
 #include "DirectXBase.h"
+#include "BLASRegister.h"
 #include <assert.h>
 
-D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID)
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
+
+	instanceIndex_ = InstanceIndex;
 
 	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc;
 
@@ -35,6 +38,10 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 
 	isActive_ = true;
 	childCount_ = 0;
+	haveMeshCollisionData_ = HaveMeshCollisionData;
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
 
 	return instanceDesc;
 
@@ -48,6 +55,10 @@ void PolygonMeshInstance::AddTrans(const Vec3& Pos)
 	matTrans_ *= DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
 	pos_ = Vec3(matTrans_.r[3].m128_f32[0], matTrans_.r[3].m128_f32[1], matTrans_.r[3].m128_f32[2]);
 
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
+
 }
 
 void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
@@ -58,12 +69,20 @@ void PolygonMeshInstance::ChangeTrans(const Vec3& Pos)
 	matTrans_ = DirectX::XMMatrixTranslation(Pos.x_, Pos.y_, Pos.z_);
 	pos_ = Vec3(matTrans_.r[3].m128_f32[0], matTrans_.r[3].m128_f32[1], matTrans_.r[3].m128_f32[2]);
 
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
+
 }
 
 void PolygonMeshInstance::ChangeTrans(const DirectX::XMMATRIX& Trans)
 {
 
 	matTrans_ = Trans;
+
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
 
 }
 
@@ -80,12 +99,20 @@ void PolygonMeshInstance::AddRotate(const Vec3& Rot)
 
 	matRot_ = buff * matRot_;
 
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
+
 }
 
 void PolygonMeshInstance::AddRotate(const DirectX::XMMATRIX& Rot)
 {
 
 	matRot_ = matRot_ * Rot;
+
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
 
 }
 
@@ -102,6 +129,10 @@ void PolygonMeshInstance::ChangeRotate(const Vec3& Rot)
 
 	rotate_ = Rot;
 
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
+
 }
 
 void PolygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)
@@ -110,6 +141,10 @@ void PolygonMeshInstance::ChangeRotate(const DirectX::XMMATRIX& Rot)
 	/*===== 回転関数 =====*/
 
 	matRot_ = Rot;
+
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
 
 }
 
@@ -124,6 +159,10 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 	scaleMat_ *= buff;
 
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
+
 }
 
 void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
@@ -137,12 +176,20 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 
 	scaleMat_ = buff;
 
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
+
 }
 
 void PolygonMeshInstance::ChangeScale(const DirectX::XMMATRIX& Scale)
 {
 
 	scaleMat_ = Scale;
+
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
 
 }
 
@@ -225,6 +272,24 @@ void PolygonMeshInstance::SetParentInstance(std::weak_ptr<PolygonMeshInstance> P
 
 	parentInstance_ = ParentInstance;
 	++parentInstance_.lock()->childCount_;
+
+}
+
+int PolygonMeshInstance::GetParentInstanceIndex()
+{
+
+	/*===== 親インスタンスのIDを取得 =====*/
+
+	// 親行列が存在していたらだったら。
+	if (!parentInstance_.expired()) {
+
+		return parentInstance_.lock()->GetInstanceIndex();
+
+	}
+
+	// 親が存在していない。
+	assert(0);
+	return -1;
 
 }
 
@@ -320,5 +385,60 @@ Microsoft::WRL::ComPtr<ID3D12Resource> PolygonMeshInstance::CreateBuffer(size_t 
 	}
 
 	return resource;
+
+}
+
+void PolygonMeshInstance::CalMeshCollisionData()
+{
+
+	/*===== メッシュの当たり判定情報を計算 =====*/
+
+	// メッシュの初期値を取得する。
+	std::vector<Vec3> meshDataPos = BLASRegister::Ins()->GetVertex(blasIndex_);
+	std::vector<Vec3> meshDataNormal = BLASRegister::Ins()->GetNormal(blasIndex_);
+	std::vector<Vec2> meshDataUV = BLASRegister::Ins()->GetUV(blasIndex_);
+	std::vector<UINT> meshDataIndex = BLASRegister::Ins()->GetVertexIndex(blasIndex_);
+
+	// ポリゴン数に合わせてリサイズ
+	meshCollisionData_.resize(static_cast<unsigned __int64>(static_cast<float>(meshDataPos.size()) / 3.0f));
+
+	// ポリゴンの中身を代入
+	for (auto& index : meshCollisionData_) {
+
+		// 頂点1
+		index.p1_.pos_ = meshDataPos[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3)])];
+		index.p1_.normal_ = meshDataNormal[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3)])];
+		index.p1_.uv_ = meshDataUV[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3)])];
+		// 頂点2
+		index.p2_.pos_ = meshDataPos[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3 + 1)])];
+		index.p2_.normal_ = meshDataNormal[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3 + 1)])];
+		index.p2_.uv_ = meshDataUV[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3 + 1)])];
+		// 頂点3
+		index.p3_.pos_ = meshDataPos[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3 + 2)])];
+		index.p3_.normal_ = meshDataNormal[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3 + 2)])];
+		index.p3_.uv_ = meshDataUV[static_cast<UINT>(meshDataIndex[static_cast<UINT>((&index - &meshCollisionData_[0]) * 3 + 2)])];
+		// 有効化フラグ
+		index.isActive_ = true;
+	}
+
+	/*----- 保存したポリゴンの頂点座標にワールド変換行列をかける -----*/
+	// ワールド行列
+	DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
+	matWorld *= scaleMat_;
+	matWorld *= matRot_;
+	matWorld *= matTrans_;
+	for (auto& index : meshCollisionData_) {
+		// 頂点を変換
+		index.p1_.pos_ = DirectX::XMVector3Transform(index.p1_.pos_.ConvertXMVECTOR(), matWorld);
+		index.p2_.pos_ = DirectX::XMVector3Transform(index.p2_.pos_.ConvertXMVECTOR(), matWorld);
+		index.p3_.pos_ = DirectX::XMVector3Transform(index.p3_.pos_.ConvertXMVECTOR(), matWorld);
+		// 法線を回転行列分だけ変換
+		index.p1_.normal_ = DirectX::XMVector3Transform(index.p1_.normal_.ConvertXMVECTOR(), matRot_);
+		index.p1_.normal_.Normalize();
+		index.p2_.normal_ = DirectX::XMVector3Transform(index.p2_.normal_.ConvertXMVECTOR(), matRot_);
+		index.p2_.normal_.Normalize();
+		index.p3_.normal_ = DirectX::XMVector3Transform(index.p3_.normal_.ConvertXMVECTOR(), matRot_);
+		index.p3_.normal_.Normalize();
+	}
 
 }

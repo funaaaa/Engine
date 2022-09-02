@@ -54,6 +54,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		std::vector<Vec2> uv_;				// uvを保存しておく
 		std::vector<Vec3> normal_;			// 法線ベクトルを保存しておく
 		std::vector<unsigned short> index_;
+		bool isFace = false;	// faceが存在したかどうかのフラグ
 		while (getline(file, line)) {
 			// 1行分の文字列をストリームに変換して解析しやすくする
 			std::istringstream lineStream(line);
@@ -98,6 +99,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 			}
 			// 先頭文字がfならポリゴン(三角形)
 			if (key == "f") {
+				isFace = true;
 				// 半角スペース区切りで行の続きを読み込む
 				std::string indexString;
 				unsigned short indexPosition;		// 受け皿
@@ -145,6 +147,14 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		// isSmoothingがtrueだったら法線情報をなめらかにする
 		if (IsSmoothing) {
 			CalculateSmoothedVertexNormals(smoothData, ObjectBuffer, modelData_.at(modelData_.size() - 1));
+		}
+
+		// faceが存在しなかったら頂点データを保存する。
+		if (!isFace) {
+			for (auto& index : position_) {
+				ObjectBuffer.vertex_.emplace_back();
+				ObjectBuffer.vertex_.back().pos_ = index;
+			}
 		}
 
 		return;

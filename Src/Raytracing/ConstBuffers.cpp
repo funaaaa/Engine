@@ -38,7 +38,7 @@ void RayLightConstBufferData::Init()
 	// 並行光源をセッティング
 	dirLight_.isActive_ = true;
 	dirLight_.lightColor_ = Vec3{ 0,0,0 };
-	dirLight_.lihgtDir_ = Vec3{ -0.5f,-0.01f,0 };
+	dirLight_.lihgtDir_ = Vec3{ -0.5f,-0.2f,0 };
 	dirLight_.lihgtDir_.Normalize();
 
 }

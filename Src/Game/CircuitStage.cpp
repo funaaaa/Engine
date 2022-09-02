@@ -130,28 +130,28 @@ void CircuitStage::Setting(const int& TireMaskIndex)
 
 
 	// 加速ギミックをセット。
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(100, -15, 1400));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 200, 200));
 
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-80, -15, 3000));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 200, 200));
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(100, -15, 4000));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(100, 200, 200));
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-5842, -29, -167));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 1.48f, 0));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(200, 200, 200));
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOS_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-2352, -18, 6336));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 1.58f, 0));
@@ -183,7 +183,7 @@ void CircuitStage::Destroy()
 
 }
 
-void CircuitStage::Update()
+void CircuitStage::Update(RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 更新処理 =====*/
@@ -191,6 +191,8 @@ void CircuitStage::Update()
 	++timer_;
 
 	stageObjectMgr_->Update(timer_);
+
+	ConstBufferData;
 
 }
 

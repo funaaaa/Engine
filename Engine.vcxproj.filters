@@ -214,6 +214,12 @@
     <ClCompile Include="Src\Game\ConcentrationLineMgr.cpp">
       <Filter>アプリケーション\集中線</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\MugenStage.cpp">
+      <Filter>アプリケーション\ステージ\各ステージ</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\ConvertGimmickInfoFromBlender.cpp">
+      <Filter>アプリケーション\ステージオブジェクト\blenderからの頂点変換</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -465,6 +471,12 @@
     <ClInclude Include="Src\Game\ConcentrationLineMgr.h">
       <Filter>アプリケーション\集中線</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\MugenStage.h">
+      <Filter>アプリケーション\ステージ\各ステージ</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\ConvertGimmickInfoFromBlender.h">
+      <Filter>アプリケーション\ステージオブジェクト\blenderからの頂点変換</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -657,6 +669,9 @@
     </Filter>
     <Filter Include="アプリケーション\集中線">
       <UniqueIdentifier>{6eabc27a-26e5-40c3-a8d0-094d6eae6fd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\ステージオブジェクト\blenderからの頂点変換">
+      <UniqueIdentifier>{014cb50a-a6e3-4121-bb63-d096a8b8a008}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

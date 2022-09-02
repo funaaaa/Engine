@@ -14,6 +14,7 @@ static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ƒ‰ƒ
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID ’Êí‚Ìˆ— + GI‚às‚¤B
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK = 9; // instanceID ’Êí‚Ìˆ— + GI + ƒ^ƒCƒ„­
 static const int CHS_IDENTIFICATION_INSTANCE_ALPHA = 10; // instanceID ”¼“§–¾
+static const int CHS_IDENTIFICATION_INSTANCE_ADD = 11; // instanceID ‰ÁZ‡¬
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // ƒfƒtƒHƒ‹ƒg‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI—p‚ÌƒŒƒC

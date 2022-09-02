@@ -17,6 +17,7 @@
 #include "Pipline.h"
 #include "WindowsAPI.h"
 #include "CircuitStage.h"
+#include "MugenStage.h"
 #include "RayComputeShader.h"
 #include "StageObjectMgr.h"
 #include "BLAS.h"
@@ -61,7 +62,7 @@ GameScene::GameScene()
 	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {});
 
 	// ステージをセッティングする。
-	stages_.emplace_back(std::make_shared<CircuitStage>());
+	stages_.emplace_back(std::make_shared<MugenStage>());
 
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::CIRCUIT]->Setting(tireMaskTexture_->GetUAVIndex());
@@ -117,7 +118,7 @@ GameScene::GameScene()
 	pipline_->ConstructionShaderTable();
 
 	// 太陽に関する変数
-	sunAngle_ = 0;
+	sunAngle_ = 0.1f;
 	sunSpeed_ = 0.0001f;
 
 	isDisplayFPS_ = false;
@@ -127,14 +128,14 @@ GameScene::GameScene()
 
 	isPassedMiddlePoint_ = false;
 	rapCount_ = 0;
+	countDownStartTimer_ = 0;
+	countDownNumber_ = 2;
+	isBeforeStart_ = true;
+	isCountDown_ = false;
+	countDownEasingTimer_ = 0;
+	isCountDownExit_ = false;
 
-	// スプライトを生成。
-	nowRapCountSprite_ = std::make_shared<Sprite>();
-	nowRapCountSprite_->GenerateSpecifyTextureID(Vec3(95, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
-	maxRapCountSprite_ = std::make_shared<Sprite>();
-	maxRapCountSprite_->GenerateSpecifyTextureID(Vec3(180, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
-	rapSlashSprite_ = std::make_shared<Sprite>();
-	rapSlashSprite_->GenerateSpecifyTextureID(Vec3(140, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+
 
 	// フォントをロード
 	{
@@ -151,9 +152,45 @@ GameScene::GameScene()
 		numFontHandle_[10] = TextureManager::Ins()->LoadTexture(L"Resource/Game/Font/slash.png");
 	}
 
+
+	// スプライトを生成。
+	//nowRapCountSprite_ = std::make_shared<Sprite>();
+	//nowRapCountSprite_->GenerateSpecifyTextureID(Vec3(95, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	//maxRapCountSprite_ = std::make_shared<Sprite>();
+	//maxRapCountSprite_->GenerateSpecifyTextureID(Vec3(180, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	//rapSlashSprite_ = std::make_shared<Sprite>();
+	//rapSlashSprite_->GenerateSpecifyTextureID(Vec3(140, 80, 0.1f), Vec2(16.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, 0);
+	coinUI_ = std::make_shared<Sprite>();
+	coinUI_->GenerateForTexture(Vec3(140, 647, 0.1f), Vec2(192 / 2.0f, 64 / 2.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/coinUI.png");
+	rapUI_ = std::make_shared<Sprite>();
+	rapUI_->GenerateForTexture(Vec3(327, 647, 0.1f), Vec2(224 / 2.0f, 64 / 2.0f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/rapUI.png");
+
+	coinCountUI_[0] = std::make_shared<Sprite>();
+	coinCountUI_[0]->GenerateSpecifyTextureID(Vec3(145, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[0]);
+	coinCountUI_[1] = std::make_shared<Sprite>();
+	coinCountUI_[1]->GenerateSpecifyTextureID(Vec3(178, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[0]);
+
+	nowRapCountUI_ = std::make_shared<Sprite>();
+	nowRapCountUI_->GenerateSpecifyTextureID(Vec3(321, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[1]);
+	slashUI_ = std::make_shared<Sprite>();
+	slashUI_->GenerateSpecifyTextureID(Vec3(356, 651, 0.1f), Vec2(16.0f * 0.6f, 32.0f * 0.6f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[10]);
+	maxRapCountUI_ = std::make_shared<Sprite>();
+	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(381, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
+
+	itemFrameUI_ = std::make_shared<Sprite>();
+	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/itemFrame.png");
+	itemFrameEasingTimer_ = 1;
+
 	// 集中線
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
 
+	// カウントダウン用UI
+	countDownSprite_ = std::make_shared<Sprite>();
+	countDownSprite_->GenerateSpecifyTextureID(COUNT_DOWN_START_POS, COUNT_DOWN_FONT_SIZE, Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[2]);
+	countDownSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f));
+	goSprite_ = std::make_shared<Sprite>();
+	goSprite_->GenerateForTexture(WINDOW_CENTER, GO_FONT_SIZE, Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/go.png");
+	goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f));
 
 }
 
@@ -205,8 +242,15 @@ void GameScene::Init()
 	DriftParticleMgr::Ins()->Init();
 
 	isPassedMiddlePoint_ = false;
+	isBeforeStart_ = true;
+	isCountDown_ = false;
+	countDownEasingTimer_ = 0;
+	isCountDownExit_ = false;
 	rapCount_ = 0;
-	sunAngle_ = 0;
+	countDownStartTimer_ = 0;
+	countDownNumber_ = 2;
+	sunAngle_ = 0.3f;
+	itemFrameEasingTimer_ = 1;
 
 }
 
@@ -231,13 +275,13 @@ void GameScene::Update()
 	}
 
 	// キャラを更新。
-	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_);
+	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_, isBeforeStart_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
-	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer());
+	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_);
 
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {
@@ -246,13 +290,15 @@ void GameScene::Update()
 
 	}
 
+	// 開始していなかったらカウントダウンの処理を行う。
+	UpdateCountDown();
+
+
 	// ラップ数のUIを更新。
-	maxRapCountSprite_->ChangeTextureID(numFontHandle_[3], 0);
-	nowRapCountSprite_->ChangeTextureID(numFontHandle_[rapCount_], 0);
-	rapSlashSprite_->ChangeTextureID(numFontHandle_[10], 0);
+	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount_ + 1], 0);
 
 	// ステージを更新。
-	stages_[STAGE_ID::CIRCUIT]->Update();
+	stages_[STAGE_ID::CIRCUIT]->Update(constBufferData_);
 
 	// ゴールの表示非表示を切り替え。
 	if (isPassedMiddlePoint_) {
@@ -286,6 +332,33 @@ void GameScene::Update()
 		concentrationLine_->Generate();
 	}
 	concentrationLine_->Update();
+
+
+
+	// アイテムを取得した瞬間や使った瞬間にイージングタイマーを初期化。
+	if (characterMgr_->GetPlayerIns().lock()->GetIsGetItem() || characterMgr_->GetPlayerIns().lock()->GetUseItem()) {
+
+		itemFrameEasingTimer_ = 0;
+
+	}
+
+	// アイテムのフレームの位置を更新。
+	itemFrameEasingTimer_ += 0.05f;
+	if (1.0f < itemFrameEasingTimer_) itemFrameEasingTimer_ = 1.0f;
+	if (characterMgr_->GetPlayerIns().lock()->GetIsItem()) {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseOutQuint(itemFrameEasingTimer_);
+		itemFrameUI_->ChangePosition(ITEM_FRAME_OUT_POS + (ITEM_FRAME_IN_POS - ITEM_FRAME_OUT_POS) * easingAmount);
+
+	}
+	else {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseInQuint(itemFrameEasingTimer_);
+		itemFrameUI_->ChangePosition(ITEM_FRAME_IN_POS + (ITEM_FRAME_OUT_POS - ITEM_FRAME_IN_POS) * easingAmount);
+
+	}
 
 }
 
@@ -514,11 +587,33 @@ void GameScene::Draw()
 	static int firstTime = 0;
 	if (firstTime != 0) {
 
+		//nowRapCountSprite_->Draw();
+		//maxRapCountSprite_->Draw();
+		//rapSlashSprite_->Draw();
+
 		concentrationLine_->Draw();
 
-		nowRapCountSprite_->Draw();
-		maxRapCountSprite_->Draw();
-		rapSlashSprite_->Draw();
+		// 左上のアイテムのUI。
+		itemFrameUI_->Draw();
+
+		// コインの取得数のUI。
+		coinCountUI_[0]->Draw();
+		coinCountUI_[1]->Draw();
+
+		// 現在のラップ数のUI。
+		nowRapCountUI_->Draw();
+		slashUI_->Draw();
+		maxRapCountUI_->Draw();
+
+		// 左下のUIのフレーム。
+		coinUI_->Draw();
+		rapUI_->Draw();
+
+		// カウントダウン用のUI。
+		countDownSprite_->Draw();
+
+		// カウントダウン終了時のGOのUI。
+		goSprite_->Draw();
 
 	}
 	if (firstTime == 0) ++firstTime;
@@ -615,77 +710,71 @@ void GameScene::InputImGUI()
 	// FPSを表示するかのフラグをセット。
 	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
-	// アイテムデバッグ用。
-	bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
+	//// アイテムデバッグ用。
+	//bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
 
-	if (haveItem) {
+	//if (haveItem) {
 
-		bool haveBoostItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST;
+	//	bool haveBoostItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST;
 
-		ImGui::Checkbox("BoostItem", &haveBoostItem);
+	//	ImGui::Checkbox("BoostItem", &haveBoostItem);
 
-		bool haveShellItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::SHELL;
+	//	bool haveShellItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::SHELL;
 
-		ImGui::Checkbox("ShellItem", &haveShellItem);
+	//	ImGui::Checkbox("ShellItem", &haveShellItem);
 
-	}
+	//}
 
+	//Vec3 position = itemFrameUI_->GetPos();
+	//float pos[3] = { position.x_, position.y_, position.z_ };
 
+	//ImGui::DragFloat3("Position", pos, 1.0f);
 
-
-
-	//int index = 71;
-
-	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
-
-	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
-
-	//ImGui::DragFloat3("Pos", posArray, 0.5f);
-
-	//pos.x_ = posArray[0];
-	//pos.y_ = posArray[1];
-	//pos.z_ = posArray[2];
-
-	//PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
+	//position = Vec3(pos[0], pos[1], pos[2]);
+	//itemFrameUI_->ChangePosition(position);
 
 
-	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
 
-	//float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
+	int index = 39;
 
-	//ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
+	Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
-	//rotate.x_ = rotateArray[0];
-	//rotate.y_ = rotateArray[1];
-	//rotate.z_ = rotateArray[2];
+	float posArray[3] = { pos.x_, pos.y_, pos.z_ };
 
-	//PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+	ImGui::DragFloat3("Pos", posArray, 1.0f);
+
+	pos.x_ = posArray[0];
+	pos.y_ = posArray[1];
+	pos.z_ = posArray[2];
+
+	PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
 
 
-	//// 1個目
-	//GimmickMgr::Ins()->ChangeTrans(0, Vec3(100, -15, 1400));
-	//GimmickMgr::Ins()->ChangeRotate(0, Vec3(0, 0, 0));
-	//GimmickMgr::Ins()->ChangeScale(0, Vec3(100, 200, 200));
+	Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
 
-	//// 2個目
-	//GimmickMgr::Ins()->ChangeTrans(1, Vec3(-80, -15, 3000));
-	//GimmickMgr::Ins()->ChangeRotate(1, Vec3(0, 0, 0));
-	//GimmickMgr::Ins()->ChangeScale(1, Vec3(100, 200, 200));
+	float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
 
-	//// 3個目
-	//GimmickMgr::Ins()->ChangeTrans(2, Vec3(100, -15, 4000));
-	//GimmickMgr::Ins()->ChangeRotate(2, Vec3(0, 0, 0));
-	//GimmickMgr::Ins()->ChangeScale(2, Vec3(100, 200, 200));
+	ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
 
-	//// 4個目
-	//GimmickMgr::Ins()->ChangeTrans(3, Vec3(-5842, -29, -167));
-	//GimmickMgr::Ins()->ChangeRotate(3, Vec3(0, 1.48f, 0));
-	//GimmickMgr::Ins()->ChangeScale(3, Vec3(200, 200, 200));
+	rotate.x_ = rotateArray[0];
+	rotate.y_ = rotateArray[1];
+	rotate.z_ = rotateArray[2];
 
-	//// 5個目
-	//GimmickMgr::Ins()->ChangeTrans(4, Vec3(-2352, -18, 6336));
-	//GimmickMgr::Ins()->ChangeRotate(4, Vec3(0, 1.58f, 0));
-	//GimmickMgr::Ins()->ChangeScale(4, Vec3(190, 200, 200));
+	PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+
+
+	DirectX::XMMATRIX scale = PolygonInstanceRegister::Ins()->GetScale(index);
+
+	float scaleArray[3] = { scale.r[0].m128_f32[0], scale.r[1].m128_f32[1], scale.r[2].m128_f32[2] };
+
+	ImGui::DragFloat3("Scale", scaleArray, 1.0f);
+
+	Vec3 scaleVec3;
+	scaleVec3.x_ = scaleArray[0];
+	scaleVec3.y_ = scaleArray[1];
+	scaleVec3.z_ = scaleArray[2];
+
+	PolygonInstanceRegister::Ins()->ChangeScale(index, scaleVec3);
 
 
 }
@@ -710,11 +799,159 @@ void GameScene::GenerateGimmick()
 
 }
 
-/*
+void GameScene::UpdateCountDown()
+{
 
-集中線を実装する。
-集中線クラスとマネージャーを作ってGameSceneに持たせる。
-P1のキャラの集中線フラグが経っていたら集中線を生成する。
-集中線はぱっと発生し、画面外にゆっくり移動しながらだんだん薄くなって消えていく。
+	/*===== ゲーム開始前の更新処理 =====*/
 
-*/
+	// ゲームが開始していたら。
+	if (!isBeforeStart_) {
+
+		if (countDownEasingTimer_ < 1.0f) {
+
+			// UIを動かす用のタイマーを更新。
+			countDownEasingTimer_ += COUNT_DOWN_EASING_TIMER;
+
+		}
+		// タイマーがカンストしたら。
+		else {
+
+			if (!isCountDownExit_) {
+
+				isCountDownExit_ = true;
+				countDownEasingTimer_ = 0.0f;
+
+			}
+			else {
+
+				return;
+
+			}
+
+		}
+
+		// GOが出現中だったら。
+		if (!isCountDownExit_) {
+
+			// イージング量を計算。
+			float easingAmount = FEasing::EaseOutQuint(countDownEasingTimer_);
+
+			// アルファ値を変える。
+			goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, easingAmount));
+
+			// でかいバージョンのサイズ。
+			const float BIG_SIZE = 3.0f;
+			Vec3 BIG_GO_FONT_SIZE = Vec3(GO_FONT_SIZE.x_ * BIG_SIZE, GO_FONT_SIZE.y_ * BIG_SIZE, 1.0f);
+			Vec3 DEF_FONT_SIZE = Vec3(GO_FONT_SIZE.x_, GO_FONT_SIZE.y_, 1.0f);
+
+			goSprite_->ChangeScale(BIG_GO_FONT_SIZE + (DEF_FONT_SIZE - BIG_GO_FONT_SIZE) * easingAmount);
+
+		}
+		else {
+
+			// イージング量を計算。
+			float easingAmount = FEasing::EaseOutSine(countDownEasingTimer_);
+
+			// イージングに使用するフォントサイズ。
+			Vec3 DEF_FONT_SIZE = Vec3(GO_FONT_SIZE.x_, GO_FONT_SIZE.y_, 1.0f);
+			Vec3 EXIT_SIZE = DEF_FONT_SIZE + DEF_FONT_SIZE / 5.0f;
+
+			goSprite_->ChangeScale((DEF_FONT_SIZE + (EXIT_SIZE - DEF_FONT_SIZE) * easingAmount));
+
+			// イージングの値を反転させる。
+			easingAmount = 1.0f - easingAmount;
+			goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, easingAmount));
+
+		}
+
+		return;
+
+	}
+
+	// カウントダウンを始めるまでのタイマーを更新。
+	if (!isCountDown_) {
+		++countDownStartTimer_;
+		if (COUNT_DOWN_TIMER < countDownStartTimer_) {
+
+			isCountDown_ = true;
+
+			// カウントダウンに使用する変数を初期化。
+			countDownEasingTimer_ = 0;
+			isCountDownExit_ = false;
+			countDownNumber_ = 3;
+			countDownSprite_->ChangeTextureID(numFontHandle_[countDownNumber_], 0);
+
+		}
+	}
+
+	// カウントダウン
+	if (isCountDown_) {
+
+		// UIを動かす用のタイマーを更新。
+		countDownEasingTimer_ += COUNT_DOWN_EASING_TIMER;
+
+		// 動かし終えたら。
+		if (1.0f <= countDownEasingTimer_) {
+
+			countDownEasingTimer_ = 0;
+
+			// 上から真ん中に来ている段階だったら、次はアルファ値を下げる。
+			if (!isCountDownExit_) {
+
+				isCountDownExit_ = true;
+
+			}
+			// アルファ値を下げる段階だったら次の数字をカウントする。
+			else {
+
+				isCountDownExit_ = false;
+
+				--countDownNumber_;
+				// カウントダウンの番号が0になったら(カウントダウンが終わったら)
+				if (countDownNumber_ < 1) {
+
+					// ゲームを開始する。
+					isBeforeStart_ = false;
+
+					// 各変数を初期化。
+					isCountDownExit_ = false;
+					countDownSprite_->ChangePosition(WINDOW_CENTER);
+
+
+				}
+				else {
+
+					countDownSprite_->ChangeTextureID(numFontHandle_[countDownNumber_], 0);
+
+				}
+
+			}
+
+		}
+
+		// UIを更新する。
+		if (isCountDownExit_) {
+
+			// イージング量を求める。
+			float easingAmount = FEasing::EaseInQuint(countDownEasingTimer_);
+
+			// アルファ値を下げる。
+			countDownSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f - easingAmount));
+
+		}
+		else {
+
+			// イージング量を求める。
+			float easingAmount = FEasing::EaseOutQuint(countDownEasingTimer_);
+
+			// アルファ値を上げる。
+			countDownSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, easingAmount));
+
+			// 移動させる。
+			countDownSprite_->ChangePosition(COUNT_DOWN_START_POS + (WINDOW_CENTER - COUNT_DOWN_START_POS) * easingAmount);
+
+		}
+
+	}
+
+}

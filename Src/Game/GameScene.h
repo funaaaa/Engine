@@ -52,10 +52,18 @@ private:
 	STAGE_ID nowStageID;
 
 	// UI関係
-	std::shared_ptr<Sprite> nowRapCountSprite_;
-	std::shared_ptr<Sprite> maxRapCountSprite_;
-	std::shared_ptr<Sprite> rapSlashSprite_;
+	std::shared_ptr<Sprite> coinUI_;
+	std::shared_ptr<Sprite> rapUI_;
+	std::array<std::shared_ptr<Sprite>, 2> coinCountUI_;
+	std::shared_ptr<Sprite> nowRapCountUI_;
+	std::shared_ptr<Sprite> slashUI_;
+	std::shared_ptr<Sprite> maxRapCountUI_;
 	std::array<int, 11> numFontHandle_;
+
+	std::shared_ptr<Sprite> itemFrameUI_;
+	float itemFrameEasingTimer_;
+	const Vec3 ITEM_FRAME_OUT_POS = Vec3(128.0f, -200.0f, 1.0f);
+	const Vec3 ITEM_FRAME_IN_POS = Vec3(128.0f, 125.0f, 1.0f);
 
 	// 集中線
 	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
@@ -64,7 +72,7 @@ private:
 	// ゴール関係
 	bool isPassedMiddlePoint_;
 	int rapCount_;
-	const Vec3 GOAL_DEF_POS = Vec3(10, -30, 0);
+	const Vec3 GOAL_DEF_POS = Vec3(-0.00279516284f, 25.2644310f, -30.0005894f);
 
 	// TLASを生成。
 	std::shared_ptr<TLAS> tlas_;
@@ -109,9 +117,24 @@ private:
 	// キャラ管理クラス
 	std::shared_ptr<CharacterMgr> characterMgr_;
 
-	int testIns_;
 
+	/*-- レース開始前の変数 --*/
 
+	std::shared_ptr<Sprite> countDownSprite_;
+	std::shared_ptr<Sprite> goSprite_;
+	const Vec2 COUNT_DOWN_FONT_SIZE = Vec2(16.0f * 2.1f, 32.0f * 2.1f);
+	const Vec2 GO_FONT_SIZE = Vec2(512.0f / 5.0f, 256.0f / 5.0f);
+	int countDownNumber_;		// カウントダウンでの現在の番号
+	int countDownStartTimer_;	// 開始前にカウントダウンが始まるまでのタイマー
+	const int COUNT_DOWN_TIMER = 120;
+	float countDownEasingTimer_;						// カウントダウンのUIが動く際の加算量
+	const float COUNT_DOWN_EASING_TIMER = 1.0f / 30.0f;	// カウントダウンのUIが動く際の加算量 値は0.5秒で画面の半分を動かさなければ行けないため、1.0fを30Fで割っている。
+	bool isCountDownExit_;		// カウントダウンの際のUIの動きで使用。 t:アルファ値を下げる f:上から真ん中
+	bool isBeforeStart_;		// 開始前かどうかフラグ
+	bool isCountDown_;			// カウントダウン中。
+
+	Vec3 WINDOW_CENTER = Vec3(1280.0f / 2.0f, 720.0f / 2.0f, 0.1f);
+	Vec3 COUNT_DOWN_START_POS = Vec3(1280.0f / 2.0f, 720.0f / 2.0f - 300.0f, 0.1f);
 
 
 public:
@@ -133,6 +156,11 @@ public:
 
 	// ギミックを生成。
 	void GenerateGimmick();
+
+private:
+
+	// ゲーム開始前の更新処理
+	void UpdateCountDown();
 
 
 };

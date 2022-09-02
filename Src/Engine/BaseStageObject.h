@@ -25,12 +25,15 @@ public:
 	enum class OBJECT_ID {
 		STAGE,			// ステージ
 		STAGE_GRASS,	// ステージの草
+		WALL,			// 壁
 		GOAL,			// ゴール
 		MIDDLE_POINT,	// 中間地点
 		ORNAMENT,		// 装飾オブジェクト
 		FLOATING_ORNAMENT,	// ふわふわ動く装飾オブジェクト
-		BOOS_GIMMICK,	// 加速ギミック
+		BOOST_GIMMICK,	// 加速ギミック
 		ITEM_BOX,		// アイテムボックス
+		STEP_BOOST_GIMMICK,	// 段差加速ギミック
+		INV_WALL,		// 見えない壁
 	};
 
 
@@ -64,7 +67,7 @@ public:
 
 	// ゲッタ
 	inline const int& GetBLASIndex() { return blasIndex_; }
-	inline const int& GetINSTANCEIndex() { return insIndex_; }
+	inline const int& GetInstanceIndex() { return insIndex_; }
 	inline const bool& GetIsActive() { return isActive_; }
 	inline std::shared_ptr<OBB> GetOBB() { return obb_; }
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }

@@ -61,4 +61,10 @@ public:
 	const Vec3& GetVertexMax(const int& Index);
 	Vec3 GetVertexLengthMax(const int& Index);
 
+	// ƒƒbƒVƒ…‚Ìî•ñ‚ğæ“¾B
+	const std::vector<Vec3>& GetVertex(const int& Index);
+	const std::vector<Vec3>& GetNormal(const int& Index);
+	const std::vector<Vec2>& GetUV(const int& Index);
+	const std::vector<UINT>& GetVertexIndex(const int& Index);
+
 };
