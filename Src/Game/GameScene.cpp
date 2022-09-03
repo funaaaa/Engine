@@ -309,7 +309,13 @@ void GameScene::Update()
 
 
 	// ラップ数のUIを更新。
-	nowRapCountUI_->ChangeTextureID(numFontHandle_[characterMgr_->GetPlayerIns().lock()->GetRapCount() + 1], 0);
+	int rapCount = characterMgr_->GetPlayerIns().lock()->GetRapCount();
+	if (3 <= rapCount) {
+
+		rapCount = 2;
+
+	}
+	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount + 1], 0);
 
 	// ステージを更新。
 	stages_[STAGE_ID::CIRCUIT]->Update(constBufferData_);

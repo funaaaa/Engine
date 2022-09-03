@@ -40,6 +40,9 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, false, this);
 
+		// 初期位置を設定。
+		DEF_POS = PLAYER_DEF_POS;
+
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::RED, false);
 
@@ -48,6 +51,9 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, true, this);
 
+		// 初期位置を設定。
+		DEF_POS = GHOST_DEF_POS;
+
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::RED, false);
 
@@ -55,6 +61,9 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 	else if (charaID_ == CHARA_ID::AI1) {
 
 		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::LEFT_LEARNING));
+
+		// 初期位置を設定。
+		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::BLUE, false);
@@ -67,6 +76,9 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		std::string number = std::to_string(Param);
 
 		operationObject_ = std::make_shared<GhostOperationObject>(filePath + number + dottxt);
+
+		// 初期位置を設定。
+		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::BLUE, true);
@@ -83,7 +95,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
-	pos_ = PLAYER_DEF_POS;
+	pos_ = DEF_POS;
 	prevPos_ = pos_;
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
@@ -140,9 +152,23 @@ void Character::Init()
 
 	/*===== 初期化処理 =====*/
 
+		// 初期位置を設定。
+	if (charaID_ == CHARA_ID::P1) {
+		DEF_POS = PLAYER_DEF_POS;
+	}
+	else if (charaID_ == CHARA_ID::P1_WGHOST) {
+		DEF_POS = GHOST_DEF_POS;
+	}
+	else if (charaID_ == CHARA_ID::AI1) {
+		DEF_POS = GHOST_DEF_POS;
+	}
+	else if (charaID_ == CHARA_ID::GHOST) {
+		DEF_POS = GHOST_DEF_POS;
+	}
+
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
-	pos_ = PLAYER_DEF_POS;
+	pos_ = DEF_POS;
 	prevPos_ = pos_;
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
@@ -222,8 +248,8 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	if (IsBeforeStart) {
 
 		// プレイヤーの位置を初期位置に戻す。
-		pos_.x_ = PLAYER_DEF_POS.x_;
-		pos_.z_ = PLAYER_DEF_POS.z_;
+		pos_.x_ = DEF_POS.x_;
+		pos_.z_ = DEF_POS.z_;
 
 	}
 
@@ -251,7 +277,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
 
-			pos_ = PLAYER_DEF_POS;
+			pos_ = DEF_POS;
 			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 			forwardVec_ = Vec3(0, 0, -1);
