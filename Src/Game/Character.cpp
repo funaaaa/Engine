@@ -610,53 +610,65 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	Vec3 HitNormal;
 	Vec2 HitUV;
 	float HitDistance;
+	bool isHit = false;
 
-	// 左前タイヤ
-	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+	// 右ドリフトしていたらこの処理は通さない。
+	if (!(isDrift_ && !isDriftRight_)) {
 
-	// タイヤ痕の位置を検出
-	bool isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+		// 左前タイヤ
+		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 
-	// 当たり判定が正しいかどうかをチェック。
-	if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+		// タイヤ痕の位置を検出
+		isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
 
-		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
-		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
+		// 当たり判定が正しいかどうかをチェック。
+		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
 
-		return false;
+			tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
+			tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
 
-	}
-	else {
+			return false;
 
-		tireMaskUV_.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.uv_;
-		tireMaskUV_.forwardLeftUV_.uv_ = HitUV;
-		TireMaskUVData.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.prevuv_;
-		TireMaskUVData.forwardLeftUV_.uv_ = HitUV;
+		}
+		else {
 
-	}
+			tireMaskUV_.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.uv_;
+			tireMaskUV_.forwardLeftUV_.uv_ = HitUV;
+			TireMaskUVData.forwardLeftUV_.prevuv_ = tireMaskUV_.forwardLeftUV_.prevuv_;
+			TireMaskUVData.forwardLeftUV_.uv_ = HitUV;
 
-	// 右前タイヤ
-	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-	// タイヤ痕の位置を検出
-	isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
-
-	if (!isHit || HitDistance < 0 || 40 < HitDistance) {
-
-		tireMaskUV_.forwardRightUV_.prevuv_ = Vec2(0, 0);
-		tireMaskUV_.forwardRightUV_.uv_ = Vec2(0, 0);
-
-		return false;
+		}
 
 	}
-	else {
 
-		tireMaskUV_.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.uv_;
-		tireMaskUV_.forwardRightUV_.uv_ = HitUV;
-		TireMaskUVData.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.prevuv_;
-		TireMaskUVData.forwardRightUV_.uv_ = HitUV;
+
+	// 左ドリフトしていたらこの処理は通さない。
+	if (!(isDrift_ && isDriftRight_)) {
+
+		// 右前タイヤ
+		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+
+		// タイヤ痕の位置を検出
+		isHit = FHelper::RayToModelCollision(InputRayData, ImpactPos, HitDistance, HitNormal, HitUV);
+
+		if (!isHit || HitDistance < 0 || 40 < HitDistance) {
+
+			tireMaskUV_.forwardRightUV_.prevuv_ = Vec2(0, 0);
+			tireMaskUV_.forwardRightUV_.uv_ = Vec2(0, 0);
+
+			return false;
+
+		}
+		else {
+
+			tireMaskUV_.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.uv_;
+			tireMaskUV_.forwardRightUV_.uv_ = HitUV;
+			TireMaskUVData.forwardRightUV_.prevuv_ = tireMaskUV_.forwardRightUV_.prevuv_;
+			TireMaskUVData.forwardRightUV_.uv_ = HitUV;
+
+		}
 
 	}
 
