@@ -12,8 +12,18 @@ void DriftParticleMgr::Setting()
 	smokeGenerateDelay_ = 0;
 	particleGenerateDelay_ = 0;
 	fireGenerateDelay_ = 0;
-	bigAuraIndex_ = -1;
-	smallAuraIndex_ = -1;
+
+	for (auto& index : smallAuraIndex_) {
+		index.charaIndex_ = -1;
+		index.insIndex_ = -1;
+		index.isActive_ = false;
+	}
+	for (auto& index : bigAuraIndex_) {
+		index.charaIndex_ = -1;
+		index.insIndex_ = -1;
+		index.isActive_ = false;
+	}
+
 
 	// パーティクル用のスフィアのBLASを生成する。
 	smokeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smoke.png" }, false, false);
@@ -42,8 +52,17 @@ void DriftParticleMgr::Init()
 
 	smokeGenerateDelay_ = 0;
 	fireGenerateDelay_ = 0;
-	bigAuraIndex_ = -1;
-	smallAuraIndex_ = -1;
+
+	for (auto& index : smallAuraIndex_) {
+		index.charaIndex_ = -1;
+		index.insIndex_ = -1;
+		index.isActive_ = false;
+	}
+	for (auto& index : bigAuraIndex_) {
+		index.charaIndex_ = -1;
+		index.insIndex_ = -1;
+		index.isActive_ = false;
+	}
 
 	for (auto& index : driftParticle_) {
 
@@ -137,7 +156,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 }
 
-void DriftParticleMgr::GenerateAura(const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateAura(const int& CharaIndex, const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== オーラを生成する =====*/
@@ -157,10 +176,36 @@ void DriftParticleMgr::GenerateAura(const int& TireInsIndex_, const int& Id, con
 		}
 
 		if (isAuraBig) {
-			bigAuraIndex_ = static_cast<int>(&index - &driftParticle_[0]);
+
+			// オーラデータの空きを調べる。
+			for (auto& auraIndex : bigAuraIndex_) {
+
+				if (auraIndex.isActive_) continue;
+
+				auraIndex.charaIndex_ = CharaIndex;
+				auraIndex.insIndex_ = static_cast<int>(&index - &driftParticle_[0]);
+				auraIndex.isActive_ = true;
+
+				break;
+
+			}
+
 		}
 		else {
-			smallAuraIndex_ = static_cast<int>(&index - &driftParticle_[0]);
+
+			// オーラデータの空きを調べる。
+			for (auto& auraIndex : smallAuraIndex_) {
+
+				if (auraIndex.isActive_) continue;
+
+				auraIndex.charaIndex_ = CharaIndex;
+				auraIndex.insIndex_ = static_cast<int>(&index - &driftParticle_[0]);
+				auraIndex.isActive_ = true;
+
+				break;
+
+			}
+
 		}
 
 		break;
@@ -244,26 +289,70 @@ void DriftParticleMgr::Update(RayConstBufferData& ConstBufferData)
 
 }
 
-void DriftParticleMgr::DestroyAura()
+bool DriftParticleMgr::IsAuraGenerated(const int& CharaIndex)
+{
+
+	// ビッグオーラが生成されているか。
+	bool isGenerateBigAura = false;
+	for (auto& index : bigAuraIndex_) {
+
+		if (!index.isActive_) continue;
+		if (index.charaIndex_ != CharaIndex) continue;
+
+		isGenerateBigAura = true;
+
+		break;
+
+	}
+
+	// スモールオーラが生成されているか。
+	bool isGenerateSmallAura = false;
+	for (auto& index : smallAuraIndex_) {
+
+		if (!index.isActive_) continue;
+		if (index.charaIndex_ != CharaIndex) continue;
+
+		isGenerateSmallAura = true;
+
+		break;
+
+	}
+
+	return isGenerateBigAura && isGenerateSmallAura;
+}
+
+void DriftParticleMgr::DestroyAura(const int& CharaIndex)
 {
 
 	/*===== オーラを破棄 =====*/
 
-	// -1だったらオーラは生成されていない。
-	if (bigAuraIndex_ != -1) {
+	// オーラデータを破棄する。
+	for (auto& index : bigAuraIndex_) {
 
-		// オーラを破棄。
-		driftParticle_[bigAuraIndex_]->Init();
+		if (!index.isActive_) continue;
+		if (index.charaIndex_ != CharaIndex) continue;
 
-		bigAuraIndex_ = -1;
+		driftParticle_[index.insIndex_]->Init();
+
+		index.charaIndex_ = -1;
+		index.insIndex_ = -1;
+		index.isActive_ = false;
+
+		break;
 
 	}
-	if (smallAuraIndex_ != -1) {
+	for (auto& index : smallAuraIndex_) {
 
-		// オーラを破棄。
-		driftParticle_[smallAuraIndex_]->Init();
+		if (!index.isActive_) continue;
+		if (index.charaIndex_ != CharaIndex) continue;
 
-		smallAuraIndex_ = -1;
+		driftParticle_[index.insIndex_]->Init();
+
+		index.charaIndex_ = -1;
+		index.insIndex_ = -1;
+		index.isActive_ = false;
+
+		break;
 
 	}
 

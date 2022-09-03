@@ -32,6 +32,7 @@ public:
 	float shellHitRot_;		// 甲羅に当たったときの回転。
 	DirectX::XMMATRIX defBodyMatRot_;	// そのフレームのデフォルトの回転行列
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
+	int charaIndex_;
 	int canNotMoveTimer_;	// 操作不能のタイマー
 	const int CAN_NOT_MOVE_TIMER_SHELL_HIT = 60;
 	const int RETURN_DEFPOS_TIMER = 600;
@@ -201,7 +202,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	Character(CHARA_ID CharaID, const int& Param);
+	Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param);
 	void Init();
 
 	// 更新処理

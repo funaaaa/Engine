@@ -24,13 +24,16 @@
 #include "DriftParticleMgr.h"
 #include "DriftParticle.h"
 
-Character::Character(CHARA_ID CharaID, const int& Param)
+Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 {
 
 	/*===== 初期化処理 =====*/
 
 	// キャラのIDを保存
 	charaID_ = CharaID;
+
+	// キャラの番号を保存。
+	charaIndex_ = CharaIndex;
 
 	// キャラIDに応じて操作オブジェクトを生成。
 	if (charaID_ == CHARA_ID::P1) {
@@ -171,6 +174,14 @@ void Character::Init()
 	isConcentrationLine_ = false;
 	isJumpActionTrigger_ = false;
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+
+
+	// 臨時のバグ対策です。 最初の一回目のドリフトのときのみオーラが出ないので、ここで一回生成しておく。
+	RayConstBufferData constBuffer;
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0, constBuffer);
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= 0, constBuffer);
+
+	DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
 }
 
@@ -1627,9 +1638,9 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 		// 現在のドリフトレベルが1以上だったらパーティクルとオーラを出す。
 		if (1 <= nowLevel) {
 
-			if (!DriftParticleMgr::Ins()->IsAuraGenerated()) {
-				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateAura(playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel, ConstBufferData);
+			if (!DriftParticleMgr::Ins()->IsAuraGenerated(charaIndex_)) {
+				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel, ConstBufferData);
 			}
 
 			// レートを求める。
@@ -1649,7 +1660,7 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
 
 				// オーラを一旦破棄
-				DriftParticleMgr::Ins()->DestroyAura();
+				DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
 			}
 
@@ -1665,7 +1676,7 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 	else {
 
 		// オーラを破棄 関数内に二重解放対策の条件式がある。
-		DriftParticleMgr::Ins()->DestroyAura();
+		DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
 	}
 

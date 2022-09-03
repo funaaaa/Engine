@@ -50,7 +50,7 @@ void CharacterMgr::AddChara(const int& CharaID, const bool& IsPlayer, int Param)
 
 	/*===== キャラクターを追加 =====*/
 
-	character_.emplace_back(std::make_shared<Character>(static_cast<Character::CHARA_ID>(CharaID), Param));
+	character_.emplace_back(std::make_shared<Character>(static_cast<Character::CHARA_ID>(CharaID), static_cast<int>(character_.size()), Param));
 
 	if (IsPlayer) playerIndex_ = static_cast<int>(character_.size()) - 1;
 
