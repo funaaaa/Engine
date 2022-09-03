@@ -292,11 +292,18 @@ void GameScene::Update()
 	// 3週していたらリザルトシーンに移動する。
 	if (3 <= rapCount_) {
 
+		rapCount_ = 3;
 
-		//isGameFinish_ = true;
+		isGameFinish_ = true;
 
-		isTransition_ = true;
+		//isTransition_ = true;
 
+	}
+
+	if(Input::Ins()->IsKeyTrigger(DIK_Y)){
+	
+		++rapCount_;
+	
 	}
 
 
