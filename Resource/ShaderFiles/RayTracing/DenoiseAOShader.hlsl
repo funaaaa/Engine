@@ -861,12 +861,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             rayDir = refract(WorldRayDirection(), -WorldNormal, eta);
       
         }
-        
-        //if (length(rayDir) == 0)
-        //{
-        //    payload.rayData_[rayDataIndex].color_ = worldNormal;
-        //    return;
-        //}
             
         if (0.0f < PayloadData.impactAmount_)
         {
@@ -944,8 +938,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
                 PayloadData.isCullingAlpha_ = true;
             }
         }
-        
-        //PayloadData.light_ = float3(1, 1, 1);
             
         if (0.0f < PayloadData.impactAmount_)
         {
@@ -957,11 +949,74 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
     }
     
+    // 当たったオブジェクトのInstanceIDが屈折アルファだったら。
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION_ALPHA)
+    {
+        
+        // アルファ値を求める。
+        int instanceIndex = InstanceIndex();
+        float alpha = 0;
+        for (int alphaIndex = 0; alphaIndex < ALPHA_DATA_COUNT; ++alphaIndex)
+        {
+            if (gSceneParam.alphaData_.alphaData_[alphaIndex].instanceIndex_ != instanceIndex)
+            {
+                continue;
+            }
+            alpha = gSceneParam.alphaData_.alphaData_[alphaIndex].alpha_;
+            break;
+        }
+        
+        // payloadに入れる色を計算する。
+        if (PayloadData.impactAmount_ < alpha * TexColor.w)
+        {
+            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+            PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
+            PayloadData.impactAmount_ = 0.0f;
+
+        }
+        else
+        {
+            PayloadData.color_.xyz += (float3) TexColor * alpha;
+            PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
+            PayloadData.impactAmount_ -= alpha * TexColor.w;
+        }
+
+        
+        // アルファが一定以下だったら。
+        if (alpha < 0.5f)
+        {
+            ++PayloadData.alphaCounter_;
+            if (3 <= PayloadData.alphaCounter_)
+            {
+                PayloadData.isCullingAlpha_ = true;
+            }
+        }
+            
+        if (0.0f < PayloadData.impactAmount_)
+        {
+            
+            float refractVal = 1.4f * (alpha * TexColor.w);
+            float3 rayDir = float3(0, 0, 0);
+
+            float eta = 1.0f / refractVal;
+            rayDir = refract(WorldRayDirection(), WorldNormal, eta);
+                
+            // 反射レイを飛ばす。
+            ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, rayDir, PayloadData, gRtScene);
+            
+        }
+        
+    }
+    
 }
 
 // closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
 [shader("closesthit")]
-void mainCHS(inout Payload payload, MyAttribute attrib)
+
+    void mainCHS
+    (inout
+    Payload payload, MyAttribute
+    attrib)
 {
     
     // 影用レイだったら。
@@ -1039,13 +1094,21 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
 
 // 影用CHS 使用していない。
 [shader("closesthit")]
-void shadowCHS(inout Payload payload, MyAttribute attrib)
+
+    void shadowCHS
+    (inout
+    Payload payload, MyAttribute
+    attrib)
 {
 }
 
 // AnyHitShader
 [shader("anyhit")]
-void mainAnyHit(inout Payload payload, MyAttribute attrib)
+
+    void mainAnyHit
+    (inout
+    Payload payload, MyAttribute
+    attrib)
 {
         
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
