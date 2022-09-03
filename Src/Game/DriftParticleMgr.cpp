@@ -24,6 +24,7 @@ void DriftParticleMgr::Setting()
 	bigAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/bigAuraOrange.png" }, false, false);
 	smallAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smallAuraOrange.png" }, false, false);
 	driftParticleOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/driftParticleOrange.png" }, false, false);
+	jumpEffectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/jumpEffect.png" }, false, false);
 
 
 	for (auto& index : driftParticle_) {
@@ -205,6 +206,24 @@ void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const boo
 			}
 
 		}
+
+	}
+
+}
+
+void DriftParticleMgr::GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstBufferData& ConstBufferData)
+{
+
+	/*===== ジャンプアクション時のエフェクトを生成 =====*/
+
+	// 生成する。
+	for (auto& index : driftParticle_) {
+
+		if (index->GetIsActive()) continue;
+
+		index->GenerateJumpEffect(jumpEffectBlas_, CarBodyInsIndex_, ConstBufferData);
+
+		break;
 
 	}
 

@@ -23,6 +23,7 @@ private:
 	int smallAuraOrangeBlas_;
 	int bigAuraOrangeBlas_;
 	int driftParticleOrangeBlas_;
+	int jumpEffectBlas_;
 
 	int bigAuraIndex_;		// ドリフト二段階目以降に発生するドリフト演出の大きい方
 	int smallAuraIndex_;	// ドリフト二段階目以降二発生するドリフト演出の小さい方
@@ -59,6 +60,7 @@ public:
 	void GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
 	void GenerateAura(const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData);
 	void GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData);
+	void GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

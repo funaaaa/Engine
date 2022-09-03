@@ -42,6 +42,7 @@ public:
 	bool isConcentrationLine_;	// 集中線を出すかフラグ。
 	bool isUseItem_;	// アイテムを使った瞬間。
 	bool isJumpActionTrigger_;	// ジャンプアクションのトリガー
+	bool isJumpAction_;			// ジャンプアクションが行われたか。
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
@@ -252,5 +253,8 @@ private:
 
 	// ゲーム終了時の更新処理
 	void UpdateGameFinish();
+
+	// ドリフトパーティクルの更新処理
+	void UpdateDriftParticle(RayConstBufferData& ConstBufferData, const bool& IsGameFinish, const bool& IsBeforeStart);
 
 };

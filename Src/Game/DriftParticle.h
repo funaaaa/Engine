@@ -13,6 +13,7 @@ private:
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
 	Vec3 pos_;				// 座標
 	Vec3 forardVec_;		// 移動方向ベクトル
+	Vec3 scale_;
 	bool isActive_;			// 有効化フラグ
 	bool isAppearingNow_;	// 出現中フラグ アルファ値を濃くする。
 	int appearingTimer_;	// 出現してから消えるまでのタイマー
@@ -62,6 +63,16 @@ private:
 	const float MAX_GRAV = 8.0f;
 
 
+	/*-- ジャンプアクションエフェクトに関する変数 --*/
+
+	float jumpActionEasingTimer_;
+	const float ADD_JUMP_ACTION_EASING_TIMER_APPE = 0.08f;
+	const float ADD_JUMP_ACTION_EASING_TIMER_EXIT = 0.1f;
+	const float JUMP_DEF_SCALE = 10.0f;
+	const float JUMP_BIG_SCALE = 80.0f;
+	const float JUMP_EXIT_SCALE = 120.0f;
+
+
 public:
 
 	enum class ID {
@@ -70,6 +81,7 @@ public:
 		AURA_BIG,	// ドリフトの二段階目以降でタイヤに発生するオーラの大きい方
 		AURA_SMALL,	// ドリフトの二段階目以降でタイヤに発生するオーラの小さい方
 		PARTICLE,
+		JUMP_EFFECT,
 	};
 
 private:
@@ -93,6 +105,7 @@ public:
 	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
 	void GenerateAura(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
 	void GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
+	void GenerateJumpEffect(const int& BlasIndex, const int& CarBodyInsIndex, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);
