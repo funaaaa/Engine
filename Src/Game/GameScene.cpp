@@ -126,9 +126,8 @@ GameScene::GameScene()
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
 
-	isPassedMiddlePoint_ = false;
-	rapCount_ = 0;
 	countDownStartTimer_ = 0;
+	transitionTimer = 0;
 	countDownNumber_ = 2;
 	isBeforeStart_ = true;
 	isCountDown_ = false;
@@ -246,14 +245,13 @@ void GameScene::Init()
 
 	DriftParticleMgr::Ins()->Init();
 
-	isPassedMiddlePoint_ = false;
 	isBeforeStart_ = true;
 	isCountDown_ = false;
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
 	isGameFinish_ = false;
-	rapCount_ = 0;
 	countDownStartTimer_ = 0;
+	transitionTimer = 0;
 	countDownNumber_ = 2;
 	sunAngle_ = 0.3f;
 	itemFrameEasingTimer_ = 1;
@@ -281,7 +279,7 @@ void GameScene::Update()
 	}
 
 	// キャラを更新。
-	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_, isBeforeStart_, isGameFinish_);
+	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isBeforeStart_, isGameFinish_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
@@ -289,30 +287,35 @@ void GameScene::Update()
 	// カメラを更新。
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
 
-	// 3週していたらリザルトシーンに移動する。
-	if (3 <= rapCount_) {
+	// いずれかのキャラがゴールしていたらリザルトシーンに移動する。
+	if (characterMgr_->CheckGoal()) {
 
-		rapCount_ = 3;
 
 		isGameFinish_ = true;
+
+		++transitionTimer;
+		if (TRANSION_TIME < transitionTimer) {
+
+			isTransition_ = true;
+
+		}
 
 		//isTransition_ = true;
 
 	}
-
 
 	// 開始していなかったらカウントダウンの処理を行う。
 	UpdateCountDown();
 
 
 	// ラップ数のUIを更新。
-	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount_ + 1], 0);
+	nowRapCountUI_->ChangeTextureID(numFontHandle_[characterMgr_->GetPlayerIns().lock()->GetRapCount() + 1], 0);
 
 	// ステージを更新。
 	stages_[STAGE_ID::CIRCUIT]->Update(constBufferData_);
 
 	// ゴールの表示非表示を切り替え。
-	if (isPassedMiddlePoint_) {
+	if (characterMgr_->GetPlayerIns().lock()->GetIsPassedMiddlePoint()) {
 		stages_[STAGE_ID::CIRCUIT]->DisplayGoal();
 	}
 	else {

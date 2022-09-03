@@ -81,6 +81,8 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInsIndex_, true));
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInsIndex_, true));
 
+	rapCount_ = 0;
+	isPassedMiddlePoint_ = 0;
 	pos_ = PLAYER_DEF_POS;
 	prevPos_ = pos_;
 	forwardVec_ = Vec3(0, 0, -1);
@@ -138,6 +140,8 @@ void Character::Init()
 
 	/*===== 初期化処理 =====*/
 
+	rapCount_ = 0;
+	isPassedMiddlePoint_ = 0;
 	pos_ = PLAYER_DEF_POS;
 	prevPos_ = pos_;
 	forwardVec_ = Vec3(0, 0, -1);
@@ -185,7 +189,7 @@ void Character::Init()
 
 }
 
-void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart, const bool& IsGameFinish)
+void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish)
 {
 
 
@@ -212,7 +216,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	Move(IsBeforeStart);
 
 	// 当たり判定
-	CheckHit(StageData, IsPassedMiddlePoint, RapCount);
+	CheckHit(StageData);
 
 	// 開始前だったら
 	if (IsBeforeStart) {
@@ -1036,7 +1040,7 @@ void Character::UpdateDrift(const bool& IsBeforeStart)
 
 }
 
-void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount)
+void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 {
 
 	/*===== 当たり判定 =====*/
@@ -1070,9 +1074,12 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	if (output.isHitGoal_) {
 
 		// ゴール
-		if (IsPassedMiddlePoint) {
-			IsPassedMiddlePoint = false;
-			++RapCount;
+		if (isPassedMiddlePoint_) {
+			isPassedMiddlePoint_ = false;
+			++rapCount_;
+
+			// 三周以上にならないようにする。
+			if (3 <= rapCount_) rapCount_ = 3;
 
 		}
 
@@ -1082,7 +1089,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	if (output.isHitMiddlePoint_) {
 
 		// 中間地点との当たり判定
-		IsPassedMiddlePoint = true;
+		isPassedMiddlePoint_ = true;
 
 	}
 	if (output.isHitOrnament_) {
@@ -1201,6 +1208,13 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddl
 	if (jumpBoostSpeed_ < 0) {
 
 		jumpBoostSpeed_ = 0;
+
+	}
+
+
+	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
+
+		++rapCount_;
 
 	}
 

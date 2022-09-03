@@ -156,6 +156,13 @@ public:
 	bool isGameFinishDriftLeft_;	// ゲーム終了演出でどちらにドリフトするか。 t:左 f:右
 
 
+	/*-- ゴール用 --*/
+
+	int rapCount_;
+	bool isPassedMiddlePoint_;
+
+
+
 public:
 
 	struct TireUVSet {
@@ -206,7 +213,7 @@ public:
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, bool& IsPassedMiddlePoint, int& RapCount, const bool& IsBeforeStart, const bool& IsGameFinish);
+	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish);
 
 	// 描画処理
 	void Draw();
@@ -225,6 +232,8 @@ public:
 	bool GetIsItem();	// アイテムを持っているか。
 	bool GetUseItem() { return isUseItem_; }	// アイテムを使った瞬間。
 	bool GetIdConcentrationLine() { return isConcentrationLine_; }
+	int GetRapCount() { return rapCount_; }
+	bool GetIsPassedMiddlePoint() { return isPassedMiddlePoint_; }
 
 	// モデルを削除。
 	void DeleteInstance();
@@ -244,7 +253,7 @@ private:
 	void UpdateDrift(const bool& IsBeforeStart);
 
 	// 当たり判定
-	void CheckHit(std::weak_ptr<BaseStage> StageData, bool& IsPassedMiddlePoint, int& RapCount);
+	void CheckHit(std::weak_ptr<BaseStage> StageData);
 
 	// 車体傾けの処理
 	void InclineCarBody();

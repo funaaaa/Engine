@@ -28,14 +28,14 @@ void CharacterMgr::Init()
 
 }
 
-void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, int& RapCount, bool& IsPassedMiddlePoint, const bool& IsBeforeStart, const bool& IsGameFinish)
+void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish)
 {
 
 	/*===== XVˆ— =====*/
 
 	for (auto& index : character_) {
 
-		index->Update(Stage, ConstBufferData, IsPassedMiddlePoint, RapCount, IsBeforeStart, IsGameFinish);
+		index->Update(Stage, ConstBufferData, IsBeforeStart, IsGameFinish);
 
 	}
 
@@ -74,4 +74,22 @@ bool CharacterMgr::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::ve
 	}
 
 	return isTireMask;
+}
+
+bool CharacterMgr::CheckGoal()
+{
+
+	bool isGoal = false;
+
+	for (auto& index : character_) {
+
+		if (index->GetRapCount() < 3) continue;
+
+		isGoal = true;
+
+		break;
+
+	}
+
+	return isGoal;
 }
