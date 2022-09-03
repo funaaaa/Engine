@@ -38,15 +38,15 @@ void TitleScene::Update()
 
 	}
 
-	int mode = static_cast<int>(GameSceneMode::Ins()->id_);
-	ImGui::RadioButton("DEF", &mode, static_cast<int>(GameSceneMode::MODE_ID::DEF));
+	int mode = GameSceneMode::Ins()->ghostLevel_;
+	ImGui::RadioButton("Level : 1", &mode, 0);
 	ImGui::SameLine();
-	ImGui::RadioButton("AI", &mode, static_cast<int>(GameSceneMode::MODE_ID::AI));
+	ImGui::RadioButton("Level : 2", &mode, 1);
 	ImGui::SameLine();
-	ImGui::RadioButton("WRITE_GHOST", &mode, static_cast<int>(GameSceneMode::MODE_ID::WRITE_GHOST));
+	ImGui::RadioButton("Level : 3", &mode, 2);
 	ImGui::SameLine();
-	ImGui::RadioButton("GHOST", &mode, static_cast<int>(GameSceneMode::MODE_ID::GHOST));
-	GameSceneMode::Ins()->id_ = static_cast<GameSceneMode::MODE_ID>(mode);
+	ImGui::RadioButton("Level : 4", &mode, 3);
+	GameSceneMode::Ins()->ghostLevel_ = mode;
 
 }
 

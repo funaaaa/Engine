@@ -201,7 +201,7 @@ public:
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
 	// ‰Šú‰»ˆ—
-	Character(CHARA_ID CharaID);
+	Character(CHARA_ID CharaID, const int& Param);
 	void Init();
 
 	// XVˆ—

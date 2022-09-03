@@ -24,7 +24,7 @@
 #include "DriftParticleMgr.h"
 #include "DriftParticle.h"
 
-Character::Character(CHARA_ID CharaID)
+Character::Character(CHARA_ID CharaID, const int& Param)
 {
 
 	/*===== ‰Šú‰»ˆ— =====*/
@@ -59,7 +59,11 @@ Character::Character(CHARA_ID CharaID)
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
 
-		operationObject_ = std::make_shared<GhostOperationObject>("Resource/Game/CharaGhostData/Dev_0.txt");
+		std::string filePath = "Resource/Game/CharaGhostData/Dev_";
+		std::string dottxt = ".txt";
+		std::string number = std::to_string(Param);
+
+		operationObject_ = std::make_shared<GhostOperationObject>(filePath + number + dottxt);
 
 		// Ô‚Ìƒ‚ƒfƒ‹‚ğƒ[ƒh
 		playerModel_.Load(PlayerModel::COLOR::BLUE, true);

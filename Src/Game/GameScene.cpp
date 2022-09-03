@@ -237,7 +237,7 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
 
 		// ゴーストを生成。
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, GameSceneMode::Ins()->ghostLevel_);
 
 	}
 
@@ -300,10 +300,10 @@ void GameScene::Update()
 
 	}
 
-	if(Input::Ins()->IsKeyTrigger(DIK_Y)){
-	
+	if (Input::Ins()->IsKeyTrigger(DIK_Y)) {
+
 		++rapCount_;
-	
+
 	}
 
 

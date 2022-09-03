@@ -220,6 +220,9 @@ void PlayerOperationObject::WriteGhostInfo(BaseOperationObject::Operation Operat
 		wfile << "UR:" << std::to_string(static_cast<int>(Operation.isUseItemRelease_)) << " ";
 
 	}
+	if (Operation.isJumpActionTrigger_) {
+		wfile << "JT:" << std::to_string(static_cast<int>(Operation.isJumpActionTrigger_)) << " ";
+	}
 
 	wfile << std::endl;
 

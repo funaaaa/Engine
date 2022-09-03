@@ -17,9 +17,11 @@ public:
 	};
 
 	MODE_ID id_;
+	int ghostLevel_;
 
 	GameSceneMode() {
-		id_ = MODE_ID::DEF;
+		id_ = MODE_ID::GHOST;
+		ghostLevel_;
 	}
 
 };

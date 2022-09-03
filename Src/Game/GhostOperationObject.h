@@ -21,6 +21,7 @@ private:
 		GETITEM,
 		USETRIGGER,
 		USERELEASE,
+		JUMPACTIONTRIGGER,
 	};
 	struct OperationElement {
 		OPERATION_ID operationID_;
