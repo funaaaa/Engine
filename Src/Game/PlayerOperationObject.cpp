@@ -52,11 +52,11 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 		operation.isShotBehind_ = true;
 	}
 	// アイテムを使用するかの入力処理
-	if (Input::Ins()->IsKeyTrigger(DIK_P) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER)) {
+	if (Input::Ins()->IsKeyTrigger(DIK_E) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER)) {
 		operation.isUseItemTrigger_ = true;
 	}
 	// アイテムを使用するかの入力処理
-	if (Input::Ins()->IsKeyRelease(DIK_P) || Input::Ins()->IsPadBottomRelease(XINPUT_GAMEPAD_LEFT_SHOULDER)) {
+	if (Input::Ins()->IsKeyRelease(DIK_E) || Input::Ins()->IsPadBottomRelease(XINPUT_GAMEPAD_LEFT_SHOULDER)) {
 		operation.isUseItemRelease_ = true;
 	}
 
