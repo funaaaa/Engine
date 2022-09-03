@@ -28,6 +28,7 @@ public:
 	float speed_;			// 移動速度
 	float gravity_;			// 重力
 	float rotY_;			// ハンドル操作によって変わるY軸の回転量
+	const float DEF_ROTY = -0.367411435f;
 	float shellHitRot_;		// 甲羅に当たったときの回転。
 	DirectX::XMMATRIX defBodyMatRot_;	// そのフレームのデフォルトの回転行列
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
@@ -120,13 +121,19 @@ public:
 	const float SUB_JUMP_BOOST_SPEED = 0.2f;
 
 
+	/*-- エンジン用変数 --*/
+
+	float engineWaveTimer_;	// 開始前にサイン波の動きを指せるようのタイマー	
+	float engineWaveAmount_;
+
+
 	/*-- 開始前用変数 --*/
 
 	bool isAccel_;
 	bool isBeforeStartPrev_;
-	float beforeStartWaveTimer_;	// 開始前にサイン波の動きを指せるようのタイマー	
 	int beforeStartSmokeTimer_;
 	const int BEFORE_START_SMOKE_TIMER = 5;
+	const float BEFORE_START_WAVE_LENGTH_RUN = 0.05f;
 	const float BEFORE_START_WAVE_LENGTH_DEF = 0.3f;
 	const float BEFORE_START_WAVE_LENGTH_ACCELL = 1.0f;
 

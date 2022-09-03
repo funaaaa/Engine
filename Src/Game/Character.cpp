@@ -80,11 +80,13 @@ Character::Character(CHARA_ID CharaID)
 	bottomVec = Vec3(0, -1, 0);
 	upVec_ = Vec3(0, 1, 0);
 	size_ = Vec3(50, 30, 50);
-	rotY_ = -0.367411435;
+	rotY_ = DEF_ROTY;
 	speed_ = 0;
 	gravity_ = 0;
 	beforeStartSmokeTimer_ = 0;
 	jumpBoostSpeed_ = 0;
+	engineWaveTimer_ = 0;
+	engineWaveAmount_ = 0;
 	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
 	boostTimer_ = 0;
@@ -105,7 +107,6 @@ Character::Character(CHARA_ID CharaID)
 	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
 	driftTimer_ = 0;
-	beforeStartWaveTimer_ = 0;
 	boostRotQ_ = DirectX::XMVECTOR();
 	handleAmount_ = 0;
 	handleRotQ_ = DirectX::XMVECTOR();
@@ -137,7 +138,7 @@ void Character::Init()
 	upVec_ = Vec3(0, 1, 0);
 	size_ = Vec3(50, 30, 50);
 	returnDefPosTimer_ = 0;
-	rotY_ = -0.367411435;
+	rotY_ = DEF_ROTY;
 	speed_ = 0;
 	gravity_ = 0;
 	boostSpeed_ = 0;
@@ -146,7 +147,8 @@ void Character::Init()
 	turningIndicatorTimer_ = 0;
 	canNotMoveTimer_ = 0;
 	driftJumpVec_ = Vec3();
-	beforeStartWaveTimer_ = 0;
+	engineWaveTimer_ = 0;
+	engineWaveAmount_ = 0;
 	beforeStartSmokeTimer_ = 0;
 	driftJumpSpeed_ = 0;
 	isDriftJump_ = false;;
@@ -174,20 +176,13 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	/*===== 更新処理 =====*/
 
-	if (Input::Ins()->IsKey(DIK_I)) {
-
-		rotY_ += 0.05f;
-
-	}
-	if (Input::Ins()->IsKey(DIK_O)) {
-
-		rotY_ -= 0.05f;
-
-	}
 
 	// ゲーム終了フラグを更新。
 	isPrevGameFinish_ = isGameFinish_;
 	isGameFinish_ = IsGameFinish;
+
+	// エンジンの動きで動いた分を打ち消す。
+	pos_.y_ -= engineWaveAmount_;
 
 	// ブースト時の回転を打ち消す。
 	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, defBodyMatRot_);
@@ -210,9 +205,10 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		// プレイヤーの位置を初期位置に戻す。
 		pos_ = PLAYER_DEF_POS;
 
-		EngineSineWave();
-
 	}
+
+	// エンジンの動き
+	EngineSineWave();
 
 	// ゲーム終了時の更新処理
 	UpdateGameFinish();
@@ -220,17 +216,8 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	// 座標を更新。
 	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
 
-	// 開始前だったら
-	if (IsBeforeStart && !isDriftJump_) {
-
-		// プレイヤーの位置を初期位置に戻す。
-		pos_ = PLAYER_DEF_POS;
-
-	}
-
 	// 車体を傾ける処理。
 	InclineCarBody();
-
 
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
 	if (onGround_) {
@@ -951,7 +938,8 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	// ドリフトボタンの入力がトリガーだったら。
 	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
 	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.0f;
-	if (triggerDriftBottom && notJump && onGround_) {
+	bool isOnGround = onGround_ || IsBeforeStart;	// 設置していたら ゲームが始まっていない場合、キャラは空中に浮いているので、接地判定を取る。
+	if (triggerDriftBottom && notJump && isOnGround) {
 
 		isDriftJump_ = true;
 		driftJumpVec_ = upVec_;
@@ -1040,18 +1028,6 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 
 	// 入力を保存する。
 	handleAmount_ = operation.handleDriveRate_;
-
-	// デバッグ用 Bボタンが押されたら初期位置に戻す。
-	if (Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_R)) {
-
-		pos_ = PLAYER_DEF_POS;
-		PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
-		forwardVec_ = Vec3(0, 0, -1);
-		rotY_ = -0.367411435;
-		upVec_ = Vec3(0, 1, 0);
-
-	}
 
 }
 
@@ -1607,13 +1583,34 @@ void Character::EngineSineWave()
 	/*===== エンジンの上下 =====*/
 
 	// サイン波用のタイマーを更新する。
-	beforeStartWaveTimer_ += 1.5f;
+	engineWaveTimer_ += 1.5f;
+
+	// 変化量
+	float waveLength = 0;
+
+	// 開始前でアクセルがふまれていたら激しく動かす。
+	if (isAccel_ && isBeforeStartPrev_) {
+
+		waveLength = BEFORE_START_WAVE_LENGTH_ACCELL;
+
+	}
+	// [地上にいて止まっていたら] or [開始前だったら] エンジンを動かす。
+	else if ((onGround_ && speed_ <= 0.1f && boostSpeed_ <= 0.1f) || isBeforeStartPrev_) {
+
+		waveLength = BEFORE_START_WAVE_LENGTH_DEF;
+
+	}
+	else if (onGround_) {
+
+		waveLength = BEFORE_START_WAVE_LENGTH_RUN;
+
+	}
 
 	// サイン波を計算する。
-	float sineWave = std::sin(beforeStartWaveTimer_) * (isAccel_ ? BEFORE_START_WAVE_LENGTH_ACCELL : BEFORE_START_WAVE_LENGTH_DEF);
+	engineWaveAmount_ = std::sin(engineWaveTimer_) * waveLength;
 
 	// 動かす。
-	pos_.y_ += sineWave;
+	pos_.y_ += engineWaveAmount_;
 
 }
 
