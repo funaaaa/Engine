@@ -290,7 +290,7 @@ void DirectXBase::ProcessBeforeDrawing() {
 	//}
 
 	// ウィンドウ設定
-	ImGui::Begin("Debug Menu");
+	ImGui::Begin("Menu");
 	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
 
 }

@@ -300,29 +300,6 @@ void GameScene::Update()
 
 	}
 
-	if (Input::Ins()->IsKeyTrigger(DIK_Y)) {
-
-		++rapCount_;
-
-	}
-
-
-
-	// 仮の処理
-	if (Input::Ins()->IsKeyTrigger(DIK_9)) {
-
-		isGameFinish_ = true;
-
-	}
-
-	if (Input::Ins()->IsKeyTrigger(DIK_0)) {
-
-		isGameFinish_ = false;
-
-	}
-
-
-
 
 	// 開始していなかったらカウントダウンの処理を行う。
 	UpdateCountDown();

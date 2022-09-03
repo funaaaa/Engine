@@ -38,6 +38,8 @@ void TitleScene::Update()
 
 	}
 
+	ImGui::Text("Choose your level!");
+
 	int mode = GameSceneMode::Ins()->ghostLevel_;
 	ImGui::RadioButton("Level : 1", &mode, 0);
 	ImGui::SameLine();
