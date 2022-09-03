@@ -57,6 +57,8 @@ private:
 	bool isChangeTexture;
 	bool isChangeVertex;
 
+	bool isGenerate_;
+
 	std::vector<int> textureHandle_;			// 使用するテクスチャのハンドル
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
@@ -79,6 +81,11 @@ private:
 public:
 
 	/*===== メンバ関数 =====*/
+
+	BLAS();
+
+	// 初期化処理
+	void Init();
 
 	// BLASの生成
 	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true);
@@ -123,6 +130,7 @@ public:
 	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath_; }
 	const Vec3& GetVertexMin() { return vertexMin_; }
 	const Vec3& GetVertexMax() { return vertexMax_; }
+	bool GetIsGenerate() { return isGenerate_; }
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex_; }

@@ -8,6 +8,7 @@
 #include "PiplineManager.h"
 #include "PolygonInstanceRegister.h"
 #include "Input.h"
+#include "BLASRegister.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -23,6 +24,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// ディスクリプタヒープを初期化。
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();
+
+	// BLASを準備。
+	BLASRegister::Ins()->Setting();
 
 	// インスタンスをセット。
 	PolygonInstanceRegister::Ins()->Setting();

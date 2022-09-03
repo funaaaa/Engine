@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <array>
 #include <memory>
 #include <string>
 #include <wrl.h>
@@ -15,12 +15,16 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<BLAS>> blas_;	// 加速構造体
+	static const int BLAS_COUNT = 256;
+	std::array<std::shared_ptr<BLAS>, BLAS_COUNT> blas_;	// 加速構造体
 
 
 public:
 
 	/*===== メンバ関数 =====*/
+
+	// BLASを準備。
+	void Setting();
 
 	// 生成処理
 	int GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
@@ -51,7 +55,7 @@ public:
 	int GetBLASCount() { return static_cast<int>(blas_.size()); }
 
 	// BLASを取得。
-	std::vector<std::shared_ptr<BLAS>>& GetBLAS() { return blas_; }
+	std::array<std::shared_ptr<BLAS>, BLAS_COUNT>& GetBLAS() { return blas_; }
 
 	// すべての頂点情報にVec3情報をかける。 重い処理なのでたくさん呼ばない。
 	void MulVec3Vertex(const int& Index, Vec3 Vec);
@@ -66,5 +70,8 @@ public:
 	const std::vector<Vec3>& GetNormal(const int& Index);
 	const std::vector<Vec2>& GetUV(const int& Index);
 	const std::vector<UINT>& GetVertexIndex(const int& Index);
+
+	// 指定の要素を削除。
+	void DeleteIndex(const int& Index);
 
 };
