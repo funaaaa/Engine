@@ -204,10 +204,11 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	CheckHit(StageData, IsPassedMiddlePoint, RapCount);
 
 	// 開始前だったら
-	if (IsBeforeStart && !isDriftJump_) {
+	if (IsBeforeStart) {
 
 		// プレイヤーの位置を初期位置に戻す。
-		pos_ = PLAYER_DEF_POS;
+		pos_.x_ = PLAYER_DEF_POS.x_;
+		pos_.z_ = PLAYER_DEF_POS.z_;
 
 	}
 
