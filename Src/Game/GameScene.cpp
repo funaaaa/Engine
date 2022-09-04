@@ -682,14 +682,15 @@ void GameScene::Input()
 
 	InputImGUI();
 
-}
+}	
+
 #include "BaseItem.h"
 void GameScene::InputImGUI()
 {
 
 	/*===== IMGUI更新 =====*/
 
-	ImGui::Text("あいうえお");
+	ImGui::Text("Let's do three laps!");
 
 	//// 太陽の移動速度を更新。
 	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
