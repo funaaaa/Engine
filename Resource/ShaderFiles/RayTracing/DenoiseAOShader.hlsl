@@ -1095,7 +1095,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             float4(vtx.Normal, 0.0f),
             { 0, 0, 0, 1 }
         };
-      //  mat = transpose(mat); // “]’u
         
         worldNormal = mul(worldNormal, mat);
 

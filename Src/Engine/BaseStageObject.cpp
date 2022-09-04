@@ -215,7 +215,7 @@ void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, cons
 	obb_->Setting(blasIndex_, insIndex_);
 
 	// オブジェクトのIDが中間地点だったら、OBBを生成した時点で描画するInstanceは不要になるので破棄する。
-	if (ObjectID == BaseStageObject::OBJECT_ID::MIDDLE_POINT || ObjectID == BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK) {
+	if (ObjectID == BaseStageObject::OBJECT_ID::MIDDLE_POINT || ObjectID == BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK || ObjectID == BaseStageObject::OBJECT_ID::GOAL) {
 
 		PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
 

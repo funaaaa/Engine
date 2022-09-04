@@ -57,6 +57,7 @@ public:
 
 	// íœB
 	void DeleteIndex(const int& Index);
+	void ChangeInstanceShaderID(const int& Index, const UINT& ShaderID);
 
 
 private:

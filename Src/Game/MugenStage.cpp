@@ -49,18 +49,6 @@ void MugenStage::Setting(const int& TireMaskIndex)
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
-	// ステージの屈折オブジェクトをセット。
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/", "MugenStageRefractionObject.obj", { L"Resource/Game/green.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
-	// ステージのパラメーターを設定。
-	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-
-	//// ステージの球Bをセット。
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/", "MugenStageSphereB.obj", { L"Resource/Game/green.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::COMPLETE_REFLECTION);
-	//// ステージのパラメーターを設定。
-	//stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-
 	// トンネルをセット。
 	tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/", "MugenStageTunnel.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
@@ -248,10 +236,17 @@ void MugenStage::Setting(const int& TireMaskIndex)
 	}
 
 	// ゴールをセット。
-	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::MESH,
+	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/", "MugenStageGoal.obj", { L"Resource/Game/red.png",L"Resource/Game/grassNormal.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
 	// ゴールのパラメーターを設定。
 	stageObjectMgr_->AddScale(goalInsIndex, Vec3(120.0f, 120.0f, 120.0f));
+
+	// ゴールの当たり判定
+	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
+		"Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
+	stageObjectMgr_->AddScale(goalInsIndex, Vec3(450.0f, 300.0f, 300.0f));
+	stageObjectMgr_->ChangeRotate(goalInsIndex, Vec3(0.0f, -0.417f, 0.0f));
+	stageObjectMgr_->AddTrans(goalInsIndex, Vec3(-32.0f, -14.0f, 220.0f));
 
 	// 中間地点をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::MIDDLE_POINT, BaseStageObject::COLLISION_ID::OBB,
@@ -324,11 +319,9 @@ void MugenStage::ChangeStageStatus(const int& Status)
 
 	// 前フレームがDEFで、今フレームがREFLECTIONだったら。
 	if (status_ == STATUS::DEF && static_cast<STATUS>(Status) == STATUS::REFLECTION) {
+		
+		stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::COMPLETE_REFLECTION);
 
-		stageObjectMgr_->DeleteIndex(tunnelIndex_);
-
-		tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			"Resource/Game/Stage/", "MugenStageTunnel.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::COMPLETE_REFLECTION);
 		// ステージのパラメーターを設定。
 		stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
 
@@ -336,10 +329,8 @@ void MugenStage::ChangeStageStatus(const int& Status)
 	}
 	else if (status_ == STATUS::REFLECTION && static_cast<STATUS>(Status) == STATUS::DEF) {
 
-		stageObjectMgr_->DeleteIndex(tunnelIndex_);
+		stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
 
-		tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			"Resource/Game/Stage/", "MugenStageTunnel.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 		// ステージのパラメーターを設定。
 		stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
 

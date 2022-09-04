@@ -279,6 +279,30 @@ void StageObjectMgr::DeleteIndex(const int& Index)
 
 }
 
+void StageObjectMgr::ChangeInstanceShaderID(const int& Index, const UINT& ShaderID)
+{
+
+	/*===== インスタンスのシェーダーIDを切り替える =====*/
+
+	if (Index < 0 || static_cast<int>(objects_.size()) <= Index) assert(0);
+	if (!objects_[Index].second) assert(0);
+
+	// 各要素を保存。
+	int blasIndex = PolygonInstanceRegister::Ins()->GetBLASIndex(objects_[Index].first->GetInstanceIndex());
+	BaseStageObject::COLLISION_ID CollisionID = objects_[Index].first->GetCollisionID();
+	BaseStageObject::OBJECT_ID ObjectID = objects_[Index].first->GetObjectID();
+
+	// Instanceを破棄。
+	PolygonInstanceRegister::Ins()->DestroyInstance(objects_[Index].first->GetInstanceIndex());
+
+	// Instanceを生成。
+	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+
+	// オブジェクトを設定。
+	objects_[Index].first->Setting(ObjectID, CollisionID, instanceIndex);
+
+}
+
 BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID)
 {
 
