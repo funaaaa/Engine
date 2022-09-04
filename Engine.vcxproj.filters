@@ -695,9 +695,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
-      <Filter>レイトレーシング\シェーダー</Filter>
-    </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\WhiteMakeUpShader.hlsl">
       <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
     </FxCompile>

@@ -25,6 +25,9 @@
 #include "DriftParticle.h"
 #include "MugenStage.h"
 
+#pragma warning(push)
+#pragma warning(disable:4324)
+
 Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 {
 
@@ -237,7 +240,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	Input(ConstBufferData, IsBeforeStart);
 
 	// ドリフトに関する更新処理
-	UpdateDrift(IsBeforeStart);
+	UpdateDrift();
 
 	// 移動処理
 	Move(IsBeforeStart);
@@ -282,7 +285,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
 			forwardVec_ = Vec3(0, 0, -1);
-			rotY_ = -0.367411435;
+			rotY_ = -0.367411435f;
 			upVec_ = Vec3(0, 1, 0);
 			returnDefPosTimer_ = 0;
 
@@ -1022,7 +1025,7 @@ void Character::Move(const bool& IsBeforeStart)
 
 }
 
-void Character::UpdateDrift(const bool& IsBeforeStart)
+void Character::UpdateDrift()
 {
 
 	/*===== ドリフトに関する更新処理 =====*/
@@ -1198,21 +1201,8 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		}
 		else {
 
-			// ランダムでアイテムを生成する。
-			int random = FHelper::GetRand(0, 1000);
-
-			//if (random % 2 == 0) {
-
 			item_ = std::make_shared<BoostItem>();
 			item_->Generate(playerModel_.carBodyInsIndex_);
-
-			/*}
-			else {
-
-				item_ = std::make_shared<ShellItem>();
-				item_->Generate(playerModel_.carBodyInsIndex_);
-
-			}*/
 
 		}
 
@@ -1657,7 +1647,7 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 
 			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
 			// 左右に散らす。
-			Vec3 generatePos = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * FHelper::GetRand(-2, 2);
+			Vec3 generatePos = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * static_cast<float>(FHelper::GetRand(-2, 2));
 			// 後ろ方向に持ってくる。
 			generatePos += -forwardVec_ * 20.0f;
 			DriftParticleMgr::Ins()->GenerateSmoke(generatePos, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY, -forwardVec_);

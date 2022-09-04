@@ -5,6 +5,9 @@
 #include "PlayerModel.h"
 #include <memory>
 
+#pragma warning(push)
+#pragma warning(disable:4324)
+
 class BaseStage;
 class OBB;
 class PlayerTire;
@@ -252,7 +255,7 @@ private:
 	void Move(const bool& IsBeforeStart);
 
 	// ドリフトに関する更新処理
-	void UpdateDrift(const bool& IsBeforeStart);
+	void UpdateDrift();
 
 	// 当たり判定
 	void CheckHit(std::weak_ptr<BaseStage> StageData);

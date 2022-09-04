@@ -49,4 +49,6 @@ void FloatingStageObject::Disable(const int& TimerToActivation)
 
 	/*===== 無効化して再設定までのタイマーをセット =====*/
 
+	TimerToActivation;
+
 }

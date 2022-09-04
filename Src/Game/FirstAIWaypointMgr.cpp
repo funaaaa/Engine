@@ -100,7 +100,7 @@ float FirstAIWayPointMgr::LeftRightCheck(const Vec3& Pos, const Vec3& ForwardVec
 
 		if (!index->GetIsActive()) continue;
 
-		headIndex = &index - &waypoint_[0];
+		headIndex = static_cast<int>(&index - &waypoint_[0]);
 
 		break;
 

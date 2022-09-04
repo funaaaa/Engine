@@ -94,19 +94,19 @@ void CircuitStage::Setting(const int& TireMaskIndex)
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-7607.0f, 589.0f, 2801.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184f));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-7607.0f, 589.0f, 2951.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184f));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/stageOrnament/", "itemBox.obj", { L"Resource/Game/item.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-7607.0f, 589.0f, 2651.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184));
+	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, -0.184f));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(60, 60, 60));
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
@@ -211,6 +211,9 @@ BaseStage::ColliderOutput CircuitStage::Collider(BaseStage::ColliderInput Input)
 
 void CircuitStage::ChangeStageStatus(const int& Status)
 {
+
+	Status;
+
 }
 
 void CircuitStage::DisplayGoal()

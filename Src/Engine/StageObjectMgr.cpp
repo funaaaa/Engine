@@ -408,6 +408,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 	float hitDistance;
 	Vec3 hitNormal;
 	Vec2 hitUV;
+	ObjectID;
 
 	// ŠÑ’Ê–h~‚Å³–Ê•ûŒü‚É‚àƒŒƒC‚ğ”ò‚Î‚·B
 	InputRayData.rayPos_ = Input.targetPos_;

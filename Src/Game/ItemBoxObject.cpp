@@ -25,6 +25,7 @@ void ItemBoxObject::Update(const int& Timer)
 
 	/*===== XVˆ— =====*/
 
+	Timer;
 	if (!isActive_) {
 
 		NonDisplay();
