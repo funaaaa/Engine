@@ -1031,6 +1031,15 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             return;
 
         }
+        
+        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
+        {
+            
+            payload.impactAmount_ = 0.3f;
+            
+            return;
+
+        }
                 
         payload.impactAmount_ = false;
         
@@ -1068,6 +1077,28 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
     {
         worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
+        
+        // 当たったメッシュの情報を取得。
+        Vertex meshInfo[3];
+        GetHitMeshInfo(attrib, vertexBuffer, indexBuffer, meshInfo);
+        
+        // 接空間変換用
+        float3 tan;
+        float3 bnorm;
+        CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
+        
+        // 説空間行列を求める。
+        float4x4 mat =
+        {
+            float4(tan, 0.0f),
+            float4(bnorm, 0.0f),
+            float4(vtx.Normal, 0.0f),
+            { 0, 0, 0, 1 }
+        };
+      //  mat = transpose(mat); // 転置
+        
+        worldNormal = mul(worldNormal, mat);
+
     }
     
 

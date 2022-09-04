@@ -248,12 +248,10 @@ void MugenStage::Setting(const int& TireMaskIndex)
 	}
 
 	// ゴールをセット。
-	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
+	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/Stage/", "MugenStageGoal.obj", { L"Resource/Game/red.png",L"Resource/Game/grassNormal.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
 	// ゴールのパラメーターを設定。
-	stageObjectMgr_->AddScale(goalInsIndex, Vec3(368.0f, 180.0f, 180.0f));
-	stageObjectMgr_->ChangeRotate(goalInsIndex, Vec3(0.0f, -0.417f, 0.0f));
-	stageObjectMgr_->AddTrans(goalInsIndex, Vec3(-32.0f, -14.0f, 120.0f));
+	stageObjectMgr_->AddScale(goalInsIndex, Vec3(120.0f, 120.0f, 120.0f));
 
 	// 中間地点をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::MIDDLE_POINT, BaseStageObject::COLLISION_ID::OBB,
