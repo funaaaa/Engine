@@ -23,6 +23,7 @@
 #include "GhostOperationObject.h"
 #include "DriftParticleMgr.h"
 #include "DriftParticle.h"
+#include "MugenStage.h"
 
 Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 {
@@ -1115,6 +1116,18 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		if (isPassedMiddlePoint_) {
 			isPassedMiddlePoint_ = false;
 			++rapCount_;
+
+			// ステージの状態を変える。
+			if (rapCount_ == 1) {
+
+				StageData.lock()->ChangeStageStatus(static_cast<int>(MugenStage::STATUS::REFLECTION));
+
+			}
+			else {
+
+				StageData.lock()->ChangeStageStatus(static_cast<int>(MugenStage::STATUS::DEF));
+
+			}
 
 			// 三周以上にならないようにする。
 			if (3 <= rapCount_) rapCount_ = 3;

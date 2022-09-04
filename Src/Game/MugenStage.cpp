@@ -14,6 +14,7 @@ void MugenStage::Setting(const int& TireMaskIndex)
 
 	// ステージオブジェクト管理クラスをセット。
 	stageObjectMgr_ = std::make_shared<StageObjectMgr>();
+	stageObjectMgr_->Setting();
 
 	// ステージをセット。
 	int indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
@@ -48,11 +49,23 @@ void MugenStage::Setting(const int& TireMaskIndex)
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
-	// トンネルをセット。
+	// ステージの屈折オブジェクトをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/", "MugenStageTunnel.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/Stage/", "MugenStageRefractionObject.obj", { L"Resource/Game/green.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+
+	//// ステージの球Bをセット。
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+	//	"Resource/Game/Stage/", "MugenStageSphereB.obj", { L"Resource/Game/green.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::COMPLETE_REFLECTION);
+	//// ステージのパラメーターを設定。
+	//stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+
+	// トンネルをセット。
+	tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+		"Resource/Game/Stage/", "MugenStageTunnel.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
 
 
 	// 段差加速ギミックをセット。
@@ -260,6 +273,8 @@ void MugenStage::Setting(const int& TireMaskIndex)
 	// 各変数を初期化。
 	timer_ = 0;
 
+	status_ = STATUS::DEF;
+
 }
 
 void MugenStage::Destroy()
@@ -281,7 +296,7 @@ void MugenStage::Update(RayConstBufferData& ConstBufferData)
 	// 点光源をセット。
 	for (auto& index : pointLightPos) {
 
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = true;
+		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = status_ == STATUS::DEF;
 		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isShadow_ = false;
 		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPower_ = 1000;
 		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPos_ = index;
@@ -301,6 +316,39 @@ BaseStage::ColliderOutput MugenStage::Collider(BaseStage::ColliderInput Input)
 	output = stageObjectMgr_->Collider(Input);
 
 	return output;
+
+}
+
+void MugenStage::ChangeStageStatus(const int& Status)
+{
+
+	/*===== ステージのステータスを変更 =====*/
+
+	// 前フレームがDEFで、今フレームがREFLECTIONだったら。
+	if (status_ == STATUS::DEF && static_cast<STATUS>(Status) == STATUS::REFLECTION) {
+
+		stageObjectMgr_->DeleteIndex(tunnelIndex_);
+
+		tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+			"Resource/Game/Stage/", "MugenStageTunnel.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::COMPLETE_REFLECTION);
+		// ステージのパラメーターを設定。
+		stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
+
+
+	}
+	else if (status_ == STATUS::REFLECTION && static_cast<STATUS>(Status) == STATUS::DEF) {
+
+		stageObjectMgr_->DeleteIndex(tunnelIndex_);
+
+		tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+			"Resource/Game/Stage/", "MugenStageTunnel.obj", { L"Resource/Game/wayGray.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		// ステージのパラメーターを設定。
+		stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
+
+	}
+
+	// ステータスを保存。
+	status_ = static_cast<STATUS>(Status);
 
 }
 

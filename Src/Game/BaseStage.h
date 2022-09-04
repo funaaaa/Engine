@@ -54,6 +54,7 @@ public:
 	virtual void Destroy() = 0;
 	virtual void Update(RayConstBufferData& ConstBufferData) = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;
+	virtual void ChangeStageStatus(const int& Status) = 0;
 
 	// ゴールの表示、非表示
 	virtual void DisplayGoal() = 0;

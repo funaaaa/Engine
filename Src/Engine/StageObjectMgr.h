@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <array>
 #include <memory>
 #include "BaseStageObject.h"
 #include "Singleton.h"
@@ -12,13 +12,16 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<std::shared_ptr<BaseStageObject>> objects_;
+	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 256> objects_;
 
 
 
 public:
 
 	/*===== メンバ変数 =====*/
+
+	// セッティング
+	void Setting();
 
 	// 追加する。
 	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID);
@@ -30,7 +33,7 @@ public:
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input);
 
 	// ギミック集を追加。
-	std::vector<std::shared_ptr<BaseStageObject>> GetGimmickData() { return objects_; }
+	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 256> GetGimmickData() { return objects_; }
 
 	// 移動関係
 	void AddTrans(const int& Index, const Vec3& Trans);
@@ -49,8 +52,11 @@ public:
 	void Display(const int& Index);
 
 	// ゲッタ
-	int GetBlasIndex(const int& Index) { return objects_[Index]->GetBLASIndex(); }
-	int GetInstanceIndex(const int& Index) { return objects_[Index]->GetInstanceIndex(); }
+	int GetBlasIndex(const int& Index) { return objects_[Index].first->GetBLASIndex(); }
+	int GetInstanceIndex(const int& Index) { return objects_[Index].first->GetInstanceIndex(); }
+
+	// 削除。
+	void DeleteIndex(const int& Index);
 
 
 private:

@@ -85,6 +85,9 @@ public:
 	void AddRotate(const Vec3& Rotate);
 	void ChangeRotate(const Vec3& Rotate);
 
+	// 削除。
+	void Delete();
+
 protected:
 
 	// 基底クラスのメンバ変数の初期化

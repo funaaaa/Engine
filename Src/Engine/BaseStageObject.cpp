@@ -2,6 +2,7 @@
 #include "PolygonInstanceRegister.h"
 #include "FHelper.h"
 #include "OBB.h"
+#include "BLASRegister.h"
 
 void BaseStageObject::Display()
 {
@@ -180,6 +181,18 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 	obb_->dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
 	//}
+
+}
+
+void BaseStageObject::Delete()
+{
+
+	/*===== íœ =====*/
+
+	isActive_ = false;
+
+	BLASRegister::Ins()->DeleteIndex(blasIndex_);
+	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
 
 }
 
