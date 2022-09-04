@@ -187,9 +187,12 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 
 	}
 
+	bodyInsIndex_.clear();
+	tireInsIndex_.clear();
+	carBlasIndex_.clear();
+
 
 	// 車体のインデックスを保存。
-	bodyInsIndex_.emplace_back(carBodyInsIndex_);
 	bodyInsIndex_.emplace_back(carBumperInsIndex_);
 	bodyInsIndex_.emplace_back(carLeftLightInsIndex_);
 	bodyInsIndex_.emplace_back(carRightLightInsIndex_);
@@ -197,6 +200,7 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 	bodyInsIndex_.emplace_back(carMirrorInsIndex_);
 	bodyInsIndex_.emplace_back(carMirrorCoverInsIndex_);
 	bodyInsIndex_.emplace_back(carWindowInsIndex_);
+	bodyInsIndex_.emplace_back(carBodyInsIndex_);
 
 	// タイヤのインデックスを保存。
 	tireInsIndex_.emplace_back(carBehindTireInsIndex_);
@@ -205,4 +209,44 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 	tireInsIndex_.emplace_back(carRightTireFrameInsIndex_);
 	tireInsIndex_.emplace_back(carLeftTireInsIndex_);
 	tireInsIndex_.emplace_back(carLeftTireFrameInsIndex_);
+
+	// 車体のインデックスを保存。
+	carBlasIndex_.emplace_back(carBumperBlasIndex_);
+	carBlasIndex_.emplace_back(carLeftLightBlasIndex_);
+	carBlasIndex_.emplace_back(carRightLightBlasIndex_);
+	carBlasIndex_.emplace_back(carFrontLightBlasIndex_);
+	carBlasIndex_.emplace_back(carMirrorBlasIndex_);
+	carBlasIndex_.emplace_back(carMirrorCoverBlasIndex_);
+	carBlasIndex_.emplace_back(carWindowBlasIndex_);
+	carBlasIndex_.emplace_back(carBodyBlasIndex_);
+	carBlasIndex_.emplace_back(carBehindTireBlasIndex_);
+	carBlasIndex_.emplace_back(carBehindTireFrameBlasIndex_);
+	carBlasIndex_.emplace_back(carRightTireBlasIndex_);
+	carBlasIndex_.emplace_back(carRightTireFrameBlasIndex_);
+	carBlasIndex_.emplace_back(carLeftTireBlasIndex_);
+	carBlasIndex_.emplace_back(carLeftTireFrameBlasIndex_);
+}
+
+void PlayerModel::Delete()
+{
+
+	/*===== 車のインスタンスを削除 =====*/
+
+	for (auto& index : tireInsIndex_) {
+
+		PolygonInstanceRegister::Ins()->DestroyInstance(index);
+
+	}
+	for (auto& index : bodyInsIndex_) {
+
+		PolygonInstanceRegister::Ins()->DestroyInstance(index);
+
+	}
+
+	for (auto& index : carBlasIndex_) {
+
+		BLASRegister::Ins()->DeleteIndex(index);
+
+	}
+
 }

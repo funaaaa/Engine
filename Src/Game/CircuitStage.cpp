@@ -209,6 +209,10 @@ BaseStage::ColliderOutput CircuitStage::Collider(BaseStage::ColliderInput Input)
 
 }
 
+void CircuitStage::ChangeStageStatus(const int& Status)
+{
+}
+
 void CircuitStage::DisplayGoal()
 {
 

@@ -217,6 +217,7 @@ void DirectXBase::Init() {
 	if (!blnResult) {
 		assert(0);
 	}
+
 	// directX12用の初期化
 	blnResult = ImGui_ImplDX12_Init(dev_.Get(), 3, DXGI_FORMAT_R8G8B8A8_UNORM, heapForImgui_.Get(),
 		heapForImgui_.Get()->GetCPUDescriptorHandleForHeapStart(), heapForImgui_.Get()->GetGPUDescriptorHandleForHeapStart());
@@ -290,7 +291,7 @@ void DirectXBase::ProcessBeforeDrawing() {
 	//}
 
 	// ウィンドウ設定
-	ImGui::Begin("Light Menu");
+	ImGui::Begin("Menu");
 	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
 
 }

@@ -9,7 +9,7 @@ ResultScene::ResultScene()
 	/*===== コンストラクタ =====*/
 
 	isTransition_ = false;
-	nextScene_ = SCENE_ID::GAME;
+	nextScene_ = SCENE_ID::TITLE;
 
 	result_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Result/result.png");
 
@@ -21,7 +21,7 @@ void ResultScene::Init()
 	/*===== 初期化処理 =====*/
 
 	isTransition_ = false;
-	nextScene_ = SCENE_ID::GAME;
+	nextScene_ = SCENE_ID::TITLE;
 
 }
 
@@ -35,6 +35,8 @@ void ResultScene::Update()
 		isTransition_ = true;
 
 	}
+
+	ImGui::Text("Press A or Enter to return to the title!");
 
 }
 

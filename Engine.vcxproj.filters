@@ -202,9 +202,6 @@
     <ClCompile Include="Src\Game\FirstAIWaypointMgr.cpp">
       <Filter>アプリケーション\最初のAI</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\CharacterMgr.cpp">
-      <Filter>アプリケーション\ゲームモード</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Game\GhostOperationObject.cpp">
       <Filter>アプリケーション\操作オブジェクト</Filter>
     </ClCompile>
@@ -219,6 +216,9 @@
     </ClCompile>
     <ClCompile Include="Src\Game\ConvertGimmickInfoFromBlender.cpp">
       <Filter>アプリケーション\ステージオブジェクト\blenderからの頂点変換</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterMgr.cpp">
+      <Filter>アプリケーション\キャラクター</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -70,6 +70,11 @@ GhostOperationObject::GhostOperationObject(std::string GhostFilePath)
 					operationElementData.operationID_ = OPERATION_ID::USERELEASE;
 					continue;
 				}
+				// JTだったらジャンプアクショントリガーリリース。
+				if (operationString == "JT") {
+					operationElementData.operationID_ = OPERATION_ID::JUMPACTIONTRIGGER;
+					continue;
+				}
 
 				// operationElementData.operationID_がNONEなのにここまで来たとしたらそれはフレーム数なのでフレーム数を保存する。
 				if (operationElementData.operationID_ == OPERATION_ID::NONE) {
@@ -77,7 +82,7 @@ GhostOperationObject::GhostOperationObject(std::string GhostFilePath)
 					continue;
 				}
 
-				// ここまで来たら数字なので、文字列を数字に変換する。                                                     コントローラー操作で(floatが絡むと)うまくいく保証はない。
+				// ここまで来たら数字なので、文字列を数字に変換する。
 				operationElementData.operationValue_ = std::stof(operationString);
 
 				// 命令を保存する。
@@ -130,6 +135,9 @@ BaseOperationObject::Operation GhostOperationObject::Input(const BaseOperationOb
 				break;
 			case GhostOperationObject::OPERATION_ID::USERELEASE:
 				operation.isUseItemRelease_ = index.operationValue_;
+				break;
+			case GhostOperationObject::OPERATION_ID::JUMPACTIONTRIGGER:
+				operation.isJumpActionTrigger_ = index.operationValue_;
 				break;
 			default:
 				break;

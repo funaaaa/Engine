@@ -53,6 +53,9 @@ public:
 	// 車体とタイヤで処理を分けるための変数
 	std::vector<int> bodyInsIndex_;
 	std::vector<int> tireInsIndex_;
+	
+	// リトライ時BLAS解放用変数
+	std::vector<int> carBlasIndex_;
 
 public:
 
@@ -67,11 +70,7 @@ public:
 
 	// ロード
 	void Load(COLOR ColorID, bool IsGhost);
+	// 削除
+	void Delete();
 
 };
-
-/*
-
-・設置した瞬間に沈める処理を書く。ｗｗ
-
-*/

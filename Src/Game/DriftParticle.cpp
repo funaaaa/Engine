@@ -1,6 +1,7 @@
 #include "DriftParticle.h"
 #include "PolygonInstanceRegister.h"
 #include "FHelper.h"
+#include "Camera.h"
 
 DriftParticle::DriftParticle()
 {
@@ -232,6 +233,33 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireI
 
 }
 
+void DriftParticle::GenerateJumpEffect(const int& BlasIndex, const int& CarBodyInsIndex, RayConstBufferData& ConstBufferData)
+{
+
+	/*===== ジャンプエフェクトを生成 =====*/
+
+	id_ = ID::JUMP_EFFECT;
+	blasIndex_ = BlasIndex;
+	isActive_ = true;
+	isAppearingNow_ = true;
+	jumpActionEasingTimer_ = 0;
+	particleIns_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
+	trackedID_ = CarBodyInsIndex;
+
+	// 座標を求める。
+	pos_ = PolygonInstanceRegister::Ins()->GetWorldPos(trackedID_);
+
+	// 移動させる。
+	PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, pos_);
+
+	// サイズを変える。
+	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(particleNowScale_.x_, particleNowScale_.y_, particleNowScale_.x_));
+
+	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = particleIns_;
+	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+
+}
+
 void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 {
 
@@ -434,6 +462,73 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 			ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= EXIT_ALPHA;
 
 		}
+
+	}
+
+	break;
+
+	case DriftParticle::ID::JUMP_EFFECT:
+
+	{
+
+		// 車の座標を求める。
+		Vec3 carPos = PolygonInstanceRegister::Ins()->GetWorldPos(trackedID_);
+
+		// 座標を設定。
+		PolygonInstanceRegister::Ins()->ChangeTrans(particleIns_, carPos);
+
+		// 回転を設定。
+		DirectX::XMMATRIX charaRot = PolygonInstanceRegister::Ins()->GetRotate(trackedID_);
+		PolygonInstanceRegister::Ins()->ChangeRotate(particleIns_, charaRot);
+
+		// イージングタイマーを更新し、イージング量を求める。
+		jumpActionEasingTimer_ = FHelper::Saturate(jumpActionEasingTimer_ + ADD_JUMP_ACTION_EASING_TIMER_APPE);
+		float easingAmount = FEasing::EaseInSine(jumpActionEasingTimer_);
+
+		// スケールを設定。
+		float nowScale = JUMP_DEF_SCALE + (JUMP_BIG_SCALE - JUMP_DEF_SCALE) * easingAmount;
+		PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(nowScale, nowScale, nowScale));
+
+		// アルファを求める。
+		ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f - (1.1f * easingAmount);
+
+		//// 出現中だったら。
+		//if (isAppearingNow_) {
+
+		//	// イージングタイマーを更新し、イージング量を求める。
+		//	jumpActionEasingTimer_ = FHelper::Saturate(jumpActionEasingTimer_ + ADD_JUMP_ACTION_EASING_TIMER_APPE);
+		//	float easingAmount = FEasing::EaseOutCubic(jumpActionEasingTimer_);
+
+		//	// スケールを設定。
+		//	float nowScale = JUMP_DEF_SCALE + (JUMP_BIG_SCALE - JUMP_DEF_SCALE) * easingAmount;
+		//	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(nowScale, nowScale, nowScale));
+
+		//	// アルファを求める。
+		//	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 0.1f + (1.0f - 0.1f) * easingAmount;
+
+		//	// タイマーがカンストしたら次へ。
+		//	if (1.0f <= jumpActionEasingTimer_) {
+
+		//		jumpActionEasingTimer_ = 0;
+		//		isAppearingNow_ = false;
+
+		//	}
+
+		//}
+		//else {
+
+		//	// イージングタイマーを更新し、イージング量を求める。
+		//	jumpActionEasingTimer_ = FHelper::Saturate(jumpActionEasingTimer_ + ADD_JUMP_ACTION_EASING_TIMER_EXIT);
+		//	float easingAmount = FEasing::EaseInSine(jumpActionEasingTimer_);
+
+		//	// スケールを設定。
+		//	float nowScale = JUMP_BIG_SCALE + (JUMP_EXIT_SCALE - JUMP_BIG_SCALE) * easingAmount;
+		//	PolygonInstanceRegister::Ins()->ChangeScale(particleIns_, Vec3(nowScale, nowScale, nowScale));
+
+		//	// アルファを求める。
+		//	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f + (-1.1 * easingAmount);
+
+		//}
 
 	}
 

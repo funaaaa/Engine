@@ -197,7 +197,7 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 	UINT hitgroupRegion = RoundUp(hitGroupSize, tableAlign);
 
 	// 生成されたBLASの数。
-	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
+	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount() - 1;
 
 	// シェーダーテーブルのサイズ。
 	UINT tableSize = raygenRegion_ + missRegion_ + hitgroupRegion * BLAS_COUNT;

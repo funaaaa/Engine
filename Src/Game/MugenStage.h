@@ -12,8 +12,22 @@ private:
 
 	int timer_;	// 各オブジェクトで使用するタイマー。セッティングされてからインクリメントし続ける。
 	int goalInsIndex;	// ゴールのインスタンスのインデックス。
+	int tunnelIndex_;
 
 	std::vector<Vec3> pointLightPos;
+
+public:
+
+	enum class STATUS {
+
+		DEF,
+		REFLECTION,
+
+	};
+
+private:
+
+	STATUS status_;
 
 public:
 
@@ -23,6 +37,7 @@ public:
 	void Destroy()override;
 	void Update(RayConstBufferData& ConstBufferData)override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
+	void ChangeStageStatus(const int& Status)override;
 
 	// ゴールの表示、非表示
 	void DisplayGoal()override;

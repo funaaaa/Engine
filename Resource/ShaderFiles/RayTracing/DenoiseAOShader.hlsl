@@ -861,12 +861,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             rayDir = refract(WorldRayDirection(), -WorldNormal, eta);
       
         }
-        
-        //if (length(rayDir) == 0)
-        //{
-        //    payload.rayData_[rayDataIndex].color_ = worldNormal;
-        //    return;
-        //}
             
         if (0.0f < PayloadData.impactAmount_)
         {
@@ -944,8 +938,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
                 PayloadData.isCullingAlpha_ = true;
             }
         }
-        
-        //PayloadData.light_ = float3(1, 1, 1);
             
         if (0.0f < PayloadData.impactAmount_)
         {
@@ -957,11 +949,74 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
     }
     
+    // 当たったオブジェクトのInstanceIDが屈折アルファだったら。
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION_ALPHA)
+    {
+        
+        // アルファ値を求める。
+        int instanceIndex = InstanceIndex();
+        float alpha = 0;
+        for (int alphaIndex = 0; alphaIndex < ALPHA_DATA_COUNT; ++alphaIndex)
+        {
+            if (gSceneParam.alphaData_.alphaData_[alphaIndex].instanceIndex_ != instanceIndex)
+            {
+                continue;
+            }
+            alpha = gSceneParam.alphaData_.alphaData_[alphaIndex].alpha_;
+            break;
+        }
+        
+        // payloadに入れる色を計算する。
+        if (PayloadData.impactAmount_ < alpha * TexColor.w)
+        {
+            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+            PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
+            PayloadData.impactAmount_ = 0.0f;
+
+        }
+        else
+        {
+            PayloadData.color_.xyz += (float3) TexColor * alpha;
+            PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
+            PayloadData.impactAmount_ -= alpha * TexColor.w;
+        }
+
+        
+        // アルファが一定以下だったら。
+        if (alpha < 0.5f)
+        {
+            ++PayloadData.alphaCounter_;
+            if (3 <= PayloadData.alphaCounter_)
+            {
+                PayloadData.isCullingAlpha_ = true;
+            }
+        }
+            
+        if (0.0f < PayloadData.impactAmount_)
+        {
+            
+            float refractVal = 1.4f * (alpha * TexColor.w);
+            float3 rayDir = float3(0, 0, 0);
+
+            float eta = 1.0f / refractVal;
+            rayDir = refract(WorldRayDirection(), WorldNormal, eta);
+                
+            // 反射レイを飛ばす。
+            ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, rayDir, PayloadData, gRtScene);
+            
+        }
+        
+    }
+    
 }
 
 // closesthitシェーダー レイがヒットした時に呼ばれるシェーダー
 [shader("closesthit")]
-void mainCHS(inout Payload payload, MyAttribute attrib)
+
+    void mainCHS
+    (inout
+    Payload payload, MyAttribute
+    attrib)
 {
     
     // 影用レイだったら。
@@ -972,6 +1027,15 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
         {
                 
             payload.impactAmount_ = 1;
+            
+            return;
+
+        }
+        
+        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
+        {
+            
+            payload.impactAmount_ = 0.3f;
             
             return;
 
@@ -1013,6 +1077,27 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
     if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
     {
         worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
+        
+        // 当たったメッシュの情報を取得。
+        Vertex meshInfo[3];
+        GetHitMeshInfo(attrib, vertexBuffer, indexBuffer, meshInfo);
+        
+        // 接空間変換用
+        float3 tan;
+        float3 bnorm;
+        CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
+        
+        // 説空間行列を求める。
+        float4x4 mat =
+        {
+            float4(tan, 0.0f),
+            float4(bnorm, 0.0f),
+            float4(vtx.Normal, 0.0f),
+            { 0, 0, 0, 1 }
+        };
+        
+        worldNormal = mul(worldNormal, mat);
+
     }
     
 
@@ -1039,13 +1124,21 @@ void mainCHS(inout Payload payload, MyAttribute attrib)
 
 // 影用CHS 使用していない。
 [shader("closesthit")]
-void shadowCHS(inout Payload payload, MyAttribute attrib)
+
+    void shadowCHS
+    (inout
+    Payload payload, MyAttribute
+    attrib)
 {
 }
 
 // AnyHitShader
 [shader("anyhit")]
-void mainAnyHit(inout Payload payload, MyAttribute attrib)
+
+    void mainAnyHit
+    (inout
+    Payload payload, MyAttribute
+    attrib)
 {
         
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);

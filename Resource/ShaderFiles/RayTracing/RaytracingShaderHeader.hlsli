@@ -15,6 +15,7 @@ static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID ’Êí‚Ìˆ—
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK = 9; // instanceID ’Êí‚Ìˆ— + GI + ƒ^ƒCƒ„­
 static const int CHS_IDENTIFICATION_INSTANCE_ALPHA = 10; // instanceID ”¼“§–¾
 static const int CHS_IDENTIFICATION_INSTANCE_ADD = 11; // instanceID ‰ÁZ‡¬
+static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION_ALPHA = 12; // instanceID ‹üÜƒAƒ‹ƒtƒ@
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // ƒfƒtƒHƒ‹ƒg‚ÌƒŒƒC
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI—p‚ÌƒŒƒC
@@ -414,9 +415,32 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
         v.Normal += vertexBuffer[index].Normal * w;
         v.uv += vertexBuffer[index].uv * w;
     }
-    v.Normal = normalize(v.Normal);
 
     return v;
+}
+
+void GetHitMeshInfo(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer, inout Vertex meshInfo[3])
+{
+    
+    Vertex v = (Vertex) 0;
+    float3 barycentrics = CalcBarycentrics(attrib.barys);
+    uint vertexId = PrimitiveIndex() * 3; // Triangle List ‚Ì‚½‚ß.
+
+    float weights[3] =
+    {
+        barycentrics.x, barycentrics.y, barycentrics.z
+    };
+
+    for (int i = 0; i < 3; ++i)
+    {
+        uint index = indexBuffer[vertexId + i];
+        
+        meshInfo[i].Position = vertexBuffer[index].Position;
+        meshInfo[i].Normal = vertexBuffer[index].Normal;
+        meshInfo[i].uv = vertexBuffer[index].uv;
+       
+    }
+    
 }
 
 
@@ -436,4 +460,58 @@ float3 IntersectionPos(float3 Dir, float3 A, float Radius)
     float d = max(b * b - c, 0.0);
 
     return A + Dir * (-b + sqrt(d));
+}
+
+// 3’¸“_‚ÆUV’l‚©‚çw’èÀ•W‚Å‚ÌU²iTangentj‹y‚ÑV²iBinormalj‚ğZo
+void CalcTangentAndBinormal(float3 p0, float3 p1, float3 p2, float2 uv0, float2 uv1, float2 uv2, inout float3 outTangent, inout float3 outBinormal)
+{
+   // 5ŸŒ³¨3ŸŒ³’¸“_‚É
+    float3 CP0[3] =
+    {
+        float3(p0.x, uv0.x, uv0.y),
+        float3(p0.y, uv0.x, uv0.y),
+        float3(p0.z, uv0.x, uv0.y),
+    };
+    float3 CP1[3] =
+    {
+        float3(p1.x, uv1.x, uv1.y),
+        float3(p1.y, uv1.x, uv1.y),
+        float3(p1.z, uv1.x, uv1.y),
+    };
+    float3 CP2[3] =
+    {
+        float3(p2.x, uv2.x, uv2.y),
+        float3(p2.y, uv2.x, uv2.y),
+        float3(p2.z, uv2.x, uv2.y),
+    };
+
+   // •½–Êƒpƒ‰ƒ[ƒ^‚©‚çUV²À•WZo
+    float U[3], V[3];
+    for (int i = 0; i < 3; ++i)
+    {
+        float3 V1 = CP1[i] - CP0[i];
+        float3 V2 = CP2[i] - CP1[i];
+        float3 ABC;
+        ABC = cross(V1, V2);
+
+        if (ABC.x == 0.0f)
+        {
+            return;
+        }
+        U[i] = -ABC.y / ABC.x;
+        V[i] = -ABC.z / ABC.x;
+    }
+
+    outTangent.x = U[0];
+    outTangent.y = U[1];
+    outTangent.z = U[2];
+
+    outBinormal.x = V[0];
+    outBinormal.y = V[1];
+    outBinormal.z = V[2];
+    
+    // ³‹K‰»
+    outTangent = normalize(outTangent);
+    outBinormal = normalize(outBinormal);
+    
 }

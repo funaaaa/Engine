@@ -126,14 +126,14 @@ GameScene::GameScene()
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
 
-	isPassedMiddlePoint_ = false;
-	rapCount_ = 0;
 	countDownStartTimer_ = 0;
+	transitionTimer = 0;
 	countDownNumber_ = 2;
 	isBeforeStart_ = true;
 	isCountDown_ = false;
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
+	isGameFinish_ = false;
 
 
 
@@ -202,8 +202,12 @@ void GameScene::Init()
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
 
+	concentrationLine_->Init();
 
 	characterMgr_->Init();
+
+	countDownSprite_->ChangePosition(Vec3(100000, 10000, 100));
+	goSprite_->ChangePosition(Vec3(100000, 10000, 100));
 
 	if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::AI) {
 
@@ -232,7 +236,7 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
 
 		// ゴーストを生成。
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, GameSceneMode::Ins()->ghostLevel_);
 
 	}
 
@@ -241,13 +245,13 @@ void GameScene::Init()
 
 	DriftParticleMgr::Ins()->Init();
 
-	isPassedMiddlePoint_ = false;
 	isBeforeStart_ = true;
 	isCountDown_ = false;
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
-	rapCount_ = 0;
+	isGameFinish_ = false;
 	countDownStartTimer_ = 0;
+	transitionTimer = 0;
 	countDownNumber_ = 2;
 	sunAngle_ = 0.3f;
 	itemFrameEasingTimer_ = 1;
@@ -275,18 +279,28 @@ void GameScene::Update()
 	}
 
 	// キャラを更新。
-	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, rapCount_, isPassedMiddlePoint_, isBeforeStart_);
+	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isBeforeStart_, isGameFinish_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
-	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_);
+	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
 
-	// 3週していたらリザルトシーンに移動する。
-	if (3 <= rapCount_) {
+	// いずれかのキャラがゴールしていたらリザルトシーンに移動する。
+	if (characterMgr_->CheckGoal()) {
 
-		isTransition_ = true;
+
+		isGameFinish_ = true;
+
+		++transitionTimer;
+		if (TRANSION_TIME < transitionTimer) {
+
+			isTransition_ = true;
+
+		}
+
+		//isTransition_ = true;
 
 	}
 
@@ -295,13 +309,19 @@ void GameScene::Update()
 
 
 	// ラップ数のUIを更新。
-	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount_ + 1], 0);
+	int rapCount = characterMgr_->GetPlayerIns().lock()->GetRapCount();
+	if (3 <= rapCount) {
+
+		rapCount = 2;
+
+	}
+	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount + 1], 0);
 
 	// ステージを更新。
 	stages_[STAGE_ID::CIRCUIT]->Update(constBufferData_);
 
 	// ゴールの表示非表示を切り替え。
-	if (isPassedMiddlePoint_) {
+	if (characterMgr_->GetPlayerIns().lock()->GetIsPassedMiddlePoint()) {
 		stages_[STAGE_ID::CIRCUIT]->DisplayGoal();
 	}
 	else {
@@ -662,53 +682,56 @@ void GameScene::Input()
 
 	InputImGUI();
 
-}
+}	
+
 #include "BaseItem.h"
 void GameScene::InputImGUI()
 {
 
 	/*===== IMGUI更新 =====*/
 
-	// 太陽の移動速度を更新。
-	ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
+	ImGui::Text("Let's do three laps!");
 
-	// メッシュを表示する。
-	bool isMesh = constBufferData_.debug_.isMeshScene_;
-	ImGui::Checkbox("Mesh Scene", &isMesh);
-	constBufferData_.debug_.isMeshScene_ = isMesh;
+	//// 太陽の移動速度を更新。
+	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
 
-	// 法線を表示する。
-	bool isNormal = constBufferData_.debug_.isNormalScene_;
-	ImGui::Checkbox("Normal Scene", &isNormal);
-	constBufferData_.debug_.isNormalScene_ = isNormal;
+	//// メッシュを表示する。
+	//bool isMesh = constBufferData_.debug_.isMeshScene_;
+	//ImGui::Checkbox("Mesh Scene", &isMesh);
+	//constBufferData_.debug_.isMeshScene_ = isMesh;
 
-	// ライトがあたった面だけ表示するフラグを更新。
-	bool isLightHit = constBufferData_.debug_.isLightHitScene_;
-	ImGui::Checkbox("LightHit Scene", &isLightHit);
-	constBufferData_.debug_.isLightHitScene_ = isLightHit;
+	//// 法線を表示する。
+	//bool isNormal = constBufferData_.debug_.isNormalScene_;
+	//ImGui::Checkbox("Normal Scene", &isNormal);
+	//constBufferData_.debug_.isNormalScene_ = isNormal;
 
-	// デバッグ用でノイズ画面を出すためのフラグをセット。
-	bool isNoise = constBufferData_.debug_.isNoiseScene_;
-	ImGui::Checkbox("Noise Scene", &isNoise);
-	constBufferData_.debug_.isNoiseScene_ = isNoise;
+	//// ライトがあたった面だけ表示するフラグを更新。
+	//bool isLightHit = constBufferData_.debug_.isLightHitScene_;
+	//ImGui::Checkbox("LightHit Scene", &isLightHit);
+	//constBufferData_.debug_.isLightHitScene_ = isLightHit;
 
-	// AOを行うかのフラグをセット。
-	bool isNoAO_ = constBufferData_.debug_.isNoAO_;
-	ImGui::Checkbox("NoAO Scene", &isNoAO_);
-	constBufferData_.debug_.isNoAO_ = isNoAO_;
+	//// デバッグ用でノイズ画面を出すためのフラグをセット。
+	//bool isNoise = constBufferData_.debug_.isNoiseScene_;
+	//ImGui::Checkbox("Noise Scene", &isNoise);
+	//constBufferData_.debug_.isNoiseScene_ = isNoise;
 
-	// GIを行うかのフラグをセット。
-	bool isNoGI_ = constBufferData_.debug_.isNoGI_;
-	ImGui::Checkbox("NoGI Scene", &isNoGI_);
-	constBufferData_.debug_.isNoGI_ = isNoGI_;
+	//// AOを行うかのフラグをセット。
+	//bool isNoAO_ = constBufferData_.debug_.isNoAO_;
+	//ImGui::Checkbox("NoAO Scene", &isNoAO_);
+	//constBufferData_.debug_.isNoAO_ = isNoAO_;
 
-	// GIのみを描画するかのフラグをセット。
-	bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
-	ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
-	constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
+	//// GIを行うかのフラグをセット。
+	//bool isNoGI_ = constBufferData_.debug_.isNoGI_;
+	//ImGui::Checkbox("NoGI Scene", &isNoGI_);
+	//constBufferData_.debug_.isNoGI_ = isNoGI_;
 
-	// FPSを表示するかのフラグをセット。
-	ImGui::Checkbox("Display FPS", &isDisplayFPS_);
+	//// GIのみを描画するかのフラグをセット。
+	//bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
+	//ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
+	//constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
+
+	//// FPSを表示するかのフラグをセット。
+	//ImGui::Checkbox("Display FPS", &isDisplayFPS_);
 
 	//// アイテムデバッグ用。
 	//bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
@@ -735,46 +758,55 @@ void GameScene::InputImGUI()
 
 
 
-	int index = 39;
+	//int index = 37;
 
-	Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
+	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
 
-	float posArray[3] = { pos.x_, pos.y_, pos.z_ };
+	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
 
-	ImGui::DragFloat3("Pos", posArray, 1.0f);
+	//ImGui::DragFloat3("Pos", posArray, 1.0f);
 
-	pos.x_ = posArray[0];
-	pos.y_ = posArray[1];
-	pos.z_ = posArray[2];
+	//pos.x_ = posArray[0];
+	//pos.y_ = posArray[1];
+	//pos.z_ = posArray[2];
 
-	PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
-
-
-	Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
-
-	float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
-
-	ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
-
-	rotate.x_ = rotateArray[0];
-	rotate.y_ = rotateArray[1];
-	rotate.z_ = rotateArray[2];
-
-	PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+	//PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
 
 
-	DirectX::XMMATRIX scale = PolygonInstanceRegister::Ins()->GetScale(index);
+	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
 
-	float scaleArray[3] = { scale.r[0].m128_f32[0], scale.r[1].m128_f32[1], scale.r[2].m128_f32[2] };
+	//float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
 
-	ImGui::DragFloat3("Scale", scaleArray, 1.0f);
+	//ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
 
-	Vec3 scaleVec3;
-	scaleVec3.x_ = scaleArray[0];
-	scaleVec3.y_ = scaleArray[1];
-	scaleVec3.z_ = scaleArray[2];
+	//rotate.x_ = rotateArray[0];
+	//rotate.y_ = rotateArray[1];
+	//rotate.z_ = rotateArray[2];
 
-	PolygonInstanceRegister::Ins()->ChangeScale(index, scaleVec3);
+	//PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
+
+
+	//DirectX::XMMATRIX scale = PolygonInstanceRegister::Ins()->GetScale(index);
+
+	//float scaleArray[3] = { scale.r[0].m128_f32[0], scale.r[1].m128_f32[1], scale.r[2].m128_f32[2] };
+
+	//ImGui::DragFloat3("Scale", scaleArray, 1.0f);
+
+	//Vec3 scaleVec3;
+	//scaleVec3.x_ = scaleArray[0];
+	//scaleVec3.y_ = scaleArray[1];
+	//scaleVec3.z_ = scaleArray[2];
+
+	//PolygonInstanceRegister::Ins()->ChangeScale(index, scaleVec3);
+
+
+
+	//// デバッグ用
+	//if (Input::Ins()->IsKey(DIK_U)) {
+
+	//	PolygonInstanceRegister::Ins()->ChangeTrans(index, characterMgr_->GetPlayerIns().lock()->GetPos());
+
+	//}
 
 
 }
@@ -845,6 +877,8 @@ void GameScene::UpdateCountDown()
 			Vec3 DEF_FONT_SIZE = Vec3(GO_FONT_SIZE.x_, GO_FONT_SIZE.y_, 1.0f);
 
 			goSprite_->ChangeScale(BIG_GO_FONT_SIZE + (DEF_FONT_SIZE - BIG_GO_FONT_SIZE) * easingAmount);
+
+			goSprite_->ChangePosition(WINDOW_CENTER);
 
 		}
 		else {

@@ -52,11 +52,11 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 		operation.isShotBehind_ = true;
 	}
 	// アイテムを使用するかの入力処理
-	if (Input::Ins()->IsKeyTrigger(DIK_P)) {
+	if (Input::Ins()->IsKeyTrigger(DIK_E) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_LEFT_SHOULDER)) {
 		operation.isUseItemTrigger_ = true;
 	}
 	// アイテムを使用するかの入力処理
-	if (Input::Ins()->IsKeyRelease(DIK_P)) {
+	if (Input::Ins()->IsKeyRelease(DIK_E) || Input::Ins()->IsPadBottomRelease(XINPUT_GAMEPAD_LEFT_SHOULDER)) {
 		operation.isUseItemRelease_ = true;
 	}
 
@@ -219,6 +219,9 @@ void PlayerOperationObject::WriteGhostInfo(BaseOperationObject::Operation Operat
 
 		wfile << "UR:" << std::to_string(static_cast<int>(Operation.isUseItemRelease_)) << " ";
 
+	}
+	if (Operation.isJumpActionTrigger_) {
+		wfile << "JT:" << std::to_string(static_cast<int>(Operation.isJumpActionTrigger_)) << " ";
 	}
 
 	wfile << std::endl;

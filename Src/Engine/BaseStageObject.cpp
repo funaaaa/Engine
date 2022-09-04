@@ -2,6 +2,7 @@
 #include "PolygonInstanceRegister.h"
 #include "FHelper.h"
 #include "OBB.h"
+#include "BLASRegister.h"
 
 void BaseStageObject::Display()
 {
@@ -183,6 +184,18 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 
 }
 
+void BaseStageObject::Delete()
+{
+
+	/*===== 削除 =====*/
+
+	isActive_ = false;
+
+	BLASRegister::Ins()->DeleteIndex(blasIndex_);
+	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+
+}
+
 void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID)
 {
 
@@ -202,7 +215,7 @@ void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, cons
 	obb_->Setting(blasIndex_, insIndex_);
 
 	// オブジェクトのIDが中間地点だったら、OBBを生成した時点で描画するInstanceは不要になるので破棄する。
-	if (ObjectID == BaseStageObject::OBJECT_ID::MIDDLE_POINT || ObjectID == BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK) {
+	if (ObjectID == BaseStageObject::OBJECT_ID::MIDDLE_POINT || ObjectID == BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK || ObjectID == BaseStageObject::OBJECT_ID::GOAL) {
 
 		PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
 

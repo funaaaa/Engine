@@ -144,6 +144,8 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	isChangeVertex = true;
 	isChangeTexture = true;
 
+	isGenerate_ = true;
+
 }
 
 void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
@@ -277,6 +279,8 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 		++counter;
 	}
 
+	isGenerate_ = true;
+
 }
 
 void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
@@ -383,12 +387,17 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 		++counter;
 	}
 
+	isGenerate_ = true;
+
 }
 
 void BLAS::Update()
 {
 
 	/*===== BLASの更新 =====*/
+
+	// 生成していなかったら処理を飛ばす。
+	if (!isGenerate_) return;
 
 	//// モデルがアニメーションを持っていたら。
 	//if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation) {
@@ -505,10 +514,23 @@ void BLAS::StopAnimation()
 }
 #include "HitGroupMgr.h"
 #include <assert.h>
+BLAS::BLAS()
+{
+
+	isGenerate_ = false;
+
+}
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
 	/*===== シェーダーレコードを書き込む =====*/
+
+	// 生成されていなかったら飛ばす。
+	if (!isGenerate_) {
+
+		return Dst;
+
+	}
 
 	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps_;
 	StateObject.As(&rtsoProps_);
@@ -664,6 +686,22 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	//	return Dst;
 
 	//}
+
+}
+
+void BLAS::Init()
+{
+
+	/*===== 初期化処理 =====*/
+
+	texturePath_.clear();
+	defVertex_.clear();
+	vertex_.clear();
+	vertexPos_.clear();
+	vertexNormal_.clear();
+	vertexUV_.clear();
+	vertIndex_.clear();
+	isGenerate_ = false;
 
 }
 
