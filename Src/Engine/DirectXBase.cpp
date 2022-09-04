@@ -217,6 +217,7 @@ void DirectXBase::Init() {
 	if (!blnResult) {
 		assert(0);
 	}
+
 	// directX12—p‚Ì‰Šú‰»
 	blnResult = ImGui_ImplDX12_Init(dev_.Get(), 3, DXGI_FORMAT_R8G8B8A8_UNORM, heapForImgui_.Get(),
 		heapForImgui_.Get()->GetCPUDescriptorHandleForHeapStart(), heapForImgui_.Get()->GetGPUDescriptorHandleForHeapStart());
