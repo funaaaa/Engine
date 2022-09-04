@@ -1118,12 +1118,12 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 			++rapCount_;
 
 			// ステージの状態を変える。
-			if (rapCount_ == 1) {
+			if (rapCount_ == 1 && charaID_ == CHARA_ID::P1) {
 
 				StageData.lock()->ChangeStageStatus(static_cast<int>(MugenStage::STATUS::REFLECTION));
 
 			}
-			else {
+			else if (charaID_ == CHARA_ID::P1) {
 
 				StageData.lock()->ChangeStageStatus(static_cast<int>(MugenStage::STATUS::DEF));
 
