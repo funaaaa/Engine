@@ -1,6 +1,9 @@
 #include "CharacterMgr.h"
 #include "Character.h"
 
+#pragma warning(push)
+#pragma warning(disable:4324)
+
 CharacterMgr::CharacterMgr()
 {
 

@@ -31,8 +31,8 @@ private:
 	/*-- オーラに関する変数 --*/
 
 	int changeScaleTimer_;	// スケールを変えるまでのタイマー
-	const int CHANGE_SCALE_TIMER_BIG = 7.0f;
-	const int CHANGE_SCALE_TIMER_SMALL = 3.0f;
+	const int CHANGE_SCALE_TIMER_BIG = 7;
+	const int CHANGE_SCALE_TIMER_SMALL = 3;
 	const int AURA_FIRST_BIG_COUNT = 3;
 	bool isAuraBig_;
 	float nowScale_;

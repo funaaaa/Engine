@@ -26,8 +26,6 @@ GhostOperationObject::GhostOperationObject(std::string GhostFilePath)
 	std::string cutLine;
 	while (std::getline(file, cutLine, '\n')) {
 
-		bool isCurrentFrame = false;
-
 		// 読み込んだ1行の先頭にある数字をフレーム数と比較する。
 		std::istringstream line(cutLine);
 		std::string cutElement;
@@ -78,7 +76,7 @@ GhostOperationObject::GhostOperationObject(std::string GhostFilePath)
 
 				// operationElementData.operationID_がNONEなのにここまで来たとしたらそれはフレーム数なのでフレーム数を保存する。
 				if (operationElementData.operationID_ == OPERATION_ID::NONE) {
-					operationData.frameTimer_ = std::stof(operationString);
+					operationData.frameTimer_ = static_cast<int>(std::stof(operationString));
 					continue;
 				}
 
@@ -108,6 +106,7 @@ BaseOperationObject::Operation GhostOperationObject::Input(const BaseOperationOb
 	/*===== 入力処理 =====*/
 
 	BaseOperationObject::Operation operation;
+	InputData;
 
 	// 次の命令と今のフレーム数を比較する。
 	if (operationData_[operationCurrentIndex_].frameTimer_ == frameTimer_) {

@@ -211,17 +211,17 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, const int& TireI
 	const float HUNDRED = 100.0f;
 
 	if (IsLevelChange) {
-		float random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.x_ * HUNDRED));
+		float random = static_cast<float>(FHelper::GetRand(static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.x_ * HUNDRED)));
 		particleNowScale_.x_ = random / HUNDRED;
 
-		random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.y_ * HUNDRED));
+		random = static_cast<float>(FHelper::GetRand(static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE_LEVEL_CHANGE.y_ * HUNDRED)));
 		particleNowScale_.y_ = random / HUNDRED;
 	}
 	else {
-		float random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED));
+		float random = static_cast<float>(FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.x_ * HUNDRED)));
 		particleNowScale_.x_ = random / HUNDRED;
 
-		random = FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED));
+		random = static_cast<float>(FHelper::GetRand(static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED / 2), static_cast<int>(PARTICLE_SCALE.y_ * HUNDRED)));
 		particleNowScale_.y_ = random / HUNDRED;
 	}
 
@@ -355,8 +355,8 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 
 				// 補間先のスケールをランダムで求める。
 				const float HUNDRED = 100.0f;
-				int CHANGE_SCALE = (id_ == ID::AURA_BIG ? AURA_BIG_SCALE * HUNDRED : AURA_SMALL_SCALE * HUNDRED);
-				float random = FHelper::GetRand(CHANGE_SCALE / 2, CHANGE_SCALE);
+				int CHANGE_SCALE = static_cast<int>((id_ == ID::AURA_BIG ? AURA_BIG_SCALE * HUNDRED : AURA_SMALL_SCALE * HUNDRED));
+				float random = static_cast<float>(FHelper::GetRand(CHANGE_SCALE / 2, CHANGE_SCALE));
 				changeScale_ = random / 100.0f;
 
 			}

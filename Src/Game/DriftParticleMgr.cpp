@@ -40,7 +40,7 @@ void DriftParticleMgr::Setting()
 	for (auto& index : driftParticle_) {
 
 		index = std::make_shared<DriftParticle>();
-		index->Setting(smokeBlas_, &index - &driftParticle_[0]);
+		index->Setting(smokeBlas_, static_cast<int>(&index - &driftParticle_[0]));
 
 	}
 }
@@ -138,7 +138,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 		if (index_->GetIsActive()) continue;
 
-		Vec3 random = FHelper::GetRandVec3(-500.0f, 500.0f) / 100.0f;
+		Vec3 random = FHelper::GetRandVec3(-500, 500) / 100.0f;
 
 		index_->GenerateFire(fireBlas_, Pos + random, MatRot, ConstBufferData);
 
@@ -232,7 +232,7 @@ void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const boo
 
 		// ê∂ê¨Ç∑ÇÈêî
 		const int MAX = 5;
-		const int GENERATE_COUNT = 5 * DriftRate;
+		const int GENERATE_COUNT = static_cast<int>(5 * DriftRate);
 		int generateCounter = 0;
 
 		// ê∂ê¨Ç∑ÇÈÅB

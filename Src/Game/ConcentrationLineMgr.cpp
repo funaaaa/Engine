@@ -48,20 +48,20 @@ void ConcentrationLineMgr::Generate()
 	switch (random)
 	{
 	case 0:
-		pos.x_ = FHelper::GetRand(0, 1280);
-		pos.y_ = FHelper::GetRand(-400, -100);
+		pos.x_ = static_cast<float>(FHelper::GetRand(0, 1280));
+		pos.y_ = static_cast<float>(FHelper::GetRand(-400, -100));
 		break;
 	case 1:
-		pos.x_ = FHelper::GetRand(0, 1280);
-		pos.y_ = FHelper::GetRand(100, 400) + 720;
+		pos.x_ = static_cast<float>(FHelper::GetRand(0, 1280));
+		pos.y_ = static_cast<float>(FHelper::GetRand(100, 400) + 720);
 		break;
 	case 2:
-		pos.x_ = FHelper::GetRand(-400, -100);
-		pos.y_ = FHelper::GetRand(0, 720);
+		pos.x_ = static_cast<float>(FHelper::GetRand(-400, -100));
+		pos.y_ = static_cast<float>(FHelper::GetRand(0, 720));
 		break;
 	case 3:
-		pos.x_ = FHelper::GetRand(100, 400) + 1280;
-		pos.y_ = FHelper::GetRand(0, 720);
+		pos.x_ = static_cast<float>(FHelper::GetRand(100, 400) + 1280);
+		pos.y_ = static_cast<float>(FHelper::GetRand(0, 720));
 		break;
 	default:
 		break;
