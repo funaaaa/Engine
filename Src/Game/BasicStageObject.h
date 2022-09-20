@@ -13,7 +13,7 @@ public:
 
 	/*===== ÉÅÉìÉoä÷êî =====*/
 
-	void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID)override;
+	void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance)override;
 	void Destroy()override;
 	void Update(const int& Timer)override;
 	void Disable(const int& TimerToActivation)override;

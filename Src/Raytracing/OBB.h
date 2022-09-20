@@ -3,6 +3,8 @@
 #include <array>
 #include <memory>
 
+class PolygonMeshInstance;
+
 class OBB
 {
 
@@ -25,10 +27,10 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// OBBを生成
-	void Setting(const int& BlasIndex, const int& InsIndex);
+	void Setting(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> Instance);
 
-	// InstanceIDを指定して各種行列を設定。
-	void SetMat(const int& InsIndex);
+	// Instanceを指定して各種行列を設定。
+	void SetMat(std::weak_ptr<PolygonMeshInstance> Instance);
 
 	// OBBとの当たり判定
 	bool CheckHitOBB(OBB TargetOBB);

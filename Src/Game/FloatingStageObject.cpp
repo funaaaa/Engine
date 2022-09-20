@@ -1,16 +1,17 @@
 #include "FloatingStageObject.h"
 #include "PolygonInstanceRegister.h"
+#include "PolygonInstance.h"
 #include "OBB.h"
 
-void FloatingStageObject::Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID)
+void FloatingStageObject::Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== セッティング処理 =====*/
 
-	BasicInit(ObjectID, CollisionID, InstanceID);
+	BasicInit(ObjectID, CollisionID, Instance);
 
 	// 移動量を初期化。
-	timerOffset_ = static_cast<float>(InstanceID);	// InstanceIDをタイマーのオフセットに使用する。これによって連続で生成したFloatingStageObjectは波のように動く。
+	timerOffset_ = static_cast<float>(Instance.lock()->GetInstanceIndex());	// InstanceIDをタイマーのオフセットに使用する。これによって連続で生成したFloatingStageObjectは波のように動く。
 	floatingMove_ = Vec3();
 
 }
@@ -20,7 +21,7 @@ void FloatingStageObject::Destroy()
 
 	/*===== インスタンス破棄 =====*/
 
-	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+	PolygonInstanceRegister::Ins()->DestroyInstance(instance_);
 	isActive_ = false;
 
 }

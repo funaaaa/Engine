@@ -6,6 +6,7 @@
 #include "Vec.h"
 
 class OBB;
+class PolygonMeshInstance;
 
 class BaseStageObject {
 
@@ -40,7 +41,7 @@ public:
 protected:
 
 	int blasIndex_;		// BLASのインデックス
-	int insIndex_;		// Instanceのインデックス
+	std::weak_ptr<PolygonMeshInstance> instance_;		// Instanceのインデックス
 	bool isActive_;		// 有効化フラグ
 	COLLISION_ID collisionID_;	// 当たり判定のID
 	OBJECT_ID objID_;			// オブジェクトのID
@@ -51,7 +52,7 @@ public:
 
 	/*===== メンバ関数 =====*/
 
-	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID) = 0;
+	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance) = 0;
 	virtual void Destroy() = 0;
 	virtual void Update(const int& Timer) = 0;
 	virtual void Disable(const int& TimerToActivation) = 0;
@@ -67,7 +68,7 @@ public:
 
 	// ゲッタ
 	inline const int& GetBLASIndex() { return blasIndex_; }
-	inline const int& GetInstanceIndex() { return insIndex_; }
+	int GetInstanceIndex();
 	inline const bool& GetIsActive() { return isActive_; }
 	inline std::shared_ptr<OBB> GetOBB() { return obb_; }
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }
@@ -91,6 +92,6 @@ public:
 protected:
 
 	// 基底クラスのメンバ変数の初期化
-	void BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID);
+	void BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance);
 
 };

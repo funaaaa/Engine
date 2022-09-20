@@ -17,7 +17,7 @@ void PolygonInstanceRegister::Setting()
 
 }
 
-int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData)
+std::weak_ptr<PolygonMeshInstance> PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData)
 {
 
 	/*===== インスタンスを生成する =====*/
@@ -59,7 +59,7 @@ int PolygonInstanceRegister::CreateInstance(const int& BlasIndex, const UINT& Sh
 
 	instanceDesc_[instanceIndex] = buff;
 
-	return instanceIndex;
+	return instance_[instanceIndex];
 
 }
 
@@ -198,7 +198,7 @@ void PolygonInstanceRegister::SetParentInstance(const int& Index, const int& Par
 
 }
 
- int PolygonInstanceRegister::GetParentInstanceIndex(const int& Index)
+int PolygonInstanceRegister::GetParentInstanceIndex(const int& Index)
 {
 
 	/*===== 指定のインスタンスの親のIDを取得 =====*/
@@ -234,25 +234,27 @@ Vec3 PolygonInstanceRegister::GetWorldPos(const int& Index)
 
 }
 
-void PolygonInstanceRegister::DestroyInstance(const int& Index)
+void PolygonInstanceRegister::DestroyInstance(std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== 指定のインスタンスを破棄 =====*/
 
 	// インデックスが範囲外だったらassert	。
-	if (Index < 0 || MAX_INSTANCE < Index) assert(0);
+	int index = Instance.lock()->GetInstanceIndex();
+	if (index < 0 || MAX_INSTANCE < index) assert(0);
 
-	instance_[Index]->Disable();
-	instanceDesc_[Index] = {};
+	instance_[index]->Disable();
+	instanceDesc_[index] = {};
 
 }
 
-void PolygonInstanceRegister::Display(const int& Index)
+void PolygonInstanceRegister::Display(std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*====== 非表示 ======*/
 
 	// 行列を保存しておく。
+	int index = Instance.lock()->GetInstanceIndex();
 	DirectX::XMMATRIX matRot = instance_[Index]->GetRotate();
 	DirectX::XMMATRIX matScale = instance_[Index]->GetScale();
 	DirectX::XMMATRIX matTrans = instance_[Index]->GetTrans();
@@ -269,12 +271,12 @@ void PolygonInstanceRegister::Display(const int& Index)
 
 }
 
-void PolygonInstanceRegister::NonDisplay(const int& Index)
+void PolygonInstanceRegister::NonDisplay(std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*====== 非表示 ======*/
 
-	instanceDesc_[Index] = {};
+	instanceDesc_[Instance.lock()->GetInstanceIndex()] = {};
 
 }
 

@@ -2,12 +2,12 @@
 #include "PolygonInstanceRegister.h"
 #include "OBB.h"
 
-void BasicStageObject::Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID)
+void BasicStageObject::Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== セッティング処理 =====*/
 
-	BasicInit(ObjectID, CollisionID, InstanceID);
+	BasicInit(ObjectID, CollisionID, Instance);
 
 }
 
@@ -16,7 +16,7 @@ void BasicStageObject::Destroy()
 
 	/*===== インスタンス破棄 =====*/
 
-	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+	PolygonInstanceRegister::Ins()->DestroyInstance(instance_);
 	isActive_ = false;
 
 }

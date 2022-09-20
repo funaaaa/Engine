@@ -57,7 +57,7 @@ public:
 
 	// íœB
 	void DeleteIndex(const int& Index);
-	void ChangeInstanceShaderID(const int& Index, const UINT& ShaderID);
+	void ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, const UINT& ShaderID);
 
 
 private:

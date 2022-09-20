@@ -3,17 +3,18 @@
 #include "PolygonInstanceRegister.h"
 #include "FHelper.h"
 #include "HitGroupMgr.h"
+#include "PolygonInstance.h"
 
-void OBB::Setting(const int& BlasIndex, const int& InsIndex)
+void OBB::Setting(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== OBBをセッティング =====*/
 
 	// OBBをセット。
-	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
+	pos_ = Instance.lock()->GetPos();
 	defLength_ = BLASRegister::Ins()->GetVertexLengthMax(BlasIndex);
 	length_ = defLength_;
-	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	DirectX::XMMATRIX matRot_ = Instance.lock()->GetRotate();
 	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
@@ -34,14 +35,14 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 
 }
 
-void OBB::SetMat(const int& InsIndex)
+void OBB::SetMat(std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== InstanceIDを指定して行列を生成 =====*/
 
-	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
-	length_ = FHelper::MulMat(defLength_, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
-	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	pos_ = Instance.lock()->GetPos();
+	length_ = FHelper::MulMat(defLength_, Instance.lock()->GetScale());
+	DirectX::XMMATRIX matRot_ = Instance.lock()->GetRotate();
 	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);

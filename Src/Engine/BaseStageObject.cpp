@@ -3,13 +3,14 @@
 #include "FHelper.h"
 #include "OBB.h"
 #include "BLASRegister.h"
+#include "PolygonInstance.h"
 
 void BaseStageObject::Display()
 {
 
 	/*===== 表示 =====*/
 
-	PolygonInstanceRegister::Ins()->Display(insIndex_);
+	PolygonInstanceRegister::Ins()->Display(instance_);
 
 }
 
@@ -18,8 +19,13 @@ void BaseStageObject::NonDisplay()
 
 	/*===== 非表示 =====*/
 
-	PolygonInstanceRegister::Ins()->NonDisplay(insIndex_);
+	PolygonInstanceRegister::Ins()->NonDisplay(instance_);
 
+}
+
+int BaseStageObject::GetInstanceIndex()
+{
+	return instance_.lock()->GetInstanceIndex();
 }
 
 void BaseStageObject::AddTrans(const Vec3& Trans)
@@ -30,7 +36,7 @@ void BaseStageObject::AddTrans(const Vec3& Trans)
 	// オブジェクトのIDが中間地点のときは、描画しないので処理を通さない。
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
-		PolygonInstanceRegister::Ins()->AddTrans(insIndex_, Trans);
+		instance_.lock()->AddTrans(Trans);
 
 	}
 
@@ -56,7 +62,7 @@ void BaseStageObject::ChangeTrans(const Vec3& Trans)
 	// オブジェクトのIDが中間地点のときは、描画しないので処理を通さない。
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
-		PolygonInstanceRegister::Ins()->ChangeTrans(insIndex_, Trans);
+		instance_.lock()->ChangeTrans(Trans);
 
 	}
 
@@ -68,7 +74,7 @@ void BaseStageObject::ChangeTrans(const Vec3& Trans)
 #endif
 
 	// OBBも移動させる。
-	obb_->pos_ = PolygonInstanceRegister::Ins()->GetPos(insIndex_);
+	obb_->pos_ = instance_.lock()->GetPos();
 
 	//}
 
@@ -82,7 +88,7 @@ void BaseStageObject::AddScale(const Vec3& Scale)
 	// オブジェクトのIDが中間地点のときは、描画しないので処理を通さない。
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
-		PolygonInstanceRegister::Ins()->AddScale(insIndex_, Scale);
+		instance_.lock()->AddScale(Scale);
 
 	}
 
@@ -108,7 +114,7 @@ void BaseStageObject::ChangeScale(const Vec3& Scale)
 	// オブジェクトのIDが中間地点のときは、描画しないので処理を通さない。
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
-		PolygonInstanceRegister::Ins()->ChangeScale(insIndex_, Scale);
+		instance_.lock()->ChangeScale(Scale);
 
 	}
 
@@ -120,7 +126,7 @@ void BaseStageObject::ChangeScale(const Vec3& Scale)
 #endif
 
 	// OBBの大きさも変える。
-	obb_->length_ = FHelper::MulMat(obb_->defLength_, PolygonInstanceRegister::Ins()->GetScale(insIndex_));
+	obb_->length_ = FHelper::MulMat(obb_->defLength_, instance_.lock()->GetScale());
 
 	//}
 
@@ -134,7 +140,7 @@ void BaseStageObject::AddRotate(const Vec3& Rotate)
 	// オブジェクトのIDが中間地点のときは、描画しないので処理を通さない。
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
-		PolygonInstanceRegister::Ins()->AddRotate(insIndex_, Rotate);
+		instance_.lock()->AddRotate(Rotate);
 
 	}
 
@@ -146,7 +152,7 @@ void BaseStageObject::AddRotate(const Vec3& Rotate)
 #endif
 
 	// OBBのベクトルを回転させる。
-	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(insIndex_);
+	DirectX::XMMATRIX matRot_ = instance_.lock()->GetRotate();
 	obb_->dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	obb_->dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	obb_->dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
@@ -163,7 +169,7 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 	// オブジェクトのIDが中間地点のときは、描画しないので処理を通さない。
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
-		PolygonInstanceRegister::Ins()->ChangeRotate(insIndex_, Rotate);
+		instance_.lock()->ChangeRotate(Rotate);
 
 	}
 
@@ -175,7 +181,7 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 #endif
 
 	// OBBのベクトルを回転させる。
-	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(insIndex_);
+	DirectX::XMMATRIX matRot_ = instance_.lock()->GetRotate();
 	obb_->dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	obb_->dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	obb_->dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
@@ -192,18 +198,18 @@ void BaseStageObject::Delete()
 	isActive_ = false;
 
 	BLASRegister::Ins()->DeleteIndex(blasIndex_);
-	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+	PolygonInstanceRegister::Ins()->DestroyInstance(instance_);
 
 }
 
-void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID)
+void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== 基底クラスのメンバ変数の初期化 =====*/
 
 	// オブジェクトをロード
-	insIndex_ = InstanceID;
-	blasIndex_ = PolygonInstanceRegister::Ins()->GetBLASIndex(InstanceID);
+	instance_ = Instance;
+	blasIndex_ = Instance.lock()->GetBLASIndex();
 
 	// 各種変数を初期化。
 	collisionID_ = CollisionID;
@@ -212,12 +218,12 @@ void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, cons
 
 	// OBBをセット。
 	obb_ = std::make_shared<OBB>();
-	obb_->Setting(blasIndex_, insIndex_);
+	obb_->Setting(blasIndex_, Instance);
 
 	// オブジェクトのIDが中間地点だったら、OBBを生成した時点で描画するInstanceは不要になるので破棄する。
 	if (ObjectID == BaseStageObject::OBJECT_ID::MIDDLE_POINT || ObjectID == BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK || ObjectID == BaseStageObject::OBJECT_ID::GOAL) {
 
-		PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+		PolygonInstanceRegister::Ins()->DestroyInstance(Instance);
 
 	}
 

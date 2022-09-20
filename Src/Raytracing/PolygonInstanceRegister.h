@@ -38,7 +38,7 @@ public:
 	void Setting();
 
 	// Ins‚ğ¶¬‚·‚éB
-	int CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData = false);
+	std::weak_ptr<PolygonMeshInstance> CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData = false);
 
 	// ˆÚ“®(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);

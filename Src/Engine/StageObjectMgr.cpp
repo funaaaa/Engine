@@ -4,6 +4,7 @@
 #include "ItemBoxObject.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
+#include "PolygonInstance.h"
 #include "OBB.h"
 #include "BLAS.h"
 
@@ -66,10 +67,10 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	// Blasをロード
 	int blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
 	// Instanceを生成。
-	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
 	// オブジェクトを設定。
-	objects_[addIndex].first->Setting(ObjectID, CollisionID, instanceIndex);
+	objects_[addIndex].first->Setting(ObjectID, CollisionID, instance);
 	objects_[addIndex].second = true;
 
 	return addIndex;
@@ -279,27 +280,28 @@ void StageObjectMgr::DeleteIndex(const int& Index)
 
 }
 
-void StageObjectMgr::ChangeInstanceShaderID(const int& Index, const UINT& ShaderID)
+void StageObjectMgr::ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, const UINT& ShaderID)
 {
 
 	/*===== インスタンスのシェーダーIDを切り替える =====*/
 
-	if (Index < 0 || static_cast<int>(objects_.size()) <= Index) assert(0);
-	if (!objects_[Index].second) assert(0);
+	int index = Instance.lock()->GetInstanceIndex();
+	if (index < 0 || static_cast<int>(objects_.size()) <= index) assert(0);
+	if (!objects_[index].second) assert(0);
 
 	// 各要素を保存。
-	int blasIndex = PolygonInstanceRegister::Ins()->GetBLASIndex(objects_[Index].first->GetInstanceIndex());
-	BaseStageObject::COLLISION_ID CollisionID = objects_[Index].first->GetCollisionID();
-	BaseStageObject::OBJECT_ID ObjectID = objects_[Index].first->GetObjectID();
+	int blasIndex = PolygonInstanceRegister::Ins()->GetBLASIndex(objects_[index].first->GetInstanceIndex());
+	BaseStageObject::COLLISION_ID CollisionID = objects_[index].first->GetCollisionID();
+	BaseStageObject::OBJECT_ID ObjectID = objects_[index].first->GetObjectID();
 
 	// Instanceを破棄。
-	PolygonInstanceRegister::Ins()->DestroyInstance(objects_[Index].first->GetInstanceIndex());
+	PolygonInstanceRegister::Ins()->DestroyInstance(Instance);
 
 	// Instanceを生成。
-	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
 	// オブジェクトを設定。
-	objects_[Index].first->Setting(ObjectID, CollisionID, instanceIndex);
+	objects_[index].first->Setting(ObjectID, CollisionID, instance);
 
 }
 
