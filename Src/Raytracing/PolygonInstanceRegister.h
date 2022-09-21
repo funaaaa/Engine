@@ -40,53 +40,8 @@ public:
 	// Insを生成する。
 	std::weak_ptr<PolygonMeshInstance> CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData = false);
 
-	// 移動(引数を加算)関数
-	void AddTrans(const int& Index, const float& X, const float& Y, const float Z);
-	void AddTrans(const int& Index, const Vec3& Pos);
-
-	// 移動(引数に移動)関数
-	void ChangeTrans(const int& Index, const float& X, const float& Y, const float Z);
-	void ChangeTrans(const int& Index, const Vec3& Pos);
-	void ChangeTrans(const int& Index, DirectX::XMMATRIX Trans);
-	DirectX::XMMATRIX GetTrans(const int& Index);
-	Vec3 GetPos(const int& Index);
-
-	// 回転(ラジアン、引数を加算)関数
-	void AddRotate(const int& Index, const float& X, const float& Y, const float Z);
-	void AddRotate(const int& Index, const Vec3& Rot);
-	void AddRotate(const int& Index, const DirectX::XMMATRIX& Rot);
-	DirectX::XMMATRIX GetRotate(const int& Index);
-	Vec3 GetRotateVec3(const int& Index);
-
-	// 回転(ラジアン、引数を代入)関数
-	void ChangeRotate(const int& Index, const float& X, const float& Y, const float Z);
-	void ChangeRotate(const int& Index, const Vec3& Rot);
-	void ChangeRotate(const int& Index, DirectX::XMMATRIX Rot);
-
-	// 拡縮(引数を加算)関数
-	void AddScale(const int& Index, const float& X, const float& Y, const float Z);
-	void AddScale(const int& Index, const Vec3& Scale);
-	DirectX::XMMATRIX GetScale(const int& Index);
-
-	// 拡縮(引数を代入)関数
-	void ChangeScale(const int& Index, const float& X, const float& Y, const float Z);
-	void ChangeScale(const int& Index, const Vec3& Scale);
-	void ChangeScale(const int& Index, DirectX::XMMATRIX Scale);
-
-	// 親行列を設定。
-	void SetParentInstance(const int& Index, const int& ParentIndex);
-
-	// 指定のインスタンスの親のIDを取得。
-	int GetParentInstanceIndex(const int& Index);
-
-	// BLASのIndexをかける。
-	UINT GetBLASIndex(const int& Index);
-
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
-
-	// 親子関係も考慮したワールド座標系での座標を取得。
-	Vec3 GetWorldPos(const int& Index);
 
 	// インスタンスを破棄。
 	void DestroyInstance(std::weak_ptr<PolygonMeshInstance> Instance);

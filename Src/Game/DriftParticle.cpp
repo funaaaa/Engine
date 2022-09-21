@@ -120,8 +120,8 @@ void DriftParticle::GenerateAura(const int& BlasIndex, std::weak_ptr<PolygonMesh
 	isAuraBig_ = true;
 
 	// 親の回転行列を求める。
-	int parentInstanceIndex = TireInstance.lock()->GetParentInstanceIndex();
-	DirectX::XMMATRIX parentMatRot = PolygonInstanceRegister::Ins()->GetRotate(parentInstanceIndex);
+	std::weak_ptr<PolygonMeshInstance> parentInstance = TireInstance.lock()->GetParetntInstance();
+	DirectX::XMMATRIX parentMatRot = parentInstance.lock()->GetRotate();
 
 	// 座標を求める。
 	pos_ = trackedInstance.lock()->GetWorldPos();
@@ -174,8 +174,8 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, std::weak_ptr<Po
 	grav = 0;
 
 	// 親の回転行列を求める。
-	int parentInstanceIndex = TireInstance.lock()->GetParentInstanceIndex();
-	DirectX::XMMATRIX parentMatRot = PolygonInstanceRegister::Ins()->GetRotate(parentInstanceIndex);
+	std::weak_ptr<PolygonMeshInstance> parentInstance = TireInstance.lock()->GetParetntInstance();
+	DirectX::XMMATRIX parentMatRot = parentInstance.lock()->GetRotate();
 
 	// パーティクル特有の変数を初期化。
 	particlePos_ = Vec3();
@@ -314,8 +314,8 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	{
 
 		// 親の回転行列を求める。
-		int parentInstanceIndex = trackedInstance.lock()->GetParentInstanceIndex();
-		DirectX::XMMATRIX parentMatRot = PolygonInstanceRegister::Ins()->GetRotate(parentInstanceIndex);
+		std::weak_ptr<PolygonMeshInstance> parentInstance = trackedInstance.lock()->GetParetntInstance();
+		DirectX::XMMATRIX parentMatRot = parentInstance.lock()->GetRotate();
 
 		// 座標を求める。
 		pos_ = trackedInstance.lock()->GetWorldPos();
@@ -379,8 +379,8 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	{
 
 		// 親の回転行列を求める。
-		int parentInstanceIndex = trackedInstance.lock()->GetParentInstanceIndex();
-		DirectX::XMMATRIX parentMatRot = PolygonInstanceRegister::Ins()->GetRotate(parentInstanceIndex);
+		std::weak_ptr<PolygonMeshInstance> parentInstanceIndex = trackedInstance.lock()->GetParetntInstance();
+		DirectX::XMMATRIX parentMatRot = parentInstanceIndex.lock()->GetRotate();
 
 		// 座標を求める。
 		pos_ = trackedInstance.lock()->GetWorldPos();

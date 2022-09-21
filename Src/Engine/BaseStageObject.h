@@ -69,6 +69,7 @@ public:
 	// ƒQƒbƒ^
 	inline const int& GetBLASIndex() { return blasIndex_; }
 	int GetInstanceIndex();
+	std::weak_ptr<PolygonMeshInstance> GetInstance() { return instance_; }
 	inline const bool& GetIsActive() { return isActive_; }
 	inline std::shared_ptr<OBB> GetOBB() { return obb_; }
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }

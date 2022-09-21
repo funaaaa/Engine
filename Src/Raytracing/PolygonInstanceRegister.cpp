@@ -63,155 +63,6 @@ std::weak_ptr<PolygonMeshInstance> PolygonInstanceRegister::CreateInstance(const
 
 }
 
-// 移動(引数を加算)関数
-void PolygonInstanceRegister::AddTrans(const int& Index, const float& X, const float& Y, const float Z) {
-
-	instance_[Index]->AddTrans(Vec3(X, Y, Z));
-
-}
-
-void PolygonInstanceRegister::AddTrans(const int& Index, const Vec3& Pos) {
-
-	instance_[Index]->AddTrans(Pos);
-
-}
-
-void PolygonInstanceRegister::ChangeTrans(const int& Index, const float& X, const float& Y, const float Z)
-{
-
-	instance_[Index]->ChangeTrans(Vec3(X, Y, Z));
-
-}
-
-void PolygonInstanceRegister::ChangeTrans(const int& Index, const Vec3& Pos)
-{
-
-	instance_[Index]->ChangeTrans(Pos);
-
-}
-
-void PolygonInstanceRegister::ChangeTrans(const int& Index, DirectX::XMMATRIX Trans)
-{
-
-	instance_[Index]->ChangeTrans(Trans);
-
-}
-
-DirectX::XMMATRIX PolygonInstanceRegister::GetTrans(const int& Index)
-{
-	return instance_[Index]->GetTrans();
-}
-
-Vec3 PolygonInstanceRegister::GetPos(const int& Index)
-{
-	return instance_[Index]->GetPos();
-}
-
-// 回転(ラジアン、引数を加算)関数
-void PolygonInstanceRegister::AddRotate(const int& Index, const float& X, const float& Y, const float Z) {
-
-	instance_[Index]->AddRotate(Vec3(X, Y, Z));
-
-}
-
-void PolygonInstanceRegister::AddRotate(const int& Index, const Vec3& Rot) {
-
-	instance_[Index]->AddRotate(Rot);
-
-}
-
-void PolygonInstanceRegister::AddRotate(const int& Index, const DirectX::XMMATRIX& Rot)
-{
-	instance_[Index]->AddRotate(Rot);
-}
-
-DirectX::XMMATRIX PolygonInstanceRegister::GetRotate(const int& Index)
-{
-	return instance_[Index]->GetRotate();
-}
-
-Vec3 PolygonInstanceRegister::GetRotateVec3(const int& Index)
-{
-	return instance_[Index]->GetRotateVec3();
-}
-
-void PolygonInstanceRegister::ChangeRotate(const int& Index, const float& X, const float& Y, const float Z)
-{
-	instance_[Index]->ChangeRotate(Vec3(X, Y, Z));
-}
-
-void PolygonInstanceRegister::ChangeRotate(const int& Index, const Vec3& Rot)
-{
-	instance_[Index]->ChangeRotate(Rot);
-}
-
-void PolygonInstanceRegister::ChangeRotate(const int& Index, DirectX::XMMATRIX Rot)
-{
-	instance_[Index]->ChangeRotate(Rot);
-}
-
-void PolygonInstanceRegister::AddScale(const int& Index, const float& X, const float& Y, const float Z)
-{
-
-	instance_[Index]->AddScale(Vec3(X, Y, Z));
-
-}
-
-void PolygonInstanceRegister::AddScale(const int& Index, const Vec3& Scale)
-{
-
-	instance_[Index]->AddScale(Scale);
-
-}
-
-DirectX::XMMATRIX PolygonInstanceRegister::GetScale(const int& Index)
-{
-	return instance_[Index]->GetScale();
-}
-void PolygonInstanceRegister::ChangeScale(const int& Index, const float& X, const float& Y, const float Z)
-{
-
-	instance_[Index]->ChangeScale(Vec3(X, Y, Z));
-
-}
-
-void PolygonInstanceRegister::ChangeScale(const int& Index, const Vec3& Scale)
-{
-
-	instance_[Index]->ChangeScale(Scale);
-
-}
-
-void PolygonInstanceRegister::ChangeScale(const int& Index, DirectX::XMMATRIX Scale)
-{
-
-	instance_[Index]->ChangeScale(Scale);
-
-}
-
-void PolygonInstanceRegister::SetParentInstance(const int& Index, const int& ParentIndex)
-{
-
-	/*===== 親行列を設定 =====*/
-
-	instance_[Index]->SetParentInstance(instance_[ParentIndex]);
-
-}
-
-int PolygonInstanceRegister::GetParentInstanceIndex(const int& Index)
-{
-
-	/*===== 指定のインスタンスの親のIDを取得 =====*/
-
-	return instance_[Index]->GetParentInstanceIndex();
-
-}
-
-UINT PolygonInstanceRegister::GetBLASIndex(const int& Index)
-{
-	return instance_[Index]->GetBLASIndex();
-}
-
 void PolygonInstanceRegister::CalWorldMat()
 {
 
@@ -222,15 +73,6 @@ void PolygonInstanceRegister::CalWorldMat()
 		index_->CalWorldMat(instanceDesc_[&index_ - &instance_[0]]);
 
 	}
-
-}
-
-Vec3 PolygonInstanceRegister::GetWorldPos(const int& Index)
-{
-
-	/*===== 親子関係も考慮したワールド座標系での座標を取得 =====*/
-
-	return instance_[Index]->GetWorldPos();
 
 }
 
@@ -269,17 +111,17 @@ void PolygonInstanceRegister::Display(std::weak_ptr<PolygonMeshInstance> Instanc
 
 	// 行列を保存しておく。
 	int index = Instance.lock()->GetInstanceIndex();
-	DirectX::XMMATRIX matRot = instance_[index]->GetRotate();
-	DirectX::XMMATRIX matScale = instance_[index]->GetScale();
-	DirectX::XMMATRIX matTrans = instance_[index]->GetTrans();
-	bool haveMeshCollisionData = instance_[index]->GetHaveMeshCollisionData();
+	DirectX::XMMATRIX matRot = Instance.lock()->GetRotate();
+	DirectX::XMMATRIX matScale = Instance.lock()->GetScale();
+	DirectX::XMMATRIX matTrans = Instance.lock()->GetTrans();
+	bool haveMeshCollisionData = Instance.lock()->GetHaveMeshCollisionData();
 
 	instanceDesc_[index] = instance_[index]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(instance_[index]->GetBLASIndex()), instance_[index]->GetBLASIndex(), instance_[index]->GetShaderID(), haveMeshCollisionData, index);
 
 	// 保存していた行列をセット。
-	ChangeRotate(index, matRot);
-	ChangeScale(index, matScale);
-	ChangeTrans(index, matTrans);
+	Instance.lock()->ChangeRotate(matRot);
+	Instance.lock()->ChangeScale(matScale);
+	Instance.lock()->ChangeTrans(matTrans);
 
 	instance_[index]->CalWorldMat(instanceDesc_[index]);
 
@@ -299,9 +141,9 @@ void PolygonInstanceRegister::Display(const int& Index)
 	instanceDesc_[Index] = instance_[Index]->CreateInstance(BLASRegister::Ins()->GetBLASBuffer(instance_[Index]->GetBLASIndex()), instance_[Index]->GetBLASIndex(), instance_[Index]->GetShaderID(), haveMeshCollisionData, Index);
 
 	// 保存していた行列をセット。
-	ChangeRotate(Index, matRot);
-	ChangeScale(Index, matScale);
-	ChangeTrans(Index, matTrans);
+	instance_[Index]->ChangeRotate(matRot);
+	instance_[Index]->ChangeScale(matScale);
+	instance_[Index]->ChangeTrans(matTrans);
 
 	instance_[Index]->CalWorldMat(instanceDesc_[Index]);
 

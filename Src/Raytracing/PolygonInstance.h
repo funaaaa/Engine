@@ -90,6 +90,7 @@ public:
 	inline const UINT GetShaderID() { return shaderID_; }
 	inline int GetInstanceIndex() { return instanceIndex_; }
 	int GetParentInstanceIndex();
+	std::weak_ptr<PolygonMeshInstance> GetParetntInstance();
 
 	// BLASインデックスを取得。
 	inline const UINT& GetBLASIndex() { return blasIndex_; }

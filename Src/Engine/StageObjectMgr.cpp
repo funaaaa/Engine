@@ -177,7 +177,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ORNAMENT) {
 
 				// 一定以上離れていたら。 オブジェクトの配置をBlender基準でやっているため距離を頂点から持ってきているが、いずれは手動で配置して座標から距離を持ってこれるようにする
-				float distance = Vec3(Input.targetPos_ - PolygonInstanceRegister::Ins()->GetPos(index.first->GetInstanceIndex())).Length();
+				float distance = Vec3(Input.targetPos_ - index.first->GetInstance().lock()->GetPos()).Length();
 				float size = Vec3(Input.targetSize_ + index.first->GetOBB()->length_).Length();
 				if (size < distance) continue;
 
@@ -290,7 +290,7 @@ void StageObjectMgr::ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> I
 	if (!objects_[index].second) assert(0);
 
 	// 各要素を保存。
-	int blasIndex = PolygonInstanceRegister::Ins()->GetBLASIndex(objects_[index].first->GetInstanceIndex());
+	int blasIndex = objects_[index].first->GetInstance().lock()->GetBLASIndex();
 	BaseStageObject::COLLISION_ID CollisionID = objects_[index].first->GetCollisionID();
 	BaseStageObject::OBJECT_ID ObjectID = objects_[index].first->GetObjectID();
 
@@ -315,7 +315,7 @@ void StageObjectMgr::ChangeInstanceShaderID(const int& Index, const UINT& Shader
 	if (!objects_[index].second) assert(0);
 
 	// 各要素を保存。
-	int blasIndex = PolygonInstanceRegister::Ins()->GetBLASIndex(objects_[index].first->GetInstanceIndex());
+	int blasIndex = objects_[index].first->GetInstance().lock()->GetBLASIndex();
 	BaseStageObject::COLLISION_ID CollisionID = objects_[index].first->GetCollisionID();
 	BaseStageObject::OBJECT_ID ObjectID = objects_[index].first->GetObjectID();
 
@@ -349,7 +349,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 
 		// レイ用の設定を追加。
 		InputRayData.rayPos_ = Input.targetPos_;
-		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInstance_.lock()->GetInstanceIndex()));
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), Input.targetInstance_.lock()->GetRotate());
 
 		// 当たり判定を行う。
 		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
@@ -439,7 +439,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 
 	// 貫通防止で正面方向にもレイを飛ばす。
 	InputRayData.rayPos_ = Input.targetPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInstance_.lock()->GetInstanceIndex()));
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), Input.targetInstance_.lock()->GetRotate());
 
 	// 当たり判定を行う。
 	isHit = false;
@@ -463,7 +463,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 
 	// 貫通防止で左方向にもレイを飛ばす。
 	InputRayData.rayPos_ = Input.targetPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInstance_.lock()->GetInstanceIndex()));
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), Input.targetInstance_.lock()->GetRotate());
 
 	// 当たり判定を行う。
 	isHit = false;
@@ -487,7 +487,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 
 	// 貫通防止で右方向にもレイを飛ばす。
 	InputRayData.rayPos_ = Input.targetPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInstance_.lock()->GetInstanceIndex()));
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), Input.targetInstance_.lock()->GetRotate());
 
 	// 当たり判定を行う。
 	isHit = false;

@@ -293,6 +293,24 @@ int PolygonMeshInstance::GetParentInstanceIndex()
 
 }
 
+std::weak_ptr<PolygonMeshInstance> PolygonMeshInstance::GetParetntInstance()
+{
+
+	/*===== 親インスタンスを取得 =====*/
+
+	// 親行列が存在していたらだったら。
+	if (!parentInstance_.expired()) {
+
+		return parentInstance_;
+
+	}
+
+	// 親が存在していない。
+	assert(0);
+	return std::weak_ptr<PolygonMeshInstance>();
+
+}
+
 void PolygonMeshInstance::Disable()
 {
 
