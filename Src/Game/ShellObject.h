@@ -4,6 +4,7 @@
 
 class OBB;
 class BaseStage;
+class PolygonMeshInstance;
 
 class ShellObject {
 
@@ -23,8 +24,8 @@ private:
 
 	// モデルデータ関係
 	int blasIndex_;			// BLASのインデックス
-	int insIndex_;			// INSTANCEのインデックス
-	int charaInsIndex_;		// 保持しているキャラのINSTANCEのインデックス
+	std::weak_ptr<PolygonMeshInstance> instance;			// INSTANCEのインデックス
+	std::weak_ptr<PolygonMeshInstance> charaInstance;		// 保持しているキャラのINSTANCEのインデックス
 
 	// オブジェクト固有のパラメーター
 	Vec3 pos_;				// 座標
@@ -60,7 +61,7 @@ public:
 	void Destroy();
 
 	// 生成処理
-	void Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex);
+	void Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance);
 
 	// 更新処理
 	void Update(std::weak_ptr<BaseStage> StageData);

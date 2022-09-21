@@ -26,6 +26,7 @@
 #include "GameSceneMode.h"
 #include "DriftParticleMgr.h"
 #include "ConcentrationLineMgr.h"
+#include "PolygonInstance.h"
 
 GameScene::GameScene()
 {
@@ -70,7 +71,7 @@ GameScene::GameScene()
 	// 天球用のスフィアを生成する。
 	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/skydome.jpg" });
 	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
-	PolygonInstanceRegister::Ins()->AddScale(skyDomeIns_, Vec3(1000, 1000, 1000));
+	skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
 
 	characterMgr_ = std::make_shared<CharacterMgr>();
 
@@ -339,7 +340,7 @@ void GameScene::Update()
 	constBufferData_.light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
-	PolygonInstanceRegister::Ins()->AddRotate(skyDomeIns_, Vec3(0.001f, 0, 0));
+	skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
 
 	// 甲羅を更新。
 	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::CIRCUIT]);

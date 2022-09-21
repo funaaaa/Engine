@@ -30,11 +30,11 @@ void CircuitStage::Setting(const int& TireMaskIndex)
 	stageObjectMgr_->AddScale(indexBuff, Vec3(200.0f, 200.0f, 200.0f));
 
 	// ゴールをセット。
-	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
+	goalInsIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::GOAL, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/", "goal.obj", { L"Resource/Game/red.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
 	// ゴールのパラメーターを設定。
-	stageObjectMgr_->AddScale(goalInsIndex, Vec3(200.0f, 200.0f, 200.0f));
-	stageObjectMgr_->AddTrans(goalInsIndex, Vec3(10, -30, 0));
+	stageObjectMgr_->AddScale(goalInsIndex_, Vec3(200.0f, 200.0f, 200.0f));
+	stageObjectMgr_->AddTrans(goalInsIndex_, Vec3(10, -30, 0));
 
 	// 中間地点をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::MIDDLE_POINT, BaseStageObject::COLLISION_ID::OBB,
@@ -221,7 +221,7 @@ void CircuitStage::DisplayGoal()
 
 	/*===== ゴールの表示 =====*/
 
-	PolygonInstanceRegister::Ins()->Display(goalInsIndex);
+	PolygonInstanceRegister::Ins()->Display(goalInsIndex_);
 
 }
 
@@ -230,6 +230,6 @@ void CircuitStage::NonDisplayGoal()
 
 	/*===== ゴールの非表示 =====*/
 
-	PolygonInstanceRegister::Ins()->NonDisplay(goalInsIndex);
+	PolygonInstanceRegister::Ins()->NonDisplay(goalInsIndex_);
 
 }

@@ -5,6 +5,9 @@
 #include <string>
 #include <array>
 #include <wtypes.h>
+#include <memory>
+
+class PolygonMeshInstance;
 
 // OBJ複数メッシュクラス 実質SPONZA読み込み用クラス 今は使用していません。
 class MultiMeshLoadOBJ : public Singleton<MultiMeshLoadOBJ> {
@@ -28,7 +31,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// レイトレ用OBJ複数メッシュ読み込み関数 BLASのアドレスを返す。
-	std::vector<int> RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName);
+	std::vector<std::weak_ptr<PolygonMeshInstance>> RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName);
 
 private:
 

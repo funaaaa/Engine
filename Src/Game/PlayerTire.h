@@ -1,5 +1,8 @@
 #pragma once
 #include "Vec.h"
+#include <memory>
+
+class PolygonMeshInstance;
 
 class PlayerTire{
 
@@ -7,7 +10,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	int tireInsIndex_;	// タイヤのインスタンスのインデックス
+	std::weak_ptr<PolygonMeshInstance> tireInstance;	// タイヤのインスタンスのインデックス
 	Vec3 pos_;			// 座標
 	Vec3 prevPos_;		// 前フレームの座標
 	Vec3 rot_;			// 回転量
@@ -19,7 +22,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// コンストラクタ
-	PlayerTire(const int& TireInsIndex, const bool& IsBehindTire);
+	PlayerTire(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBehindTire);
 
 	// 更新処理
 	void Update();

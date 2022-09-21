@@ -17,6 +17,7 @@ class BaseStage;
 class RayComputeShader;
 class CharacterMgr;
 class ConcentrationLineMgr;
+class PolygonMeshInstance;
 
 // ゲームシーン
 class GameScene : public BaseScene {
@@ -41,7 +42,7 @@ private:
 
 	// 天球用のスフィア
 	int skyDomeBlas_;
-	int skyDomeIns_;
+	std::weak_ptr<PolygonMeshInstance> skyDomeIns_;
 
 	// ステージ関係。
 	std::vector<std::shared_ptr<BaseStage>> stages_;

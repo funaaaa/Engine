@@ -4,6 +4,7 @@
 #include "BLASRegister.h"
 #include "TextureManager.h"
 #include "PolygonInstanceRegister.h"
+#include "PolygonInstance.h"
 #include <DirectXMath.h>
 #include <fstream>
 #include <sstream>
@@ -14,12 +15,12 @@
 #pragma warning(pop)
 #include "ModelDataManager.h"
 
-std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName)
+std::vector<std::weak_ptr<PolygonMeshInstance>> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPath, const string& FilePath, const LPCWSTR& HitGroupName)
 {
 
 	/*===== レイトレ用OBJ複数メッシュ読み込み関数 =====*/
 
-	std::vector<int> InstanceID;
+	std::vector<std::weak_ptr<PolygonMeshInstance>> InstanceID;
 
 	// フィルストリーム
 	std::ifstream file;
@@ -183,7 +184,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 				blasID_.emplace_back(buff);
 
 				// 保存されているBLASIDでインスタンスを生成する。
-				int idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, isFloor_ ? 10 : 0);
+				std::weak_ptr<PolygonMeshInstance> idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, isFloor_ ? 10 : 0);
 				InstanceID.emplace_back(idBuff);
 
 				// その他データを初期化する。
@@ -221,7 +222,7 @@ std::vector<int> MultiMeshLoadOBJ::RayMultiMeshLoadOBJ(const string& DirectryPat
 	blasID_.emplace_back(buff);
 
 	// 保存されているBLASIDでインスタンスを生成する。
-	int idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 0);
+	std::weak_ptr<PolygonMeshInstance> idBuff = PolygonInstanceRegister::Ins()->CreateInstance(blasIDBuff, 0);
 	InstanceID.emplace_back(idBuff);
 
 	// ファイルを閉じる。

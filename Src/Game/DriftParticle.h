@@ -2,13 +2,16 @@
 #include "Vec.h"
 #include "ConstBuffers.h"
 #include <DirectXPackedVector.h>
+#include <memory>
+
+class PolygonMeshInstance;
 
 // ドリフト時のパーティクル
 class DriftParticle {
 
 private:
 
-	int particleIns_;		// パーティクルのインスタンスID
+	std::weak_ptr<PolygonMeshInstance> instance_;		// パーティクルのインスタンスID
 	int blasIndex_;			// BLASのインデックス
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
 	Vec3 pos_;				// 座標
@@ -17,7 +20,7 @@ private:
 	bool isActive_;			// 有効化フラグ
 	bool isAppearingNow_;	// 出現中フラグ アルファ値を濃くする。
 	int appearingTimer_;	// 出現してから消えるまでのタイマー
-	int trackedID_;			// 追跡対象のID
+	std::weak_ptr<PolygonMeshInstance> trackedInstance;			// 追跡対象のID
 	bool isTrackRight_;		// どちら側のタイヤに追跡するか t:右 f:左
 
 	const int APPEARING_TIMER = 5;
@@ -103,9 +106,9 @@ public:
 	// 生成処理
 	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec);
 	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
-	void GenerateAura(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
-	void GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
-	void GenerateJumpEffect(const int& BlasIndex, const int& CarBodyInsIndex, RayConstBufferData& ConstBufferData);
+	void GenerateAura(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
+	void GenerateDriftParticle(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
+	void GenerateJumpEffect(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

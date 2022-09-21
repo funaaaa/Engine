@@ -8,6 +8,7 @@ class ShellObject;
 class StageData;
 class BaseStage;
 class OBB;
+class PolygonMeshInstance;
 
 class ShellObjectMgr : public Singleton<ShellObjectMgr> {
 
@@ -26,7 +27,7 @@ public:
 	/*===== ÉÅÉìÉoä÷êî =====*/
 
 	void Setting();
-	int AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex);
+	int AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance);
 	void DestroyObject(const int& Index);
 	void Update(std::weak_ptr<BaseStage> StageData);
 

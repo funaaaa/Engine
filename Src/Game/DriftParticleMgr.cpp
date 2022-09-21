@@ -156,7 +156,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 }
 
-void DriftParticleMgr::GenerateAura(const int& CharaIndex, const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateAura(const int& CharaIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== オーラを生成する =====*/
@@ -169,10 +169,10 @@ void DriftParticleMgr::GenerateAura(const int& CharaIndex, const int& TireInsInd
 		DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
 		bool isAuraBig = id == DriftParticle::ID::AURA_BIG;
 		if (IsOrange) {
-			index->GenerateAura(isAuraBig ? bigAuraOrangeBlas_ : smallAuraOrangeBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+			index->GenerateAura(isAuraBig ? bigAuraOrangeBlas_ : smallAuraOrangeBlas_, TireInstance, id, IsBoostRight, ConstBufferData);
 		}
 		else {
-			index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+			index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInstance, id, IsBoostRight, ConstBufferData);
 		}
 
 		if (isAuraBig) {
@@ -214,7 +214,7 @@ void DriftParticleMgr::GenerateAura(const int& CharaIndex, const int& TireInsInd
 
 }
 
-void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== パーティクルを生成 =====*/
@@ -241,7 +241,7 @@ void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const boo
 			if (index_->GetIsActive()) continue;
 
 			DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
-			index_->GenerateDriftParticle(IsOrange ? driftParticleOrangeBlas_ : driftParticleBlas_, TireInsIndex_, id, IsBoostRight, IsLevelChange, ConstBufferData);
+			index_->GenerateDriftParticle(IsOrange ? driftParticleOrangeBlas_ : driftParticleBlas_, TireInstance, id, IsBoostRight, IsLevelChange, ConstBufferData);
 
 			++generateCounter;
 			if (GENERATE_COUNT < generateCounter) {
@@ -256,7 +256,7 @@ void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const boo
 
 }
 
-void DriftParticleMgr::GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== ジャンプアクション時のエフェクトを生成 =====*/
@@ -266,7 +266,7 @@ void DriftParticleMgr::GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstB
 
 		if (index->GetIsActive()) continue;
 
-		index->GenerateJumpEffect(jumpEffectBlas_, CarBodyInsIndex_, ConstBufferData);
+		index->GenerateJumpEffect(jumpEffectBlas_, CarBodyInstance, ConstBufferData);
 
 		break;
 

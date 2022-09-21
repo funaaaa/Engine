@@ -14,7 +14,7 @@ void ShellObjectMgr::Setting()
 
 }
 
-int ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex)
+int ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 
 	/*===== オブジェクト追加 =====*/
@@ -23,7 +23,7 @@ int ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const flo
 
 		if (index->GetIsActive()) continue;
 
-		index->Generate(Pos, ForwardVec, CharaRotY, ShellID, CharaInsIndex);
+		index->Generate(Pos, ForwardVec, CharaRotY, ShellID, CharaInstance);
 
 		return static_cast<int>(&index - &shell_[0]);
 

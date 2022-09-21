@@ -6,6 +6,7 @@
 #include "ConstBuffers.h"
 
 class DriftParticle;
+class PolygonMeshInstance;
 
 // ドリフト時のパーティクル管理クラス
 class DriftParticleMgr : public Singleton<DriftParticleMgr> {
@@ -63,9 +64,9 @@ public:
 	// 生成処理
 	void GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec = Vec3());
 	void GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
-	void GenerateAura(const int& CharaIndex, const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData);
-	void GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData);
-	void GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstBufferData& ConstBufferData);
+	void GenerateAura(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData);
+	void GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData);
+	void GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

@@ -13,6 +13,7 @@ class OBB;
 class PlayerTire;
 class BaseItem;
 class BaseOperationObject;
+class PolygonMeshInstance;
 class BaseStage;
 
 class Character {

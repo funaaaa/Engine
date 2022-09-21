@@ -24,7 +24,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	void Generate(const int& CharaInsIndex)override;
+	void Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)override;
 	void Update()override;
 	void Use(const float& CharaRotY = 0, const int ParamID = 0)override;
 

@@ -89,12 +89,15 @@ public:
 	Vec3 GetWorldPos(const int& Index);
 
 	// インスタンスを破棄。
+	void DestroyInstance(std::weak_ptr<PolygonMeshInstance> Instance);
 	void DestroyInstance(const int& Index);
 
 	// インスタンスを表示
+	void Display(std::weak_ptr<PolygonMeshInstance> Instance);
 	void Display(const int& Index);
 
 	// インスタンスを非表示
+	void NonDisplay(std::weak_ptr<PolygonMeshInstance> Instance);
 	void NonDisplay(const int& Index);
 
 	// レジスターのDataを取得する関数。

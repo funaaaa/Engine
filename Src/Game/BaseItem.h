@@ -1,5 +1,8 @@
 #pragma once
 #include "Vec.h"
+#include <memory>
+
+class PolygonMeshInstance;
 
 // アイテム基底クラス
 class BaseItem {
@@ -18,18 +21,18 @@ public:
 protected:
 
 	ItemID itemID_;		// アイテム識別用ID
-	int charaInsIndex_;	// キャラのインスタンスのインデックス
+	std::weak_ptr<PolygonMeshInstance> charaInstance;	// キャラのインスタンスのインデックス
 
 
 public:
 
 	/*===== メンバ変数 =====*/
 
-	virtual void Generate(const int& CharaInsIndex) = 0;
+	virtual void Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance) = 0;
 	virtual void Update() = 0;
 	virtual void Use(const float& CharaRotY = 0, const int ParamID = 0) = 0;
 
 	ItemID GetItemID() { return itemID_; }
-	int GetCharaInsIndex() { return charaInsIndex_; }
+	std::weak_ptr<PolygonMeshInstance> GetCharaInstance() { return charaInstance; }
 
 };

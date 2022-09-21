@@ -1,12 +1,12 @@
 #include "BoostItem.h"
 
-void BoostItem::Generate(const int& CharaInsIndex)
+void BoostItem::Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 
 	/*===== ê∂ê¨èàóù =====*/
 
 	itemID_ = BaseItem::ItemID::BOOST;
-	charaInsIndex_ = CharaInsIndex;
+	charaInstance = CharaInstance;
 
 }
 
