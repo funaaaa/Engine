@@ -4,6 +4,7 @@
 #include "OBB.h"
 #include "BLASRegister.h"
 #include "PolygonInstance.h"
+#include "BLAS.h"
 
 void BaseStageObject::Display()
 {
@@ -21,6 +22,11 @@ void BaseStageObject::NonDisplay()
 
 	PolygonInstanceRegister::Ins()->NonDisplay(instance_);
 
+}
+
+int BaseStageObject::GetBLASIndex()
+{
+	return blas_.lock()->GetBlasIndex();
 }
 
 int BaseStageObject::GetInstanceIndex()
@@ -197,7 +203,7 @@ void BaseStageObject::Delete()
 
 	isActive_ = false;
 
-	BLASRegister::Ins()->DeleteIndex(blasIndex_);
+	blas_.lock()->Init();
 	PolygonInstanceRegister::Ins()->DestroyInstance(instance_);
 
 }
@@ -209,7 +215,7 @@ void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, cons
 
 	// オブジェクトをロード
 	instance_ = Instance;
-	blasIndex_ = Instance.lock()->GetBLASIndex();
+	blas_ = Instance.lock()->GetBLAS();
 
 	// 各種変数を初期化。
 	collisionID_ = CollisionID;
@@ -218,7 +224,7 @@ void BaseStageObject::BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, cons
 
 	// OBBをセット。
 	obb_ = std::make_shared<OBB>();
-	obb_->Setting(blasIndex_, Instance);
+	obb_->Setting(blas_, Instance);
 
 	// オブジェクトのIDが中間地点だったら、OBBを生成した時点で描画するInstanceは不要になるので破棄する。
 	if (ObjectID == BaseStageObject::OBJECT_ID::MIDDLE_POINT || ObjectID == BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK || ObjectID == BaseStageObject::OBJECT_ID::GOAL) {

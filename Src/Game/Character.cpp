@@ -148,7 +148,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
-	obb_->Setting(playerModel_.carBodyBlasIndex_, playerModel_.carBodyInstance);
+	obb_->Setting(playerModel_.carBodyBlas_, playerModel_.carBodyInstance);
 
 }
 
@@ -820,22 +820,22 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 			// 曲がっているのが右だったら。
 			if (0 < operation.handleDriveRate_) {
 
-				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
-				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+				playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
+				playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
 
 			}
 			else {
 
-				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
-				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+				playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
+				playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
 
 			}
 
 		}
 		else {
 
-			BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
-			BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+			playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+			playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
 
 		}
 
@@ -843,8 +843,8 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	else {
 
 		// 車のライトの色を元に戻す。
-		BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
-		BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+		playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+		playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
 
 		// 各変数を初期化。
 		IsTurningIndicatorRed_ = false;
@@ -1185,7 +1185,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		}
 
 		// 回転を更新。
-		playerModel_.carBodyInstance.lock()->ChangeRotate( output.matRot_);
+		playerModel_.carBodyInstance.lock()->ChangeRotate(output.matRot_);
 
 	}
 	// ゴーストだったら当たり判定を飛ばす。
@@ -1439,7 +1439,7 @@ void Character::InclineCarBody()
 	nowHandleRotQ_ = DirectX::XMQuaternionSlerp(nowHandleRotQ_, handleRotQ_, 0.2f);
 	// 回転行列を求める。
 	DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowHandleRotQ_);
-	playerModel_.carBodyInstance.lock()->AddRotate( mat);
+	playerModel_.carBodyInstance.lock()->AddRotate(mat);
 
 
 	// ゲーム終了時演出用の回転

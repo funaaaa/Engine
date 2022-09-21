@@ -10,6 +10,7 @@
 #include <wrl.h>
 
 class PolygonMeshInstance;
+class BLAS;
 
 // ポリゴンインスタンスの参照を保存するクラス
 class PolygonInstanceRegister : public Singleton<PolygonInstanceRegister> {
@@ -38,7 +39,7 @@ public:
 	void Setting();
 
 	// Insを生成する。
-	std::weak_ptr<PolygonMeshInstance> CreateInstance(const int& BlasIndex, const UINT& ShaderID, bool HaveMeshCollisionData = false);
+	std::weak_ptr<PolygonMeshInstance> CreateInstance(std::weak_ptr<BLAS> Blas_, const UINT& ShaderID, bool HaveMeshCollisionData = false);
 
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();

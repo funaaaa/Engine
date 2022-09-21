@@ -14,6 +14,7 @@ class TLAS;
 class RaytracingOutput;
 class Sprite;
 class BaseStage;
+class BLAS;
 class RayComputeShader;
 class CharacterMgr;
 class ConcentrationLineMgr;
@@ -41,7 +42,7 @@ private:
 	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns_;
 
 	// 天球用のスフィア
-	int skyDomeBlas_;
+	std::weak_ptr<BLAS> skyDomeBlas_;
 	std::weak_ptr<PolygonMeshInstance> skyDomeIns_;
 
 	// ステージ関係。

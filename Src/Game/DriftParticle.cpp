@@ -16,12 +16,12 @@ DriftParticle::DriftParticle()
 
 }
 
-void DriftParticle::Setting(const int& BlasIndex, const int ConstBufferIndex)
+void DriftParticle::Setting(std::weak_ptr<BLAS> Blas, const int ConstBufferIndex)
 {
 
 	/*===== セッティング =====*/
 
-	blasIndex_ = BlasIndex;
+	blas_ = Blas;
 	constBufferIndex_ = ConstBufferIndex;
 
 }
@@ -41,7 +41,7 @@ void DriftParticle::Init()
 
 }
 
-void DriftParticle::GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec)
+void DriftParticle::GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec)
 {
 
 	/*===== 生成処理 =====*/
@@ -49,11 +49,11 @@ void DriftParticle::GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const D
 	id_ = ID::SMOKE;
 	pos_ = Pos;
 	forardVec_ = ForwardVec;
-	blasIndex_ = BlasIndex;
+	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
 	appearingTimer_ = 0;
-	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
+	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::ALPHA);
 	instance_.lock()->ChangeTrans(Pos);
 	instance_.lock()->ChangeRotate(MatRot);
 
@@ -75,18 +75,18 @@ void DriftParticle::GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const D
 
 }
 
-void DriftParticle::GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== 生成処理 =====*/
 
 	id_ = ID::FIRE;
 	pos_ = Pos;
-	blasIndex_ = BlasIndex;
+	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
 	appearingTimer_ = 0;
-	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
+	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::ALPHA);
 	instance_.lock()->ChangeTrans(Pos);
 	instance_.lock()->ChangeRotate(MatRot);
 
@@ -103,17 +103,17 @@ void DriftParticle::GenerateFire(const int& BlasIndex, const Vec3& Pos, const Di
 
 }
 
-void DriftParticle::GenerateAura(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== オーラの生成処理 =====*/
 
 	id_ = static_cast<DriftParticle::ID>(Id);
-	blasIndex_ = BlasIndex;
+	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
 	appearingTimer_ = 0;
-	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ADD);
+	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::ADD);
 	trackedInstance = TireInstance;
 	isTrackRight_ = IsBoostRight;
 	changeScaleTimer_ = 0;
@@ -156,18 +156,18 @@ void DriftParticle::GenerateAura(const int& BlasIndex, std::weak_ptr<PolygonMesh
 
 }
 
-void DriftParticle::GenerateDriftParticle(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== ドリフト時のパーティクルを生成 =====*/
 
 	id_ = Id;
-	blasIndex_ = BlasIndex;
+	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
 	appearingTimer_ = 0;
 	particleMatQ_ = DirectX::XMQuaternionIdentity();
-	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ADD);
+	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::ADD);
 	trackedInstance = TireInstance;
 	isTrackRight_ = IsBoostRight;
 	changeScaleTimer_ = 0;
@@ -233,17 +233,17 @@ void DriftParticle::GenerateDriftParticle(const int& BlasIndex, std::weak_ptr<Po
 
 }
 
-void DriftParticle::GenerateJumpEffect(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData)
 {
 
 	/*===== ジャンプエフェクトを生成 =====*/
 
 	id_ = ID::JUMP_EFFECT;
-	blasIndex_ = BlasIndex;
+	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
 	jumpActionEasingTimer_ = 0;
-	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::ALPHA);
+	instance_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::ALPHA);
 	trackedInstance = CarBodyInstance;
 
 	// 座標を求める。

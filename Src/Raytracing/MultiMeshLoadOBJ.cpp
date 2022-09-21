@@ -179,8 +179,8 @@ std::vector<std::weak_ptr<PolygonMeshInstance>> MultiMeshLoadOBJ::RayMultiMeshLo
 			else {
 
 				// BLASを生成する。
-				int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle_, isOpaque_);
-				std::pair<std::vector<int>, int> buff = { textureHandle_,blasIDBuff };
+				std::weak_ptr<BLAS> blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle_, isOpaque_);
+				std::pair<std::vector<int>, std::weak_ptr<BLAS>> buff = { textureHandle_,blasIDBuff };
 				blasID_.emplace_back(buff);
 
 				// 保存されているBLASIDでインスタンスを生成する。
@@ -217,8 +217,8 @@ std::vector<std::weak_ptr<PolygonMeshInstance>> MultiMeshLoadOBJ::RayMultiMeshLo
 	}
 
 	// 一番最後のBLASを生成。
-	int blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle_, isOpaque_);
-	std::pair<std::vector<int>, int> buff = { textureHandle_,blasIDBuff };
+	std::weak_ptr<BLAS> blasIDBuff = BLASRegister::Ins()->GenerateData(blasData, HitGroupName, textureHandle_, isOpaque_);
+	std::pair<std::vector<int>, std::weak_ptr<BLAS>> buff = { textureHandle_,blasIDBuff };
 	blasID_.emplace_back(buff);
 
 	// 保存されているBLASIDでインスタンスを生成する。

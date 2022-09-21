@@ -65,7 +65,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	}
 
 	// Blasをロード
-	int blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
 	// Instanceを生成。
 	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
@@ -290,7 +290,7 @@ void StageObjectMgr::ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> I
 	if (!objects_[index].second) assert(0);
 
 	// 各要素を保存。
-	int blasIndex = objects_[index].first->GetInstance().lock()->GetBLASIndex();
+	std::weak_ptr<BLAS> blasIndex = objects_[index].first->GetInstance().lock()->GetBLAS();
 	BaseStageObject::COLLISION_ID CollisionID = objects_[index].first->GetCollisionID();
 	BaseStageObject::OBJECT_ID ObjectID = objects_[index].first->GetObjectID();
 
@@ -315,7 +315,7 @@ void StageObjectMgr::ChangeInstanceShaderID(const int& Index, const UINT& Shader
 	if (!objects_[index].second) assert(0);
 
 	// 各要素を保存。
-	int blasIndex = objects_[index].first->GetInstance().lock()->GetBLASIndex();
+	std::weak_ptr<BLAS> blasIndex = objects_[index].first->GetInstance().lock()->GetBLAS();
 	BaseStageObject::COLLISION_ID CollisionID = objects_[index].first->GetCollisionID();
 	BaseStageObject::OBJECT_ID ObjectID = objects_[index].first->GetObjectID();
 

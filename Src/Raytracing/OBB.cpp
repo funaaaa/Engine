@@ -1,18 +1,19 @@
 #include "OBB.h"
+#include "BLAS.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
 #include "FHelper.h"
 #include "HitGroupMgr.h"
 #include "PolygonInstance.h"
 
-void OBB::Setting(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> Instance)
+void OBB::Setting(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== OBBをセッティング =====*/
 
 	// OBBをセット。
 	pos_ = Instance.lock()->GetPos();
-	defLength_ = BLASRegister::Ins()->GetVertexLengthMax(BlasIndex);
+	defLength_ = Blas.lock()->GetVertexLengthMax();
 	length_ = defLength_;
 	DirectX::XMMATRIX matRot_ = Instance.lock()->GetRotate();
 	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);

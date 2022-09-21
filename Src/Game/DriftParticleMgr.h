@@ -6,6 +6,7 @@
 #include "ConstBuffers.h"
 
 class DriftParticle;
+class BLAS;
 class PolygonMeshInstance;
 
 // ドリフト時のパーティクル管理クラス
@@ -16,15 +17,15 @@ private:
 	static const int DRIFT_PARTICLE_COUNT = 120;
 	std::array<std::shared_ptr<DriftParticle>, DRIFT_PARTICLE_COUNT> driftParticle_;	// ドリフト時のパーティクル
 
-	int smokeBlas_;
-	int fireBlas_;
-	int smallAuraBlas_;
-	int bigAuraBlas_;
-	int driftParticleBlas_;
-	int smallAuraOrangeBlas_;
-	int bigAuraOrangeBlas_;
-	int driftParticleOrangeBlas_;
-	int jumpEffectBlas_;
+	std::weak_ptr<BLAS> smokeBlas_;
+	std::weak_ptr<BLAS> fireBlas_;
+	std::weak_ptr<BLAS> smallAuraBlas_;
+	std::weak_ptr<BLAS> bigAuraBlas_;
+	std::weak_ptr<BLAS> driftParticleBlas_;
+	std::weak_ptr<BLAS> smallAuraOrangeBlas_;
+	std::weak_ptr<BLAS> bigAuraOrangeBlas_;
+	std::weak_ptr<BLAS> driftParticleOrangeBlas_;
+	std::weak_ptr<BLAS> jumpEffectBlas_;
 
 	struct AuraData {
 		int insIndex_;

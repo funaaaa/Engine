@@ -7,6 +7,7 @@
 
 class OBB;
 class PolygonMeshInstance;
+class BLAS;
 
 class BaseStageObject {
 
@@ -40,7 +41,7 @@ public:
 
 protected:
 
-	int blasIndex_;		// BLASのインデックス
+	std::weak_ptr<BLAS> blas_;			// BLASのインデックス
 	std::weak_ptr<PolygonMeshInstance> instance_;		// Instanceのインデックス
 	bool isActive_;		// 有効化フラグ
 	COLLISION_ID collisionID_;	// 当たり判定のID
@@ -67,7 +68,7 @@ public:
 	void NonDisplay();
 
 	// ゲッタ
-	inline const int& GetBLASIndex() { return blasIndex_; }
+	int GetBLASIndex();
 	int GetInstanceIndex();
 	std::weak_ptr<PolygonMeshInstance> GetInstance() { return instance_; }
 	inline const bool& GetIsActive() { return isActive_; }

@@ -1,9 +1,10 @@
 #include "PolygonInstance.h"
 #include "DirectXBase.h"
 #include "BLASRegister.h"
+#include "BLAS.h"
 #include <assert.h>
 
-D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex)
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr<BLAS> Blas, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex)
 {
 
 	/*===== インスタンスを生成する処理 =====*/
@@ -28,13 +29,14 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(const Microso
 	// インスタンスの詳細を設定。
 	instanceDesc.InstanceID = ShaderID;
 	instanceDesc.InstanceMask = 0xFF;
-	instanceDesc.InstanceContributionToHitGroupIndex = BlasIndex;
+	instanceDesc.InstanceContributionToHitGroupIndex = Blas.lock()->GetBlasIndex();
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc.AccelerationStructure = BlassBuffer->GetGPUVirtualAddress();
+	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer()->GetGPUVirtualAddress();
 
 
 	// BLASのIndexを保存。
-	blasIndex_ = BlasIndex;
+	blasIndex_ = Blas.lock()->GetBlasIndex();
+	blas_ = Blas;
 
 	isActive_ = true;
 	childCount_ = 0;
@@ -412,10 +414,10 @@ void PolygonMeshInstance::CalMeshCollisionData()
 	/*===== メッシュの当たり判定情報を計算 =====*/
 
 	// メッシュの初期値を取得する。
-	std::vector<Vec3> meshDataPos = BLASRegister::Ins()->GetVertex(blasIndex_);
-	std::vector<Vec3> meshDataNormal = BLASRegister::Ins()->GetNormal(blasIndex_);
-	std::vector<Vec2> meshDataUV = BLASRegister::Ins()->GetUV(blasIndex_);
-	std::vector<UINT> meshDataIndex = BLASRegister::Ins()->GetVertexIndex(blasIndex_);
+	std::vector<Vec3> meshDataPos = blas_.lock()->GetVertexPos();
+	std::vector<Vec3> meshDataNormal = blas_.lock()->GetVertexNormal();
+	std::vector<Vec2> meshDataUV = blas_.lock()->GetVertexUV();
+	std::vector<UINT> meshDataIndex = blas_.lock()->GetVertexIndex();
 
 	// ポリゴン数に合わせてリサイズ
 	meshCollisionData_.resize(static_cast<unsigned __int64>(static_cast<float>(meshDataPos.size()) / 3.0f));

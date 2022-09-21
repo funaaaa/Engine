@@ -7,6 +7,8 @@
 #include "Vec.h"
 #include "FHelper.h"
 
+class BLAS;
+
 // TLASに登録するインスタンスクラス
 class PolygonMeshInstance {
 
@@ -35,6 +37,7 @@ private:
 	Vec3 rotate_;		// 装飾オブジェクト配置用
 
 	UINT blasIndex_;
+	std::weak_ptr<BLAS> blas_;
 
 	bool haveMeshCollisionData_;
 	std::vector<FHelper::CheckHitPorygon> meshCollisionData_;
@@ -45,7 +48,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// Ins生成関数
-	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(const Microsoft::WRL::ComPtr<ID3D12Resource>& BlassBuffer, const UINT& BlasIndex, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex);
+	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(std::weak_ptr<BLAS> Blas, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const Vec3& Pos);
@@ -93,7 +96,8 @@ public:
 	std::weak_ptr<PolygonMeshInstance> GetParetntInstance();
 
 	// BLASインデックスを取得。
-	inline const UINT& GetBLASIndex() { return blasIndex_; }
+	const UINT& GetBLASIndex() { return blasIndex_; }
+	std::weak_ptr<BLAS> GetBLAS() { return blas_; }
 
 	// instanceを無効化する。
 	void Disable();

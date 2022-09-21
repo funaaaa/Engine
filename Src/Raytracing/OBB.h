@@ -4,6 +4,7 @@
 #include <memory>
 
 class PolygonMeshInstance;
+class BLAS;
 
 class OBB
 {
@@ -27,7 +28,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// OBBを生成
-	void Setting(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> Instance);
+	void Setting(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> Instance);
 
 	// Instanceを指定して各種行列を設定。
 	void SetMat(std::weak_ptr<PolygonMeshInstance> Instance);

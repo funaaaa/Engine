@@ -38,15 +38,15 @@ void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float&
 	/*===== ¶¬ˆ— =====*/
 
 	// BLAS‚ÆInstance‚ğ¶¬B
-	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Carapace/", "Carapace.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF], { L"Resource/Game/blackRed.png" });
-	instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
+	blas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Carapace/", "Carapace.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF], { L"Resource/Game/blackRed.png" });
+	instance = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::DEF);
 
 	size_ = Vec3(20.0f, 20.0f, 20.0f);
 	instance.lock()->AddScale(size_);
 
 	// OBB‚ğİ’èB
 	obb_ = std::make_shared<OBB>();
-	obb_->Setting(blasIndex_, instance);
+	obb_->Setting(blas_, instance);
 
 	// •Ï”‚ğİ’èB
 	pos_ = Pos;

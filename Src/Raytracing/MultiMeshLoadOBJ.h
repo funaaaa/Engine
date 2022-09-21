@@ -8,6 +8,7 @@
 #include <memory>
 
 class PolygonMeshInstance;
+class BLAS;
 
 // OBJ複数メッシュクラス 実質SPONZA読み込み用クラス 今は使用していません。
 class MultiMeshLoadOBJ : public Singleton<MultiMeshLoadOBJ> {
@@ -18,7 +19,7 @@ private:
 
 	std::vector<std::wstring> texturePath_;
 
-	std::vector<std::pair<std::vector<int>, int>> blasID_;	// テクスチャのハンドルと、それを使用したBLASのIDを保存するコンテナ
+	std::vector<std::pair<std::vector<int>, std::weak_ptr<BLAS>>> blasID_;	// テクスチャのハンドルと、それを使用したBLASのIDを保存するコンテナ
 
 	using string = std::string;
 

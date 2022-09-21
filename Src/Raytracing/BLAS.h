@@ -34,6 +34,9 @@ private:
 	// マテリアル情報用定数バッファ
 	ModelDataManager::Material material_;
 
+	// BLASのインデックス。
+	int blasIndex_;
+
 	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer_;		// BLAS用バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;	// スクラッチバッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> updateBuffer_;	// 更新用バッファ
@@ -88,9 +91,9 @@ public:
 	void Init();
 
 	// BLASの生成
-	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true);
-	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	void GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
+	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true);
+	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath);
+	void GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASの更新
 	void Update();
@@ -131,6 +134,7 @@ public:
 	const Vec3& GetVertexMin() { return vertexMin_; }
 	const Vec3& GetVertexMax() { return vertexMax_; }
 	bool GetIsGenerate() { return isGenerate_; }
+	int GetBlasIndex() { return blasIndex_; }
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex_; }

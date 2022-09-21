@@ -5,14 +5,15 @@
 #include <memory>
 
 class PolygonMeshInstance;
+class BLAS;
 
 // ドリフト時のパーティクル
 class DriftParticle {
 
 private:
 
-	std::weak_ptr<PolygonMeshInstance> instance_;		// パーティクルのインスタンスID
-	int blasIndex_;			// BLASのインデックス
+	std::weak_ptr<PolygonMeshInstance> instance_;	// パーティクルのインスタンスID
+	std::weak_ptr<BLAS> blas_;						// BLASのインデックス
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
 	Vec3 pos_;				// 座標
 	Vec3 forardVec_;		// 移動方向ベクトル
@@ -98,17 +99,17 @@ public:
 	DriftParticle();
 
 	// セッティング処理
-	void Setting(const int& BlasIndex, const int ConstBufferIndex);
+	void Setting(std::weak_ptr<BLAS> Blas, const int ConstBufferIndex);
 
 	// 初期化処理
 	void Init();
 
 	// 生成処理
-	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec);
-	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
-	void GenerateAura(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
-	void GenerateDriftParticle(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
-	void GenerateJumpEffect(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData);
+	void GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec);
+	void GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
+	void GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
+	void GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
+	void GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData);
 
 	// 更新処理
 	void Update(RayConstBufferData& ConstBufferData);

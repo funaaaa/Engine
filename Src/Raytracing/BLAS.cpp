@@ -8,7 +8,7 @@
 #include "TextureManager.h"
 #include "FHelper.h"
 
-void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -24,6 +24,9 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(index_));
 
 	}
+
+	// BlasのIndexを保存。
+	blasIndex_ = BlasIndex;
 
 
 	/*-- 形状データを読み込む --*/
@@ -148,7 +151,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 }
 
-void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
+void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath)
 {
 
 	/*===== BLASを生成する処理 =====*/
@@ -160,6 +163,9 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(TexturePath[index]));
 
 	}
+
+	// BlasのIndexを保存。
+	blasIndex_ = BlasIndex;
 
 	/*-- 形状データを読み込む --*/
 
@@ -283,13 +289,16 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 }
 
-void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
+void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<int> TextureHandle, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	// テクスチャを読み込む。
 	textureHandle_ = TextureHandle;
+
+	// BlasのIndexを保存。
+	blasIndex_ = BlasIndex;
 
 	/*-- 形状データを読み込む --*/
 

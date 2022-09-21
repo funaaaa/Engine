@@ -5,6 +5,7 @@
 class OBB;
 class BaseStage;
 class PolygonMeshInstance;
+class BLAS;
 
 class ShellObject {
 
@@ -23,9 +24,9 @@ private:
 	/*===== メンバ変数 =====*/
 
 	// モデルデータ関係
-	int blasIndex_;			// BLASのインデックス
-	std::weak_ptr<PolygonMeshInstance> instance;			// INSTANCEのインデックス
-	std::weak_ptr<PolygonMeshInstance> charaInstance;		// 保持しているキャラのINSTANCEのインデックス
+	std::weak_ptr<BLAS> blas_;							// BLASのインデックス
+	std::weak_ptr<PolygonMeshInstance> instance;		// INSTANCEのインデックス
+	std::weak_ptr<PolygonMeshInstance> charaInstance;	// 保持しているキャラのINSTANCEのインデックス
 
 	// オブジェクト固有のパラメーター
 	Vec3 pos_;				// 座標
