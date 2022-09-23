@@ -343,18 +343,19 @@ void mainRayGen()
     0, // miss index
     rayDesc,
     payloadData);
-    
-    if (payloadData.color_.x <= 0.4f && payloadData.color_.y <= 0.4f && payloadData.color_.z <= 0.4f)
-    {
-        //payloadData.color_ = float3(1, 1, 0);
-    }
 
     // 結果書き込み用UAVを一旦初期化。
     lightingOutput[launchIndex.xy] = float4(1, 1, 1, 1);
-    aoOutput[launchIndex.xy] = float4(1, 1, 1, 1);
+    aoOutput[launchIndex.xy] = float4(0, 0, 0, 1);
     colorOutput[launchIndex.xy] = float4(1, 1, 1, 1);
     giOutput[launchIndex.xy] = float4(1, 1, 1, 1);
     denoiseMaskoutput[launchIndex.xy] = float4(1, 1, 1, 1);
+
+    // Linear -> sRGB
+    payloadData.light_ = 1.055f * pow(payloadData.light_, 1.0f / 2.4f) - 0.055f;
+    payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
+    //payloadData.color_ = pow(payloadData.color_, 1.0f / 2.2f);
+    //payloadData.gi_ = pow(payloadData.gi_, 1.0f / 2.2f);
 
     // 結果格納
     lightingOutput[launchIndex.xy] = float4(saturate(payloadData.light_), 1);
@@ -454,7 +455,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         // 影響度をかけつつ色を保存。
         PayloadData.light_ += float3(1, 1, 1);
         PayloadData.color_ += AtmosphericScattering(WorldPos, mieColor, isUnderGround) * PayloadData.impactAmount_;
-        PayloadData.ao_ += 1;
+        PayloadData.ao_ += float3(1, 1, 1);
         PayloadData.gi_ += float3(0, 0, 0);
         
         // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
@@ -464,13 +465,16 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         float t = dot(PayloadData.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
         
         // サンプリングした点が地上より下じゃなかったら。
-        if (!isUnderGround)
+        if (!isUnderGround && t <= 0.9f)
         {
             
             // サンプリングした輝度をもとに、暗かったら星空を描画する。
             t = (1.0f - t);
-            t = t == 0.0f ? 0.0f : pow(2.0f, 10.0f * t - 10.0f);
-            t = t == 0.0f ? 0.0f : pow(2.0f, 10.0f * t - 10.0f);
+            if (t != 0.0f)
+            {
+                t = pow(t, 10.0f);
+                //t = pow(2.0f, 10.0f * t - 10.0f);
+            }
             PayloadData.color_ += (float3) TexColor * t;
             PayloadData.color_ = saturate(PayloadData.color_);
             
