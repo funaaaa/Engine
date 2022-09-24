@@ -293,6 +293,16 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 	isGenerate_ = true;
 
+	// Å¬‚ÆÅ‘å‚Ì’¸“_‚ð•Û‘¶B
+	ModelDataManager::ObjectData dataBuff;
+	for (auto& index : vertexPos_) {
+
+		ModelDataManager::Ins()->SaveVertexMinMaxInfo(dataBuff, index);
+
+	}
+	vertexMin_ = dataBuff.vertexMin_;
+	vertexMax_ = dataBuff.vertexMax_;
+
 }
 
 void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<int> TextureHandle, const bool& IsOpaque)

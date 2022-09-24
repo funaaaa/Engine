@@ -75,8 +75,6 @@ public:
 	int GetModelCount() { return static_cast<int>(modelData_.size()); }
 	const ModelData& GetModelData(const int& Index) { return modelData_[Index]; }
 
-private:
-
 	// Å‘åÅ¬‚Ì’¸“_‚ğ•Û‘¶B
 	void SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3& Pos);
 

@@ -19,8 +19,8 @@ public:
 	Vec3 defLength_;				// デフォルトの各軸方向の長さ
 
 	// デバッグ用
-	int blasIndex_;
-	int insIndex_;
+	std::weak_ptr<BLAS> blasIndex_;
+	std::weak_ptr<PolygonMeshInstance> insIndex_;
 
 
 public:

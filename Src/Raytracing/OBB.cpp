@@ -27,8 +27,8 @@ void OBB::Setting(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> I
 	int hitGroupID = static_cast<int>(HitGroupMgr::Ins()->DEF);
 	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[hitGroupID], { L"Resource/Game/black.png" }, false, true, true);
 
-	BLASRegister::Ins()->MulVec3Vertex(blasIndex_, length_);
-	BLASRegister::Ins()->Update(blasIndex_);
+	blasIndex_.lock()->MulVec3Vertex(length_);
+	blasIndex_.lock()->Update();
 
 	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 
@@ -50,9 +50,9 @@ void OBB::SetMat(std::weak_ptr<PolygonMeshInstance> Instance)
 
 #ifdef DEBUG
 
-	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex_, PolygonInstanceRegister::Ins()->GetRotate(InsIndex));
-	PolygonInstanceRegister::Ins()->ChangeScale(insIndex_, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
-	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex_, PolygonInstanceRegister::Ins()->GetTrans(InsIndex));
+	insIndex_.lock()->ChangeRotate(Instance.lock()->GetRotate());
+	insIndex_.lock()->ChangeScale(Instance.lock()->GetScale());
+	insIndex_.lock()->ChangeTrans(Instance.lock()->GetPos());
 
 #endif
 
