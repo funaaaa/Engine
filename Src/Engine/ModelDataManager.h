@@ -42,6 +42,7 @@ public:
 		Material material_;
 		Vec3 vertexMax_;	// 頂点における各軸の最大の位置
 		Vec3 vertexMin_;	// 頂点における各軸の最小の位置
+		int textureHandle_;
 
 	};
 
@@ -67,7 +68,7 @@ public:
 	void LoadObj(std::string DirectoryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing);
 
 	// objファイルの読み込み時にマテリアルをロードするための関数
-	void LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData);
+	void LoadObjMaterial(std::string DirectoryPath, const std::string& MaterialFileName, ModelData& ModelData, ObjectData& ObjectBuffer);
 
 	// 法線の平均を求める関数
 	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);

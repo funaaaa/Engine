@@ -807,15 +807,15 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
     {
      
-        if (PayloadData.impactAmount_ < 0.4f)
+        if (PayloadData.impactAmount_ < TexColor.w)
         {
             PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
             PayloadData.impactAmount_ = 0.0f;
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * 0.4f;
-            PayloadData.impactAmount_ -= 0.4f;
+            PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
+            PayloadData.impactAmount_ -= TexColor.w;
             
             if (0.0f < PayloadData.impactAmount_)
             {
@@ -833,16 +833,16 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
     {
         
-        if (PayloadData.impactAmount_ < 0.3f)
+        if (PayloadData.impactAmount_ < TexColor.w)
         {
             PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-            PayloadData.impactAmount_ = 0.0f;
+            PayloadData.impactAmount_ = TexColor.w;
 
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * 0.3f;
-            PayloadData.impactAmount_ -= 0.3f;
+            PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
+            PayloadData.impactAmount_ -= TexColor.w;
         }
 
         float refractVal = 1.4f;
@@ -899,14 +899,14 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
             if (PayloadData.impactAmount_ < alpha * TexColor.w)
             {
-                PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+                PayloadData.color_.xyz += (float3) TexColor * TexColor.w * PayloadData.impactAmount_;
                 PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
                 PayloadData.impactAmount_ = 0.0f;
 
             }
             else
             {
-                PayloadData.color_.xyz += (float3) TexColor * alpha;
+                PayloadData.color_.xyz += (float3) TexColor * TexColor.w * alpha;
                 PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
                 PayloadData.impactAmount_ -= alpha * TexColor.w;
             }
@@ -920,14 +920,14 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             
             if (PayloadData.impactAmount_ < alpha * TexColor.w)
             {
-                PayloadData.color_.xyz += (float3) TexColor;
+                PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
                 PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
                 PayloadData.impactAmount_ = 0.0f;
 
             }
             else
             {
-                PayloadData.color_.xyz += (float3) TexColor;
+                PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
                 PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
                 PayloadData.impactAmount_ -= alpha * TexColor.w;
             }
@@ -1072,7 +1072,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
     // テクスチャの色を取得。
     float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
-    texColor.xyz *= texColor.w;
     
     // 法線マップの色を取得。
     float3 normalMapColor = (float3) normalTexture.SampleLevel(smp, vtx.uv, 0.0f);

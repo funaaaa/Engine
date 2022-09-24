@@ -7,6 +7,7 @@
 #include "PolygonInstance.h"
 #include "OBB.h"
 #include "BLAS.h"
+#include "BaseStageObject.h"
 
 void StageObjectMgr::Setting()
 {
@@ -18,62 +19,6 @@ void StageObjectMgr::Setting()
 		index.second = false;
 
 	}
-
-}
-
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID)
-{
-
-	/*===== ギミックを追加 =====*/
-
-	// 空きオブジェクト検索。
-	int addIndex = -1;
-	for (auto& index : objects_) {
-
-		if (index.second) continue;
-
-		addIndex = static_cast<int>(&index - &objects_[0]);
-
-		break;
-
-	}
-
-	// -1だったらもう空きはないです。
-	if (addIndex == -1) {
-
-		assert(0);
-
-	}
-
-	// ふわふわ動く装飾オブジェクトだったら。
-	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
-
-		objects_[addIndex].first = std::make_shared<FloatingStageObject>();
-
-	}
-	// アイテムボックスオブジェクトだったら
-	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
-
-		objects_[addIndex].first = std::make_shared<ItemBoxObject>();
-
-	}
-	// それ以外の通常のオブジェクトだったら。
-	else {
-
-		objects_[addIndex].first = std::make_shared<BasicStageObject>();
-
-	}
-
-	// Blasをロード
-	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
-	// Instanceを生成。
-	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
-
-	// オブジェクトを設定。
-	objects_[addIndex].first->Setting(ObjectID, CollisionID, instance);
-	objects_[addIndex].second = true;
-
-	return addIndex;
 
 }
 
@@ -121,7 +66,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	}
 
 	// Blasをロード
-	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateFbx(DirectryPath, ModelName, HitGroupName);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName);
 	// Instanceを生成。
 	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
@@ -145,6 +90,15 @@ void StageObjectMgr::Update(const int& Timer)
 		index.first->Update(Timer);
 
 	}
+
+}
+
+void StageObjectMgr::ChangeNormalTexture(const int& Index, const int& NormalTexture)
+{
+
+	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
+
+	objects_[Index].first->ChangeNormalTexture(NormalTexture);
 
 }
 

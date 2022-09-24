@@ -9,7 +9,7 @@ ConcentrationLine::ConcentrationLine()
 	/*===== コンストラクタ =====*/
 
 	sprite_ = std::make_shared<Sprite>();
-	sprite_->GenerateForTexture(Vec3(0, 0, 0), Vec2(512.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::BLEND_ID::BLENDMODE_ALPHA, L"Resource/Game/concentrationLine.png");
+	sprite_->GenerateForTexture(Vec3(0, 0, 0), Vec2(512.0f, 32.0f), Pipline::PROJECTIONID::UI, Pipline::BLEND_ID::BLENDMODE_ALPHA, L"Resource/Game/UI/concentrationLine.png");
 	alpha_ = 0;
 	exitTimer_ = 0;
 	isActive_ = false;

@@ -48,7 +48,7 @@ private:
 	// ステージ関係。
 	std::vector<std::shared_ptr<BaseStage>> stages_;
 	enum STAGE_ID {
-		CIRCUIT,	// サーキット
+		MUGEN,	// 無限型ステージ
 		MAX_STAGE,	// ステージの最大数
 	};
 	STAGE_ID nowStageID;

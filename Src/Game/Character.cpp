@@ -820,22 +820,22 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 			// 曲がっているのが右だったら。
 			if (0 < operation.handleDriveRate_) {
 
-				playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
-				playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+				playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/blackRed.png"));
+				playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 			}
 			else {
 
-				playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
-				playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+				playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/blackRed.png"));
+				playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 			}
 
 		}
 		else {
 
-			playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
-			playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+			playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
+			playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 		}
 
@@ -843,8 +843,8 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	else {
 
 		// 車のライトの色を元に戻す。
-		playerModel_.carRightLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
-		playerModel_.carLeftLightBlas_.lock()->ChangeTex(0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+		playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
+		playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 		// 各変数を初期化。
 		IsTurningIndicatorRed_ = false;

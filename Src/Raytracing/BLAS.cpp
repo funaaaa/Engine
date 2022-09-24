@@ -8,22 +8,13 @@
 #include "TextureManager.h"
 #include "FHelper.h"
 
-void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	// パスを保存。
-	texturePath_ = TexturePath;
 	modelPath_ = DirectryPath + ModelName;
-
-	// テクスチャを読み込む。
-	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
-	for (auto& index_ : TexturePath) {
-
-		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(index_));
-
-	}
 
 	// BlasのIndexを保存。
 	blasIndex_ = BlasIndex;
@@ -35,7 +26,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	ModelDataManager::ObjectData dataBuff;
 
 	// モデルをロード。
-	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, IsSmoothing);
+	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, false);
 
 	// 各成分の値を保存。
 	vertexMax_ = dataBuff.vertexMax_;
@@ -43,6 +34,9 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	// マテリアル情報を保存。
 	material_ = dataBuff.material_;
+
+	// テクスチャを保存。
+	baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// マテリアル用定数バッファを生成。
 	materialBuffer_ = CreateBuffer(
@@ -171,9 +165,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	FbxLoader::Ins()->GetFbxData(modelIndex_, modelVertexData, modelIndexData);
 
 	// テクスチャを取得。
-	textureHandle_.clear();
-	textureHandle_.shrink_to_fit();
-	textureHandle_.emplace_back(FbxLoader::Ins()->GetTextureIndex(modelIndex_));
+	baseTextureHandle_ = FbxLoader::Ins()->GetTextureIndex(modelIndex_);
 
 	// マテリアル用定数バッファを生成。
 	materialBuffer_ = CreateBuffer(
@@ -305,117 +297,6 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 }
 
-void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<int> TextureHandle, const bool& IsOpaque)
-{
-
-	/*===== BLASを生成する処理 =====*/
-
-	// テクスチャを読み込む。
-	textureHandle_ = TextureHandle;
-
-	// BlasのIndexを保存。
-	blasIndex_ = BlasIndex;
-
-	/*-- 形状データを読み込む --*/
-
-	// マテリアル用定数バッファを生成。
-	materialBuffer_ = CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::Material)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-
-	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
-
-	// マテリアルデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点数を求める。
-	vertexCount_ = static_cast<UINT>(Data.vertex_.size());
-
-	// 頂点インデックス数を求める。
-	indexCount_ = static_cast<UINT>(Data.index_.size());
-
-	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
-
-		RayVertex buff{};
-		buff.normal_ = Data.vertex_[index].normal_;
-		buff.position_ = Data.vertex_[index].pos_;
-		buff.uv_ = Data.vertex_[index].uv_;
-
-		// データを保存。
-		vertex_.push_back(buff);
-
-	}
-
-	// 頂点インデックスデータを保存。
-	vertIndex_ = Data.index_;
-
-	// 頂点サイズを求める。
-	vertexStride_ = sizeof(RayVertex);
-
-	// 頂点インデックスサイズを求める。
-	indexStride_ = sizeof(UINT);
-
-	// 頂点バッファを生成する。
-	vertexBuffer_ = CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-
-	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
-
-	// 頂点インデックスバッファを生成する。
-	indexBuffer_ = CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-
-	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
-
-	// 頂点インデックスデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点データでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-
-	/*-- BLASバッファを生成する --*/
-
-	// 形状を設定する用の構造体を設定。
-	isOpaque_ = IsOpaque;
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_);
-
-	// BLASバッファを設定、構築する。
-	SettingAccelerationStructure(geomDesc);
-
-
-	// ヒットグループ名を保存する。
-	this->hitGroupName_ = HitGroupName;
-
-	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	int counter = 0;
-	for (auto& index_ : vertex_) {
-		vertexPos_[counter] = index_.position_;
-		vertexNormal_[counter] = index_.normal_;
-		++counter;
-	}
-
-	isGenerate_ = true;
-
-}
-
 void BLAS::Update()
 {
 
@@ -543,8 +424,11 @@ BLAS::BLAS()
 {
 
 	isGenerate_ = false;
+	baseTextureHandle_ = -1;
+	normalMapHandle_ = -1;
 
 }
+
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
@@ -615,20 +499,42 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
 		for (int index = 0; index < srvCount; ++index) {
 
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle_.size() <= index) {
+			// 0番目は基本テクスチャ。
+			if (index == 0) {
 
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
+				// 基本のテクスチャが設定されていない。
+				if (baseTextureHandle_ == -1) assert(0);
+
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
+			// 1番目は法線マップテクスチャ。
+			else if (index == 1) {
+
+				if (normalMapHandle_ != -1) {
+
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(normalMapHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+				}
+				else {
+
+					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+				}
+
+			}
+			// それ以降は通常テクスチャを書き込んでメモリの隙間を埋める。
 			else {
 
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
+
 		}
 
 		isChangeTexture = false;
@@ -657,61 +563,6 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	Dst = entryBegin + recordSize;
 	return Dst;
 
-	//}
-
-
-	// ヒットグループが複数あったときの処理。今は一つしか無いので消す。
-	//else {
-
-	//	// シェーダー識別子を書き込む。
-	//	auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
-	//	memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-	//	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
-	//	// 今回のプログラムでは以下の順序でディスクリプタを記録。
-	//	// [0] : インデックスバッファ
-	//	// [1] : 頂点バッファ
-	//	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-	//	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-	//	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-
-	//	// マテリアル用のバッファをセット。
-	//	Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
-
-	//	// ヒットグループ名からヒットグループ名IDを取得する。
-	//	int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
-
-	//	// 頂点、インデックス、マテリアルのオフセット
-	//	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
-
-	//	// ヒットグループIDからSRVの数を取得。
-	//	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
-
-	//	// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
-	//	// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-	//	for (int index = 0; index < srvCount; ++index) {
-
-	//		// このインデックスのテクスチャが存在していなかったら
-	//		if (textureHandle_.size() <= index) {
-
-	//			// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
-	//			WriteGPUDescriptor(Dst, &texHandle);
-
-	//		}
-	//		else {
-
-	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
-	//			Dst += WriteGPUDescriptor(Dst, &texHandle);
-
-	//		}
-	//	}
-
-	//	Dst = entryBegin + recordSize;
-	//	return Dst;
-
-	//}
-
 }
 
 void BLAS::Init()
@@ -727,20 +578,8 @@ void BLAS::Init()
 	vertexUV_.clear();
 	vertIndex_.clear();
 	isGenerate_ = false;
-
-}
-
-void BLAS::ChangeTex(const int& Index, const int& TextureHandle)
-{
-
-	/*===== テクスチャを変更 =====*/
-
-	// インデックスが範囲外じゃないかを検索。
-	if (Index < 0 || textureHandle_.size() <= Index) assert(0);
-
-	textureHandle_[Index] = TextureHandle;
-
-	isChangeTexture = true;
+	baseTextureHandle_ = -1;
+	normalMapHandle_ = -1;
 
 }
 

@@ -66,10 +66,10 @@ GameScene::GameScene()
 	stages_.emplace_back(std::make_shared<MugenStage>());
 
 	// 一旦サーキットステージを有効化する。
-	stages_[STAGE_ID::CIRCUIT]->Setting(tireMaskTexture_->GetUAVIndex());
+	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
 
 	// 天球用のスフィアを生成する。
-	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/skydome.jpg" });
+	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
 	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
 	skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
 
@@ -280,7 +280,7 @@ void GameScene::Update()
 	}
 
 	// キャラを更新。
-	characterMgr_->Update(stages_[STAGE_ID::CIRCUIT], constBufferData_, isBeforeStart_, isGameFinish_);
+	characterMgr_->Update(stages_[STAGE_ID::MUGEN], constBufferData_, isBeforeStart_, isGameFinish_);
 
 	// 乱数の種を更新。
 	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
@@ -319,14 +319,14 @@ void GameScene::Update()
 	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount + 1], 0);
 
 	// ステージを更新。
-	stages_[STAGE_ID::CIRCUIT]->Update(constBufferData_);
+	stages_[STAGE_ID::MUGEN]->Update(constBufferData_);
 
 	// ゴールの表示非表示を切り替え。
 	if (characterMgr_->GetPlayerIns().lock()->GetIsPassedMiddlePoint()) {
-		stages_[STAGE_ID::CIRCUIT]->DisplayGoal();
+		stages_[STAGE_ID::MUGEN]->DisplayGoal();
 	}
 	else {
-		stages_[STAGE_ID::CIRCUIT]->NonDisplayGoal();
+		stages_[STAGE_ID::MUGEN]->NonDisplayGoal();
 	}
 
 
@@ -343,7 +343,7 @@ void GameScene::Update()
 	skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
 
 	// 甲羅を更新。
-	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::CIRCUIT]);
+	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::MUGEN]);
 
 	// 煙を更新する。
 	DriftParticleMgr::Ins()->Update(constBufferData_);
@@ -448,7 +448,7 @@ void GameScene::Draw()
 
 	// タイヤ痕を書き込む。
 	std::vector<Character::TireMaskUV> tireMaskUV;
-	bool isWriteTireMask = characterMgr_->CheckTireMask(stages_[STAGE_ID::CIRCUIT], tireMaskUV);
+	bool isWriteTireMask = characterMgr_->CheckTireMask(stages_[STAGE_ID::MUGEN], tireMaskUV);
 
 	if (isWriteTireMask) {
 

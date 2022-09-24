@@ -62,7 +62,8 @@ private:
 
 	bool isGenerate_;
 
-	std::vector<int> textureHandle_;			// 使用するテクスチャのハンドル
+	int baseTextureHandle_;				// 使用するテクスチャのハンドル
+	int normalMapHandle_;
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
 	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
@@ -91,9 +92,8 @@ public:
 	void Init();
 
 	// BLASの生成
-	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true);
+	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
 	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
-	void GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASの更新
 	void Update();
@@ -107,11 +107,15 @@ public:
 	void StopAnimation();	// 停止
 
 	// テクスチャを追加。
-	inline void AddTex(const int& Index) { textureHandle_.emplace_back(Index); }
-	inline void AddUAVTex(const int& Index) { uavHandle_.emplace_back(Index); }
-
-	// テクスチャを変更。
-	void ChangeTex(const int& Index, const int& TextureHandle);
+	void ChangeBaseTexture(const int& Index) {
+		baseTextureHandle_ = Index;
+		isChangeTexture = true;
+	}
+	void ChangeNormalTexture(const int& Index) {
+		normalMapHandle_ = Index;
+		isChangeTexture = true;
+	}
+	void AddUAVTex(const int& Index) { uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);

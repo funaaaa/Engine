@@ -34,6 +34,15 @@ int BaseStageObject::GetInstanceIndex()
 	return instance_.lock()->GetInstanceIndex();
 }
 
+void BaseStageObject::ChangeNormalTexture(const int& Index)
+{
+
+	/*===== 法線マップを変更 =====*/
+
+	blas_.lock()->ChangeNormalTexture(Index);
+
+}
+
 void BaseStageObject::AddTrans(const Vec3& Trans)
 {
 
@@ -58,7 +67,7 @@ void BaseStageObject::AddTrans(const Vec3& Trans)
 
 	//}
 
-}
+	}
 
 void BaseStageObject::ChangeTrans(const Vec3& Trans)
 {
@@ -84,7 +93,7 @@ void BaseStageObject::ChangeTrans(const Vec3& Trans)
 
 	//}
 
-}
+	}
 
 void BaseStageObject::AddScale(const Vec3& Scale)
 {
@@ -110,7 +119,7 @@ void BaseStageObject::AddScale(const Vec3& Scale)
 
 	//}
 
-}
+	}
 
 void BaseStageObject::ChangeScale(const Vec3& Scale)
 {
@@ -136,7 +145,7 @@ void BaseStageObject::ChangeScale(const Vec3& Scale)
 
 	//}
 
-}
+	}
 
 void BaseStageObject::AddRotate(const Vec3& Rotate)
 {
@@ -165,7 +174,7 @@ void BaseStageObject::AddRotate(const Vec3& Rotate)
 
 	//}
 
-}
+	}
 
 void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 {
@@ -194,7 +203,7 @@ void BaseStageObject::ChangeRotate(const Vec3& Rotate)
 
 	//}
 
-}
+	}
 
 void BaseStageObject::Delete()
 {

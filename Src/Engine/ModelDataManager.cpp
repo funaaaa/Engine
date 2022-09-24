@@ -1,4 +1,5 @@
 #include "ModelDataManager.h"
+#include <array>
 #pragma warning(push)
 #pragma warning(disable:4099)
 #pragma warning(disable:4023)
@@ -136,7 +137,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				std::string materialFileName;
 				lineStream >> materialFileName;
 				// マテリアルの読み込み
-				LoadObjMaterial(DirectryPath + materialFileName, modelData_.at(modelData_.size() - 1));
+				LoadObjMaterial(DirectryPath, DirectryPath + materialFileName, modelData_.at(modelData_.size() - 1), ObjectBuffer);
 				ObjectBuffer.material_ = modelData_[modelData_.size() - 1].material_;
 
 			}
@@ -173,7 +174,8 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 
 }
 
-void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData)
+#include "TextureManager.h"
+void ModelDataManager::LoadObjMaterial(std::string DirectoryPath, const std::string& MaterialFileName, ModelData& ModelData, ObjectData& ObjectBuffer)
 {
 
 	// ファイルストリーム
@@ -218,6 +220,21 @@ void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, Mode
 			lineStream >> ModelData.material_.specular.x_;
 			lineStream >> ModelData.material_.specular.y_;
 			lineStream >> ModelData.material_.specular.z_;
+		}
+		// 先頭文字がmap_Kdならテクスチャ
+		if (key == "map_Kd") {
+
+			std::array<wchar_t, 128> wFilePath;
+
+			std::string fullPath;
+			lineStream >> fullPath;
+			fullPath = DirectoryPath + fullPath;
+
+			MultiByteToWideChar(CP_ACP, 0, fullPath.c_str(), -1, wFilePath.data(), static_cast<int>(wFilePath.size()));
+
+			// テクスチャをロード。
+			ObjectBuffer.textureHandle_ = TextureManager::Ins()->LoadTexture(wFilePath);
+
 		}
 	}
 }

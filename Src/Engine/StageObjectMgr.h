@@ -24,11 +24,13 @@ public:
 	void Setting();
 
 	// 追加する。
-	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID);
 	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const UINT& ShaderID);
 
 	// 更新処理
 	void Update(const int& Timer);
+
+	// 指定のインデックスの法線ベクトルを変更。
+	void ChangeNormalTexture(const int& Index, const int& NormalTexture);
 
 	// 当たり判定
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input);
