@@ -92,7 +92,7 @@ public:
 
 	// BLASÇÃê∂ê¨
 	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true);
-	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath);
+	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
 	void GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// BLASÇÃçXêV

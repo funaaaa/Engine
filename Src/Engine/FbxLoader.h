@@ -157,6 +157,7 @@ public:
 		Vec2 uv_;
 	};
 	void GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex);
+	int GetTextureIndex(const int& Index);
 
 
 private:

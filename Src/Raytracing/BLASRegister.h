@@ -28,7 +28,7 @@ public:
 
 	// 生成処理
 	std::weak_ptr<BLAS> GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
-	std::weak_ptr<BLAS> GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
+	std::weak_ptr<BLAS> GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
 	std::weak_ptr<BLAS> GenerateData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
 
 	// シェーダーレコードを書き込む。

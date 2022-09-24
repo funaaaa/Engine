@@ -151,18 +151,10 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 }
 
-void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, std::vector<LPCWSTR> TexturePath)
+void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
-
-	// テクスチャを読み込む。
-	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
-	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
-
-		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(TexturePath[index]));
-
-	}
 
 	// BlasのIndexを保存。
 	blasIndex_ = BlasIndex;
@@ -177,6 +169,11 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	modelIndex_ = FbxLoader::Ins()->LoadModelFromFile(DirectryPath, ModelName);
 
 	FbxLoader::Ins()->GetFbxData(modelIndex_, modelVertexData, modelIndexData);
+
+	// テクスチャを取得。
+	textureHandle_.clear();
+	textureHandle_.shrink_to_fit();
+	textureHandle_.emplace_back(FbxLoader::Ins()->GetTextureIndex(modelIndex_));
 
 	// マテリアル用定数バッファを生成。
 	materialBuffer_ = CreateBuffer(
@@ -278,12 +275,21 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
 	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
 	for (auto& index_ : vertex_) {
 		vertexPos_[counter] = index_.position_;
 		vertexNormal_[counter] = index_.normal_;
+		vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
+
+	// 頂点を保存。
+	defVertex_ = vertex_;
+
+	// ダーティフラグ
+	isChangeVertex = true;
+	isChangeTexture = true;
 
 	isGenerate_ = true;
 

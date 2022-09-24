@@ -112,7 +112,7 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 	else {
 
 		// 車のボディをロード
-		carBodyBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/car/", "carBody.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { texPath }, true, true, true);
+		carBodyBlas_ = BLASRegister::Ins()->GenerateFbx("Resource/Game/car/Player/", "body.fbx", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
 		carBodyInstance = PolygonInstanceRegister::Ins()->CreateInstance(carBodyBlas_, PolygonInstanceRegister::SHADER_ID::REFLECTION);
 		carBodyInstance.lock()->AddScale(Vec3(25, 25, 25));
 

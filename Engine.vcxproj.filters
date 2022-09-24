@@ -488,6 +488,9 @@
     <None Include="lib\imgui\imgui.ini">
       <Filter>エンジン\lib</Filter>
     </None>
+    <None Include="Resource\ShaderFiles\RayTracing\RaytracingShaderHeader.hlsli">
+      <Filter>レイトレーシング\シェーダー</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="エンジン">

@@ -30,6 +30,15 @@ void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, 
 
 }
 
+int FbxLoader::GetTextureIndex(const int& Index)
+{
+
+	/*===== テクスチャのインデックスを取得 =====*/
+
+	return fbxModelData_[Index].textureID_;
+
+}
+
 void FbxLoader::Init()
 {
 
@@ -85,6 +94,9 @@ int FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& Model
 
 	// モデルを生成。
 	FbxModel modelData_;
+
+	// モデル名を保存。
+	modelData_.modelName_ = DirectryPath + ModelName;
 
 	// FBXノードの数を取得。
 	int nodeCount = fbxScene_->GetNodeCount();
