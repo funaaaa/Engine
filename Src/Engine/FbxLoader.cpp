@@ -450,7 +450,7 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 					MultiByteToWideChar(CP_ACP, 0, fullPath.c_str(), -1, wFilePath.data(), static_cast<int>(wFilePath.size()));
 
 					// テクスチャ読み込み。
-					Model.textureID_ = TextureManager::Ins()->LoadTexture(wFilePath.data());
+					Model.textureID_ = TextureManager::Ins()->LoadTexture(wFilePath);
 
 					textureLoaded = true;
 
