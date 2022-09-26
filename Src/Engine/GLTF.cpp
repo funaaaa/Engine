@@ -21,13 +21,13 @@ bool LoadFile(std::vector<char>& out, const std::wstring& fileName)
 	return true;
 }
 
-void GLTF::LoadModel(std::wstring DirectoryPath, std::wstring ModelName) {
+void GLTF::LoadModel(std::wstring Path) {
 
 	/*===== GLTFのモデルをロード =====*/
 
-	std::filesystem::path filePath(DirectoryPath + ModelName);
+	std::filesystem::path filePath(Path);
 	std::vector<char> buffer;
-	LoadFile(buffer, DirectoryPath + ModelName);
+	LoadFile(buffer, Path);
 
 	std::string baseDir;
 	if (filePath.is_relative()) {
@@ -67,6 +67,7 @@ void GLTF::LoadModel(std::wstring DirectoryPath, std::wstring ModelName) {
 
 	LoadMaterial(model);
 
+	// テクスチャをロード。
 	for (auto& texture : model.textures) {
 		auto image = model.images[texture.source];
 		auto fileName = ConvertFromUTF8(image.name);
@@ -76,10 +77,8 @@ void GLTF::LoadModel(std::wstring DirectoryPath, std::wstring ModelName) {
 		UINT64 size = view.byteLength;
 
 		auto t = TextureManager::Ins()->LoadTexture(fileName, src, size);
-		texture_.emplace_back(t);
+		texture_ = t;
 	}
-
-	int a = 0;
 
 }
 

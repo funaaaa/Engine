@@ -11,6 +11,7 @@
 #pragma warning(disable:4267)
 #include <memory>
 #pragma warning(pop)
+#include "GLTF.h"
 
 void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing)
 {
@@ -162,6 +163,73 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 	}
 
 	// objのデータをObjectDataに入れる
+	for (auto& index_ : modelData_[dataNumber].index_) {
+		ObjectBuffer.index_.push_back(index_);
+	}
+	for (auto& index_ : modelData_[dataNumber].vertex_) {
+		ObjectBuffer.vertex_.push_back(index_);
+	}
+	ObjectBuffer.material_ = modelData_[dataNumber].material_;
+	ObjectBuffer.vertexMin_ = modelData_[dataNumber].vertexMin_;
+	ObjectBuffer.vertexMax_ = modelData_[dataNumber].vertexMax_;
+
+}
+
+#include "FString.h"
+void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
+
+	/*===== GLTFをロード =====*/
+
+	// gltfファイルがロード済みかどうか
+	bool isLoad = false;
+	// ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
+	int dataNumber = 0;
+
+	const int MODELDATA_SIZE = static_cast<int>(modelData_.size());
+	for (int index = 0; index < MODELDATA_SIZE; ++index) {
+		if (modelData_[index].modelName_ == FString::WStringToString(Path)) {
+			isLoad = true;
+			dataNumber = index;
+			break;
+		}
+	}
+
+	// gltfファイルが未ロードだったらロードする
+	if (!isLoad) {
+
+		modelData_.push_back({});
+		ModelDataManager::modelData_.at(ModelDataManager::modelData_.size() - 1).modelName_ = FString::WStringToString(Path);
+
+		GLTF gltfModel;
+		gltfModel.LoadModel(Path);
+
+		// モデルのデータを取得。
+		GLTF::VertexAttributeVisitor vertexInfo = gltfModel.GetVertexData();
+		for (auto& index : vertexInfo.positionBuffer) {
+
+			Vertex buff;
+			buff.pos_ = index;
+			buff.normal_ = vertexInfo.normalBuffer[static_cast<int>(&index - &vertexInfo.positionBuffer[0])];
+			buff.uv_ = vertexInfo.texcoordBuffer[static_cast<int>(&index - &vertexInfo.positionBuffer[0])];
+
+			// 頂点の最大と最小を保存しておく。
+			SaveVertexMinMaxInfo(ObjectBuffer, buff.pos_);
+
+			ObjectBuffer.vertex_.emplace_back(buff);
+
+		}
+		for (auto& index : vertexInfo.indexBuffer) {
+
+			ObjectBuffer.index_.emplace_back(index);
+
+		}
+		ObjectBuffer.textureHandle_ = gltfModel.GetTextureIndex();
+
+		return;
+
+	}
+
+	// gltfのデータをObjectDataに入れる
 	for (auto& index_ : modelData_[dataNumber].index_) {
 		ObjectBuffer.index_.push_back(index_);
 	}

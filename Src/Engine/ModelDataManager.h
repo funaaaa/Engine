@@ -66,6 +66,7 @@ public:
 
 	// objファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
 	void LoadObj(std::string DirectoryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing);
+	void LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer);
 
 	// objファイルの読み込み時にマテリアルをロードするための関数
 	void LoadObjMaterial(std::string DirectoryPath, const std::string& MaterialFileName, ModelData& ModelData, ObjectData& ObjectBuffer);

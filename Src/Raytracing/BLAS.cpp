@@ -298,10 +298,141 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 }
 
-void BLAS::GenerateBLASGLTF(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
+#include "FString.h"
+void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
 {
 
-	
+	/*===== BLASを生成する処理 =====*/
+
+	// パスを保存。
+	modelPath_ = FString::WStringToString(Path);
+
+	// BlasのIndexを保存。
+	blasIndex_ = BlasIndex;
+
+
+	/*-- 形状データを読み込む --*/
+
+	// 読み込んだデータを一時保存する用のバッファ。
+	ModelDataManager::ObjectData dataBuff;
+
+	// モデルをロード。
+	ModelDataManager::Ins()->LoadGLTF(Path, dataBuff);
+
+	// 各成分の値を保存。
+	vertexMax_ = dataBuff.vertexMax_;
+	vertexMin_ = dataBuff.vertexMin_;
+
+	// マテリアル情報を保存。
+	material_ = dataBuff.material_;
+
+	// テクスチャを保存。
+	baseTextureHandle_ = dataBuff.textureHandle_;
+
+	// マテリアル用定数バッファを生成。
+	materialBuffer_ = CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
+	// 頂点数を求める。
+	vertexCount_ = static_cast<UINT>(dataBuff.vertex_.size());
+
+	// 頂点インデックス数を求める。
+	indexCount_ = static_cast<UINT>(dataBuff.index_.size());
+
+	// 頂点データを変換。
+	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
+
+		RayVertex buff{};
+		buff.normal_ = dataBuff.vertex_[index].normal_;
+		buff.position_ = dataBuff.vertex_[index].pos_;
+		buff.uv_ = dataBuff.vertex_[index].uv_;
+
+		// データを保存。
+		vertex_.push_back(buff);
+
+	}
+
+	// 頂点インデックスデータを保存。
+	vertIndex_ = dataBuff.index_;
+
+	// 頂点サイズを求める。
+	vertexStride_ = sizeof(RayVertex);
+
+	// 頂点インデックスサイズを求める。
+	indexStride_ = sizeof(UINT);
+
+	// 頂点バッファを生成する。
+	vertexBuffer_ = CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	// 頂点インデックスバッファを生成する。
+	indexBuffer_ = CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+
+	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
+	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
+
+	// 頂点インデックスデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
+	// 頂点データでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
+
+	/*-- BLASバッファを生成する --*/
+
+	// 形状を設定する用の構造体を設定。
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
+	isOpaque_ = IsOpaque;
+
+	// BLASバッファを設定、構築する。
+	SettingAccelerationStructure(geomDesc);
+
+
+	// ヒットグループ名を保存する。
+	this->hitGroupName_ = HitGroupName;
+
+	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
+	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	int counter = 0;
+	for (auto& index_ : vertex_) {
+		vertexPos_[counter] = index_.position_;
+		vertexNormal_[counter] = index_.normal_;
+		vertexUV_[counter] = index_.uv_;
+		++counter;
+	}
+
+	// 頂点を保存。
+	defVertex_ = vertex_;
+
+	// ダーティフラグ
+	isChangeVertex = true;
+	isChangeTexture = true;
+
+	isGenerate_ = true;
 
 }
 

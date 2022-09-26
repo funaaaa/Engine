@@ -483,17 +483,17 @@
     <ClInclude Include="Src\Engine\GLTF.h">
       <Filter>エンジン\モデルデータ関係</Filter>
     </ClInclude>
-    <ClInclude Include="Lib\glTF\json.hpp">
-      <Filter>エンジン\モデルデータ関係</Filter>
-    </ClInclude>
-    <ClInclude Include="Lib\glTF\stb_image.h">
-      <Filter>エンジン\モデルデータ関係</Filter>
+    <ClInclude Include="Lib\glTF\tiny_gltf.h">
+      <Filter>エンジン\モデルデータ関係\gltf外部</Filter>
     </ClInclude>
     <ClInclude Include="Lib\glTF\stb_image_write.h">
-      <Filter>エンジン\モデルデータ関係</Filter>
+      <Filter>エンジン\モデルデータ関係\gltf外部</Filter>
     </ClInclude>
-    <ClInclude Include="Lib\glTF\tiny_gltf.h">
-      <Filter>エンジン\モデルデータ関係</Filter>
+    <ClInclude Include="Lib\glTF\stb_image.h">
+      <Filter>エンジン\モデルデータ関係\gltf外部</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\glTF\json.hpp">
+      <Filter>エンジン\モデルデータ関係\gltf外部</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -693,6 +693,9 @@
     </Filter>
     <Filter Include="アプリケーション\ステージオブジェクト\blenderからの頂点変換">
       <UniqueIdentifier>{014cb50a-a6e3-4121-bb63-d096a8b8a008}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\モデルデータ関係\gltf外部">
+      <UniqueIdentifier>{26e6a8d3-a71d-43ee-81d2-e11f062c3e25}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -13,7 +13,7 @@ class Model;
 // GLTFモデルクラス
 class GLTF {
 
-private:
+public:
 
 	/*===== メンバ変数 =====*/
 
@@ -73,6 +73,8 @@ private:
 		friend class DxrModel;
 	};
 
+private:
+
 	// ノード
 	std::vector<int> rootNodes_;
 	std::vector<std::shared_ptr<Node>> nodes_;
@@ -83,14 +85,18 @@ private:
 	// 各データ
 	VertexAttributeVisitor vertexInfo_;
 	std::vector<Material> materials_;
-	std::vector<int> texture_;
+	int texture_;
 
 
 public:
 
 	/*===== メンバ関数 =====*/
 
-	void LoadModel(std::wstring DirectoryPath, std::wstring ModelName);
+	void LoadModel(std::wstring Path);
+
+	// ゲッタ
+	VertexAttributeVisitor GetVertexData() { return vertexInfo_;}
+	int GetTextureIndex() { return texture_; }
 
 
 private:

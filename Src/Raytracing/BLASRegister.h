@@ -29,6 +29,7 @@ public:
 	// 生成処理
 	std::weak_ptr<BLAS> GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
 	std::weak_ptr<BLAS> GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
+	std::weak_ptr<BLAS> GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
 	
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);

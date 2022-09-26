@@ -33,11 +33,6 @@
 GameScene::GameScene()
 {
 
-	GLTF testModel;
-	testModel.LoadModel(L"Resource/Game/Gimmick/", L"gltfTest.glb");
-
-
-
 	/*===== 初期化処理 =====*/
 
 	// 甲羅オブジェクトをセッティング。

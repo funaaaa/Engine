@@ -94,7 +94,7 @@ public:
 	// BLASÇÃê∂ê¨
 	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
 	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
-	void GenerateBLASGLTF(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
+	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
 
 	// BLASÇÃçXêV
 	void Update();
