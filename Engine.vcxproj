@@ -120,10 +120,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\glTF</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,10 +142,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\Dxcompiler</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Lib\glTF</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,6 +174,7 @@
     <ClCompile Include="Src\Engine\DirectXBase.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
+    <ClCompile Include="Src\Engine\GLTF.cpp" />
     <ClCompile Include="Src\Engine\StageObjectMgr.cpp" />
     <ClCompile Include="Src\Engine\Input.cpp" />
     <ClCompile Include="Src\Engine\Joycon.cpp" />
@@ -233,6 +236,10 @@
     <ClCompile Include="Src\Raytracing\TLAS.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Lib\glTF\json.hpp" />
+    <ClInclude Include="Lib\glTF\stb_image.h" />
+    <ClInclude Include="Lib\glTF\stb_image_write.h" />
+    <ClInclude Include="Lib\glTF\tiny_gltf.h" />
     <ClInclude Include="lib\imgui\imconfig.h" />
     <ClInclude Include="lib\imgui\imgui.h" />
     <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
@@ -251,6 +258,7 @@
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />
     <ClInclude Include="Src\Engine\FString.h" />
+    <ClInclude Include="Src\Engine\GLTF.h" />
     <ClInclude Include="Src\Engine\StageObjectMgr.h" />
     <ClInclude Include="Src\Engine\Input.h" />
     <ClInclude Include="Src\Engine\Joycon.h" />

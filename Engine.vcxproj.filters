@@ -220,6 +220,9 @@
     <ClCompile Include="Src\Game\CharacterMgr.cpp">
       <Filter>アプリケーション\キャラクター</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Engine\GLTF.cpp">
+      <Filter>エンジン\モデルデータ関係</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -476,6 +479,21 @@
     </ClInclude>
     <ClInclude Include="Src\Game\ConvertGimmickInfoFromBlender.h">
       <Filter>アプリケーション\ステージオブジェクト\blenderからの頂点変換</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\GLTF.h">
+      <Filter>エンジン\モデルデータ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\glTF\json.hpp">
+      <Filter>エンジン\モデルデータ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\glTF\stb_image.h">
+      <Filter>エンジン\モデルデータ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\glTF\stb_image_write.h">
+      <Filter>エンジン\モデルデータ関係</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\glTF\tiny_gltf.h">
+      <Filter>エンジン\モデルデータ関係</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

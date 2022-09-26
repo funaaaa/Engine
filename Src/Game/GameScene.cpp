@@ -28,8 +28,15 @@
 #include "ConcentrationLineMgr.h"
 #include "PolygonInstance.h"
 
+#include "GLTF.h"
+
 GameScene::GameScene()
 {
+
+	GLTF testModel;
+	testModel.LoadModel(L"Resource/Game/Gimmick/", L"gltfTest.glb");
+
+
 
 	/*===== ‰Šú‰»ˆ— =====*/
 

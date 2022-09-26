@@ -7,6 +7,7 @@
 #include <vector>
 #include <array>
 #include <DirectXTex/DirectXTex.h>
+#include <string>
 
 struct Texture {
 	LPCWSTR filePath_;								// ファイル名
@@ -32,6 +33,7 @@ public:
 	// 画像をロードして識別番号を返す関数、ロード済みだったら識別番号を返す。
 	int LoadTexture(LPCWSTR FileName);
 	int LoadTexture(std::array<wchar_t, 128> FileName);
+	int LoadTexture(std::wstring FileName, const void* Src, const UINT64& Size);
 	// 画像を生成して識別番号を返す関数
 	int CreateTexture(DirectX::XMFLOAT4 Color);
 	// 識別番号の順番のシェーダーリソースビューを返す。

@@ -8,6 +8,7 @@
 #include "TextureManager.h"
 #include "FHelper.h"
 
+
 void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
 {
 
@@ -294,6 +295,13 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	}
 	vertexMin_ = dataBuff.vertexMin_;
 	vertexMax_ = dataBuff.vertexMax_;
+
+}
+
+void BLAS::GenerateBLASGLTF(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
+{
+
+	
 
 }
 
