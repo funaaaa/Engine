@@ -590,7 +590,7 @@ float3 DisneyFresnel(float LdotH)
     // 色合い
     float3 tintColor = material[0].baseColor_ / luminance;
     // 非金属の鏡面反射色を計算
-    float3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
+    float3 nonMetalColor = material[0].metalness_ * 0.08f * tintColor;
     // metalnessによる色補完 金属の場合はベースカラー
     float3 specularColor = lerp(nonMetalColor, material[0].baseColor_, material[0].metalness_);
     // NdotHの割合でSchlickFresnel補間
