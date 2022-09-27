@@ -214,16 +214,31 @@ void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
 
 			// 頂点の最大と最小を保存しておく。
 			SaveVertexMinMaxInfo(ObjectBuffer, buff.pos_);
+			SaveVertexMinMaxInfo(ObjectBuffer, buff.pos_);
 
 			ObjectBuffer.vertex_.emplace_back(buff);
+			modelData_.back().vertex_.emplace_back(buff);
 
 		}
 		for (auto& index : vertexInfo.indexBuffer) {
 
 			ObjectBuffer.index_.emplace_back(index);
+			modelData_.back().index_.emplace_back(index);
 
 		}
 		ObjectBuffer.textureHandle_ = gltfModel.GetTextureIndex();
+
+		// マテリアルを保存。
+		ObjectBuffer.material_.baseColor_ = gltfModel.GetMaterial().baseColor_;
+		ObjectBuffer.material_.metalness_ = gltfModel.GetMaterial().metalness_;
+		ObjectBuffer.material_.roughness_ = gltfModel.GetMaterial().roughness_;
+		ObjectBuffer.material_.specular_ = gltfModel.GetMaterial().specular_;
+
+		modelData_.back().material_.baseColor_ = gltfModel.GetMaterial().baseColor_;
+		modelData_.back().material_.metalness_ = gltfModel.GetMaterial().metalness_;
+		modelData_.back().material_.roughness_ = gltfModel.GetMaterial().roughness_;
+		modelData_.back().material_.specular_ = gltfModel.GetMaterial().specular_;
+		
 
 		return;
 
@@ -271,24 +286,24 @@ void ModelDataManager::LoadObjMaterial(std::string DirectoryPath, const std::str
 			// マテリアル名の読み込み
 			// lineStream >> ModelData.material.name;
 		}
-		// 先頭文字列がKaならアンビエント色
-		if (key == "Ka") {
-			lineStream >> ModelData.material_.ambient_.x_;
-			lineStream >> ModelData.material_.ambient_.y_;
-			lineStream >> ModelData.material_.ambient_.z_;
-		}
-		// 先頭文字列がKdならディフューズ色
-		if (key == "Kd") {
-			lineStream >> ModelData.material_.diffuse_.x_;
-			lineStream >> ModelData.material_.diffuse_.y_;
-			lineStream >> ModelData.material_.diffuse_.z_;
-		}
-		// 先頭文字がKsならスペキュラー色
-		if (key == "Ks") {
-			lineStream >> ModelData.material_.specular.x_;
-			lineStream >> ModelData.material_.specular.y_;
-			lineStream >> ModelData.material_.specular.z_;
-		}
+		//// 先頭文字列がKaならアンビエント色
+		//if (key == "Ka") {
+		//	lineStream >> ModelData.material_.ambient_.x_;
+		//	lineStream >> ModelData.material_.ambient_.y_;
+		//	lineStream >> ModelData.material_.ambient_.z_;
+		//}
+		//// 先頭文字列がKdならディフューズ色
+		//if (key == "Kd") {
+		//	lineStream >> ModelData.material_.diffuse_.x_;
+		//	lineStream >> ModelData.material_.diffuse_.y_;
+		//	lineStream >> ModelData.material_.diffuse_.z_;
+		//}
+		//// 先頭文字がKsならスペキュラー色
+		//if (key == "Ks") {
+		//	lineStream >> ModelData.material_.specular.x_;
+		//	lineStream >> ModelData.material_.specular.y_;
+		//	lineStream >> ModelData.material_.specular.z_;
+		//}
 		// 先頭文字がmap_Kdならテクスチャ
 		if (key == "map_Kd") {
 

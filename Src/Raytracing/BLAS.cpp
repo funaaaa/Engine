@@ -557,6 +557,17 @@ void BLAS::StopAnimation()
 	}
 
 }
+void BLAS::IsChangeMaterial()
+{
+
+	/*===== マテリアルを書き換えた際の処理 =====*/
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	isChangeVertex = true;
+
+}
 #include "HitGroupMgr.h"
 #include <assert.h>
 BLAS::BLAS()

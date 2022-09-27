@@ -7,7 +7,7 @@
 #include <DirectXMath.h>
 
 namespace tinygltf {
-class Model;
+	class Model;
 }
 
 // GLTFモデルクラス
@@ -57,12 +57,13 @@ public:
 	};
 
 	// マテリアル。
-	class Material {
-	public:
-		Material() : name_(), textureIndex_(-1), diffuseColor_(1, 1, 1) { }
+	struct Material {
+		Vec3 baseColor_;
+		float metalness_;
+		float specular_;
+		float roughness_;
 		std::wstring name_;
-		int textureIndex_;
-		Vec3 diffuseColor_;
+		Material() :baseColor_(Vec3()), metalness_(0.5f), specular_(0.5f), roughness_(0.5f) {};
 	};
 
 	// 同じノードに関連するポリゴンメッシュを束ねたデータ。
@@ -84,7 +85,7 @@ private:
 
 	// 各データ
 	VertexAttributeVisitor vertexInfo_;
-	std::vector<Material> materials_;
+	Material material_;
 	int texture_;
 
 
@@ -95,8 +96,9 @@ public:
 	void LoadModel(std::wstring Path);
 
 	// ゲッタ
-	VertexAttributeVisitor GetVertexData() { return vertexInfo_;}
+	VertexAttributeVisitor GetVertexData() { return vertexInfo_; }
 	int GetTextureIndex() { return texture_; }
+	GLTF::Material GetMaterial() { return material_; }
 
 
 private:

@@ -685,7 +685,7 @@ void GameScene::Input()
 
 	InputImGUI();
 
-}	
+}
 
 #include "BaseItem.h"
 void GameScene::InputImGUI()

@@ -107,6 +107,12 @@ public:
 	void PlayAnimation();	// 再生
 	void StopAnimation();	// 停止
 
+	// マテリアルの参照を取得。
+	ModelDataManager::Material& GetMaterial() { return material_; }
+
+	// マテリアルを書き換えた判定。
+	void IsChangeMaterial();
+
 	// テクスチャを追加。
 	void ChangeBaseTexture(const int& Index) {
 		baseTextureHandle_ = Index;

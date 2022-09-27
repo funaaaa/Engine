@@ -29,6 +29,7 @@ void GLTF::LoadModel(std::wstring Path) {
 	std::vector<char> buffer;
 	LoadFile(buffer, Path);
 
+	// 絶対パスを取得。
 	std::string baseDir;
 	if (filePath.is_relative()) {
 		auto current = std::filesystem::current_path();
@@ -37,6 +38,7 @@ void GLTF::LoadModel(std::wstring Path) {
 	}
 	baseDir = filePath.parent_path().string();
 
+	// ファイルを開く。
 	std::string err, warn;
 	tinygltf::TinyGLTF loader;
 	tinygltf::Model model;
@@ -61,10 +63,12 @@ void GLTF::LoadModel(std::wstring Path) {
 	for (const auto& nodeIndex : scene.nodes) {
 		rootNodes_.emplace_back(nodeIndex);
 	}
-
 	LoadNode(model);
+
+	// メッシュの情報を取得。
 	LoadMesh(model, vertexInfo_);
 
+	// マテリアル情報を取得。
 	LoadMaterial(model);
 
 	// テクスチャをロード。
@@ -249,26 +253,18 @@ void GLTF::LoadMaterial(const tinygltf::Model& inModel)
 	/*===== マテリアルをロード =====*/
 
 	for (const auto& inMaterial : inModel.materials) {
-		materials_.emplace_back(Material());
-		auto& material = materials_.back();
-		material.name_ = ConvertFromUTF8(inMaterial.name);
 
-		for (auto& value : inMaterial.values) {
-			auto valueName = value.first;
-			if (valueName == "baseColorTexture") {
-				auto textureIndex = value.second.TextureIndex();
-				material.textureIndex_ = textureIndex;
-			}
-			if (valueName == "normalTexture") {
-				auto textureIndex = value.second.TextureIndex();
-			}
-			if (valueName == "baseColorFactor") {
-				auto color = value.second.ColorFactor();
-				material.diffuseColor_ = Vec3(
-					float(color[0]), float(color[1]), float(color[2])
-				);
-			}
-		}
+		material_.name_ = ConvertFromUTF8(inMaterial.name);
+
+		material_.baseColor_ = Vec3(inMaterial.pbrMetallicRoughness.baseColorFactor[0], inMaterial.pbrMetallicRoughness.baseColorFactor[1], inMaterial.pbrMetallicRoughness.baseColorFactor[2]);
+
+		// BaseColorは一旦真っ白にする。
+		material_.baseColor_ = Vec3(1, 1, 1);
+
+		material_.metalness_ = inMaterial.pbrMetallicRoughness.metallicFactor;
+		material_.roughness_ = inMaterial.pbrMetallicRoughness.roughnessFactor;
+		material_.specular_ = 0.5f;
+
 	}
 }
 

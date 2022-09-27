@@ -353,7 +353,8 @@ void mainRayGen()
 
     // Linear -> sRGB
     payloadData.light_ = 1.055f * pow(payloadData.light_, 1.0f / 2.4f) - 0.055f;
-    payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
+    //payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
+    payloadData.ao_ = 0.0f;
     //payloadData.color_ = pow(payloadData.color_, 1.0f / 2.2f);
     //payloadData.gi_ = pow(payloadData.gi_, 1.0f / 2.2f);
 
@@ -428,17 +429,17 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         
         float3 giBuff = (float3) TexColor * rate;
         
-        // 当たったオブジェクトが完全反射だったらGIの色を黒くする。(完全反射で色がないから。黒は色として反映されない。)
-        if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-        {
-            giBuff = float3(0, 0, 0);
-        }
+        //// 当たったオブジェクトが完全反射だったらGIの色を黒くする。(完全反射で色がないから。黒は色として反映されない。)
+        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
+        //{
+        //    giBuff = float3(0, 0, 0);
+        //}
         
-        // 当たったオブジェクトが反射だったらGIの色を薄くする。
-        if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
-        {
-            giBuff /= 2.0f;
-        }
+        //// 当たったオブジェクトが反射だったらGIの色を薄くする。
+        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
+        //{
+        //    giBuff /= 2.0f;
+        //}
         
         PayloadData.gi_ += giBuff;
         
@@ -486,8 +487,21 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         return true;
     }
     
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
+    {
+        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.color_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.ao_ += 1 * PayloadData.impactAmount_;
+        PayloadData.gi_ += float3(0, 0, 0);
+        
+        // 影響度を0にする。
+        PayloadData.impactAmount_ = 0.0f;
+        
+        return true;
+    }
+    
     // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
     {
         PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
         PayloadData.color_ += (float3) TexColor * PayloadData.impactAmount_;
@@ -501,23 +515,23 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     }
     
     // 当たったオブジェクトのInstanceIDが完全反射だったら。
-    if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-    {
+    //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
+    //{
         
-        // 完全反射用のレイを発射。
-        ShootRay(CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
+    //    // 完全反射用のレイを発射。
+    //    ShootRay(CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
         
-        // 色を少しだけ明るくする。
-        //PayloadData.color += 0.1f;
+    //    // 色を少しだけ明るくする。
+    //    //PayloadData.color += 0.1f;
         
-        PayloadData.color_ = saturate(PayloadData.color_);
+    //    PayloadData.color_ = saturate(PayloadData.color_);
         
-        //// 残った影響度を入れる。
-        //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
+    //    //// 残った影響度を入れる。
+    //    //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
         
-        return true;
+    //    return true;
         
-    }
+    //}
     
     // メッシュ情報を返す。デバッグ機能。
     if (gSceneParam.debug.isMeshScene)
@@ -543,8 +557,131 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     
 }
 
+// UE4のGGX分布
+float DistributionGGX(float Alpha, float NdotH)
+{
+    float alpha2 = Alpha * Alpha;
+    float t = NdotH * NdotH * (alpha2 - 1.0f) + 1.0f;
+    return alpha2 / (PI * t * t);
+}
+
+// Schlickによるフレネルの近似 
+float SchlickFresnel(float F0, float F90, float Cosine)
+{
+    float m = saturate(1.0f - Cosine);
+    float m2 = m * m;
+    float m5 = m2 * m2 * m;
+    return lerp(F0, F90, m5);
+}
+float3 SchlickFresnel3(float3 F0, float3 F90, float Cosine)
+{
+    float m = saturate(1.0f - Cosine);
+    float m2 = m * m;
+    float m5 = m2 * m2 * m;
+    return lerp(F0, F90, m5);
+}
+
+// ディズニーのフレネル計算
+float3 DisneyFresnel(float LdotH)
+{
+    
+    // 輝度
+    float luminance = 0.3f * material[0].baseColor_.r + 0.6f * material[0].baseColor_.g + 0.1f * material[0].baseColor_.b;
+    // 色合い
+    float3 tintColor = material[0].baseColor_ / luminance;
+    // 非金属の鏡面反射色を計算
+    float3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
+    // metalnessによる色補完 金属の場合はベースカラー
+    float3 specularColor = lerp(nonMetalColor, material[0].baseColor_, material[0].metalness_);
+    // NdotHの割合でSchlickFresnel補間
+    return SchlickFresnel3(specularColor, float3(1.0f, 1.0f, 1.0f), LdotH);
+    
+}
+
+// UE4のSmithモデル
+float GeometricSmith(float Cosine)
+{
+    float k = (material[0].roughness_ + 1.0f);
+    k = k * k / 8.0f;
+    return Cosine / (Cosine * (1.0f - k) + k);
+}
+
+// 鏡面反射の計算
+float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH)
+{
+    
+    // D項(分布:Distribution)
+    float Ds = DistributionGGX(material[0].roughness_ * material[0].roughness_, NdotH);
+    
+    // F項(フレネル:Fresnel)
+    float3 Fs = DisneyFresnel(LdotH);
+    
+    // G項(幾何減衰:Geometry attenuation)
+    float Gs = GeometricSmith(NdotL) * GeometricSmith(NdotV);
+    
+    // M項(分母)
+    float m = 4.0f * NdotL * NdotV;
+    
+    // 合成して鏡面反射の色を得る。
+    return Ds * Fs * Gs / m;
+    
+}
+
+// 双方向反射分布関数
+float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal)
+{
+    // 法線とライト方向の内積
+    float NdotL = dot(Normal, LightVec);
+    
+    // 法線とカメラ方向の内積
+    float NdotV = dot(Normal, ViewVec);
+    
+    // どちらかが90度以上であれば真っ黒を返す。
+    if (NdotL < 0.0f || NdotV < 0.0f)
+    {
+        
+        return float3(0.0f, 0.0f, 0.0f);
+        
+    }
+    
+    // ライト方向とカメラ方向の中間であるハーフベクトル
+    float3 halfVec = normalize(LightVec + ViewVec);
+    
+    // 法線とハーフベクトルの内積
+    float NdotH = dot(Normal, halfVec);
+    
+    // ライトとハーフベクトルの内積
+    float LdotH = dot(LightVec, halfVec);
+    
+    // 拡散反射率
+    float diffuseReflectance = 1.0f / PI;
+    
+    // 入射角が90度の場合の拡散反射率
+    float energyBias = 0.5f * material[0].roughness_;
+    float FD90 = energyBias + 2.0f * LdotH * LdotH * material[0].roughness_;
+    
+    // 入っていくときの拡散反射率
+    float FL = SchlickFresnel(1.0f, FD90, NdotL);
+    
+    // 出ていくときの拡散反射率
+    float FV = SchlickFresnel(1.0f, FD90, NdotV);
+    
+    // 入って出ていくまでの拡散反射率
+    float energyFactor = lerp(1.0f, 1.0f / 1.51f, material[0].roughness_);
+    float FD = FL * FV * energyFactor;
+    
+    // 拡散反射項
+    float3 diffuseColor = diffuseReflectance * FD * material[0].baseColor_ * (1.0f - material[0].metalness_);
+    
+    // 鏡面反射項
+    float3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH);
+    
+    return diffuseColor + specularColor;
+    
+}
+
 // ライティング処理
-bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Vertex Vtx)
+bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Vertex Vtx, float4 TexColor)
 {
     
     // 乱数の種となる値を取得。
@@ -552,15 +689,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     uint2 numPix = DispatchRaysDimensions().xy;
     
     // 各光源の明るさ情報
-    float pointLightVisibility = 0;
-    float dirLightVisibility = 0;
     float aoLightVisibility = 0;
-    
-    // ポイントライトの色
-    float3 pointLightColor = float3(0, 0, 0);
-    
-    // ディレクショナルライトの色
-    float3 dirLightColor = float3(0, 0, 0);
     
     for (int index = 0; index < POINT_LIGHT_COUNT; ++index)
     {
@@ -601,25 +730,8 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
                 rate = pow(rate, 5);
                 rate = 1.0f - rate;
                 
-                // ディフーズの色
-                float mDiffuse = material[0].diffuse.x;
-                float3 diffuse = dot(-pointLightDir, WorldNormal) * mDiffuse;
-			    // 光沢
-                const float shininess = 4.0f;
-		    	// 視点までの距離
-                float3 eyedir = normalize(WorldRayOrigin() - WorldPos);
-		    	// 反射ベクトル
-                float3 reflect = normalize(pointLightDir + 2.0f * dot(-pointLightDir, WorldNormal) * WorldNormal);
-                // スペキュラー
-                float mSpecular = material[0].specular.x;
-                float3 specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
-                
-                // 最終結果の色
-                pointLightVisibilityBuff = pointLightVisibilityBuff * ((diffuse.x + specular.x) * rate);
-                
-                pointLightColor += gSceneParam.light.pointLight[index].lightColor * pointLightVisibilityBuff;
-            
-                pointLightVisibility += pointLightVisibilityBuff;
+
+                PayloadData.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate;
                 
             
             }
@@ -627,10 +739,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         }
     }
     
-    
-    
-    pointLightColor = saturate(pointLightColor);
-    pointLightVisibility = saturate(pointLightVisibility);
             
     // 太陽の位置とベクトル
     float3 sunPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
@@ -641,32 +749,11 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     {
         
         // ディレクショナルライトの方向にレイを飛ばす。
-        dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
+        float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
         
         // ディレクショナルライトの明るさが一定以上だったら
-        if (0 < dirLightVisibility && gSceneParam.light.dirLight.lightDir.y < 0.2f)
+        if (0 < dirLightVisibility)
         {
-        
-            // ディレクショナルライトの色
-            //dirLightColor = dirLightVisibility * gSceneParam.light.dirLight.lightColor;
-            dirLightColor = float3(0, 0, 0);
-            
-            // ディフーズの色
-            float mDiffuse = material[0].diffuse.x;
-            float diffuse = dot(sunDir, WorldNormal) * mDiffuse;
-            
-			// 光沢
-            const float shininess = 4.0f;
-			// 視点ベクトル
-            float3 eyedir = normalize(WorldRayOrigin() - WorldPos);
-			// 反射ベクトル
-            float3 reflect = normalize(-sunDir + 2.0f * dot(sunDir, WorldNormal) * WorldNormal);
-            // スペキュラー
-            float mSpecular = material[0].specular.x;
-            float specular = pow(saturate(dot(reflect, eyedir)), shininess) * mSpecular;
-            
-            // 最終結果の色
-            dirLightVisibility = diffuse + specular;
             
             const float SKYDOME_RADIUS = 15000.0f;
             const float SAMPLING_POS_Y = 0.0f;
@@ -689,16 +776,10 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             bool isUnderGround = false;
             float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor, isUnderGround);
             
-            dirLightColor += mieColor * float3(1.0f, 0.5f, 0.5f);
+            //PayloadData.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) * BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal);
+            PayloadData.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal);
             
-            dirLightColor = normalize(dirLightColor);
             
-            
-        }
-        else
-        {
-            dirLightColor = float3(0, 0, 0);
-            dirLightVisibility = 0;
         }
         
     }
@@ -725,36 +806,10 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     
     
     // ライトの総合隠蔽度を求める。
-    float lightVisibility = 0;
-    lightVisibility += pointLightVisibility + dirLightVisibility;
     float aoVisibility = aoLightVisibility;
     
     // 各色を設定。
-    PayloadData.light_ += lightVisibility + (pointLightColor + dirLightColor) / PI;
     PayloadData.ao_ += aoVisibility;
-    
-    
-    
-    // デバッグ機能でライトに当たった位置のみを描画するフラグが立っていたら。
-    if (gSceneParam.debug.isLightHitScene)
-    {
-        
-        if (0.0f < lightVisibility)
-        {
-            PayloadData.color_ = float3(1, 1, 1);
-            PayloadData.light_ = float3(1, 1, 1);
-        }
-        else
-        {
-            PayloadData.color_ = float3(0, 0, 0);
-            PayloadData.light_ = float3(0, 0, 0);
-        }
-        
-        PayloadData.impactAmount_ = 0;
-        
-        return true;
-        
-    }
     
     return false;
     
@@ -778,9 +833,9 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     {
         if (0.0f < PayloadData.impactAmount_)
         {
-            ShootGIRay(Vtx, 300, PayloadData);
-            PayloadData.gi_ = (PayloadData.gi_ * PayloadData.impactAmount_) * (material[0].specular / 2.0f);
-            PayloadData.gi_ = saturate(PayloadData.gi_);
+            //ShootGIRay(Vtx, 300, PayloadData);
+            //PayloadData.gi_ = (PayloadData.gi_ * PayloadData.impactAmount_);
+            //PayloadData.gi_ = saturate(PayloadData.gi_);
             PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
         
             PayloadData.impactAmount_ = 0.0f;
@@ -788,93 +843,22 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
     }
     
-    // GIのみを描画するフラグがたったら。
-    if (gSceneParam.debug.isGIOnlyScene)
-    {
+    //// GIのみを描画するフラグがたったら。
+    //if (gSceneParam.debug.isGIOnlyScene)
+    //{
         
-        PayloadData.light_ = float3(1, 1, 1);
-        PayloadData.color_ = float3(0, 0, 0);
-        PayloadData.ao_ = 0;
+    //    PayloadData.light_ = float3(1, 1, 1);
+    //    PayloadData.color_ = float3(0, 0, 0);
+    //    PayloadData.ao_ = 0;
         
-        PayloadData.impactAmount_ = 0;
+    //    PayloadData.impactAmount_ = 0;
         
-        return;
+    //    return;
         
-    }
-    
-    
-    // 当たったオブジェクトのInstanceIDが反射だったら
-    if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
-    {
-     
-        if (PayloadData.impactAmount_ < TexColor.w)
-        {
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-            PayloadData.impactAmount_ = 0.0f;
-        }
-        else
-        {
-            PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
-            PayloadData.impactAmount_ -= TexColor.w;
-            
-            if (0.0f < PayloadData.impactAmount_)
-            {
-                
-                // 反射レイを飛ばす。
-                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
-                
-            }
+    //}
         
-        }
-        
-    }
-    
-    // 当たったオブジェクトのInstanceIDが屈折だったら
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
-    {
-        
-        if (PayloadData.impactAmount_ < TexColor.w)
-        {
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-            PayloadData.impactAmount_ = TexColor.w;
-
-        }
-        else
-        {
-            PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
-            PayloadData.impactAmount_ -= TexColor.w;
-        }
-
-        float refractVal = 1.4f;
-        float3 rayDir = float3(0, 0, 0);
-
-        float nr = dot(WorldNormal, WorldRayDirection());
-        if (nr < 0)
-        {
-
-            // 空気中->オブジェクト
-            float eta = 1.0f / refractVal;
-            rayDir = refract(WorldRayDirection(), WorldNormal, eta);
-
-        }
-        else
-        {
-
-            // オブジェクト->空気中
-            float eta = refractVal / 1.0f;
-            rayDir = refract(WorldRayDirection(), -WorldNormal, eta);
-      
-        }
-            
-        if (0.0f < PayloadData.impactAmount_)
-        {
-                
-            ShootRay(CHS_IDENTIFICATION_RAYID_REFRACTION, WorldPos, rayDir, PayloadData, gRtScene);
-            
-        }
-
-    }
-    
+    // 金属度
+    float metalness = 1.0f - material[0].metalness_;
     
     // 当たったオブジェクトのInstanceIDがアルファだったら
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA || InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
@@ -952,62 +936,73 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
         
     }
-    
-    // 当たったオブジェクトのInstanceIDが屈折アルファだったら。
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION_ALPHA)
+    // 当たったオブジェクトのInstanceIDが屈折だったら
+    else if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
     {
         
-        // アルファ値を求める。
-        int instanceIndex = InstanceIndex();
-        float alpha = 0;
-        for (int alphaIndex = 0; alphaIndex < ALPHA_DATA_COUNT; ++alphaIndex)
-        {
-            if (gSceneParam.alphaData_.alphaData_[alphaIndex].instanceIndex_ != instanceIndex)
-            {
-                continue;
-            }
-            alpha = gSceneParam.alphaData_.alphaData_[alphaIndex].alpha_;
-            break;
-        }
-        
-        // payloadに入れる色を計算する。
-        if (PayloadData.impactAmount_ < alpha * TexColor.w)
+        if (PayloadData.impactAmount_ < metalness)
         {
             PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-            PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
             PayloadData.impactAmount_ = 0.0f;
 
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * alpha;
-            PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
-            PayloadData.impactAmount_ -= alpha * TexColor.w;
+            PayloadData.color_.xyz += (float3) TexColor * TexColor.w * metalness;
+            PayloadData.impactAmount_ -= TexColor.w * metalness;
         }
 
-        
-        // アルファが一定以下だったら。
-        if (alpha < 0.5f)
+        float refractVal = 1.4f;
+        float3 rayDir = float3(0, 0, 0);
+
+        float nr = dot(WorldNormal, WorldRayDirection());
+        if (nr < 0)
         {
-            ++PayloadData.alphaCounter_;
-            if (3 <= PayloadData.alphaCounter_)
-            {
-                PayloadData.isCullingAlpha_ = true;
-            }
+
+            // 空気中->オブジェクト
+            float eta = 1.0f / refractVal;
+            rayDir = refract(WorldRayDirection(), WorldNormal, eta);
+
+        }
+        else
+        {
+
+            // オブジェクト->空気中
+            float eta = refractVal / 1.0f;
+            rayDir = refract(WorldRayDirection(), -WorldNormal, eta);
+      
         }
             
         if (0.0f < PayloadData.impactAmount_)
         {
-            
-            float refractVal = 1.4f * (alpha * TexColor.w);
-            float3 rayDir = float3(0, 0, 0);
-
-            float eta = 1.0f / refractVal;
-            rayDir = refract(WorldRayDirection(), WorldNormal, eta);
                 
-            // 反射レイを飛ばす。
-            ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, rayDir, PayloadData, gRtScene);
+            ShootRay(CHS_IDENTIFICATION_RAYID_REFRACTION, WorldPos, rayDir, PayloadData, gRtScene);
             
+        }
+
+    }
+    // 反射の処理
+    else
+    {
+        
+        if (PayloadData.impactAmount_ < metalness)
+        {
+            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+            PayloadData.impactAmount_ = 0.0f;
+        }
+        else
+        {
+            PayloadData.color_.xyz += (float3) TexColor * TexColor.w * metalness;
+            PayloadData.impactAmount_ -= TexColor.w * metalness;
+            
+            if (0.0f < PayloadData.impactAmount_)
+            {
+                
+                // 反射レイを飛ばす。
+                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
+                
+            }
+        
         }
         
     }
@@ -1114,7 +1109,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     // ライティングの処理
     if (instanceID != CHS_IDENTIFICATION_INSTANCE_ALPHA)
     {
-        if (Lighting(payload, worldPos, worldNormal, vtx))
+        if (Lighting(payload, worldPos, worldNormal, vtx, texColor))
         {
             return;
         }

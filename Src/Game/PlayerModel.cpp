@@ -102,12 +102,12 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 
 		// 車のボディをロード
 		carBodyBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/CAR/OBJ/" + folder, "body.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-		carBodyInstance = PolygonInstanceRegister::Ins()->CreateInstance(carBodyBlas_, PolygonInstanceRegister::SHADER_ID::REFLECTION);
+		carBodyInstance = PolygonInstanceRegister::Ins()->CreateInstance(carBodyBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
 		carBodyInstance.lock()->AddScale(Vec3(25, 25, 25));
 
 		// 車のバンパーをロード
 		carBumperBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/CAR/OBJ/" + folder, "bumper.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-		carBumperInstance = PolygonInstanceRegister::Ins()->CreateInstance(carBumperBlas_, PolygonInstanceRegister::SHADER_ID::REFLECTION);
+		carBumperInstance = PolygonInstanceRegister::Ins()->CreateInstance(carBumperBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
 		carBumperInstance.lock()->SetParentInstance(carBodyInstance);
 
 		// 車のライトをロード
@@ -163,12 +163,12 @@ void PlayerModel::Load(COLOR ColorID, bool IsGhost)
 
 		// 車の鏡をロード
 		carMirrorBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/CAR/OBJ/" + folder, "mirror.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-		carMirrorInstance = PolygonInstanceRegister::Ins()->CreateInstance(carMirrorBlas_, PolygonInstanceRegister::SHADER_ID::COMPLETE_REFLECTION);
+		carMirrorInstance = PolygonInstanceRegister::Ins()->CreateInstance(carMirrorBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
 		carMirrorInstance.lock()->SetParentInstance(carBodyInstance);
 
 		// 車の鏡のカバーをロード
 		carMirrorCoverBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/CAR/OBJ/" + folder, "mirrorCover.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-		carMirrorCoverInstance = PolygonInstanceRegister::Ins()->CreateInstance(carMirrorBlas_, PolygonInstanceRegister::SHADER_ID::COMPLETE_REFLECTION);
+		carMirrorCoverInstance = PolygonInstanceRegister::Ins()->CreateInstance(carMirrorBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
 		carMirrorCoverInstance.lock()->SetParentInstance(carBodyInstance);
 
 		// 車のウィンドウをロード

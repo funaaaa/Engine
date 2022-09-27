@@ -26,12 +26,12 @@ public:
 
 	// マテリアル
 	struct Material {
-		Vec3 ambient_ = { 0.3f,0.3f,0.3f };	//アンビエント影響度
-		float pad1_;
-		Vec3 diffuse_ = { 0.3f,0.3f,0.3f };	//ディフューズ影響度
-		float pad2_;
-		Vec3 specular = { 0.3f,0.3f,0.3f };//スペキュラー影響度
-		float alpha_;									//アルファ
+		Vec3 baseColor_;
+		float metalness_;
+		float specular_;
+		float roughness_;
+		Vec2 pad_;
+		Material() :baseColor_(Vec3(1,1,1)), metalness_(0.0f), specular_(0.5f), roughness_(0.0f) {};
 	};
 
 	// データを渡す構造体

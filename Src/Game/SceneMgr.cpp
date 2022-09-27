@@ -2,6 +2,7 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "ResultScene.h"
+#include "PBRTestScene.h"
 
 SceneMgr::SceneMgr()
 {
@@ -19,10 +20,11 @@ void SceneMgr::Init()
 	scenes_.emplace_back(std::make_shared<TitleScene>());
 	scenes_.emplace_back(std::make_shared<GameScene>());
 	scenes_.emplace_back(std::make_shared<ResultScene>());
+	scenes_.emplace_back(std::make_shared<PBRTestScene>());
 
 	// ÉVÅ[Éìî‘çÜÇê›íËÅB
-	nowScene_ = BaseScene::SCENE_ID::TITLE;
-	nextScene_ = BaseScene::SCENE_ID::TITLE;
+	nowScene_ = BaseScene::SCENE_ID::PBR_TEST;
+	nextScene_ = BaseScene::SCENE_ID::PBR_TEST;
 
 }
 
