@@ -353,8 +353,7 @@ void mainRayGen()
 
     // Linear -> sRGB
     payloadData.light_ = 1.055f * pow(payloadData.light_, 1.0f / 2.4f) - 0.055f;
-    //payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
-    payloadData.ao_ = 0.0f;
+    payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
     //payloadData.color_ = pow(payloadData.color_, 1.0f / 2.2f);
     //payloadData.gi_ = pow(payloadData.gi_, 1.0f / 2.2f);
 
@@ -454,10 +453,10 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         bool isUnderGround = false;
         
         // 影響度をかけつつ色を保存。
-        PayloadData.light_ += float3(1, 1, 1);
-        PayloadData.color_ += AtmosphericScattering(WorldPos, mieColor, isUnderGround) * PayloadData.impactAmount_;
-        PayloadData.ao_ += float3(1, 1, 1);
-        PayloadData.gi_ += float3(0, 0, 0);
+        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.color_ += AtmosphericScattering(WorldPos, mieColor, isUnderGround) * PayloadData.impactAmount_ * PayloadData.impactAmount_;
+        PayloadData.ao_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.gi_ += float3(0, 0, 0) * PayloadData.impactAmount_;
         
         // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
         PayloadData.denoiseMask_ = float3(1, 1, 1);
@@ -476,7 +475,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
                 t = pow(t, 10.0f);
                 //t = pow(2.0f, 10.0f * t - 10.0f);
             }
-            PayloadData.color_ += (float3) TexColor * t;
+            PayloadData.color_ += (float3) TexColor * t * PayloadData.impactAmount_;
             PayloadData.color_ = saturate(PayloadData.color_);
             
         }
@@ -590,7 +589,7 @@ float3 DisneyFresnel(float LdotH)
     // 色合い
     float3 tintColor = material[0].baseColor_ / luminance;
     // 非金属の鏡面反射色を計算
-    float3 nonMetalColor = material[0].metalness_ * 0.08f * tintColor;
+    float3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
     // metalnessによる色補完 金属の場合はベースカラー
     float3 specularColor = lerp(nonMetalColor, material[0].baseColor_, material[0].metalness_);
     // NdotHの割合でSchlickFresnel補間
@@ -731,7 +730,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
                 rate = 1.0f - rate;
                 
 
-                PayloadData.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate;
+                PayloadData.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate * PayloadData.impactAmount_;
                 
             
             }
@@ -745,7 +744,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     float3 sunDir = normalize(sunPos - WorldPos);
     
     // ディレクショナルライトの色
-    if (gSceneParam.light.dirLight.isActive/* && gSceneParam.light.dirLight.lightDir.y < 0.2f*/)
+    if (gSceneParam.light.dirLight.isActive && gSceneParam.light.dirLight.lightDir.y < 0.2f)
     {
         
         // ディレクショナルライトの方向にレイを飛ばす。
@@ -776,8 +775,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             bool isUnderGround = false;
             float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor, isUnderGround);
             
-            //PayloadData.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) * BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal);
-            PayloadData.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal);
+            PayloadData.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) * BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
             
             
         }
@@ -793,7 +791,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
         
         // AOのレイを飛ばす。
-        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 10, gRtScene);
+        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 50, gRtScene);
         
         float NoL = saturate(dot(WorldNormal, sampleDir));
         float pdf = 1.0 / (2.0 * PI);
@@ -809,7 +807,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     float aoVisibility = aoLightVisibility;
     
     // 各色を設定。
-    PayloadData.ao_ += aoVisibility;
+    PayloadData.ao_ += aoVisibility * PayloadData.impactAmount_;
     
     return false;
     
@@ -818,15 +816,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
 // ライティング後処理
 void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
 {
-    
-    // デフォルトのレイだったら。
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF)
-    {
-        
-        PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-        PayloadData.impactAmount_ = 0;
-        
-    }
     
     // 当たったオブジェクトがGIを行うオブジェクトで、GIを行うフラグが立っていたら。
     if ((InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK) && !gSceneParam.debug.isNoGI)
@@ -842,20 +831,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
         
     }
-    
-    //// GIのみを描画するフラグがたったら。
-    //if (gSceneParam.debug.isGIOnlyScene)
-    //{
-        
-    //    PayloadData.light_ = float3(1, 1, 1);
-    //    PayloadData.color_ = float3(0, 0, 0);
-    //    PayloadData.ao_ = 0;
-        
-    //    PayloadData.impactAmount_ = 0;
-        
-    //    return;
-        
-    //}
         
     // 金属度
     float metalness = 1.0f - material[0].metalness_;
@@ -949,7 +924,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         else
         {
             PayloadData.color_.xyz += (float3) TexColor * TexColor.w * metalness;
-            PayloadData.impactAmount_ -= TexColor.w * metalness;
+            PayloadData.impactAmount_ -= metalness * PayloadData.impactAmount_;
         }
 
         float refractVal = 1.4f;
@@ -993,7 +968,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         else
         {
             PayloadData.color_.xyz += (float3) TexColor * TexColor.w * metalness;
-            PayloadData.impactAmount_ -= TexColor.w * metalness;
+            PayloadData.impactAmount_ -= metalness * PayloadData.impactAmount_;
             
             if (0.0f < PayloadData.impactAmount_)
             {
@@ -1203,3 +1178,12 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     //AcceptHitAndEndSearch();
     
 }
+
+
+/*
+
+
+全てのモデルをGLTFに変える。
+
+
+*/

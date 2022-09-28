@@ -120,6 +120,11 @@ private:
 	std::shared_ptr<CharacterMgr> characterMgr_;
 
 
+	// PBRテスト用
+	std::weak_ptr<BLAS> pbrSphereBlas_;
+	std::weak_ptr<PolygonMeshInstance> pbrSphereIns_;
+
+
 	/*-- レース開始前の変数 --*/
 
 	std::shared_ptr<Sprite> countDownSprite_;

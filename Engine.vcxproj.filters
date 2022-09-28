@@ -223,7 +223,9 @@
     <ClCompile Include="Src\Engine\GLTF.cpp">
       <Filter>エンジン\モデルデータ関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\PBRTestScene.cpp" />
+    <ClCompile Include="Src\Game\PBRTestScene.cpp">
+      <Filter>アプリケーション\シーン管理\シーン</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">

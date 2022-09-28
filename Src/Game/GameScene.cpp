@@ -195,6 +195,14 @@ GameScene::GameScene()
 	goSprite_->GenerateForTexture(WINDOW_CENTER, GO_FONT_SIZE, Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/go.png");
 	goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f));
 
+
+	// PBRテスト用
+	pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
+	pbrSphereIns_.lock()->AddScale(Vec3(50, 50, 50));
+	pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
+	pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
+
 }
 
 void GameScene::Init()
@@ -339,6 +347,13 @@ void GameScene::Update()
 
 	// 太陽の角度を更新。
 	sunAngle_ += sunSpeed_;
+	if (0.0f < constBufferData_.light_.dirLight_.lihgtDir_.y_) {
+
+		sunAngle_ += sunSpeed_;
+		sunAngle_ += sunSpeed_;
+		sunAngle_ += sunSpeed_;
+
+	}
 	constBufferData_.light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
@@ -810,6 +825,15 @@ void GameScene::InputImGUI()
 	//	PolygonInstanceRegister::Ins()->ChangeTrans(index, characterMgr_->GetPlayerIns().lock()->GetPos());
 
 	//}
+
+	// マテリアルの値を書き換える。
+	ImGui::Text("Menu");
+	ImGui::SliderFloat("Metalness", &pbrSphereBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
+	ImGui::SliderFloat("Specular", &pbrSphereBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
+	ImGui::SliderFloat("Roughness", &pbrSphereBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
+	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
+
+	pbrSphereBlas_.lock()->IsChangeMaterial();
 
 
 }

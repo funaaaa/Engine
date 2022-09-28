@@ -11,7 +11,6 @@ public:
 		TITLE,			// タイトルシーン
 		GAME,			// ゲームシーン
 		RESULT,			// リザルトシーン
-		PBR_TEST,
 		SCENE_COUNT,	// シーン数
 
 	};
