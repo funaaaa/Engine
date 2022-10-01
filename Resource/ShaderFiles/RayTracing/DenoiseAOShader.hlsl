@@ -426,7 +426,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         float rate = rayLength / MAX_RAY;
         rate = 1.0f - saturate(rate);
         
-        float3 giBuff = (float3) TexColor * rate;
+        float3 giBuff = (float3) TexColor * rate * (1.0f - material[0].metalness_);
         
         //// 当たったオブジェクトが完全反射だったらGIの色を黒くする。(完全反射で色がないから。黒は色として反映されない。)
         //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
@@ -822,9 +822,9 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     {
         if (0.0f < PayloadData.impactAmount_)
         {
-            //ShootGIRay(Vtx, 300, PayloadData);
-            //PayloadData.gi_ = (PayloadData.gi_ * PayloadData.impactAmount_);
-            //PayloadData.gi_ = saturate(PayloadData.gi_);
+            ShootGIRay(Vtx, 300, PayloadData);
+            PayloadData.gi_ = (PayloadData.gi_ * PayloadData.impactAmount_);
+            PayloadData.gi_ = saturate(PayloadData.gi_);
             PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
         
             PayloadData.impactAmount_ = 0.0f;
@@ -923,8 +923,8 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * TexColor.w * metalness;
-            PayloadData.impactAmount_ -= metalness * PayloadData.impactAmount_;
+            PayloadData.color_.xyz += (float3) TexColor * metalness;
+            PayloadData.impactAmount_ -= metalness;
         }
 
         float refractVal = 1.4f;
@@ -967,8 +967,8 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * TexColor.w * metalness;
-            PayloadData.impactAmount_ -= metalness * PayloadData.impactAmount_;
+            PayloadData.color_.xyz += (float3) TexColor * metalness;
+            PayloadData.impactAmount_ -= metalness;
             
             if (0.0f < PayloadData.impactAmount_)
             {
@@ -1184,6 +1184,17 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
 
 全てのモデルをGLTFに変える。
+
+○頭の中のメモ
+Roughnessのぼやけるやつどうやるんだ？
+AOで色の明るさを底上げするのは物理的に正しいのか？
+Spcularの値を取ってこれないのどうしよう。
+モデルをGLTFに対応させなきゃ。
+全反射から反射に切り替わる瞬間に、映り込んだオブジェクトの反射屈折が消えるのは何故？
+
+9/29 モデルをGLTFに。
+9/30 全反射から反射に切り替わる瞬間の問題を解決。
+10/1 その他の違和感を解決していく。
 
 
 */

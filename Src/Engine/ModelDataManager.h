@@ -31,7 +31,7 @@ public:
 		float specular_;
 		float roughness_;
 		Vec2 pad_;
-		Material() :baseColor_(Vec3(1,1,1)), metalness_(0.0f), specular_(0.5f), roughness_(0.0f) {};
+		Material() :baseColor_(Vec3(1,1,1)), metalness_(0.1f), specular_(0.1f), roughness_(0.3f) {};
 	};
 
 	// データを渡す構造体

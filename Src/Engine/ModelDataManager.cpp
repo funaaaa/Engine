@@ -298,12 +298,12 @@ void ModelDataManager::LoadObjMaterial(std::string DirectoryPath, const std::str
 		//	lineStream >> ModelData.material_.diffuse_.y_;
 		//	lineStream >> ModelData.material_.diffuse_.z_;
 		//}
-		//// 先頭文字がKsならスペキュラー色
-		//if (key == "Ks") {
-		//	lineStream >> ModelData.material_.specular.x_;
-		//	lineStream >> ModelData.material_.specular.y_;
-		//	lineStream >> ModelData.material_.specular.z_;
-		//}
+		// 先頭文字がKsならスペキュラー色
+		if (key == "Ks") {
+			lineStream >> ModelData.material_.metalness_;
+			//lineStream >> ModelData.material_.specular.y_;
+			//lineStream >> ModelData.material_.specular.z_;
+		}
 		// 先頭文字がmap_Kdならテクスチャ
 		if (key == "map_Kd") {
 

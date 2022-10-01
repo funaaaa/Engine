@@ -78,6 +78,62 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 }
 
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, const UINT& ShaderID)
+{
+
+	/*===== ギミックを追加 =====*/
+
+	// 空きオブジェクト検索。
+	int addIndex = -1;
+	for (auto& index : objects_) {
+
+		if (index.second) continue;
+
+		addIndex = static_cast<int>(&index - &objects_[0]);
+
+		break;
+
+	}
+
+	// -1だったらもう空きはないです。
+	if (addIndex == -1) {
+
+		assert(0);
+
+	}
+
+	// ふわふわ動く装飾オブジェクトだったら。
+	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
+
+		objects_[addIndex].first = std::make_shared<FloatingStageObject>();
+
+	}
+	// アイテムボックスオブジェクトだったら
+	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+
+		objects_[addIndex].first = std::make_shared<ItemBoxObject>();
+
+	}
+	// それ以外の通常のオブジェクトだったら。
+	else {
+
+		objects_[addIndex].first = std::make_shared<BasicStageObject>();
+
+	}
+
+	// Blasをロード
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateGLTF(ModelPath, HitGroupName);
+	// Instanceを生成。
+	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+
+	// オブジェクトを設定。
+	objects_[addIndex].first->Setting(ObjectID, CollisionID, instance);
+	objects_[addIndex].second = true;
+
+	return addIndex;
+
+}
+
 void StageObjectMgr::Update(const int& Timer)
 {
 
