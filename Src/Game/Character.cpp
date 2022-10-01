@@ -65,7 +65,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
 
-		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::LEFT_LEARNING));
+		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER));
 
 		// ‰ŠúˆÊ’u‚ğİ’èB
 		DEF_POS = GHOST_DEF_POS;
