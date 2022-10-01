@@ -49,7 +49,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		DEF_POS = PLAYER_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::RED, false);
+		playerModel_.Load(PlayerModel::COLOR::RED, PlayerModel::CHARA::PLAYER);
 
 	}
 	else if (charaID_ == CHARA_ID::P1_WGHOST) {
@@ -60,7 +60,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::RED, false);
+		playerModel_.Load(PlayerModel::COLOR::RED, PlayerModel::CHARA::PLAYER);
 
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
@@ -71,7 +71,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::BLUE, false);
+		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::AI);
 
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
@@ -86,7 +86,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::BLUE, true);
+		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::GHOST);
 
 	}
 
@@ -1194,7 +1194,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		// アイテムを取得したフラグ
 		isGetItem_ = true;
 
-		if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::WRITE_GHOST || GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::GHOST) {
+		if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::WRITE_GHOST || GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::GHOST) {
 
 			item_ = std::make_shared<BoostItem>();
 			item_->Generate(playerModel_.carBodyInstance);

@@ -40,15 +40,31 @@ void TitleScene::Update()
 
 	ImGui::Text("Choose your level!");
 
-	int mode = GameSceneMode::Ins()->ghostLevel_;
-	ImGui::RadioButton("Level : 1", &mode, 0);
+	// AIかゴーストかを選択する。
+	int mode = static_cast<int>(GameSceneMode::Ins()->mode_);
+	ImGui::RadioButton("AI", &mode, 1);
 	ImGui::SameLine();
-	ImGui::RadioButton("Level : 2", &mode, 1);
-	ImGui::SameLine();
-	ImGui::RadioButton("Level : 3", &mode, 2);
-	ImGui::SameLine();
-	ImGui::RadioButton("Level : 4", &mode, 3);
-	GameSceneMode::Ins()->ghostLevel_ = mode;
+	ImGui::RadioButton("GHOST", &mode, 3);
+	GameSceneMode::Ins()->mode_ = static_cast<GameSceneMode::MODE>(mode);
+
+	// AIだったら。
+	if (mode == 1) {
+
+	}
+	// GHOSTだったら。
+	else if (mode == 3) {
+
+		int level = GameSceneMode::Ins()->level_;
+		ImGui::RadioButton("Level : 1", &level, 0);
+		ImGui::SameLine();
+		ImGui::RadioButton("Level : 2", &level, 1);
+		ImGui::SameLine();
+		ImGui::RadioButton("Level : 3", &level, 2);
+		ImGui::SameLine();
+		ImGui::RadioButton("Level : 4", &level, 3);
+		GameSceneMode::Ins()->level_ = level;
+
+	}
 
 }
 

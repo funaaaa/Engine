@@ -220,7 +220,7 @@ void GameScene::Init()
 	countDownSprite_->ChangePosition(Vec3(100000, 10000, 100));
 	goSprite_->ChangePosition(Vec3(100000, 10000, 100));
 
-	if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::AI) {
+	if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::AI) {
 
 		// プレイヤーを生成。
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
@@ -229,25 +229,25 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false);
 
 	}
-	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::DEF) {
+	else if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::DEF) {
 
 		// プレイヤーを生成。
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
 
 	}
-	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::WRITE_GHOST) {
+	else if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::WRITE_GHOST) {
 
 		// プレイヤーを生成。
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1_WGHOST), true);
 
 	}
-	else if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::GHOST) {
+	else if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::GHOST) {
 
 		// プレイヤーを生成。
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
 
 		// ゴーストを生成。
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, GameSceneMode::Ins()->ghostLevel_);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, GameSceneMode::Ins()->level_);
 
 	}
 

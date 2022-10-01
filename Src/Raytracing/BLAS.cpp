@@ -599,8 +599,8 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	// 保存されているヒットグループ名と違っていたら書き込まない。
 	//if (HitGroupName == shader) {
 
-	auto id_ = rtsoProps_->GetShaderIdentifier(shader.c_str());
-	if (id_ == nullptr) {
+	auto mode_ = rtsoProps_->GetShaderIdentifier(shader.c_str());
+	if (mode_ == nullptr) {
 		throw std::logic_error("Not found ShaderIdentifier");
 	}
 
@@ -608,7 +608,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	if (isChangeVertex) {
 
 		// シェーダー識別子を書き込む。
-		memcpy(Dst, id_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		memcpy(Dst, mode_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
 		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
 		// 今回のプログラムでは以下の順序でディスクリプタを記録。

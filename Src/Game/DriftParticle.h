@@ -90,7 +90,7 @@ public:
 
 private:
 
-	ID id_;
+	ID mode_;
 
 
 public:

@@ -72,8 +72,16 @@ public:
 
 	};
 
+	enum class CHARA {
+
+		PLAYER,
+		GHOST,
+		AI,
+
+	};
+
 	// ÉçÅ[Éh
-	void Load(COLOR ColorID, bool IsGhost);
+	void Load(COLOR ColorID, CHARA Chara);
 	// çÌèú
 	void Delete();
 

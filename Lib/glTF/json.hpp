@@ -2776,11 +2776,11 @@ class exception : public std::exception
 
   protected:
     JSON_HEDLEY_NON_NULL(3)
-    exception(int id_, const char* what_arg) : id(id_), m(what_arg) {}
+    exception(int mode_, const char* what_arg) : id(mode_), m(what_arg) {}
 
-    static std::string name(const std::string& ename, int id_)
+    static std::string name(const std::string& ename, int mode_)
     {
-        return "[json.exception." + ename + "." + std::to_string(id_) + "] ";
+        return "[json.exception." + ename + "." + std::to_string(mode_) + "] ";
     }
 
     template<typename BasicJsonType>
@@ -2910,20 +2910,20 @@ class parse_error : public exception
     @return parse_error object
     */
     template<typename BasicJsonType>
-    static parse_error create(int id_, const position_t& pos, const std::string& what_arg, const BasicJsonType& context)
+    static parse_error create(int mode_, const position_t& pos, const std::string& what_arg, const BasicJsonType& context)
     {
-        std::string w = exception::name("parse_error", id_) + "parse error" +
+        std::string w = exception::name("parse_error", mode_) + "parse error" +
                         position_string(pos) + ": " + exception::diagnostics(context) + what_arg;
-        return parse_error(id_, pos.chars_read_total, w.c_str());
+        return parse_error(mode_, pos.chars_read_total, w.c_str());
     }
 
     template<typename BasicJsonType>
-    static parse_error create(int id_, std::size_t byte_, const std::string& what_arg, const BasicJsonType& context)
+    static parse_error create(int mode_, std::size_t byte_, const std::string& what_arg, const BasicJsonType& context)
     {
-        std::string w = exception::name("parse_error", id_) + "parse error" +
+        std::string w = exception::name("parse_error", mode_) + "parse error" +
                         (byte_ != 0 ? (" at byte " + std::to_string(byte_)) : "") +
                         ": " + exception::diagnostics(context) + what_arg;
-        return parse_error(id_, byte_, w.c_str());
+        return parse_error(mode_, byte_, w.c_str());
     }
 
     /*!
@@ -2938,8 +2938,8 @@ class parse_error : public exception
     const std::size_t byte;
 
   private:
-    parse_error(int id_, std::size_t byte_, const char* what_arg)
-        : exception(id_, what_arg), byte(byte_) {}
+    parse_error(int mode_, std::size_t byte_, const char* what_arg)
+        : exception(mode_, what_arg), byte(byte_) {}
 
     static std::string position_string(const position_t& pos)
     {
@@ -2989,16 +2989,16 @@ class invalid_iterator : public exception
 {
   public:
     template<typename BasicJsonType>
-    static invalid_iterator create(int id_, const std::string& what_arg, const BasicJsonType& context)
+    static invalid_iterator create(int mode_, const std::string& what_arg, const BasicJsonType& context)
     {
-        std::string w = exception::name("invalid_iterator", id_) + exception::diagnostics(context) + what_arg;
-        return invalid_iterator(id_, w.c_str());
+        std::string w = exception::name("invalid_iterator", mode_) + exception::diagnostics(context) + what_arg;
+        return invalid_iterator(mode_, w.c_str());
     }
 
   private:
     JSON_HEDLEY_NON_NULL(3)
-    invalid_iterator(int id_, const char* what_arg)
-        : exception(id_, what_arg) {}
+    invalid_iterator(int mode_, const char* what_arg)
+        : exception(mode_, what_arg) {}
 };
 
 /*!
@@ -3044,15 +3044,15 @@ class type_error : public exception
 {
   public:
     template<typename BasicJsonType>
-    static type_error create(int id_, const std::string& what_arg, const BasicJsonType& context)
+    static type_error create(int mode_, const std::string& what_arg, const BasicJsonType& context)
     {
-        std::string w = exception::name("type_error", id_) + exception::diagnostics(context) + what_arg;
-        return type_error(id_, w.c_str());
+        std::string w = exception::name("type_error", mode_) + exception::diagnostics(context) + what_arg;
+        return type_error(mode_, w.c_str());
     }
 
   private:
     JSON_HEDLEY_NON_NULL(3)
-    type_error(int id_, const char* what_arg) : exception(id_, what_arg) {}
+    type_error(int mode_, const char* what_arg) : exception(mode_, what_arg) {}
 };
 
 /*!
@@ -3092,15 +3092,15 @@ class out_of_range : public exception
 {
   public:
     template<typename BasicJsonType>
-    static out_of_range create(int id_, const std::string& what_arg, const BasicJsonType& context)
+    static out_of_range create(int mode_, const std::string& what_arg, const BasicJsonType& context)
     {
-        std::string w = exception::name("out_of_range", id_) + exception::diagnostics(context) + what_arg;
-        return out_of_range(id_, w.c_str());
+        std::string w = exception::name("out_of_range", mode_) + exception::diagnostics(context) + what_arg;
+        return out_of_range(mode_, w.c_str());
     }
 
   private:
     JSON_HEDLEY_NON_NULL(3)
-    out_of_range(int id_, const char* what_arg) : exception(id_, what_arg) {}
+    out_of_range(int mode_, const char* what_arg) : exception(mode_, what_arg) {}
 };
 
 /*!
@@ -3131,15 +3131,15 @@ class other_error : public exception
 {
   public:
     template<typename BasicJsonType>
-    static other_error create(int id_, const std::string& what_arg, const BasicJsonType& context)
+    static other_error create(int mode_, const std::string& what_arg, const BasicJsonType& context)
     {
-        std::string w = exception::name("other_error", id_) + exception::diagnostics(context) + what_arg;
-        return other_error(id_, w.c_str());
+        std::string w = exception::name("other_error", mode_) + exception::diagnostics(context) + what_arg;
+        return other_error(mode_, w.c_str());
     }
 
   private:
     JSON_HEDLEY_NON_NULL(3)
-    other_error(int id_, const char* what_arg) : exception(id_, what_arg) {}
+    other_error(int mode_, const char* what_arg) : exception(mode_, what_arg) {}
 };
 }  // namespace detail
 }  // namespace nlohmann

@@ -46,7 +46,7 @@ void DriftParticle::GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, con
 
 	/*===== 生成処理 =====*/
 
-	id_ = ID::SMOKE;
+	mode_ = ID::SMOKE;
 	pos_ = Pos;
 	forardVec_ = ForwardVec;
 	blas_ = Blas;
@@ -80,7 +80,7 @@ void DriftParticle::GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, cons
 
 	/*===== 生成処理 =====*/
 
-	id_ = ID::FIRE;
+	mode_ = ID::FIRE;
 	pos_ = Pos;
 	blas_ = Blas;
 	isActive_ = true;
@@ -108,7 +108,7 @@ void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<Polygon
 
 	/*===== オーラの生成処理 =====*/
 
-	id_ = static_cast<DriftParticle::ID>(Id);
+	mode_ = static_cast<DriftParticle::ID>(Id);
 	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
@@ -161,7 +161,7 @@ void DriftParticle::GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_pt
 
 	/*===== ドリフト時のパーティクルを生成 =====*/
 
-	id_ = Id;
+	mode_ = Id;
 	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
@@ -238,7 +238,7 @@ void DriftParticle::GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<P
 
 	/*===== ジャンプエフェクトを生成 =====*/
 
-	id_ = ID::JUMP_EFFECT;
+	mode_ = ID::JUMP_EFFECT;
 	blas_ = Blas;
 	isActive_ = true;
 	isAppearingNow_ = true;
@@ -265,7 +265,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 
 	/*===== 更新処理 =====*/
 
-	switch (id_)
+	switch (mode_)
 	{
 	case DriftParticle::ID::SMOKE:
 
@@ -332,7 +332,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		// サイズを変える。
 		if (isAuraBig_) {
 
-			float CHANGE_SCALE = (id_ == ID::AURA_BIG ? AURA_BIG_SCALE + AURA_ADD_SCALE : AURA_SMALL_SCALE + AURA_ADD_SCALE);
+			float CHANGE_SCALE = (mode_ == ID::AURA_BIG ? AURA_BIG_SCALE + AURA_ADD_SCALE : AURA_SMALL_SCALE + AURA_ADD_SCALE);
 
 			// 補完する。
 			nowScale_ += (CHANGE_SCALE - nowScale_) / 2.0f;
@@ -348,14 +348,14 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		else {
 
 			++changeScaleTimer_;
-			int MAX_CHANGE_TIMER = (id_ == ID::AURA_BIG ? CHANGE_SCALE_TIMER_BIG : CHANGE_SCALE_TIMER_SMALL);
+			int MAX_CHANGE_TIMER = (mode_ == ID::AURA_BIG ? CHANGE_SCALE_TIMER_BIG : CHANGE_SCALE_TIMER_SMALL);
 			if (MAX_CHANGE_TIMER < changeScaleTimer_) {
 
 				changeScaleTimer_ = 0;
 
 				// 補間先のスケールをランダムで求める。
 				const float HUNDRED = 100.0f;
-				int CHANGE_SCALE = static_cast<int>((id_ == ID::AURA_BIG ? AURA_BIG_SCALE * HUNDRED : AURA_SMALL_SCALE * HUNDRED));
+				int CHANGE_SCALE = static_cast<int>((mode_ == ID::AURA_BIG ? AURA_BIG_SCALE * HUNDRED : AURA_SMALL_SCALE * HUNDRED));
 				float random = static_cast<float>(FHelper::GetRand(CHANGE_SCALE / 2, CHANGE_SCALE));
 				changeScale_ = random / 100.0f;
 

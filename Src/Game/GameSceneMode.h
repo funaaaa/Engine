@@ -7,7 +7,7 @@ class GameSceneMode : public Singleton<GameSceneMode> {
 
 public:
 
-	enum class MODE_ID {
+	enum class MODE {
 
 		DEF,
 		AI,
@@ -16,12 +16,12 @@ public:
 
 	};
 
-	MODE_ID id_;
-	int ghostLevel_;
+	MODE mode_;
+	int level_;
 
 	GameSceneMode() {
-		id_ = MODE_ID::GHOST;
-		ghostLevel_;
+		mode_ = MODE::GHOST;
+		level_;
 	}
 
 };
