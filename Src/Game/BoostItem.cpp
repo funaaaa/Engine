@@ -1,5 +1,10 @@
 #include "BoostItem.h"
 
+BoostItem::BoostItem()
+{
+	itemID_ = ItemID::NONE;
+}
+
 void BoostItem::Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 

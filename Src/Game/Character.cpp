@@ -707,6 +707,10 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	BaseOperationObject::OperationInputData operationInputData;
 	operationInputData.pos_ = pos_;
 	operationInputData.forwradVec_ = forwardVec_;
+	if (item_.operator bool()) {
+		operationInputData.hasItemID_ = item_->GetItemID();
+	}
+	operationInputData.isHitJumpBoostGimmick_ = isHitJumpActionGimmick_;
 	BaseOperationObject::Operation operation = operationObject_->Input(operationInputData);
 
 	// タイヤのマスクのフラグを初期化する。
@@ -1217,6 +1221,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 
 	// 段差加速オブジェクトと当たっていて、ジャンプアクションボタンを押していたら。
 	isJumpAction_ = false;
+	isHitJumpActionGimmick_ = output.isHitStepBoostGimmick_;
 	if (output.isHitStepBoostGimmick_ && isJumpActionTrigger_) {
 
 		// 加速させる。
@@ -1250,13 +1255,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 	if (jumpBoostSpeed_ < 0) {
 
 		jumpBoostSpeed_ = 0;
-
-	}
-
-
-	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
-
-		++rapCount_;
 
 	}
 

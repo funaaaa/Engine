@@ -61,6 +61,8 @@ public:
 	// アイテムクラス
 	std::shared_ptr<BaseItem> item_;
 
+	bool isHitJumpActionGimmick_;
+
 	bool IsTurningIndicatorRed_;// ウインカーの色が赤かどうか。
 	int turningIndicatorTimer_;	// ウインカーがチカチカするタイマー
 	const int TURNING_INDICATOR_TIMER = 30;

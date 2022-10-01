@@ -5,6 +5,11 @@
 #include "PolygonInstance.h"
 #include "FHelper.h"
 
+ShellItem::ShellItem()
+{
+	itemID_ = ItemID::NONE;
+}
+
 void ShellItem::Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 

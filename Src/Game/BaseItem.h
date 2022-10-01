@@ -13,6 +13,7 @@ public:
 
 	enum class ItemID {
 
+		NONE,		// ‰½‚à‚Á‚Ä‚È‚¢B
 		BOOST,		// ‰Á‘¬‚«‚Ì‚±
 		SHELL,		// —Îb—…
 
