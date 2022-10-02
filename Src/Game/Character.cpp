@@ -139,6 +139,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 	nowBoostRotQ_ = DirectX::XMVECTOR();
 	nowHandleRotQ_ = DirectX::XMVECTOR();
 	defBodyMatRot_ = DirectX::XMMatrixIdentity();
+	cameraForwardVec_ = forwardVec_;
 
 	baseDriftRot_ = 0;
 	nowDriftRot_ = 0;
@@ -209,6 +210,7 @@ void Character::Init()
 	isConcentrationLine_ = false;
 	isJumpActionTrigger_ = false;
 	playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
+	cameraForwardVec_ = forwardVec_;
 
 
 	// 臨時のバグ対策です。 最初の一回目のドリフトのときのみオーラが出ないので、ここで一回生成しておく。
@@ -321,6 +323,11 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		easingAmount = easingAmount * easingAmount * easingAmount * easingAmount * easingAmount;
 
 		rotY_ = shellHitRot_ + easingAmount * DirectX::XM_2PI;
+
+	}
+	else {
+
+		cameraForwardVec_ = forwardVec_;
 
 	}
 
@@ -650,21 +657,7 @@ Vec3 Character::GetCameraForwardVec()
 {
 	/*===== カメラ用正面ベクトル取得関数 =====*/
 
-	//Vec3 movedVec = pos_ - prevPos_;
-
-	return forwardVec_;
-
-	//return FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-	//// 移動していなかったら。
-	//if (movedVec.Length() == 0) {
-
-	//	return forwardVec_;
-
-	//}
-
-	//// 移動していたら。
-	//return movedVec.GetNormal();
+	return cameraForwardVec_;
 
 }
 
@@ -731,6 +724,12 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	if (0 < operation.accelerationRate_ && onGround_ && !IsBeforeStart) {
 
 		speed_ += operation.accelerationRate_ * ADD_SPEED;
+
+	}
+	// 甲羅にあたっていたら。
+	else if (0 < canNotMoveTimer_) {
+
+		speed_ -= speed_ / 50.0f;
 
 	}
 	else if (onGround_) {
@@ -867,7 +866,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
 	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.0f;
 	bool isOnGround = onGround_ || IsBeforeStart;	// 設置していたら ゲームが始まっていない場合、キャラは空中に浮いているので、接地判定を取る。
-	if (triggerDriftBottom && notJump && isOnGround) {
+	if (triggerDriftBottom && notJump && isOnGround && canNotMoveTimer_ <= 0) {
 
 		isDriftJump_ = true;
 		driftJumpVec_ = upVec_;
@@ -978,8 +977,14 @@ void Character::Move(const bool& IsBeforeStart)
 
 	}
 
+	// 移動させる方向。 甲羅にあたっているときはあたった方向に進ませる為。
+	Vec3 moveVec = forwardVec_;
+	if (0 < canNotMoveTimer_) {
+		moveVec = cameraForwardVec_;
+	}
+
 	// 座標移動させる。
-	pos_ += forwardVec_ * (speed_ + boostSpeed_ + jumpBoostSpeed_);
+	pos_ += moveVec * (speed_ + boostSpeed_ + jumpBoostSpeed_);
 
 	// ドリフト時のブースト移動量を0に近づける。
 	if (0 < boostSpeed_) {
@@ -1214,8 +1219,8 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 			//	item_->Generate(playerModel_.carBodyInstance);
 			//}
 			//else {
-				item_ = std::make_shared<ShellItem>();
-				item_->Generate(playerModel_.carBodyInstance);
+			item_ = std::make_shared<ShellItem>();
+			item_->Generate(playerModel_.carBodyInstance);
 			//}
 
 		}
@@ -1249,7 +1254,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		// 甲羅との当たり判定
 		bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_);
 
-		if (isHitShell) {
+		if (isHitShell || Input::Ins()->IsKeyTrigger(DIK_P)) {
 
 			canNotMoveTimer_ = CAN_NOT_MOVE_TIMER_SHELL_HIT;
 			shellHitRot_ = rotY_;

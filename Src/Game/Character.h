@@ -26,6 +26,7 @@ public:
 	Vec3 pos_;				// 車の座標
 	Vec3 prevPos_;			// 車の前フレームの座標
 	Vec3 forwardVec_;		// 進行方向ベクトル
+	Vec3 cameraForwardVec_;	// 甲羅にあたった瞬間の正面ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
 	Vec3 upVec_;			// 上方向ベクトル
 	Vec3 size_;				// サイズ
