@@ -19,7 +19,7 @@ BaseOperationObject::Operation FirstAIOperationObject::Input(const BaseOperation
 
 	BaseOperationObject::Operation operation;
 
-	operation.accelerationRate_ = 1.0f;
+	//operation.accelerationRate_ = 1.0f;
 
 	operation.handleDriveRate_ = waypointMgr_->LeftRightCheck(InputData.pos_, InputData.forwradVec_);
 

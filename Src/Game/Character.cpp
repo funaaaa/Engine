@@ -1206,8 +1206,17 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		}
 		else {
 
-			item_ = std::make_shared<BoostItem>();
-			item_->Generate(playerModel_.carBodyInstance);
+			// AI戦だったらランダムでアイテムを生成する。
+			int random = FHelper::GetRand(0, 1);
+
+			//if (random == 0) {
+			//	item_ = std::make_shared<BoostItem>();
+			//	item_->Generate(playerModel_.carBodyInstance);
+			//}
+			//else {
+				item_ = std::make_shared<ShellItem>();
+				item_->Generate(playerModel_.carBodyInstance);
+			//}
 
 		}
 

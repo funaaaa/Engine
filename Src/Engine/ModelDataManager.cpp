@@ -157,6 +157,10 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				ObjectBuffer.vertex_.emplace_back();
 				ObjectBuffer.vertex_.back().pos_ = index;
 			}
+			for (auto& index : position_) {
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertex_.emplace_back();
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertex_.back().pos_ = index;
+			}
 		}
 
 		return;

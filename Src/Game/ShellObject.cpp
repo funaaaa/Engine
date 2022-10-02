@@ -38,7 +38,7 @@ void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float&
 	/*===== ¶¬ˆ— =====*/
 
 	// BLAS‚ÆInstance‚ð¶¬B
-	blas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Shell/", "shell.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF]);
+	blas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Item/Shell/", "shell.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF]);
 	instance = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::DEF);
 
 	size_ = Vec3(20.0f, 20.0f, 20.0f);
