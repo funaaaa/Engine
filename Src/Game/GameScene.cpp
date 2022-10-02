@@ -27,6 +27,7 @@
 #include "DriftParticleMgr.h"
 #include "ConcentrationLineMgr.h"
 #include "PolygonInstance.h"
+#include "BaseItem.h"
 
 #include "GLTF.h"
 
@@ -181,7 +182,7 @@ GameScene::GameScene()
 	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(381, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
 
 	itemFrameUI_ = std::make_shared<Sprite>();
-	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/itemFrame.png");
+	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/boostItem.png");
 	itemFrameEasingTimer_ = 1;
 
 	// 集中線
@@ -384,6 +385,14 @@ void GameScene::Update()
 	itemFrameEasingTimer_ += 0.05f;
 	if (1.0f < itemFrameEasingTimer_) itemFrameEasingTimer_ = 1.0f;
 	if (characterMgr_->GetPlayerIns().lock()->GetIsItem()) {
+
+		// UIのテクスチャを変更。
+		if (characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST) {
+			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/boostItem.png"), 0);
+		}
+		else {
+			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/shellItem.png"), 0);
+		}
 
 		// イージング量を求める。
 		float easingAmount = FEasing::EaseOutQuint(itemFrameEasingTimer_);
