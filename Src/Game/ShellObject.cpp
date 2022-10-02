@@ -222,6 +222,9 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 
 		pos_ += underVec * UNDER_DISTANCCE;
 
+		// インスタンスを回転させる。
+		instance.lock()->ChangeRotate(charaInstance.lock()->GetRotate());
+
 
 	}
 
