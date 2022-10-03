@@ -234,6 +234,7 @@
     <ClCompile Include="Src\Raytracing\RayRootsignature.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingPipline.cpp" />
+    <ClCompile Include="Src\Raytracing\RoughnessBlur.cpp" />
     <ClCompile Include="Src\Raytracing\TLAS.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -327,6 +328,7 @@
     <ClInclude Include="Src\Raytracing\RayComputeShader.h" />
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />
     <ClInclude Include="Src\Raytracing\RaytracingPipline.h" />
+    <ClInclude Include="Src\Raytracing\RoughnessBlur.h" />
     <ClInclude Include="Src\Raytracing\TLAS.h" />
   </ItemGroup>
   <ItemGroup>
@@ -366,6 +368,26 @@
     <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\RoughnessBlurX.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\RoughnessBlurY.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>

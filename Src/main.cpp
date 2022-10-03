@@ -9,6 +9,7 @@
 #include "PolygonInstanceRegister.h"
 #include "Input.h"
 #include "BLASRegister.h"
+#include "RoughnessBlur.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -39,6 +40,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// デノイズ用のクラスを初期化。
 	Denoiser::Ins()->Setting();
+	RoughnessBlur::Ins()->Setting();
 
 	// カメラを初期化。
 	Camera::Ins()->Init();

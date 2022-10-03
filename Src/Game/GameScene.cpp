@@ -28,6 +28,7 @@
 #include "ConcentrationLineMgr.h"
 #include "PolygonInstance.h"
 #include "BaseItem.h"
+#include "RoughnessBlur.h"
 
 #include "GLTF.h"
 
@@ -47,7 +48,7 @@ GameScene::GameScene()
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	int payloadSize = sizeof(float) * 5 + sizeof(Vec3) * 4 + sizeof(int) * 4 ;
+	int payloadSize = sizeof(float) * 5 + sizeof(Vec3) * 4 + sizeof(int) * 4;
 	pipline_ = std::make_shared<RaytracingPipline>();
 	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 6, payloadSize, sizeof(Vec2), 6);
 
@@ -542,6 +543,9 @@ void GameScene::Draw()
 	//	Denoiser::Ins()->Denoise(giOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 1);
 
 	//}
+
+	// ラフネス成分を使ってブラーをかける。
+	RoughnessBlur::Ins()->Denoise(reflectionColor_->GetUAVIndex(), roughnessMap_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), denoiseReflectionColor_->GetUAVIndex(), 100, 1);
 
 	denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 

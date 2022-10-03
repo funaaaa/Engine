@@ -226,6 +226,7 @@
     <ClCompile Include="Src\Game\PBRTestScene.cpp">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Raytracing\RoughnessBlur.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -501,6 +502,9 @@
     <ClInclude Include="Src\Game\PBRTestScene.h">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Raytracing\RoughnessBlur.h">
+      <Filter>レイトレーシング\デノイズ\Roughness用シェーダー</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -703,6 +707,9 @@
     <Filter Include="エンジン\モデルデータ関係\gltf外部">
       <UniqueIdentifier>{26e6a8d3-a71d-43ee-81d2-e11f062c3e25}</UniqueIdentifier>
     </Filter>
+    <Filter Include="レイトレーシング\デノイズ\Roughness用シェーダー">
+      <UniqueIdentifier>{4969bf7e-f160-4d44-9233-9f98b30cbd9a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SetupAPI.Lib">
@@ -736,6 +743,12 @@
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
       <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\RoughnessBlurX.hlsl">
+      <Filter>レイトレーシング\デノイズ\Roughness用シェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\RoughnessBlurY.hlsl">
+      <Filter>レイトレーシング\デノイズ\Roughness用シェーダー</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

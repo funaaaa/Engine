@@ -865,7 +865,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     //}
         
     // 金属度
-    float metalness = 1.0f - material[0].metalness_;
+    float metalness = 1.0f - material[0].metalness_ + material[0].roughness_;
     
     // 当たったオブジェクトのInstanceIDがアルファだったら
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA || InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
