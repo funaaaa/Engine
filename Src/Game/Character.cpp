@@ -65,7 +65,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
 
-		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER));
+		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER), Param);
 
 		// ‰ŠúˆÊ’u‚ğİ’èB
 		DEF_POS = GHOST_DEF_POS;
@@ -1219,8 +1219,8 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 				item_->Generate(playerModel_.carBodyInstance);
 			}
 			else {
-			item_ = std::make_shared<ShellItem>();
-			item_->Generate(playerModel_.carBodyInstance);
+				item_ = std::make_shared<ShellItem>();
+				item_->Generate(playerModel_.carBodyInstance);
 			}
 
 		}

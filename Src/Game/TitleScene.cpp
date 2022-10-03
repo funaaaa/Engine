@@ -50,6 +50,14 @@ void TitleScene::Update()
 	// AI‚¾‚Á‚½‚çB
 	if (mode == 1) {
 
+		int level = GameSceneMode::Ins()->level_;
+		ImGui::RadioButton("Level : 1", &level, 0);
+		ImGui::SameLine();
+		ImGui::RadioButton("Level : 2", &level, 1);
+		ImGui::SameLine();
+		ImGui::RadioButton("Level : 3", &level, 2);
+		GameSceneMode::Ins()->level_ = level;
+
 	}
 	// GHOST‚¾‚Á‚½‚çB
 	else if (mode == 3) {

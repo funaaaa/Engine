@@ -242,6 +242,7 @@ void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
 		modelData_.back().material_.metalness_ = gltfModel.GetMaterial().metalness_;
 		modelData_.back().material_.roughness_ = gltfModel.GetMaterial().roughness_;
 		modelData_.back().material_.specular_ = gltfModel.GetMaterial().specular_;
+		modelData_.back().material_.textureHandle_ = ObjectBuffer.textureHandle_;
 		
 
 		return;
@@ -258,6 +259,7 @@ void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
 	ObjectBuffer.material_ = modelData_[dataNumber].material_;
 	ObjectBuffer.vertexMin_ = modelData_[dataNumber].vertexMin_;
 	ObjectBuffer.vertexMax_ = modelData_[dataNumber].vertexMax_;
+	ObjectBuffer.textureHandle_ = modelData_[dataNumber].material_.textureHandle_;
 
 }
 

@@ -15,7 +15,7 @@ public:
 
 public:
 
-	static const int RADIUS = 400;
+	static const int RADIUS = 500;
 
 
 public:
