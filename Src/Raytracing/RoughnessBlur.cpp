@@ -60,7 +60,7 @@ void RoughnessBlur::ApplyGaussianBlur(const int& InputReflectionIndex, const int
 
 	// コンピュートシェーダーを実行。
 	blurX_->ChangeInputUAVIndex({ InputReflectionIndex, InputRoughnessIndex, DenoiseMaskIndex });
-	blurY_->ChangeInputUAVIndex({ blurXOutput_->GetUAVIndex(), DenoiseMaskIndex });
+	blurY_->ChangeInputUAVIndex({ blurXOutput_->GetUAVIndex(), InputRoughnessIndex, DenoiseMaskIndex });
 	blurX_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), blurXOutput_->GetUAVIndex(), { weightTableCBX_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 	blurY_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 1.0f) / 32) + 1, static_cast<UINT>((WINDOW_HEIGHT / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 
@@ -129,10 +129,10 @@ void RoughnessBlur::CalcWeightsTableFromGaussian(float Power)
 
 	// ここからガウス関数を用いて重みを計算している。
 	// ループ変数のxが基準テクセルからの距離。
-	for (int x_ = 0; x_ < GAUSSIAN_WEIGHTS_COUNT; x_++)
+	for (int x = 0; x < GAUSSIAN_WEIGHTS_COUNT; x++)
 	{
-		gaussianWeights_[x_] = expf(-0.5f * static_cast<float>(x_ * x_) / Power);
-		total += 2.0f * gaussianWeights_.at(x_);
+		gaussianWeights_[x] = expf(-0.5f * static_cast<float>(x * x) / Power);
+		total += 2.0f * gaussianWeights_.at(x);
 	}
 
 	// 重みの合計で除算することで、重みの合計を1にしている。

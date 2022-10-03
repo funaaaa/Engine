@@ -23,5 +23,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     // ??I?I??S???e?N?X?`??????????????B
     OutputImg[DTid.xy] = (aoLuminance + lightLuminance) * (color + InputReflection[DTid.xy]);
+    OutputImg[DTid.xy] = (color + InputReflection[DTid.xy]) * float4(1, 1, 1, 1);
     
 }

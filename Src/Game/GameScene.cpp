@@ -544,8 +544,19 @@ void GameScene::Draw()
 
 	//}
 
-	// ラフネス成分を使ってブラーをかける。
-	RoughnessBlur::Ins()->Denoise(reflectionColor_->GetUAVIndex(), roughnessMap_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), denoiseReflectionColor_->GetUAVIndex(), 100, 1);
+	{
+		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+			reflectionColor_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			roughnessMap_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseMaskOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseReflectionColor_->GetRaytracingOutput().Get())
+		};
+
+		DirectXBase::Ins()->cmdList_->ResourceBarrier(4, barrierToUAV);
+
+		// ラフネス成分を使ってブラーをかける。
+		RoughnessBlur::Ins()->Denoise(reflectionColor_->GetUAVIndex(), roughnessMap_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), denoiseReflectionColor_->GetUAVIndex(), 1000, 10);
+	}
 
 	denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 

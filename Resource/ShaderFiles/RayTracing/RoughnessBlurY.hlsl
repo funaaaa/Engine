@@ -34,7 +34,7 @@ float4 GetRoughnessColor(int x, int y)
     x = clamp(x, 0, texSize.x);
     y = clamp(y, 0, texSize.y);
 
-    return InputRoughnessImg[uint2(x, y)];
+    return InputRoughnessImg[uint2(x, y)] * 2.0f;
 }
 // マスクテクスチャの色を取得
 float4 GetMaskColor(int x, int y)
@@ -51,6 +51,7 @@ float4 GetMaskColor(int x, int y)
 float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor, float4 baseColor, float4 targetColor, float weight)
 {
     
+    return targetColor * weight;
     // ある程度ならマスクの色の違いを許容するようにする。
     float subR = abs(baseMaskColor.x - targetMaskColor.x);
     float subG = abs(baseMaskColor.y - targetMaskColor.y);
