@@ -21,8 +21,9 @@ SamplerState smp : register(s0, space1);
 RWTexture2D<float4> aoOutput : register(u0);
 RWTexture2D<float4> lightingOutput : register(u1);
 RWTexture2D<float4> colorOutput : register(u2);
-RWTexture2D<float4> giOutput : register(u3);
+RWTexture2D<float4> reflectionOutput : register(u3);
 RWTexture2D<float4> denoiseMaskoutput : register(u4);
+RWTexture2D<float4> roughnessOutput : register(u5);
 
 // 大気散乱
 float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnderGround)
@@ -319,12 +320,14 @@ void mainRayGen()
     payloadData.rayID_ = CHS_IDENTIFICATION_RAYID_DEF;
     payloadData.recursive_ = 0;
     payloadData.ao_ = 0;
+    payloadData.roughness_ = 0;
     payloadData.color_ = float3(0, 0, 0);
     payloadData.denoiseMask_ = float3(0, 0, 0);
-    payloadData.gi_ = float3(0, 0, 0);
+    payloadData.reflectionColor_ = float3(0, 0, 0);
     payloadData.light_ = float3(0, 0, 0);
     payloadData.isCullingAlpha_ = false;
     payloadData.alphaCounter_ = 0;
+    payloadData.pad_ = 0;
 
     // TransRayに必要な設定を作成
     uint rayMask = 0xFF;
@@ -348,8 +351,9 @@ void mainRayGen()
     lightingOutput[launchIndex.xy] = float4(1, 1, 1, 1);
     aoOutput[launchIndex.xy] = float4(0, 0, 0, 1);
     colorOutput[launchIndex.xy] = float4(1, 1, 1, 1);
-    giOutput[launchIndex.xy] = float4(1, 1, 1, 1);
+    reflectionOutput[launchIndex.xy] = float4(1, 1, 1, 1);
     denoiseMaskoutput[launchIndex.xy] = float4(1, 1, 1, 1);
+    roughnessOutput[launchIndex.xy] = float4(1, 1, 1, 1);
 
     // Linear -> sRGB
     payloadData.light_ = 1.055f * pow(payloadData.light_, 1.0f / 2.4f) - 0.055f;
@@ -360,201 +364,14 @@ void mainRayGen()
     // 結果格納
     lightingOutput[launchIndex.xy] = float4(saturate(payloadData.light_), 1);
     aoOutput[launchIndex.xy] = float4(saturate(payloadData.ao_), saturate(payloadData.ao_), saturate(payloadData.ao_), 1);
+    roughnessOutput[launchIndex.xy] = float4(saturate(payloadData.roughness_), saturate(payloadData.roughness_), saturate(payloadData.roughness_), 1);
     colorOutput[launchIndex.xy] = float4(saturate(payloadData.color_), 1);
-    giOutput[launchIndex.xy] = float4(saturate(payloadData.gi_), 1);
+    reflectionOutput[launchIndex.xy] = float4(saturate(payloadData.reflectionColor_), 1);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
 
 }
 
-// missシェーダー レイがヒットしなかった時に呼ばれるシェーダー
-[shader("miss")]
-void mainMS(inout Payload payload)
-{
 
-    // 単色を返すようにする。
-   //payload.color_ = float3(0, 0, 0);
-    //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
-    //payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
-
-}
-
-// シャドウ用missシェーダー
-[shader("miss")]
-void shadowMS(inout Payload payload)
-{
-    // 何にも当たっていないということなので、影は生成しない。
-    payload.impactAmount_ = 1.0f;
-}
-
-// ライティング前処理
-bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute Attrib, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
-{
-    
-    // デノイズ用のマスクに使用するテクスチャに法線の色とInstanceIndexをかけたものを書き込む。
-    if (PayloadData.recursive_ == 1)
-    {
-        PayloadData.denoiseMask_ = (WorldNormal);
-    }
-    
-    // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
-    {
-        float4 tiremasktex = (float4) tireMaskTexture[uint2((uint) (Vtx.uv.x * 4096.0f), (uint) (Vtx.uv.y * 4096.0f))];
-        if (tiremasktex.x == 0)
-        {
-            TexColor = tiremasktex;
-        }
-        else if (tiremasktex.x != 1)
-        {
-            TexColor += tiremasktex;
-            TexColor = normalize(TexColor);
-
-        }
-    }
-    
-    // 今発射されているレイのIDがGI用だったら
-    if (PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_GI)
-    {
-        
-        // レイの長さを求める。
-        float rayLength = length(WorldRayOrigin() - WorldPos);
-        
-        // GIを表示するレイの長さの最大値。
-        const float MAX_RAY = 300.0f;
-        
-        // レイの長さの割合。
-        float rate = rayLength / MAX_RAY;
-        rate = 1.0f - saturate(rate);
-        
-        float3 giBuff = (float3) TexColor * rate * (1.0f - material[0].metalness_);
-        
-        //// 当たったオブジェクトが完全反射だったらGIの色を黒くする。(完全反射で色がないから。黒は色として反映されない。)
-        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-        //{
-        //    giBuff = float3(0, 0, 0);
-        //}
-        
-        //// 当たったオブジェクトが反射だったらGIの色を薄くする。
-        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
-        //{
-        //    giBuff /= 2.0f;
-        //}
-        
-        PayloadData.gi_ += giBuff;
-        
-        return true;
-    }
-
-    
-    // 当たったオブジェクトが天球だったら。
-    if (InstanceID == CHS_IDENTIFICATION_INSTNACE_AS)
-    {
-        float3 mieColor = float3(1, 1, 1);
-        bool isUnderGround = false;
-        
-        // 影響度をかけつつ色を保存。
-        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += AtmosphericScattering(WorldPos, mieColor, isUnderGround) * PayloadData.impactAmount_ * PayloadData.impactAmount_;
-        PayloadData.ao_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.gi_ += float3(0, 0, 0) * PayloadData.impactAmount_;
-        
-        // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
-        PayloadData.denoiseMask_ = float3(1, 1, 1);
-        
-        // サンプリングした点の輝度を取得する。
-        float t = dot(PayloadData.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
-        
-        // サンプリングした点が地上より下じゃなかったら。
-        if (!isUnderGround && t <= 0.9f)
-        {
-            
-            // サンプリングした輝度をもとに、暗かったら星空を描画する。
-            t = (1.0f - t);
-            if (t != 0.0f)
-            {
-                t = pow(t, 10.0f);
-                //t = pow(2.0f, 10.0f * t - 10.0f);
-            }
-            PayloadData.color_ += (float3) TexColor * t * PayloadData.impactAmount_;
-            PayloadData.color_ = saturate(PayloadData.color_);
-            
-        }
-        
-        // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
-        
-        return true;
-    }
-    
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
-    {
-        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.ao_ += 1 * PayloadData.impactAmount_;
-        PayloadData.gi_ += float3(0, 0, 0);
-        
-        // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
-        
-        return true;
-    }
-    
-    // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
-    {
-        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += (float3) TexColor * PayloadData.impactAmount_;
-        PayloadData.ao_ += 1 * PayloadData.impactAmount_;
-        PayloadData.gi_ += float3(0, 0, 0);
-        
-        // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
-        
-        return true;
-    }
-    
-    // 当たったオブジェクトのInstanceIDが完全反射だったら。
-    //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-    //{
-        
-    //    // 完全反射用のレイを発射。
-    //    ShootRay(CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
-        
-    //    // 色を少しだけ明るくする。
-    //    //PayloadData.color += 0.1f;
-        
-    //    PayloadData.color_ = saturate(PayloadData.color_);
-        
-    //    //// 残った影響度を入れる。
-    //    //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
-        
-    //    return true;
-        
-    //}
-    
-    // メッシュ情報を返す。デバッグ機能。
-    if (gSceneParam.debug.isMeshScene)
-    {
-        PayloadData.light_ = CalcBarycentrics(Attrib.barys);
-        
-        // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
-        return true;
-    }
-    
-    // 法線情報を返す。デバッグ機能。
-    if (gSceneParam.debug.isNormalScene)
-    {
-        PayloadData.light_ = WorldNormal;
-        
-        // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
-        return true;
-    }
-    
-    return false;
-    
-}
 
 // UE4のGGX分布
 float DistributionGGX(float Alpha, float NdotH)
@@ -676,6 +493,196 @@ float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal)
     float3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH);
     
     return diffuseColor + specularColor;
+    
+}
+
+// missシェーダー レイがヒットしなかった時に呼ばれるシェーダー
+[shader("miss")]
+void mainMS(inout Payload payload)
+{
+
+    // 単色を返すようにする。
+   //payload.color_ = float3(0, 0, 0);
+    //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
+    //payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
+
+}
+
+// シャドウ用missシェーダー
+[shader("miss")]
+void shadowMS(inout Payload payload)
+{
+    // 何にも当たっていないということなので、影は生成しない。
+    payload.impactAmount_ = 1.0f;
+}
+
+// ライティング前処理
+bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute Attrib, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
+{
+    
+    // デノイズ用のマスクに使用するテクスチャに法線の色とInstanceIndexをかけたものを書き込む。
+    if (PayloadData.recursive_ == 1)
+    {
+        PayloadData.denoiseMask_ = (WorldNormal);
+    }
+    
+    // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
+    {
+        float4 tiremasktex = (float4) tireMaskTexture[uint2((uint) (Vtx.uv.x * 4096.0f), (uint) (Vtx.uv.y * 4096.0f))];
+        if (tiremasktex.x == 0)
+        {
+            TexColor = tiremasktex;
+        }
+        else if (tiremasktex.x != 1)
+        {
+            TexColor += tiremasktex;
+            TexColor = normalize(TexColor);
+
+        }
+    }
+    
+    // 今発射されているレイのIDがGI用だったら
+    //if (PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_GI)
+    //{
+        
+    //    // レイの長さを求める。
+    //    float rayLength = length(WorldRayOrigin() - WorldPos);
+        
+    //    // GIを表示するレイの長さの最大値。
+    //    const float MAX_RAY = 300.0f;
+        
+    //    // レイの長さの割合。
+    //    float rate = rayLength / MAX_RAY;
+    //    rate = 1.0f - saturate(rate);
+        
+    //    float3 giBuff = (float3) TexColor * rate * (1.0f - material[0].metalness_);
+        
+    //    //// 当たったオブジェクトが完全反射だったらGIの色を黒くする。(完全反射で色がないから。黒は色として反映されない。)
+    //    //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
+    //    //{
+    //    //    giBuff = float3(0, 0, 0);
+    //    //}
+        
+    //    //// 当たったオブジェクトが反射だったらGIの色を薄くする。
+    //    //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
+    //    //{
+    //    //    giBuff /= 2.0f;
+    //    //}
+        
+    //    PayloadData.gi_ += giBuff;
+        
+    //    return true;
+    //}
+
+    
+    // 当たったオブジェクトが天球だったら。
+    if (InstanceID == CHS_IDENTIFICATION_INSTNACE_AS)
+    {
+        float3 mieColor = float3(1, 1, 1);
+        bool isUnderGround = false;
+        
+        // 影響度をかけつつ色を保存。
+        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.color_ += AtmosphericScattering(WorldPos, mieColor, isUnderGround) * PayloadData.impactAmount_ * PayloadData.impactAmount_;
+        PayloadData.ao_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        //PayloadData.gi_ += float3(0, 0, 0) * PayloadData.impactAmount_;
+        
+        // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
+        PayloadData.denoiseMask_ = float3(1, 1, 1);
+        
+        // サンプリングした点の輝度を取得する。
+        float t = dot(PayloadData.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
+        
+        // サンプリングした点が地上より下じゃなかったら。
+        if (!isUnderGround && t <= 0.9f)
+        {
+            
+            // サンプリングした輝度をもとに、暗かったら星空を描画する。
+            t = (1.0f - t);
+            if (t != 0.0f)
+            {
+                t = pow(t, 10.0f);
+                //t = pow(2.0f, 10.0f * t - 10.0f);
+            }
+            PayloadData.color_ += (float3) TexColor * t * PayloadData.impactAmount_;
+            PayloadData.color_ = saturate(PayloadData.color_);
+            
+        }
+        
+        // 影響度を0にする。
+        PayloadData.impactAmount_ = 0.0f;
+        
+        return true;
+    }
+    
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
+    {
+        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.color_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.ao_ += 1 * PayloadData.impactAmount_;
+        //PayloadData.gi_ += float3(0, 0, 0);
+        
+        // 影響度を0にする。
+        PayloadData.impactAmount_ = 0.0f;
+        
+        return true;
+    }
+    
+    // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
+    {
+        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        PayloadData.color_ += (float3) TexColor * PayloadData.impactAmount_;
+        PayloadData.ao_ += 1 * PayloadData.impactAmount_;
+        //PayloadData.gi_ += float3(0, 0, 0);
+        
+        // 影響度を0にする。
+        PayloadData.impactAmount_ = 0.0f;
+        
+        return true;
+    }
+    
+    // 当たったオブジェクトのInstanceIDが完全反射だったら。
+    //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
+    //{
+        
+    //    // 完全反射用のレイを発射。
+    //    ShootRay(CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
+        
+    //    // 色を少しだけ明るくする。
+    //    //PayloadData.color += 0.1f;
+        
+    //    PayloadData.color_ = saturate(PayloadData.color_);
+        
+    //    //// 残った影響度を入れる。
+    //    //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
+        
+    //    return true;
+        
+    //}
+    
+    // メッシュ情報を返す。デバッグ機能。
+    if (gSceneParam.debug.isMeshScene)
+    {
+        PayloadData.light_ = CalcBarycentrics(Attrib.barys);
+        
+        // 影響度を0にする。
+        PayloadData.impactAmount_ = 0.0f;
+        return true;
+    }
+    
+    // 法線情報を返す。デバッグ機能。
+    if (gSceneParam.debug.isNormalScene)
+    {
+        PayloadData.light_ = WorldNormal;
+        
+        // 影響度を0にする。
+        PayloadData.impactAmount_ = 0.0f;
+        return true;
+    }
+    
+    return false;
     
 }
 
@@ -813,24 +820,49 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     
 }
 
+// 色を加算する処理
+void WriteColor(inout Payload PayloadData, float3 WriteColor, float Rate)
+{
+    
+    // このレイが最初の一本目だったら。
+    if (PayloadData.recursive_ == 1)
+    {
+        
+        // 色情報をColorに書き込む。
+        PayloadData.color_.xyz = WriteColor * Rate;
+        
+        // ついでにMetalnessも書き込む。
+        PayloadData.roughness_ = material[0].roughness_;
+        
+    }
+    else
+    {
+        
+        // 反射情報を書き込む。
+        PayloadData.reflectionColor_.xyz = WriteColor * Rate;
+        
+    }
+    
+}
+
 // ライティング後処理
 void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
 {
     
-    // 当たったオブジェクトがGIを行うオブジェクトで、GIを行うフラグが立っていたら。
-    if ((InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK) && !gSceneParam.debug.isNoGI)
-    {
-        if (0.0f < PayloadData.impactAmount_)
-        {
-            ShootGIRay(Vtx, 300, PayloadData);
-            PayloadData.gi_ = (PayloadData.gi_ * PayloadData.impactAmount_);
-            PayloadData.gi_ = saturate(PayloadData.gi_);
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+    //// 当たったオブジェクトがGIを行うオブジェクトで、GIを行うフラグが立っていたら。
+    //if ((InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK) && !gSceneParam.debug.isNoGI)
+    //{
+    //    if (0.0f < PayloadData.impactAmount_)
+    //    {
+    //        ShootGIRay(Vtx, 300, PayloadData);
+    //        PayloadData.gi_ = (PayloadData.gi_ * PayloadData.impactAmount_);
+    //        PayloadData.gi_ = saturate(PayloadData.gi_);
+    //        PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
         
-            PayloadData.impactAmount_ = 0.0f;
-        }
+    //        PayloadData.impactAmount_ = 0.0f;
+    //    }
         
-    }
+    //}
         
     // 金属度
     float metalness = 1.0f - material[0].metalness_;
@@ -917,13 +949,13 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
         if (PayloadData.impactAmount_ < metalness)
         {
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+            WriteColor(PayloadData, (float3) TexColor, PayloadData.impactAmount_);
             PayloadData.impactAmount_ = 0.0f;
 
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * metalness;
+            WriteColor(PayloadData, (float3) TexColor, metalness);
             PayloadData.impactAmount_ -= metalness;
         }
 
@@ -962,12 +994,12 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
         if (PayloadData.impactAmount_ < metalness)
         {
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+            WriteColor(PayloadData, (float3) TexColor, PayloadData.impactAmount_);
             PayloadData.impactAmount_ = 0.0f;
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * metalness;
+            WriteColor(PayloadData, (float3) TexColor, metalness);
             PayloadData.impactAmount_ -= metalness;
             
             if (0.0f < PayloadData.impactAmount_)

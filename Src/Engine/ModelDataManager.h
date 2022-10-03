@@ -32,7 +32,7 @@ public:
 		float roughness_;
 		int textureHandle_;
 		Vec2 pad_;
-		Material() :baseColor_(Vec3(1, 1, 1)), metalness_(0.1f), specular_(0.1f), roughness_(0.0f), textureHandle_(-1) {};
+		Material() :baseColor_(Vec3(1, 1, 1)), metalness_(0.1f), specular_(0.1f), roughness_(0.3f), textureHandle_(-1) {};
 	};
 
 	// データを渡す構造体

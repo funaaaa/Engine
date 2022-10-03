@@ -126,15 +126,16 @@ struct Payload
 {
     uint recursive_; // 反復回数
     uint rayID_; // レイのID
-    float impactAmount_; // 合計影響度
-    float ao_; // AOの色
-    float3 color_; // 色情報
-    float3 gi_; // GI情報
-    float3 light_; // ライティングの色情報
-    float3 denoiseMask_; // デノイズのマスクの色情報
     uint alphaCounter_; // 薄いアルファのオブジェクトに当たった数
     uint isCullingAlpha_; // 薄いアルファのオブジェクトに一定以上当たったら次からアルファを無効化するフラグ。
+    float impactAmount_; // 合計影響度
+    float ao_; // AOの色
+    float roughness_; // Roughness情報
     float2 pad_;
+    float3 color_; // 色情報
+    float3 reflectionColor_; // 反射色情報
+    float3 light_; // ライティングの色情報
+    float3 denoiseMask_; // デノイズのマスクの色情報
 };
 
 struct MyAttribute
@@ -230,12 +231,14 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     payloadData.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
     payloadData.recursive_ = 0;
     payloadData.ao_ = 0;
+    payloadData.roughness_ = 0;
     payloadData.color_ = float3(0, 0, 0);
     payloadData.denoiseMask_ = float3(0, 0, 0);
-    payloadData.gi_ = float3(0, 0, 0);
+    payloadData.reflectionColor_ = float3(0, 0, 0);
     payloadData.light_ = float3(0, 0, 0);
     payloadData.isCullingAlpha_ = false;
     payloadData.alphaCounter_ = 0;
+    payloadData.pad_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -270,9 +273,10 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
     payload.recursive_ = 0;
     payload.ao_ = 0;
+    payload.roughness_ = 0;
     payload.color_ = float3(0, 0, 0);
     payload.denoiseMask_ = float3(0, 0, 0);
-    payload.gi_ = float3(0, 0, 0);
+    payload.reflectionColor_ = float3(0, 0, 0);
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;
@@ -312,12 +316,14 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
     payload.recursive_ = 0;
     payload.ao_ = 0;
+    payload.roughness_ = 0;
     payload.color_ = float3(0, 0, 0);
     payload.denoiseMask_ = float3(0, 0, 0);
-    payload.gi_ = float3(0, 0, 0);
+    payload.reflectionColor_ = float3(0, 0, 0);
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;
+    payload.pad_ = 0;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;

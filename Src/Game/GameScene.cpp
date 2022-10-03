@@ -47,9 +47,9 @@ GameScene::GameScene()
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
+	int payloadSize = sizeof(float) * 5 + sizeof(Vec3) * 4 + sizeof(int) * 4 ;
 	pipline_ = std::make_shared<RaytracingPipline>();
-	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
+	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 6, payloadSize, sizeof(Vec2), 6);
 
 	// タイヤ痕用クラスをセット。
 	tireMaskTexture_ = std::make_shared<RaytracingOutput>();
@@ -104,11 +104,13 @@ GameScene::GameScene()
 	denoiseLightOutput_ = std::make_shared<RaytracingOutput>();
 	denoiseLightOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput");
 
-	// GI出力用クラスをセット。
-	giOutput_ = std::make_shared<RaytracingOutput>();
-	giOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput");
-	denoiseGiOutput_ = std::make_shared<RaytracingOutput>();
-	denoiseGiOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput");
+	// 反射色出力用クラス。
+	reflectionColor_ = std::make_shared<RaytracingOutput>();
+	reflectionColor_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ReflectionColor");
+	denoiseReflectionColor_ = std::make_shared<RaytracingOutput>();
+	denoiseReflectionColor_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseReflectionColor");
+	roughnessMap_ = std::make_shared<RaytracingOutput>();
+	roughnessMap_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"RoughnessMap");
 
 	// デノイズマスク用クラスをセット。
 	denoiseMaskOutput_ = std::make_shared<RaytracingOutput>();
@@ -442,16 +444,18 @@ void GameScene::Draw()
 	lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseLightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	colorOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	giOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseGiOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	reflectionColor_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseReflectionColor_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	roughnessMap_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseMaskOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// 出力用UAVを設定。
 	aoOutput_->SetComputeRootDescriptorTalbe(2);		// AOの結果出力用
 	lightOutput_->SetComputeRootDescriptorTalbe(3);	// ライトの明るさの結果出力用
 	colorOutput_->SetComputeRootDescriptorTalbe(4);	// テクスチャの色情報出力用
-	giOutput_->SetComputeRootDescriptorTalbe(5);		// giの結果出力用
+	reflectionColor_->SetComputeRootDescriptorTalbe(5);		// 反射色の結果出力用
 	denoiseMaskOutput_->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
+	roughnessMap_->SetComputeRootDescriptorTalbe(7);// Roughness出力用
 
 	// パイプラインを設定。
 	DirectXBase::Ins()->cmdList_->SetPipelineState1(pipline_->GetStateObject().Get());
@@ -493,93 +497,67 @@ void GameScene::Draw()
 	}
 
 
-	// [ノイズを描画]のときはデノイズをかけない。
-	if (!constBufferData_.debug_.isNoiseScene_) {
-
-		// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
-		if (!constBufferData_.debug_.isMeshScene_ && !constBufferData_.debug_.isNormalScene_ && !constBufferData_.debug_.isLightHitScene_) {
-
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				lightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseLightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_->GetRaytracingOutput().Get())
-			};
-
-			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
-
-			// ライトにデノイズをかける。
-			Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1, 1);
-
-		}
-
-		// AO情報にデノイズをかける。
-		{
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				aoOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseAOOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_->GetRaytracingOutput().Get())
-			};
-
-			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
-
-			// AOにデノイズをかける。
-			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 6);
-		}
-
-
-		// GI情報にデノイズをかける。
-		{
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				giOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseGiOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_->GetRaytracingOutput().Get())
-			};
-
-			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
-
-			// GIにデノイズをかける。
-			Denoiser::Ins()->Denoise(giOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 1);
-
-		}
-
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
+	if (!constBufferData_.debug_.isMeshScene_ && !constBufferData_.debug_.isNormalScene_ && !constBufferData_.debug_.isLightHitScene_) {
 
 		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-			colorOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseAOOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseLightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseGiOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
-		};
-
-		DirectXBase::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
-
-		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-
-	}
-	// デノイズしないデバッグ状態の場合は、レイトレ関数から出力された生の値を合成する。
-	else {
-
-
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-			colorOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			aoOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
 			lightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			giOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
+			denoiseLightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseMaskOutput_->GetRaytracingOutput().Get())
 		};
 
-		DirectXBase::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
+		DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
-		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), aoOutput_->GetUAVIndex(), lightOutput_->GetUAVIndex(), giOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		// ライトにデノイズをかける。
+		Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1, 1);
 
 	}
+
+	// AO情報にデノイズをかける。
+	{
+		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+			aoOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseAOOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseMaskOutput_->GetRaytracingOutput().Get())
+		};
+
+		DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
+
+		// AOにデノイズをかける。
+		Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 6);
+	}
+
+
+	//// GI情報にデノイズをかける。
+	//{
+	//	D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+	//		giOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+	//		denoiseGiOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+	//		denoiseMaskOutput_->GetRaytracingOutput().Get())
+	//	};
+
+	//	DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
+
+	//	// GIにデノイズをかける。
+	//	Denoiser::Ins()->Denoise(giOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 1);
+
+	//}
+
+	denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+	D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+		colorOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+		denoiseAOOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+		denoiseLightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+		denoiseReflectionColor_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+		denoiseMixTextureOutput_->GetRaytracingOutput().Get())
+	};
+
+	DirectXBase::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
+
+	// デノイズをかけたライティング情報と色情報を混ぜる。
+	Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseReflectionColor_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
+	denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 
 	// バックバッファのインデックスを取得する。
@@ -626,8 +604,9 @@ void GameScene::Draw()
 	lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	denoiseLightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	colorOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	giOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseGiOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	reflectionColor_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	denoiseReflectionColor_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	roughnessMap_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	denoiseMaskOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// UIを描画

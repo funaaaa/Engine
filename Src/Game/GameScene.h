@@ -79,7 +79,7 @@ private:
 	// TLASを生成。
 	std::shared_ptr<TLAS> tlas_;
 
-	// AO出力用。
+	// AOz出力用。
 	std::shared_ptr<RaytracingOutput> aoOutput_;
 	std::shared_ptr<RaytracingOutput> denoiseAOOutput_;
 
@@ -90,9 +90,10 @@ private:
 	std::shared_ptr<RaytracingOutput> lightOutput_;
 	std::shared_ptr<RaytracingOutput> denoiseLightOutput_;
 
-	// GI出力用。
-	std::shared_ptr<RaytracingOutput> giOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseGiOutput_;
+	// Roughness出力用。
+	std::shared_ptr<RaytracingOutput> reflectionColor_;
+	std::shared_ptr<RaytracingOutput> roughnessMap_;
+	std::shared_ptr<RaytracingOutput> denoiseReflectionColor_;
 
 	// デノイズマスク用。
 	std::shared_ptr<RaytracingOutput> denoiseMaskOutput_;
