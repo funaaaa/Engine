@@ -864,6 +864,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
     //}
         
+    
     // ‹à‘®“x
     float metalness = 1.0f - material[0].metalness_ + material[0].roughness_;
     
