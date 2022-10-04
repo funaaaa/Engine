@@ -39,6 +39,9 @@ public:
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
 	int charaIndex_;
 	int canNotMoveTimer_;	// 操作不能のタイマー
+	int shellIndex_;
+	int timerToSkipShellCollider_;	// 甲羅の当たり判定を無効化するタイマー(甲羅を射った後に直ぐに自分に当たらないようにするため)
+	const int TIMER_TO_SKIP_SHELL_COLLIDER = 60;
 	const int CAN_NOT_MOVE_TIMER_SHELL_HIT = 60;
 	const int RETURN_DEFPOS_TIMER = 600;
 	bool isShotBehind_;		// 後ろ側に甲羅を投げるかのフラグ

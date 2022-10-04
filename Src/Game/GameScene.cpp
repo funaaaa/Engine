@@ -523,7 +523,7 @@ void GameScene::Draw()
 			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
-			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 6);
+			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1000, 6);
 		}
 
 

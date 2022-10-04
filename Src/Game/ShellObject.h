@@ -48,7 +48,7 @@ private:
 	const float SPEED = 50.0f;
 	const float SCALE = 20.0f;
 	const float MAX_GRAV = 10.0f;	// 重力の最大量
-	const float ADD_GRAV = 1.0f;	// 重力の加算量
+	const float ADD_GRAV = 3.0f;	// 重力の加算量
 	const int EXIT_TIMER = 180;		// 消滅までの時間
 
 
@@ -67,6 +67,9 @@ public:
 
 	// 更新処理
 	void Update(std::weak_ptr<BaseStage> StageData);
+
+	// 甲羅のステータスを更新。
+	void ChangeStatus(const Vec3& ForwardVec, const int& ShellID);
 
 	// OBBとの当たり判定 キャラクターとの当たり判定で使用する。
 	bool CheckHitOBB(std::weak_ptr<OBB> CharaOBB);

@@ -65,7 +65,16 @@ void ShellObjectMgr::Update(std::weak_ptr<BaseStage> StageData)
 
 }
 
-bool ShellObjectMgr::Collider(std::weak_ptr<OBB> CharaOBB)
+void ShellObjectMgr::ChangeStatus(const int Index, const Vec3& ForwardVec, const int& ShellID)
+{
+
+	/*===== 指定のインデックスのステータスを更新 =====*/
+
+	shell_[Index]->ChangeStatus(ForwardVec, ShellID);
+
+}
+
+bool ShellObjectMgr::Collider(std::weak_ptr<OBB> CharaOBB, const int IndexToSkipCollision)
 {
 
 	/*===== 当たり判定 =====*/
@@ -73,6 +82,7 @@ bool ShellObjectMgr::Collider(std::weak_ptr<OBB> CharaOBB)
 	for (auto& index : shell_) {
 
 		if (!index->GetIsActive()) continue;
+		if (static_cast<int>(&index - &shell_[0]) == IndexToSkipCollision) continue;
 
 		bool isHit = index->CheckHitOBB(CharaOBB);
 

@@ -245,6 +245,16 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 
 }
 
+void ShellObject::ChangeStatus(const Vec3& ForwardVec, const int& ShellID)
+{
+
+	/*===== ステータスを更新 ======*/
+
+	forwardVec_ = ForwardVec;
+	shellID_ = static_cast<SHELL_ID>(ShellID);
+
+}
+
 bool ShellObject::CheckHitOBB(std::weak_ptr<OBB> CharaOBB)
 {
 

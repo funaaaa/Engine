@@ -31,7 +31,7 @@ public:
 
 	virtual void Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance) = 0;
 	virtual void Update() = 0;
-	virtual void Use(const float& CharaRotY = 0, const int ParamID = 0) = 0;
+	virtual int Use(const float& CharaRotY = 0, const int ParamID = 0) = 0;
 
 	ItemID GetItemID() { return itemID_; }
 	std::weak_ptr<PolygonMeshInstance> GetCharaInstance() { return charaInstance; }

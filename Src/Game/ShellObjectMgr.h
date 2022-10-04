@@ -30,8 +30,9 @@ public:
 	int AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance);
 	void DestroyObject(const int& Index);
 	void Update(std::weak_ptr<BaseStage> StageData);
+	void ChangeStatus(const int Index, const Vec3& ForwardVec, const int& ShellID);
 
 	// “–‚½‚è”»’è
-	bool Collider(std::weak_ptr<OBB> CharaOBB);
+	bool Collider(std::weak_ptr<OBB> CharaOBB, const int IndexToSkipCollision = -1);
 
 };

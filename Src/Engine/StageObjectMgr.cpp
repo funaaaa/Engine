@@ -451,6 +451,23 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 
 		}
 
+
+
+		// 移動量の線分の当たり判定。
+		InputRayData.rayPos_ = Input.targetPrevPos_;
+		InputRayData.rayDir_ = (Input.targetPos_ - Input.targetPrevPos_).GetNormal();
+
+		// 当たった距離がY軸のサイズよりも小さかったら。
+		isHit &= fabs(hitDistance) < (Input.targetPos_ - Input.targetPrevPos_).Length();
+
+		// 当たっていたら押し戻す。
+		if (isHit) {
+
+			// 法線方向に当たった分押し戻す。
+			Input.targetPos_ = impactPos + hitNormal * hitDistance;
+
+		}
+
 	}
 
 	return Output;

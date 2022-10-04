@@ -32,6 +32,12 @@ void MugenStage::Setting(const int& TireMaskIndex)
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
+	// ステージの坂セット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/Stage/MugenStage/", "MugenStageTunnelSlope.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/Stage/MugenStage/", "MugenStageGrass1.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
@@ -320,28 +326,28 @@ void MugenStage::ChangeStageStatus(const int& Status)
 {
 
 	/*===== ステージのステータスを変更 =====*/
+	Status;
+	//// 前フレームがDEFで、今フレームがREFLECTIONだったら。
+	//if (status_ == STATUS::DEF && static_cast<STATUS>(Status) == STATUS::REFLECTION) {
 
-	// 前フレームがDEFで、今フレームがREFLECTIONだったら。
-	if (status_ == STATUS::DEF && static_cast<STATUS>(Status) == STATUS::REFLECTION) {
+	//	stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
 
-		stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
-
-		// ステージのパラメーターを設定。
-		stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
+	//	// ステージのパラメーターを設定。
+	//	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
 
 
-	}
-	else if (status_ == STATUS::REFLECTION && static_cast<STATUS>(Status) == STATUS::DEF) {
+	//}
+	//else if (status_ == STATUS::REFLECTION && static_cast<STATUS>(Status) == STATUS::DEF) {
 
-		stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
+	//	stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
 
-		// ステージのパラメーターを設定。
-		stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
+	//	// ステージのパラメーターを設定。
+	//	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
 
-	}
+	//}
 
-	// ステータスを保存。
-	status_ = static_cast<STATUS>(Status);
+	//// ステータスを保存。
+	//status_ = static_cast<STATUS>(Status);
 
 }
 

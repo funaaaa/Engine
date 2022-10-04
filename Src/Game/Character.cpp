@@ -928,7 +928,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 		}
 		else {
 
-			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
+			shellIndex_ = item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
 
 		}
 
@@ -941,9 +941,11 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 
 		if (isShotBehind_) {
 			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
+			timerToSkipShellCollider_ = TIMER_TO_SKIP_SHELL_COLLIDER;
 		}
 		else {
 			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::FORWARD_THROW));
+			timerToSkipShellCollider_ = TIMER_TO_SKIP_SHELL_COLLIDER;
 		}
 		item_.reset();
 
@@ -1222,6 +1224,8 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 				item_ = std::make_shared<ShellItem>();
 				item_->Generate(playerModel_.carBodyInstance);
 			}
+			item_ = std::make_shared<ShellItem>();
+			item_->Generate(playerModel_.carBodyInstance);
 
 		}
 
@@ -1251,8 +1255,17 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 	// ゴースト以外だったら。
 	if (charaID_ != CHARA_ID::GHOST) {
 
+		int shellIndex = -1;
+
+		if (0 < timerToSkipShellCollider_) {
+
+			--timerToSkipShellCollider_;
+			shellIndex = shellIndex_;
+
+		}
+
 		// 甲羅との当たり判定
-		bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_);
+		bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_, shellIndex);
 
 		if (isHitShell || Input::Ins()->IsKeyTrigger(DIK_P)) {
 

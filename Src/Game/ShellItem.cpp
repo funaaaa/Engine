@@ -29,7 +29,7 @@ void ShellItem::Update()
 
 }
 
-void ShellItem::Use(const float& CharaRotY, const int ParamID)
+int ShellItem::Use(const float& CharaRotY, const int ParamID)
 {
 
 	/*===== 使用処理 =====*/
@@ -51,14 +51,8 @@ void ShellItem::Use(const float& CharaRotY, const int ParamID)
 		// 正面方向にベクトルを生成
 		shellVec = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), charaInstance.lock()->GetRotate());
 
-		// 甲羅を動かす。
-		shellPos += shellVec * 90.0f;
-
-		// 甲羅アイテムを生成する。
-		ShellObjectMgr::Ins()->AddObject(shellPos, shellVec, CharaRotY, static_cast<int>(ShellObject::SHELL_ID::FORWARD_THROW), charaInstance);
-
-		// 保持していた甲羅を破棄。
-		ShellObjectMgr::Ins()->DestroyObject(behindShellIndex_);
+		// 甲羅を飛ばす。
+		ShellObjectMgr::Ins()->ChangeStatus(behindShellIndex_, shellVec, static_cast<int>(ShellObject::SHELL_ID::FORWARD_THROW));
 
 		break;
 	case ShellItem::PARAM_ID::BEHIND_THROW:
@@ -66,15 +60,14 @@ void ShellItem::Use(const float& CharaRotY, const int ParamID)
 		// 後ろ方向にベクトルを生成
 		shellVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), charaInstance.lock()->GetRotate());
 
-		// 甲羅アイテムを生成する。
-		ShellObjectMgr::Ins()->AddObject(shellPos, shellVec, CharaRotY, static_cast<int>(ShellObject::SHELL_ID::BEHIND_THROW), charaInstance);
-
-		// 保持していた甲羅を破棄。
-		ShellObjectMgr::Ins()->DestroyObject(behindShellIndex_);
+		// 甲羅を飛ばす。
+		ShellObjectMgr::Ins()->ChangeStatus(behindShellIndex_, shellVec, static_cast<int>(ShellObject::SHELL_ID::BEHIND_THROW));
 
 		break;
 	default:
 		break;
 	}
+
+	return behindShellIndex_;
 
 }
