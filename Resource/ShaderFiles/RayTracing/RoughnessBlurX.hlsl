@@ -33,8 +33,8 @@ float4 GetRoughnessColor(int x, int y)
     
     x = clamp(x, 0, texSize.x);
     y = clamp(y, 0, texSize.y);
-
-    return InputRoughnessImg[uint2(x, y)];
+    
+    return saturate(InputRoughnessImg[uint2(x, y)] * 5.0f);
 }
 // マスクテクスチャの色を取得
 float4 GetMaskColor(int x, int y)
@@ -48,10 +48,10 @@ float4 GetMaskColor(int x, int y)
 }
 
 // ライトリーク対策用のサンプリング関数
-float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor, float4 baseColor, float4 targetColor, float weight)
+float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor, float4 baseColor, float4 targetColor)
 {
     
-    return targetColor * weight;
+    return targetColor;
     // ある程度ならマスクの色の違いを許容するようにする。
     float subR = abs(baseMaskColor.x - targetMaskColor.x);
     float subG = abs(baseMaskColor.y - targetMaskColor.y);
@@ -59,11 +59,11 @@ float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor,
     const float SUB_NEAR = 0.1f;
     if (subR < SUB_NEAR && subG < SUB_NEAR && subB < SUB_NEAR)
     {
-        return targetColor * weight;
+        return targetColor;
     }
     else
     {
-        return baseColor * weight;
+        return baseColor;
     }
     
 }
@@ -72,34 +72,33 @@ float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor,
 void main(uint3 DTid : SV_DispatchThreadID)
 {
     
-    uint2 basepos = uint2(DTid.x * 1, DTid.y);
+    uint2 basepos = uint2(DTid.x, DTid.y);
     
     float4 color = float4(0, 0, 0, 0);
     
-    // ガウシアンブラーをかける際の基準の色
+    // ブラーをかける際の基準の色
     float4 baseColor = GetPixelColor(basepos.x, basepos.y);
     float4 baseMaskColor = GetMaskColor(basepos.x, basepos.y);
     
-    color = LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y), baseColor, GetPixelColor(basepos.x, basepos.y), weights[0].x * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + 1, basepos.y), baseColor, GetPixelColor(basepos.x + 1, basepos.y), weights[0].y * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + 2, basepos.y), baseColor, GetPixelColor(basepos.x + 2, basepos.y), weights[0].z * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + 3, basepos.y), baseColor, GetPixelColor(basepos.x + 3, basepos.y), weights[0].w * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + 4, basepos.y), baseColor, GetPixelColor(basepos.x + 4, basepos.y), weights[1].x * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + 5, basepos.y), baseColor, GetPixelColor(basepos.x + 5, basepos.y), weights[1].y * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + 6, basepos.y), baseColor, GetPixelColor(basepos.x + 6, basepos.y), weights[1].z * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + 7, basepos.y), baseColor, GetPixelColor(basepos.x + 7, basepos.y), weights[1].w * GetRoughnessColor(basepos.x, basepos.y).x);
+    // 最大数
+    const float BLUR_COUNT = 10.0f * GetRoughnessColor(basepos.x, basepos.y);
+    int nowBlurCount = (int) (BLUR_COUNT * GetRoughnessColor(basepos.x, basepos.y));
 
-
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - 1, basepos.y), baseColor, GetPixelColor(basepos.x - 1, basepos.y), weights[0].y * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - 2, basepos.y), baseColor, GetPixelColor(basepos.x - 2, basepos.y), weights[0].z * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - 3, basepos.y), baseColor, GetPixelColor(basepos.x - 3, basepos.y), weights[0].w * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - 4, basepos.y), baseColor, GetPixelColor(basepos.x - 4, basepos.y), weights[1].x * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - 5, basepos.y), baseColor, GetPixelColor(basepos.x - 5, basepos.y), weights[1].y * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - 6, basepos.y), baseColor, GetPixelColor(basepos.x - 6, basepos.y), weights[1].z * GetRoughnessColor(basepos.x, basepos.y).x);
-    color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - 7, basepos.y), baseColor, GetPixelColor(basepos.x - 7, basepos.y), weights[1].w * GetRoughnessColor(basepos.x, basepos.y).x);
+    // 中心のピクセルの色を入れる。
+    color = LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x, basepos.y), baseColor, GetPixelColor(basepos.x, basepos.y));
     
-    //OutputImg[DTid.xy] = float4(1, 0, 0, 1);
-    //OutputImg[DTid.xy] = InputImg[DTid.xy];
+    // ブラーの回数分ブラーをかける。
+    for (int index = 0; index < nowBlurCount; ++index)
+    {
+        
+        color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x + index, basepos.y), baseColor, GetPixelColor(basepos.x + index, basepos.y));
+        color += LightLeakageCountermeasures(baseMaskColor, GetMaskColor(basepos.x - index, basepos.y), baseColor, GetPixelColor(basepos.x - index, basepos.y));
+        
+    }
+    
+    // 色を割る。
+    color /= nowBlurCount * 2.0f + 1.0f;
+    
     color = saturate(color);
     OutputImg[DTid.xy] = color;
     

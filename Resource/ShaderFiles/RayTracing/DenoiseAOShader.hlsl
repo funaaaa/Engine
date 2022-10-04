@@ -176,6 +176,31 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnd
 
 }
 
+// 色を加算する処理
+void WriteColor(inout Payload PayloadData, float3 WriteColor, float Rate)
+{
+    
+    // このレイが最初の一本目だったら。
+    if (PayloadData.recursive_ == 1)
+    {
+        
+        // 色情報をColorに書き込む。
+        PayloadData.color_.xyz = WriteColor * Rate;
+        
+        // ついでにMetalnessも書き込む。
+        PayloadData.roughness_ = material[0].roughness_;
+        
+    }
+    else
+    {
+        
+        // 反射情報を書き込む。
+        PayloadData.reflectionColor_.xyz = WriteColor * Rate;
+        
+    }
+    
+}
+
 // ソフトシャドウ射出関数
 float SoftShadow(Vertex vtx, float lightSize, float length, int lightIndex)
 {
@@ -584,9 +609,9 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         
         // 影響度をかけつつ色を保存。
         PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += AtmosphericScattering(WorldPos, mieColor, isUnderGround) * PayloadData.impactAmount_ * PayloadData.impactAmount_;
+        WriteColor(PayloadData, AtmosphericScattering(WorldPos, mieColor, isUnderGround), PayloadData.impactAmount_ * PayloadData.impactAmount_);
         PayloadData.ao_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        //PayloadData.gi_ += float3(0, 0, 0) * PayloadData.impactAmount_;
+        PayloadData.roughness_ = 0;
         
         // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
         PayloadData.denoiseMask_ = float3(1, 1, 1);
@@ -605,7 +630,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
                 t = pow(t, 10.0f);
                 //t = pow(2.0f, 10.0f * t - 10.0f);
             }
-            PayloadData.color_ += (float3) TexColor * t * PayloadData.impactAmount_;
+            WriteColor(PayloadData, (float3) TexColor, t * PayloadData.impactAmount_);
             PayloadData.color_ = saturate(PayloadData.color_);
             
         }
@@ -619,7 +644,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
         PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += float3(1, 1, 1) * PayloadData.impactAmount_;
+        WriteColor(PayloadData, float3(1, 1, 1), PayloadData.impactAmount_);
         PayloadData.ao_ += 1 * PayloadData.impactAmount_;
         //PayloadData.gi_ += float3(0, 0, 0);
         
@@ -633,7 +658,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
     {
         PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += (float3) TexColor * PayloadData.impactAmount_;
+        WriteColor(PayloadData, float3(1, 1, 1), PayloadData.impactAmount_);
         PayloadData.ao_ += 1 * PayloadData.impactAmount_;
         //PayloadData.gi_ += float3(0, 0, 0);
         
@@ -642,25 +667,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         
         return true;
     }
-    
-    // 当たったオブジェクトのInstanceIDが完全反射だったら。
-    //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-    //{
-        
-    //    // 完全反射用のレイを発射。
-    //    ShootRay(CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
-        
-    //    // 色を少しだけ明るくする。
-    //    //PayloadData.color += 0.1f;
-        
-    //    PayloadData.color_ = saturate(PayloadData.color_);
-        
-    //    //// 残った影響度を入れる。
-    //    //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
-        
-    //    return true;
-        
-    //}
     
     // メッシュ情報を返す。デバッグ機能。
     if (gSceneParam.debug.isMeshScene)
@@ -817,31 +823,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     PayloadData.ao_ += aoVisibility * PayloadData.impactAmount_;
     
     return false;
-    
-}
-
-// 色を加算する処理
-void WriteColor(inout Payload PayloadData, float3 WriteColor, float Rate)
-{
-    
-    // このレイが最初の一本目だったら。
-    if (PayloadData.recursive_ == 1)
-    {
-        
-        // 色情報をColorに書き込む。
-        PayloadData.color_.xyz = WriteColor * Rate;
-        
-        // ついでにMetalnessも書き込む。
-        PayloadData.roughness_ = material[0].roughness_;
-        
-    }
-    else
-    {
-        
-        // 反射情報を書き込む。
-        PayloadData.reflectionColor_.xyz = WriteColor * Rate;
-        
-    }
     
 }
 

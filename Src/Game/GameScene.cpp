@@ -555,7 +555,7 @@ void GameScene::Draw()
 		DirectXBase::Ins()->cmdList_->ResourceBarrier(4, barrierToUAV);
 
 		// ラフネス成分を使ってブラーをかける。
-		RoughnessBlur::Ins()->Denoise(reflectionColor_->GetUAVIndex(), roughnessMap_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), denoiseReflectionColor_->GetUAVIndex(), 1000, 10);
+		RoughnessBlur::Ins()->Denoise(reflectionColor_->GetUAVIndex(), roughnessMap_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), denoiseReflectionColor_->GetUAVIndex(), 1000, 1);
 	}
 
 	denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
