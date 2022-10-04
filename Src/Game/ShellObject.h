@@ -46,8 +46,9 @@ private:
 	std::shared_ptr<OBB> obb_;		// 当たり判定用OBB
 
 	const float SPEED = 50.0f;
+	const float SCALE = 20.0f;
 	const float MAX_GRAV = 10.0f;	// 重力の最大量
-	const float ADD_GRAV = 0.4f;	// 重力の加算量
+	const float ADD_GRAV = 1.0f;	// 重力の加算量
 	const int EXIT_TIMER = 180;		// 消滅までの時間
 
 

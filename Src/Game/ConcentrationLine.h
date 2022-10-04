@@ -14,7 +14,7 @@ private:
 	std::shared_ptr<Sprite> sprite_;
 	float alpha_;
 	int exitTimer_;
-	const int EXIT_TIME = 30;
+	const int EXIT_TIME = 10;
 	bool isActive_;
 
 
