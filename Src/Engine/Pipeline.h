@@ -6,7 +6,7 @@
 // パイプラインクラス
 // 以前はオブジェクト等を描画するために使用していましたが、新たにレイトレ用のパイプラインクラスを作ったので現在はスプライト関係の処理を行うのみとなっています。
 // PiplineMgrがこのクラスを管理しています。
-class Pipline {
+class Pipeline {
 
 public:
 
@@ -41,7 +41,7 @@ private:
 	using string = std::string;
 
 public:
-	Pipline() {};
+	Pipeline() {};
 	///<summary>
 	/// コンストラクタ
 	///</summary>
@@ -53,7 +53,7 @@ public:
 	///<param name="rootparam"><ルートパラメーター/param>
 	///<param name="primitive"><プリミティブ形状param>
 	///<param name="blendID"><どのブレンドをするかのID/param>
-	Pipline(
+	Pipeline(
 		PIPLINE_ID piplineID_,
 		string PSname,
 		string VSname,
@@ -66,7 +66,7 @@ public:
 		D3D12_CULL_MODE cullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	Pipline(
+	Pipeline(
 		PIPLINE_ID piplineID_,
 		string PSname,
 		string VSname,
@@ -81,7 +81,7 @@ public:
 		DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM,
 		DXGI_FORMAT dxgiFormat2 = DXGI_FORMAT_R8_UNORM);
 
-	Pipline(
+	Pipeline(
 		PIPLINE_ID piplineID_,
 		string PSname,
 		string VSname,

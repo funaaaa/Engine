@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseScene.h"
 #include "ConstBuffers.h"
-#include "RaytracingPipline.h"
+#include "RayPipeline.h"
 #include <memory>
 
 #include "OBB.h"
@@ -9,7 +9,7 @@
 
 class Character;
 class DynamicConstBuffer;
-class RaytracingPipline;
+class RayPipeline;
 class TLAS;
 class RaytracingOutput;
 class Sprite;
@@ -32,7 +32,7 @@ private:
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPiplineShaderData> dAOuseShaders_;
-	std::shared_ptr<RaytracingPipline> pipline_;
+	std::shared_ptr<RayPipeline> pipline_;
 
 	std::shared_ptr<Sprite> itemFrameUI_;
 	float itemFrameEasingTimer_;

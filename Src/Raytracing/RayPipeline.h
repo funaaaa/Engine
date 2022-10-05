@@ -22,7 +22,7 @@ struct RayPiplineShaderData {
 };
 
 // レイトレーシングで使用するパイプライン
-class RaytracingPipline {
+class RayPipeline {
 
 protected:
 

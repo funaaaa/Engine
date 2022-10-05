@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "HitGroupMgr.h"
 #include "DescriptorHeapMgr.h"
-#include "PiplineManager.h"
+#include "PipelineManager.h"
 #include "PolygonInstanceRegister.h"
 #include "Input.h"
 #include "BLASRegister.h"
@@ -17,7 +17,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
 	/*----------パイプライン生成----------*/
-	PiplineManager::Ins()->Init();
+	PipelineManager::Ins()->Init();
 
 	/*----------変数宣言----------*/
 	srand(static_cast<unsigned int>(time(NULL)));

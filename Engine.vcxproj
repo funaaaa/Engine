@@ -179,8 +179,8 @@
     <ClCompile Include="Src\Engine\Input.cpp" />
     <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
-    <ClCompile Include="Src\Engine\Pipline.cpp" />
-    <ClCompile Include="Src\Engine\PiplineManager.cpp" />
+    <ClCompile Include="Src\Engine\Pipeline.cpp" />
+    <ClCompile Include="Src\Engine\PipelineManager.cpp" />
     <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp" />
     <ClCompile Include="Src\Engine\ShaderData.cpp" />
     <ClCompile Include="Src\Engine\ShaderStorage.cpp" />
@@ -233,7 +233,7 @@
     <ClCompile Include="Src\Raytracing\RayDescriptor.cpp" />
     <ClCompile Include="Src\Raytracing\RayRootsignature.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
-    <ClCompile Include="Src\Raytracing\RaytracingPipline.cpp" />
+    <ClCompile Include="Src\Raytracing\RayPipeline.cpp" />
     <ClCompile Include="Src\Raytracing\TLAS.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -264,8 +264,8 @@
     <ClInclude Include="Src\Engine\Input.h" />
     <ClInclude Include="Src\Engine\Joycon.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
-    <ClInclude Include="Src\Engine\Pipline.h" />
-    <ClInclude Include="Src\Engine\PiplineManager.h" />
+    <ClInclude Include="Src\Engine\Pipeline.h" />
+    <ClInclude Include="Src\Engine\PipelineManager.h" />
     <ClInclude Include="Src\Engine\RWStructuredBuffer.h" />
     <ClInclude Include="Src\Engine\ShaderData.h" />
     <ClInclude Include="Src\Engine\ShaderStorage.h" />
@@ -323,10 +323,11 @@
     <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />
     <ClInclude Include="Src\Raytracing\RayDescriptor.h" />
     <ClInclude Include="Src\Raytracing\RayDenoiser.h" />
+    <ClInclude Include="Src\Raytracing\RayEngine.h" />
     <ClInclude Include="Src\Raytracing\RayRootsignature.h" />
     <ClInclude Include="Src\Raytracing\RayComputeShader.h" />
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />
-    <ClInclude Include="Src\Raytracing\RaytracingPipline.h" />
+    <ClInclude Include="Src\Raytracing\RayPipeline.h" />
     <ClInclude Include="Src\Raytracing\TLAS.h" />
   </ItemGroup>
   <ItemGroup>

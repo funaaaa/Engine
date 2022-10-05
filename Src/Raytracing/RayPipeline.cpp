@@ -1,4 +1,4 @@
-#include "RaytracingPipline.h"
+#include "RayPipeline.h"
 #include "DirectXTex/d3dx12.h"
 #include "ShaderStorage.h"
 #include "HitGroupMgr.h"
@@ -7,7 +7,7 @@
 #include "BLASRegister.h"
 #include <DirectXMath.h>
 
-void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount)
+void RayPipeline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount)
 {
 
 	/*===== セッティング処理 =====*/
@@ -160,7 +160,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 
 }
 
-void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int& DispatchY)
+void RayPipeline::ConstructionShaderTable(const int& DispatchX, const int& DispatchY)
 {
 
 	/*===== シェーダーテーブルを構築 =====*/
@@ -302,7 +302,7 @@ void RaytracingPipline::ConstructionShaderTable(const int& DispatchX, const int&
 
 }
 
-void RaytracingPipline::MapHitGroupInfo()
+void RayPipeline::MapHitGroupInfo()
 {
 
 	/*===== HitGroupの情報を転送 =====*/
@@ -332,7 +332,7 @@ void RaytracingPipline::MapHitGroupInfo()
 
 }
 
-UINT RaytracingPipline::GetLargestDataSizeInHitGroup()
+UINT RayPipeline::GetLargestDataSizeInHitGroup()
 {
 
 	/*===== 全てのヒットグループの中で最もデータサイズが大きいものを取得する =====*/
@@ -360,7 +360,7 @@ UINT RaytracingPipline::GetLargestDataSizeInHitGroup()
 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType, const wchar_t* name_)
+Microsoft::WRL::ComPtr<ID3D12Resource> RayPipeline::CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType, const wchar_t* name_)
 {
 	D3D12_HEAP_PROPERTIES heapProps{};
 	if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
@@ -404,13 +404,13 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t si
 	return resource;
 }
 
-UINT RaytracingPipline::WriteShaderIdentifier(void* dst, const void* shaderId)
+UINT RayPipeline::WriteShaderIdentifier(void* dst, const void* shaderId)
 {
 	memcpy(dst, shaderId, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
 	return D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 }
 
-int RaytracingPipline::GetRayGenerationCount()
+int RayPipeline::GetRayGenerationCount()
 {
 	int count = 0;
 
@@ -425,7 +425,7 @@ int RaytracingPipline::GetRayGenerationCount()
 
 }
 
-int RaytracingPipline::GetMissCount()
+int RayPipeline::GetMissCount()
 {
 	int count = 0;
 

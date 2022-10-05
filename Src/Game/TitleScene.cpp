@@ -1,6 +1,6 @@
 #include "TitleScene.h"
 #include "Input.h"
-#include "Pipline.h"
+#include "Pipeline.h"
 #include "Engine.h"
 #include "FHelper.h"
 #include "GameSceneMode.h"
@@ -13,7 +13,7 @@ TitleScene::TitleScene()
 	isTransition_ = false;
 	nextScene_ = SCENE_ID::GAME;
 
-	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipline::PROJECTIONID::UI, Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
+	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
 
 }
 

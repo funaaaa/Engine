@@ -1,7 +1,7 @@
 #include "Sprite.h"
 #include "TextureManager.h"
 #include "Engine.h"
-#include "PiplineManager.h"
+#include "PipelineManager.h"
 #include "DescriptorHeapMgr.h"
 
 void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID)
@@ -129,7 +129,7 @@ void Sprite::Draw()
 	if (isDisplay_ == false) return;
 
 	// パイプラインとルートシグネチャの設定
-	PiplineManager::Ins()->SetPipline(piplineID_);
+	PipelineManager::Ins()->SetPipline(piplineID_);
 
 	// 定数バッファB0構造体をマップ処理
 	MapConstDataB0(constBuffB0_, constBufferDataB0_);

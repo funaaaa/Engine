@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseScene.h"
 #include "ConstBuffers.h"
-#include "RaytracingPipline.h"
+#include "RayPipeline.h"
 #include <memory>
 
 #include "OBB.h"
@@ -9,7 +9,7 @@
 
 class Character;
 class DynamicConstBuffer;
-class RaytracingPipline;
+class RayPipeline;
 class TLAS;
 class RaytracingOutput;
 class Sprite;
@@ -32,10 +32,7 @@ private:
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPiplineShaderData> dAOuseShaders_;
-	std::shared_ptr<RaytracingPipline> pipline_;
-
-	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance_;
+	std::shared_ptr<RayPipeline> pipline_;
 
 	// ライト用のスフィアを読み込む。
 	int sphereBlas_;
