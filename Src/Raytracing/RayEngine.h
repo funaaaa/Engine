@@ -63,6 +63,9 @@ public:
 	// 事前準備処理
 	void Setting();
 
+	// TLASを設定。
+	void SettingTLAS();
+
 	// 更新処理
 	void Update();
 

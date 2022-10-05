@@ -60,6 +60,13 @@ void RayEngine::Setting()
 	// シェーダーテーブルを生成。
 	pipeline_->ConstructionShaderTable();
 
+}
+
+void RayEngine::SettingTLAS()
+{
+
+	/*===== TLASをセット =====*/
+
 	// TLASを生成。
 	tlas_ = std::make_shared<TLAS>();
 	tlas_->GenerateTLAS();

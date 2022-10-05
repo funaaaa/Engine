@@ -201,6 +201,8 @@ void GameScene::Init()
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
 
+	// TLASをセット。
+	RayEngine::Ins()->SettingTLAS();
 
 	Camera::Ins()->Init();
 
