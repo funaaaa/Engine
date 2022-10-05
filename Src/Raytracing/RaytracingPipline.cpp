@@ -3,7 +3,7 @@
 #include "ShaderStorage.h"
 #include "HitGroupMgr.h"
 #include "RayRootsignature.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 #include "BLASRegister.h"
 #include <DirectXMath.h>
 
@@ -152,7 +152,7 @@ void RaytracingPipline::Setting(const std::vector<RayPiplineShaderData>& InputDa
 	pipelineConfig->Config(ReflectionCount);
 
 	// ¶¬‚·‚éB
-	DirectXBase::Ins()->dev_->CreateStateObject(
+	Engine::Ins()->dev_->CreateStateObject(
 		subobjects, IID_PPV_ARGS(stateObject_.ReleaseAndGetAddressOf())
 	);
 
@@ -387,7 +387,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipline::CreateBuffer(size_t si
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resDesc.Flags = flags;
 
-	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

@@ -13,7 +13,7 @@
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
-	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
+	Engine::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
 	/*----------パイプライン生成----------*/
@@ -50,7 +50,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	while (true) {
 
 		// 描画前処理
-		DirectXBase::Ins()->ProcessBeforeDrawing();
+		Engine::Ins()->ProcessBeforeDrawing();
 
 
 		SceneMgr::Ins()->Update();
@@ -64,7 +64,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 		// 描画後処理
-		DirectXBase::Ins()->ProcessAfterDrawing();
+		Engine::Ins()->ProcessAfterDrawing();
 
 	}
 

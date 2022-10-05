@@ -55,7 +55,7 @@
     <ClCompile Include="Src\Engine\SoundManager.cpp">
       <Filter>エンジン\音データ関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\DirectXBase.cpp">
+    <ClCompile Include="Src\Engine\Engine.cpp">
       <Filter>エンジン\基盤関係</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\Joycon.cpp">
@@ -285,7 +285,7 @@
     <ClInclude Include="Src\Engine\SoundManager.h">
       <Filter>エンジン\音データ関係</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Engine\DirectXBase.h">
+    <ClInclude Include="Src\Engine\Engine.h">
       <Filter>エンジン\基盤関係</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\Singleton.h">

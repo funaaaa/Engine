@@ -1,13 +1,13 @@
 #include "StructuredBuffer.h"
 #include <DirectXTex/d3dx12.h>
-#include "DirectXBase.h"
+#include "Engine.h"
 
 
 void StructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 {
 	this->sizeOfElement_ = SizeOfElement;
 	this->numElement_ = NumElement;
-	auto device = DirectXBase::Ins()->dev_;
+	auto device = Engine::Ins()->dev_;
 
 	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(SizeOfElement * NumElement);
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
@@ -53,7 +53,7 @@ void StructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE Desc
 	if (!isInited_) {
 		return;
 	}
-	auto device = DirectXBase::Ins()->dev_;
+	auto device = Engine::Ins()->dev_;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));

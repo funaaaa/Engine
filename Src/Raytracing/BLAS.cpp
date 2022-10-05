@@ -491,7 +491,7 @@ void BLAS::Update()
 	asDesc.ScratchAccelerationStructureData = updateBuffer_->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -837,7 +837,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -901,7 +901,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 
 	// 関数を使って必要なメモリ量を求める.
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
-	DirectXBase::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
+	Engine::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &blasPrebuild
 	);
 
@@ -933,7 +933,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
 	buildASDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
-	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
 
@@ -951,28 +951,28 @@ void BLAS::CreateAccelerationStructure()
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 	uavBarrier.UAV.pResource = blasBuffer_.Get();
-	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
-	DirectXBase::Ins()->cmdList_->Close();
+	Engine::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
+	Engine::Ins()->cmdList_->Close();
 
 	// BLASを構築。
-	//ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
+	//ID3D12CommandList* pCmdList[] = { Engine::Ins()->cmdList.Get() };
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList_.Get() };
-	DirectXBase::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->cmdList_.Get() };
+	Engine::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
 
 	// グラフィックコマンドリストの完了待ち
-	DirectXBase::Ins()->cmdQueue_->Signal(DirectXBase::Ins()->fence_.Get(), ++DirectXBase::Ins()->fenceVal_);
-	if (DirectXBase::Ins()->fence_->GetCompletedValue() != DirectXBase::Ins()->fenceVal_) {
+	Engine::Ins()->cmdQueue_->Signal(Engine::Ins()->fence_.Get(), ++Engine::Ins()->fenceVal_);
+	if (Engine::Ins()->fence_->GetCompletedValue() != Engine::Ins()->fenceVal_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		DirectXBase::Ins()->fence_->SetEventOnCompletion(DirectXBase::Ins()->fenceVal_, event);
+		Engine::Ins()->fence_->SetEventOnCompletion(Engine::Ins()->fenceVal_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	// コマンドアロケータのリセット
-	DirectXBase::Ins()->cmdAllocator_->Reset();	//キューをクリア
+	Engine::Ins()->cmdAllocator_->Reset();	//キューをクリア
 
 	// コマンドリストのリセット
-	DirectXBase::Ins()->cmdList_->Reset(DirectXBase::Ins()->cmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+	Engine::Ins()->cmdList_->Reset(Engine::Ins()->cmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
 
 }

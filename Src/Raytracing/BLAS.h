@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXBase.h"
+#include "Engine.h"
 #include "RayDescriptor.h"
 #include "ComputeShader.h"
 #include "ModelDataManager.h"

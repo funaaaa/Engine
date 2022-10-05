@@ -1,4 +1,4 @@
-#include "DirectXBase.h"
+#include "Engine.h"
 #include <cassert>
 #include "Input.h"
 #include <stdexcept>
@@ -9,11 +9,11 @@
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
-DirectXBase::DirectXBase() {
+Engine::Engine() {
 	backBuffers_.resize(2);
 }
 
-void DirectXBase::Init() {
+void Engine::Init() {
 #ifdef _DEBUG
 	// デバッグレイヤーの有効化
 	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController_))))
@@ -224,7 +224,7 @@ void DirectXBase::Init() {
 
 }
 
-void DirectXBase::ProcessBeforeDrawing() {
+void Engine::ProcessBeforeDrawing() {
 	// メッセージ確認
 	if (PeekMessage(&windowsAPI_->msg_, nullptr, 0, 0, PM_REMOVE)) {
 		TranslateMessage(&windowsAPI_->msg_);	// キー入力メッセージの処理
@@ -296,7 +296,7 @@ void DirectXBase::ProcessBeforeDrawing() {
 
 }
 
-void DirectXBase::ProcessAfterDrawing() {
+void Engine::ProcessAfterDrawing() {
 
 	ImGui::End();
 	ImGui::Render();
@@ -335,33 +335,33 @@ void DirectXBase::ProcessAfterDrawing() {
 	cmdList_->Reset(cmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
 }
 
-void DirectXBase::SetRenderTarget()
+void Engine::SetRenderTarget()
 {
 	// レンダーターゲットのリソースバリア変更
-	UINT bbIndex = DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
-	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(DirectXBase::Ins()->backBuffers_[bbIndex].Get(),
+	UINT bbIndex = Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
+	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->cmdList_->ResourceBarrier(1, &resourceBarrier);
 
-	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(DirectXBase::Ins()->backBuffers_[bbIndex].Get(),
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->cmdList_->ResourceBarrier(1, &resourceBarrier);
 	// レンダーターゲットの設定
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DirectXBase::Ins()->rtvHeaps_->GetCPUDescriptorHandleForHeapStart(), bbIndex, DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(DirectXBase::Ins()->heapDesc_.Type));
+		Engine::Ins()->rtvHeaps_->GetCPUDescriptorHandleForHeapStart(), bbIndex, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(Engine::Ins()->heapDesc_.Type));
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE backBufferHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(DirectXBase::Ins()->rtvHeaps_->GetCPUDescriptorHandleForHeapStart(),
-		DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(DirectXBase::Ins()->heapDesc_.Type));
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvStartHandle = DirectXBase::Ins()->dsvHeap_->GetCPUDescriptorHandleForHeapStart();
-	DirectXBase::Ins()->cmdList_->OMSetRenderTargets(1, &backBufferHandle, false, &dsvStartHandle);
+	CD3DX12_CPU_DESCRIPTOR_HANDLE backBufferHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(Engine::Ins()->rtvHeaps_->GetCPUDescriptorHandleForHeapStart(),
+		Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(Engine::Ins()->heapDesc_.Type));
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvStartHandle = Engine::Ins()->dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+	Engine::Ins()->cmdList_->OMSetRenderTargets(1, &backBufferHandle, false, &dsvStartHandle);
 	// レンダーターゲットのクリア
 	float clearColor[] = { 0.5f,0.5f,0.5f,0.0f };
-	DirectXBase::Ins()->cmdList_->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
+	Engine::Ins()->cmdList_->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
 	// 深度バッファのクリアコマンド
-	DirectXBase::Ins()->cmdList_->ClearDepthStencilView(DirectXBase::Ins()->dsvHeap_->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	Engine::Ins()->cmdList_->ClearDepthStencilView(Engine::Ins()->dsvHeap_->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
-void DirectXBase::ResourceBarrierAfter()
+void Engine::ResourceBarrierAfter()
 {
 	// レンダーターゲットのリソースバリア変更
 	CD3DX12_RESOURCE_BARRIER resrouceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers_[swapchain_->GetCurrentBackBufferIndex()].Get(),
@@ -369,7 +369,7 @@ void DirectXBase::ResourceBarrierAfter()
 	cmdList_->ResourceBarrier(1, &resrouceBarrier);
 }
 
-Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> DirectXBase::CreateDescriptorHeaoForImgui()
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> Engine::CreateDescriptorHeaoForImgui()
 {
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> ret;
 

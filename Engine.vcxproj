@@ -171,7 +171,7 @@
     <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
     <ClCompile Include="Src\Engine\Camera.cpp" />
     <ClCompile Include="Src\Engine\ComputeShader.cpp" />
-    <ClCompile Include="Src\Engine\DirectXBase.cpp" />
+    <ClCompile Include="Src\Engine\Engine.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
     <ClCompile Include="Src\Engine\GLTF.cpp" />
@@ -254,7 +254,7 @@
     <ClInclude Include="Src\Engine\BaseSprite.h" />
     <ClInclude Include="Src\Engine\Camera.h" />
     <ClInclude Include="Src\Engine\ComputeShader.h" />
-    <ClInclude Include="Src\Engine\DirectXBase.h" />
+    <ClInclude Include="Src\Engine\Engine.h" />
     <ClInclude Include="Src\Engine\dxcapi.h" />
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />

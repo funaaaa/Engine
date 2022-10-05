@@ -38,7 +38,7 @@ PBRTestScene::PBRTestScene()
 	constBufferData_.Init();
 	constBuffer_ = std::make_shared<DynamicConstBuffer>();
 	constBuffer_->Generate(sizeof(RayConstBufferData), L"CameraConstBuffer");
-	constBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(RayConstBufferData));
+	constBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(RayConstBufferData));
 
 	// デノイズAO用のパイプラインを設定。
 	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
@@ -212,26 +212,26 @@ void PBRTestScene::Draw()
 	/*===== 描画処理 =====*/
 
 	// カメラ行列を更新。
-	auto frameIndex = DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
+	auto frameIndex = Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
 	constBufferData_.camera_.mtxView_ = Camera::Ins()->matView_;
 	constBufferData_.camera_.mtxViewInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxView_);
 	constBufferData_.camera_.mtxProj_ = Camera::Ins()->matPerspective_;
 	constBufferData_.camera_.mtxProjInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxProj_);
 
 	// 定数バッファをセット。
-	constBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
+	constBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
 
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-	DirectXBase::Ins()->cmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	DirectXBase::Ins()->cmdList_->SetComputeRootSignature(pipline_->GetGlobalRootSig()->GetRootSig().Get());
+	Engine::Ins()->cmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	Engine::Ins()->cmdList_->SetComputeRootSignature(pipline_->GetGlobalRootSig()->GetRootSig().Get());
 
 	// TLASを設定。
-	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas_->GetDescriptorHeapIndex()));
+	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas_->GetDescriptorHeapIndex()));
 
 	// 定数バッファをセット
-	DirectXBase::Ins()->cmdList_->SetComputeRootConstantBufferView(1, constBuffer_->GetBuffer(frameIndex)->GetGPUVirtualAddress());
+	Engine::Ins()->cmdList_->SetComputeRootConstantBufferView(1, constBuffer_->GetBuffer(frameIndex)->GetGPUVirtualAddress());
 
 	// バリアを設定し各リソースの状態を遷移させる.
 	aoOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -251,11 +251,11 @@ void PBRTestScene::Draw()
 	denoiseMaskOutput_->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
-	DirectXBase::Ins()->cmdList_->SetPipelineState1(pipline_->GetStateObject().Get());
+	Engine::Ins()->cmdList_->SetPipelineState1(pipline_->GetStateObject().Get());
 
 	// レイトレーシングを実行。
 	D3D12_DISPATCH_RAYS_DESC rayDesc = pipline_->GetDispatchRayDesc();
-	DirectXBase::Ins()->cmdList_->DispatchRays(&rayDesc);
+	Engine::Ins()->cmdList_->DispatchRays(&rayDesc);
 
 
 	// 床を白塗り
@@ -275,15 +275,15 @@ void PBRTestScene::Draw()
 	if (false) {
 
 		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
-		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
+		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
 						tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
 						tireMaskTextureOutput_->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
+			Engine::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
 		}
 
 	}
@@ -301,7 +301,7 @@ void PBRTestScene::Draw()
 				denoiseMaskOutput_->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// ライトにデノイズをかける。
 			Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1, 1);
@@ -316,7 +316,7 @@ void PBRTestScene::Draw()
 				denoiseMaskOutput_->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
 			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 6);
@@ -331,7 +331,7 @@ void PBRTestScene::Draw()
 				denoiseMaskOutput_->GetRaytracingOutput().Get())
 			};
 
-			DirectXBase::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// GIにデノイズをかける。
 			Denoiser::Ins()->Denoise(giOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 1);
@@ -348,7 +348,7 @@ void PBRTestScene::Draw()
 			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
 		};
 
-		DirectXBase::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
+		Engine::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
@@ -369,7 +369,7 @@ void PBRTestScene::Draw()
 			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
 		};
 
-		DirectXBase::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
+		Engine::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), aoOutput_->GetUAVIndex(), lightOutput_->GetUAVIndex(), giOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
@@ -379,28 +379,28 @@ void PBRTestScene::Draw()
 
 
 	// バックバッファのインデックスを取得する。
-	UINT backBufferIndex = DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
+	UINT backBufferIndex = Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
 
 	D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
-		DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(),
+		Engine::Ins()->backBuffers_[backBufferIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET,
 		D3D12_RESOURCE_STATE_COPY_DEST),
 	};
-	DirectXBase::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
+	Engine::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
 
 	// デバッグ情報によって描画するデータを変える。
 	if (constBufferData_.debug_.isLightHitScene_ || constBufferData_.debug_.isMeshScene_ || constBufferData_.debug_.isNormalScene_) {
 
 		// デノイズされた通常の描画
 		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		DirectXBase::Ins()->cmdList_->CopyResource(DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(), lightOutput_->GetRaytracingOutput().Get());
+		Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), lightOutput_->GetRaytracingOutput().Get());
 		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	}
 	else {
 
-		DirectXBase::Ins()->cmdList_->CopyResource(DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
+		Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
 
 	}
 
@@ -408,13 +408,13 @@ void PBRTestScene::Draw()
 	D3D12_RESOURCE_BARRIER endBarriers[] = {
 
 	CD3DX12_RESOURCE_BARRIER::Transition(
-	DirectXBase::Ins()->backBuffers_[backBufferIndex].Get(),
+	Engine::Ins()->backBuffers_[backBufferIndex].Get(),
 	D3D12_RESOURCE_STATE_COPY_DEST,
 	D3D12_RESOURCE_STATE_RENDER_TARGET)
 
 	};
 
-	DirectXBase::Ins()->cmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
+	Engine::Ins()->cmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
 
 	// バリアを設定し各リソースの状態を遷移させる.
 	aoOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
