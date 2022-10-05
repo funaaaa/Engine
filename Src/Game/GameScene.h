@@ -27,9 +27,6 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance_;
-
 	// ライト用のスフィアを読み込む。
 	int sphereBlas_;
 	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns_;

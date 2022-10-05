@@ -154,10 +154,10 @@ void GameScene::Init()
 
 	concentrationLine_->Init();
 
-	characterMgr_ = std::make_shared<CharacterMgr>();
-
 	countDownSprite_->ChangePosition(Vec3(100000, 10000, 100));
 	goSprite_->ChangePosition(Vec3(100000, 10000, 100));
+
+	characterMgr_ = std::make_shared<CharacterMgr>();
 
 	if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::AI) {
 
@@ -301,11 +301,8 @@ void GameScene::Update()
 		stages_[STAGE_ID::MUGEN]->NonDisplayGoal();
 	}
 
-
-	// BLASの情報を変更。いずれは変更した箇所のみ書き換えられるようにしたい。
-	RayEngine::Ins()->pipeline_->MapHitGroupInfo();
-
-	RayEngine::Ins()->tlas_->Update();
+	// TLASやパイプラインを更新。
+	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
 	sunAngle_ += sunSpeed_;
@@ -375,7 +372,9 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
+	// レイトレーシングを実行。
 	RayEngine::Ins()->Draw();
+
 
 	// 床を白塗り
 	static int a = 0;
@@ -385,8 +384,6 @@ void GameScene::Draw()
 		++a;
 
 	}
-
-
 
 	// タイヤ痕を書き込む。
 	std::vector<Character::TireMaskUV> tireMaskUV;

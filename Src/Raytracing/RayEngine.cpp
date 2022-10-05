@@ -67,6 +67,15 @@ void RayEngine::SettingTLAS()
 
 void RayEngine::Update()
 {
+
+	/*===== 更新処理 =====*/
+
+	// BLASの情報を変更。いずれは変更した箇所のみ書き換えられるようにしたい。
+	pipeline_->MapHitGroupInfo();
+
+	// TLASを更新。
+	tlas_->Update();
+
 }
 
 #include "RayDenoiser.h"
