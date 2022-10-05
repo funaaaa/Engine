@@ -1,11 +1,11 @@
 #include "RWStructuredBuffer.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 
 void RWStructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 {
 	this->sizeOfElement_ = SizeOfElement;
 	this->numElement_ = NumElement;
-	auto device = DirectXBase::Ins()->dev_;
+	auto device = Engine::Ins()->dev_;
 	D3D12_RESOURCE_DESC desc = CD3DX12_RESOURCE_DESC::Buffer(static_cast<size_t>(SizeOfElement * NumElement));
 	desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
@@ -37,7 +37,7 @@ void RWStructuredBuffer::Init(int SizeOfElement, int NumElement, void* InitData)
 
 Microsoft::WRL::ComPtr<ID3D12Resource> RWStructuredBuffer::GetD3DResoruce()
 {
-	DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
+	Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
 	return buffersOnGPU_;
 }
 
@@ -47,7 +47,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RWStructuredBuffer::GetD3DResoruce()
 /// <returns></returns>
 void* RWStructuredBuffer::GetResourceOnCPU()
 {
-	DirectXBase::Ins()->swapchain_->GetCurrentBackBufferIndex();
+	Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
 	return buffersOnCPU_;
 }
 
@@ -56,7 +56,7 @@ void RWStructuredBuffer::RegistUnorderAccessView(D3D12_CPU_DESCRIPTOR_HANDLE Des
 	if (!isInited_) {
 		return;
 	}
-	auto device = DirectXBase::Ins()->dev_;
+	auto device = Engine::Ins()->dev_;
 
 	D3D12_UNORDERED_ACCESS_VIEW_DESC desc{};
 	desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
@@ -76,7 +76,7 @@ void RWStructuredBuffer::RegistShaderResourceView(D3D12_CPU_DESCRIPTOR_HANDLE De
 	if (!isInited_) {
 		return;
 	}
-	auto device = DirectXBase::Ins()->dev_;
+	auto device = Engine::Ins()->dev_;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	ZeroMemory(&srvDesc, sizeof(srvDesc));

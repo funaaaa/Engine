@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXBase.h"
+#include "Engine.h"
 
 // TLASƒNƒ‰ƒX
 class TLAS {

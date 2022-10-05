@@ -1,10 +1,10 @@
-#include "PiplineManager.h"
-#include "Pipline.h"
+#include "PipelineManager.h"
+#include "Pipeline.h"
 #include <cassert>
 
-//map<string, Pipline> PiplineManager::pipline{};
+//map<string, Pipeline> PiplineManager::pipline{};
 
-void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
+void PiplineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 	std::string PSname,
 	std::string VSname,
 	int InputLayoutCount,
@@ -12,7 +12,7 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	int RootparamCount,
 	CD3DX12_ROOT_PARAMETER* Rootparam,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
-	Pipline::BLEND_ID BlendID,
+	Pipeline::BLEND_ID BlendID,
 	D3D12_CULL_MODE CullMode,
 	DXGI_FORMAT DxgiFormat)
 {
@@ -28,11 +28,11 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	}
 
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines_.emplace_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
+	piplines_.emplace_back(Pipeline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
-void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
+void PiplineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 	std::string PSname,
 	std::string VSname,
 	std::string GSname,
@@ -41,7 +41,7 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	int RootparamCount,
 	CD3DX12_ROOT_PARAMETER* Rootparam,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
-	Pipline::BLEND_ID BlendID,
+	Pipeline::BLEND_ID BlendID,
 	D3D12_CULL_MODE CullMode,
 	DXGI_FORMAT DxgiFormat)
 {
@@ -57,11 +57,11 @@ void PiplineManager::GeneratePipline(Pipline::PIPLINE_ID PiplineID,
 	}
 
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines_.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
+	piplines_.push_back(Pipeline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
-void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID PiplineID,
+void PiplineManager::GeneratePiplineDepth(Pipeline::PIPLINE_ID PiplineID,
 	std::string PSname,
 	std::string VSname,
 	int InputLayoutCount,
@@ -69,7 +69,7 @@ void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID PiplineID,
 	int RootparamCount,
 	CD3DX12_ROOT_PARAMETER* Rootparam,
 	D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
-	Pipline::BLEND_ID BlendID,
+	Pipeline::BLEND_ID BlendID,
 	D3D12_CULL_MODE CullMode,
 	DXGI_FORMAT DxgiFormat,
 	DXGI_FORMAT DxgiFormat2)
@@ -86,7 +86,7 @@ void PiplineManager::GeneratePiplineDepth(Pipline::PIPLINE_ID PiplineID,
 	}
 	DxgiFormat2;
 	//指定されたパイプラインIDごとに生成して最後尾に追加
-	piplines_.push_back(Pipline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
+	piplines_.push_back(Pipeline(PiplineID, PSname, VSname, InputLayoutCount, InputLayout, RootparamCount, Rootparam, Primitive, BlendID, CullMode, DxgiFormat));
 
 }
 
@@ -243,7 +243,7 @@ void PiplineManager::Init()
 
 	/*スプライト用のパイプライン*/
 	//GeneratePipline(PIPLINE_SPRITE_ADD, "Resource/ShaderFiles/SpritePS.hlsl", "Resource/ShaderFiles/SpriteVS.hlsl", 3, inputLayout, 2, const1Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ADD);
-	GeneratePipline(Pipline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, "Resource/ShaderFiles/SpritePS.hlsl", "Resource/ShaderFiles/SpriteVS.hlsl", 3, inputLayout, 2, const1Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, Pipline::BLEND_ID::BLENDMODE_ALPHA);
+	GeneratePipline(Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, "Resource/ShaderFiles/SpritePS.hlsl", "Resource/ShaderFiles/SpriteVS.hlsl", 3, inputLayout, 2, const1Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, Pipeline::BLEND_ID::BLENDMODE_ALPHA);
 
 	/*オブジェクト用のパイプライン*/
 	//GeneratePipline(PIPLINE_OBJECT_LIGHT_ALPHA, "Resource/ShaderFiles/ObjectLightPS.hlsl", "Resource/ShaderFiles/ObjectVS.hlsl", 3, inputLayout, 4, const3Tex1, D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, BLENDMODE_ALPHA, D3D12_CULL_MODE_BACK);

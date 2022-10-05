@@ -5,14 +5,14 @@
 #include <string>
 #include <DirectXTex/d3dx12.h>
 #include "Singleton.h"
-#include "Pipline.h"
+#include "Pipeline.h"
 
 // パイプライン管理クラス
 // 以前オブジェクト等を描画するパイプラインを管理するために使用していたが、レイトレ用で新しくパイプラインを作ったのでこのクラスではスプライト関係のパイプラインを管理するのみとなっています。
 class PiplineManager :public Singleton<PiplineManager> {
 public:
 
-	std::vector<Pipline> piplines_;	// パイプライン
+	std::vector<Pipeline> piplines_;	// パイプライン
 	// コンストラクタ
 	PiplineManager() {};
 
@@ -29,7 +29,7 @@ public:
 	/// <param name="Rootparam">ルートパラメーター</param>
 	/// <param name="Primitive">プリミティブ形状</param>
 	/// <param name="BlendID">ブレンドのID</param>
-	void GeneratePipline(Pipline::PIPLINE_ID PiplineID,
+	void GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 		std::string PSname,
 		std::string VSname,
 		int InputLayoutCount,
@@ -37,7 +37,7 @@ public:
 		int RootparamCount,
 		CD3DX12_ROOT_PARAMETER* Rootparam,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
-		Pipline::BLEND_ID BlendID,
+		Pipeline::BLEND_ID BlendID,
 		D3D12_CULL_MODE CullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT DxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 	/// <summary>
@@ -53,7 +53,7 @@ public:
 	/// <param name="Rootparam">ルートパラメーター</param>
 	/// <param name="Primitive">プリミティブ形状</param>
 	/// <param name="BlendID">ブレンドのID</param>
-	void GeneratePipline(Pipline::PIPLINE_ID PiplineID,
+	void GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 		std::string PSname,
 		std::string VSname,
 		std::string GSname,
@@ -62,11 +62,11 @@ public:
 		int RootparamCount,
 		CD3DX12_ROOT_PARAMETER* Rootparam,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
-		Pipline::BLEND_ID BlendID,
+		Pipeline::BLEND_ID BlendID,
 		D3D12_CULL_MODE CullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT DxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM);
 
-	void GeneratePiplineDepth(Pipline::PIPLINE_ID PiplineID,
+	void GeneratePiplineDepth(Pipeline::PIPLINE_ID PiplineID,
 		std::string PSname,
 		std::string VSname,
 		int InputLayoutCount,
@@ -74,7 +74,7 @@ public:
 		int RootparamCount,
 		CD3DX12_ROOT_PARAMETER* Rootparam,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE Primitive,
-		Pipline::BLEND_ID BlendID,
+		Pipeline::BLEND_ID BlendID,
 		D3D12_CULL_MODE CullMode = D3D12_CULL_MODE_BACK,
 		DXGI_FORMAT DxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM,
 		DXGI_FORMAT DxgiFormat2 = DXGI_FORMAT_R8_UNORM);

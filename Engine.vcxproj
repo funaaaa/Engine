@@ -171,7 +171,7 @@
     <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
     <ClCompile Include="Src\Engine\Camera.cpp" />
     <ClCompile Include="Src\Engine\ComputeShader.cpp" />
-    <ClCompile Include="Src\Engine\DirectXBase.cpp" />
+    <ClCompile Include="Src\Engine\Engine.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
     <ClCompile Include="Src\Engine\GLTF.cpp" />
@@ -179,8 +179,8 @@
     <ClCompile Include="Src\Engine\Input.cpp" />
     <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
-    <ClCompile Include="Src\Engine\Pipline.cpp" />
-    <ClCompile Include="Src\Engine\PiplineManager.cpp" />
+    <ClCompile Include="Src\Engine\Pipeline.cpp" />
+    <ClCompile Include="Src\Engine\PipelineManager.cpp" />
     <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp" />
     <ClCompile Include="Src\Engine\ShaderData.cpp" />
     <ClCompile Include="Src\Engine\ShaderStorage.cpp" />
@@ -233,7 +233,7 @@
     <ClCompile Include="Src\Raytracing\RayDescriptor.cpp" />
     <ClCompile Include="Src\Raytracing\RayRootsignature.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
-    <ClCompile Include="Src\Raytracing\RaytracingPipline.cpp" />
+    <ClCompile Include="Src\Raytracing\RaytracingPipeline.cpp" />
     <ClCompile Include="Src\Raytracing\TLAS.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -254,7 +254,7 @@
     <ClInclude Include="Src\Engine\BaseSprite.h" />
     <ClInclude Include="Src\Engine\Camera.h" />
     <ClInclude Include="Src\Engine\ComputeShader.h" />
-    <ClInclude Include="Src\Engine\DirectXBase.h" />
+    <ClInclude Include="Src\Engine\Engine.h" />
     <ClInclude Include="Src\Engine\dxcapi.h" />
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />
@@ -264,8 +264,8 @@
     <ClInclude Include="Src\Engine\Input.h" />
     <ClInclude Include="Src\Engine\Joycon.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
-    <ClInclude Include="Src\Engine\Pipline.h" />
-    <ClInclude Include="Src\Engine\PiplineManager.h" />
+    <ClInclude Include="Src\Engine\Pipeline.h" />
+    <ClInclude Include="Src\Engine\PipelineManager.h" />
     <ClInclude Include="Src\Engine\RWStructuredBuffer.h" />
     <ClInclude Include="Src\Engine\ShaderData.h" />
     <ClInclude Include="Src\Engine\ShaderStorage.h" />
@@ -326,7 +326,7 @@
     <ClInclude Include="Src\Raytracing\RayRootsignature.h" />
     <ClInclude Include="Src\Raytracing\RayComputeShader.h" />
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />
-    <ClInclude Include="Src\Raytracing\RaytracingPipline.h" />
+    <ClInclude Include="Src\Raytracing\RaytracingPipeline.h" />
     <ClInclude Include="Src\Raytracing\TLAS.h" />
   </ItemGroup>
   <ItemGroup>

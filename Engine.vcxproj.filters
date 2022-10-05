@@ -55,7 +55,7 @@
     <ClCompile Include="Src\Engine\SoundManager.cpp">
       <Filter>エンジン\音データ関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\DirectXBase.cpp">
+    <ClCompile Include="Src\Engine\Engine.cpp">
       <Filter>エンジン\基盤関係</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\Joycon.cpp">
@@ -91,7 +91,7 @@
     <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp">
       <Filter>レイトレーシング\加速構造体\HitGroup</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Raytracing\RaytracingPipline.cpp">
+    <ClCompile Include="Src\Raytracing\RaytracingPipeline.cpp">
       <Filter>レイトレーシング\基礎\レイトレーシングパイプライン</Filter>
     </ClCompile>
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp">
@@ -133,10 +133,10 @@
     <ClCompile Include="Src\Game\ResultScene.cpp">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\Pipline.cpp">
+    <ClCompile Include="Src\Engine\Pipeline.cpp">
       <Filter>エンジン\パイプライン</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\PiplineManager.cpp">
+    <ClCompile Include="Src\Engine\PipelineManager.cpp">
       <Filter>エンジン\パイプライン</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\BaseDrawData.cpp">
@@ -285,7 +285,7 @@
     <ClInclude Include="Src\Engine\SoundManager.h">
       <Filter>エンジン\音データ関係</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Engine\DirectXBase.h">
+    <ClInclude Include="Src\Engine\Engine.h">
       <Filter>エンジン\基盤関係</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\Singleton.h">
@@ -336,7 +336,7 @@
     <ClInclude Include="Src\Raytracing\HitGroupMgr.h">
       <Filter>レイトレーシング\加速構造体\HitGroup</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Raytracing\RaytracingPipline.h">
+    <ClInclude Include="Src\Raytracing\RaytracingPipeline.h">
       <Filter>レイトレーシング\基礎\レイトレーシングパイプライン</Filter>
     </ClInclude>
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h">
@@ -375,10 +375,10 @@
     <ClInclude Include="Src\Game\TitleScene.h">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Engine\Pipline.h">
+    <ClInclude Include="Src\Engine\Pipeline.h">
       <Filter>エンジン\パイプライン</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Engine\PiplineManager.h">
+    <ClInclude Include="Src\Engine\PipelineManager.h">
       <Filter>エンジン\パイプライン</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\BaseDrawData.h">

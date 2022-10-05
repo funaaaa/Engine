@@ -9,26 +9,26 @@
 
 class RayRootsignature;
 
-struct RayPiplineShaderData {
+struct RayPipelineShaderData {
 
 	std::string shaderPath_;					// シェーダーパス
 	std::vector<LPCWSTR> rayGenEnteryPoint_;	// エントリポイント
 	std::vector<LPCWSTR> missEntryPoint_;	// エントリポイント
 	std::vector<LPCWSTR> hitgroupEntryPoint_;// エントリポイント
-	RayPiplineShaderData() {};
-	RayPiplineShaderData(std::string ShaderPath, std::vector<LPCWSTR> RGEntry, std::vector<LPCWSTR> MSEntry, std::vector<LPCWSTR> HGEntry)
+	RayPipelineShaderData() {};
+	RayPipelineShaderData(std::string ShaderPath, std::vector<LPCWSTR> RGEntry, std::vector<LPCWSTR> MSEntry, std::vector<LPCWSTR> HGEntry)
 		:shaderPath_(ShaderPath), rayGenEnteryPoint_(RGEntry), missEntryPoint_(MSEntry), hitgroupEntryPoint_(HGEntry) {};
 
 };
 
 // レイトレーシングで使用するパイプライン
-class RaytracingPipline {
+class RaytracingPipeline {
 
 protected:
 
 	/*===== メンバ変数 =====*/
 
-	std::vector<RayPiplineShaderData> shaderData_;			// 使用するシェーダーを纏めた構造体
+	std::vector<RayPipelineShaderData> shaderData_;			// 使用するシェーダーを纏めた構造体
 	std::vector<D3D12_SHADER_BYTECODE> shaderCode_;			// 使用するシェーダーのバイトコード
 	Microsoft::WRL::ComPtr<ID3D12StateObject> stateObject_;	// ステートオブジェクト
 	std::shared_ptr<RayRootsignature> globalRootSig_;		// グローバルルートシグネチャ
@@ -47,7 +47,7 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// セッティング処理
-	void Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount = 4);
+	void Setting(const std::vector<RayPipelineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount = 4);
 
 	// シェーダーテーブルを構築
 	void ConstructionShaderTable(const int& DispatchX = WINDOW_WIDTH, const int& DispatchY = WINDOW_HEIGHT);

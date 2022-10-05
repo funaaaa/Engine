@@ -1,7 +1,7 @@
 #include "BaseDrawData.h"
 #include "Camera.h"
 #include "Vec.h"
-#include "Pipline.h"
+#include "Pipeline.h"
 
 void BaseDrawData::ChangeScale(Vec3 Amount)
 {
@@ -150,7 +150,7 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 	ConstBufferDataB0* constMap = nullptr;
 	ConstBuffB0->Map(0, nullptr, (void**)&constMap);
 	// 投影IDがbackGourndの場合は平行投影変換を行う
-	if (projectionID_ == Pipline::PROJECTIONID::UI) {
+	if (projectionID_ == Pipeline::PROJECTIONID::UI) {
 		// ワールド行列の更新
 		DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
 		matWorld *= scaleMat_;
@@ -162,7 +162,7 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 		constMap->color = ConstBufferB0.color;
 	}
 	// 投影IDがobjectの場合はいろいろな変換を行う
-	else if (projectionID_ == Pipline::PROJECTIONID::OBJECT) {
+	else if (projectionID_ == Pipeline::PROJECTIONID::OBJECT) {
 		// ワールド行列の更新
 		DirectX::XMMATRIX matWorld = DirectX::XMMatrixIdentity();
 		matWorld *= scaleMat_;
@@ -174,7 +174,7 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 		constMap->color = ConstBufferB0.color;
 	}
 	// ビルボードの場合
-	else if (projectionID_ == Pipline::PROJECTIONID::BILLBOARD) {
+	else if (projectionID_ == Pipeline::PROJECTIONID::BILLBOARD) {
 		// 視点座標
 		DirectX::XMVECTOR eyePosition = eye_.ConvertXMVECTOR();
 		// 注視点座標

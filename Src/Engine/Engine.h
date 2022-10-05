@@ -14,7 +14,7 @@
 
 class WindowsAPI;
 
-class DirectXBase : public Singleton<DirectXBase> {
+class Engine : public Singleton<Engine> {
 
 public:
 
@@ -47,8 +47,8 @@ public:
 
 public:
 	//コンストラクタ
-	friend Singleton<DirectXBase>;
-	DirectXBase();
+	friend Singleton<Engine>;
+	Engine();
 	//初期化処理
 	void Init();
 	//毎フレーム処理(描画前処理)

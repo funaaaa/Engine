@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include "FHelper.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 #include <d3d12.h>
 
 Camera::Camera() {

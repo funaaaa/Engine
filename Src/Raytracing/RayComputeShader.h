@@ -18,7 +18,7 @@ private:
 	/*===== メンバ変数 =====*/
 
 	std::shared_ptr<RayRootsignature> rootSignature_;			// ルートシグネチャ
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipline_;		// パイプライン
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipeline_;		// パイプライン
 	int inputCBVCount_;					// 入力するCBVの数
 	int inputSRVCount_;					// 入力するSRVの数
 	int inputUAVCount_;					// 入力するUAVの数

@@ -1,9 +1,9 @@
-#include "Pipline.h"
+#include "Pipeline.h"
 #include "ShaderStorage.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 #include <DirectXTex/d3dx12.h>
 
-Pipline::Pipline(
+Pipeline::Pipeline(
 	PIPLINE_ID piplineID_,
 	string PSname,
 	string VSname,
@@ -37,10 +37,10 @@ Pipline::Pipline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
-	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
-Pipline::Pipline(
+Pipeline::Pipeline(
 	PIPLINE_ID piplineID_,
 	string PSname,
 	string VSname,
@@ -75,10 +75,10 @@ Pipline::Pipline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDescDepth(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat, dxgiFormat2);
 	isMRT;
-	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
-Pipline::Pipline(
+Pipeline::Pipeline(
 	PIPLINE_ID piplineID_,
 	string PSname,
 	string VSname,
@@ -119,30 +119,30 @@ Pipline::Pipline(
 
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
-	DirectXBase::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
-void Pipline::SetPipline()
+void Pipeline::SetPipline()
 {
 	//パイプラインステート設定コマンド
-	DirectXBase::Ins()->cmdList_->SetPipelineState(pipelinestate_.Get());
+	Engine::Ins()->cmdList_->SetPipelineState(pipelinestate_.Get());
 
 	//ルートシグネチャ設定コマンド
-	DirectXBase::Ins()->cmdList_->SetGraphicsRootSignature(rootsignature_.Get());
+	Engine::Ins()->cmdList_->SetGraphicsRootSignature(rootsignature_.Get());
 
 	//プリミティブ形状設定コマンド
 	if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) {
-		DirectXBase::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) {
-		DirectXBase::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 	}
 	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) {
-		DirectXBase::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	}
 }
 
-void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat)
+void Pipeline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat)
 {
 	gpipelineDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;						//標準設定
 	gpipelineDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);		//背面カリング,ポリゴン内塗りつぶし,深度クリッピングを有効に
@@ -200,13 +200,13 @@ void Pipline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, 
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = DirectXBase::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
+	result = Engine::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
 
 	//パイプラインにルートシグネチャをセット
 	gpipelineDesc.pRootSignature = rootsignature_.Get();
 }
 
-void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat, DXGI_FORMAT dxgiFormat2)
+void Pipeline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc, D3D12_INPUT_ELEMENT_DESC* inputLayout, int inputLayoutCount, CD3DX12_ROOT_PARAMETER* rootparam_, int rootparamCount_, BLEND_ID blendID, D3D12_CULL_MODE cullMode, DXGI_FORMAT dxgiFormat, DXGI_FORMAT dxgiFormat2)
 {
 	gpipelineDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;						//標準設定
 	gpipelineDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);		//背面カリング,ポリゴン内塗りつぶし,深度クリッピングを有効に
@@ -265,7 +265,7 @@ void Pipline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineD
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = DirectXBase::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
+	result = Engine::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
 
 	//パイプラインにルートシグネチャをセット
 	gpipelineDesc.pRootSignature = rootsignature_.Get();

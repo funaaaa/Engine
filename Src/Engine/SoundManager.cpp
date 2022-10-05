@@ -1,6 +1,6 @@
 #include "SoundManager.h"
 #include <cassert>
-#include "DirectXBase.h"
+#include "Engine.h"
 
 #pragma comment(lib,"xaudio2.lib")
 
