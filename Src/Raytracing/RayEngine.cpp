@@ -61,10 +61,8 @@ void RayEngine::Setting()
 	pipeline_->ConstructionShaderTable();
 
 	// TLAS‚ğ¶¬B
-	if (!tlas_.operator bool()) {
-		tlas_ = std::make_shared<TLAS>();
-		tlas_->GenerateTLAS();
-	}
+	tlas_ = std::make_shared<TLAS>();
+	tlas_->GenerateTLAS();
 
 }
 

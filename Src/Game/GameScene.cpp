@@ -179,23 +179,6 @@ void GameScene::Init()
 	}
 
 
-	Camera::Ins()->Init();
-
-	DriftParticleMgr::Ins()->Setting();
-	DriftParticleMgr::Ins()->Init();
-
-	isBeforeStart_ = true;
-	isCountDown_ = false;
-	countDownEasingTimer_ = 0;
-	isCountDownExit_ = false;
-	isGameFinish_ = false;
-	countDownStartTimer_ = 0;
-	transitionTimer = 0;
-	countDownNumber_ = 2;
-	sunAngle_ = 0.3f;
-	itemFrameEasingTimer_ = 1;
-
-
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
 
@@ -211,11 +194,26 @@ void GameScene::Init()
 	pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
 	pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
 
+	// 設定
+	DriftParticleMgr::Ins()->Setting();
+	DriftParticleMgr::Ins()->Init();
+
 	// Instanceのワールド行列を生成。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
 
-	// 設定
-	DriftParticleMgr::Ins()->Setting();
+
+	Camera::Ins()->Init();
+
+	isBeforeStart_ = true;
+	isCountDown_ = false;
+	countDownEasingTimer_ = 0;
+	isCountDownExit_ = false;
+	isGameFinish_ = false;
+	countDownStartTimer_ = 0;
+	transitionTimer = 0;
+	countDownNumber_ = 2;
+	sunAngle_ = 0.3f;
+	itemFrameEasingTimer_ = 1;
 
 }
 
