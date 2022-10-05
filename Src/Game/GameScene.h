@@ -27,13 +27,6 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	RayConstBufferData constBufferData_;
-	std::shared_ptr<DynamicConstBuffer> constBuffer_;
-
-	// デノイズAO用のパイプラインを設定。
-	std::vector<RayPipelineShaderData> dAOuseShaders_;
-	std::shared_ptr<RaytracingPipeline> pipeline_;
-
 	// SPONZAを読み込む。
 	std::vector<int> sponzaInstance_;
 
@@ -75,30 +68,6 @@ private:
 	bool isGameFinish_;
 	int transitionTimer;
 	const int TRANSION_TIME = 180;
-
-	// TLASを生成。
-	std::shared_ptr<TLAS> tlas_;
-
-	// AO出力用。
-	std::shared_ptr<RaytracingOutput> aoOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseAOOutput_;
-
-	// 色出力用クラス。
-	std::shared_ptr<RaytracingOutput> colorOutput_;
-
-	// ライト出力用。
-	std::shared_ptr<RaytracingOutput> lightOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseLightOutput_;
-
-	// GI出力用。
-	std::shared_ptr<RaytracingOutput> giOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseGiOutput_;
-
-	// デノイズマスク用。
-	std::shared_ptr<RaytracingOutput> denoiseMaskOutput_;
-
-	// デノイズの結果出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput_;
 
 	// タイヤ痕出力用クラス
 	std::shared_ptr<RaytracingOutput> tireMaskTexture_;

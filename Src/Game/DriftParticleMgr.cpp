@@ -83,7 +83,7 @@ void DriftParticleMgr::Init()
 
 }
 
-void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec)
+void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec)
 {
 
 	/*===== 生成処理 =====*/
@@ -109,7 +109,7 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 
 			if (index_->GetIsActive()) continue;
 
-			index_->GenerateSmoke(smokeBlas_, Pos, MatRot, ConstBufferData, IsBoost, ForwardVec);
+			index_->GenerateSmoke(smokeBlas_, Pos, MatRot, IsBoost, ForwardVec);
 
 			++generateCounter;
 			bool isDashOverTheAmount = (DelayID == DELAY_ID::DASH && GCOUNT_DASH <= generateCounter);
@@ -127,7 +127,7 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 
 }
 
-void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot)
 {
 
 	/*===== 生成処理 =====*/
@@ -151,7 +151,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 		Vec3 random = FHelper::GetRandVec3(-500, 500) / 100.0f;
 
-		index_->GenerateFire(fireBlas_, Pos + random, MatRot, ConstBufferData);
+		index_->GenerateFire(fireBlas_, Pos + random, MatRot);
 
 		++generateCount;
 		if (GENERATE_COUNT_FIRE < generateCount) {
@@ -167,7 +167,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 }
 
-void DriftParticleMgr::GenerateAura(const int& CharaIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateAura(const int& CharaIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const int& Id, const bool& IsBoostRight, const bool& IsOrange)
 {
 
 	/*===== オーラを生成する =====*/
@@ -180,10 +180,10 @@ void DriftParticleMgr::GenerateAura(const int& CharaIndex, std::weak_ptr<Polygon
 		DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
 		bool isAuraBig = id == DriftParticle::ID::AURA_BIG;
 		if (IsOrange) {
-			index->GenerateAura(isAuraBig ? bigAuraOrangeBlas_ : smallAuraOrangeBlas_, TireInstance, id, IsBoostRight, ConstBufferData);
+			index->GenerateAura(isAuraBig ? bigAuraOrangeBlas_ : smallAuraOrangeBlas_, TireInstance, id, IsBoostRight);
 		}
 		else {
-			index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInstance, id, IsBoostRight, ConstBufferData);
+			index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInstance, id, IsBoostRight);
 		}
 
 		if (isAuraBig) {
@@ -225,7 +225,7 @@ void DriftParticleMgr::GenerateAura(const int& CharaIndex, std::weak_ptr<Polygon
 
 }
 
-void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID)
 {
 
 	/*===== パーティクルを生成 =====*/
@@ -252,7 +252,7 @@ void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> 
 			if (index_->GetIsActive()) continue;
 
 			DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
-			index_->GenerateDriftParticle(IsOrange ? driftParticleOrangeBlas_ : driftParticleBlas_, TireInstance, id, IsBoostRight, IsLevelChange, ConstBufferData);
+			index_->GenerateDriftParticle(IsOrange ? driftParticleOrangeBlas_ : driftParticleBlas_, TireInstance, id, IsBoostRight, IsLevelChange);
 
 			++generateCounter;
 			if (GENERATE_COUNT < generateCounter) {
@@ -267,7 +267,7 @@ void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> 
 
 }
 
-void DriftParticleMgr::GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> CarBodyInstance)
 {
 
 	/*===== ジャンプアクション時のエフェクトを生成 =====*/
@@ -277,7 +277,7 @@ void DriftParticleMgr::GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> Car
 
 		if (index->GetIsActive()) continue;
 
-		index->GenerateJumpEffect(jumpEffectBlas_, CarBodyInstance, ConstBufferData);
+		index->GenerateJumpEffect(jumpEffectBlas_, CarBodyInstance);
 
 		break;
 
@@ -285,7 +285,7 @@ void DriftParticleMgr::GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> Car
 
 }
 
-void DriftParticleMgr::Update(RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::Update()
 {
 
 	/*===== 更新処理 =====*/
@@ -294,7 +294,7 @@ void DriftParticleMgr::Update(RayConstBufferData& ConstBufferData)
 
 		if (!index_->GetIsActive()) continue;
 
-		index_->Update(ConstBufferData);
+		index_->Update();
 
 	}
 

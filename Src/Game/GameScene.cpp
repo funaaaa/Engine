@@ -29,6 +29,8 @@
 #include "PolygonInstance.h"
 #include "BaseItem.h"
 
+#include "RayEngine.h"
+
 #include "GLTF.h"
 
 GameScene::GameScene()
@@ -36,20 +38,9 @@ GameScene::GameScene()
 
 	/*===== 初期化処理 =====*/
 
+
 	// 甲羅オブジェクトをセッティング。
 	ShellObjectMgr::Ins()->Setting();
-
-	// 定数バッファを生成。
-	constBufferData_.Init();
-	constBuffer_ = std::make_shared<DynamicConstBuffer>();
-	constBuffer_->Generate(sizeof(RayConstBufferData), L"CameraConstBuffer");
-	constBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(RayConstBufferData));
-
-	// デノイズAO用のパイプラインを設定。
-	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
-	pipeline_ = std::make_shared<RaytracingPipeline>();
-	pipeline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
 
 	// タイヤ痕用クラスをセット。
 	tireMaskTexture_ = std::make_shared<RaytracingOutput>();
@@ -65,17 +56,6 @@ GameScene::GameScene()
 	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
 	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {});
 
-	// ステージをセッティングする。
-	stages_.emplace_back(std::make_shared<MugenStage>());
-
-	// 一旦サーキットステージを有効化する。
-	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
-
-	// 天球用のスフィアを生成する。
-	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
-	skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
-
 	characterMgr_ = std::make_shared<CharacterMgr>();
 
 	// Instanceのワールド行列を生成。
@@ -83,43 +63,6 @@ GameScene::GameScene()
 
 	// 設定
 	DriftParticleMgr::Ins()->Setting();
-
-	// TLASを生成。
-	tlas_ = std::make_shared<TLAS>();
-	tlas_->GenerateTLAS();
-
-	// AO出力用クラスをセット。
-	aoOutput_ = std::make_shared<RaytracingOutput>();
-	aoOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput");
-	denoiseAOOutput_ = std::make_shared<RaytracingOutput>();
-	denoiseAOOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseAOOutput");
-
-	// 色出力用クラスをセット。
-	colorOutput_ = std::make_shared<RaytracingOutput>();
-	colorOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput");
-
-	// 明るさ情報出力用クラスをセット。
-	lightOutput_ = std::make_shared<RaytracingOutput>();
-	lightOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"LightOutput");
-	denoiseLightOutput_ = std::make_shared<RaytracingOutput>();
-	denoiseLightOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput");
-
-	// GI出力用クラスをセット。
-	giOutput_ = std::make_shared<RaytracingOutput>();
-	giOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput");
-	denoiseGiOutput_ = std::make_shared<RaytracingOutput>();
-	denoiseGiOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput");
-
-	// デノイズマスク用クラスをセット。
-	denoiseMaskOutput_ = std::make_shared<RaytracingOutput>();
-	denoiseMaskOutput_->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput");
-
-	// 最終出力用クラスをセット。
-	denoiseMixTextureOutput_ = std::make_shared<RaytracingOutput>();
-	denoiseMixTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput");
-
-	// シェーダーテーブルを生成。
-	pipeline_->ConstructionShaderTable();
 
 	// 太陽に関する変数
 	sunAngle_ = 0.1f;
@@ -196,14 +139,6 @@ GameScene::GameScene()
 	goSprite_->GenerateForTexture(WINDOW_CENTER, GO_FONT_SIZE, Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/go.png");
 	goSprite_->SetColor(DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 0.0f));
 
-
-	// PBRテスト用
-	pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
-	pbrSphereIns_.lock()->AddScale(Vec3(50, 50, 50));
-	pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
-	pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
-
 }
 
 void GameScene::Init()
@@ -211,12 +146,15 @@ void GameScene::Init()
 
 	/*===== 初期化処理 =====*/
 
+	// インスタンスを初期化。
+	PolygonInstanceRegister::Ins()->Setting();
+
 	nextScene_ = SCENE_ID::RESULT;
 	isTransition_ = false;
 
 	concentrationLine_->Init();
 
-	characterMgr_->Init();
+	characterMgr_ = std::make_shared<CharacterMgr>();
 
 	countDownSprite_->ChangePosition(Vec3(100000, 10000, 100));
 	goSprite_->ChangePosition(Vec3(100000, 10000, 100));
@@ -251,6 +189,29 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, GameSceneMode::Ins()->level_);
 
 	}
+
+	// ステージをセッティングする。
+	stages_.emplace_back(std::make_shared<MugenStage>());
+
+	// 一旦サーキットステージを有効化する。
+	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
+
+	// 天球用のスフィアを生成する。
+	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
+	skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
+
+	// PBRテスト用
+	pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
+	pbrSphereIns_.lock()->AddScale(Vec3(50, 50, 50));
+	pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
+	pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
+
+
+
+	// TLASを生成。
+	RayEngine::Ins()->SettingTLAS();
 
 
 	Camera::Ins()->Init();
@@ -291,10 +252,10 @@ void GameScene::Update()
 	}
 
 	// キャラを更新。
-	characterMgr_->Update(stages_[STAGE_ID::MUGEN], constBufferData_, isBeforeStart_, isGameFinish_);
+	characterMgr_->Update(stages_[STAGE_ID::MUGEN], isBeforeStart_, isGameFinish_);
 
 	// 乱数の種を更新。
-	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
+	RayEngine::Ins()->GetConstBufferData().debug_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
@@ -330,7 +291,7 @@ void GameScene::Update()
 	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount + 1], 0);
 
 	// ステージを更新。
-	stages_[STAGE_ID::MUGEN]->Update(constBufferData_);
+	stages_[STAGE_ID::MUGEN]->Update();
 
 	// ゴールの表示非表示を切り替え。
 	if (characterMgr_->GetPlayerIns().lock()->GetIsPassedMiddlePoint()) {
@@ -342,21 +303,21 @@ void GameScene::Update()
 
 
 	// BLASの情報を変更。いずれは変更した箇所のみ書き換えられるようにしたい。
-	pipeline_->MapHitGroupInfo();
+	RayEngine::Ins()->pipeline_->MapHitGroupInfo();
 
-	tlas_->Update();
+	RayEngine::Ins()->tlas_->Update();
 
 	// 太陽の角度を更新。
 	sunAngle_ += sunSpeed_;
-	if (0.0f < constBufferData_.light_.dirLight_.lihgtDir_.y_) {
+	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
 		sunAngle_ += sunSpeed_;
 		sunAngle_ += sunSpeed_;
 		sunAngle_ += sunSpeed_;
 
 	}
-	constBufferData_.light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
-	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
 	skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
 
@@ -364,7 +325,7 @@ void GameScene::Update()
 	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::MUGEN]);
 
 	// 煙を更新する。
-	DriftParticleMgr::Ins()->Update(constBufferData_);
+	DriftParticleMgr::Ins()->Update();
 
 	// 集中線を更新。
 	if (characterMgr_->GetPlayerIns().lock()->GetIdConcentrationLine()) {
@@ -414,52 +375,7 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
-	// カメラ行列を更新。
-	auto frameIndex = Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
-	constBufferData_.camera_.mtxView_ = Camera::Ins()->matView_;
-	constBufferData_.camera_.mtxViewInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxView_);
-	constBufferData_.camera_.mtxProj_ = Camera::Ins()->matPerspective_;
-	constBufferData_.camera_.mtxProjInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxProj_);
-
-	// 定数バッファをセット。
-	constBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
-
-
-	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
-	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-	Engine::Ins()->cmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	Engine::Ins()->cmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
-
-	// TLASを設定。
-	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas_->GetDescriptorHeapIndex()));
-
-	// 定数バッファをセット
-	Engine::Ins()->cmdList_->SetComputeRootConstantBufferView(1, constBuffer_->GetBuffer(frameIndex)->GetGPUVirtualAddress());
-
-	// バリアを設定し各リソースの状態を遷移させる.
-	aoOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseAOOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseLightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	colorOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	giOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseGiOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseMaskOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	// 出力用UAVを設定。
-	aoOutput_->SetComputeRootDescriptorTalbe(2);		// AOの結果出力用
-	lightOutput_->SetComputeRootDescriptorTalbe(3);	// ライトの明るさの結果出力用
-	colorOutput_->SetComputeRootDescriptorTalbe(4);	// テクスチャの色情報出力用
-	giOutput_->SetComputeRootDescriptorTalbe(5);		// giの結果出力用
-	denoiseMaskOutput_->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
-
-	// パイプラインを設定。
-	Engine::Ins()->cmdList_->SetPipelineState1(pipeline_->GetStateObject().Get());
-
-	// レイトレーシングを実行。
-	D3D12_DISPATCH_RAYS_DESC rayDesc = pipeline_->GetDispatchRayDesc();
-	Engine::Ins()->cmdList_->DispatchRays(&rayDesc);
-
+	RayEngine::Ins()->Draw();
 
 	// 床を白塗り
 	static int a = 0;
@@ -491,144 +407,6 @@ void GameScene::Draw()
 		}
 
 	}
-
-
-	// [ノイズを描画]のときはデノイズをかけない。
-	if (!constBufferData_.debug_.isNoiseScene_) {
-
-		// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
-		if (!constBufferData_.debug_.isMeshScene_ && !constBufferData_.debug_.isNormalScene_ && !constBufferData_.debug_.isLightHitScene_) {
-
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				lightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseLightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_->GetRaytracingOutput().Get())
-			};
-
-			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
-
-			// ライトにデノイズをかける。
-			Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1, 1);
-
-		}
-
-		// AO情報にデノイズをかける。
-		{
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				aoOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseAOOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_->GetRaytracingOutput().Get())
-			};
-
-			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
-
-			// AOにデノイズをかける。
-			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1000, 6);
-		}
-
-
-		// GI情報にデノイズをかける。
-		{
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				giOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseGiOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_->GetRaytracingOutput().Get())
-			};
-
-			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
-
-			// GIにデノイズをかける。
-			Denoiser::Ins()->Denoise(giOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 1);
-
-		}
-
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-			colorOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseAOOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseLightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseGiOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
-		};
-
-		Engine::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
-
-		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseGiOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-
-	}
-	// デノイズしないデバッグ状態の場合は、レイトレ関数から出力された生の値を合成する。
-	else {
-
-
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-			colorOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			aoOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			lightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			giOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseMixTextureOutput_->GetRaytracingOutput().Get())
-		};
-
-		Engine::Ins()->cmdList_->ResourceBarrier(5, barrierToUAV);
-
-		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_->GetUAVIndex(), aoOutput_->GetUAVIndex(), lightOutput_->GetUAVIndex(), giOutput_->GetUAVIndex(), denoiseMixTextureOutput_->GetUAVIndex());
-		denoiseMixTextureOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-
-	}
-
-
-	// バックバッファのインデックスを取得する。
-	UINT backBufferIndex = Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
-
-	D3D12_RESOURCE_BARRIER barriers[] = {
-		CD3DX12_RESOURCE_BARRIER::Transition(
-		Engine::Ins()->backBuffers_[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET,
-		D3D12_RESOURCE_STATE_COPY_DEST),
-	};
-	Engine::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
-
-	// デバッグ情報によって描画するデータを変える。
-	if (constBufferData_.debug_.isLightHitScene_ || constBufferData_.debug_.isMeshScene_ || constBufferData_.debug_.isNormalScene_) {
-
-		// デノイズされた通常の描画
-		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), lightOutput_->GetRaytracingOutput().Get());
-		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	}
-	else {
-
-		Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
-
-	}
-
-	// レンダーターゲットのリソースバリアをもとに戻す。
-	D3D12_RESOURCE_BARRIER endBarriers[] = {
-
-	CD3DX12_RESOURCE_BARRIER::Transition(
-	Engine::Ins()->backBuffers_[backBufferIndex].Get(),
-	D3D12_RESOURCE_STATE_COPY_DEST,
-	D3D12_RESOURCE_STATE_RENDER_TARGET)
-
-	};
-
-	Engine::Ins()->cmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
-
-	// バリアを設定し各リソースの状態を遷移させる.
-	aoOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseAOOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseLightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	colorOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	giOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseGiOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	denoiseMaskOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// UIを描画
 	static int firstTime = 0;
@@ -840,7 +618,7 @@ void GameScene::InputImGUI()
 	ImGui::SliderFloat("Metalness", &pbrSphereBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
 	ImGui::SliderFloat("Specular", &pbrSphereBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
 	ImGui::SliderFloat("Roughness", &pbrSphereBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
-	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 
 	pbrSphereBlas_.lock()->IsChangeMaterial();
 

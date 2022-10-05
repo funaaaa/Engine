@@ -231,6 +231,7 @@
     <ClCompile Include="Src\Raytracing\RayComputeShader.cpp" />
     <ClCompile Include="Src\Raytracing\RayDenoiser.cpp" />
     <ClCompile Include="Src\Raytracing\RayDescriptor.cpp" />
+    <ClCompile Include="Src\Raytracing\RayEngine.cpp" />
     <ClCompile Include="Src\Raytracing\RayRootsignature.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingPipeline.cpp" />
@@ -323,6 +324,7 @@
     <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />
     <ClInclude Include="Src\Raytracing\RayDescriptor.h" />
     <ClInclude Include="Src\Raytracing\RayDenoiser.h" />
+    <ClInclude Include="Src\Raytracing\RayEngine.h" />
     <ClInclude Include="Src\Raytracing\RayRootsignature.h" />
     <ClInclude Include="Src\Raytracing\RayComputeShader.h" />
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />

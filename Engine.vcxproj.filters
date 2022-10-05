@@ -226,6 +226,9 @@
     <ClCompile Include="Src\Game\PBRTestScene.cpp">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Raytracing\RayEngine.cpp">
+      <Filter>レイトレーシング\基礎\エンジン</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -501,6 +504,9 @@
     <ClInclude Include="Src\Game\PBRTestScene.h">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Raytracing\RayEngine.h">
+      <Filter>レイトレーシング\基礎\エンジン</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -702,6 +708,9 @@
     </Filter>
     <Filter Include="エンジン\モデルデータ関係\gltf外部">
       <UniqueIdentifier>{26e6a8d3-a71d-43ee-81d2-e11f062c3e25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="レイトレーシング\基礎\エンジン">
+      <UniqueIdentifier>{31c9ec33-b50a-4f1a-b277-48f67b8935a9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

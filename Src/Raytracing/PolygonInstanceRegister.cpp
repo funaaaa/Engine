@@ -82,6 +82,7 @@ void PolygonInstanceRegister::DestroyInstance(std::weak_ptr<PolygonMeshInstance>
 
 	/*===== 指定のインスタンスを破棄 =====*/
 
+	if (Instance.expired()) return;
 	// インデックスが範囲外だったらassert	。
 	int index = Instance.lock()->GetInstanceIndex();
 	if (index < 0 || MAX_INSTANCE < index) assert(0);

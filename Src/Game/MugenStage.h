@@ -35,7 +35,7 @@ public:
 
 	void Setting(const int& TireMaskIndex)override;
 	void Destroy()override;
-	void Update(RayConstBufferData& ConstBufferData)override;
+	void Update()override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
 	void ChangeStageStatus(const int& Status)override;
 

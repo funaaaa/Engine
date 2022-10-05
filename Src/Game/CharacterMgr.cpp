@@ -31,14 +31,14 @@ void CharacterMgr::Init()
 
 }
 
-void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish)
+void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, const bool& IsBeforeStart, const bool& IsGameFinish)
 {
 
 	/*===== XVˆ— =====*/
 
 	for (auto& index : character_) {
 
-		index->Update(Stage, ConstBufferData, IsBeforeStart, IsGameFinish);
+		index->Update(Stage, IsBeforeStart, IsGameFinish);
 
 	}
 

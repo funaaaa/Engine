@@ -41,7 +41,8 @@ void DriftParticle::Init()
 
 }
 
-void DriftParticle::GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec)
+#include "RayEngine.h"
+void DriftParticle::GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, const bool& IsBoost, Vec3 ForwardVec)
 {
 
 	/*===== 生成処理 =====*/
@@ -70,12 +71,12 @@ void DriftParticle::GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, con
 		instance_.lock()->ChangeScale(Vec3(15, 15, 15));
 	}
 
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 0.1f;
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ = 0.1f;
 
 }
 
-void DriftParticle::GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot)
 {
 
 	/*===== 生成処理 =====*/
@@ -98,12 +99,12 @@ void DriftParticle::GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, cons
 
 	instance_.lock()->ChangeScale(Vec3(5, 5, 5));
 
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
 
 }
 
-void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight)
 {
 
 	/*===== オーラの生成処理 =====*/
@@ -151,12 +152,12 @@ void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<Polygon
 
 	}
 
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
 
 }
 
-void DriftParticle::GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange)
 {
 
 	/*===== ドリフト時のパーティクルを生成 =====*/
@@ -228,12 +229,12 @@ void DriftParticle::GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_pt
 	// サイズを変える。
 	instance_.lock()->ChangeScale(Vec3(particleNowScale_.x_, particleNowScale_.y_, particleNowScale_.x_));
 
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
 
 }
 
-void DriftParticle::GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> CarBodyInstance, RayConstBufferData& ConstBufferData)
+void DriftParticle::GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> CarBodyInstance)
 {
 
 	/*===== ジャンプエフェクトを生成 =====*/
@@ -255,12 +256,12 @@ void DriftParticle::GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<P
 	// サイズを変える。
 	instance_.lock()->ChangeScale(Vec3(particleNowScale_.x_, particleNowScale_.y_, particleNowScale_.x_));
 
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
-	ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].instanceIndex_ = instance_.lock()->GetInstanceIndex();
+	RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
 
 }
 
-void DriftParticle::Update(RayConstBufferData& ConstBufferData)
+void DriftParticle::Update()
 {
 
 	/*===== 更新処理 =====*/
@@ -278,10 +279,10 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		if (isAppearingNow_) {
 
 			// アルファ値を加算。
-			ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ += APPEARING_ALPHA;
-			if (1.0f < ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_) {
+			RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ += APPEARING_ALPHA;
+			if (1.0f < RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_) {
 
-				ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
+				RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f;
 				++appearingTimer_;
 
 				// 出現タイマーが一定値に達したらアルファ値を下げていく。
@@ -296,14 +297,14 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		}
 		else {
 
-			ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= EXIT_ALPHA;
+			RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ -= EXIT_ALPHA;
 
 		}
 
 		break;
 	case DriftParticle::ID::FIRE:
 
-		ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= FIRE_ALPHA;
+		RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ -= FIRE_ALPHA;
 		instance_.lock()->AddScale(Vec3(1.0f, 1.0f, 1.0f));
 
 		break;
@@ -459,7 +460,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 
 			particleNowScale_.y_ -= 0.5f;
 			if (particleNowScale_.y_ <= 0.1f) particleNowScale_.y_ = 0.1f;
-			ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ -= EXIT_ALPHA;
+			RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ -= EXIT_ALPHA;
 
 		}
 
@@ -490,7 +491,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 		instance_.lock()->ChangeScale(Vec3(nowScale, nowScale, nowScale));
 
 		// アルファを求める。
-		ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f - (1.1f * easingAmount);
+		RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ = 1.0f - (1.1f * easingAmount);
 
 		//// 出現中だったら。
 		//if (isAppearingNow_) {
@@ -539,7 +540,7 @@ void DriftParticle::Update(RayConstBufferData& ConstBufferData)
 	}
 
 
-	if (ConstBufferData.alphaData_.alphaData_[constBufferIndex_].alpha_ < 0.0f) {
+	if (RayEngine::Ins()->GetConstBufferData().alphaData_.alphaData_[constBufferIndex_].alpha_ < 0.0f) {
 
 		Init();
 

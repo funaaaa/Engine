@@ -9,6 +9,7 @@
 #include "PolygonInstanceRegister.h"
 #include "Input.h"
 #include "BLASRegister.h"
+#include "RayEngine.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -45,6 +46,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// シーンクラス。
 	SceneMgr::Ins()->Init();
+
+	// レイトレエンジンを設定。
+	RayEngine::Ins()->Setting();
+
 
 	/*----------ゲームループ----------*/
 	while (true) {

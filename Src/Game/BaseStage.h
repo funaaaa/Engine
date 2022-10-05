@@ -53,7 +53,7 @@ public:
 
 	virtual void Setting(const int& TireMaskIndex) = 0;
 	virtual void Destroy() = 0;
-	virtual void Update(RayConstBufferData& ConstBufferData) = 0;
+	virtual void Update() = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;
 	virtual void ChangeStageStatus(const int& Status) = 0;
 
