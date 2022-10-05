@@ -214,15 +214,14 @@ void Character::Init()
 
 
 	// 臨時のバグ対策です。 最初の一回目のドリフトのときのみオーラが出ないので、ここで一回生成しておく。
-	RayConstBufferData constBuffer;
-	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0, constBuffer);
-	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= 0, constBuffer);
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0);
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= 0);
 
 	DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
 }
 
-void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish)
+void Character::Update(std::weak_ptr<BaseStage> StageData, const bool& IsBeforeStart, const bool& IsGameFinish)
 {
 
 
@@ -240,7 +239,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	playerModel_.carBodyInstance.lock()->ChangeRotate(defBodyMatRot_);
 
 	// 入力処理
-	Input(ConstBufferData, IsBeforeStart);
+	Input(IsBeforeStart);
 
 	// ドリフトに関する更新処理
 	UpdateDrift();
@@ -310,7 +309,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	}
 
 	// ドリフトパーティクルの更新処理。
-	UpdateDriftParticle(ConstBufferData, IsGameFinish, IsBeforeStart);
+	UpdateDriftParticle(IsGameFinish, IsBeforeStart);
 
 	// 移動できないタイマーを更新する。
 	if (0 < canNotMoveTimer_) {
@@ -686,15 +685,13 @@ void Character::DeleteInstance()
 
 }
 
-void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart)
+void Character::Input(const bool& IsBeforeStart)
 {
 
 	/*===== 入力処理 =====*/
 
 	// ゲームが終了している場合は入力を無効化する。 ゲームが終了した最初のFでは入力を取る必要があるので、Prevも比較している。
 	if (isGameFinish_ && isPrevGameFinish_) return;
-
-	ConstBufferData;
 
 	// 操作オブジェクトからの入力を受け取る。
 	BaseOperationObject::OperationInputData operationInputData;
@@ -1629,7 +1626,7 @@ void Character::UpdateGameFinish()
 
 }
 
-void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const bool& IsGameFinish, const bool& IsBeforeStart)
+void Character::UpdateDriftParticle(const bool& IsGameFinish, const bool& IsBeforeStart)
 {
 
 	/*===== ドリフトパーティクルの更新処理 =====*/
@@ -1650,14 +1647,14 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 		// 設置していたら煙を生成。
 		if (onGround_) {
 			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), ConstBufferData, IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate() , IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
 			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), ConstBufferData, IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate() , IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
 		}
 
 		// 設置していて移動速度が一定以上だったら炎を生成。
 		if (15.0f < boostSpeed_) {
-			DriftParticleMgr::Ins()->GenerateFire(playerModel_.carBehindTireInstance.lock()->GetWorldPos(), playerModel_.carBodyInstance.lock()->GetRotate(), ConstBufferData);
+			DriftParticleMgr::Ins()->GenerateFire(playerModel_.carBehindTireInstance.lock()->GetWorldPos(), playerModel_.carBodyInstance.lock()->GetRotate() );
 		}
 
 	}
@@ -1676,7 +1673,7 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 			Vec3 generatePos = playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * static_cast<float>(FHelper::GetRand(-2, 2));
 			// 後ろ方向に持ってくる。
 			generatePos += -forwardVec_ * 20.0f;
-			DriftParticleMgr::Ins()->GenerateSmoke(generatePos, playerModel_.carBodyInstance.lock()->GetRotate(), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY, -forwardVec_);
+			DriftParticleMgr::Ins()->GenerateSmoke(generatePos, playerModel_.carBodyInstance.lock()->GetRotate() , false, DriftParticleMgr::DELAY_ID::NONE_DELAY, -forwardVec_);
 
 		}
 
@@ -1691,12 +1688,12 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
 		for (int index = 0; index < 3; ++index) {
 
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate() , false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
 
 		}
 		// 三回ランダムに位置をずらして生成する。
 		for (int index = 0; index < 3; ++index) {
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() - driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() - driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate() , false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
 
 		}
 
@@ -1720,8 +1717,8 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 		if (1 <= nowLevel) {
 
 			if (!DriftParticleMgr::Ins()->IsAuraGenerated(charaIndex_)) {
-				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel );
+				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel );
 			}
 
 			// レートを求める。
@@ -1729,16 +1726,16 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 			rate = FHelper::Saturate(static_cast<float>(driftTimer_) / static_cast<float>(DRIFT_TIMER[0]));
 
 			// パーティクルを生成する。
-			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), rate, false, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), rate, false, DriftParticleMgr::DELAY_ID::DELAY1 );
 
 			// レベルが上った瞬間だったら一気にパーティクルを生成する。
 			if (driftTimer_ == DRIFT_TIMER[0] || driftTimer_ == DRIFT_TIMER[1] || driftTimer_ == DRIFT_TIMER[2]) {
 
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1 );
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1 );
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1 );
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1 );
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1 );
 
 				// オーラを一旦破棄
 				DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
@@ -1749,7 +1746,7 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 
 		// 煙を出す。
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isDriftRight_ ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), ConstBufferData, nowLevel < 1, DriftParticleMgr::DELAY_ID::DEF);
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate() , nowLevel < 1, DriftParticleMgr::DELAY_ID::DEF);
 
 
 
@@ -1766,9 +1763,9 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 
 		// 煙を出す。
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isGameFinishDriftLeft_ ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(isGameFinishDriftLeft_ ? playerModel_.carLeftTireInstance.lock()->GetWorldPos() : playerModel_.carRightTireInstance.lock()->GetWorldPos(), gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_ , false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_ , false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(isGameFinishDriftLeft_ ? playerModel_.carLeftTireInstance.lock()->GetWorldPos() : playerModel_.carRightTireInstance.lock()->GetWorldPos(), gameFinishTriggerMatRot_ , false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
 
 
 	}
@@ -1776,7 +1773,7 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 	// ジャンプアクションのパーティクルを生成。
 	if (isJumpAction_ || Input::Ins()->IsKeyTrigger(DIK_M)) {
 
-		DriftParticleMgr::Ins()->GenerateJumpEffect(playerModel_.carBodyInstance, ConstBufferData);
+		DriftParticleMgr::Ins()->GenerateJumpEffect(playerModel_.carBodyInstance );
 
 	}
 

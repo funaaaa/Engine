@@ -7,7 +7,7 @@
 #include "BLASRegister.h"
 #include <DirectXMath.h>
 
-void RayPipeline::Setting(const std::vector<RayPiplineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount)
+void RayPipeline::Setting(const std::vector<std::shared_ptr<RayPipelineShaderData>>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount)
 {
 
 	/*===== セッティング処理 =====*/
@@ -20,35 +20,36 @@ void RayPipeline::Setting(const std::vector<RayPiplineShaderData>& InputData, co
 	for (int index = 0; index < INPUT_COUNT; ++index) {
 
 		// 入力されたデータ構造体。
-		RayPiplineShaderData buff;
+		std::shared_ptr<RayPipelineShaderData> buff;
+		buff = std::make_shared<RayPipelineShaderData>();
 
 		// 保存する。
-		buff.shaderPath_ = InputData[index].shaderPath_;
+		buff->shaderPath_ = InputData[index]->shaderPath_;
 
 		// 保存されているエントリポイントを保存。
-		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint_.size());
+		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index]->rayGenEnteryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < RG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			buff.rayGenEnteryPoint_.push_back(InputData[index].rayGenEnteryPoint_[entryPointIndex]);
+			buff->rayGenEnteryPoint_.emplace_back(InputData[index]->rayGenEnteryPoint_[entryPointIndex]);
 
 		}
-		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint_.size());
+		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index]->missEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < MS_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			buff.missEntryPoint_.push_back(InputData[index].missEntryPoint_[entryPointIndex]);
+			buff->missEntryPoint_.emplace_back(InputData[index]->missEntryPoint_[entryPointIndex]);
 
 		}
 
 		// 保存する。
-		const int HS_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint_.size());
+		const int HS_ENTRY_COUNT = static_cast<int>(InputData[index]->hitgroupEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < HS_ENTRY_COUNT; ++entryPointIndex) {
-			buff.hitgroupEntryPoint_.push_back(InputData[index].hitgroupEntryPoint_[entryPointIndex]);
+			buff->hitgroupEntryPoint_.emplace_back(InputData[index]->hitgroupEntryPoint_[entryPointIndex]);
 		}
 
 		// 保存する。
-		shaderData_.push_back(buff);
+		shaderData_.emplace_back(buff);
 
 	}
 
@@ -78,36 +79,36 @@ void RayPipeline::Setting(const std::vector<RayPiplineShaderData>& InputData, co
 		shaderCode_.emplace_back();
 
 		// シェーダーをコンパイルする。
-		ShaderStorage::Ins()->LoadShaderForDXC(shaderData_[index].shaderPath_, "lib_6_4", "");
+		ShaderStorage::Ins()->LoadShaderForDXC(shaderData_[index]->shaderPath_, "lib_6_4", "");
 
 		// シェーダーを読み込む。
-		shaderCode_[index].BytecodeLength = static_cast<SIZE_T>(ShaderStorage::Ins()->GetShaderBin(shaderData_[index].shaderPath_).size());
-		shaderCode_[index].pShaderBytecode = ShaderStorage::Ins()->GetShaderBin(shaderData_[index].shaderPath_).data();
+		shaderCode_[index].BytecodeLength = static_cast<SIZE_T>(ShaderStorage::Ins()->GetShaderBin(shaderData_[index]->shaderPath_).size());
+		shaderCode_[index].pShaderBytecode = ShaderStorage::Ins()->GetShaderBin(shaderData_[index]->shaderPath_).data();
 
 		// シェーダーの各関数レコードの登録。
 		auto dxilLib = subobjects.CreateSubobject<CD3DX12_DXIL_LIBRARY_SUBOBJECT>();
 		dxilLib->SetDXILLibrary(&shaderCode_[index]);
 
 		// シェーダーのエントリポイントを登録。
-		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index].rayGenEnteryPoint_.size());
+		const int RG_ENTRY_COUNT = static_cast<int>(InputData[index]->rayGenEnteryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < RG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			dxilLib->DefineExport(shaderData_[index].rayGenEnteryPoint_[entryPointIndex]);
+			dxilLib->DefineExport(shaderData_[index]->rayGenEnteryPoint_[entryPointIndex]);
 
 		}
-		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index].missEntryPoint_.size());
+		const int MS_ENTRY_COUNT = static_cast<int>(InputData[index]->missEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < MS_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			dxilLib->DefineExport(shaderData_[index].missEntryPoint_[entryPointIndex]);
+			dxilLib->DefineExport(shaderData_[index]->missEntryPoint_[entryPointIndex]);
 
 		}
-		const int HG_ENTRY_COUNT = static_cast<int>(InputData[index].hitgroupEntryPoint_.size());
+		const int HG_ENTRY_COUNT = static_cast<int>(InputData[index]->hitgroupEntryPoint_.size());
 		for (int entryPointIndex = 0; entryPointIndex < HG_ENTRY_COUNT; ++entryPointIndex) {
 
 			// 保存する。
-			dxilLib->DefineExport(shaderData_[index].hitgroupEntryPoint_[entryPointIndex]);
+			dxilLib->DefineExport(shaderData_[index]->hitgroupEntryPoint_[entryPointIndex]);
 
 		}
 
@@ -226,10 +227,10 @@ void RayPipeline::ConstructionShaderTable(const int& DispatchX, const int& Dispa
 		const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 		for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-			const int RG_COUNT = static_cast<int>(shaderData_[index].rayGenEnteryPoint_.size());
+			const int RG_COUNT = static_cast<int>(shaderData_[index]->rayGenEnteryPoint_.size());
 			for (int rgIndex = 0; rgIndex < RG_COUNT; ++rgIndex) {
 
-				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index].rayGenEnteryPoint_[rgIndex]);
+				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index]->rayGenEnteryPoint_[rgIndex]);
 				p += WriteShaderIdentifier(p, id_);
 
 			}
@@ -246,10 +247,10 @@ void RayPipeline::ConstructionShaderTable(const int& DispatchX, const int& Dispa
 		const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 		for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-			const int MS_COUNT = static_cast<int>(shaderData_[index].missEntryPoint_.size());
+			const int MS_COUNT = static_cast<int>(shaderData_[index]->missEntryPoint_.size());
 			for (int msIndex = 0; msIndex < MS_COUNT; ++msIndex) {
 
-				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index].missEntryPoint_[msIndex]);
+				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index]->missEntryPoint_[msIndex]);
 				p += WriteShaderIdentifier(p, id_);
 
 			}
@@ -417,7 +418,7 @@ int RayPipeline::GetRayGenerationCount()
 	const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 	for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-		count += static_cast<int>(shaderData_[index].rayGenEnteryPoint_.size());
+		count += static_cast<int>(shaderData_[index]->rayGenEnteryPoint_.size());
 
 	}
 
@@ -432,7 +433,7 @@ int RayPipeline::GetMissCount()
 	const int SHADER_DATA_COUNT = static_cast<int>(shaderData_.size());
 	for (int index = 0; index < SHADER_DATA_COUNT; ++index) {
 
-		count += static_cast<int>(shaderData_[index].missEntryPoint_.size());
+		count += static_cast<int>(shaderData_[index]->missEntryPoint_.size());
 
 	}
 

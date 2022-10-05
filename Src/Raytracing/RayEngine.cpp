@@ -1,67 +1,31 @@
-#include "PBRTestScene.h"
-#include "HitGroupMgr.h"
-#include "BLASRegister.h"
-#include "PolygonInstanceRegister.h"
-#include "Character.h"
-#include "FHelper.h"
-#include "Camera.h"
-#include "RayDenoiser.h"
-#include "RayRootsignature.h"
+#include "RayEngine.h"
 #include "DynamicConstBuffer.h"
 #include "RayPipeline.h"
-#include "RaytracingOutput.h"
 #include "TLAS.h"
-#include "Input.h"
-#include "TextureManager.h"
-#include "Sprite.h"
-#include "Pipeline.h"
-#include "WindowsAPI.h"
-#include "CircuitStage.h"
-#include "MugenStage.h"
-#include "RayComputeShader.h"
-#include "StageObjectMgr.h"
-#include "BLAS.h"
-#include "ShellObjectMgr.h"
-#include "CharacterMgr.h"
-#include "GameSceneMode.h"
-#include "DriftParticleMgr.h"
-#include "ConcentrationLineMgr.h"
-#include "PolygonInstance.h"
+#include "RaytracingOutput.h"
+#include "ConstBuffers.h"
+#include "HitGroupMgr.h"
+#include "Camera.h"	
+#include "RayRootsignature.h"
+#include "RayDenoiser.h"
 
-#include "GLTF.h"
-
-PBRTestScene::PBRTestScene()
+void RayEngine::Setting()
 {
-	/*===== 初期化処理 =====*/
+
+	/*===== 事前準備処理 =====*/
 
 	// 定数バッファを生成。
-	constBufferData_.Init();
+	constBufferData_ = std::make_shared<RayConstBufferData>();
+	constBufferData_->Init();
 	constBuffer_ = std::make_shared<DynamicConstBuffer>();
 	constBuffer_->Generate(sizeof(RayConstBufferData), L"CameraConstBuffer");
 	constBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(RayConstBufferData));
 
 	// デノイズAO用のパイプラインを設定。
-	dAOuseShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
+	pipelineShaders_.emplace_back(std::make_shared<RayPipelineShaderData>(shaderName, rgEntry, msEntry, hgEntry));
 	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
-	pipline_ = std::make_shared<RayPipeline>();
-	pipline_->Setting(dAOuseShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
-
-	// タイヤ痕用クラスをセット。
-	tireMaskTexture_ = std::make_shared<RaytracingOutput>();
-	tireMaskTexture_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	tireMaskTextureOutput_ = std::make_shared<RaytracingOutput>();
-	tireMaskTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
-	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
-	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
-	tireMaskConstBuffer_->Generate(sizeof(Character::TireMaskUV) * 2, L"TireMaskUV");
-
-	// 白塗りコンピュートシェーダー
-	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
-	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {});
-
-	// Instanceのワールド行列を生成。
-	PolygonInstanceRegister::Ins()->CalWorldMat();
+	pipeline_ = std::make_shared<RayPipeline>();
+	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
 
 	// TLASを生成。
 	tlas_ = std::make_shared<TLAS>();
@@ -98,125 +62,34 @@ PBRTestScene::PBRTestScene()
 	denoiseMixTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput");
 
 	// シェーダーテーブルを生成。
-	pipline_->ConstructionShaderTable();
-
-	// 太陽に関する変数
-	sunAngle_ = 0.1f;
-	sunSpeed_ = 0.01f;
-
-	isDisplayFPS_ = false;
-
-	nextScene_ = SCENE_ID::RESULT;
-	isTransition_ = false;
-
-
-	// PBR用の円をロード
-	pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
-	pbrSphereIns_.lock()->AddScale(Vec3(10, 10, 10));
-	pbrSphereIns_.lock()->AddTrans(Vec3(0, 20, 0));
-	pbrSphereIns_.lock()->AddRotate(Vec3(0, DirectX::XM_PI, 0));
-
-	//lightSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	//lightSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(lightSphereBlas_, PolygonInstanceRegister::SHADER_ID::LIGHT);
-	//lightSphereIns_.lock()->AddScale(Vec3(2, 2, 2));
-
-	constBufferData_.light_.pointLight_[0].lightPos_ = Vec3();
+	pipeline_->ConstructionShaderTable();
 
 }
 
-void PBRTestScene::Init()
+void RayEngine::Update()
 {
-}
 
-void PBRTestScene::Update()
-{
 	/*===== 更新処理 =====*/
 
-	isTransition_ = false;
+	// BLASの情報を変更。
+	pipeline_->MapHitGroupInfo();
 
-	// ライトを一つ有効化。
-	constBufferData_.light_.pointLight_[0].isActive_ = true;
-	float lightSpeed = 1.0f;
-	if (Input::Ins()->IsKey(DIK_W)) {
-		constBufferData_.light_.pointLight_[0].lightPos_.z_ += lightSpeed;
-	}
-	if (Input::Ins()->IsKey(DIK_S)) {
-		constBufferData_.light_.pointLight_[0].lightPos_.z_ -= lightSpeed;
-	}
-	if (Input::Ins()->IsKey(DIK_D)) {
-		constBufferData_.light_.pointLight_[0].lightPos_.x_ += lightSpeed;
-	}
-	if (Input::Ins()->IsKey(DIK_A)) {
-		constBufferData_.light_.pointLight_[0].lightPos_.x_ -= lightSpeed;
-	}
-	if (Input::Ins()->IsKey(DIK_SPACE)) {
-		constBufferData_.light_.pointLight_[0].lightPos_.y_ += lightSpeed;
-	}
-	if (Input::Ins()->IsKey(DIK_LSHIFT)) {
-		constBufferData_.light_.pointLight_[0].lightPos_.y_ -= lightSpeed;
-	}
-	if (Input::Ins()->IsKey(DIK_UP)) {
-		constBufferData_.light_.pointLight_[0].lightPower_ += 0.1f;
-	}
-	if (Input::Ins()->IsKey(DIK_DOWN)) {
-		constBufferData_.light_.pointLight_[0].lightPower_ -= 0.1f;
-	}
-
-	//lightSphereIns_.lock()->ChangeTrans(constBufferData_.light_.pointLight_[0].lightPos_);
-
-
-	// マテリアルの値を書き換える。
-	ImGui::Text("Menu");
-	ImGui::SliderFloat("Metalness", &pbrSphereBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
-	ImGui::SliderFloat("Specular", &pbrSphereBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
-	ImGui::SliderFloat("Roughness", &pbrSphereBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
-
-	ImGui::SliderFloat("DirLight_X", &constBufferData_.light_.dirLight_.lihgtDir_.x_, -1.0f, 1.0f);
-	ImGui::SliderFloat("DirLight_Y", &constBufferData_.light_.dirLight_.lihgtDir_.y_, -1.0f, 1.0f);
-	ImGui::SliderFloat("DirLight_Z", &constBufferData_.light_.dirLight_.lihgtDir_.z_, -1.0f, 1.0f);
-	constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
-
-	pbrSphereBlas_.lock()->IsChangeMaterial();
-
-
-	// 乱数の種を更新。
-	constBufferData_.debug_.seed_ = FHelper::GetRand(0, 1000);
-
-	// カメラを更新。
-	Camera::Ins()->Update(Vec3(0, -15, 120), Vec3(0, 0, 1), Vec3(0, 1, 0), 0.0f, false, false);
-
-
-	// BLASの情報を変更。いずれは変更した箇所のみ書き換えられるようにしたい。
-	pipline_->MapHitGroupInfo();
-
+	// 更新されたINSTANCE分のTLASを再構築。
 	tlas_->Update();
-
-	// 太陽の角度を更新。
-	//sunAngle_ += sunSpeed_;
-	//constBufferData_.light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
-	//constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
-	//sunAngle_ = 30.0f;
-
-	//constBufferData_.light_.dirLight_.lihgtDir_ = Vec3(0.0f, -0.8f, -0.4f);
-	//constBufferData_.light_.dirLight_.lihgtDir_.Normalize();
-
-	// 煙を更新する。
-	//DriftParticleMgr::Ins()->Update(constBufferData_);
 
 }
 
-void PBRTestScene::Draw()
+void RayEngine::Draw()
 {
 
 	/*===== 描画処理 =====*/
 
 	// カメラ行列を更新。
 	auto frameIndex = Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
-	constBufferData_.camera_.mtxView_ = Camera::Ins()->matView_;
-	constBufferData_.camera_.mtxViewInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxView_);
-	constBufferData_.camera_.mtxProj_ = Camera::Ins()->matPerspective_;
-	constBufferData_.camera_.mtxProjInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxProj_);
+	constBufferData_->camera_.mtxView_ = Camera::Ins()->matView_;
+	constBufferData_->camera_.mtxViewInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_->camera_.mtxView_);
+	constBufferData_->camera_.mtxProj_ = Camera::Ins()->matPerspective_;
+	constBufferData_->camera_.mtxProjInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_->camera_.mtxProj_);
 
 	// 定数バッファをセット。
 	constBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
@@ -225,7 +98,7 @@ void PBRTestScene::Draw()
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
 	Engine::Ins()->cmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-	Engine::Ins()->cmdList_->SetComputeRootSignature(pipline_->GetGlobalRootSig()->GetRootSig().Get());
+	Engine::Ins()->cmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 
 	// TLASを設定。
 	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(tlas_->GetDescriptorHeapIndex()));
@@ -251,49 +124,17 @@ void PBRTestScene::Draw()
 	denoiseMaskOutput_->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
-	Engine::Ins()->cmdList_->SetPipelineState1(pipline_->GetStateObject().Get());
+	Engine::Ins()->cmdList_->SetPipelineState1(pipeline_->GetStateObject().Get());
 
 	// レイトレーシングを実行。
-	D3D12_DISPATCH_RAYS_DESC rayDesc = pipline_->GetDispatchRayDesc();
+	D3D12_DISPATCH_RAYS_DESC rayDesc = pipeline_->GetDispatchRayDesc();
 	Engine::Ins()->cmdList_->DispatchRays(&rayDesc);
 
-
-	// 床を白塗り
-	static int a = 0;
-	if (Input::Ins()->IsKeyTrigger(DIK_R) || a == 0) {
-
-		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
-		++a;
-
-	}
-
-
-
-	// タイヤ痕を書き込む。
-	std::vector<Character::TireMaskUV> tireMaskUV;
-
-	if (false) {
-
-		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
-		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-		{
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-						tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-						tireMaskTextureOutput_->GetRaytracingOutput().Get())
-			};
-
-			Engine::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
-		}
-
-	}
-
-
 	// [ノイズを描画]のときはデノイズをかけない。
-	if (!constBufferData_.debug_.isNoiseScene_) {
+	if (!constBufferData_->debug_.isNoiseScene_) {
 
 		// デバッグ機能で[法線描画][メッシュ描画][ライトに当たった点のみ描画]のときはデノイズをかけないようにする。
-		if (!constBufferData_.debug_.isMeshScene_ && !constBufferData_.debug_.isNormalScene_ && !constBufferData_.debug_.isLightHitScene_) {
+		if (!constBufferData_->debug_.isMeshScene_ && !constBufferData_->debug_.isNormalScene_ && !constBufferData_->debug_.isLightHitScene_) {
 
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
 				lightOutput_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
@@ -319,7 +160,7 @@ void PBRTestScene::Draw()
 			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
-			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 100, 6);
+			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1000, 6);
 		}
 
 
@@ -390,7 +231,7 @@ void PBRTestScene::Draw()
 	Engine::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
 
 	// デバッグ情報によって描画するデータを変える。
-	if (constBufferData_.debug_.isLightHitScene_ || constBufferData_.debug_.isMeshScene_ || constBufferData_.debug_.isNormalScene_) {
+	if (constBufferData_->debug_.isLightHitScene_ || constBufferData_->debug_.isMeshScene_ || constBufferData_->debug_.isNormalScene_) {
 
 		// デノイズされた通常の描画
 		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -426,4 +267,8 @@ void PBRTestScene::Draw()
 	denoiseGiOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	denoiseMaskOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
+}
+
+void RayEngine::ClearRayWorld()
+{
 }

@@ -225,7 +225,7 @@ public:
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish);
+	void Update(std::weak_ptr<BaseStage> StageData , const bool& IsBeforeStart, const bool& IsGameFinish);
 
 	// 描画処理
 	void Draw();
@@ -256,7 +256,7 @@ public:
 private:
 
 	// 入力処理
-	void Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart);
+	void Input(const bool& IsBeforeStart);
 
 	// 移動処理
 	void Move(const bool& IsBeforeStart);
@@ -277,6 +277,6 @@ private:
 	void UpdateGameFinish();
 
 	// ドリフトパーティクルの更新処理
-	void UpdateDriftParticle(RayConstBufferData& ConstBufferData, const bool& IsGameFinish, const bool& IsBeforeStart);
+	void UpdateDriftParticle(const bool& IsGameFinish, const bool& IsBeforeStart);
 
 };

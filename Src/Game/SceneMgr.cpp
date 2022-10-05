@@ -2,7 +2,6 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "ResultScene.h"
-#include "PBRTestScene.h"
 
 SceneMgr::SceneMgr()
 {

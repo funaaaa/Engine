@@ -9,6 +9,7 @@
 #include "PolygonInstanceRegister.h"
 #include "Input.h"
 #include "BLASRegister.h"
+#include "RayEngine.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -46,14 +47,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// シーンクラス。
 	SceneMgr::Ins()->Init();
 
+	// エンジンを生成。
+	RayEngine::Ins()->Setting();
+
 	/*----------ゲームループ----------*/
 	while (true) {
 
 		// 描画前処理
 		Engine::Ins()->ProcessBeforeDrawing();
 
-
+		// シーンを更新。
 		SceneMgr::Ins()->Update();
+
+		// シーンを描画。
 		SceneMgr::Ins()->Draw();
 
 		if (Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {

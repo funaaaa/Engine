@@ -287,7 +287,8 @@ void MugenStage::Destroy()
 
 }
 
-void MugenStage::Update(RayConstBufferData& ConstBufferData)
+#include "RayEngine.h"
+void MugenStage::Update()
 {
 
 	/*===== 更新処理 =====*/
@@ -296,14 +297,16 @@ void MugenStage::Update(RayConstBufferData& ConstBufferData)
 
 	stageObjectMgr_->Update(timer_);
 
+	std::weak_ptr<RayConstBufferData> constBufferData = RayEngine::Ins()->GetConstBufferPtr();
+
 	// 点光源をセット。
 	for (auto& index : pointLightPos) {
 
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = status_ == STATUS::DEF;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isShadow_ = false;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPower_ = 1000;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPos_ = index;
-		ConstBufferData.light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightSize_ = 1;
+		constBufferData.lock()->light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = status_ == STATUS::DEF;
+		constBufferData.lock()->light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isShadow_ = false;
+		constBufferData.lock()->light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPower_ = 1000;
+		constBufferData.lock()->light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPos_ = index;
+		constBufferData.lock()->light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightSize_ = 1;
 
 	}
 
