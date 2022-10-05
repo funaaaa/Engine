@@ -9,12 +9,12 @@
 
 // パイプライン管理クラス
 // 以前オブジェクト等を描画するパイプラインを管理するために使用していたが、レイトレ用で新しくパイプラインを作ったのでこのクラスではスプライト関係のパイプラインを管理するのみとなっています。
-class PiplineManager :public Singleton<PiplineManager> {
+class PipelineManager :public Singleton<PipelineManager> {
 public:
 
 	std::vector<Pipeline> piplines_;	// パイプライン
 	// コンストラクタ
-	PiplineManager() {};
+	PipelineManager() {};
 
 public:
 	/// <summary>

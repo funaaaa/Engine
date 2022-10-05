@@ -2,9 +2,9 @@
 #include "Pipeline.h"
 #include <cassert>
 
-//map<string, Pipeline> PiplineManager::pipline{};
+//map<string, Pipeline> PipelineManager::pipline{};
 
-void PiplineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
+void PipelineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 	std::string PSname,
 	std::string VSname,
 	int InputLayoutCount,
@@ -32,7 +32,7 @@ void PiplineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 
 }
 
-void PiplineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
+void PipelineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 	std::string PSname,
 	std::string VSname,
 	std::string GSname,
@@ -61,7 +61,7 @@ void PiplineManager::GeneratePipline(Pipeline::PIPLINE_ID PiplineID,
 
 }
 
-void PiplineManager::GeneratePiplineDepth(Pipeline::PIPLINE_ID PiplineID,
+void PipelineManager::GeneratePiplineDepth(Pipeline::PIPLINE_ID PiplineID,
 	std::string PSname,
 	std::string VSname,
 	int InputLayoutCount,
@@ -90,7 +90,7 @@ void PiplineManager::GeneratePiplineDepth(Pipeline::PIPLINE_ID PiplineID,
 
 }
 
-void PiplineManager::SetPipline(int PiplineID)
+void PipelineManager::SetPipline(int PiplineID)
 {
 	for (int i = 0; i < piplines_.size(); ++i) {
 		if (piplines_.at(i).GetPiplineID() == PiplineID) {
@@ -103,7 +103,7 @@ void PiplineManager::SetPipline(int PiplineID)
 	assert(0);
 }
 
-void PiplineManager::Init()
+void PipelineManager::Init()
 {
 	/*パイプライン用の各要素を生成*/
 #pragma region inputlayout
