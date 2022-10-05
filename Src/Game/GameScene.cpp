@@ -353,9 +353,6 @@ void GameScene::Update()
 
 	}
 
-	// エンジンを更新。
-	RayEngine::Ins()->Update();
-
 }
 
 void GameScene::Draw()
@@ -363,6 +360,9 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
+
+	// エンジンを更新。
+	RayEngine::Ins()->Update();
 
 	// レイトレーシングを実行。
 	RayEngine::Ins()->Draw();

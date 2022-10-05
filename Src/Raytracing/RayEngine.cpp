@@ -27,10 +27,6 @@ void RayEngine::Setting()
 	pipeline_ = std::make_shared<RayPipeline>();
 	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
 
-	// TLASを生成。
-	tlas_ = std::make_shared<TLAS>();
-	tlas_->GenerateTLAS();
-
 	// AO出力用クラスをセット。
 	aoOutput_ = std::make_shared<RaytracingOutput>();
 	aoOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput");
@@ -63,6 +59,12 @@ void RayEngine::Setting()
 
 	// シェーダーテーブルを生成。
 	pipeline_->ConstructionShaderTable();
+
+	// TLASを生成。
+	if (!tlas_.operator bool()) {
+		tlas_ = std::make_shared<TLAS>();
+		tlas_->GenerateTLAS();
+	}
 
 }
 

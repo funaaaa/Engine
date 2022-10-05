@@ -44,11 +44,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
-	// シーンクラス。
-	SceneMgr::Ins()->Init();
-
 	// エンジンを生成。
 	RayEngine::Ins()->Setting();
+
+	// シーンクラス。
+	SceneMgr::Ins()->Init();
 
 	/*----------ゲームループ----------*/
 	while (true) {
