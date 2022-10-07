@@ -4,6 +4,14 @@
 #include "Engine.h"
 #include "FHelper.h"
 #include "GameSceneMode.h"
+#include "PolygonInstanceRegister.h"
+#include "RayEngine.h"
+#include "Character.h"
+#include "PolygonInstance.h"
+#include "PolygonInstanceRegister.h"
+#include "BLASRegister.h"
+#include "BLAS.h"
+#include "HitGroupMgr.h"
 
 TitleScene::TitleScene()
 {
@@ -25,8 +33,43 @@ void TitleScene::Init()
 	isTransition_ = false;
 	nextScene_ = SCENE_ID::GAME;
 
+	// インスタンスを初期化。
+	PolygonInstanceRegister::Ins()->Setting();
+
+	// プレイヤーを生成。
+	player_ = std::make_shared<Character>(Character::CHARA_ID::P1, 0, 0);
+	player_->pos_ = Vec3(0, 10000, 0);
+
+	// 環境マップを生成。
+	envMap1Blas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/ecvMap.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	envMap2Blas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/ecvMap2.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	envMap3Blas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/ecvMap3.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	envMap1_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap1Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
+	envMap1_.lock()->AddScale(Vec3(300, 300, 300));
+	envMap2_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap2Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
+	envMap2_.lock()->AddScale(Vec3(300, 300, 300));
+	envMap3_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap3Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
+	envMap3_.lock()->AddScale(Vec3(300, 300, 300));
+
+	pbrTestBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	pbrTest_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_, static_cast<int>(PolygonInstanceRegister::REFRACTION));
+	pbrTest_.lock()->AddScale(Vec3(30, 30, 30));
+	pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+
+	pbrTest2_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
+	pbrTest2_.lock()->AddScale(Vec3(30, 30, 30));
+	pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+
+	// TLASを生成。
+	RayEngine::Ins()->SettingTLAS();
+
+	cameraAngle = 0;
+	invMapIndex_ = 0;
+	objectIndex_ = 1;
+
 }
 
+#include "Camera.h"
 void TitleScene::Update()
 {
 
@@ -74,11 +117,111 @@ void TitleScene::Update()
 
 	}
 
+	pbrTestBlas_.lock()->IsChangeMaterial();
+	pbrTestBlas_.lock()->Update();
+
+	// 環境マップを更新。
+	if (Input::Ins()->IsKeyTrigger(DIK_1) && invMapIndex_ != 0) {
+
+		envMap1_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		invMapIndex_ = 0;
+
+	}
+	else if (Input::Ins()->IsKeyTrigger(DIK_2) && invMapIndex_ != 1) {
+
+		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		invMapIndex_ = 1;
+
+	}
+	else if (Input::Ins()->IsKeyTrigger(DIK_3) && invMapIndex_ != 2) {
+
+		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		invMapIndex_ = 2;
+
+	}
+
+	if (Input::Ins()->IsKey(DIK_UP)) {
+
+		pbrTestBlas_.lock()->GetMaterial().metalness_ += 0.01f;
+		pbrTestBlas_.lock()->GetMaterial().roughness_ = 0.3f;
+		pbrTestBlas_.lock()->GetMaterial().metalness_ = FHelper::Saturate(pbrTestBlas_.lock()->GetMaterial().metalness_);
+
+	}
+	else if (Input::Ins()->IsKey(DIK_DOWN)) {
+
+
+		pbrTestBlas_.lock()->GetMaterial().metalness_ -= 0.01f;
+		pbrTestBlas_.lock()->GetMaterial().roughness_ = 0.3f;
+		pbrTestBlas_.lock()->GetMaterial().metalness_ = FHelper::Saturate(pbrTestBlas_.lock()->GetMaterial().metalness_);
+
+
+	}
+
+	if (Input::Ins()->IsKeyTrigger(DIK_9) && objectIndex_ != 1) {
+
+		// プレイヤーを描画しないようにする。
+		player_->pos_ = Vec3(0, 10000, 0);
+		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		pbrTest_.lock()->ChangeTrans(Vec3(0, 0, 0));
+
+		objectIndex_ = 1;
+
+	}
+	else if (Input::Ins()->IsKeyTrigger(DIK_0) && objectIndex_ != 2) {
+
+		pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		player_->pos_ = Vec3(0, 0, 0);
+
+		objectIndex_ = 2;
+
+
+	}
+	else if (Input::Ins()->IsKeyTrigger(DIK_8) && objectIndex_ != 3) {
+
+		pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		pbrTest2_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		player_->pos_ = Vec3(0, 10000, 0);
+
+		objectIndex_ = 3;
+
+
+	}
+
+	// TLASやパイプラインを更新。
+	RayEngine::Ins()->Update();
+
+	// 乱数の種を更新。
+	RayEngine::Ins()->GetConstBufferData().debug_.seed_ = FHelper::GetRand(0, 1000);
+
+	// プレイヤーの位置を調整。
+	player_->UpdateTitle();
+
+	// カメラの位置を調整。
+	cameraAngle += 0.01f;
+
+	// カメラの角度から位置を求める。
+	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));
+	Camera::Ins()->eye_ = cameraDir * -150.0f;
+	Camera::Ins()->eye_.y_ = 20.0f;
+	Camera::Ins()->target_ = Vec3(0, 0, 0);
+	Camera::Ins()->up_ = Vec3(0, 1, 0);
+	Camera::Ins()->GenerateMatView();
+
 }
 
 void TitleScene::Draw()
 {
 
-	title_.Draw();
+	// レイトレーシングを実行。
+	RayEngine::Ins()->Draw();
+
+	//title_.Draw();
 
 }

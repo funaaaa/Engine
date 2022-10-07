@@ -226,6 +226,7 @@ public:
 
 	// XVˆ—
 	void Update(std::weak_ptr<BaseStage> StageData, const bool& IsBeforeStart, const bool& IsGameFinish);
+	void UpdateTitle();
 
 	// •`‰æˆ—
 	void Draw();

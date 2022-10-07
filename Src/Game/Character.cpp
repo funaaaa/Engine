@@ -341,6 +341,32 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, const bool& IsBeforeS
 
 }
 
+void Character::UpdateTitle()
+{
+
+	/*===== タイトルでの更新処理 =====*/
+
+	// 座標を更新。
+	playerModel_.carBodyInstance.lock()->ChangeTrans(pos_);
+
+	// OBBを更新。
+	obb_->SetMat(playerModel_.carBodyInstance);
+
+	// Y軸回転させる。
+	//rotY_ += 0.01f;
+
+	// 回転させる。
+	playerModel_.carBodyInstance.lock()->ChangeRotate(DirectX::XMMatrixRotationY(rotY_));
+
+	// タイヤを更新する。
+	for (auto& index : tires_) {
+
+		index->Update();
+
+	}
+
+}
+
 void Character::Draw()
 {
 
