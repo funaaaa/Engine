@@ -612,7 +612,7 @@ void GameScene::InputImGUI()
 	//}
 
 	// マテリアルの値を書き換える。
-	ImGui::Text("Menu");
+	ImGui::Text("MaterialData");
 	ImGui::SliderFloat("Metalness", &pbrSphereBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
 	ImGui::SliderFloat("Specular", &pbrSphereBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
 	ImGui::SliderFloat("Roughness", &pbrSphereBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);

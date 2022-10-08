@@ -131,9 +131,6 @@ void TitleScene::Update()
 
 	}
 
-	pbrTestBlas_.lock()->IsChangeMaterial();
-	pbrTestBlas_.lock()->Update();
-
 	// 環境マップを更新。
 	if (Input::Ins()->IsKeyTrigger(DIK_1) && invMapIndex_ != 0) {
 
