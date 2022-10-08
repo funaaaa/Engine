@@ -60,6 +60,20 @@ void TitleScene::Init()
 	pbrTest2_.lock()->AddScale(Vec3(30, 30, 30));
 	pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 
+	// コーネルボックスをロード
+	cornellBoxGreenBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxGreen.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	cornellBoxRedBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxRed.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	cornellBoxWhiteBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxWhite.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	cornellBoxGreen_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxGreenBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
+	cornellBoxGreen_.lock()->AddScale(Vec3(100, 100, 100));
+	cornellBoxRed_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxRedBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
+	cornellBoxRed_.lock()->AddScale(Vec3(100, 100, 100));
+	cornellBoxWhite_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxWhiteBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
+	cornellBoxWhite_.lock()->AddScale(Vec3(100, 100, 100));
+	cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+	cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+	cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+
 	// TLASを生成。
 	RayEngine::Ins()->SettingTLAS();
 
@@ -126,6 +140,9 @@ void TitleScene::Update()
 		envMap1_.lock()->ChangeTrans(Vec3(0, 0, 0));
 		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
 		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		invMapIndex_ = 0;
 
 	}
@@ -134,6 +151,9 @@ void TitleScene::Update()
 		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
 		envMap2_.lock()->ChangeTrans(Vec3(0, 0, 0));
 		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		invMapIndex_ = 1;
 
 	}
@@ -142,7 +162,26 @@ void TitleScene::Update()
 		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
 		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
 		envMap3_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		invMapIndex_ = 2;
+
+	}
+	else if (Input::Ins()->IsKeyTrigger(DIK_4) && invMapIndex_ != 3) {
+
+		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		invMapIndex_ = 3;
+
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isActive_ = true;
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPos_ = Vec3(0, 70, 0);
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
 
 	}
 
@@ -179,6 +218,11 @@ void TitleScene::Update()
 		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		player_->pos_ = Vec3(0, 0, 0);
 
+		// カーネルボックスだったら。
+		if (invMapIndex_ == 3) {
+			player_->pos_ = Vec3(0, -70, 0);
+		}
+
 		objectIndex_ = 2;
 
 
@@ -193,6 +237,9 @@ void TitleScene::Update()
 
 
 	}
+
+	// 並行光源を無効化。
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = false;
 
 	// TLASやパイプラインを更新。
 	RayEngine::Ins()->Update();
@@ -209,6 +256,9 @@ void TitleScene::Update()
 	// カメラの角度から位置を求める。
 	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));
 	Camera::Ins()->eye_ = cameraDir * -150.0f;
+	if (invMapIndex_ == 3) {
+		Camera::Ins()->eye_ = cameraDir * -500.0f;
+	}
 	Camera::Ins()->eye_.y_ = 20.0f;
 	Camera::Ins()->target_ = Vec3(0, 0, 0);
 	Camera::Ins()->up_ = Vec3(0, 1, 0);
@@ -225,3 +275,23 @@ void TitleScene::Draw()
 	//title_.Draw();
 
 }
+
+
+/*
+
+
+コーネルボックスを作る。
+→赤と緑と白い部分に分けてモデルを作成する。
+→赤と緑は反射強めで、白い部分はGIがんぶり。
+→完全反射のモデルと反射しないモデルを用意。
+→壁のモデルの法線は反転させておく。
+→並行光源が差し込まれなかったら点光源を配置する。暖色系のライトがいいかも。
+
+コーネルボックスができたら、タイトル画面で環境マップとコーネルボックスがランダムで出るようにする。
+
+それができたらステージを装飾。
+→木のモデルをマップに配置。
+→ステージの脇には柵を配置。
+
+
+*/

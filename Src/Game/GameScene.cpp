@@ -313,6 +313,7 @@ void GameScene::Update()
 		sunAngle_ += sunSpeed_;
 
 	}
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 	// “V‹…©‘Ì‚à‰ñ“]‚³‚¹‚éB

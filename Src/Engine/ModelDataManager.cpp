@@ -204,11 +204,12 @@ void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
 		modelData_.push_back({});
 		ModelDataManager::modelData_.at(ModelDataManager::modelData_.size() - 1).modelName_ = FString::WStringToString(Path);
 
-		GLTF gltfModel;
-		gltfModel.LoadModel(Path);
+		gltf_.emplace_back(GLTF());
+		gltf_.back().LoadModel(Path);
 
 		// モデルのデータを取得。
-		GLTF::VertexAttributeVisitor vertexInfo = gltfModel.GetVertexData();
+		GLTF::VertexAttributeVisitor vertexInfo = gltf_.back().GetVertexData();
+		filePath_.emplace_back(gltf_.back().GetFileName());
 		for (auto& index : vertexInfo.positionBuffer) {
 
 			Vertex buff;
@@ -230,20 +231,20 @@ void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
 			modelData_.back().index_.emplace_back(index);
 
 		}
-		ObjectBuffer.textureHandle_ = gltfModel.GetTextureIndex();
+		ObjectBuffer.textureHandle_ = gltf_.back().GetTextureIndex();
 
 		// マテリアルを保存。
-		ObjectBuffer.material_.baseColor_ = gltfModel.GetMaterial().baseColor_;
-		ObjectBuffer.material_.metalness_ = gltfModel.GetMaterial().metalness_;
-		ObjectBuffer.material_.roughness_ = gltfModel.GetMaterial().roughness_;
-		ObjectBuffer.material_.specular_ = gltfModel.GetMaterial().specular_;
+		ObjectBuffer.material_.baseColor_ = gltf_.back().GetMaterial().baseColor_;
+		ObjectBuffer.material_.metalness_ = gltf_.back().GetMaterial().metalness_;
+		ObjectBuffer.material_.roughness_ = gltf_.back().GetMaterial().roughness_;
+		ObjectBuffer.material_.specular_ = gltf_.back().GetMaterial().specular_;
 
-		modelData_.back().material_.baseColor_ = gltfModel.GetMaterial().baseColor_;
-		modelData_.back().material_.metalness_ = gltfModel.GetMaterial().metalness_;
-		modelData_.back().material_.roughness_ = gltfModel.GetMaterial().roughness_;
-		modelData_.back().material_.specular_ = gltfModel.GetMaterial().specular_;
+		modelData_.back().material_.baseColor_ = gltf_.back().GetMaterial().baseColor_;
+		modelData_.back().material_.metalness_ = gltf_.back().GetMaterial().metalness_;
+		modelData_.back().material_.roughness_ = gltf_.back().GetMaterial().roughness_;
+		modelData_.back().material_.specular_ = gltf_.back().GetMaterial().specular_;
 		modelData_.back().material_.textureHandle_ = ObjectBuffer.textureHandle_;
-		
+
 
 		return;
 

@@ -88,6 +88,10 @@ private:
 	Material material_;
 	int texture_;
 
+	// テクスチャ保存用
+	std::wstring fileName_;
+	std::shared_ptr<tinygltf::Model> model_;
+
 
 public:
 
@@ -99,6 +103,7 @@ public:
 	VertexAttributeVisitor GetVertexData() { return vertexInfo_; }
 	int GetTextureIndex() { return texture_; }
 	GLTF::Material GetMaterial() { return material_; }
+	std::wstring GetFileName() { return fileName_; }
 
 
 private:

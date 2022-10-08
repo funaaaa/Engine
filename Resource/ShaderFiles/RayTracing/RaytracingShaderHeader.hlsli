@@ -226,7 +226,7 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     rayDesc.TMax = TMax;
 
     Payload payloadData;
-    payloadData.impactAmount_ = 0.0f;
+    payloadData.impactAmount_ = 1.0f;
     payloadData.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
     payloadData.recursive_ = 0;
     payloadData.ao_ = 0;

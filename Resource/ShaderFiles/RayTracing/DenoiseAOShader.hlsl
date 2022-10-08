@@ -708,17 +708,13 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             
             // ライトの隠蔽度
             float pointLightVisibilityBuff = 0;
-            if (!gSceneParam.light.pointLight[index].isShadow)
+            if (gSceneParam.light.pointLight[index].isShadow)
             {
-                pointLightVisibilityBuff = SoftShadow(Vtx, gSceneParam.light.pointLight[index].lightSize, length(gSceneParam.light.pointLight[index].lightPos - WorldPos), index);
-            }
-            else
-            {
-                pointLightVisibilityBuff = 1;
+                pointLightVisibilityBuff = SoftShadow(Vtx, gSceneParam.light.pointLight[index].lightSize, lightLength, index);
             }
         
             // ライトの明るさが一定以上だったらスペキュラーなどを計算する。
-            if (0 <= pointLightVisibilityBuff)
+            if (0 < pointLightVisibilityBuff)
             {
                 
                 float3 pointLightDir = WorldPos - gSceneParam.light.pointLight[index].lightPos;
@@ -731,8 +727,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
                 
 
                 PayloadData.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate * PayloadData.impactAmount_;
-                
-            
+
             }
         
         }
@@ -775,8 +770,8 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             bool isUnderGround = false;
             float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor, isUnderGround);
             
-            PayloadData.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) * BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
-            
+            PayloadData.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) + BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
+            PayloadData.light_ = saturate(PayloadData.light_);
             
         }
         
@@ -791,7 +786,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
         
         // AOのレイを飛ばす。
-        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 50, gRtScene);
+        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 25, gRtScene);
         
         float NoL = saturate(dot(WorldNormal, sampleDir));
         float pdf = 1.0 / (2.0 * PI);
@@ -1015,7 +1010,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
         }
                 
-        payload.impactAmount_ = false;
+        payload.impactAmount_ = 0.0f;
         
         return;
     }

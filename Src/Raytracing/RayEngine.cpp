@@ -147,7 +147,7 @@ void RayEngine::Draw()
 			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// ライトにデノイズをかける。
-			Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1, 1);
+			Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 10, 3);
 
 		}
 
@@ -162,7 +162,7 @@ void RayEngine::Draw()
 			Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
-			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1000, 6);
+			Denoiser::Ins()->Denoise(aoOutput_->GetUAVIndex(), denoiseAOOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 1000, 8);
 		}
 
 

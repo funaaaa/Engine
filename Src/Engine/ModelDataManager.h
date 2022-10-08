@@ -10,6 +10,7 @@
 #include "Vec.h"
 #include <wtypes.h>
 #include "Singleton.h"
+#include "GLTF.h"
 
 class ModelDataManager : public Singleton<ModelDataManager> {
 
@@ -61,7 +62,9 @@ public:
 private:
 
 
-	std::vector<ModelData> modelData_;			//モデルデータを保存しておく配列
+	std::vector<ModelData> modelData_;			// モデルデータを保存しておく配列
+	std::vector<std::wstring> filePath_;		// ファイルパス保存用
+	std::vector<GLTF> gltf_;
 
 public:
 

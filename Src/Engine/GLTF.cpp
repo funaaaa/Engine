@@ -21,6 +21,7 @@ bool LoadFile(std::vector<char>& out, const std::wstring& fileName)
 	return true;
 }
 
+#include "FString.h"
 void GLTF::LoadModel(std::wstring Path) {
 
 	/*===== GLTFのモデルをロード =====*/
@@ -39,12 +40,12 @@ void GLTF::LoadModel(std::wstring Path) {
 	baseDir = filePath.parent_path().string();
 
 	// ファイルを開く。
+	model_ = std::make_shared<tinygltf::Model>();
 	std::string err, warn;
 	tinygltf::TinyGLTF loader;
-	tinygltf::Model model;
 	bool result = false;
 	if (filePath.extension() == L".glb") {
-		result = loader.LoadBinaryFromMemory(&model, &err, &warn,
+		result = loader.LoadBinaryFromMemory(model_.get(), &err, &warn,
 			reinterpret_cast<const uint8_t*>(buffer.data()),
 			uint32_t(buffer.size()), baseDir);
 	}
@@ -59,28 +60,27 @@ void GLTF::LoadModel(std::wstring Path) {
 	}
 
 	// ルートノードを抜き取る。
-	const auto& scene = model.scenes[0];
+	const auto& scene = model_->scenes[0];
 	for (const auto& nodeIndex : scene.nodes) {
 		rootNodes_.emplace_back(nodeIndex);
 	}
-	LoadNode(model);
+	LoadNode(*model_);
 
 	// メッシュの情報を取得。
-	LoadMesh(model, vertexInfo_);
+	LoadMesh(*model_, vertexInfo_);
 
 	// マテリアル情報を取得。
-	LoadMaterial(model);
+	LoadMaterial(*model_);
 
 	// テクスチャをロード。
-	for (auto& texture : model.textures) {
-		auto image = model.images[texture.source];
-		auto fileName = ConvertFromUTF8(image.name);
-		auto view = model.bufferViews[image.bufferView];
+	for (auto& texture : model_->textures) {
+		fileName_ = FString::StringToWString(model_->images[texture.source].name);
+		auto view = model_->bufferViews[model_->images[texture.source].bufferView];
 		auto offsetBytes = view.byteOffset;
-		const void* src = &model.buffers[view.buffer].data[offsetBytes];
+		const void* src = &model_->buffers[view.buffer].data[offsetBytes];
 		UINT64 size = view.byteLength;
 
-		auto t = TextureManager::Ins()->LoadTexture(fileName, src, size);
+		auto t = TextureManager::Ins()->LoadTexture(Path, src, size);
 		texture_ = t;
 	}
 
