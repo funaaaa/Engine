@@ -201,12 +201,12 @@ void GameScene::Init()
 	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
 	skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
 
-	// PBRテスト用
-	pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
-	pbrSphereIns_.lock()->AddScale(Vec3(50, 50, 50));
-	pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
-	pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
+	//// PBRテスト用
+	//pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	//pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
+	//pbrSphereIns_.lock()->AddScale(Vec3(50, 50, 50));
+	//pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
+	//pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
 
 
 
@@ -240,7 +240,7 @@ void GameScene::Update()
 	Input();
 
 	// ウィンドウの名前を更新。
-	if (isDisplayFPS_) {
+	if (true) {
 
 		FPS();
 
@@ -612,13 +612,13 @@ void GameScene::InputImGUI()
 	//}
 
 	// マテリアルの値を書き換える。
-	ImGui::Text("MaterialData");
-	ImGui::SliderFloat("Metalness", &pbrSphereBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
-	ImGui::SliderFloat("Specular", &pbrSphereBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
-	ImGui::SliderFloat("Roughness", &pbrSphereBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
-	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
+	//ImGui::Text("MaterialData");
+	//ImGui::SliderFloat("Metalness", &pbrSphereBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
+	//ImGui::SliderFloat("Specular", &pbrSphereBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
+	//ImGui::SliderFloat("Roughness", &pbrSphereBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
+	//RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 
-	pbrSphereBlas_.lock()->IsChangeMaterial();
+	//pbrSphereBlas_.lock()->IsChangeMaterial();
 
 
 }

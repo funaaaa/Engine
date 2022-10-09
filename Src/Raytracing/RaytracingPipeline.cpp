@@ -265,11 +265,7 @@ void RaytracingPipeline::ConstructionShaderTable(const int& DispatchX, const int
 		uint8_t* pRecord = hitgroupStart;
 
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		for (int index = 0; index < BLAS_COUNT; ++index) {
-
-			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize_, stateObject_, hitGroupName_);
-
-		}
+		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_);
 
 	}
 	shaderTable_->Unmap(0, nullptr);
@@ -321,11 +317,7 @@ void RaytracingPipeline::MapHitGroupInfo()
 		uint8_t* pRecord = hitgroupStart;
 
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		for (int index = 0; index < BLAS_COUNT; ++index) {
-
-			pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, index, hitgroupRecordSize_, stateObject_, hitGroupName_);
-
-		}
+		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_);
 
 	}
 	shaderTable_->Unmap(0, nullptr);

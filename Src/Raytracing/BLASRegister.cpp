@@ -167,11 +167,15 @@ std::weak_ptr<BLAS> BLASRegister::GenerateGLTF(const std::wstring& Path, const s
 
 }
 
-uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
+uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
 	/*===== シェーダーレコードを書き込む =====*/
 
-	return blas_[Index]->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName);
+	for (auto& index : blas_) {
+		Dst = index->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName);
+	}
+
+	return Dst;
 
 }

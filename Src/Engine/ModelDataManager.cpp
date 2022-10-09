@@ -300,11 +300,12 @@ void ModelDataManager::LoadObjMaterial(std::string DirectoryPath, const std::str
 		//	lineStream >> ModelData.material_.ambient_.z_;
 		//}
 		//// 先頭文字列がKdならディフューズ色
-		//if (key == "Kd") {
-		//	lineStream >> ModelData.material_.diffuse_.x_;
-		//	lineStream >> ModelData.material_.diffuse_.y_;
-		//	lineStream >> ModelData.material_.diffuse_.z_;
-		//}
+		if (key == "Kd") {
+			lineStream >> ModelData.material_.roughness_;
+			//	lineStream >> ModelData.material_.diffuse_.x_;
+			//	lineStream >> ModelData.material_.diffuse_.y_;
+			//	lineStream >> ModelData.material_.diffuse_.z_;
+		}
 		// 先頭文字がKsならスペキュラー色
 		if (key == "Ks") {
 			lineStream >> ModelData.material_.metalness_;

@@ -514,23 +514,24 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     }
     
     // 当たったオブジェクトのInstanceIDが完全反射だったら。
-    //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-    //{
+    float metalness = 1.0f - material[0].metalness_;
+    if (metalness <= 0.0f)
+    {
         
-    //    // 完全反射用のレイを発射。
-    //    ShootRay(CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
+        // 完全反射用のレイを発射。
+        ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
         
-    //    // 色を少しだけ明るくする。
-    //    //PayloadData.color += 0.1f;
+        // 色を少しだけ明るくする。
+        //PayloadData.color += 0.1f;
         
-    //    PayloadData.color_ = saturate(PayloadData.color_);
+        PayloadData.color_ = saturate(PayloadData.color_);
         
-    //    //// 残った影響度を入れる。
-    //    //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
+        //// 残った影響度を入れる。
+        //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
         
-    //    return true;
+        return true;
         
-    //}
+    }
     
     // メッシュ情報を返す。デバッグ機能。
     if (gSceneParam.debug.isMeshScene)
@@ -1173,23 +1174,3 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     //AcceptHitAndEndSearch();
     
 }
-
-
-/*
-
-
-全てのモデルをGLTFに変える。
-
-○頭の中のメモ
-Roughnessのぼやけるやつどうやるんだ？
-AOで色の明るさを底上げするのは物理的に正しいのか？
-Spcularの値を取ってこれないのどうしよう。
-モデルをGLTFに対応させなきゃ。
-全反射から反射に切り替わる瞬間に、映り込んだオブジェクトの反射屈折が消えるのは何故？
-
-9/29 モデルをGLTFに。
-9/30 全反射から反射に切り替わる瞬間の問題を解決。
-10/1 その他の違和感を解決していく。
-
-
-*/

@@ -32,7 +32,7 @@ public:
 	std::weak_ptr<BLAS> GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
 	
 	// シェーダーレコードを書き込む。
-	uint8_t* WriteShaderRecord(uint8_t* Dst, const int& Index, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
+	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
 
 	// BLASの数を取得。
 	int GetBLASCount() { return static_cast<int>(blas_.size()); }
