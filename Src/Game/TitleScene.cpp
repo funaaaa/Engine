@@ -254,7 +254,7 @@ void TitleScene::Update()
 	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));
 	Camera::Ins()->eye_ = cameraDir * -150.0f;
 	if (invMapIndex_ == 3) {
-		Camera::Ins()->eye_ = cameraDir * -500.0f;
+		Camera::Ins()->eye_ = cameraDir * -350.0f;
 	}
 	Camera::Ins()->eye_.y_ = 20.0f;
 	Camera::Ins()->target_ = Vec3(0, 0, 0);
@@ -266,29 +266,21 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 
+	static bool isNoise = false;
+	if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
+
 	// レイトレーシングを実行。
-	RayEngine::Ins()->Draw();
+	if (isNoise) {
+
+		RayEngine::Ins()->NoiseDraw();
+
+	}
+	else {
+
+		RayEngine::Ins()->Draw();
+
+	}
 
 	//title_.Draw();
 
 }
-
-
-/*
-
-
-コーネルボックスを作る。
-→赤と緑と白い部分に分けてモデルを作成する。
-→赤と緑は反射強めで、白い部分はGIがんぶり。
-→完全反射のモデルと反射しないモデルを用意。
-→壁のモデルの法線は反転させておく。
-→並行光源が差し込まれなかったら点光源を配置する。暖色系のライトがいいかも。
-
-コーネルボックスができたら、タイトル画面で環境マップとコーネルボックスがランダムで出るようにする。
-
-それができたらステージを装飾。
-→木のモデルをマップに配置。
-→ステージの脇には柵を配置。
-
-
-*/

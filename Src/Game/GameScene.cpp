@@ -373,8 +373,20 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
+	static bool isNoise = false;
+	if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
+
 	// レイトレーシングを実行。
-	RayEngine::Ins()->Draw();
+	if (isNoise) {
+
+		RayEngine::Ins()->NoiseDraw();
+
+	}
+	else {
+
+		RayEngine::Ins()->Draw();
+
+	}
 
 
 	// 床を白塗り
