@@ -18,7 +18,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	FirstAIOperationObject(const int& WayPointOffset, const int& Level);
+	FirstAIOperationObject(int WayPointOffset, int Level);
 
 	BaseOperationObject::Operation Input(const BaseOperationObject::OperationInputData& InputData)override;
 

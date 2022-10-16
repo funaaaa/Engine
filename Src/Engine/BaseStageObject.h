@@ -55,8 +55,8 @@ public:
 
 	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance) = 0;
 	virtual void Destroy() = 0;
-	virtual void Update(const int& Timer) = 0;
-	virtual void Disable(const int& TimerToActivation) = 0;
+	virtual void Update(int Timer) = 0;
+	virtual void Disable(int TimerToActivation) = 0;
 
 	// 有効化。
 	inline void Activate() { isActive_ = true; }
@@ -71,13 +71,13 @@ public:
 	int GetBLASIndex();
 	int GetInstanceIndex();
 	std::weak_ptr<PolygonMeshInstance> GetInstance() { return instance_; }
-	inline const bool& GetIsActive() { return isActive_; }
+	inline bool GetIsActive() { return isActive_; }
 	inline std::shared_ptr<OBB> GetOBB() { return obb_; }
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }
 	inline const OBJECT_ID GetObjectID() { return objID_; }
 
 	// 法線マップを変更。
-	void ChangeNormalTexture(const int& Index);
+	void ChangeNormalTexture(int Index);
 
 	// 移動関係
 	void AddTrans(const Vec3& Trans);

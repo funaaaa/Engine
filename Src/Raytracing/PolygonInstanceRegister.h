@@ -39,22 +39,22 @@ public:
 	void Setting();
 
 	// Insを生成する。
-	std::weak_ptr<PolygonMeshInstance> CreateInstance(std::weak_ptr<BLAS> Blas_, const UINT& ShaderID, bool HaveMeshCollisionData = false);
+	std::weak_ptr<PolygonMeshInstance> CreateInstance(std::weak_ptr<BLAS> Blas_, UINT ShaderID, bool HaveMeshCollisionData = false);
 
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
 
 	// インスタンスを破棄。
 	void DestroyInstance(std::weak_ptr<PolygonMeshInstance> Instance);
-	void DestroyInstance(const int& Index);
+	void DestroyInstance(int Index);
 
 	// インスタンスを表示
 	void Display(std::weak_ptr<PolygonMeshInstance> Instance);
-	void Display(const int& Index);
+	void Display(int Index);
 
 	// インスタンスを非表示
 	void NonDisplay(std::weak_ptr<PolygonMeshInstance> Instance);
-	void NonDisplay(const int& Index);
+	void NonDisplay(int Index);
 
 	// レジスターのDataを取得する関数。
 	D3D12_RAYTRACING_INSTANCE_DESC* GetData() { return instanceDesc_.data(); };
@@ -63,7 +63,7 @@ public:
 	UINT GetRegisterSize() { return UINT(instance_.size()); }
 
 	// メッシュの当たり判定データを取得。
-	const std::vector<FHelper::CheckHitPorygon>& GetMeshCollisionData(const int& Index);
+	const std::vector<FHelper::CheckHitPorygon>& GetMeshCollisionData(int Index);
 
 	// hlsl側での動きを判断する用の識別子
 	enum SHADER_ID {

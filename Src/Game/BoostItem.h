@@ -18,6 +18,6 @@ public:
 	BoostItem();
 	void Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)override;
 	void Update()override;
-	int Use(const float& CharaRotY = 0, const int ParamID = 0)override;
+	int Use(float CharaRotY = 0, const int ParamID = 0)override;
 
 };

@@ -41,7 +41,7 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT Shade
 
 }
 
-void RayRootsignature::AddStaticSampler(const int& RegisterSpace) {
+void RayRootsignature::AddStaticSampler(int RegisterSpace) {
 
 	/*===== スタティックサンプラー追加処理 =====*/
 
@@ -57,7 +57,7 @@ void RayRootsignature::AddStaticSampler(const int& RegisterSpace) {
 
 }
 
-void RayRootsignature::Create(const bool& IsLocal, const wchar_t* Name)
+void RayRootsignature::Create(bool IsLocal, const wchar_t* Name)
 {
 
 	/*===== ルートシグネチャ生成処理 =====*/

@@ -92,9 +92,9 @@ public:
 	void Init();
 
 	// BLASの生成
-	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
-	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
-	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque = true);
+	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
+	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
+	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
 
 	// BLASの更新
 	void Update();
@@ -114,12 +114,12 @@ public:
 	void IsChangeMaterial();
 
 	// テクスチャを追加。
-	void ChangeBaseTexture(const int& Index);
-	void ChangeNormalTexture(const int& Index) {
+	void ChangeBaseTexture(int Index);
+	void ChangeNormalTexture(int Index) {
 		normalMapHandle_ = Index;
 		isChangeTexture = true;
 	}
-	void AddUAVTex(const int& Index) { uavHandle_.emplace_back(Index); }
+	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
@@ -160,7 +160,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
 
 	// BLAS生成時に設定を取得する関数
-	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(const bool& IsOpaque);
+	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque);
 
 	// 加速構造体の設定用関数
 	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc);

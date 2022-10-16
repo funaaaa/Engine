@@ -156,8 +156,8 @@ public:
 		Vec3 normal_;
 		Vec2 uv_;
 	};
-	void GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex);
-	int GetTextureIndex(const int& Index);
+	void GetFbxData(int Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex);
+	int GetTextureIndex(int Index);
 
 
 private:
@@ -179,16 +179,16 @@ public:
 	void ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& Src);
 
 	// スキニング行列を取得。
-	SkinData GetSkinMat(const int& Index);
+	SkinData GetSkinMat(int Index);
 
 	// スキニングアニメーション用コンピュートシェーダーの入力構造体を取得。
-	void GetSkinComputeInput(const int& Index, std::vector<SkinComputeInput>& Input);
+	void GetSkinComputeInput(int Index, std::vector<SkinComputeInput>& Input);
 
 	// FBXシーンのゲッタ
 	FbxScene* GetFbxScene() { return fbxScene_; }
 
 	// モデル情報のゲッタ
-	FbxModel& GetFbxModel(const int& Index) { return fbxModelData_[Index]; }
+	FbxModel& GetFbxModel(int Index) { return fbxModelData_[Index]; }
 
 
 private:

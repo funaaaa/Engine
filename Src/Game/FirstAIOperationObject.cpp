@@ -2,7 +2,7 @@
 #include "FirstAIWaypointMgr.h"
 #include "FirstAIWayPoint.h"
 
-FirstAIOperationObject::FirstAIOperationObject(const int& WayPointOffset, const int& Level)
+FirstAIOperationObject::FirstAIOperationObject(int WayPointOffset, int Level)
 {
 
 	/*===== コンストラクタ =====*/

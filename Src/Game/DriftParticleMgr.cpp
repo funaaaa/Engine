@@ -83,7 +83,7 @@ void DriftParticleMgr::Init()
 
 }
 
-void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec)
+void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, bool IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec)
 {
 
 	/*===== 生成処理 =====*/
@@ -167,7 +167,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 }
 
-void DriftParticleMgr::GenerateAura(const int& CharaIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const int& Id, const bool& IsBoostRight, const bool& IsOrange)
+void DriftParticleMgr::GenerateAura(int CharaIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, int Id, bool IsBoostRight, bool IsOrange)
 {
 
 	/*===== オーラを生成する =====*/
@@ -225,7 +225,7 @@ void DriftParticleMgr::GenerateAura(const int& CharaIndex, std::weak_ptr<Polygon
 
 }
 
-void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID)
+void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, bool IsBoostRight, bool IsOrange, int Id, float DriftRate, bool IsLevelChange, DriftParticleMgr::DELAY_ID DelayID)
 {
 
 	/*===== パーティクルを生成 =====*/
@@ -300,7 +300,7 @@ void DriftParticleMgr::Update()
 
 }
 
-bool DriftParticleMgr::IsAuraGenerated(const int& CharaIndex)
+bool DriftParticleMgr::IsAuraGenerated(int CharaIndex)
 {
 
 	// ビッグオーラが生成されているか。
@@ -332,7 +332,7 @@ bool DriftParticleMgr::IsAuraGenerated(const int& CharaIndex)
 	return isGenerateBigAura && isGenerateSmallAura;
 }
 
-void DriftParticleMgr::DestroyAura(const int& CharaIndex)
+void DriftParticleMgr::DestroyAura(int CharaIndex)
 {
 
 	/*===== オーラを破棄 =====*/

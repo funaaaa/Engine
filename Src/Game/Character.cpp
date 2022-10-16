@@ -29,7 +29,7 @@
 #pragma warning(push)
 #pragma warning(disable:4324)
 
-Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
+Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 {
 
 	/*===== 初期化処理 =====*/
@@ -221,7 +221,7 @@ void Character::Init()
 
 }
 
-void Character::Update(std::weak_ptr<BaseStage> StageData, const bool& IsBeforeStart, const bool& IsGameFinish)
+void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, bool IsGameFinish)
 {
 
 
@@ -711,7 +711,7 @@ void Character::DeleteInstance()
 
 }
 
-void Character::Input(const bool& IsBeforeStart)
+void Character::Input(bool IsBeforeStart)
 {
 
 	/*===== 入力処理 =====*/
@@ -983,7 +983,7 @@ void Character::Input(const bool& IsBeforeStart)
 
 }
 
-void Character::Move(const bool& IsBeforeStart)
+void Character::Move(bool IsBeforeStart)
 {
 
 	/*===== 移動処理 =====*/
@@ -1652,7 +1652,7 @@ void Character::UpdateGameFinish()
 
 }
 
-void Character::UpdateDriftParticle(const bool& IsGameFinish, const bool& IsBeforeStart)
+void Character::UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart)
 {
 
 	/*===== ドリフトパーティクルの更新処理 =====*/

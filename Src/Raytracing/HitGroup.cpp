@@ -5,7 +5,7 @@ HitGroup::HitGroup()
 {
 }
 
-void HitGroup::Generate(const HitGroupInitData& InputData, const int& RegisterSpace, const LPCWSTR& HitGroupName)
+void HitGroup::Generate(const HitGroupInitData& InputData, int RegisterSpace, const LPCWSTR& HitGroupName)
 {
 
 	/*===== ê∂ê¨èàóù =====*/

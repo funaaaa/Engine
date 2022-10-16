@@ -63,13 +63,13 @@ public:
 	void Destroy();
 
 	// 生成処理
-	void Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance);
+	void Generate(const Vec3& Pos, const Vec3& ForwardVec, float CharaRotY, int ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance);
 
 	// 更新処理
 	void Update(std::weak_ptr<BaseStage> StageData);
 
 	// 甲羅のステータスを更新。
-	void ChangeStatus(const Vec3& ForwardVec, const int& ShellID);
+	void ChangeStatus(const Vec3& ForwardVec, int ShellID);
 
 	// OBBとの当たり判定 キャラクターとの当たり判定で使用する。
 	bool CheckHitOBB(std::weak_ptr<OBB> CharaOBB);

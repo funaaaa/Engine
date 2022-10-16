@@ -5,7 +5,7 @@
 #include "RayRootsignature.h"
 #include <assert.h>
 
-void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& CBVCount, const int& UAVCount, std::vector<int> UAVIndex)
+void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int UAVCount, std::vector<int> UAVIndex)
 {
 
 	/*===== セッティング処理 =====*/
@@ -54,7 +54,7 @@ void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& C
 
 }
 
-void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV)
+void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV)
 {
 
 	/*===== 実行処理 =====*/

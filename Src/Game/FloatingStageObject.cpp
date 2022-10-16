@@ -26,7 +26,7 @@ void FloatingStageObject::Destroy()
 
 }
 
-void FloatingStageObject::Update(const int& Timer)
+void FloatingStageObject::Update(int Timer)
 {
 
 	/*===== 更新処理 =====*/
@@ -45,7 +45,7 @@ void FloatingStageObject::Update(const int& Timer)
 
 }
 
-void FloatingStageObject::Disable(const int& TimerToActivation)
+void FloatingStageObject::Disable(int TimerToActivation)
 {
 
 	/*===== 無効化して再設定までのタイマーをセット =====*/

@@ -35,7 +35,7 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 Text
 
 }
 
-void RaytracingOutput::SetComputeRootDescriptorTalbe(const int& RootParamIndex)
+void RaytracingOutput::SetComputeRootDescriptorTalbe(int RootParamIndex)
 {
 
 	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex_));

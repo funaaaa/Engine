@@ -18,7 +18,7 @@ void PolygonInstanceRegister::Setting()
 
 }
 
-std::weak_ptr<PolygonMeshInstance> PolygonInstanceRegister::CreateInstance(std::weak_ptr<BLAS> Blas_, const UINT& ShaderID, bool HaveMeshCollisionData)
+std::weak_ptr<PolygonMeshInstance> PolygonInstanceRegister::CreateInstance(std::weak_ptr<BLAS> Blas_, UINT ShaderID, bool HaveMeshCollisionData)
 {
 
 	/*===== インスタンスを生成する =====*/
@@ -92,7 +92,7 @@ void PolygonInstanceRegister::DestroyInstance(std::weak_ptr<PolygonMeshInstance>
 
 }
 
-void PolygonInstanceRegister::DestroyInstance(const int& Index)
+void PolygonInstanceRegister::DestroyInstance(int Index)
 {
 
 	/*===== 指定のインスタンスを破棄 =====*/
@@ -129,7 +129,7 @@ void PolygonInstanceRegister::Display(std::weak_ptr<PolygonMeshInstance> Instanc
 
 }
 
-void PolygonInstanceRegister::Display(const int& Index)
+void PolygonInstanceRegister::Display(int Index)
 {
 
 	/*====== 非表示 ======*/
@@ -160,7 +160,7 @@ void PolygonInstanceRegister::NonDisplay(std::weak_ptr<PolygonMeshInstance> Inst
 
 }
 
-void PolygonInstanceRegister::NonDisplay(const int& Index)
+void PolygonInstanceRegister::NonDisplay(int Index)
 {
 
 	/*====== 非表示 ======*/
@@ -169,7 +169,7 @@ void PolygonInstanceRegister::NonDisplay(const int& Index)
 
 }
 
-const std::vector<FHelper::CheckHitPorygon>& PolygonInstanceRegister::GetMeshCollisionData(const int& Index)
+const std::vector<FHelper::CheckHitPorygon>& PolygonInstanceRegister::GetMeshCollisionData(int Index)
 {
 
 	/*===== メッシュの当たり判定データを取得 =====*/

@@ -21,7 +21,7 @@ void ItemBoxObject::Destroy()
 
 }
 
-void ItemBoxObject::Update(const int& Timer)
+void ItemBoxObject::Update(int Timer)
 {
 
 	/*===== 更新処理 =====*/
@@ -48,7 +48,7 @@ void ItemBoxObject::Update(const int& Timer)
 
 }
 
-void ItemBoxObject::Disable(const int& TimerToActivation)
+void ItemBoxObject::Disable(int TimerToActivation)
 {
 
 	/*===== 無効化して再度有効化されるまでの時間をセット =====*/

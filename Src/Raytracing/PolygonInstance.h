@@ -48,7 +48,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// Ins生成関数
-	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(std::weak_ptr<BLAS> Blas, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex);
+	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex);
 
 	// 移動(引数を加算)関数
 	void AddTrans(const Vec3& Pos);
@@ -96,7 +96,7 @@ public:
 	std::weak_ptr<PolygonMeshInstance> GetParetntInstance();
 
 	// BLASインデックスを取得。
-	const UINT& GetBLASIndex() { return blasIndex_; }
+	UINT GetBLASIndex() { return blasIndex_; }
 	std::weak_ptr<BLAS> GetBLAS() { return blas_; }
 
 	// instanceを無効化する。
@@ -105,7 +105,7 @@ public:
 
 	// メッシュの当たり判定のデータを返す。
 	const std::vector<FHelper::CheckHitPorygon>& GetMeshCollisionData() { return meshCollisionData_; }
-	const bool& GetHaveMeshCollisionData() { return haveMeshCollisionData_; }
+	bool GetHaveMeshCollisionData() { return haveMeshCollisionData_; }
 
 
 private:

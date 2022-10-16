@@ -22,7 +22,7 @@ void StageObjectMgr::Setting()
 
 }
 
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const UINT& ShaderID)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID)
 {
 
 	/*===== ギミックを追加 =====*/
@@ -78,7 +78,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 }
 
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, const UINT& ShaderID)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID)
 {
 
 	/*===== ギミックを追加 =====*/
@@ -134,7 +134,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 }
 
-void StageObjectMgr::Update(const int& Timer)
+void StageObjectMgr::Update(int Timer)
 {
 
 	/*===== 更新処理 =====*/
@@ -149,7 +149,7 @@ void StageObjectMgr::Update(const int& Timer)
 
 }
 
-void StageObjectMgr::ChangeNormalTexture(const int& Index, const int& NormalTexture)
+void StageObjectMgr::ChangeNormalTexture(int Index, int NormalTexture)
 {
 
 	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
@@ -261,7 +261,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 
 }
 
-void StageObjectMgr::AddTrans(const int& Index, const Vec3& Trans)
+void StageObjectMgr::AddTrans(int Index, const Vec3& Trans)
 {
 
 	/*===== 移動を加算 =====*/
@@ -270,7 +270,7 @@ void StageObjectMgr::AddTrans(const int& Index, const Vec3& Trans)
 
 }
 
-void StageObjectMgr::ChangeTrans(const int& Index, const Vec3& Trans)
+void StageObjectMgr::ChangeTrans(int Index, const Vec3& Trans)
 {
 
 	/*===== 移動を代入 =====*/
@@ -279,7 +279,7 @@ void StageObjectMgr::ChangeTrans(const int& Index, const Vec3& Trans)
 
 }
 
-void StageObjectMgr::AddScale(const int& Index, const Vec3& Scale)
+void StageObjectMgr::AddScale(int Index, const Vec3& Scale)
 {
 
 	/*===== スケールを加算 =====*/
@@ -288,7 +288,7 @@ void StageObjectMgr::AddScale(const int& Index, const Vec3& Scale)
 
 }
 
-void StageObjectMgr::ChangeScale(const int& Index, const Vec3& Scale)
+void StageObjectMgr::ChangeScale(int Index, const Vec3& Scale)
 {
 
 	/*===== スケールを代入 =====*/
@@ -297,7 +297,7 @@ void StageObjectMgr::ChangeScale(const int& Index, const Vec3& Scale)
 
 }
 
-void StageObjectMgr::AddRotate(const int& Index, const Vec3& Rotate)
+void StageObjectMgr::AddRotate(int Index, const Vec3& Rotate)
 {
 
 	/*===== 回転を加算 =====*/
@@ -306,7 +306,7 @@ void StageObjectMgr::AddRotate(const int& Index, const Vec3& Rotate)
 
 }
 
-void StageObjectMgr::ChangeRotate(const int& Index, const Vec3& Rotate)
+void StageObjectMgr::ChangeRotate(int Index, const Vec3& Rotate)
 {
 
 	/*===== 回転を代入 =====*/
@@ -315,7 +315,7 @@ void StageObjectMgr::ChangeRotate(const int& Index, const Vec3& Rotate)
 
 }
 
-void StageObjectMgr::NonDisplay(const int& Index)
+void StageObjectMgr::NonDisplay(int Index)
 {
 
 	/*===== 非表示 =====*/
@@ -324,7 +324,7 @@ void StageObjectMgr::NonDisplay(const int& Index)
 
 }
 
-void StageObjectMgr::Display(const int& Index)
+void StageObjectMgr::Display(int Index)
 {
 
 	/*===== 表示 =====*/
@@ -333,7 +333,7 @@ void StageObjectMgr::Display(const int& Index)
 
 }
 
-void StageObjectMgr::DeleteIndex(const int& Index)
+void StageObjectMgr::DeleteIndex(int Index)
 {
 
 	/*===== 要素を削除 =====*/
@@ -346,7 +346,7 @@ void StageObjectMgr::DeleteIndex(const int& Index)
 
 }
 
-void StageObjectMgr::ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, const UINT& ShaderID)
+void StageObjectMgr::ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, UINT ShaderID)
 {
 
 	/*===== インスタンスのシェーダーIDを切り替える =====*/
@@ -371,7 +371,7 @@ void StageObjectMgr::ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> I
 
 }
 
-void StageObjectMgr::ChangeInstanceShaderID(const int& Index, const UINT& ShaderID)
+void StageObjectMgr::ChangeInstanceShaderID(int Index, UINT ShaderID)
 {
 
 	/*===== インスタンスのシェーダーIDを切り替える =====*/

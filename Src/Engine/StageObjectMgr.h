@@ -24,14 +24,14 @@ public:
 	void Setting();
 
 	// 追加する。
-	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const UINT& ShaderID);
-	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, const UINT& ShaderID);
+	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID);
+	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID);
 
 	// 更新処理
-	void Update(const int& Timer);
+	void Update(int Timer);
 
 	// 指定のインデックスの法線ベクトルを変更。
-	void ChangeNormalTexture(const int& Index, const int& NormalTexture);
+	void ChangeNormalTexture(int Index, int NormalTexture);
 
 	// 当たり判定
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input);
@@ -40,29 +40,29 @@ public:
 	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 256> GetGimmickData() { return objects_; }
 
 	// 移動関係
-	void AddTrans(const int& Index, const Vec3& Trans);
-	void ChangeTrans(const int& Index, const Vec3& Trans);
+	void AddTrans(int Index, const Vec3& Trans);
+	void ChangeTrans(int Index, const Vec3& Trans);
 
 	// サイズ関係
-	void AddScale(const int& Index, const Vec3& Scale);
-	void ChangeScale(const int& Index, const Vec3& Scale);
+	void AddScale(int Index, const Vec3& Scale);
+	void ChangeScale(int Index, const Vec3& Scale);
 
 	// 回転関係
-	void AddRotate(const int& Index, const Vec3& Rotate);
-	void ChangeRotate(const int& Index, const Vec3& Rotate);
+	void AddRotate(int Index, const Vec3& Rotate);
+	void ChangeRotate(int Index, const Vec3& Rotate);
 
 	// Instanseを非表示、表示関数
-	void NonDisplay(const int& Index);
-	void Display(const int& Index);
+	void NonDisplay(int Index);
+	void Display(int Index);
 
 	// ゲッタ
-	int GetBlasIndex(const int& Index) { return objects_[Index].first->GetBLASIndex(); }
-	int GetInstanceIndex(const int& Index) { return objects_[Index].first->GetInstanceIndex(); }
+	int GetBlasIndex(int Index) { return objects_[Index].first->GetBLASIndex(); }
+	int GetInstanceIndex(int Index) { return objects_[Index].first->GetInstanceIndex(); }
 
 	// 削除。
-	void DeleteIndex(const int& Index);
-	void ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, const UINT& ShaderID);
-	void ChangeInstanceShaderID(const int& Index, const UINT& ShaderID);
+	void DeleteIndex(int Index);
+	void ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, UINT ShaderID);
+	void ChangeInstanceShaderID(int Index, UINT ShaderID);
 
 
 private:

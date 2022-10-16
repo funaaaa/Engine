@@ -43,13 +43,13 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap_; }
 
 	// 先頭のゲッタ
-	const int& GetHead() { return head_; }
+	int GetHead() { return head_; }
 
 	// 先頭をインクリメント
 	inline void IncrementHead() { ++head_; }
 
 	// 指定のインデックスのCPUハンドルを取得
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(const int& Index){
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(int Index){
 
 	return CD3DX12_GPU_DESCRIPTOR_HANDLE(
 		descriptorHeap_.Get()->GetGPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));

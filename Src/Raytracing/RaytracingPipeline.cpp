@@ -7,7 +7,7 @@
 #include "BLASRegister.h"
 #include <DirectXMath.h>
 
-void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount)
+void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& InputData, int UseHitGroup, int SRVCount, int CBVCount, int UAVCount, int PayloadSize, int AttribSize, int ReflectionCount)
 {
 
 	/*===== セッティング処理 =====*/
@@ -160,7 +160,7 @@ void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& Input
 
 }
 
-void RaytracingPipeline::ConstructionShaderTable(const int& DispatchX, const int& DispatchY)
+void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 {
 
 	/*===== シェーダーテーブルを構築 =====*/

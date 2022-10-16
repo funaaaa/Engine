@@ -45,13 +45,13 @@ public:
 	void Setting();
 
 	// ガウシアンブラーをかける。
-	void ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMaskIndex, const int& OutputUAVIndex, const int& BlurPower);
+	void ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower);
 
 	// 色情報と明るさ情報をかける。
-	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& InputGIIndex, const int& OutputUAVIndex);
+	void MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex, int InputLightLuminanceIndex, int InputGIIndex, int OutputUAVIndex);
 
 	// デノイズ
-	void Denoise(const int& InImg, const int& OutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount);
+	void Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoisePower, int DenoiseCount);
 
 private:
 

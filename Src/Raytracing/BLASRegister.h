@@ -27,9 +27,9 @@ public:
 	void Setting();
 
 	// 生成処理
-	std::weak_ptr<BLAS> GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
-	std::weak_ptr<BLAS> GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
-	std::weak_ptr<BLAS> GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const bool& IsOpaque = true, const bool& IsNewGenerate = false);
+	std::weak_ptr<BLAS> GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque = true, bool IsNewGenerate = false);
+	std::weak_ptr<BLAS> GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque = true, bool IsNewGenerate = false);
+	std::weak_ptr<BLAS> GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, bool IsOpaque = true, bool IsNewGenerate = false);
 	
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
@@ -39,6 +39,6 @@ public:
 
 	// BLASを取得。
 	std::array<std::shared_ptr<BLAS>, BLAS_COUNT>& GetBLAS() { return blas_; }
-	std::weak_ptr<BLAS> GetBlasSpecificationIndex(const int& Index) { return blas_[Index]; }
+	std::weak_ptr<BLAS> GetBlasSpecificationIndex(int Index) { return blas_[Index]; }
 
 };

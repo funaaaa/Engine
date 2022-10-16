@@ -42,7 +42,7 @@ void DriftParticle::Init()
 }
 
 #include "RayEngine.h"
-void DriftParticle::GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, const bool& IsBoost, Vec3 ForwardVec)
+void DriftParticle::GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot, bool IsBoost, Vec3 ForwardVec)
 {
 
 	/*===== 生成処理 =====*/
@@ -104,7 +104,7 @@ void DriftParticle::GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, cons
 
 }
 
-void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight)
+void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, bool IsBoostRight)
 {
 
 	/*===== オーラの生成処理 =====*/
@@ -157,7 +157,7 @@ void DriftParticle::GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<Polygon
 
 }
 
-void DriftParticle::GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange)
+void DriftParticle::GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, bool IsBoostRight, bool IsLevelChange)
 {
 
 	/*===== ドリフト時のパーティクルを生成 =====*/

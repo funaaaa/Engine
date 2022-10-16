@@ -3,7 +3,7 @@
 #include "PolygonInstance.h"
 #include "FHelper.h"
 
-PlayerTire::PlayerTire(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBehindTire)
+PlayerTire::PlayerTire(std::weak_ptr<PolygonMeshInstance> TireInstance, bool IsBehindTire)
 {
 
 	/*===== コンストラクタ =====*/
@@ -57,7 +57,7 @@ void PlayerTire::Update()
 
 }
 
-void PlayerTire::Rot(const bool& IsDrift, const float& Rate)
+void PlayerTire::Rot(bool IsDrift, float Rate)
 {
 
 	/*===== 回転処理 =====*/

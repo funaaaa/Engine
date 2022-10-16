@@ -27,7 +27,7 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetTLASBuffer() { return tlasBuffer; }
 
 	// ディスクリプタヒープのインデックスのアクセッサ
-	inline const int& GetDescriptorHeapIndex() { return descriptorHeapIndex; }
+	inline int GetDescriptorHeapIndex() { return descriptorHeapIndex; }
 
 	// インスタンスを更新
 	void Update();

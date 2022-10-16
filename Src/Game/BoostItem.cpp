@@ -22,7 +22,7 @@ void BoostItem::Update()
 
 }
 
-int BoostItem::Use(const float& CharaRotY, const int ParamID)
+int BoostItem::Use(float CharaRotY, const int ParamID)
 {
 
 	/*===== g—pˆ— =====*/

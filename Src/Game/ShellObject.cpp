@@ -32,7 +32,7 @@ void ShellObject::Destroy()
 
 }
 
-void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance)
+void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, float CharaRotY, int ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 
 	/*===== 生成処理 =====*/
@@ -245,7 +245,7 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 
 }
 
-void ShellObject::ChangeStatus(const Vec3& ForwardVec, const int& ShellID)
+void ShellObject::ChangeStatus(const Vec3& ForwardVec, int ShellID)
 {
 
 	/*===== ステータスを更新 ======*/

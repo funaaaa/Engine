@@ -63,18 +63,18 @@ public:
 	void Init();
 
 	// 生成処理
-	void GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot , const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec = Vec3());
+	void GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot , bool IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec = Vec3());
 	void GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot );
-	void GenerateAura(const int& BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, const int& Id, const bool& IsBoostRight, const bool& IsOrange );
-	void GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID );
+	void GenerateAura(int BlasIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, int Id, bool IsBoostRight, bool IsOrange );
+	void GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, bool IsBoostRight, bool IsOrange, int Id, float DriftRate, bool IsLevelChange, DriftParticleMgr::DELAY_ID DelayID );
 	void GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> CarBodyInstance );
 
 	// 更新処理
 	void Update();
 
 	// オーラを破棄。
-	void DestroyAura(const int& CharaIndex);
+	void DestroyAura(int CharaIndex);
 	// オーラは生成済みか
-	bool IsAuraGenerated(const int& CharaIndex);
+	bool IsAuraGenerated(int CharaIndex);
 
 };

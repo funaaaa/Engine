@@ -45,7 +45,7 @@ void Denoiser::Setting()
 
 }
 
-void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMaskIndex, const int& OutputUAVIndex, const int& BlurPower)
+void Denoiser::ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower)
 {
 
 	/*===== デノイズ処理 =====*/
@@ -65,7 +65,7 @@ void Denoiser::ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMas
 
 }
 
-void Denoiser::MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& InputGIIndex, const int& OutputUAVIndex)
+void Denoiser::MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex, int InputLightLuminanceIndex, int InputGIIndex, int OutputUAVIndex)
 {
 
 	/*===== 色情報と明るさ情報の乗算 =====*/
@@ -76,7 +76,7 @@ void Denoiser::MixColorAndLuminance(const int& InputColorIndex, const int& Input
 
 }
 
-void Denoiser::Denoise(const int& InImg, const int& OutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount)
+void Denoiser::Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoisePower, int DenoiseCount)
 {
 
 	/*===== デノイズ =====*/

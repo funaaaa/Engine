@@ -79,7 +79,7 @@ public:
 	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);
 
 	int GetModelCount() { return static_cast<int>(modelData_.size()); }
-	const ModelData& GetModelData(const int& Index) { return modelData_[Index]; }
+	const ModelData& GetModelData(int Index) { return modelData_[Index]; }
 
 	// ç≈ëÂç≈è¨ÇÃí∏ì_Çï€ë∂ÅB
 	void SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3& Pos);

@@ -9,7 +9,7 @@
 #include "FHelper.h"
 
 
-void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque)
 {
 
 	/*===== BLASÇê∂ê¨Ç∑ÇÈèàóù =====*/
@@ -146,7 +146,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 }
 
-void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
+void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque)
 {
 
 	/*===== BLASÇê∂ê¨Ç∑ÇÈèàóù =====*/
@@ -299,7 +299,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 }
 
 #include "FString.h"
-void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const int& BlasIndex, const bool& IsOpaque)
+void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque)
 {
 
 	/*===== BLASÇê∂ê¨Ç∑ÇÈèàóù =====*/
@@ -568,7 +568,7 @@ void BLAS::IsChangeMaterial()
 	isChangeVertex = true;
 
 }
-void BLAS::ChangeBaseTexture(const int& Index)
+void BLAS::ChangeBaseTexture(int Index)
 {
 	baseTextureHandle_ = Index;
 	isChangeTexture = true;
@@ -860,7 +860,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RES
 
 }
 
-D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(const bool& IsOpaque)
+D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(bool IsOpaque)
 {
 
 	/*===== BLASê∂ê¨éûÇ…ê›íËÇéÊìæÇ∑ÇÈópä÷êî =====*/

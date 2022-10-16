@@ -29,7 +29,7 @@ public:
 
 	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetBuffer(UINT BufferIndex) const { return buffer_[BufferIndex]; }
-	const int& GetDescHeapIndex() { return descHeapIndex_; }
+	int GetDescHeapIndex() { return descHeapIndex_; }
 
 
 private:

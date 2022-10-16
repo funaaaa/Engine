@@ -31,7 +31,7 @@ void CharacterMgr::Init()
 
 }
 
-void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, const bool& IsBeforeStart, const bool& IsGameFinish)
+void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bool IsGameFinish)
 {
 
 	/*===== 更新処理 =====*/
@@ -48,7 +48,7 @@ void CharacterMgr::Draw()
 {
 }
 
-void CharacterMgr::AddChara(const int& CharaID, const bool& IsPlayer, int Param)
+void CharacterMgr::AddChara(int CharaID, bool IsPlayer, int Param)
 {
 
 	/*===== キャラクターを追加 =====*/

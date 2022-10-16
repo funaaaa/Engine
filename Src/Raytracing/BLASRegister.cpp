@@ -14,7 +14,7 @@ void BLASRegister::Setting()
 
 }
 
-std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const bool& IsOpaque, const bool& IsNewGenerate)
+std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque, bool IsNewGenerate)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
@@ -64,7 +64,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, c
 
 }
 
-std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, const bool& IsOpaque, const bool& IsNewGenerate)
+std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque, bool IsNewGenerate)
 {
 
 	/*===== BLASÇê∂ê¨ =====*/
@@ -116,7 +116,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, c
 }
 
 #include "FString.h"
-std::weak_ptr<BLAS> BLASRegister::GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, const bool& IsOpaque, const bool& IsNewGenerate) {
+std::weak_ptr<BLAS> BLASRegister::GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, bool IsOpaque, bool IsNewGenerate) {
 
 
 	/*===== BLASÇê∂ê¨ =====*/

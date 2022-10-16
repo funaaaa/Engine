@@ -8,7 +8,7 @@
 #include "ConvertGimmickInfoFromBlender.h"
 #include "TextureManager.h"
 
-void MugenStage::Setting(const int& TireMaskIndex)
+void MugenStage::Setting(int TireMaskIndex)
 {
 
 	/*===== セッティング処理 =====*/
@@ -358,7 +358,7 @@ BaseStage::ColliderOutput MugenStage::Collider(BaseStage::ColliderInput Input)
 
 }
 
-void MugenStage::ChangeStageStatus(const int& Status)
+void MugenStage::ChangeStageStatus(int Status)
 {
 
 	/*===== ステージのステータスを変更 =====*/

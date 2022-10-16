@@ -105,16 +105,16 @@ public:
 	void Init();
 
 	// 生成処理
-	void GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot,  const bool& IsBoost, Vec3 ForwardVec);
+	void GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot,  bool IsBoost, Vec3 ForwardVec);
 	void GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot);
-	void GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight);
-	void GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange);
+	void GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, bool IsBoostRight);
+	void GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, bool IsBoostRight, bool IsLevelChange);
 	void GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> CarBodyInstance);
 
 	// 更新処理
 	void Update();
 
 	// アクセッサ
-	const bool& GetIsActive() { return isActive_; }
+	bool GetIsActive() { return isActive_; }
 
 };

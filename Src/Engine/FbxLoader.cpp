@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "TextureManager.h"
 
-void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex)
+void FbxLoader::GetFbxData(int Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex)
 {
 
 	// 指定されたインデックスが範囲外だったら何も返さない。
@@ -30,7 +30,7 @@ void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, 
 
 }
 
-int FbxLoader::GetTextureIndex(const int& Index)
+int FbxLoader::GetTextureIndex(int Index)
 {
 
 	/*===== テクスチャのインデックスを取得 =====*/
@@ -133,7 +133,7 @@ void FbxLoader::ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& S
 
 }
 
-FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
+FbxLoader::SkinData FbxLoader::GetSkinMat(int Index)
 {
 
 	/*===== スキニング行列を取得 =====*/
@@ -169,7 +169,7 @@ FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 
 }
 
-void FbxLoader::GetSkinComputeInput(const int& Index, std::vector<SkinComputeInput>& Input)
+void FbxLoader::GetSkinComputeInput(int Index, std::vector<SkinComputeInput>& Input)
 {
 
 	/*===== スキニングアニメーション用コンピュートシェーダーの入力構造体を取得 =====*/

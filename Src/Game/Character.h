@@ -221,11 +221,11 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param);
+	Character(CHARA_ID CharaID, int CharaIndex, int Param);
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, const bool& IsBeforeStart, const bool& IsGameFinish);
+	void Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, bool IsGameFinish);
 	void UpdateTitle();
 
 	// 描画処理
@@ -257,10 +257,10 @@ public:
 private:
 
 	// 入力処理
-	void Input(const bool& IsBeforeStart);
+	void Input(bool IsBeforeStart);
 
 	// 移動処理
-	void Move(const bool& IsBeforeStart);
+	void Move(bool IsBeforeStart);
 
 	// ドリフトに関する更新処理
 	void UpdateDrift();
@@ -278,6 +278,6 @@ private:
 	void UpdateGameFinish();
 
 	// ドリフトパーティクルの更新処理
-	void UpdateDriftParticle(const bool& IsGameFinish, const bool& IsBeforeStart);
+	void UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart);
 
 };

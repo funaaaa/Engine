@@ -4,7 +4,7 @@
 #include "BLAS.h"
 #include <assert.h>
 
-D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr<BLAS> Blas, const UINT& ShaderID, const bool& HaveMeshCollisionData, const int& InstanceIndex)
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex)
 {
 
 	/*===== インスタンスを生成する処理 =====*/

@@ -21,7 +21,7 @@ void BasicStageObject::Destroy()
 
 }
 
-void BasicStageObject::Update(const int& Timer)
+void BasicStageObject::Update(int Timer)
 {
 
 	/*===== 更新処理 =====*/
@@ -30,7 +30,7 @@ void BasicStageObject::Update(const int& Timer)
 
 }
 
-void BasicStageObject::Disable(const int& TimerToActivation)
+void BasicStageObject::Disable(int TimerToActivation)
 {
 
 	/*===== 無効化して再設定までの時間をセット =====*/

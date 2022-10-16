@@ -34,7 +34,7 @@ int BaseStageObject::GetInstanceIndex()
 	return instance_.lock()->GetInstanceIndex();
 }
 
-void BaseStageObject::ChangeNormalTexture(const int& Index)
+void BaseStageObject::ChangeNormalTexture(int Index)
 {
 
 	/*===== 法線マップを変更 =====*/

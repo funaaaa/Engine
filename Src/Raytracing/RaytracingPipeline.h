@@ -47,10 +47,10 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// セッティング処理
-	void Setting(const std::vector<RayPipelineShaderData>& InputData, const int& UseHitGroup, const int& SRVCount, const int& CBVCount, const int& UAVCount, const int& PayloadSize, const int& AttribSize, const int& ReflectionCount = 4);
+	void Setting(const std::vector<RayPipelineShaderData>& InputData, int UseHitGroup, int SRVCount, int CBVCount, int UAVCount, int PayloadSize, int AttribSize, int ReflectionCount = 4);
 
 	// シェーダーテーブルを構築
-	void ConstructionShaderTable(const int& DispatchX = WINDOW_WIDTH, const int& DispatchY = WINDOW_HEIGHT);
+	void ConstructionShaderTable(int DispatchX = WINDOW_WIDTH, int DispatchY = WINDOW_HEIGHT);
 
 	// HitGroupの情報を転送。
 	void MapHitGroupInfo();

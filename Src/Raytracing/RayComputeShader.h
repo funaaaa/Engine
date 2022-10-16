@@ -31,10 +31,10 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// セッティング処理
-	void Setting(LPCWSTR CsPath, const int& SRVCount, const int& CVBCount, const int& UAVCount, std::vector<int> UAVIndex);
+	void Setting(LPCWSTR CsPath, int SRVCount, int CVBCount, int UAVCount, std::vector<int> UAVIndex);
 
 	// 実行！
-	void Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV = {});
+	void Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV = {});
 
 	// 入力用UAVを変更。
 	void ChangeInputUAVIndex(const std::vector<int>& NewInputUAV) { inputUAVIndex_ = NewInputUAV; }

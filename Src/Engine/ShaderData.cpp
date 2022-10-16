@@ -9,7 +9,7 @@
 
 #pragma comment(lib, "dxcompiler.lib")
 
-ShaderData::ShaderData(const std::string& shaderPath_, const std::string& entryPoint_, const std::string& shaderModel_, const bool& isDXC)
+ShaderData::ShaderData(const std::string& shaderPath_, const std::string& entryPoint_, const std::string& shaderModel_, bool isDXC)
 {
 
 	/*-- コンストラクタ --*/

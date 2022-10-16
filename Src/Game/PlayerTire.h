@@ -22,12 +22,12 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// コンストラクタ
-	PlayerTire(std::weak_ptr<PolygonMeshInstance> TireInstance, const bool& IsBehindTire);
+	PlayerTire(std::weak_ptr<PolygonMeshInstance> TireInstance, bool IsBehindTire);
 
 	// 更新処理
 	void Update();
 
 	// 回転処理
-	void Rot(const bool& IsDrift, const float& Rate);
+	void Rot(bool IsDrift, float Rate);
 
 };

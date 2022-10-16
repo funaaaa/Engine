@@ -6,7 +6,7 @@
 //#include "BLASRegister.h"
 //#include "BLAS.h"
 //
-//void CircuitStage::Setting(const int& TireMaskIndex)
+//void CircuitStage::Setting(int TireMaskIndex)
 //{
 //
 //	/*===== セッティング処理 =====*/
@@ -209,7 +209,7 @@
 //
 //}
 //
-//void CircuitStage::ChangeStageStatus(const int& Status)
+//void CircuitStage::ChangeStageStatus(int Status)
 //{
 //
 //	Status;

@@ -14,7 +14,7 @@ void ShellObjectMgr::Setting()
 
 }
 
-int ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance)
+int ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, float CharaRotY, int ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 
 	/*===== オブジェクト追加 =====*/
@@ -33,7 +33,7 @@ int ShellObjectMgr::AddObject(const Vec3& Pos, const Vec3& ForwardVec, const flo
 
 }
 
-void ShellObjectMgr::DestroyObject(const int& Index)
+void ShellObjectMgr::DestroyObject(int Index)
 {
 
 	/*===== オブジェクト破壊 =====*/
@@ -65,7 +65,7 @@ void ShellObjectMgr::Update(std::weak_ptr<BaseStage> StageData)
 
 }
 
-void ShellObjectMgr::ChangeStatus(const int Index, const Vec3& ForwardVec, const int& ShellID)
+void ShellObjectMgr::ChangeStatus(const int Index, const Vec3& ForwardVec, int ShellID)
 {
 
 	/*===== 指定のインデックスのステータスを更新 =====*/
