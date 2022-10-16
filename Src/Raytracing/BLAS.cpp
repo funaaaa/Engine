@@ -568,6 +568,11 @@ void BLAS::IsChangeMaterial()
 	isChangeVertex = true;
 
 }
+void BLAS::ChangeBaseTexture(const int& Index)
+{
+	baseTextureHandle_ = Index;
+	isChangeTexture = true;
+}
 #include "HitGroupMgr.h"
 #include <assert.h>
 BLAS::BLAS()

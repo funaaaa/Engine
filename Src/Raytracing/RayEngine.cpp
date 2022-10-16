@@ -303,7 +303,7 @@ void RayEngine::NoiseDraw()
 	};
 	Engine::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
 
-	Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), colorOutput_->GetRaytracingOutput().Get());
+	Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
 
 	// レンダーターゲットのリソースバリアをもとに戻す。
 	D3D12_RESOURCE_BARRIER endBarriers[] = {

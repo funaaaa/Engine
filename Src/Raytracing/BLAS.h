@@ -114,10 +114,7 @@ public:
 	void IsChangeMaterial();
 
 	// テクスチャを追加。
-	void ChangeBaseTexture(const int& Index) {
-		baseTextureHandle_ = Index;
-		isChangeTexture = true;
-	}
+	void ChangeBaseTexture(const int& Index);
 	void ChangeNormalTexture(const int& Index) {
 		normalMapHandle_ = Index;
 		isChangeTexture = true;

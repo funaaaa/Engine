@@ -223,9 +223,6 @@
     <ClCompile Include="Src\Engine\GLTF.cpp">
       <Filter>エンジン\モデルデータ関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\PBRTestScene.cpp">
-      <Filter>アプリケーション\シーン管理\シーン</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Raytracing\RayEngine.cpp">
       <Filter>レイトレーシング\基礎\エンジン</Filter>
     </ClCompile>
@@ -500,9 +497,6 @@
     </ClInclude>
     <ClInclude Include="Lib\glTF\json.hpp">
       <Filter>エンジン\モデルデータ関係\gltf外部</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\PBRTestScene.h">
-      <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClInclude>
     <ClInclude Include="Src\Raytracing\RayEngine.h">
       <Filter>レイトレーシング\基礎\エンジン</Filter>

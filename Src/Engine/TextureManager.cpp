@@ -29,14 +29,25 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 	Texture proTexture{};
 	proTexture.filePath_ = FileName;
 
-	// ロードしていなかったらロードする
+	//// ロードしていなかったらロードする
+	//DirectX::TexMetadata metadata_;
+	//DirectX::ScratchImage scratchImg_;
+	//HRESULT result = LoadFromWICFile(
+	//	FileName,
+	//	DirectX::WIC_FLAGS_NONE,
+	//	&metadata_, scratchImg_
+	//);
+
 	DirectX::TexMetadata metadata_;
 	DirectX::ScratchImage scratchImg_;
-	HRESULT result = LoadFromWICFile(
-		FileName,
-		DirectX::WIC_FLAGS_NONE,
-		&metadata_, scratchImg_
-	);
+	HRESULT result = LoadFromDDSFile(FileName, DDS_FLAGS_NONE, &metadata_, scratchImg_);
+	if (FAILED(result)) {
+		result = LoadFromWICFile(FileName, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata_, scratchImg_);
+	}
+	if (FAILED(result)) {
+		assert(0);
+	}
+
 	const DirectX::Image* img = scratchImg_.GetImage(0, 0, 0);
 
 	// リソース設定

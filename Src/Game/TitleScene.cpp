@@ -21,9 +21,11 @@ TitleScene::TitleScene()
 	isTransition_ = false;
 	nextScene_ = SCENE_ID::GAME;
 
-	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
+	//title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
 
 }
+
+#include "TextureManager.h"
 
 void TitleScene::Init()
 {
@@ -41,9 +43,11 @@ void TitleScene::Init()
 	player_->pos_ = Vec3(0, 10000, 0);
 
 	// 環境マップを生成。
-	envMap1Blas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/ecvMap.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	envMap2Blas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/ecvMap2.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	envMap3Blas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/ecvMap3.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	envMap1Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap2Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap2Blas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/envMap2.dds"));
+	envMap3Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap3Blas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/envMap3.dds"));
 	envMap1_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap1Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
 	envMap1_.lock()->AddScale(Vec3(300, 300, 300));
 	envMap2_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap2Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
@@ -103,6 +107,9 @@ void TitleScene::Update()
 	ImGui::SameLine();
 	ImGui::RadioButton("GHOST", &mode, 3);
 	GameSceneMode::Ins()->mode_ = static_cast<GameSceneMode::MODE>(mode);
+
+	envMap2Blas_.lock()->Update();
+	envMap3Blas_.lock()->Update();
 
 	// AIだったら。
 	if (mode == 1) {
@@ -215,7 +222,7 @@ void TitleScene::Update()
 		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		player_->pos_ = Vec3(0, 0, 0);
 
-		// カーネルボックスだったら。
+		// コーネルボックスだったら。
 		if (invMapIndex_ == 3) {
 			player_->pos_ = Vec3(0, -70, 0);
 		}

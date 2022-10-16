@@ -787,7 +787,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
         
         // AOÇÃÉåÉCÇîÚÇŒÇ∑ÅB
-        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 25, gRtScene);
+        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 15, gRtScene);
         
         float NoL = saturate(dot(WorldNormal, sampleDir));
         float pdf = 1.0 / (2.0 * PI);
