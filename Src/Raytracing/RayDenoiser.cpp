@@ -2,7 +2,6 @@
 #include "RaytracingOutput.h"
 #include "RayComputeShader.h"
 #include "DynamicConstBuffer.h"
-#include "Engine.h"
 #include "WindowsAPI.h"
 
 void Denoiser::Setting()
@@ -42,6 +41,27 @@ void Denoiser::Setting()
 	weightTableCBX_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBX");
 	weightTableCBY_ = std::make_shared<DynamicConstBuffer>();
 	weightTableCBY_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBY");
+
+	// コンピュートキュー用の設定。
+	HRESULT result = Engine::Ins()->dev_->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_COMPUTE,
+		IID_PPV_ARGS(&cmdAllocator_));
+
+	// コマンドリストの生成
+	result = Engine::Ins()->dev_->CreateCommandList(0,
+		D3D12_COMMAND_LIST_TYPE_COMPUTE,
+		cmdAllocator_.Get(), nullptr,
+		IID_PPV_ARGS(&cmdList_));
+
+	// コマンドキューの生成
+	D3D12_COMMAND_QUEUE_DESC cmdQueueDesc{};
+	cmdQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
+	cmdQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+	cmdQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
+	result = Engine::Ins()->dev_->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&cmdQueue_));
+
+	// フェンスの生成
+	result = Engine::Ins()->dev_->CreateFence(fenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
 
 }
 
@@ -122,6 +142,52 @@ void Denoiser::Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoiseP
 
 	}
 
+
+}
+
+void Denoiser::AfterDraw()
+{
+
+	/*===== 描画後処理 =====*/
+
+	////グラフィックコマンドリストの実行
+	//ID3D12CommandList* cmdLists[] = { cmdList_.Get() }; // コマンドリストの配列
+	//cmdQueue_->ExecuteCommandLists(1, cmdLists);
+
+	// グラフィックコマンドリストの完了待ち
+	cmdQueue_->Signal(fence_.Get(), ++fenceVal_);
+	if (fence_->GetCompletedValue() != fenceVal_) {
+		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+		fence_->SetEventOnCompletion(fenceVal_, event);
+		WaitForSingleObject(event, INFINITE);
+		CloseHandle(event);
+	}
+
+	// コマンドアロケータのリセット
+	cmdAllocator_->Reset();							// キューをクリア
+
+	// コマンドリストのリセット
+	cmdList_->Reset(cmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+}
+
+void Denoiser::BeforeDraw()
+{
+
+	/*===== 描画前処理 =====*/
+
+	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
+	cmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+}
+
+void Denoiser::CloseCommandList()
+{
+
+	/*===== コマンドリストを閉める =====*/
+
+	// グラフィックコマンドリストのクローズ
+	cmdList_->Close();
 
 }
 

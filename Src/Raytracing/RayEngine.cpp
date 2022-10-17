@@ -134,7 +134,7 @@ void RayEngine::Draw()
 		Engine::Ins()->cmdList_->ResourceBarrier(3, barrierToUAV);
 
 		// ライトにデノイズをかける。
-		Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 10, 3);
+		Denoiser::Ins()->Denoise(lightOutput_->GetUAVIndex(), denoiseLightOutput_->GetUAVIndex(), denoiseMaskOutput_->GetUAVIndex(), 0, 1);
 
 	}
 
@@ -222,6 +222,8 @@ void RayEngine::Draw()
 
 	Engine::Ins()->cmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
 
+	// RayDenoiserの描画後処理。
+	//Denoiser::Ins()->AfterDraw();
 
 }
 

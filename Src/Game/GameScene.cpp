@@ -5,7 +5,6 @@
 #include "Character.h"
 #include "FHelper.h"
 #include "Camera.h"
-#include "RayDenoiser.h"
 #include "RayRootsignature.h"
 #include "DynamicConstBuffer.h"
 #include "RaytracingPipeline.h"
@@ -374,7 +373,7 @@ void GameScene::Draw()
 	/*===== 描画処理 =====*/
 
 	static bool isNoise = false;
-	if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
+	//if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
 
 	// レイトレーシングを実行。
 	if (isNoise) {

@@ -22,7 +22,7 @@ void StageObjectMgr::Setting()
 
 }
 
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque)
 {
 
 	/*===== ギミックを追加 =====*/
@@ -66,7 +66,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	}
 
 	// Blasをロード
-	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, IsOpaque);
 	// Instanceを生成。
 	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
@@ -78,7 +78,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 }
 
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque)
 {
 
 	/*===== ギミックを追加 =====*/
@@ -122,7 +122,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	}
 
 	// Blasをロード
-	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateGLTF(ModelPath, HitGroupName);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateGLTF(ModelPath, HitGroupName, IsOpaque);
 	// Instanceを生成。
 	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 

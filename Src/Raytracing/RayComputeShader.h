@@ -34,7 +34,7 @@ public:
 	void Setting(LPCWSTR CsPath, int SRVCount, int CVBCount, int UAVCount, std::vector<int> UAVIndex);
 
 	// 実行！
-	void Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV = {});
+	void Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV = {}, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> CmdList = nullptr);
 
 	// 入力用UAVを変更。
 	void ChangeInputUAVIndex(const std::vector<int>& NewInputUAV) { inputUAVIndex_ = NewInputUAV; }

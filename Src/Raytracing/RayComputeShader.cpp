@@ -54,21 +54,30 @@ void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int U
 
 }
 
-void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV)
+void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> CmdList)
 {
 
 	/*===== 実行処理 =====*/
 
+	// 使用するコマンドリストをセット。
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList;
+	if (CmdList != nullptr) {
+		cmdList = CmdList;
+	}
+	else {
+		cmdList = Engine::Ins()->cmdList_;
+	}
+
 	// ルートシグネチャをセット。
-	Engine::Ins()->cmdList_->SetComputeRootSignature(rootSignature_->GetRootSig().Get());
+	cmdList->SetComputeRootSignature(rootSignature_->GetRootSig().Get());
 
 	// パイプラインをセット。
-	Engine::Ins()->cmdList_->SetPipelineState(pipeline_.Get());
+	cmdList->SetPipelineState(pipeline_.Get());
 
 	// 一応UAVをセット。
 	for (auto& index_ : inputUAVIndex_) {
 
-		Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(static_cast<int>(&index_ - &inputUAVIndex_[0]) + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
+		cmdList->SetComputeRootDescriptorTable(static_cast<int>(&index_ - &inputUAVIndex_[0]) + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
 
 	}
 
@@ -78,15 +87,15 @@ void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, 
 	// CBVをセット。
 	for (auto& index_ : InputCBV) {
 
-		Engine::Ins()->cmdList_->SetComputeRootConstantBufferView(static_cast<int>(&index_ - &InputCBV[0]), index_);
+		cmdList->SetComputeRootConstantBufferView(static_cast<int>(&index_ - &InputCBV[0]), index_);
 
 	}
 
 	// 出力用UAVをセット。
-	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(inputUAVCount_ + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
+	cmdList->SetComputeRootDescriptorTable(inputUAVCount_ + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
 
 	// ディスパッチ。
-	Engine::Ins()->cmdList_->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
+	cmdList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 
 }
 

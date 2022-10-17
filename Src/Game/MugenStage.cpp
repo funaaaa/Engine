@@ -22,6 +22,7 @@ void MugenStage::Setting(int TireMaskIndex)
 		"Resource/Game/Stage/MugenStage/", "MugenStage.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+	//BLASRegister::Ins()->GetBlasSpecificationIndex(stageObjectMgr_->GetBlasIndex(indexBuff)).lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/wayGray.png"));
 
 	// ステージにタイヤ痕用マスクをセット。
 	BLASRegister::Ins()->GetBLAS()[stageObjectMgr_->GetBlasIndex(indexBuff)]->AddUAVTex(TireMaskIndex);
@@ -40,14 +41,14 @@ void MugenStage::Setting(int TireMaskIndex)
 
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/Stage/MugenStage/", "MugenStageGrass1.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
+		"Resource/Game/Stage/MugenStage/", "MugenStageGrass1.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/grassNormal.png"));
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/Stage/MugenStage/", "MugenStageGrass2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
+		"Resource/Game/Stage/MugenStage/", "MugenStageGrass2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/grassNormal.png"));
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
@@ -241,32 +242,33 @@ void MugenStage::Setting(int TireMaskIndex)
 	for (int index = 0; index < treeCount; ++index) {
 
 		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			L"Resource/Game/Stage/Tree/leaf.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-		stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index));
+			"Resource/Game/Stage/Tree/", "mapleLeaf.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, false);
+		stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index) + Vec3(0, -10, 0));
 		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-		stageObjectMgr_->ChangeScale(indexBuff, Vec3(90, 90, 90));
+		stageObjectMgr_->ChangeScale(indexBuff, Vec3(20, 20, 20));
+		BLASRegister::Ins()->GetBlasSpecificationIndex(stageObjectMgr_->GetBlasIndex(indexBuff)).lock()->ChangeNormalTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/Tree/maple_leaf_normal.png"));
 
 		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			L"Resource/Game/Stage/Tree/stem.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-		stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index));
+			"Resource/Game/Stage/Tree/", "mapleBark.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index) + Vec3(0, -10, 0));
 		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-		stageObjectMgr_->ChangeScale(indexBuff, Vec3(90, 90, 90));
+		stageObjectMgr_->ChangeScale(indexBuff, Vec3(20, 20, 20));
 
 	}
 
 	// フェンスを生成。
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/Fence/", "fence01.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/Fence/", "fence02.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/Fence/", "fence03.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/Fence/", "fence04.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+	//	"Resource/Game/Stage/Fence/", "fence01.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+	//	"Resource/Game/Stage/Fence/", "fence02.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+	//	"Resource/Game/Stage/Fence/", "fence03.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
+	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+	//	"Resource/Game/Stage/Fence/", "fence04.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
 
 	// 点光源
 	ConvertGimmickInfoFromBlender pointLightData;

@@ -224,7 +224,9 @@ void Engine::Init() {
 
 }
 
+#include "RayDenoiser.h"
 void Engine::ProcessBeforeDrawing() {
+
 	// メッセージ確認
 	if (PeekMessage(&windowsAPI_->msg_, nullptr, 0, 0, PM_REMOVE)) {
 		TranslateMessage(&windowsAPI_->msg_);	// キー入力メッセージの処理
@@ -313,7 +315,7 @@ void Engine::ProcessAfterDrawing() {
 	cmdList_->Close();
 
 	//グラフィックコマンドリストの実行
-	ID3D12CommandList* cmdLists[] = { cmdList_.Get() }; // コマンドリストの配列
+	ID3D12CommandList* cmdLists[] = { cmdList_.Get()}; // コマンドリストの配列
 	cmdQueue_->ExecuteCommandLists(1, cmdLists);
 
 	// 画面バッファをフリップ
@@ -333,6 +335,7 @@ void Engine::ProcessAfterDrawing() {
 
 	// コマンドリストのリセット
 	cmdList_->Reset(cmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
 }
 
 void Engine::SetRenderTarget()
