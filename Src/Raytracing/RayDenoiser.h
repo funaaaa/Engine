@@ -37,6 +37,8 @@ private:
 	std::shared_ptr<DynamicConstBuffer> weightTableCBX_;
 	std::shared_ptr<DynamicConstBuffer> weightTableCBY_;
 
+public:
+
 	// コンピュートキュー
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList_;
@@ -69,8 +71,6 @@ public:
 
 	// コマンドリストをクローズ。
 	void CloseCommandList();
-
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> GetCommandList() { return cmdList_; }
 
 private:
 

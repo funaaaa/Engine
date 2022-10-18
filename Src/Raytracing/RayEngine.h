@@ -2,6 +2,7 @@
 #include "Singleton.h"
 #include "ConstBuffers.h"
 #include <memory>
+#include <array>
 
 #include "ConstBuffers.h"
 #include "DynamicConstBuffer.h"
@@ -23,25 +24,28 @@ public:
 	std::shared_ptr<TLAS> tlas_;
 
 	// AO出力用。
-	std::shared_ptr<RaytracingOutput> aoOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseAOOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> aoOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseAOOutput_;
 
 	// 色出力用クラス。
-	std::shared_ptr<RaytracingOutput> colorOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> colorOutput_;
 
 	// ライト出力用。
-	std::shared_ptr<RaytracingOutput> lightOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseLightOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> lightOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseLightOutput_;
 
 	// GI出力用。
-	std::shared_ptr<RaytracingOutput> giOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseGiOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> giOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseGiOutput_;
 
 	// デノイズマスク用。
-	std::shared_ptr<RaytracingOutput> denoiseMaskOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseMaskOutput_;
 
 	// デノイズの結果出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput_;
+	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseMixTextureOutput_;
+
+	// 現在のUAVのインデックス。
+	int currentUAVIndex_;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPipelineShaderData> pipelineShaders_;

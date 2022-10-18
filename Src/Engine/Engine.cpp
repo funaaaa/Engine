@@ -16,10 +16,10 @@ Engine::Engine() {
 void Engine::Init() {
 #ifdef _DEBUG
 	// デバッグレイヤーの有効化
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController_))))
-	{
-		debugController_->EnableDebugLayer();
-	}
+	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController_))))
+	//{
+	//	debugController_->EnableDebugLayer();
+	//}
 	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController_))))
 	//{
 	//	shaderDebugController_->SetEnableGPUBasedValidation(true);
@@ -298,6 +298,7 @@ void Engine::ProcessBeforeDrawing() {
 
 }
 
+#include "RayDenoiser.h"
 void Engine::ProcessAfterDrawing() {
 
 	ImGui::End();
@@ -313,10 +314,13 @@ void Engine::ProcessAfterDrawing() {
 
 	// グラフィックコマンドリストのクローズ
 	cmdList_->Close();
+	Denoiser::Ins()->cmdList_->Close();
 
 	//グラフィックコマンドリストの実行
 	ID3D12CommandList* cmdLists[] = { cmdList_.Get()}; // コマンドリストの配列
 	cmdQueue_->ExecuteCommandLists(1, cmdLists);
+	ID3D12CommandList* computeCmdLists[] = { Denoiser::Ins()->cmdList_.Get() }; // コマンドリストの配列
+	Denoiser::Ins()->cmdQueue_->ExecuteCommandLists(1, computeCmdLists);
 
 	// 画面バッファをフリップ
 	swapchain_->Present(1, 0);
@@ -329,12 +333,27 @@ void Engine::ProcessAfterDrawing() {
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
+	Denoiser::Ins()->cmdQueue_->Signal(Denoiser::Ins()->fence_.Get(), ++Denoiser::Ins()->fenceVal_);
+	if (Denoiser::Ins()->fence_->GetCompletedValue() != Denoiser::Ins()->fenceVal_) {
+		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+		Denoiser::Ins()->fence_->SetEventOnCompletion(Denoiser::Ins()->fenceVal_, event);
+		WaitForSingleObject(event, INFINITE);
+		CloseHandle(event);
+	}
 
 	// コマンドアロケータのリセット
 	cmdAllocator_->Reset();							// キューをクリア
 
 	// コマンドリストのリセット
 	cmdList_->Reset(cmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+	// RayDenoiserでも同じことをやる。
+
+	// コマンドアロケータのリセット
+	Denoiser::Ins()->cmdAllocator_->Reset();							// キューをクリア
+
+	// コマンドリストのリセット
+	Denoiser::Ins()->cmdList_->Reset(Denoiser::Ins()->cmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
 
 }
 
