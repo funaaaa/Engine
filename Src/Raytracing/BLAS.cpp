@@ -86,6 +86,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 		static_cast<size_t>(vertexStride_ * vertexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	vertexBuffer_->SetName(L"VertexBuffer");
 
 	// 確保したバッファに頂点データを書き込む。
 	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
@@ -224,6 +225,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 		static_cast<size_t>(indexStride_ * indexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	indexBuffer_->SetName(L"IndexBuffer");
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
 	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
@@ -491,7 +493,7 @@ void BLAS::Update()
 	asDesc.ScratchAccelerationStructureData = updateBuffer_->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -917,6 +919,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	scratchBuffer_->SetName(L"BLASScratchBuffer");
 
 	// BLASのバッファを生成する。
 	blasBuffer_ = CreateBuffer(
@@ -925,6 +928,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	blasBuffer_->SetName(L"BLASBuffer");
 
 	// 更新用バッファを生成する。
 	updateBuffer_ = CreateBuffer(
@@ -933,12 +937,13 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	updateBuffer_->SetName(L"BLASUpdateBuffer");
 
 	// AccelerationStructureの構築。
 	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
 	buildASDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
 
@@ -956,28 +961,28 @@ void BLAS::CreateAccelerationStructure()
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 	uavBarrier.UAV.pResource = blasBuffer_.Get();
-	Engine::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
-	Engine::Ins()->cmdList_->Close();
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->Close();
 
 	// BLASを構築。
 	//ID3D12CommandList* pCmdList[] = { Engine::Ins()->cmdList.Get() };
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { Engine::Ins()->cmdList_.Get() };
-	Engine::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
+	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
 
 	// グラフィックコマンドリストの完了待ち
-	Engine::Ins()->cmdQueue_->Signal(Engine::Ins()->fence_.Get(), ++Engine::Ins()->fenceVal_);
-	if (Engine::Ins()->fence_->GetCompletedValue() != Engine::Ins()->fenceVal_) {
+	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->GPUtoCPUFence_.Get(), ++Engine::Ins()->GPUtoCPUFenceVal_);
+	if (Engine::Ins()->GPUtoCPUFence_->GetCompletedValue() != Engine::Ins()->GPUtoCPUFenceVal_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		Engine::Ins()->fence_->SetEventOnCompletion(Engine::Ins()->fenceVal_, event);
+		Engine::Ins()->GPUtoCPUFence_->SetEventOnCompletion(Engine::Ins()->GPUtoCPUFenceVal_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	// コマンドアロケータのリセット
-	Engine::Ins()->cmdAllocator_->Reset();	//キューをクリア
+	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();	//キューをクリア
 
 	// コマンドリストのリセット
-	Engine::Ins()->cmdList_->Reset(Engine::Ins()->cmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
 
 }

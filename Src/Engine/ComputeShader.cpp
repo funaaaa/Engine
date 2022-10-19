@@ -62,27 +62,27 @@ void ComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UIN
 
 	/*-- ルートシグネチャをセット --*/
 
-	Engine::Ins()->cmdList_->SetComputeRootSignature(rootSignature_.Get());
+	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootSignature(rootSignature_.Get());
 
 
 	/*-- パイプラインをセット --*/
 
-	Engine::Ins()->cmdList_->SetPipelineState(pipeline_.Get());
+	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState(pipeline_.Get());
 
 
 	/*-- ディスクリプタヒープをセット --*/
 
 	ID3D12DescriptorHeap* descHeapBuff[1] = { descHeap_.Get() };
-	Engine::Ins()->cmdList_->SetDescriptorHeaps(1, descHeapBuff);
+	Engine::Ins()->mainGraphicsCmdList_->SetDescriptorHeaps(1, descHeapBuff);
 
 	//ディスクリプタテーブルに登録する。
-	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(1, srvGPUDescHeapHandle_);
-	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(2, uavGPUDescHeapHandle_);
+	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootDescriptorTable(1, srvGPUDescHeapHandle_);
+	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootDescriptorTable(2, uavGPUDescHeapHandle_);
 
 
 	/*-- ディスパッチ --*/
 
-	Engine::Ins()->cmdList_->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
+	Engine::Ins()->mainGraphicsCmdList_->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 
 }
 

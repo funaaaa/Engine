@@ -14,6 +14,7 @@
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
+
 	Engine::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
@@ -26,6 +27,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ディスクリプタヒープを初期化。
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();
 
+	// デノイズ用のクラスを初期化。
+	Denoiser::Ins()->Setting();
+
 	// BLASを準備。
 	BLASRegister::Ins()->Setting();
 
@@ -37,9 +41,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// ヒットグループを設定。
 	HitGroupMgr::Ins()->Setting();
-
-	// デノイズ用のクラスを初期化。
-	Denoiser::Ins()->Setting();
 
 	// カメラを初期化。
 	Camera::Ins()->Init();
@@ -74,4 +75,5 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	}
 
 	return 0;
+
 }

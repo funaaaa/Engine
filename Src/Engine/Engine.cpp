@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <d3d12sdklayers.h>
 #include "WindowsAPI.h"
+#include "DescriptorHeapMgr.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -13,17 +14,18 @@ Engine::Engine() {
 	backBuffers_.resize(2);
 }
 
+#include "RayDenoiser.h"
 void Engine::Init() {
 #ifdef _DEBUG
 	// デバッグレイヤーの有効化
-	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController_))))
-	//{
-	//	debugController_->EnableDebugLayer();
-	//}
-	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController_))))
-	//{
-	//	shaderDebugController_->SetEnableGPUBasedValidation(true);
-	//}
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController_))))
+	{
+		debugController_->EnableDebugLayer();
+	}
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&shaderDebugController_))))
+	{
+		shaderDebugController_->SetEnableGPUBasedValidation(true);
+	}
 #endif
 
 	// ウィンドウ初期化
@@ -75,6 +77,7 @@ void Engine::Init() {
 			break;
 		}
 	}
+	dev_->SetName(L"Device");
 
 	// DXR サポートしているか確認
 	D3D12_FEATURE_DATA_D3D12_OPTIONS5 options{};
@@ -86,21 +89,32 @@ void Engine::Init() {
 		throw std::runtime_error("DirectX Raytracing not supported.");
 	}
 
-
 	// コマンドアロケータの生成
 	result = dev_->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		IID_PPV_ARGS(&cmdAllocator_));
+		IID_PPV_ARGS(&mainGraphicsCmdAllocator_));
+	mainGraphicsCmdAllocator_->SetName(L"MainGraphicsCmdAllocator");
+	result = dev_->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		IID_PPV_ARGS(&copyResourceCmdAllocator_));
+	copyResourceCmdAllocator_->SetName(L"CopyResourceCmdAllocator");
 
 	// コマンドリストの生成
 	result = dev_->CreateCommandList(0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		cmdAllocator_.Get(), nullptr,
-		IID_PPV_ARGS(&cmdList_));
+		mainGraphicsCmdAllocator_.Get(), nullptr,
+		IID_PPV_ARGS(&mainGraphicsCmdList_));
+	mainGraphicsCmdList_->SetName(L"GraphicsCmdList");
+	result = dev_->CreateCommandList(0,
+		D3D12_COMMAND_LIST_TYPE_DIRECT,
+		copyResourceCmdAllocator_.Get(), nullptr,
+		IID_PPV_ARGS(&copyResourceCmdList));
+	copyResourceCmdList->SetName(L"CopyResourceCmdList");
 
 	// コマンドキューの生成
 	D3D12_COMMAND_QUEUE_DESC cmdQueueDesc{};
-	result = dev_->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&cmdQueue_));
+	result = dev_->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&graphicsCmdQueue_));
+	graphicsCmdQueue_->SetName(L"GraphicsCmdQueue");
 
 	// スワップチェーンの生成
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain1;
@@ -114,7 +128,7 @@ void Engine::Init() {
 	swapchainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;	// フリップ後は破棄
 	swapchainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 	result = dxgiFactory_->CreateSwapChainForHwnd(
-		cmdQueue_.Get(),
+		graphicsCmdQueue_.Get(),
 		windowsAPI_->hwnd_,
 		&swapchainDesc,
 		nullptr,
@@ -141,7 +155,10 @@ void Engine::Init() {
 			backBuffers_[i].Get(),
 			nullptr,
 			handle);
+
 	}
+	backBuffers_[0]->SetName(L"BackBuffer0");
+	backBuffers_[1]->SetName(L"BackBuffer1");
 
 	// リソース生成
 	CD3DX12_RESOURCE_DESC depthResDesc = CD3DX12_RESOURCE_DESC::Tex2D(
@@ -163,6 +180,7 @@ void Engine::Init() {
 		&resrouceClearValue,
 		IID_PPV_ARGS(&depthBuffer_)
 	);
+	depthBuffer_->SetName(L"DepthBuffer");
 
 	// 深度バッファビュー生成
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
@@ -177,9 +195,24 @@ void Engine::Init() {
 		&dsvDesc,
 		dsvHeap_->GetCPUDescriptorHandleForHeapStart()
 	);
+	dsvHeap_->SetName(L"DsvHeap");
 
-	// フェンスの生成
-	result = dev_->CreateFence(fenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
+	// GraphicsとDenoiseのフェンスの生成
+	graphicsToDenoiseFenceVal_ = 1;
+	result = dev_->CreateFence(graphicsToDenoiseFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToDenoiseFence_));
+	graphicsToDenoiseFence_->SetName(L"GraphicsWithDenoiseSynchronizeFence");
+	// GraphicsとCPUのフェンスの生成
+	GPUtoCPUFenceVal_ = 1;
+	result = dev_->CreateFence(GPUtoCPUFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&GPUtoCPUFence_));
+	GPUtoCPUFence_->SetName(L"GraphicsWithCPUSynchronizeFence");
+	// DenoiseとGraphicsのフェンスの生成
+	denoiseToCopyFenceVal_ = 1;
+	result = dev_->CreateFence(denoiseToCopyFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_));
+	denoiseToCopyFence_->SetName(L"DenoiseToCopyFence");
+	// Copy終了監視用のフェンスの生成
+	finishCopyFenceVal_ = 1;
+	result = dev_->CreateFence(finishCopyFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&finishCopyFence_));
+	finishCopyFence_->SetName(L"FinishCopyFence");
 
 	// DirectInputオブジェクトの生成
 	result = DirectInput8Create(
@@ -222,6 +255,11 @@ void Engine::Init() {
 	blnResult = ImGui_ImplDX12_Init(dev_.Get(), 3, DXGI_FORMAT_R8G8B8A8_UNORM, heapForImgui_.Get(),
 		heapForImgui_.Get()->GetCPUDescriptorHandleForHeapStart(), heapForImgui_.Get()->GetGPUDescriptorHandleForHeapStart());
 
+	canUseMainGraphicsQueue_ = true;
+	canUseDenoiseQueue_ = true;
+	canUseCopyQueue_ = true;
+	hasFinishedMainGraphicsProcess_ = false;
+
 }
 
 #include "RayDenoiser.h"
@@ -240,38 +278,50 @@ void Engine::ProcessBeforeDrawing() {
 	// 全キーの入力状態を取得する
 	Input::Ins()->Update(devkeybord_, devmouse_);
 
-	// レンダーターゲットのリソースバリア変更
-	UINT bbIndex = swapchain_->GetCurrentBackBufferIndex();
-	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers_[bbIndex].Get(),
-		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	cmdList_->ResourceBarrier(1, &resourceBarrier);
+	// CopyQueueが実行できるときのみレンダーターゲット周りの初期化を行う。
+	bool isEndDispatchRayAndDenoise = canUseCopyQueue_ && canUseMainGraphicsQueue_;
+	if (canUseCopyQueue_ && isEndDispatchRayAndDenoise) {
 
-	// レンダーターゲットの設定
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		rtvHeaps_->GetCPUDescriptorHandleForHeapStart(), bbIndex, dev_->GetDescriptorHandleIncrementSize(heapDesc_.Type));
+		// レンダーターゲットのリソースバリア変更
+		UINT bbIndex = swapchain_->GetCurrentBackBufferIndex();
+		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		copyResourceCmdList->ResourceBarrier(1, &resourceBarrier);
 
-	// 深度バッファ用のディスクリプタヒープの先頭アドレスを取得
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvH = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
-	cmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
+		// レンダーターゲットの設定
+		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			rtvHeaps_->GetCPUDescriptorHandleForHeapStart(), bbIndex, dev_->GetDescriptorHandleIncrementSize(heapDesc_.Type));
 
-	// 画面クリア
-	// 初期化色
-	float clearColor[] = { 0.35f,0.3f,0.2f,0.0f };
-	for (int i = 0; i < 4; ++i) {
-		clearColor[i] = clearColor[i] / 255.0f;
+		// 深度バッファ用のディスクリプタヒープの先頭アドレスを取得
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+		copyResourceCmdList->OMSetRenderTargets(1, &rtvH, false, &dsvH);
+
+		// 画面クリア
+		// 初期化色
+		float clearColor[] = { 0.35f,0.3f,0.2f,0.0f };
+		for (int i = 0; i < 4; ++i) {
+			clearColor[i] = clearColor[i] / 255.0f;
+		}
+		copyResourceCmdList->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
+
+		// 深度バッファのクリアコマンド
+		copyResourceCmdList->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+		// ビューポート設定
+		CD3DX12_VIEWPORT viewportData = CD3DX12_VIEWPORT(0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT);
+		copyResourceCmdList->RSSetViewports(1, &viewportData);
+
+		// シザリング矩形設定
+		CD3DX12_RECT rectData = CD3DX12_RECT(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+		copyResourceCmdList->RSSetScissorRects(1, &rectData);
+
+
+		// 次にBackBufferに書き込む処理は別のQueueにあるのでステートをCommonに変える。
+		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+		copyResourceCmdList->ResourceBarrier(1, &resourceBarrier);
+
 	}
-	cmdList_->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
-
-	// 深度バッファのクリアコマンド
-	cmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
-	// ビューポート設定
-	CD3DX12_VIEWPORT viewportData = CD3DX12_VIEWPORT(0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT);
-	cmdList_->RSSetViewports(1, &viewportData);
-
-	// シザリング矩形設定
-	CD3DX12_RECT rectData = CD3DX12_RECT(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	cmdList_->RSSetScissorRects(1, &rectData);
 
 	// imgui描画前処理
 	ImGui_ImplDX12_NewFrame();
@@ -303,57 +353,141 @@ void Engine::ProcessAfterDrawing() {
 
 	ImGui::End();
 	ImGui::Render();
-	// コマンドリストに追加
-	cmdList_->SetDescriptorHeaps(1, heapForImgui_.GetAddressOf());
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), cmdList_.Get());
 
-	// レンダーターゲットのリソースバリア変更
-	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers_[swapchain_->GetCurrentBackBufferIndex()].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	cmdList_->ResourceBarrier(1, &resourceBarrier);
+	// 各フェンスの値を加算する。
+	{
 
-	// グラフィックコマンドリストのクローズ
-	cmdList_->Close();
-	Denoiser::Ins()->cmdList_->Close();
+		// GPUからCPU間でのフェンスの値を加算。
+		++GPUtoCPUFenceVal_;
 
-	//グラフィックコマンドリストの実行
-	ID3D12CommandList* cmdLists[] = { cmdList_.Get()}; // コマンドリストの配列
-	cmdQueue_->ExecuteCommandLists(1, cmdLists);
-	ID3D12CommandList* computeCmdLists[] = { Denoiser::Ins()->cmdList_.Get() }; // コマンドリストの配列
-	Denoiser::Ins()->cmdQueue_->ExecuteCommandLists(1, computeCmdLists);
+		// MainGraphicsQueueからDenoiseQueue間でのフェンスの値を加算。
+		++graphicsToDenoiseFenceVal_;
 
-	// 画面バッファをフリップ
-	swapchain_->Present(1, 0);
+		// DenoiseQueueからCopy間でのフェンスの値を加算。
+		++denoiseToCopyFenceVal_;
 
-	// グラフィックコマンドリストの完了待ち
-	cmdQueue_->Signal(fence_.Get(), ++fenceVal_);
-	if (fence_->GetCompletedValue() != fenceVal_) {
-		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		fence_->SetEventOnCompletion(fenceVal_, event);
-		WaitForSingleObject(event, INFINITE);
-		CloseHandle(event);
-	}
-	Denoiser::Ins()->cmdQueue_->Signal(Denoiser::Ins()->fence_.Get(), ++Denoiser::Ins()->fenceVal_);
-	if (Denoiser::Ins()->fence_->GetCompletedValue() != Denoiser::Ins()->fenceVal_) {
-		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		Denoiser::Ins()->fence_->SetEventOnCompletion(Denoiser::Ins()->fenceVal_, event);
-		WaitForSingleObject(event, INFINITE);
-		CloseHandle(event);
+		// Copyの終了監視用フェンスを加算。
+		++finishCopyFenceVal_;
+
 	}
 
-	// コマンドアロケータのリセット
-	cmdAllocator_->Reset();							// キューをクリア
+	// DenoiseCmdListの処理
+	{
 
-	// コマンドリストのリセット
-	cmdList_->Reset(cmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+		// DenoiseCmdListが使用可能状態だったら。
+		if (canUseDenoiseQueue_) {
 
-	// RayDenoiserでも同じことをやる。
+			// コンピュートキューのデノイズコマンドを実行。
+			Denoiser::Ins()->computeCmdList_->Close();
+			ID3D12CommandList* computeCmdLists[] = { Denoiser::Ins()->computeCmdList_.Get() }; // コマンドリストの配列
+			Denoiser::Ins()->computeCmdQueue_->Wait(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);	// MainGraphicsの処理が終わってから実行する。
+			Denoiser::Ins()->computeCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
 
-	// コマンドアロケータのリセット
-	Denoiser::Ins()->cmdAllocator_->Reset();							// キューをクリア
+			// このコマンドリストを操作不可能にする。
+			canUseDenoiseQueue_ = false;
 
-	// コマンドリストのリセット
-	Denoiser::Ins()->cmdList_->Reset(Denoiser::Ins()->cmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+		}
+
+		// デノイズコマンドリストの終了をCopyのフェンスに通知。
+		Denoiser::Ins()->computeCmdQueue_->Signal(denoiseToCopyFence_.Get(), denoiseToCopyFenceVal_);
+
+		UINT64 computeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
+		if (computeFenceValue == graphicsToDenoiseFenceVal_ + 1) {
+
+			// コマンドアロケータのリセット
+			Denoiser::Ins()->computeCmdAllocator_->Reset();							// キューをクリア
+
+			// コマンドリストのリセット
+			Denoiser::Ins()->computeCmdList_->Reset(Denoiser::Ins()->computeCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+			// このコマンドリストを操作可能にする。
+			canUseDenoiseQueue_ = true;
+
+		}
+
+	}
+
+	// CopyCmdListの処理
+	{
+
+		// CopyCmdListが使用可能状態だったら。
+		bool isEndDispatchRayAndDenoise = canUseCopyQueue_ && canUseMainGraphicsQueue_;
+		if (canUseCopyQueue_ && isEndDispatchRayAndDenoise) {
+
+			// レンダーターゲットのリソースバリア変更			COMMONとPRESENTはどちらも0だから同じ意味？
+			//CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers_[swapchain_->GetCurrentBackBufferIndex()].Get(),
+			//	D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PRESENT);
+			//copyResourceCmdList->ResourceBarrier(1, &resourceBarrier);
+
+			// コピーキューのデノイズコマンドを実行。
+			copyResourceCmdList->Close();
+
+			ID3D12CommandList* computeCmdLists[] = { copyResourceCmdList.Get() }; // コマンドリストの配列
+			//graphicsCmdQueue_->Wait(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);	// MainGraphicsの処理が終わってから実行する。
+			graphicsCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
+
+			// 画面バッファをフリップ
+			swapchain_->Present(1, 0);
+
+			// このコマンドリストを操作不可能にする。
+			canUseCopyQueue_ = false;
+
+		}
+
+		// コピーコマンドリストの終了をコピー終了監視用のフェンスに通知。
+		Denoiser::Ins()->computeCmdQueue_->Signal(finishCopyFence_.Get(), finishCopyFenceVal_);
+
+		UINT64 copyFenceValue = finishCopyFence_->GetCompletedValue();
+		if (copyFenceValue == finishCopyFenceVal_ + 1) {
+
+			// コマンドアロケータのリセット
+			copyResourceCmdAllocator_->Reset();							// キューをクリア
+
+			// コマンドリストのリセット
+			mainGraphicsCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+			// このコマンドリストを操作可能にする。
+			canUseCopyQueue_ = true;
+
+		}
+
+	}
+
+	// MainGraphicsCmdListの処理
+	{
+
+		// コマンドリストに追加
+		mainGraphicsCmdList_->SetDescriptorHeaps(1, heapForImgui_.GetAddressOf());
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mainGraphicsCmdList_.Get());
+
+		// グラフィックコマンドリストのクローズ
+		mainGraphicsCmdList_->Close();
+
+		// グラフィックスキューのコマンドを実行。
+		ID3D12CommandList* cmdLists[] = { mainGraphicsCmdList_.Get() }; // コマンドリストの配列
+		graphicsCmdQueue_->ExecuteCommandLists(1, cmdLists);
+
+		// GPUの実行完了を通知。
+		graphicsCmdQueue_->Signal(GPUtoCPUFence_.Get(), GPUtoCPUFenceVal_);
+		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);
+		UINT64 graphicsFenceValue = GPUtoCPUFence_->GetCompletedValue();
+
+		// グラフィックコマンドリストの完了待ち
+		if (graphicsFenceValue != GPUtoCPUFenceVal_) {
+			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+			GPUtoCPUFence_->SetEventOnCompletion(GPUtoCPUFenceVal_, event);
+			WaitForSingleObject(event, INFINITE);
+			CloseHandle(event);
+
+		}
+
+		// コマンドアロケータのリセット
+		mainGraphicsCmdAllocator_->Reset();							// キューをクリア
+
+		// コマンドリストのリセット
+		mainGraphicsCmdList_->Reset(mainGraphicsCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+	}
 
 }
 
@@ -363,11 +497,11 @@ void Engine::SetRenderTarget()
 	UINT bbIndex = Engine::Ins()->swapchain_->GetCurrentBackBufferIndex();
 	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	Engine::Ins()->cmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	Engine::Ins()->cmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &resourceBarrier);
 	// レンダーターゲットの設定
 	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		Engine::Ins()->rtvHeaps_->GetCPUDescriptorHandleForHeapStart(), bbIndex, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(Engine::Ins()->heapDesc_.Type));
@@ -375,12 +509,12 @@ void Engine::SetRenderTarget()
 	CD3DX12_CPU_DESCRIPTOR_HANDLE backBufferHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(Engine::Ins()->rtvHeaps_->GetCPUDescriptorHandleForHeapStart(),
 		Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(Engine::Ins()->heapDesc_.Type));
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvStartHandle = Engine::Ins()->dsvHeap_->GetCPUDescriptorHandleForHeapStart();
-	Engine::Ins()->cmdList_->OMSetRenderTargets(1, &backBufferHandle, false, &dsvStartHandle);
+	Engine::Ins()->mainGraphicsCmdList_->OMSetRenderTargets(1, &backBufferHandle, false, &dsvStartHandle);
 	// レンダーターゲットのクリア
 	float clearColor[] = { 0.5f,0.5f,0.5f,0.0f };
-	Engine::Ins()->cmdList_->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
+	Engine::Ins()->mainGraphicsCmdList_->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
 	// 深度バッファのクリアコマンド
-	Engine::Ins()->cmdList_->ClearDepthStencilView(Engine::Ins()->dsvHeap_->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+	Engine::Ins()->mainGraphicsCmdList_->ClearDepthStencilView(Engine::Ins()->dsvHeap_->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }
 
 void Engine::ResourceBarrierAfter()
@@ -388,7 +522,7 @@ void Engine::ResourceBarrierAfter()
 	// レンダーターゲットのリソースバリア変更
 	CD3DX12_RESOURCE_BARRIER resrouceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(backBuffers_[swapchain_->GetCurrentBackBufferIndex()].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	cmdList_->ResourceBarrier(1, &resrouceBarrier);
+	mainGraphicsCmdList_->ResourceBarrier(1, &resrouceBarrier);
 }
 
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> Engine::CreateDescriptorHeaoForImgui()

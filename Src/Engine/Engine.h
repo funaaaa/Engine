@@ -23,26 +23,41 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Debug1> shaderDebugController_;
 	Microsoft::WRL::ComPtr<ID3D12Device5> dev_;
 	Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory_;
-	std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters_;//アダプターの列挙用
-	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter_;			//特定の名前を持つアダプターオブジェクトを入れる
-	std::vector<D3D_FEATURE_LEVEL> levels_;						//対応レベルの配列
+	std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters_;//  アダプターの列挙用
+	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter_;			// 特定の名前を持つアダプターオブジェクトを入れる
+	std::vector<D3D_FEATURE_LEVEL> levels_;						// 対応レベルの配列
 	D3D_FEATURE_LEVEL featureLevel_;
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain_;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList_;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps_;
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 	D3D12_DESCRIPTOR_HEAP_DESC heapDesc_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;			//深度バッファ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;		//深度バッファ用ディスクリプタヒープ
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
-	UINT64 fenceVal_;
-	IDirectInput8* dinput_;										//DirectInputオブジェクト
-	IDirectInputDevice8* devkeybord_;							//キーボードオブジェクト
-	IDirectInputDevice8* devmouse_;								//マウスオブジェクト
+	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;			// 深度バッファ
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;		// 深度バッファ用ディスクリプタヒープ
+	IDirectInput8* dinput_;										// DirectInputオブジェクト
+	IDirectInputDevice8* devkeybord_;							// キーボードオブジェクト
+	IDirectInputDevice8* devmouse_;								// マウスオブジェクト
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heapForImgui_;	//imgui用ディスクリプタヒープ
+
+	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain_;
+
+	// GPUの非同期処理に必要な変数。
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mainGraphicsCmdAllocator_;
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> copyResourceCmdAllocator_;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainGraphicsCmdList_;	// メインで使用するグラフィックスコマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> copyResourceCmdList;		// CopyResourceで使用するグラフィックスコマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> graphicsCmdQueue_;				// グラフィックスキュー
+	Microsoft::WRL::ComPtr<ID3D12Fence> graphicsToDenoiseFence_;	// mainGraphicsとdenoiseの同期をとるためのフェンス
+	UINT64 graphicsToDenoiseFenceVal_;
+	Microsoft::WRL::ComPtr<ID3D12Fence> GPUtoCPUFence_;				// mainGraphicsとCPUの同期をとるためのフェンス
+	UINT64 GPUtoCPUFenceVal_;
+	Microsoft::WRL::ComPtr<ID3D12Fence> denoiseToCopyFence_;		// denoiseとCopyの同期をとるためのフェンス
+	UINT64 denoiseToCopyFenceVal_;
+	Microsoft::WRL::ComPtr<ID3D12Fence> finishCopyFence_;			// copy終了監視用フェンス
+	UINT64 finishCopyFenceVal_;
+	bool canUseMainGraphicsQueue_;			// MainGraphicsCmdListにコマンドを詰むことができる状態かのフラグ
+	bool canUseDenoiseQueue_;				// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ
+	bool canUseCopyQueue_;					// CopyCmdListにコマンドを詰むことができる状態かのフラグ
+	bool hasFinishedMainGraphicsProcess_;	// そのフレームのMainGraphicsCmdListの処理が終わったかどうかのフラグ
 
 
 public:

@@ -81,7 +81,7 @@ void TLAS::Update()
 	asDesc.ScratchAccelerationStructureData = tlasUpdateBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -180,6 +180,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD);
+	instanceDescBuffer->SetName(L"InstanceDescBuffer");
 
 	// 生成したバッファにデータを書き込む。
 	WriteToMemory(instanceDescBuffer, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
@@ -208,6 +209,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	scratchBuffer_->SetName(L"TLASScratchBuffer");
 
 	// TLAS用メモリ(バッファ)を確保。
 	tlasBuffer = CreateBuffer(
@@ -216,6 +218,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	tlasBuffer->SetName(L"TLASBuffer");
 
 	// TLAS更新用メモリ(バッファ)を確保。
 	tlasUpdateBuffer = CreateBuffer(
@@ -224,6 +227,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	tlasUpdateBuffer->SetName(L"TLASUpdateBuffer");
 
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 
@@ -232,7 +236,7 @@ void TLAS::SettingAccelerationStructure()
 	buildASDesc.DestAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積んで実行する。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr
 	);
 
@@ -250,32 +254,32 @@ void TLAS::CreateAccelerationStructure()
 
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer.Get());
-	Engine::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
-	Engine::Ins()->cmdList_->Close();
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->Close();
 
 	// TLASを構築。
 	//ID3D12CommandList* pCmdList[] = { Engine::Ins()->cmdList.Get() };
 
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { Engine::Ins()->cmdList_.Get() };
-	Engine::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
+	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
 
 
 	/*-- リソースバリアを設定して書き込めないようにする --*/
 
 	//グラフィックコマンドリストの完了待ち
-	Engine::Ins()->cmdQueue_->Signal(Engine::Ins()->fence_.Get(), ++Engine::Ins()->fenceVal_);
-	if (Engine::Ins()->fence_->GetCompletedValue() != Engine::Ins()->fenceVal_) {
+	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->GPUtoCPUFence_.Get(), ++Engine::Ins()->GPUtoCPUFenceVal_);
+	if (Engine::Ins()->GPUtoCPUFence_->GetCompletedValue() != Engine::Ins()->GPUtoCPUFenceVal_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		Engine::Ins()->fence_->SetEventOnCompletion(Engine::Ins()->fenceVal_, event);
+		Engine::Ins()->GPUtoCPUFence_->SetEventOnCompletion(Engine::Ins()->GPUtoCPUFenceVal_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	//コマンドアロケータのリセット
-	Engine::Ins()->cmdAllocator_->Reset();						//キューをクリア
+	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();						//キューをクリア
 
 	//コマンドリストのリセット
-	Engine::Ins()->cmdList_->Reset(Engine::Ins()->cmdAllocator_.Get(), nullptr);		//再びコマンドリストを貯める準備
+	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }

@@ -372,20 +372,8 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
-	static bool isNoise = false;
-	//if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
-
 	// レイトレーシングを実行。
-	if (isNoise) {
-
-		RayEngine::Ins()->NoiseDraw();
-
-	}
-	else {
-
-		RayEngine::Ins()->Draw();
-
-	}
+	RayEngine::Ins()->Draw();
 
 
 	// 床を白塗り
@@ -412,7 +400,7 @@ void GameScene::Draw()
 						tireMaskTextureOutput_->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
+			Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(2, barrierToUAV);
 		}
 
 	}

@@ -65,7 +65,7 @@ void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, 
 		cmdList = CmdList;
 	}
 	else {
-		cmdList = Engine::Ins()->cmdList_;
+		cmdList = Engine::Ins()->mainGraphicsCmdList_;
 	}
 
 	// ルートシグネチャをセット。

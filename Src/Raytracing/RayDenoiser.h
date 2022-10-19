@@ -40,12 +40,9 @@ private:
 public:
 
 	// コンピュートキュー
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList_;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
-	UINT64 fenceVal_;
-
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> computeCmdAllocator_;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> computeCmdList_;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> computeCmdQueue_;
 
 public:
 

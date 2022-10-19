@@ -38,7 +38,7 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 Text
 void RaytracingOutput::SetComputeRootDescriptorTalbe(int RootParamIndex)
 {
 
-	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex_));
+	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex_));
 
 }
 
@@ -53,7 +53,7 @@ void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOU
 			Src)
 	};
 
-	Engine::Ins()->cmdList_->ResourceBarrier(1, barrierToUAV);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, barrierToUAV);
 
 }
 

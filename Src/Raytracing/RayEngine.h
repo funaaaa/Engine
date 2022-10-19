@@ -46,6 +46,7 @@ public:
 
 	// 現在のUAVのインデックス。
 	int currentUAVIndex_;
+	int frameIndex_;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPipelineShaderData> pipelineShaders_;
