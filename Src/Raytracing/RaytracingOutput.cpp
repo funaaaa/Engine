@@ -42,7 +42,7 @@ void RaytracingOutput::SetComputeRootDescriptorTalbe(int RootParamIndex)
 
 }
 
-void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src)
+void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> CmdList)
 {
 
 	/*===== リソースバリアを遷移 =====*/
@@ -53,7 +53,16 @@ void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOU
 			Src)
 	};
 
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, barrierToUAV);
+	if (CmdList == nullptr) {
+
+		Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, barrierToUAV);
+
+	}
+	else {
+
+		CmdList->ResourceBarrier(1, barrierToUAV);
+
+	}
 
 }
 

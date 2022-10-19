@@ -38,7 +38,7 @@ void RayEngine::Setting()
 
 		// 最終出力用クラスをセット。
 		denoiseMixTextureOutput_[index] = std::make_shared<RaytracingOutput>();
-		denoiseMixTextureOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_COMMON);
+		denoiseMixTextureOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	}
 
@@ -198,9 +198,7 @@ void RayEngine::Draw()
 		Denoiser::Ins()->computeCmdList_->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
-		denoiseMixTextureOutput_[!currentUAVIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[!currentUAVIndex_]->GetUAVIndex(), denoiseAOOutput_[!currentUAVIndex_]->GetUAVIndex(), denoiseLightOutput_[!currentUAVIndex_]->GetUAVIndex(), denoiseGiOutput_[!currentUAVIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[!currentUAVIndex_]->GetUAVIndex());
-		denoiseMixTextureOutput_[!currentUAVIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COMMON);
 
 	}
 
@@ -219,11 +217,11 @@ void RayEngine::Draw()
 		};
 		Engine::Ins()->copyResourceCmdList->ResourceBarrier(_countof(barriers), barriers);
 
-		denoiseMixTextureOutput_[!currentUAVIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		denoiseMixTextureOutput_[!currentUAVIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, Engine::Ins()->copyResourceCmdList);
 
 		Engine::Ins()->copyResourceCmdList->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_[!currentUAVIndex_]->GetRaytracingOutput().Get());
 
-		denoiseMixTextureOutput_[!currentUAVIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
+		denoiseMixTextureOutput_[!currentUAVIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, Engine::Ins()->copyResourceCmdList);
 
 		// レンダーターゲットのリソースバリアをもとに戻す。
 		D3D12_RESOURCE_BARRIER endBarriers[] = {
