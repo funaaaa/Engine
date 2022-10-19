@@ -15,7 +15,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
 	descHeapDesc.NumDescriptors = 2;										// CBV2つ
 	// ディスクリプタヒープの生成
-	Engine::Ins()->dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&constDescHeap_));
+	Engine::Ins()->device_.dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&constDescHeap_));
 
 	// 頂点バッファの生成
 	Vertex vertexBuff;
@@ -35,7 +35,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	// 頂点バッファビューの生成
 	CD3DX12_HEAP_PROPERTIES vtxHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC vtxResDesc = CD3DX12_RESOURCE_DESC::Buffer(vertex_.size() * sizeof(Vertex));
-	HRESULT result = Engine::Ins()->dev_->CreateCommittedResource(
+	HRESULT result = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&vtxHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&vtxResDesc,
@@ -52,7 +52,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	/*-----定数バッファの生成-----*/
 	CD3DX12_HEAP_PROPERTIES constHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC constResDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff);
-	result = Engine::Ins()->dev_->CreateCommittedResource(
+	result = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&constHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&constResDesc,
@@ -82,11 +82,11 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 	// CBVディスクリプタヒープの先頭アドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 0, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 0, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 	cbvDesc.BufferLocation = constBuffB0_->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = (UINT)constBuffB0_->GetDesc().Width;
-	Engine::Ins()->dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+	Engine::Ins()->device_.dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 }
 
 void Sprite::GenerateForTexture(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, LPCWSTR FileName)

@@ -43,27 +43,6 @@ void Denoiser::Setting()
 	weightTableCBY_ = std::make_shared<DynamicConstBuffer>();
 	weightTableCBY_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBY");
 
-	// コンピュートキュー用の設定。
-	HRESULT result = Engine::Ins()->dev_->CreateCommandAllocator(
-		D3D12_COMMAND_LIST_TYPE_COMPUTE,
-		IID_PPV_ARGS(&computeCmdAllocator_));
-	computeCmdAllocator_->SetName(L"ComputeAllocator");
-
-	// コマンドリストの生成
-	result = Engine::Ins()->dev_->CreateCommandList(0,
-		D3D12_COMMAND_LIST_TYPE_COMPUTE,
-		computeCmdAllocator_.Get(), nullptr,
-		IID_PPV_ARGS(&computeCmdList_));
-	computeCmdList_->SetName(L"ComputeCmdList");
-
-	// コマンドキューの生成
-	D3D12_COMMAND_QUEUE_DESC cmdQueueDesc{};
-	cmdQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-	cmdQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	cmdQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
-	result = Engine::Ins()->dev_->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&computeCmdQueue_));
-	computeCmdQueue_->SetName(L"ComputeQueue");
-
 }
 
 void Denoiser::ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower)
@@ -75,14 +54,14 @@ void Denoiser::ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int Ou
 	CalcWeightsTableFromGaussian(static_cast<float>(BlurPower));
 
 	// 重みテーブルを書き込む。
-	weightTableCBX_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
-	weightTableCBY_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
+	weightTableCBX_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
+	weightTableCBY_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
 
 	// コンピュートシェーダーを実行。
 	blurX_->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
 	blurY_->ChangeInputUAVIndex({ blurXOutput_->GetUAVIndex(), DenoiseMaskIndex });
-	blurX_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), blurXOutput_->GetUAVIndex(), { weightTableCBX_->GetBuffer(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, computeCmdList_);
-	blurY_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 1.0f) / 32) + 1, static_cast<UINT>((WINDOW_HEIGHT / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY_->GetBuffer(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, computeCmdList_);
+	blurX_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), blurXOutput_->GetUAVIndex(), { weightTableCBX_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->computeCmdList_);
+	blurY_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 1.0f) / 32) + 1, static_cast<UINT>((WINDOW_HEIGHT / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->computeCmdList_);
 }
 
 void Denoiser::MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex, int InputLightLuminanceIndex, int InputGIIndex, int OutputUAVIndex)
@@ -92,7 +71,7 @@ void Denoiser::MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex
 
 	// コンピュートシェーダーを実行。
 	mixColorAndLuminance_->ChangeInputUAVIndex({ InputColorIndex,InputLuminanceIndex, InputLightLuminanceIndex, InputGIIndex });
-	mixColorAndLuminance_->Dispatch(WINDOW_WIDTH / 32, WINDOW_HEIGHT / 32, 1, OutputUAVIndex, {}, computeCmdList_);
+	mixColorAndLuminance_->Dispatch(WINDOW_WIDTH / 32, WINDOW_HEIGHT / 32, 1, OutputUAVIndex, {}, Engine::Ins()->computeCmdList_);
 
 }
 
@@ -179,7 +158,7 @@ void Denoiser::BeforeDraw()
 	/*===== 描画前処理 =====*/
 
 	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-	computeCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	Engine::Ins()->computeCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 }
 
@@ -189,7 +168,7 @@ void Denoiser::CloseCommandList()
 	/*===== コマンドリストを閉める =====*/
 
 	// グラフィックコマンドリストのクローズ
-	computeCmdList_->Close();
+	Engine::Ins()->computeCmdList_->Close();
 
 }
 

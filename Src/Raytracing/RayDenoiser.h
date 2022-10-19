@@ -39,13 +39,6 @@ private:
 
 public:
 
-	// コンピュートキュー
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> computeCmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> computeCmdList_;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> computeCmdQueue_;
-
-public:
-
 	/*===== メンバ関数 =====*/
 
 	// セッティング処理。

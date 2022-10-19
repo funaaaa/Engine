@@ -152,7 +152,7 @@ void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& Input
 	pipelineConfig->Config(ReflectionCount);
 
 	// ¶¬‚·‚éB
-	Engine::Ins()->dev_->CreateStateObject(
+	Engine::Ins()->device_.dev_->CreateStateObject(
 		subobjects, IID_PPV_ARGS(stateObject_.ReleaseAndGetAddressOf())
 	);
 
@@ -379,7 +379,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipeline::CreateBuffer(size_t s
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resDesc.Flags = flags;
 
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

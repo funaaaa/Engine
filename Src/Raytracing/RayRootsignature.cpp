@@ -83,7 +83,7 @@ void RayRootsignature::Create(bool IsLocal, const wchar_t* Name)
 		std::string a = static_cast<char*>(errBlob->GetBufferPointer());
 		_RPTF0(_CRT_WARN, a.c_str());
 	}
-	Engine::Ins()->dev_->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
+	Engine::Ins()->device_.dev_->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
 		IID_PPV_ARGS(&rootsignature_));
 
 	// –¼‘O‚ğİ’è

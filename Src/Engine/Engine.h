@@ -18,27 +18,51 @@ class Engine : public Singleton<Engine> {
 
 public:
 
-	std::shared_ptr<WindowsAPI> windowsAPI_;						//WindowsAPIクラス
-	Microsoft::WRL::ComPtr<ID3D12Debug> debugController_;
-	Microsoft::WRL::ComPtr<ID3D12Debug1> shaderDebugController_;
-	Microsoft::WRL::ComPtr<ID3D12Device5> dev_;
-	Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory_;
-	std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters_;//  アダプターの列挙用
-	Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter_;			// 特定の名前を持つアダプターオブジェクトを入れる
-	std::vector<D3D_FEATURE_LEVEL> levels_;						// 対応レベルの配列
-	D3D_FEATURE_LEVEL featureLevel_;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps_;
-	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
-	D3D12_DESCRIPTOR_HEAP_DESC heapDesc_;
-	Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;			// 深度バッファ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;		// 深度バッファ用ディスクリプタヒープ
-	IDirectInput8* dinput_;										// DirectInputオブジェクト
-	IDirectInputDevice8* devkeybord_;							// キーボードオブジェクト
-	IDirectInputDevice8* devmouse_;								// マウスオブジェクト
+	// デバッグに使用する各クラス
+	struct Debug {
+		Microsoft::WRL::ComPtr<ID3D12Debug> debugController_;
+		Microsoft::WRL::ComPtr<ID3D12Debug1> shaderDebugController_;
+	};
 
+	// DirectXのデバイス関連
+	struct Device {
+		Microsoft::WRL::ComPtr<ID3D12Device5> dev_;
+		Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory_;
+		std::vector<Microsoft::WRL::ComPtr<IDXGIAdapter1>> adapters_;
+		Microsoft::WRL::ComPtr<IDXGIAdapter1> tmpAdapter_;
+		std::vector<D3D_FEATURE_LEVEL> levels_;
+		D3D_FEATURE_LEVEL featureLevel_;
+	};
+
+	// SwapChain関連
+	struct SwapChain {
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps_;
+		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
+		D3D12_DESCRIPTOR_HEAP_DESC heapDesc_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
+		Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain_;
+	};
+
+	// Input関連
+	struct DevInput {
+		IDirectInput8* dinput_;				// DirectInputオブジェクト
+		IDirectInputDevice8* devkeybord_;	// キーボードオブジェクト
+		IDirectInputDevice8* devmouse_;		// マウスオブジェクト
+	};
+
+
+public:
+
+	/*===== メンバ変数 =====*/
+
+	std::shared_ptr<WindowsAPI> windowsAPI_;	// WindowsAPIクラス
+	Debug debug_;								// デバッグ用のクラス
+	Device device_;								// デバイス関連
+	SwapChain swapchain_;						// SwapChain関連
+	DevInput input_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heapForImgui_;	//imgui用ディスクリプタヒープ
 
-	Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain_;
 
 	// GPUの非同期処理に必要な変数。
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mainGraphicsCmdAllocator_;
@@ -54,6 +78,12 @@ public:
 	UINT64 denoiseToCopyFenceVal_;
 	Microsoft::WRL::ComPtr<ID3D12Fence> finishCopyFence_;			// copy終了監視用フェンス
 	UINT64 finishCopyFenceVal_;
+
+	// コンピュートキュー
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> computeCmdAllocator_;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> computeCmdList_;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> computeCmdQueue_;
+
 	bool canUseMainGraphicsQueue_;			// MainGraphicsCmdListにコマンドを詰むことができる状態かのフラグ
 	bool canUseDenoiseQueue_;				// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ
 	bool canUseCopyQueue_;					// CopyCmdListにコマンドを詰むことができる状態かのフラグ

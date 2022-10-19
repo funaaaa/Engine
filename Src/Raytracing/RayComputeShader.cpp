@@ -46,7 +46,7 @@ void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int U
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.NodeMask = 0;
 
-	auto hr = Engine::Ins()->dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipeline_));
+	auto hr = Engine::Ins()->device_.dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipeline_));
 	if (FAILED(hr)) {
 		//ê∂ê¨Ç…é∏îsÇµÇΩ
 		assert(0);

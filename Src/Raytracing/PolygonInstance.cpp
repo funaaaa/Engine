@@ -390,7 +390,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> PolygonMeshInstance::CreateBuffer(size_t 
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

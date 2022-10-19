@@ -844,7 +844,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -908,7 +908,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 
 	// 関数を使って必要なメモリ量を求める.
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
-	Engine::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
+	Engine::Ins()->device_.dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &blasPrebuild
 	);
 

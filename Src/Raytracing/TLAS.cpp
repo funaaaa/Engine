@@ -26,8 +26,8 @@ void TLAS::GenerateTLAS()
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.RaytracingAccelerationStructure.Location = tlasBuffer->GetGPUVirtualAddress();
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-	Engine::Ins()->dev_->CreateShaderResourceView(nullptr, &srvDesc,
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	Engine::Ins()->device_.dev_->CreateShaderResourceView(nullptr, &srvDesc,
 		basicHeapHandle);
 
 	// ディスクリプタヒープをインクリメント
@@ -147,7 +147,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -196,7 +196,7 @@ void TLAS::SettingAccelerationStructure()
 
 	// メモリ量を求める関数を実行する。
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO tlasPrebuild{};
-	Engine::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
+	Engine::Ins()->device_.dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &tlasPrebuild
 	);
 
