@@ -65,52 +65,58 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heapForImgui_;	//imgui用ディスクリプタヒープ
 
 
-	// GPUの非同期処理に必要な変数。
+	/*-- GPUの非同期処理にあたって新たに作った変数たち --*/
+
+	// コマンドアロケーター
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mainGraphicsCmdAllocator_;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> copyResourceCmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainGraphicsCmdList_;	// メインで使用するグラフィックスコマンドリスト
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> copyResourceCmdList;		// CopyResourceで使用するグラフィックスコマンドリスト
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> graphicsCmdQueue_;				// グラフィックスキュー
-	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> graphicsToDenoiseFence_;	// mainGraphicsとdenoiseの同期をとるためのフェンス
-	std::array<UINT64, 2> graphicsToDenoiseFenceVal_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> GPUtoCPUFence_;				// mainGraphicsとCPUの同期をとるためのフェンス
-	UINT64 GPUtoCPUFenceVal_;
-	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> denoiseToCopyFence_;		// denoiseとCopyの同期をとるためのフェンス
-	std::array<UINT64, 2> denoiseToCopyFenceVal_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> finishCopyFence_;			// copy終了監視用フェンス
-	UINT64 finishCopyFenceVal_;
+	std::array < Microsoft::WRL::ComPtr<ID3D12CommandAllocator>, 2> denoiseCmdAllocator_;
 
-	// コンピュートキュー
-	std::array < Microsoft::WRL::ComPtr<ID3D12CommandAllocator>, 2> computeCmdAllocator_;
-	std::array < Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4>, 2> computeCmdList_;
-	std::array<Microsoft::WRL::ComPtr<ID3D12CommandQueue>, 2> computeCmdQueue_;
+	// コマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainGraphicsCmdList_;			// メインで使用するグラフィックスコマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> copyResourceCmdList_;			// CopyResourceで使用するグラフィックスコマンドリスト
+	std::array < Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4>, 2> denoiseCmdList_;// デノイズで使用するコマンドリスト SwapChainのように裏と表を切り替えて使用する。
+
+	// キュー
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> graphicsCmdQueue_;				// グラフィックスキュー レイトレ関数やUIの描画等を行う。
+	std::array<Microsoft::WRL::ComPtr<ID3D12CommandQueue>, 2> computeCmdQueue_;	// コンピュートキュー 主にデノイズを行う。
+
+	// フェンス
+	Microsoft::WRL::ComPtr<ID3D12Fence> GPUtoCPUFence_;							// mainGraphicsとCPUの同期をとるためのフェンス
+	UINT64 GPUtoCPUFenceVal_;
+	Microsoft::WRL::ComPtr<ID3D12Fence> graphicsToCopyFence_;					// copyの処理をgraphicsの処理が終わった後に実行するためのフェンス。
+	UINT64 graphicsToCopyFenceVal_;
+	Microsoft::WRL::ComPtr<ID3D12Fence> finishCopyFence_;						// copy終了監視用フェンス
+	UINT64 finishCopyFenceVal_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> graphicsToDenoiseFence_;	// mainGraphicsとdenoiseの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
+	std::array<UINT64, 2> graphicsToDenoiseFenceVal_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> denoiseToCopyFence_;		// denoiseとCopyの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
+	std::array<UINT64, 2> denoiseToCopyFenceVal_;
 
 	// 現在Queueのインデックス。
 	int currentQueueIndex_;
 	int frameIndex_;
 
-	bool canUseMainGraphicsQueue_;			// MainGraphicsCmdListにコマンドを詰むことができる状態かのフラグ
-	std::array<bool, 2> canUseDenoiseQueue_;				// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ
-	bool canUseCopyQueue_;					// CopyCmdListにコマンドを詰むことができる状態かのフラグ
-	bool hasFinishedMainGraphicsProcess_;	// そのフレームのMainGraphicsCmdListの処理が終わったかどうかのフラグ
+	// 各コマンドリストに処理を詰むことができるかを判断するフラグ
+	std::array<bool, 2> canUseDenoiseCmdList_;	// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ SwapChainのように裏と表を切り替えて使用する。
+	bool canUseCopyCmdList_;					// CopyCmdListにコマンドを詰むことができる状態かのフラグ
 
 
 public:
-	//コンストラクタ
-	friend Singleton<Engine>;
+	// コンストラクタ
 	Engine();
-	//初期化処理
+	// 初期化処理
 	void Init();
-	//毎フレーム処理(描画前処理)
+	// 毎フレーム処理(描画前処理)
 	void ProcessBeforeDrawing();
-	//毎フレーム処理(描画後処理)
+	// 毎フレーム処理(描画後処理)
 	void ProcessAfterDrawing();
 
-	//レンダーターゲットをセット
+	// レンダーターゲットをセット
 	void SetRenderTarget();
-	//描画後のリソースバリア
+	// 描画後のリソースバリア
 	void ResourceBarrierAfter();
 
-	//imgui用ヒープ生成
+	// imgui用ヒープ生成
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeaoForImgui();
 };

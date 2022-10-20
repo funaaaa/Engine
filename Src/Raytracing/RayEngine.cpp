@@ -105,9 +105,9 @@ void RayEngine::Draw()
 	Engine::Ins()->mainGraphicsCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 	// コンピュートキューにも詰む。
-	if (Engine::Ins()->canUseDenoiseQueue_[Engine::Ins()->currentQueueIndex_]) {
-		Engine::Ins()->computeCmdList_[Engine::Ins()->currentQueueIndex_]->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		Engine::Ins()->computeCmdList_[Engine::Ins()->currentQueueIndex_]->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
+	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
+		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 	}
 
 	// TLASを設定。
@@ -132,7 +132,7 @@ void RayEngine::Draw()
 
 
 	// DenoiseQueueが実行可能状態だったら。
-	if (Engine::Ins()->canUseDenoiseQueue_[Engine::Ins()->currentQueueIndex_]) {
+	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
 
 
 		// ライト情報にデノイズをかける。
@@ -144,7 +144,7 @@ void RayEngine::Draw()
 				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->computeCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
 
 			// ライトにデノイズをかける。
 			Denoiser::Ins()->Denoise(lightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 0, 1);
@@ -159,7 +159,7 @@ void RayEngine::Draw()
 				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->computeCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
 			Denoiser::Ins()->Denoise(aoOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 1000, 8);
@@ -174,7 +174,7 @@ void RayEngine::Draw()
 				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->computeCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
 
 			// GIにデノイズをかける。
 			Denoiser::Ins()->Denoise(giOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 100, 1);
@@ -189,7 +189,7 @@ void RayEngine::Draw()
 			denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 		};
 
-		Engine::Ins()->computeCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(5, barrierToUAV);
+		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
@@ -198,7 +198,7 @@ void RayEngine::Draw()
 
 
 	// 最初のFはコピーリソースを行わない。 && CopyCmdListが実行可能状態だったら。
-	if (Engine::Ins()->frameIndex_ != 0 && Engine::Ins()->canUseCopyQueue_) {
+	if (Engine::Ins()->frameIndex_ != 0 && Engine::Ins()->canUseCopyCmdList_) {
 
 		// バックバッファのインデックスを取得する。
 		UINT backBufferIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
@@ -209,13 +209,13 @@ void RayEngine::Draw()
 			D3D12_RESOURCE_STATE_COMMON,
 			D3D12_RESOURCE_STATE_COPY_DEST),
 		};
-		Engine::Ins()->copyResourceCmdList->ResourceBarrier(_countof(barriers), barriers);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(barriers), barriers);
 
-		denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, Engine::Ins()->copyResourceCmdList);
+		denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, Engine::Ins()->copyResourceCmdList_);
 
-		Engine::Ins()->copyResourceCmdList->CopyResource(Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get());
+		Engine::Ins()->copyResourceCmdList_->CopyResource(Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get());
 
-		denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, Engine::Ins()->copyResourceCmdList);
+		denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, Engine::Ins()->copyResourceCmdList_);
 
 		// レンダーターゲットのリソースバリアをもとに戻す。
 		D3D12_RESOURCE_BARRIER endBarriers[] = {
@@ -227,10 +227,9 @@ void RayEngine::Draw()
 
 		};
 
-		Engine::Ins()->copyResourceCmdList->ResourceBarrier(_countof(endBarriers), endBarriers);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
 
 	}
-	++Engine::Ins()->frameIndex_;
 
 	// RayDenoiserの描画後処理。
 	//Denoiser::Ins()->AfterDraw();

@@ -34,9 +34,6 @@ void SceneMgr::Update()
 
 	/*===== 更新処理 =====*/
 
-	// シーンの更新を行う。
-	scenes_[nowScene_]->Update();
-
 	// 現在更新中のシーンで遷移フラグが立ったら。
 	if (scenes_[nowScene_]->GetIsTransition()) {
 
@@ -50,6 +47,9 @@ void SceneMgr::Update()
 		nextScene_ = scenes_[nowScene_]->GetNextScene();
 
 	}
+
+	// シーンの更新を行う。
+	scenes_[nowScene_]->Update();
 
 }
 
