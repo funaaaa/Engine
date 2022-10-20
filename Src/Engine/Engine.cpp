@@ -22,10 +22,10 @@ void Engine::Init() {
 	{
 		debug_.debugController_->EnableDebugLayer();
 	}
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.shaderDebugController_))))
-	{
-		debug_.shaderDebugController_->SetEnableGPUBasedValidation(true);
-	}
+	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.shaderDebugController_))))
+	//{
+	//	debug_.shaderDebugController_->SetEnableGPUBasedValidation(true);
+	//}
 #endif
 
 	// ウィンドウ初期化
@@ -411,8 +411,8 @@ void Engine::ProcessAfterDrawing() {
 		// デノイズコマンドリストの終了をCopyのフェンスに通知。
 		computeCmdQueue_->Signal(denoiseToCopyFence_.Get(), denoiseToCopyFenceVal_);
 
-		UINT64 computeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
-		if (computeFenceValue == graphicsToDenoiseFenceVal_ + 1) {
+		UINT64 computeFenceValue = denoiseToCopyFence_->GetCompletedValue();
+		if (computeFenceValue == denoiseToCopyFenceVal_) {
 
 			// コマンドアロケータのリセット
 			computeCmdAllocator_->Reset();							// キューをクリア
@@ -422,52 +422,6 @@ void Engine::ProcessAfterDrawing() {
 
 			// このコマンドリストを操作可能にする。
 			canUseDenoiseQueue_ = true;
-
-		}
-
-	}
-
-	// CopyCmdListの処理
-	{
-
-		// CopyCmdListが使用可能状態だったら。
-		bool isEndDispatchRayAndDenoise = canUseCopyQueue_ && canUseMainGraphicsQueue_;
-		if (canUseCopyQueue_ && isEndDispatchRayAndDenoise) {
-
-			// レンダーターゲットのリソースバリア変更			COMMONとPRESENTはどちらも0だから同じ意味？
-			//CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(swapchain_.backBuffers_[swapchain_->GetCurrentBackBufferIndex()].Get(),
-			//	D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PRESENT);
-			//copyResourceCmdList->ResourceBarrier(1, &resourceBarrier);
-
-			// コピーキューのデノイズコマンドを実行。
-			copyResourceCmdList->Close();
-
-			ID3D12CommandList* computeCmdLists[] = { copyResourceCmdList.Get() }; // コマンドリストの配列
-			//graphicsCmdQueue_->Wait(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);	// MainGraphicsの処理が終わってから実行する。
-			graphicsCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
-
-			// 画面バッファをフリップ
-			swapchain_.swapchain_->Present(1, 0);
-
-			// このコマンドリストを操作不可能にする。
-			canUseCopyQueue_ = false;
-
-		}
-
-		// コピーコマンドリストの終了をコピー終了監視用のフェンスに通知。
-		computeCmdQueue_->Signal(finishCopyFence_.Get(), finishCopyFenceVal_);
-
-		UINT64 copyFenceValue = finishCopyFence_->GetCompletedValue();
-		if (copyFenceValue == finishCopyFenceVal_ + 1) {
-
-			// コマンドアロケータのリセット
-			copyResourceCmdAllocator_->Reset();							// キューをクリア
-
-			// コマンドリストのリセット
-			mainGraphicsCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
-
-			// このコマンドリストを操作可能にする。
-			canUseCopyQueue_ = true;
 
 		}
 
@@ -491,6 +445,7 @@ void Engine::ProcessAfterDrawing() {
 		graphicsCmdQueue_->Signal(GPUtoCPUFence_.Get(), GPUtoCPUFenceVal_);
 		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);
 		UINT64 graphicsFenceValue = GPUtoCPUFence_->GetCompletedValue();
+		UINT64 denoizeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
 
 		// グラフィックコマンドリストの完了待ち
 		if (graphicsFenceValue != GPUtoCPUFenceVal_) {
@@ -501,11 +456,67 @@ void Engine::ProcessAfterDrawing() {
 
 		}
 
+		// GPUの実行完了を通知。
+		graphicsCmdQueue_->Signal(GPUtoCPUFence_.Get(), GPUtoCPUFenceVal_);
+		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);
+		graphicsFenceValue = GPUtoCPUFence_->GetCompletedValue();
+		denoizeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
+
 		// コマンドアロケータのリセット
 		mainGraphicsCmdAllocator_->Reset();							// キューをクリア
 
 		// コマンドリストのリセット
 		mainGraphicsCmdList_->Reset(mainGraphicsCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+	}
+
+	// CopyCmdListの処理
+	{
+
+		// CopyCmdListが使用可能状態だったら。
+		bool isEndDispatchRayAndDenoise = canUseDenoiseQueue_ && canUseMainGraphicsQueue_;
+		if (canUseCopyQueue_ && isEndDispatchRayAndDenoise) {
+
+			// レンダーターゲットのリソースバリア変更			COMMONとPRESENTはどちらも0だから同じ意味？
+			//CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(swapchain_.backBuffers_[swapchain_->GetCurrentBackBufferIndex()].Get(),
+			//	D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PRESENT);
+			//copyResourceCmdList->ResourceBarrier(1, &resourceBarrier);
+
+			// コピーキューのデノイズコマンドを実行。
+			copyResourceCmdList->Close();
+
+			ID3D12CommandList* computeCmdLists[] = { copyResourceCmdList.Get() }; // コマンドリストの配列
+			graphicsCmdQueue_->Wait(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);	// MainGraphicsの処理が終わってから実行する。
+			graphicsCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
+
+			// 画面バッファをフリップ
+			swapchain_.swapchain_->Present(1, 0);
+
+			// このコマンドリストを操作不可能にする。
+			canUseCopyQueue_ = false;
+
+		}
+
+		if (!canUseCopyQueue_) {
+
+			// コピーコマンドリストの終了をコピー終了監視用のフェンスに通知。
+			graphicsCmdQueue_->Signal(finishCopyFence_.Get(), finishCopyFenceVal_);
+
+			UINT64 copyFenceValue = finishCopyFence_->GetCompletedValue();
+			if (copyFenceValue == finishCopyFenceVal_) {
+
+				// コマンドアロケータのリセット
+				copyResourceCmdAllocator_->Reset();							// キューをクリア
+
+				// コマンドリストのリセット
+				copyResourceCmdList->Reset(copyResourceCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+				// このコマンドリストを操作可能にする。
+				canUseCopyQueue_ = true;
+
+			}
+
+		}
 
 	}
 
