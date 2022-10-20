@@ -413,29 +413,29 @@ void GameScene::Draw()
 		//maxRapCountSprite_->Draw();
 		//rapSlashSprite_->Draw();
 
-		concentrationLine_->Draw();
+		//////////concentrationLine_->Draw();
 
-		// 左上のアイテムのUI。
-		itemFrameUI_->Draw();
+		//////////// 左上のアイテムのUI。
+		//////////itemFrameUI_->Draw();
 
-		// コインの取得数のUI。
-		coinCountUI_[0]->Draw();
-		coinCountUI_[1]->Draw();
+		//////////// コインの取得数のUI。
+		//////////coinCountUI_[0]->Draw();
+		//////////coinCountUI_[1]->Draw();
 
-		// 現在のラップ数のUI。
-		nowRapCountUI_->Draw();
-		slashUI_->Draw();
-		maxRapCountUI_->Draw();
+		//////////// 現在のラップ数のUI。
+		//////////nowRapCountUI_->Draw();
+		//////////slashUI_->Draw();
+		//////////maxRapCountUI_->Draw();
 
-		// 左下のUIのフレーム。
-		coinUI_->Draw();
-		rapUI_->Draw();
+		//////////// 左下のUIのフレーム。
+		//////////coinUI_->Draw();
+		//////////rapUI_->Draw();
 
-		// カウントダウン用のUI。
-		countDownSprite_->Draw();
+		//////////// カウントダウン用のUI。
+		//////////countDownSprite_->Draw();
 
-		// カウントダウン終了時のGOのUI。
-		goSprite_->Draw();
+		//////////// カウントダウン終了時のGOのUI。
+		//////////goSprite_->Draw();
 
 	}
 	if (firstTime == 0) ++firstTime;

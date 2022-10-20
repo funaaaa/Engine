@@ -5,6 +5,7 @@
 #include <dinput.h>
 #include <xstring>
 #include <vector>
+#include <array>
 #include <wrl.h>
 #include "Singleton.h"
 #include <dxgi.h>
@@ -70,22 +71,26 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainGraphicsCmdList_;	// メインで使用するグラフィックスコマンドリスト
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> copyResourceCmdList;		// CopyResourceで使用するグラフィックスコマンドリスト
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> graphicsCmdQueue_;				// グラフィックスキュー
-	Microsoft::WRL::ComPtr<ID3D12Fence> graphicsToDenoiseFence_;	// mainGraphicsとdenoiseの同期をとるためのフェンス
-	UINT64 graphicsToDenoiseFenceVal_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> graphicsToDenoiseFence_;	// mainGraphicsとdenoiseの同期をとるためのフェンス
+	std::array<UINT64, 2> graphicsToDenoiseFenceVal_;
 	Microsoft::WRL::ComPtr<ID3D12Fence> GPUtoCPUFence_;				// mainGraphicsとCPUの同期をとるためのフェンス
 	UINT64 GPUtoCPUFenceVal_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> denoiseToCopyFence_;		// denoiseとCopyの同期をとるためのフェンス
-	UINT64 denoiseToCopyFenceVal_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> denoiseToCopyFence_;		// denoiseとCopyの同期をとるためのフェンス
+	std::array<UINT64, 2> denoiseToCopyFenceVal_;
 	Microsoft::WRL::ComPtr<ID3D12Fence> finishCopyFence_;			// copy終了監視用フェンス
 	UINT64 finishCopyFenceVal_;
 
 	// コンピュートキュー
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> computeCmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> computeCmdList_;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> computeCmdQueue_;
+	std::array < Microsoft::WRL::ComPtr<ID3D12CommandAllocator>, 2> computeCmdAllocator_;
+	std::array < Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4>, 2> computeCmdList_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12CommandQueue>, 2> computeCmdQueue_;
+
+	// 現在Queueのインデックス。
+	int currentQueueIndex_;
+	int frameIndex_;
 
 	bool canUseMainGraphicsQueue_;			// MainGraphicsCmdListにコマンドを詰むことができる状態かのフラグ
-	bool canUseDenoiseQueue_;				// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ
+	std::array<bool, 2> canUseDenoiseQueue_;				// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ
 	bool canUseCopyQueue_;					// CopyCmdListにコマンドを詰むことができる状態かのフラグ
 	bool hasFinishedMainGraphicsProcess_;	// そのフレームのMainGraphicsCmdListの処理が終わったかどうかのフラグ
 

@@ -44,10 +44,6 @@ public:
 	// デノイズの結果出力用クラスをセット。
 	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseMixTextureOutput_;
 
-	// 現在のUAVのインデックス。
-	int currentUAVIndex_;
-	int frameIndex_;
-
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPipelineShaderData> pipelineShaders_;
 	std::shared_ptr<RaytracingPipeline> pipeline_;
