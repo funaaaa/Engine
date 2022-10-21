@@ -70,12 +70,12 @@ public:
 	// コマンドアロケーター
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mainGraphicsCmdAllocator_;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> copyResourceCmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> denoiseCmdAllocator_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>, 2> denoiseCmdAllocator_;
 
 	// コマンドリスト
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainGraphicsCmdList_;	// メインで使用するグラフィックスコマンドリスト
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> copyResourceCmdList_;	// CopyResourceで使用するグラフィックスコマンドリスト
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> denoiseCmdList_;			// デノイズで使用するコマンドリスト SwapChainのように裏と表を切り替えて使用する。
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainGraphicsCmdList_;			// メインで使用するグラフィックスコマンドリスト
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> copyResourceCmdList_;			// CopyResourceで使用するグラフィックスコマンドリスト
+	std::array<Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4>, 2> denoiseCmdList_;	// デノイズで使用するコマンドリスト SwapChainのように裏と表を切り替えて使用する。
 
 	// キュー
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> graphicsCmdQueue_;				// グラフィックスキュー レイトレ関数やUIの描画等を行う。
@@ -98,7 +98,7 @@ public:
 	int frameIndex_;
 
 	// 各コマンドリストに処理を詰むことができるかを判断するフラグ
-	bool canUseDenoiseCmdList_;					// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ SwapChainのように裏と表を切り替えて使用する。
+	std::array<bool, 2> canUseDenoiseCmdList_;					// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ SwapChainのように裏と表を切り替えて使用する。
 	bool canUseCopyCmdList_;					// CopyCmdListにコマンドを詰むことができる状態かのフラグ
 
 

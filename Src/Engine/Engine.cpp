@@ -107,8 +107,15 @@ void Engine::Init() {
 		// デノイズに使用するコマンドリスト表用のAllocatorを生成。
 		result = Engine::Ins()->device_.dev_->CreateCommandAllocator(
 			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			IID_PPV_ARGS(&denoiseCmdAllocator_));
-		denoiseCmdAllocator_->SetName(L"DenoiseAllocator");
+			IID_PPV_ARGS(&denoiseCmdAllocator_[0]));
+		denoiseCmdAllocator_[0]->SetName(L"DenoiseAllocator0");
+
+		// デノイズに使用するコマンドリスト裏用のAllocatorを生成。
+		result = Engine::Ins()->device_.dev_->CreateCommandAllocator(
+			D3D12_COMMAND_LIST_TYPE_COMPUTE,
+			IID_PPV_ARGS(&denoiseCmdAllocator_[1]));
+		denoiseCmdAllocator_[1]->SetName(L"DenoiseAllocator1");
+
 	}
 
 	// コマンドリストの生成
@@ -131,9 +138,16 @@ void Engine::Init() {
 		// デノイズに使用するコマンドリスト表
 		result = Engine::Ins()->device_.dev_->CreateCommandList(0,
 			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			denoiseCmdAllocator_.Get(), nullptr,
-			IID_PPV_ARGS(&denoiseCmdList_));
-		denoiseCmdList_->SetName(L"DenoiseComputeCmdList");
+			denoiseCmdAllocator_[0].Get(), nullptr,
+			IID_PPV_ARGS(&denoiseCmdList_[0]));
+		denoiseCmdList_[0]->SetName(L"DenoiseComputeCmdList0");
+
+		// デノイズに使用するコマンドリスト裏
+		result = Engine::Ins()->device_.dev_->CreateCommandList(0,
+			D3D12_COMMAND_LIST_TYPE_COMPUTE,
+			denoiseCmdAllocator_[1].Get(), nullptr,
+			IID_PPV_ARGS(&denoiseCmdList_[1]));
+		denoiseCmdList_[1]->SetName(L"DenoiseComputeCmdList1");
 
 	}
 
@@ -197,7 +211,8 @@ void Engine::Init() {
 
 		// 各コマンドリストが使用可能状態にする。
 		canUseCopyCmdList_ = true;
-		canUseDenoiseCmdList_ = true;
+		canUseDenoiseCmdList_[0] = true;
+		canUseDenoiseCmdList_[1] = true;
 
 		// 現在のキューのインデックスと経過フレームを0で初期化。
 		currentQueueIndex_ = 1;	// 最初のFの先頭でフラグが切り替わるため、1で初期化しておくことで最初のFのインデックスが0になる。
@@ -488,36 +503,40 @@ void Engine::ProcessAfterDrawing() {
 	{
 
 		// DenoiseCmdListが使用可能状態だったら。
-		if (canUseDenoiseCmdList_) {
+		if (canUseDenoiseCmdList_[currentQueueIndex_]) {
 
 			// コンピュートキューのデノイズコマンドを実行。
-			denoiseCmdList_->Close();
-			ID3D12CommandList* computeCmdLists[] = { denoiseCmdList_.Get() }; // コマンドリストの配列
+			denoiseCmdList_[currentQueueIndex_]->Close();
+			ID3D12CommandList* computeCmdLists[] = { denoiseCmdList_[currentQueueIndex_].Get() }; // コマンドリストの配列
 			//computeCmdQueue_->Wait(graphicsToDenoiseFence_[currentQueueIndex_].Get(), graphicsToDenoiseFenceVal_[currentQueueIndex_]);	// MainGraphicsの処理が終わってから実行する。
 			computeCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
 
 			// このコマンドリストを操作不可能にする。
-			canUseDenoiseCmdList_ = false;
+			canUseDenoiseCmdList_[currentQueueIndex_] = false;
 
 		}
 
-		// このフラグがtrueの時はすでにResetしてあるということなので、二重リセットを回避するために処理を飛ばす。
-		if (!canUseDenoiseCmdList_) {
+		for (int index = 0; index < 2; ++index) {
 
-			// デノイズコマンドリストの終了をCopyのフェンスに通知。
-			computeCmdQueue_->Signal(denoiseToCopyFence_.Get(), denoiseToCopyFenceVal_);
+			// このフラグがtrueの時はすでにResetしてあるということなので、二重リセットを回避するために処理を飛ばす。
+			if (!canUseDenoiseCmdList_[index]) {
 
-			UINT64 computeFenceValue = denoiseToCopyFence_->GetCompletedValue();
-			if (computeFenceValue == denoiseToCopyFenceVal_) {
+				// デノイズコマンドリストの終了をCopyのフェンスに通知。
+				computeCmdQueue_->Signal(denoiseToCopyFence_.Get(), denoiseToCopyFenceVal_);
 
-				// コマンドアロケータのリセット
-				denoiseCmdAllocator_->Reset();							// キューをクリア
+				UINT64 computeFenceValue = denoiseToCopyFence_->GetCompletedValue();
+				if (computeFenceValue == denoiseToCopyFenceVal_) {
 
-				// コマンドリストのリセット
-				denoiseCmdList_->Reset(denoiseCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+					// コマンドアロケータのリセット
+					denoiseCmdAllocator_[index]->Reset();							// キューをクリア
 
-				// このコマンドリストを操作可能にする。
-				canUseDenoiseCmdList_ = true;
+					// コマンドリストのリセット
+					denoiseCmdList_[index]->Reset(denoiseCmdAllocator_[index].Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+					// このコマンドリストを操作可能にする。
+					canUseDenoiseCmdList_[index] = true;
+
+				}
 
 			}
 
@@ -529,7 +548,7 @@ void Engine::ProcessAfterDrawing() {
 	if (frameIndex_ != 0) {
 
 		// CopyCmdListが使用可能状態だったら。 1F前のデノイズが終わっていたら。
-		if (canUseCopyCmdList_ && canUseDenoiseCmdList_) {
+		if (canUseCopyCmdList_ && canUseDenoiseCmdList_[!currentQueueIndex_]) {
 
 			// コピーキューのデノイズコマンドを実行。
 			copyResourceCmdList_->Close();

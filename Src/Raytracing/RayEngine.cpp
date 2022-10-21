@@ -8,39 +8,53 @@ void RayEngine::Setting()
 
 	/*===== 生成処理 =====*/
 
-	for (int index = 0; index < 2; ++index) {
+	// AO出力用クラスをセット。
+	aoOutput_[0] = std::make_shared<RaytracingOutput>();
+	aoOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseAOOutput_[0] = std::make_shared<RaytracingOutput>();
+	denoiseAOOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseAOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	aoOutput_[1] = std::make_shared<RaytracingOutput>();
+	aoOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseAOOutput_[1] = std::make_shared<RaytracingOutput>();
+	denoiseAOOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseAOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		// AO出力用クラスをセット。
-		aoOutput_[index] = std::make_shared<RaytracingOutput>();
-		aoOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		denoiseAOOutput_[index] = std::make_shared<RaytracingOutput>();
-		denoiseAOOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseAOOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	// 色出力用クラスをセット。
+	colorOutput_[0] = std::make_shared<RaytracingOutput>();
+	colorOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput_[1] = std::make_shared<RaytracingOutput>();
+	colorOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		// 色出力用クラスをセット。
-		colorOutput_[index] = std::make_shared<RaytracingOutput>();
-		colorOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	// 明るさ情報出力用クラスをセット。
+	lightOutput_[0] = std::make_shared<RaytracingOutput>();
+	lightOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"LightOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseLightOutput_[0] = std::make_shared<RaytracingOutput>();
+	denoiseLightOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	lightOutput_[1] = std::make_shared<RaytracingOutput>();
+	lightOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"LightOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseLightOutput_[1] = std::make_shared<RaytracingOutput>();
+	denoiseLightOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		// 明るさ情報出力用クラスをセット。
-		lightOutput_[index] = std::make_shared<RaytracingOutput>();
-		lightOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"LightOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		denoiseLightOutput_[index] = std::make_shared<RaytracingOutput>();
-		denoiseLightOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	// GI出力用クラスをセット。
+	giOutput_[0] = std::make_shared<RaytracingOutput>();
+	giOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseGiOutput_[0] = std::make_shared<RaytracingOutput>();
+	denoiseGiOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	giOutput_[1] = std::make_shared<RaytracingOutput>();
+	giOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseGiOutput_[1] = std::make_shared<RaytracingOutput>();
+	denoiseGiOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		// GI出力用クラスをセット。
-		giOutput_[index] = std::make_shared<RaytracingOutput>();
-		giOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-		denoiseGiOutput_[index] = std::make_shared<RaytracingOutput>();
-		denoiseGiOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	// デノイズマスク用クラスをセット。
+	denoiseMaskOutput_[0] = std::make_shared<RaytracingOutput>();
+	denoiseMaskOutput_[0]->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMaskOutput_[1] = std::make_shared<RaytracingOutput>();
+	denoiseMaskOutput_[1]->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-		// デノイズマスク用クラスをセット。
-		denoiseMaskOutput_[index] = std::make_shared<RaytracingOutput>();
-		denoiseMaskOutput_[index]->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-		// 最終出力用クラスをセット。
-		denoiseMixTextureOutput_[index] = std::make_shared<RaytracingOutput>();
-		denoiseMixTextureOutput_[index]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	}
+	// 最終出力用クラスをセット。
+	denoiseMixTextureOutput_[0] = std::make_shared<RaytracingOutput>();
+	denoiseMixTextureOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMixTextureOutput_[1] = std::make_shared<RaytracingOutput>();
+	denoiseMixTextureOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// デノイズAO用のパイプラインを設定。
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
@@ -105,9 +119,9 @@ void RayEngine::Draw()
 	Engine::Ins()->mainGraphicsCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 	// コンピュートキューにも詰む。
-	if (Engine::Ins()->canUseDenoiseCmdList_) {
-		Engine::Ins()->denoiseCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		Engine::Ins()->denoiseCmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
+	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
+		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 	}
 
 	// TLASを設定。
@@ -132,67 +146,67 @@ void RayEngine::Draw()
 
 
 	// DenoiseQueueが実行可能状態だったら。
-	if (Engine::Ins()->canUseDenoiseCmdList_) {
+	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
 
 
 		// ライト情報にデノイズをかける。
 		{
 
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				lightOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
+				lightOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->denoiseCmdList_->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
 
 			// ライトにデノイズをかける。
-			Denoiser::Ins()->Denoise(lightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 0, 1);
+			Denoiser::Ins()->Denoise(lightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 0, 1);
 
 		}
 
 		// AO情報にデノイズをかける。
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				aoOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
+				aoOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->denoiseCmdList_->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
-			Denoiser::Ins()->Denoise(aoOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 1000, 8);
+			Denoiser::Ins()->Denoise(aoOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 1000, 8);
 		}
 
 
 		// GI情報にデノイズをかける。
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				giOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
+				giOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->denoiseCmdList_->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
 
 			// GIにデノイズをかける。
-			Denoiser::Ins()->Denoise(giOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 100, 1);
+			Denoiser::Ins()->Denoise(giOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 100, 1);
 
 		}
 
 		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-			colorOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
+			colorOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+			denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 		};
 
-		Engine::Ins()->denoiseCmdList_->ResourceBarrier(5, barrierToUAV);
+		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
 
 	}
 
