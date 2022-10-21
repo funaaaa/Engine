@@ -105,9 +105,9 @@ void RayEngine::Draw()
 	Engine::Ins()->mainGraphicsCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 	// コンピュートキューにも詰む。
-	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
-		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
+	if (Engine::Ins()->canUseDenoiseCmdList_) {
+		Engine::Ins()->denoiseCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+		Engine::Ins()->denoiseCmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 	}
 
 	// TLASを設定。
@@ -132,7 +132,7 @@ void RayEngine::Draw()
 
 
 	// DenoiseQueueが実行可能状態だったら。
-	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
+	if (Engine::Ins()->canUseDenoiseCmdList_) {
 
 
 		// ライト情報にデノイズをかける。
@@ -144,7 +144,7 @@ void RayEngine::Draw()
 				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// ライトにデノイズをかける。
 			Denoiser::Ins()->Denoise(lightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 0, 1);
@@ -159,7 +159,7 @@ void RayEngine::Draw()
 				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// AOにデノイズをかける。
 			Denoiser::Ins()->Denoise(aoOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 1000, 8);
@@ -174,7 +174,7 @@ void RayEngine::Draw()
 				denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
+			Engine::Ins()->denoiseCmdList_->ResourceBarrier(3, barrierToUAV);
 
 			// GIにデノイズをかける。
 			Denoiser::Ins()->Denoise(giOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 100, 1);
@@ -189,7 +189,7 @@ void RayEngine::Draw()
 			denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 		};
 
-		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(5, barrierToUAV);
+		Engine::Ins()->denoiseCmdList_->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetUAVIndex());

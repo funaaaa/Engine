@@ -18,10 +18,10 @@ Engine::Engine() {
 void Engine::Init() {
 #ifdef _DEBUG
 	// デバッグレイヤーの有効化
-	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.debugController_))))
-	//{
-	//	debug_.debugController_->EnableDebugLayer();
-	//}
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.debugController_))))
+	{
+		debug_.debugController_->EnableDebugLayer();
+	}
 	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.shaderDebugController_))))
 	//{
 	//	debug_.shaderDebugController_->SetEnableGPUBasedValidation(true);
@@ -107,14 +107,8 @@ void Engine::Init() {
 		// デノイズに使用するコマンドリスト表用のAllocatorを生成。
 		result = Engine::Ins()->device_.dev_->CreateCommandAllocator(
 			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			IID_PPV_ARGS(&denoiseCmdAllocator_[0]));
-		denoiseCmdAllocator_[0]->SetName(L"DenoiseAllocator0");
-
-		// デノイズに使用するコマンドリスト裏用のAllocatorを生成。
-		result = Engine::Ins()->device_.dev_->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			IID_PPV_ARGS(&denoiseCmdAllocator_[1]));
-		denoiseCmdAllocator_[1]->SetName(L"DenoiseAllocator1");
+			IID_PPV_ARGS(&denoiseCmdAllocator_));
+		denoiseCmdAllocator_->SetName(L"DenoiseAllocator");
 	}
 
 	// コマンドリストの生成
@@ -137,16 +131,9 @@ void Engine::Init() {
 		// デノイズに使用するコマンドリスト表
 		result = Engine::Ins()->device_.dev_->CreateCommandList(0,
 			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			denoiseCmdAllocator_[0].Get(), nullptr,
-			IID_PPV_ARGS(&denoiseCmdList_[0]));
-		denoiseCmdList_[0]->SetName(L"DenoiseComputeCmdList0");
-
-		// デノイズに使用するコマンドリスト表
-		result = Engine::Ins()->device_.dev_->CreateCommandList(0,
-			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			denoiseCmdAllocator_[1].Get(), nullptr,
-			IID_PPV_ARGS(&denoiseCmdList_[1]));
-		denoiseCmdList_[1]->SetName(L"DenoiseComputeCmdList1");
+			denoiseCmdAllocator_.Get(), nullptr,
+			IID_PPV_ARGS(&denoiseCmdList_));
+		denoiseCmdList_->SetName(L"DenoiseComputeCmdList");
 
 	}
 
@@ -186,28 +173,16 @@ void Engine::Init() {
 		graphicsToCopyFence_->SetName(L"MainGraphicsToCopyFence");
 
 		// MainGraphicsからDenoise表へのフェンスの生成
-		graphicsToDenoiseFenceVal_[0] = 1;
-		result = device_.dev_->CreateFence(graphicsToDenoiseFenceVal_[0], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToDenoiseFence_[0]));
-		++graphicsToDenoiseFenceVal_[0];
-		graphicsToDenoiseFence_[0]->SetName(L"MainGraphicsToDenoiseFence0");
-
-		// MainGraphicsからDenoise裏へのフェンスの生成
-		graphicsToDenoiseFenceVal_[1] = 1;
-		result = device_.dev_->CreateFence(graphicsToDenoiseFenceVal_[1], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToDenoiseFence_[1]));
-		++graphicsToDenoiseFenceVal_[1];
-		graphicsToDenoiseFence_[1]->SetName(L"MainGraphicsToDenoiseFence1");
+		graphicsToDenoiseFenceVal_ = 1;
+		result = device_.dev_->CreateFence(graphicsToDenoiseFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToDenoiseFence_));
+		++graphicsToDenoiseFenceVal_;
+		graphicsToDenoiseFence_->SetName(L"MainGraphicsToDenoiseFence");
 
 		// Denoise表からCopyへのフェンスの生成
-		denoiseToCopyFenceVal_[0] = 1;
-		result = device_.dev_->CreateFence(denoiseToCopyFenceVal_[0], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_[0]));
-		++denoiseToCopyFenceVal_[0];
-		denoiseToCopyFence_[0]->SetName(L"DenoiseToCopyFence0");
-
-		// Denoise裏からCopyへのフェンスの生成
-		denoiseToCopyFenceVal_[1] = 1;
-		result = device_.dev_->CreateFence(denoiseToCopyFenceVal_[1], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_[1]));
-		++denoiseToCopyFenceVal_[1];
-		denoiseToCopyFence_[1]->SetName(L"DenoiseToCopyFence1");
+		denoiseToCopyFenceVal_ = 1;
+		result = device_.dev_->CreateFence(denoiseToCopyFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_));
+		++denoiseToCopyFenceVal_;
+		denoiseToCopyFence_->SetName(L"DenoiseToCopyFence");
 
 		// Copy終了監視用のフェンスの生成
 		finishCopyFenceVal_ = 1;
@@ -222,8 +197,7 @@ void Engine::Init() {
 
 		// 各コマンドリストが使用可能状態にする。
 		canUseCopyCmdList_ = true;
-		canUseDenoiseCmdList_[0] = true;
-		canUseDenoiseCmdList_[1] = true;
+		canUseDenoiseCmdList_ = true;
 
 		// 現在のキューのインデックスと経過フレームを0で初期化。
 		currentQueueIndex_ = 1;	// 最初のFの先頭でフラグが切り替わるため、1で初期化しておくことで最初のFのインデックスが0になる。
@@ -456,10 +430,10 @@ void Engine::ProcessAfterDrawing() {
 		++GPUtoCPUFenceVal_;
 
 		// MainGraphicsQueueからDenoiseQueue間でのフェンスの値を加算。
-		++graphicsToDenoiseFenceVal_[currentQueueIndex_];
+		++graphicsToDenoiseFenceVal_;
 
 		// DenoiseQueueからCopy間でのフェンスの値を加算。
-		++denoiseToCopyFenceVal_[currentQueueIndex_];
+		++denoiseToCopyFenceVal_;
 
 		// MainGraphicsQueueからCopy間でのフェンスの値を加算。
 		++graphicsToCopyFenceVal_;
@@ -485,11 +459,10 @@ void Engine::ProcessAfterDrawing() {
 
 		// MainGraphicsの実行完了を通知。
 		graphicsCmdQueue_->Signal(GPUtoCPUFence_.Get(), GPUtoCPUFenceVal_);
-		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_[currentQueueIndex_].Get(), graphicsToDenoiseFenceVal_[currentQueueIndex_]);
+		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);
 		graphicsCmdQueue_->Signal(graphicsToCopyFence_.Get(), graphicsToCopyFenceVal_);
 		UINT64 graphicsFenceValue = GPUtoCPUFence_->GetCompletedValue();
-		UINT64 currentDenoizeFenceValue = graphicsToDenoiseFence_[currentQueueIndex_]->GetCompletedValue();
-		UINT64 prevDenoizeFenceValue = graphicsToDenoiseFence_[!currentQueueIndex_]->GetCompletedValue();
+		UINT64 currentDenoizeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
 
 		// グラフィックコマンドリストの完了待ち
 		if (graphicsFenceValue != GPUtoCPUFenceVal_) {
@@ -501,8 +474,7 @@ void Engine::ProcessAfterDrawing() {
 
 		// デバッグ用。フェンスの値を見る。
 		graphicsFenceValue = GPUtoCPUFence_->GetCompletedValue();
-		currentDenoizeFenceValue = graphicsToDenoiseFence_[currentQueueIndex_]->GetCompletedValue();
-		prevDenoizeFenceValue = graphicsToDenoiseFence_[!currentQueueIndex_]->GetCompletedValue();
+		currentDenoizeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
 
 		// コマンドアロケータのリセット
 		mainGraphicsCmdAllocator_->Reset();							// キューをクリア
@@ -516,38 +488,36 @@ void Engine::ProcessAfterDrawing() {
 	{
 
 		// DenoiseCmdListが使用可能状態だったら。
-		if (canUseDenoiseCmdList_[currentQueueIndex_]) {
+		if (canUseDenoiseCmdList_) {
 
 			// コンピュートキューのデノイズコマンドを実行。
-			denoiseCmdList_[currentQueueIndex_]->Close();
-			ID3D12CommandList* computeCmdLists[] = { denoiseCmdList_[currentQueueIndex_].Get() }; // コマンドリストの配列
+			denoiseCmdList_->Close();
+			ID3D12CommandList* computeCmdLists[] = { denoiseCmdList_.Get() }; // コマンドリストの配列
 			//computeCmdQueue_->Wait(graphicsToDenoiseFence_[currentQueueIndex_].Get(), graphicsToDenoiseFenceVal_[currentQueueIndex_]);	// MainGraphicsの処理が終わってから実行する。
 			computeCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
 
 			// このコマンドリストを操作不可能にする。
-			canUseDenoiseCmdList_[currentQueueIndex_] = false;
+			canUseDenoiseCmdList_ = false;
 
 		}
 
-		for (int index = 0; index < 2; ++index) {
-
-			// このフラグがtrueの時はすでにResetしてあるということなので、二重リセットを回避するために処理を飛ばす。
-			if (canUseDenoiseCmdList_[index]) continue;
+		// このフラグがtrueの時はすでにResetしてあるということなので、二重リセットを回避するために処理を飛ばす。
+		if (!canUseDenoiseCmdList_) {
 
 			// デノイズコマンドリストの終了をCopyのフェンスに通知。
-			computeCmdQueue_->Signal(denoiseToCopyFence_[index].Get(), denoiseToCopyFenceVal_[index]);
+			computeCmdQueue_->Signal(denoiseToCopyFence_.Get(), denoiseToCopyFenceVal_);
 
-			UINT64 computeFenceValue = denoiseToCopyFence_[index]->GetCompletedValue();
-			if (computeFenceValue == denoiseToCopyFenceVal_[index]) {
+			UINT64 computeFenceValue = denoiseToCopyFence_->GetCompletedValue();
+			if (computeFenceValue == denoiseToCopyFenceVal_) {
 
 				// コマンドアロケータのリセット
-				denoiseCmdAllocator_[index]->Reset();							// キューをクリア
+				denoiseCmdAllocator_->Reset();							// キューをクリア
 
 				// コマンドリストのリセット
-				denoiseCmdList_[index]->Reset(denoiseCmdAllocator_[index].Get(), nullptr);	// 再びコマンドリストを貯める準備
+				denoiseCmdList_->Reset(denoiseCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
 
 				// このコマンドリストを操作可能にする。
-				canUseDenoiseCmdList_[index] = true;
+				canUseDenoiseCmdList_ = true;
 
 			}
 
@@ -559,7 +529,7 @@ void Engine::ProcessAfterDrawing() {
 	if (frameIndex_ != 0) {
 
 		// CopyCmdListが使用可能状態だったら。 1F前のデノイズが終わっていたら。
-		if (canUseCopyCmdList_ && canUseDenoiseCmdList_[!currentQueueIndex_]) {
+		if (canUseCopyCmdList_ && canUseDenoiseCmdList_) {
 
 			// コピーキューのデノイズコマンドを実行。
 			copyResourceCmdList_->Close();
