@@ -524,19 +524,37 @@ void Engine::ProcessAfterDrawing() {
 				// デノイズコマンドリストの終了をCopyのフェンスに通知。
 				computeCmdQueue_->Signal(denoiseToCopyFence_.Get(), denoiseToCopyFenceVal_);
 
+
 				UINT64 computeFenceValue = denoiseToCopyFence_->GetCompletedValue();
-				if (computeFenceValue == denoiseToCopyFenceVal_) {
-
-					// コマンドアロケータのリセット
-					denoiseCmdAllocator_[index]->Reset();							// キューをクリア
-
-					// コマンドリストのリセット
-					denoiseCmdList_[index]->Reset(denoiseCmdAllocator_[index].Get(), nullptr);	// 再びコマンドリストを貯める準備
-
-					// このコマンドリストを操作可能にする。
-					canUseDenoiseCmdList_[index] = true;
-
+				if (computeFenceValue != denoiseToCopyFenceVal_) {
+					HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+					denoiseToCopyFence_->SetEventOnCompletion(denoiseToCopyFenceVal_, event);
+					WaitForSingleObject(event, INFINITE);
+					CloseHandle(event);
 				}
+
+				// コマンドアロケータのリセット
+				denoiseCmdAllocator_[index]->Reset();							// キューをクリア
+
+				// コマンドリストのリセット
+				denoiseCmdList_[index]->Reset(denoiseCmdAllocator_[index].Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+				// このコマンドリストを操作可能にする。
+				canUseDenoiseCmdList_[index] = true;
+
+				//UINT64 computeFenceValue = denoiseToCopyFence_->GetCompletedValue();
+				//if (computeFenceValue == denoiseToCopyFenceVal_) {
+
+				//	// コマンドアロケータのリセット
+				//	denoiseCmdAllocator_[index]->Reset();							// キューをクリア
+
+				//	// コマンドリストのリセット
+				//	denoiseCmdList_[index]->Reset(denoiseCmdAllocator_[index].Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+				//	// このコマンドリストを操作可能にする。
+				//	canUseDenoiseCmdList_[index] = true;
+
+				//}
 
 			}
 
@@ -570,19 +588,44 @@ void Engine::ProcessAfterDrawing() {
 			// コピーコマンドリストの終了をコピー終了監視用のフェンスに通知。
 			graphicsCmdQueue_->Signal(finishCopyFence_.Get(), finishCopyFenceVal_);
 
+			// グラフィックコマンドリストの完了待ち
 			UINT64 copyFenceValue = finishCopyFence_->GetCompletedValue();
-			if (copyFenceValue == finishCopyFenceVal_) {
-
-				// コマンドアロケータのリセット
-				copyResourceCmdAllocator_->Reset();							// キューをクリア
-
-				// コマンドリストのリセット
-				copyResourceCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
-
-				// このコマンドリストを操作可能にする。
-				canUseCopyCmdList_ = true;
-
+			if (copyFenceValue != finishCopyFenceVal_) {
+				HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+				finishCopyFence_->SetEventOnCompletion(finishCopyFenceVal_, event);
+				WaitForSingleObject(event, INFINITE);
+				CloseHandle(event);
 			}
+
+			if (currentQueueIndex_) {
+				OutputDebugString(L"OutputResource1\n");
+			}
+			else {
+				OutputDebugString(L"OutputResource0\n");
+			}
+
+			// コマンドアロケータのリセット
+			copyResourceCmdAllocator_->Reset();							// キューをクリア
+
+			// コマンドリストのリセット
+			copyResourceCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+			// このコマンドリストを操作可能にする。
+			canUseCopyCmdList_ = true;
+
+			//UINT64 copyFenceValue = finishCopyFence_->GetCompletedValue();
+			//if (copyFenceValue == finishCopyFenceVal_) {
+
+			//	// コマンドアロケータのリセット
+			//	copyResourceCmdAllocator_->Reset();							// キューをクリア
+
+			//	// コマンドリストのリセット
+			//	copyResourceCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
+
+			//	// このコマンドリストを操作可能にする。
+			//	canUseCopyCmdList_ = true;
+
+			//}
 
 		}
 
