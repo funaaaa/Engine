@@ -79,7 +79,7 @@ public:
 
 	// キュー
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> graphicsCmdQueue_;				// グラフィックスキュー レイトレ関数やUIの描画等を行う。
-	std::array<Microsoft::WRL::ComPtr<ID3D12CommandQueue>, 2> computeCmdQueue_;	// コンピュートキュー 主にデノイズを行う。
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> computeCmdQueue_;				// コンピュートキュー 主にデノイズを行う。
 
 	// フェンス
 	Microsoft::WRL::ComPtr<ID3D12Fence> GPUtoCPUFence_;							// mainGraphicsとCPUの同期をとるためのフェンス
