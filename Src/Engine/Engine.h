@@ -90,8 +90,8 @@ public:
 	UINT64 finishCopyFenceVal_;
 	Microsoft::WRL::ComPtr<ID3D12Fence> graphicsToDenoiseFence_;				// mainGraphicsとdenoiseの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
 	UINT64 graphicsToDenoiseFenceVal_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> denoiseToCopyFence_;					// denoiseとCopyの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
-	UINT64 denoiseToCopyFenceVal_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> denoiseToCopyFence_;		// denoiseとCopyの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
+	std::array<UINT64, 2> denoiseToCopyFenceVal_;
 
 	// 現在Queueのインデックス。
 	int currentQueueIndex_;
@@ -99,7 +99,6 @@ public:
 
 	// 各コマンドリストに処理を詰むことができるかを判断するフラグ
 	std::array<bool, 2> canUseDenoiseCmdList_;					// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ SwapChainのように裏と表を切り替えて使用する。
-	bool canUseCopyCmdList_;					// CopyCmdListにコマンドを詰むことができる状態かのフラグ
 
 
 public:

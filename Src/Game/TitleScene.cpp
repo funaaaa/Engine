@@ -87,11 +87,42 @@ void TitleScene::Init()
 
 }
 
+#pragma comment (lib, "winmm.lib")
+
+void FPS()
+{
+
+	/*===== タイトルバーにFPS表示 =====*/
+
+	static DWORD prev_time = timeGetTime();	// 前回の時間
+	static int frame_count = 0;		// フレームカウント
+	DWORD now_time = timeGetTime();		// 今回のフレームの時間
+
+	frame_count++;	// フレーム数をカウントする
+
+	// 経過時間が１秒を超えたらカウントと時間をリセット
+	if (now_time - prev_time >= 1000)
+	{
+		wchar_t fps[1000];
+		_itow_s(frame_count, fps, 10);
+		wchar_t moji[] = L"FPS";
+		wcscat_s(fps, moji);
+		SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, fps);
+		//OutputDebugString(fps);
+
+		prev_time = now_time;
+		frame_count = 0;
+	}
+
+}
+
 #include "Camera.h"
 void TitleScene::Update()
 {
 
 	/*===== 更新処理 =====*/
+
+	FPS();
 
 	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 

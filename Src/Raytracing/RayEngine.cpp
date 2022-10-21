@@ -211,8 +211,8 @@ void RayEngine::Draw()
 	}
 
 
-	// 最初のFはコピーリソースを行わない。 && CopyCmdListが実行可能状態だったら。
-	if (Engine::Ins()->frameIndex_ != 0 && Engine::Ins()->canUseCopyCmdList_) {
+	// 最初のFはコピーリソースを行わない。
+	if (Engine::Ins()->frameIndex_ != 0) {
 
 		// バックバッファのインデックスを取得する。
 		UINT backBufferIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
