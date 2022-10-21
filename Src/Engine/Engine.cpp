@@ -374,6 +374,7 @@ void Engine::ProcessBeforeDrawing() {
 		// 深度バッファ用のディスクリプタヒープの先頭アドレスを取得
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart();
 		copyResourceCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
+		mainGraphicsCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
 
 		// 画面クリア
 		// 初期化色
@@ -385,14 +386,17 @@ void Engine::ProcessBeforeDrawing() {
 
 		// 深度バッファのクリアコマンド
 		copyResourceCmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		mainGraphicsCmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 		// ビューポート設定
 		CD3DX12_VIEWPORT viewportData = CD3DX12_VIEWPORT(0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT);
 		copyResourceCmdList_->RSSetViewports(1, &viewportData);
+		mainGraphicsCmdList_->RSSetViewports(1, &viewportData);
 
 		// シザリング矩形設定
 		CD3DX12_RECT rectData = CD3DX12_RECT(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 		copyResourceCmdList_->RSSetScissorRects(1, &rectData);
+		mainGraphicsCmdList_->RSSetScissorRects(1, &rectData);
 
 
 		// 次にBackBufferに書き込む処理は別のQueueにあるのでステートをCommonに変える。
