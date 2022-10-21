@@ -25,24 +25,24 @@ public:
 
 	// AO出力用。
 	std::array<std::shared_ptr<RaytracingOutput>, 2> aoOutput_;
-	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseAOOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseAOOutput_;
 
 	// 色出力用クラス。
-	std::array < std::shared_ptr<RaytracingOutput>, 2> colorOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> colorOutput_;
 
 	// ライト出力用。
-	std::array < std::shared_ptr<RaytracingOutput>, 2> lightOutput_;
-	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseLightOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> lightOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseLightOutput_;
 
 	// GI出力用。
-	std::array < std::shared_ptr<RaytracingOutput>, 2> giOutput_;
-	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseGiOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> giOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseGiOutput_;
 
 	// デノイズマスク用。
-	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseMaskOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseMaskOutput_;
 
 	// デノイズの結果出力用クラスをセット。
-	std::array < std::shared_ptr<RaytracingOutput>, 2> denoiseMixTextureOutput_;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseMixTextureOutput_;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPipelineShaderData> pipelineShaders_;

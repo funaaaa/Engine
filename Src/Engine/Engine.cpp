@@ -529,7 +529,7 @@ void Engine::ProcessAfterDrawing() {
 		ID3D12CommandList* cmdLists[] = { mainGraphicsCmdList_.Get() }; // コマンドリストの配列
 		graphicsCmdQueue_->ExecuteCommandLists(1, cmdLists);
 
-		// GPUの実行完了を通知。
+		// MainGraphicsの実行完了を通知。
 		graphicsCmdQueue_->Signal(GPUtoCPUFence_.Get(), GPUtoCPUFenceVal_);
 		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_[currentQueueIndex_].Get(), graphicsToDenoiseFenceVal_[currentQueueIndex_]);
 		graphicsCmdQueue_->Signal(graphicsToCopyFence_.Get(), graphicsToCopyFenceVal_);
@@ -592,11 +592,6 @@ void Engine::ProcessAfterDrawing() {
 		// CopyCmdListが使用可能状態だったら。
 		bool isEndDispatchRayAndDenoise = canUseDenoiseCmdList_[0] || canUseDenoiseCmdList_[1];
 		if (canUseCopyCmdList_ && isEndDispatchRayAndDenoise) {
-
-			// レンダーターゲットのリソースバリア変更			COMMONとPRESENTはどちらも0だから同じ意味？
-			//CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(swapchain_.backBuffers_[swapchain_->GetCurrentBackBufferIndex()].Get(),
-			//	D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PRESENT);
-			//copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 			// コピーキューのデノイズコマンドを実行。
 			copyResourceCmdList_->Close();
