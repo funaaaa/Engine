@@ -1,11 +1,11 @@
 #include "RayComputeShader.h"
 #include <d3dcompiler.h>
-#include "DirectXBase.h"
+#include "Engine.h"
 #include "DescriptorHeapMgr.h"
 #include "RayRootsignature.h"
 #include <assert.h>
 
-void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& CBVCount, const int& UAVCount, std::vector<int> UAVIndex)
+void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int UAVCount, std::vector<int> UAVIndex)
 {
 
 	/*===== セッティング処理 =====*/
@@ -46,7 +46,7 @@ void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& C
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.NodeMask = 0;
 
-	auto hr = DirectXBase::Ins()->dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipline_));
+	auto hr = Engine::Ins()->dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipeline_));
 	if (FAILED(hr)) {
 		//生成に失敗した
 		assert(0);
@@ -54,39 +54,48 @@ void RayComputeShader::Setting(LPCWSTR CsPath, const int& SRVCount, const int& C
 
 }
 
-void RayComputeShader::Dispatch(const UINT& ThreadGroupCountX, const UINT& ThreadGroupCountY, const UINT& ThreadGroupCountZ, const int& OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV)
+void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> CmdList)
 {
 
 	/*===== 実行処理 =====*/
 
+	// 使用するコマンドリストをセット。
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList;
+	if (CmdList != nullptr) {
+		cmdList = CmdList;
+	}
+	else {
+		cmdList = Engine::Ins()->cmdList_;
+	}
+
 	// ルートシグネチャをセット。
-	DirectXBase::Ins()->cmdList_->SetComputeRootSignature(rootSignature_->GetRootSig().Get());
+	cmdList->SetComputeRootSignature(rootSignature_->GetRootSig().Get());
 
 	// パイプラインをセット。
-	DirectXBase::Ins()->cmdList_->SetPipelineState(pipline_.Get());
+	cmdList->SetPipelineState(pipeline_.Get());
 
 	// 一応UAVをセット。
 	for (auto& index_ : inputUAVIndex_) {
 
-		DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(static_cast<int>(&index_ - &inputUAVIndex_[0]) + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
+		cmdList->SetComputeRootDescriptorTable(static_cast<int>(&index_ - &inputUAVIndex_[0]) + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
 
 	}
 
 	// バックバッファのフレームを取得。
-	//auto frameIndex = DirectXBase::Ins()->swapchain->GetCurrentBackBufferIndex();
+	//auto frameIndex = Engine::Ins()->swapchain->GetCurrentBackBufferIndex();
 
 	// CBVをセット。
 	for (auto& index_ : InputCBV) {
 
-		DirectXBase::Ins()->cmdList_->SetComputeRootConstantBufferView(static_cast<int>(&index_ - &InputCBV[0]), index_);
+		cmdList->SetComputeRootConstantBufferView(static_cast<int>(&index_ - &InputCBV[0]), index_);
 
 	}
 
 	// 出力用UAVをセット。
-	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(inputUAVCount_ + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
+	cmdList->SetComputeRootDescriptorTable(inputUAVCount_ + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
 
 	// ディスパッチ。
-	DirectXBase::Ins()->cmdList_->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
+	cmdList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);
 
 }
 

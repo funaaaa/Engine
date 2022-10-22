@@ -3,6 +3,9 @@
 #include <array>
 #include <memory>
 
+class PolygonMeshInstance;
+class BLAS;
+
 class OBB
 {
 
@@ -16,8 +19,8 @@ public:
 	Vec3 defLength_;				// デフォルトの各軸方向の長さ
 
 	// デバッグ用
-	int blasIndex_;
-	int insIndex_;
+	std::weak_ptr<BLAS> blasIndex_;
+	std::weak_ptr<PolygonMeshInstance> insIndex_;
 
 
 public:
@@ -25,10 +28,10 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// OBBを生成
-	void Setting(const int& BlasIndex, const int& InsIndex);
+	void Setting(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> Instance);
 
-	// InstanceIDを指定して各種行列を設定。
-	void SetMat(const int& InsIndex);
+	// Instanceを指定して各種行列を設定。
+	void SetMat(std::weak_ptr<PolygonMeshInstance> Instance);
 
 	// OBBとの当たり判定
 	bool CheckHitOBB(OBB TargetOBB);

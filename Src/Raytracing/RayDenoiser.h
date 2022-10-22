@@ -1,5 +1,6 @@
 #pragma once
 #include "Singleton.h"
+#include "Engine.h"
 #include <memory>
 #include <array>
 
@@ -36,6 +37,13 @@ private:
 	std::shared_ptr<DynamicConstBuffer> weightTableCBX_;
 	std::shared_ptr<DynamicConstBuffer> weightTableCBY_;
 
+	// コンピュートキュー
+	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList_;
+	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue_;
+	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
+	UINT64 fenceVal_;
+
 
 public:
 
@@ -45,13 +53,24 @@ public:
 	void Setting();
 
 	// ガウシアンブラーをかける。
-	void ApplyGaussianBlur(const int& InputUAVIndex, const int& DenoiseMaskIndex, const int& OutputUAVIndex, const int& BlurPower);
+	void ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower);
 
 	// 色情報と明るさ情報をかける。
-	void MixColorAndLuminance(const int& InputColorIndex, const int& InputLuminanceIndex, const int& InputLightLuminanceIndex, const int& InputGIIndex, const int& OutputUAVIndex);
+	void MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex, int InputLightLuminanceIndex, int InputGIIndex, int OutputUAVIndex);
 
 	// デノイズ
-	void Denoise(const int& InImg, const int& OutImg, const int& DenoiseMaskIndex, const int& DenoisePower, const int& DenoiseCount);
+	void Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoisePower, int DenoiseCount);
+
+	// 描画後処理
+	void AfterDraw();
+
+	// 描画前処理
+	void BeforeDraw();
+
+	// コマンドリストをクローズ。
+	void CloseCommandList();
+
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> GetCommandList() { return cmdList_; }
 
 private:
 

@@ -2,50 +2,50 @@
 #include "HitGroup.h"
 #include <assert.h>
 
-const LPCWSTR& HitGroupMgr::GetCH(const int& Index)
+const LPCWSTR& HitGroupMgr::GetCH(int Index)
 {
 	return hitGroup_[Index]->GetCH();
 }
 
-const LPCWSTR& HitGroupMgr::GetAH(const int& Index)
+const LPCWSTR& HitGroupMgr::GetAH(int Index)
 {
 	return hitGroup_[Index]->GetAH();
 }
 
-const LPCWSTR& HitGroupMgr::GetIS(const int& Index)
+const LPCWSTR& HitGroupMgr::GetIS(int Index)
 {
 	return hitGroup_[Index]->GetIS();
 }
-const bool& HitGroupMgr::GetCHFlag(const int& Index)
+bool HitGroupMgr::GetCHFlag(int Index)
 {
 	return hitGroup_[Index]->GetCHFlag();
 }
-const bool& HitGroupMgr::GetAHFlag(const int& Index)
+bool HitGroupMgr::GetAHFlag(int Index)
 {
 	return hitGroup_[Index]->GetAHFlag();
 }
 
-const bool& HitGroupMgr::GetISFlag(const int& Index)
+bool HitGroupMgr::GetISFlag(int Index)
 {
 	return hitGroup_[Index]->GetISFlag();
 }
 
-const int& HitGroupMgr::GetSRVCount(const int& Index)
+int HitGroupMgr::GetSRVCount(int Index)
 {
 	return hitGroup_[Index]->GetSRVCount();
 }
 
-const int& HitGroupMgr::GetCBVCount(const int& Index)
+int HitGroupMgr::GetCBVCount(int Index)
 {
 	return hitGroup_[Index]->GetCBVCount();
 }
 
-const int& HitGroupMgr::GetUAVCount(const int& Index)
+int HitGroupMgr::GetUAVCount(int Index)
 {
 	return hitGroup_[Index]->GetUAVCount();
 }
 
-const std::shared_ptr<RayRootsignature> HitGroupMgr::GetLocalRootSig(const int& Index)
+const std::shared_ptr<RayRootsignature> HitGroupMgr::GetLocalRootSig(int Index)
 {
 	return hitGroup_[Index]->GetLoacalRootSig();
 }
@@ -78,7 +78,7 @@ int HitGroupMgr::GetHitGroupID(const LPCWSTR& HitGroupName)
 	return hitGroupID;
 }
 
-int HitGroupMgr::GetHitGroupSRVCount(const int& HitGroupID)
+int HitGroupMgr::GetHitGroupSRVCount(int HitGroupID)
 {
 
 	/*===== ヒットグループのSRVの数を取得 =====*/
@@ -87,7 +87,7 @@ int HitGroupMgr::GetHitGroupSRVCount(const int& HitGroupID)
 
 }
 
-int HitGroupMgr::GetHitGroupUAVCount(const int& HitGroupID)
+int HitGroupMgr::GetHitGroupUAVCount(int HitGroupID)
 {
 
 	/*===== ヒットグループのSRVの数を取得 =====*/

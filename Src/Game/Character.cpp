@@ -1,6 +1,7 @@
 #include "Character.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
+#include "PolygonInstance.h"
 #include "Input.h"
 #include "FHelper.h"
 #include "BLAS.h"
@@ -28,7 +29,7 @@
 #pragma warning(push)
 #pragma warning(disable:4324)
 
-Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
+Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 {
 
 	/*===== 初期化処理 =====*/
@@ -48,7 +49,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		DEF_POS = PLAYER_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::RED, false);
+		playerModel_.Load(PlayerModel::COLOR::RED, PlayerModel::CHARA::PLAYER);
 
 	}
 	else if (charaID_ == CHARA_ID::P1_WGHOST) {
@@ -59,18 +60,18 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::RED, false);
+		playerModel_.Load(PlayerModel::COLOR::RED, PlayerModel::CHARA::PLAYER);
 
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
 
-		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::LEFT_LEARNING));
+		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER), Param);
 
 		// 初期位置を設定。
 		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::BLUE, false);
+		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::AI);
 
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
@@ -85,17 +86,17 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 		DEF_POS = GHOST_DEF_POS;
 
 		// 車のモデルをロード
-		playerModel_.Load(PlayerModel::COLOR::BLUE, true);
+		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::GHOST);
 
 	}
 
 	// タイヤをセット。
-	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireFrameInsIndex_, false));
-	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireInsIndex_, false));
-	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireFrameInsIndex_, false));
-	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireInsIndex_, false));
-	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInsIndex_, true));
-	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInsIndex_, true));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireFrameInstance, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carRightTireInstance, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireFrameInstance, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireInstance, false));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInstance, true));
+	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInstance, true));
 
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
@@ -138,6 +139,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 	nowBoostRotQ_ = DirectX::XMVECTOR();
 	nowHandleRotQ_ = DirectX::XMVECTOR();
 	defBodyMatRot_ = DirectX::XMMatrixIdentity();
+	cameraForwardVec_ = forwardVec_;
 
 	baseDriftRot_ = 0;
 	nowDriftRot_ = 0;
@@ -147,7 +149,7 @@ Character::Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param)
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
-	obb_->Setting(playerModel_.carBodyBlasIndex_, playerModel_.carBodyInsIndex_);
+	obb_->Setting(playerModel_.carBodyBlas_, playerModel_.carBodyInstance);
 
 }
 
@@ -207,19 +209,19 @@ void Character::Init()
 	isTireMask_ = false;
 	isConcentrationLine_ = false;
 	isJumpActionTrigger_ = false;
-	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+	playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
+	cameraForwardVec_ = forwardVec_;
 
 
 	// 臨時のバグ対策です。 最初の一回目のドリフトのときのみオーラが出ないので、ここで一回生成しておく。
-	RayConstBufferData constBuffer;
-	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0, constBuffer);
-	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= 0, constBuffer);
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0);
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= 0);
 
 	DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
 }
 
-void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish)
+void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, bool IsGameFinish)
 {
 
 
@@ -234,10 +236,10 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	pos_.y_ -= engineWaveAmount_;
 
 	// ブースト時の回転を打ち消す。
-	PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, defBodyMatRot_);
+	playerModel_.carBodyInstance.lock()->ChangeRotate(defBodyMatRot_);
 
 	// 入力処理
-	Input(ConstBufferData, IsBeforeStart);
+	Input(IsBeforeStart);
 
 	// ドリフトに関する更新処理
 	UpdateDrift();
@@ -264,7 +266,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	UpdateGameFinish();
 
 	// 座標を更新。
-	PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, pos_);
+	playerModel_.carBodyInstance.lock()->ChangeTrans(pos_);
 
 	// 車体を傾ける処理。
 	InclineCarBody();
@@ -282,8 +284,8 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
 
 			pos_ = DEF_POS;
-			PolygonInstanceRegister::Ins()->ChangeTrans(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
-			PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, Vec3(0, 0, 0));
+			playerModel_.carBodyInstance.lock()->ChangeTrans(Vec3(0, 0, 0));
+			playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
 			forwardVec_ = Vec3(0, 0, -1);
 			rotY_ = -0.367411435f;
 			upVec_ = Vec3(0, 1, 0);
@@ -294,7 +296,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	}
 
 	// OBBを更新。
-	obb_->SetMat(playerModel_.carBodyInsIndex_);
+	obb_->SetMat(playerModel_.carBodyInstance);
 
 	// 座標を保存。
 	prevPos_ = pos_;
@@ -307,7 +309,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 	}
 
 	// ドリフトパーティクルの更新処理。
-	UpdateDriftParticle(ConstBufferData, IsGameFinish, IsBeforeStart);
+	UpdateDriftParticle(IsGameFinish, IsBeforeStart);
 
 	// 移動できないタイマーを更新する。
 	if (0 < canNotMoveTimer_) {
@@ -322,6 +324,11 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 		rotY_ = shellHitRot_ + easingAmount * DirectX::XM_2PI;
 
 	}
+	else {
+
+		cameraForwardVec_ = forwardVec_;
+
+	}
 
 	// ブースト量が一定以上だったら集中線を出す。
 	isConcentrationLine_ = (MAX_BOOST_SPEED / 2.0f < boostSpeed_) || (JUMP_BOOST_SPEED / 2.0f < jumpBoostSpeed_);
@@ -331,6 +338,32 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& C
 
 	// ゲーム開始前フラグを保存。
 	isBeforeStartPrev_ = IsBeforeStart;
+
+}
+
+void Character::UpdateTitle()
+{
+
+	/*===== タイトルでの更新処理 =====*/
+
+	// 座標を更新。
+	playerModel_.carBodyInstance.lock()->ChangeTrans(pos_);
+
+	// OBBを更新。
+	obb_->SetMat(playerModel_.carBodyInstance);
+
+	// Y軸回転させる。
+	//rotY_ += 0.01f;
+
+	// 回転させる。
+	playerModel_.carBodyInstance.lock()->ChangeRotate(DirectX::XMMatrixRotationY(rotY_));
+
+	// タイヤを更新する。
+	for (auto& index : tires_) {
+
+		index->Update();
+
+	}
 
 }
 
@@ -384,7 +417,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 			float HitDistance;
 
 			// 左前タイヤ
-			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
+			InputRayData.rayPos_ = playerModel_.carRightTireInstance.lock()->GetWorldPos();
 			InputRayData.rayDir_ = bottomVec;
 
 			// タイヤ痕の位置を検出
@@ -409,8 +442,8 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 			}
 
 			// 右前タイヤ
-			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_);
-			InputRayData.rayPos_ += FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_)) * 20.0f;
+			InputRayData.rayPos_ = playerModel_.carBehindTireInstance.lock()->GetWorldPos();
+			InputRayData.rayPos_ += FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate()) * 20.0f;
 			InputRayData.rayDir_ = bottomVec;
 
 			// タイヤ痕の位置を検出
@@ -446,7 +479,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 			float HitDistance;
 
 			// 左前タイヤ
-			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
+			InputRayData.rayPos_ = playerModel_.carLeftTireInstance.lock()->GetWorldPos();
 			InputRayData.rayDir_ = bottomVec;
 
 			// タイヤ痕の位置を検出
@@ -471,8 +504,8 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 			}
 
 			// 右前タイヤ
-			InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_);
-			InputRayData.rayPos_ += FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_)) * 20.0f;
+			InputRayData.rayPos_ = playerModel_.carBehindTireInstance.lock()->GetWorldPos();
+			InputRayData.rayPos_ += FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate()) * 20.0f;
 			InputRayData.rayDir_ = bottomVec;
 
 			// タイヤ痕の位置を検出
@@ -528,7 +561,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	if (!(isDrift_ && !isDriftRight_)) {
 
 		// 左前タイヤ
-		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
+		InputRayData.rayPos_ = playerModel_.carLeftTireInstance.lock()->GetWorldPos();
 		InputRayData.rayDir_ = bottomVec;
 
 		// タイヤ痕の位置を検出
@@ -559,7 +592,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	if (!(isDrift_ && isDriftRight_)) {
 
 		// 右前タイヤ
-		InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
+		InputRayData.rayPos_ = playerModel_.carRightTireInstance.lock()->GetWorldPos();
 		InputRayData.rayDir_ = bottomVec;
 
 		// タイヤ痕の位置を検出
@@ -585,11 +618,11 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	}
 
 	// 右後ろタイヤ
-	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carRightTireInsIndex_);
+	InputRayData.rayPos_ = playerModel_.carRightTireInstance.lock()->GetWorldPos();
 	InputRayData.rayDir_ = bottomVec;
 
 	// 回転した後ろベクトルを求める。
-	Vec3 behindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+	Vec3 behindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), playerModel_.carBodyInstance.lock()->GetRotate());
 	InputRayData.rayPos_ += behindVec * 70.0f;
 
 	// タイヤ痕の位置を検出
@@ -613,11 +646,11 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	}
 
 	// 左後ろタイヤ
-	InputRayData.rayPos_ = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carLeftTireInsIndex_);
+	InputRayData.rayPos_ = playerModel_.carLeftTireInstance.lock()->GetWorldPos();
 	InputRayData.rayDir_ = bottomVec;
 
 	// 回転した後ろベクトルを求める。
-	behindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+	behindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), playerModel_.carBodyInstance.lock()->GetRotate());
 	InputRayData.rayPos_ += behindVec * 70.0f;
 
 	// タイヤ痕の位置を検出
@@ -649,21 +682,7 @@ Vec3 Character::GetCameraForwardVec()
 {
 	/*===== カメラ用正面ベクトル取得関数 =====*/
 
-	//Vec3 movedVec = pos_ - prevPos_;
-
-	return forwardVec_;
-
-	//return FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-
-	//// 移動していなかったら。
-	//if (movedVec.Length() == 0) {
-
-	//	return forwardVec_;
-
-	//}
-
-	//// 移動していたら。
-	//return movedVec.GetNormal();
+	return cameraForwardVec_;
 
 }
 
@@ -692,7 +711,7 @@ void Character::DeleteInstance()
 
 }
 
-void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart)
+void Character::Input(bool IsBeforeStart)
 {
 
 	/*===== 入力処理 =====*/
@@ -700,12 +719,14 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	// ゲームが終了している場合は入力を無効化する。 ゲームが終了した最初のFでは入力を取る必要があるので、Prevも比較している。
 	if (isGameFinish_ && isPrevGameFinish_) return;
 
-	ConstBufferData;
-
 	// 操作オブジェクトからの入力を受け取る。
 	BaseOperationObject::OperationInputData operationInputData;
 	operationInputData.pos_ = pos_;
 	operationInputData.forwradVec_ = forwardVec_;
+	if (item_.operator bool()) {
+		operationInputData.hasItemID_ = item_->GetItemID();
+	}
+	operationInputData.isHitJumpBoostGimmick_ = isHitJumpActionGimmick_;
 	BaseOperationObject::Operation operation = operationObject_->Input(operationInputData);
 
 	// タイヤのマスクのフラグを初期化する。
@@ -726,6 +747,12 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	if (0 < operation.accelerationRate_ && onGround_ && !IsBeforeStart) {
 
 		speed_ += operation.accelerationRate_ * ADD_SPEED;
+
+	}
+	// 甲羅にあたっていたら。
+	else if (0 < canNotMoveTimer_) {
+
+		speed_ -= speed_ / 50.0f;
 
 	}
 	else if (onGround_) {
@@ -796,12 +823,12 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 		// 回転を加算する。
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, quaternionMat);
+		playerModel_.carBodyInstance.lock()->AddRotate(quaternionMat);
 		nowFrameInputLeftStickHori = handleAmount * operation.handleDriveRate_;
 		rotY_ += handleAmount * operation.handleDriveRate_;
 
 		// 正面ベクトルを車の回転行列分回転させる。
-		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), playerModel_.carBodyInstance.lock()->GetRotate());
 
 
 		// ウインカーの色を変えるタイマーを更新。
@@ -819,22 +846,22 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 			// 曲がっているのが右だったら。
 			if (0 < operation.handleDriveRate_) {
 
-				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
-				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+				playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/blackRed.png"));
+				playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 			}
 			else {
 
-				BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/blackRed.png"));
-				BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+				playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/blackRed.png"));
+				playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 			}
 
 		}
 		else {
 
-			BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
-			BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+			playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
+			playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 		}
 
@@ -842,8 +869,8 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	else {
 
 		// 車のライトの色を元に戻す。
-		BLASRegister::Ins()->ChangeTex(playerModel_.carRightLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
-		BLASRegister::Ins()->ChangeTex(playerModel_.carLeftLightBlasIndex_, 0, TextureManager::Ins()->LoadTexture(L"Resource/Game/white.png"));
+		playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
+		playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
 
 		// 各変数を初期化。
 		IsTurningIndicatorRed_ = false;
@@ -862,7 +889,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
 	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.0f;
 	bool isOnGround = onGround_ || IsBeforeStart;	// 設置していたら ゲームが始まっていない場合、キャラは空中に浮いているので、接地判定を取る。
-	if (triggerDriftBottom && notJump && isOnGround) {
+	if (triggerDriftBottom && notJump && isOnGround && canNotMoveTimer_ <= 0) {
 
 		isDriftJump_ = true;
 		driftJumpVec_ = upVec_;
@@ -906,7 +933,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 	if (charaID_ == CHARA_ID::GHOST && operation.isGetItem_) {
 
 		item_ = std::make_shared<BoostItem>();
-		item_->Generate(playerModel_.carBodyInsIndex_);
+		item_->Generate(playerModel_.carBodyInstance);
 
 	}
 
@@ -924,7 +951,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 		}
 		else {
 
-			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
+			shellIndex_ = item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND));
 
 		}
 
@@ -937,9 +964,11 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 
 		if (isShotBehind_) {
 			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
+			timerToSkipShellCollider_ = TIMER_TO_SKIP_SHELL_COLLIDER;
 		}
 		else {
 			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::FORWARD_THROW));
+			timerToSkipShellCollider_ = TIMER_TO_SKIP_SHELL_COLLIDER;
 		}
 		item_.reset();
 
@@ -954,7 +983,7 @@ void Character::Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeS
 
 }
 
-void Character::Move(const bool& IsBeforeStart)
+void Character::Move(bool IsBeforeStart)
 {
 
 	/*===== 移動処理 =====*/
@@ -973,8 +1002,14 @@ void Character::Move(const bool& IsBeforeStart)
 
 	}
 
+	// 移動させる方向。 甲羅にあたっているときはあたった方向に進ませる為。
+	Vec3 moveVec = forwardVec_;
+	if (0 < canNotMoveTimer_) {
+		moveVec = cameraForwardVec_;
+	}
+
 	// 座標移動させる。
-	pos_ += forwardVec_ * (speed_ + boostSpeed_ + jumpBoostSpeed_);
+	pos_ += moveVec * (speed_ + boostSpeed_ + jumpBoostSpeed_);
 
 	// ドリフト時のブースト移動量を0に近づける。
 	if (0 < boostSpeed_) {
@@ -1021,7 +1056,7 @@ void Character::Move(const bool& IsBeforeStart)
 	pos_ += Vec3(0, -1, 0) * gravity_;
 
 	// 下ベクトルを車の回転行列分回転させる。
-	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+	bottomVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), playerModel_.carBodyInstance.lock()->GetRotate());
 
 }
 
@@ -1089,7 +1124,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 
 	// 当たり判定関数に入れる値を設定。
 	BaseStage::ColliderInput input;
-	input.targetInsIndex_ = playerModel_.carBodyInsIndex_;
+	input.targetInstance_ = playerModel_.carBodyInstance;
 	input.targetOBB_ = obb_;
 	input.targetPos_ = pos_;
 	input.targetUpVec_ = upVec_;
@@ -1165,7 +1200,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		upVec_ = output.upVec_;
 
 		// 回転を更新。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, output.matRot_);
+		playerModel_.carBodyInstance.lock()->ChangeRotate(output.matRot_);
 
 
 	}
@@ -1184,7 +1219,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		}
 
 		// 回転を更新。
-		PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, output.matRot_);
+		playerModel_.carBodyInstance.lock()->ChangeRotate(output.matRot_);
 
 	}
 	// ゴーストだったら当たり判定を飛ばす。
@@ -1193,16 +1228,27 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		// アイテムを取得したフラグ
 		isGetItem_ = true;
 
-		if (GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::WRITE_GHOST || GameSceneMode::Ins()->id_ == GameSceneMode::MODE_ID::GHOST) {
+		if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::WRITE_GHOST || GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::GHOST) {
 
 			item_ = std::make_shared<BoostItem>();
-			item_->Generate(playerModel_.carBodyInsIndex_);
+			item_->Generate(playerModel_.carBodyInstance);
 
 		}
 		else {
 
-			item_ = std::make_shared<BoostItem>();
-			item_->Generate(playerModel_.carBodyInsIndex_);
+			// AI戦だったらランダムでアイテムを生成する。
+			int random = FHelper::GetRand(0, 1);
+
+			if (random == 0) {
+				item_ = std::make_shared<BoostItem>();
+				item_->Generate(playerModel_.carBodyInstance);
+			}
+			else {
+				item_ = std::make_shared<ShellItem>();
+				item_->Generate(playerModel_.carBodyInstance);
+			}
+			item_ = std::make_shared<ShellItem>();
+			item_->Generate(playerModel_.carBodyInstance);
 
 		}
 
@@ -1216,6 +1262,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 
 	// 段差加速オブジェクトと当たっていて、ジャンプアクションボタンを押していたら。
 	isJumpAction_ = false;
+	isHitJumpActionGimmick_ = output.isHitStepBoostGimmick_;
 	if (output.isHitStepBoostGimmick_ && isJumpActionTrigger_) {
 
 		// 加速させる。
@@ -1231,10 +1278,19 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 	// ゴースト以外だったら。
 	if (charaID_ != CHARA_ID::GHOST) {
 
-		// 甲羅との当たり判定
-		bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_);
+		int shellIndex = -1;
 
-		if (isHitShell) {
+		if (0 < timerToSkipShellCollider_) {
+
+			--timerToSkipShellCollider_;
+			shellIndex = shellIndex_;
+
+		}
+
+		// 甲羅との当たり判定
+		bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_, shellIndex);
+
+		if (isHitShell || Input::Ins()->IsKeyTrigger(DIK_P)) {
 
 			canNotMoveTimer_ = CAN_NOT_MOVE_TIMER_SHELL_HIT;
 			shellHitRot_ = rotY_;
@@ -1252,13 +1308,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 
 	}
 
-
-	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
-
-		++rapCount_;
-
-	}
-
 }
 
 void Character::InclineCarBody()
@@ -1267,7 +1316,7 @@ void Character::InclineCarBody()
 	/*===== 車体を傾ける処理 =====*/
 
 	// BODYの回転行列を保存。
-	defBodyMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
+	defBodyMatRot_ = playerModel_.carBodyInstance.lock()->GetRotate();
 
 	// 空中に居たら。
 	if (!onGround_ && !isDriftJump_) {
@@ -1309,17 +1358,17 @@ void Character::InclineCarBody()
 				DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
 
 				// プレイヤーを回転させる。
-				PolygonInstanceRegister::Ins()->ChangeRotate(playerModel_.carBodyInsIndex_, quaternionMat);
+				playerModel_.carBodyInstance.lock()->ChangeRotate(quaternionMat);
 
 				// 上ベクトルを基準としたクォータニオンを求める。
-				Vec3 normal_ = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+				Vec3 normal_ = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), playerModel_.carBodyInstance.lock()->GetRotate());
 				DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
 
 				// クォータニオンを行列に治す。
 				DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
 
 				// プレイヤーを回転させる。
-				PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, upQuaternionMat);
+				playerModel_.carBodyInstance.lock()->AddRotate(upQuaternionMat);
 
 			}
 		}
@@ -1359,7 +1408,7 @@ void Character::InclineCarBody()
 
 		nowBoostRot_ += (baseBoostRot_ - nowBoostRot_) / 5.0f;
 
-		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
 
 		// クォータニオンを求める。
 		boostRotQ_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), nowBoostRot_);
@@ -1368,7 +1417,7 @@ void Character::InclineCarBody()
 		nowBoostRotQ_ = DirectX::XMQuaternionSlerp(nowBoostRotQ_, boostRotQ_, 0.2f);
 		// 回転行列を求める。
 		DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowBoostRotQ_);
-		PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
+		playerModel_.carBodyInstance.lock()->AddRotate(mat);
 
 	}
 
@@ -1418,9 +1467,9 @@ void Character::InclineCarBody()
 	{
 		nowDriftRot_ += (baseDriftRot_ - nowDriftRot_) / 10.0f;
 
-		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-		Vec3 forwardVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-		Vec3 upVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), playerModel_.carBodyInstance.lock()->GetRotate());
+		Vec3 forwardVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
+		Vec3 upVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), playerModel_.carBodyInstance.lock()->GetRotate());
 
 		// 横クォータニオンを求める。
 		handleRotQ_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), nowDriftRot_);
@@ -1438,7 +1487,7 @@ void Character::InclineCarBody()
 	nowHandleRotQ_ = DirectX::XMQuaternionSlerp(nowHandleRotQ_, handleRotQ_, 0.2f);
 	// 回転行列を求める。
 	DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowHandleRotQ_);
-	PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, mat);
+	playerModel_.carBodyInstance.lock()->AddRotate(mat);
 
 
 	// ゲーム終了時演出用の回転
@@ -1448,7 +1497,7 @@ void Character::InclineCarBody()
 		if (0.7f <= gameFinishEasingTimer_) {
 
 			// 回転軸を求める。
-			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), playerModel_.carBodyInstance.lock()->GetRotate());
 
 			// クォータニオンを求める。
 			DirectX::XMVECTOR gameFinishRotQ = DirectX::XMQuaternionRotationAxis(axisOfRevolution.ConvertXMVECTOR(), gameFinishRotStopAmount_);
@@ -1457,7 +1506,7 @@ void Character::InclineCarBody()
 			DirectX::XMMATRIX gameFinishRotMat = DirectX::XMMatrixRotationQuaternion(gameFinishRotQ);
 
 			// 回転させる。
-			PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, gameFinishRotMat);
+			playerModel_.carBodyInstance.lock()->AddRotate(gameFinishRotMat);
 
 			// 回転量を減らす。
 			if (isGameFinishDriftLeft_) {
@@ -1492,7 +1541,7 @@ void Character::InclineCarBody()
 			if (GAME_FINISH_STOP_ROT_LIMIT < fabs(easingAmount)) easingAmount = GAME_FINISH_STOP_ROT_LIMIT * (easingAmount < 0 ? -1.0f : 1.0f);
 
 			// 回転軸を求める。
-			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), playerModel_.carBodyInstance.lock()->GetRotate());
 
 			// クォータニオンを求める。
 			DirectX::XMVECTOR gameFinishRotQ = DirectX::XMQuaternionRotationAxis(axisOfRevolution.ConvertXMVECTOR(), easingAmount);
@@ -1501,7 +1550,7 @@ void Character::InclineCarBody()
 			DirectX::XMMATRIX gameFinishRotMat = DirectX::XMMatrixRotationQuaternion(gameFinishRotQ);
 
 			// 回転させる。
-			PolygonInstanceRegister::Ins()->AddRotate(playerModel_.carBodyInsIndex_, gameFinishRotMat);
+			playerModel_.carBodyInstance.lock()->AddRotate(gameFinishRotMat);
 
 			gameFinishRotStopAmount_ = easingAmount;
 			gameFinishRotStopReturnAmount_ = 0;
@@ -1567,7 +1616,7 @@ void Character::UpdateGameFinish()
 		gameFinishTriggerRotY_ = rotY_;
 		gameFinishEasingTimer_ = 0;
 		gameFinishTruggerForardVec_ = forwardVec_;
-		gameFinishTriggerMatRot_ = PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_);
+		gameFinishTriggerMatRot_ = playerModel_.carBodyInstance.lock()->GetRotate();
 
 		// 演出でどちらにドリフトさせるかを取得。
 		isGameFinishDriftLeft_ = handleAmount_ < 0;
@@ -1603,7 +1652,7 @@ void Character::UpdateGameFinish()
 
 }
 
-void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const bool& IsGameFinish, const bool& IsBeforeStart)
+void Character::UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart)
 {
 
 	/*===== ドリフトパーティクルの更新処理 =====*/
@@ -1623,15 +1672,15 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 
 		// 設置していたら煙を生成。
 		if (onGround_) {
-			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
-			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
+			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
+			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
 		}
 
 		// 設置していて移動速度が一定以上だったら炎を生成。
 		if (15.0f < boostSpeed_) {
-			DriftParticleMgr::Ins()->GenerateFire(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData);
+			DriftParticleMgr::Ins()->GenerateFire(playerModel_.carBehindTireInstance.lock()->GetWorldPos(), playerModel_.carBodyInstance.lock()->GetRotate());
 		}
 
 	}
@@ -1645,12 +1694,12 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 
 			beforeStartSmokeTimer_ = 0;
 
-			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
 			// 左右に散らす。
-			Vec3 generatePos = PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * static_cast<float>(FHelper::GetRand(-2, 2));
+			Vec3 generatePos = playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * static_cast<float>(FHelper::GetRand(-2, 2));
 			// 後ろ方向に持ってくる。
 			generatePos += -forwardVec_ * 20.0f;
-			DriftParticleMgr::Ins()->GenerateSmoke(generatePos, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY, -forwardVec_);
+			DriftParticleMgr::Ins()->GenerateSmoke(generatePos, playerModel_.carBodyInstance.lock()->GetRotate(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY, -forwardVec_);
 
 		}
 
@@ -1662,15 +1711,15 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 	if ((isJumpDriftRelease || onGroundTrigger) && !IsBeforeStart && !isGameFinish_) {
 
 		// 三回ランダムに位置をずらして生成する。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
 		for (int index = 0; index < 3; ++index) {
 
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
 
 		}
 		// 三回ランダムに位置をずらして生成する。
 		for (int index = 0; index < 3; ++index) {
-			DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) - driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() - driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
 
 		}
 
@@ -1694,8 +1743,8 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 		if (1 <= nowLevel) {
 
 			if (!DriftParticleMgr::Ins()->IsAuraGenerated(charaIndex_)) {
-				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInsIndex_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel);
+				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel);
 			}
 
 			// レートを求める。
@@ -1703,16 +1752,16 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 			rate = FHelper::Saturate(static_cast<float>(driftTimer_) / static_cast<float>(DRIFT_TIMER[0]));
 
 			// パーティクルを生成する。
-			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), rate, false, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), rate, false, DriftParticleMgr::DELAY_ID::DELAY1);
 
 			// レベルが上った瞬間だったら一気にパーティクルを生成する。
 			if (driftTimer_ == DRIFT_TIMER[0] || driftTimer_ == DRIFT_TIMER[1] || driftTimer_ == DRIFT_TIMER[2]) {
 
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInsIndex_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1, ConstBufferData);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
+				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
 
 				// オーラを一旦破棄
 				DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
@@ -1722,8 +1771,8 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 		}
 
 		// 煙を出す。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isDriftRight_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_), ConstBufferData, nowLevel < 1, DriftParticleMgr::DELAY_ID::DEF);
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isDriftRight_ ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance.lock()->GetRotate(), nowLevel < 1, DriftParticleMgr::DELAY_ID::DEF);
 
 
 
@@ -1739,10 +1788,10 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 	if (IsGameFinish && gameFinishEasingTimer_ < 0.9f) {
 
 		// 煙を出す。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isGameFinishDriftLeft_ ? -1.0f : 1.0f, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(playerModel_.carBodyInsIndex_));
-		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(playerModel_.carBehindTireInsIndex_) + driftVec * 30.0f, gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(PolygonInstanceRegister::Ins()->GetWorldPos(isGameFinishDriftLeft_ ? playerModel_.carLeftTireInsIndex_ : playerModel_.carRightTireInsIndex_), gameFinishTriggerMatRot_, ConstBufferData, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isGameFinishDriftLeft_ ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance.lock()->GetRotate());
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(isGameFinishDriftLeft_ ? playerModel_.carLeftTireInstance.lock()->GetWorldPos() : playerModel_.carRightTireInstance.lock()->GetWorldPos(), gameFinishTriggerMatRot_, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
 
 
 	}
@@ -1750,7 +1799,7 @@ void Character::UpdateDriftParticle(RayConstBufferData& ConstBufferData, const b
 	// ジャンプアクションのパーティクルを生成。
 	if (isJumpAction_ || Input::Ins()->IsKeyTrigger(DIK_M)) {
 
-		DriftParticleMgr::Ins()->GenerateJumpEffect(playerModel_.carBodyInsIndex_, ConstBufferData);
+		DriftParticleMgr::Ins()->GenerateJumpEffect(playerModel_.carBodyInstance);
 
 	}
 

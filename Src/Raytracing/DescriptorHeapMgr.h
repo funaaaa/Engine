@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXBase.h"
+#include "Engine.h"
 #include "Singleton.h"
 
 class DescriptorHeapMgr : public Singleton<DescriptorHeapMgr> {
@@ -31,7 +31,7 @@ public:
 		descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
 		descHeapDesc.NumDescriptors = CBV_SRV_UAV_COUNT;
 		// ディスクリプタヒープの生成。
-		DirectXBase::Ins()->dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descriptorHeap_));
+		Engine::Ins()->dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&descriptorHeap_));
 		descriptorHeap_->SetName(L"DescriptorHeapMgr");
 
 		// 先頭を初期化
@@ -43,16 +43,16 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap_; }
 
 	// 先頭のゲッタ
-	const int& GetHead() { return head_; }
+	int GetHead() { return head_; }
 
 	// 先頭をインクリメント
 	inline void IncrementHead() { ++head_; }
 
 	// 指定のインデックスのCPUハンドルを取得
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(const int& Index){
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(int Index){
 
 	return CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		descriptorHeap_.Get()->GetGPUDescriptorHandleForHeapStart(), Index, DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		descriptorHeap_.Get()->GetGPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	}
 

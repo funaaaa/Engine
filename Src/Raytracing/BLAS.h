@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXBase.h"
+#include "Engine.h"
 #include "RayDescriptor.h"
 #include "ComputeShader.h"
 #include "ModelDataManager.h"
@@ -34,6 +34,9 @@ private:
 	// マテリアル情報用定数バッファ
 	ModelDataManager::Material material_;
 
+	// BLASのインデックス。
+	int blasIndex_;
+
 	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer_;		// BLAS用バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;	// スクラッチバッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> updateBuffer_;	// 更新用バッファ
@@ -59,7 +62,8 @@ private:
 
 	bool isGenerate_;
 
-	std::vector<int> textureHandle_;			// 使用するテクスチャのハンドル
+	int baseTextureHandle_;				// 使用するテクスチャのハンドル
+	int normalMapHandle_;
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
 	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
@@ -88,9 +92,9 @@ public:
 	void Init();
 
 	// BLASの生成
-	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing = false, const bool& IsOpaque = true);
-	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath);
-	void GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque);
+	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
+	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
+	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
 
 	// BLASの更新
 	void Update();
@@ -103,12 +107,19 @@ public:
 	void PlayAnimation();	// 再生
 	void StopAnimation();	// 停止
 
-	// テクスチャを追加。
-	inline void AddTex(const int& Index) { textureHandle_.emplace_back(Index); }
-	inline void AddUAVTex(const int& Index) { uavHandle_.emplace_back(Index); }
+	// マテリアルの参照を取得。
+	ModelDataManager::Material& GetMaterial() { return material_; }
 
-	// テクスチャを変更。
-	void ChangeTex(const int& Index, const int& TextureHandle);
+	// マテリアルを書き換えた判定。
+	void IsChangeMaterial();
+
+	// テクスチャを追加。
+	void ChangeBaseTexture(int Index);
+	void ChangeNormalTexture(int Index) {
+		normalMapHandle_ = Index;
+		isChangeTexture = true;
+	}
+	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
@@ -131,6 +142,7 @@ public:
 	const Vec3& GetVertexMin() { return vertexMin_; }
 	const Vec3& GetVertexMax() { return vertexMax_; }
 	bool GetIsGenerate() { return isGenerate_; }
+	int GetBlasIndex() { return blasIndex_; }
 
 	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex_; }
@@ -148,7 +160,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
 
 	// BLAS生成時に設定を取得する関数
-	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(const bool& IsOpaque);
+	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque);
 
 	// 加速構造体の設定用関数
 	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc);

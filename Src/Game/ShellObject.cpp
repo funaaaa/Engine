@@ -5,6 +5,7 @@
 #include "HitGroupMgr.h"
 #include "BaseStage.h"
 #include "FHelper.h"
+#include "PolygonInstance.h"
 
 ShellObject::ShellObject()
 {
@@ -25,34 +26,34 @@ void ShellObject::Destroy()
 
 	if (isDestroyed_) return;
 
-	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+	PolygonInstanceRegister::Ins()->DestroyInstance(instance);
 	isDestroyed_ = true;
 
 
 }
 
-void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex)
+void ShellObject::Generate(const Vec3& Pos, const Vec3& ForwardVec, float CharaRotY, int ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 
 	/*===== 生成処理 =====*/
 
 	// BLASとInstanceを生成。
-	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Carapace/", "Carapace.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF], { L"Resource/Game/blackRed.png" });
-	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
+	blas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Item/Shell/", "shell.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::HITGROUP_ID::DEF]);
+	instance = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::SHADER_ID::DEF);
 
-	size_ = Vec3(20.0f, 20.0f, 20.0f);
-	PolygonInstanceRegister::Ins()->AddScale(insIndex_, size_);
+	size_ = Vec3(1.0f, 1.0f, 1.0f);
+	instance.lock()->ChangeScale(size_);
 
 	// OBBを設定。
 	obb_ = std::make_shared<OBB>();
-	obb_->Setting(blasIndex_, insIndex_);
+	obb_->Setting(blas_, instance);
 
 	// 変数を設定。
 	pos_ = Pos;
 	prevPos_ = Pos;
 	forwardVec_ = ForwardVec;
 	rotY_ = CharaRotY;
-	charaInsIndex_ = CharaInsIndex;
+	charaInstance = CharaInstance;
 	shellID_ = static_cast<SHELL_ID>(ShellID);
 	exitTimer_ = 0;
 	speed_ = SPEED;
@@ -71,7 +72,7 @@ void ShellObject::CheckHit(std::weak_ptr<BaseStage> StageData)
 
 	// 当たり判定関数に入れる値を設定。
 	BaseStage::ColliderInput input;
-	input.targetInsIndex_ = insIndex_;
+	input.targetInstance_ = instance;
 	input.targetOBB_ = obb_;
 	input.targetPos_ = pos_;
 	input.targetPrevPos_ = prevPos_;
@@ -202,10 +203,10 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 	else if (shellID_ == SHELL_ID::BEHIND) {
 
 		// 保持しているキャラの座標。
-		Vec3 charaPos = PolygonInstanceRegister::Ins()->GetPos(charaInsIndex_);
+		Vec3 charaPos = charaInstance.lock()->GetPos();
 
 		// 保持しているキャラの後ろベクトル
-		Vec3 charaBehindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), PolygonInstanceRegister::Ins()->GetRotate(charaInsIndex_));
+		Vec3 charaBehindVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), charaInstance.lock()->GetRotate());
 
 		// キャラと甲羅の距離
 		static const float CHARA_SHELL_DISTANCE = 70.0f;
@@ -214,24 +215,43 @@ void ShellObject::Update(std::weak_ptr<BaseStage> StageData)
 		pos_ = charaPos + charaBehindVec * CHARA_SHELL_DISTANCE;
 
 		// 保持しているキャラのしたベクトル
-		Vec3 underVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(charaInsIndex_));
+		Vec3 underVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), charaInstance.lock()->GetRotate());
 
 		// 位置調整用変ぅう
 		static const float UNDER_DISTANCCE = 10.0f;
 
 		pos_ += underVec * UNDER_DISTANCCE;
 
+		// インスタンスを回転させる。
+		instance.lock()->ChangeRotate(charaInstance.lock()->GetRotate());
+
 
 	}
 
 	// インスタンスも移動させる。
-	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex_, pos_);
+	instance.lock()->ChangeTrans(pos_);
 
 	// OBBを追従させる。
-	obb_->SetMat(insIndex_);
+	obb_->SetMat(instance);
 
 	// 座標を保存
 	prevPos_ = pos_;
+
+	// 大きさをデフォルトに近づける。
+	size_.x_ += (SCALE - size_.x_) / 3.0f;
+	size_.y_ += (SCALE - size_.y_) / 3.0f;
+	size_.z_ += (SCALE - size_.z_) / 3.0f;
+	instance.lock()->ChangeScale(size_);
+
+}
+
+void ShellObject::ChangeStatus(const Vec3& ForwardVec, int ShellID)
+{
+
+	/*===== ステータスを更新 ======*/
+
+	forwardVec_ = ForwardVec;
+	shellID_ = static_cast<SHELL_ID>(ShellID);
 
 }
 

@@ -1,19 +1,21 @@
 #include "OBB.h"
+#include "BLAS.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
 #include "FHelper.h"
 #include "HitGroupMgr.h"
+#include "PolygonInstance.h"
 
-void OBB::Setting(const int& BlasIndex, const int& InsIndex)
+void OBB::Setting(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== OBBをセッティング =====*/
 
 	// OBBをセット。
-	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
-	defLength_ = BLASRegister::Ins()->GetVertexLengthMax(BlasIndex);
+	pos_ = Instance.lock()->GetPos();
+	defLength_ = Blas.lock()->GetVertexLengthMax();
 	length_ = defLength_;
-	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	DirectX::XMMATRIX matRot_ = Instance.lock()->GetRotate();
 	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
@@ -25,8 +27,8 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 	int hitGroupID = static_cast<int>(HitGroupMgr::Ins()->DEF);
 	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[hitGroupID], { L"Resource/Game/black.png" }, false, true, true);
 
-	BLASRegister::Ins()->MulVec3Vertex(blasIndex_, length_);
-	BLASRegister::Ins()->Update(blasIndex_);
+	blasIndex_.lock()->MulVec3Vertex(length_);
+	blasIndex_.lock()->Update();
 
 	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
 
@@ -34,23 +36,23 @@ void OBB::Setting(const int& BlasIndex, const int& InsIndex)
 
 }
 
-void OBB::SetMat(const int& InsIndex)
+void OBB::SetMat(std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== InstanceIDを指定して行列を生成 =====*/
 
-	pos_ = PolygonInstanceRegister::Ins()->GetPos(InsIndex);
-	length_ = FHelper::MulMat(defLength_, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
-	DirectX::XMMATRIX matRot_ = PolygonInstanceRegister::Ins()->GetRotate(InsIndex);
+	pos_ = Instance.lock()->GetPos();
+	length_ = FHelper::MulMat(defLength_, Instance.lock()->GetScale());
+	DirectX::XMMATRIX matRot_ = Instance.lock()->GetRotate();
 	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
 #ifdef DEBUG
 
-	PolygonInstanceRegister::Ins()->ChangeRotate(insIndex_, PolygonInstanceRegister::Ins()->GetRotate(InsIndex));
-	PolygonInstanceRegister::Ins()->ChangeScale(insIndex_, PolygonInstanceRegister::Ins()->GetScale(InsIndex));
-	PolygonInstanceRegister::Ins()->ChangeTrans(insIndex_, PolygonInstanceRegister::Ins()->GetTrans(InsIndex));
+	insIndex_.lock()->ChangeRotate(Instance.lock()->GetRotate());
+	insIndex_.lock()->ChangeScale(Instance.lock()->GetScale());
+	insIndex_.lock()->ChangeTrans(Instance.lock()->GetPos());
 
 #endif
 

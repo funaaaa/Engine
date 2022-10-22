@@ -10,7 +10,7 @@
 #include <iomanip>
 #include "FileName.h"
 
-PlayerOperationObject::PlayerOperationObject(const int& ControllerIndex, const bool& IsWriteGhostInfo, Character* CharacterPointer)
+PlayerOperationObject::PlayerOperationObject(int ControllerIndex, bool IsWriteGhostInfo, Character* CharacterPointer)
 {
 
 	/*===== コンストラクタ =====*/

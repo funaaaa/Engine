@@ -5,10 +5,13 @@
 #include <d3d12.h>
 #include <DirectXMath.h>
 #include <vector>
+#include <array>
 #include <DirectXTex/DirectXTex.h>
+#include <string>
 
 struct Texture {
 	LPCWSTR filePath_;								// ファイル名
+	std::array<wchar_t, 128> filePathP_;			// ファイルパスのポインタ
 	Microsoft::WRL::ComPtr<ID3D12Resource> texBuff_;	// テクスチャバッファ
 	//以下は必ず必要ではないがあったら便利
 	DirectX::TexMetadata metadata_;					// 画像のサイズなど、テクスチャとしての各情報が入る
@@ -29,6 +32,8 @@ private:
 public:
 	// 画像をロードして識別番号を返す関数、ロード済みだったら識別番号を返す。
 	int LoadTexture(LPCWSTR FileName);
+	int LoadTexture(std::array<wchar_t, 128> FileName);
+	int LoadTexture(std::wstring FileName, const void* Src, const UINT64& Size);
 	// 画像を生成して識別番号を返す関数
 	int CreateTexture(DirectX::XMFLOAT4 Color);
 	// 識別番号の順番のシェーダーリソースビューを返す。

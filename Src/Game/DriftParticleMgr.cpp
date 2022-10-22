@@ -3,6 +3,8 @@
 #include "BLASRegister.h"
 #include "HitGroupMgr.h"
 #include "FHelper.h"
+#include "BLAS.h"
+#include "TextureManager.h"
 
 void DriftParticleMgr::Setting()
 {
@@ -26,15 +28,24 @@ void DriftParticleMgr::Setting()
 
 
 	// パーティクル用のスフィアのBLASを生成する。
-	smokeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smoke.png" }, false, false);
-	fireBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/fireBall.png" }, false, false);
-	bigAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/bigAura.png" }, false, false);
-	smallAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smallAura.png" }, false, false);
-	driftParticleBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/driftParticle.png" }, false, false);
-	bigAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/bigAuraOrange.png" }, false, false);
-	smallAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/smallAuraOrange.png" }, false, false);
-	driftParticleOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/driftParticleOrange.png" }, false, false);
-	jumpEffectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], { L"Resource/Game/jumpEffect.png" }, false, false);
+	smokeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	smokeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smoke.dds"));
+	fireBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	fireBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/fireBall.dds"));
+	bigAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	bigAuraBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/bigAura.dds"));
+	smallAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	smallAuraBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smallAura.dds"));
+	driftParticleBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	driftParticleBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/driftParticle.dds"));
+	bigAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	bigAuraOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/bigAuraOrange.dds"));
+	smallAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	smallAuraOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smallAuraOrange.dds"));
+	driftParticleOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	driftParticleOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/driftParticleOrange.dds"));
+	jumpEffectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	jumpEffectBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/jumpEffect.dds"));
 
 
 	for (auto& index : driftParticle_) {
@@ -72,7 +83,7 @@ void DriftParticleMgr::Init()
 
 }
 
-void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec)
+void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX MatRot, bool IsBoost, DriftParticleMgr::DELAY_ID DelayID, Vec3 ForwardVec)
 {
 
 	/*===== 生成処理 =====*/
@@ -98,7 +109,7 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 
 			if (index_->GetIsActive()) continue;
 
-			index_->GenerateSmoke(smokeBlas_, Pos, MatRot, ConstBufferData, IsBoost, ForwardVec);
+			index_->GenerateSmoke(smokeBlas_, Pos, MatRot, IsBoost, ForwardVec);
 
 			++generateCounter;
 			bool isDashOverTheAmount = (DelayID == DELAY_ID::DASH && GCOUNT_DASH <= generateCounter);
@@ -116,7 +127,7 @@ void DriftParticleMgr::GenerateSmoke(const Vec3& Pos, const DirectX::XMMATRIX Ma
 
 }
 
-void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX MatRot)
 {
 
 	/*===== 生成処理 =====*/
@@ -140,7 +151,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 		Vec3 random = FHelper::GetRandVec3(-500, 500) / 100.0f;
 
-		index_->GenerateFire(fireBlas_, Pos + random, MatRot, ConstBufferData);
+		index_->GenerateFire(fireBlas_, Pos + random, MatRot);
 
 		++generateCount;
 		if (GENERATE_COUNT_FIRE < generateCount) {
@@ -156,7 +167,7 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 }
 
-void DriftParticleMgr::GenerateAura(const int& CharaIndex, const int& TireInsIndex_, const int& Id, const bool& IsBoostRight, const bool& IsOrange, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateAura(int CharaIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, int Id, bool IsBoostRight, bool IsOrange)
 {
 
 	/*===== オーラを生成する =====*/
@@ -169,10 +180,10 @@ void DriftParticleMgr::GenerateAura(const int& CharaIndex, const int& TireInsInd
 		DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
 		bool isAuraBig = id == DriftParticle::ID::AURA_BIG;
 		if (IsOrange) {
-			index->GenerateAura(isAuraBig ? bigAuraOrangeBlas_ : smallAuraOrangeBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+			index->GenerateAura(isAuraBig ? bigAuraOrangeBlas_ : smallAuraOrangeBlas_, TireInstance, id, IsBoostRight);
 		}
 		else {
-			index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInsIndex_, id, IsBoostRight, ConstBufferData);
+			index->GenerateAura(isAuraBig ? bigAuraBlas_ : smallAuraBlas_, TireInstance, id, IsBoostRight);
 		}
 
 		if (isAuraBig) {
@@ -214,7 +225,7 @@ void DriftParticleMgr::GenerateAura(const int& CharaIndex, const int& TireInsInd
 
 }
 
-void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const bool& IsBoostRight, const bool& IsOrange, const int& Id, const float& DriftRate, const bool& IsLevelChange, DriftParticleMgr::DELAY_ID DelayID, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> TireInstance, bool IsBoostRight, bool IsOrange, int Id, float DriftRate, bool IsLevelChange, DriftParticleMgr::DELAY_ID DelayID)
 {
 
 	/*===== パーティクルを生成 =====*/
@@ -241,7 +252,7 @@ void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const boo
 			if (index_->GetIsActive()) continue;
 
 			DriftParticle::ID id = static_cast<DriftParticle::ID>(Id);
-			index_->GenerateDriftParticle(IsOrange ? driftParticleOrangeBlas_ : driftParticleBlas_, TireInsIndex_, id, IsBoostRight, IsLevelChange, ConstBufferData);
+			index_->GenerateDriftParticle(IsOrange ? driftParticleOrangeBlas_ : driftParticleBlas_, TireInstance, id, IsBoostRight, IsLevelChange);
 
 			++generateCounter;
 			if (GENERATE_COUNT < generateCounter) {
@@ -256,7 +267,7 @@ void DriftParticleMgr::GenerateDriftParticle(const int& TireInsIndex_, const boo
 
 }
 
-void DriftParticleMgr::GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::GenerateJumpEffect(std::weak_ptr<PolygonMeshInstance> CarBodyInstance)
 {
 
 	/*===== ジャンプアクション時のエフェクトを生成 =====*/
@@ -266,7 +277,7 @@ void DriftParticleMgr::GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstB
 
 		if (index->GetIsActive()) continue;
 
-		index->GenerateJumpEffect(jumpEffectBlas_, CarBodyInsIndex_, ConstBufferData);
+		index->GenerateJumpEffect(jumpEffectBlas_, CarBodyInstance);
 
 		break;
 
@@ -274,7 +285,7 @@ void DriftParticleMgr::GenerateJumpEffect(const int& CarBodyInsIndex_, RayConstB
 
 }
 
-void DriftParticleMgr::Update(RayConstBufferData& ConstBufferData)
+void DriftParticleMgr::Update()
 {
 
 	/*===== 更新処理 =====*/
@@ -283,13 +294,13 @@ void DriftParticleMgr::Update(RayConstBufferData& ConstBufferData)
 
 		if (!index_->GetIsActive()) continue;
 
-		index_->Update(ConstBufferData);
+		index_->Update();
 
 	}
 
 }
 
-bool DriftParticleMgr::IsAuraGenerated(const int& CharaIndex)
+bool DriftParticleMgr::IsAuraGenerated(int CharaIndex)
 {
 
 	// ビッグオーラが生成されているか。
@@ -321,7 +332,7 @@ bool DriftParticleMgr::IsAuraGenerated(const int& CharaIndex)
 	return isGenerateBigAura && isGenerateSmallAura;
 }
 
-void DriftParticleMgr::DestroyAura(const int& CharaIndex)
+void DriftParticleMgr::DestroyAura(int CharaIndex)
 {
 
 	/*===== オーラを破棄 =====*/

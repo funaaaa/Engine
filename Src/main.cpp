@@ -5,19 +5,20 @@
 #include "Camera.h"
 #include "HitGroupMgr.h"
 #include "DescriptorHeapMgr.h"
-#include "PiplineManager.h"
+#include "PipelineManager.h"
 #include "PolygonInstanceRegister.h"
 #include "Input.h"
 #include "BLASRegister.h"
+#include "RayEngine.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
-	DirectXBase::Ins()->Init();									// DirectX基盤の初期化
+	Engine::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
 	/*----------パイプライン生成----------*/
-	PiplineManager::Ins()->Init();
+	PipelineManager::Ins()->Init();
 
 	/*----------変数宣言----------*/
 	srand(static_cast<unsigned int>(time(NULL)));
@@ -46,11 +47,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// シーンクラス。
 	SceneMgr::Ins()->Init();
 
+	// レイトレエンジンを設定。
+	RayEngine::Ins()->Setting();
+
+
 	/*----------ゲームループ----------*/
 	while (true) {
 
 		// 描画前処理
-		DirectXBase::Ins()->ProcessBeforeDrawing();
+		Engine::Ins()->ProcessBeforeDrawing();
 
 
 		SceneMgr::Ins()->Update();
@@ -64,7 +69,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 
 		// 描画後処理
-		DirectXBase::Ins()->ProcessAfterDrawing();
+		Engine::Ins()->ProcessAfterDrawing();
 
 	}
 

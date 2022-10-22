@@ -10,6 +10,7 @@
 #include "Vec.h"
 #include <wtypes.h>
 #include "Singleton.h"
+#include "GLTF.h"
 
 class ModelDataManager : public Singleton<ModelDataManager> {
 
@@ -26,12 +27,13 @@ public:
 
 	// マテリアル
 	struct Material {
-		Vec3 ambient_ = { 0.3f,0.3f,0.3f };	//アンビエント影響度
-		float pad1_;
-		Vec3 diffuse_ = { 0.3f,0.3f,0.3f };	//ディフューズ影響度
-		float pad2_;
-		Vec3 specular = { 0.3f,0.3f,0.3f };//スペキュラー影響度
-		float alpha_;									//アルファ
+		Vec3 baseColor_;
+		float metalness_;
+		float specular_;
+		float roughness_;
+		int textureHandle_;
+		Vec2 pad_;
+		Material() :baseColor_(Vec3(1, 1, 1)), metalness_(0.1f), specular_(0.1f), roughness_(0.0f), textureHandle_(-1) {};
 	};
 
 	// データを渡す構造体
@@ -42,6 +44,7 @@ public:
 		Material material_;
 		Vec3 vertexMax_;	// 頂点における各軸の最大の位置
 		Vec3 vertexMin_;	// 頂点における各軸の最小の位置
+		int textureHandle_;
 
 	};
 
@@ -59,23 +62,24 @@ public:
 private:
 
 
-	std::vector<ModelData> modelData_;			//モデルデータを保存しておく配列
+	std::vector<ModelData> modelData_;			// モデルデータを保存しておく配列
+	std::vector<std::wstring> filePath_;		// ファイルパス保存用
+	std::vector<GLTF> gltf_;
 
 public:
 
 	// objファイルをロードして値をコピーする。ロード済みのファイルだったらロードせずにコピーだけ行う。
 	void LoadObj(std::string DirectoryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing);
+	void LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer);
 
 	// objファイルの読み込み時にマテリアルをロードするための関数
-	void LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData);
+	void LoadObjMaterial(std::string DirectoryPath, const std::string& MaterialFileName, ModelData& ModelData, ObjectData& ObjectBuffer);
 
 	// 法線の平均を求める関数
 	void CalculateSmoothedVertexNormals(std::map<unsigned short, std::vector<unsigned short>>& SmoothData, ObjectData& ObjectBuffer, ModelData& ModelData);
 
 	int GetModelCount() { return static_cast<int>(modelData_.size()); }
-	const ModelData& GetModelData(const int& Index) { return modelData_[Index]; }
-
-private:
+	const ModelData& GetModelData(int Index) { return modelData_[Index]; }
 
 	// 最大最小の頂点を保存。
 	void SaveVertexMinMaxInfo(ObjectData& ObjectBuffer, const Vec3& Pos);

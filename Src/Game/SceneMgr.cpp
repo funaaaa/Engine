@@ -24,6 +24,9 @@ void SceneMgr::Init()
 	nowScene_ = BaseScene::SCENE_ID::TITLE;
 	nextScene_ = BaseScene::SCENE_ID::TITLE;
 
+	// ƒV[ƒ“‚ð‰Šú‰»B
+	scenes_[nowScene_]->Init();
+
 }
 
 void SceneMgr::Update()

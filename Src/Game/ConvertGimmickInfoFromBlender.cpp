@@ -40,7 +40,7 @@ void ConvertGimmickInfoFromBlender::Convert(std::string ModelPath, std::string M
 
 }
 
-Vec3 ConvertGimmickInfoFromBlender::GetVertex(const int& Index)
+Vec3 ConvertGimmickInfoFromBlender::GetVertex(int Index)
 {
 
 	/*===== ’¸“_‚ðŽæ“¾ =====*/

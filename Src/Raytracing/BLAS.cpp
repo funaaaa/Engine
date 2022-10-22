@@ -8,22 +8,17 @@
 #include "TextureManager.h"
 #include "FHelper.h"
 
-void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath, const bool& IsSmoothing, const bool& IsOpaque)
+
+void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
 	// パスを保存。
-	texturePath_ = TexturePath;
 	modelPath_ = DirectryPath + ModelName;
 
-	// テクスチャを読み込む。
-	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
-	for (auto& index_ : TexturePath) {
-
-		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(index_));
-
-	}
+	// BlasのIndexを保存。
+	blasIndex_ = BlasIndex;
 
 
 	/*-- 形状データを読み込む --*/
@@ -32,7 +27,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	ModelDataManager::ObjectData dataBuff;
 
 	// モデルをロード。
-	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, IsSmoothing);
+	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, false);
 
 	// 各成分の値を保存。
 	vertexMax_ = dataBuff.vertexMax_;
@@ -40,6 +35,9 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	// マテリアル情報を保存。
 	material_ = dataBuff.material_;
+
+	// テクスチャを保存。
+	baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// マテリアル用定数バッファを生成。
 	materialBuffer_ = CreateBuffer(
@@ -148,18 +146,13 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 }
 
-void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, std::vector<LPCWSTR> TexturePath)
+void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
-	// テクスチャを読み込む。
-	const int TEXTURE_PATH_COUNT = static_cast<int>(TexturePath.size());
-	for (int index = 0; index < TEXTURE_PATH_COUNT; ++index) {
-
-		textureHandle_.emplace_back(TextureManager::Ins()->LoadTexture(TexturePath[index]));
-
-	}
+	// BlasのIndexを保存。
+	blasIndex_ = BlasIndex;
 
 	/*-- 形状データを読み込む --*/
 
@@ -171,6 +164,9 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	modelIndex_ = FbxLoader::Ins()->LoadModelFromFile(DirectryPath, ModelName);
 
 	FbxLoader::Ins()->GetFbxData(modelIndex_, modelVertexData, modelIndexData);
+
+	// テクスチャを取得。
+	baseTextureHandle_ = FbxLoader::Ins()->GetTextureIndex(modelIndex_);
 
 	// マテリアル用定数バッファを生成。
 	materialBuffer_ = CreateBuffer(
@@ -272,26 +268,66 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
 	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
 	for (auto& index_ : vertex_) {
 		vertexPos_[counter] = index_.position_;
 		vertexNormal_[counter] = index_.normal_;
+		vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
 
+	// 頂点を保存。
+	defVertex_ = vertex_;
+
+	// ダーティフラグ
+	isChangeVertex = true;
+	isChangeTexture = true;
+
 	isGenerate_ = true;
+
+	// 最小と最大の頂点を保存。
+	ModelDataManager::ObjectData dataBuff;
+	for (auto& index : vertexPos_) {
+
+		ModelDataManager::Ins()->SaveVertexMinMaxInfo(dataBuff, index);
+
+	}
+	vertexMin_ = dataBuff.vertexMin_;
+	vertexMax_ = dataBuff.vertexMax_;
 
 }
 
-void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstring& HitGroupName, std::vector<int> TextureHandle, const bool& IsOpaque)
+#include "FString.h"
+void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque)
 {
 
 	/*===== BLASを生成する処理 =====*/
 
-	// テクスチャを読み込む。
-	textureHandle_ = TextureHandle;
+	// パスを保存。
+	modelPath_ = FString::WStringToString(Path);
+
+	// BlasのIndexを保存。
+	blasIndex_ = BlasIndex;
+
 
 	/*-- 形状データを読み込む --*/
+
+	// 読み込んだデータを一時保存する用のバッファ。
+	ModelDataManager::ObjectData dataBuff;
+
+	// モデルをロード。
+	ModelDataManager::Ins()->LoadGLTF(Path, dataBuff);
+
+	// 各成分の値を保存。
+	vertexMax_ = dataBuff.vertexMax_;
+	vertexMin_ = dataBuff.vertexMin_;
+
+	// マテリアル情報を保存。
+	material_ = dataBuff.material_;
+
+	// テクスチャを保存。
+	baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// マテリアル用定数バッファを生成。
 	materialBuffer_ = CreateBuffer(
@@ -308,18 +344,18 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点数を求める。
-	vertexCount_ = static_cast<UINT>(Data.vertex_.size());
+	vertexCount_ = static_cast<UINT>(dataBuff.vertex_.size());
 
 	// 頂点インデックス数を求める。
-	indexCount_ = static_cast<UINT>(Data.index_.size());
+	indexCount_ = static_cast<UINT>(dataBuff.index_.size());
 
 	// 頂点データを変換。
 	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
 
 		RayVertex buff{};
-		buff.normal_ = Data.vertex_[index].normal_;
-		buff.position_ = Data.vertex_[index].pos_;
-		buff.uv_ = Data.vertex_[index].uv_;
+		buff.normal_ = dataBuff.vertex_[index].normal_;
+		buff.position_ = dataBuff.vertex_[index].pos_;
+		buff.uv_ = dataBuff.vertex_[index].uv_;
 
 		// データを保存。
 		vertex_.push_back(buff);
@@ -327,7 +363,7 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 	}
 
 	// 頂点インデックスデータを保存。
-	vertIndex_ = Data.index_;
+	vertIndex_ = dataBuff.index_;
 
 	// 頂点サイズを求める。
 	vertexStride_ = sizeof(RayVertex);
@@ -367,8 +403,8 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
 	isOpaque_ = IsOpaque;
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_);
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -380,12 +416,21 @@ void BLAS::GenerateBLASData(ModelDataManager::ObjectData Data, const std::wstrin
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
 	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
 	int counter = 0;
 	for (auto& index_ : vertex_) {
 		vertexPos_[counter] = index_.position_;
 		vertexNormal_[counter] = index_.normal_;
+		vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
+
+	// 頂点を保存。
+	defVertex_ = vertex_;
+
+	// ダーティフラグ
+	isChangeVertex = true;
+	isChangeTexture = true;
 
 	isGenerate_ = true;
 
@@ -446,7 +491,7 @@ void BLAS::Update()
 	asDesc.ScratchAccelerationStructureData = updateBuffer_->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -512,14 +557,33 @@ void BLAS::StopAnimation()
 	}
 
 }
+void BLAS::IsChangeMaterial()
+{
+
+	/*===== マテリアルを書き換えた際の処理 =====*/
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	isChangeVertex = true;
+
+}
+void BLAS::ChangeBaseTexture(int Index)
+{
+	baseTextureHandle_ = Index;
+	isChangeTexture = true;
+}
 #include "HitGroupMgr.h"
 #include <assert.h>
 BLAS::BLAS()
 {
 
 	isGenerate_ = false;
+	baseTextureHandle_ = -1;
+	normalMapHandle_ = -1;
 
 }
+
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 
@@ -540,8 +604,8 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	// 保存されているヒットグループ名と違っていたら書き込まない。
 	//if (HitGroupName == shader) {
 
-	auto id_ = rtsoProps_->GetShaderIdentifier(shader.c_str());
-	if (id_ == nullptr) {
+	auto mode_ = rtsoProps_->GetShaderIdentifier(shader.c_str());
+	if (mode_ == nullptr) {
 		throw std::logic_error("Not found ShaderIdentifier");
 	}
 
@@ -549,7 +613,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	if (isChangeVertex) {
 
 		// シェーダー識別子を書き込む。
-		memcpy(Dst, id_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+		memcpy(Dst, mode_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
 		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 
 		// 今回のプログラムでは以下の順序でディスクリプタを記録。
@@ -590,20 +654,42 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
 		for (int index = 0; index < srvCount; ++index) {
 
-			// このインデックスのテクスチャが存在していなかったら
-			if (textureHandle_.size() <= index) {
+			// 0番目は基本テクスチャ。
+			if (index == 0) {
 
-				// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
+				// 基本のテクスチャが設定されていない。
+				if (baseTextureHandle_ == -1) assert(0);
+
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
+			// 1番目は法線マップテクスチャ。
+			else if (index == 1) {
+
+				if (normalMapHandle_ != -1) {
+
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(normalMapHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+				}
+				else {
+
+					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+				}
+
+			}
+			// それ以降は通常テクスチャを書き込んでメモリの隙間を埋める。
 			else {
 
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
+
 		}
 
 		isChangeTexture = false;
@@ -632,61 +718,6 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	Dst = entryBegin + recordSize;
 	return Dst;
 
-	//}
-
-
-	// ヒットグループが複数あったときの処理。今は一つしか無いので消す。
-	//else {
-
-	//	// シェーダー識別子を書き込む。
-	//	auto idBuff = rtsoProps->GetShaderIdentifier(HitGroupName);
-	//	memcpy(Dst, idBuff, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-	//	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
-	//	// 今回のプログラムでは以下の順序でディスクリプタを記録。
-	//	// [0] : インデックスバッファ
-	//	// [1] : 頂点バッファ
-	//	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-	//	Dst += WriteGPUDescriptor(Dst, &indexDescriptor.GetGPUHandle());
-	//	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor.GetGPUHandle());
-
-	//	// マテリアル用のバッファをセット。
-	//	Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
-
-	//	// ヒットグループ名からヒットグループ名IDを取得する。
-	//	int hitGroupID = HitGroupMgr::Ins()->GetHitGroupID(HitGroupName);
-
-	//	// 頂点、インデックス、マテリアルのオフセット
-	//	const int OFFSET_VERTEX_INDEX_MATERIAL = 3;
-
-	//	// ヒットグループIDからSRVの数を取得。
-	//	int srvCount = HitGroupMgr::Ins()->GetHitGroupUAVCount(hitGroupID) + HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
-
-	//	// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
-	//	// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
-	//	for (int index = 0; index < srvCount; ++index) {
-
-	//		// このインデックスのテクスチャが存在していなかったら
-	//		if (textureHandle_.size() <= index) {
-
-	//			// メモリ上にズレが生じてしまうので先頭のテクスチャを書き込む。
-	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[0]);
-	//			WriteGPUDescriptor(Dst, &texHandle);
-
-	//		}
-	//		else {
-
-	//			CD3DX12_GPU_DESCRIPTOR_HANDLE texHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(textureHandle_[index]);
-	//			Dst += WriteGPUDescriptor(Dst, &texHandle);
-
-	//		}
-	//	}
-
-	//	Dst = entryBegin + recordSize;
-	//	return Dst;
-
-	//}
-
 }
 
 void BLAS::Init()
@@ -702,20 +733,8 @@ void BLAS::Init()
 	vertexUV_.clear();
 	vertIndex_.clear();
 	isGenerate_ = false;
-
-}
-
-void BLAS::ChangeTex(const int& Index, const int& TextureHandle)
-{
-
-	/*===== テクスチャを変更 =====*/
-
-	// インデックスが範囲外じゃないかを検索。
-	if (Index < 0 || textureHandle_.size() <= Index) assert(0);
-
-	textureHandle_[Index] = TextureHandle;
-
-	isChangeTexture = true;
+	baseTextureHandle_ = -1;
+	normalMapHandle_ = -1;
 
 }
 
@@ -823,7 +842,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -841,7 +860,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RES
 
 }
 
-D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(const bool& IsOpaque)
+D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(bool IsOpaque)
 {
 
 	/*===== BLAS生成時に設定を取得する用関数 =====*/
@@ -887,7 +906,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 
 	// 関数を使って必要なメモリ量を求める.
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
-	DirectXBase::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
+	Engine::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &blasPrebuild
 	);
 
@@ -919,7 +938,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
 	buildASDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
-	DirectXBase::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
 
@@ -937,28 +956,28 @@ void BLAS::CreateAccelerationStructure()
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 	uavBarrier.UAV.pResource = blasBuffer_.Get();
-	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
-	DirectXBase::Ins()->cmdList_->Close();
+	Engine::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
+	Engine::Ins()->cmdList_->Close();
 
 	// BLASを構築。
-	//ID3D12CommandList* pCmdList[] = { DirectXBase::Ins()->cmdList.Get() };
+	//ID3D12CommandList* pCmdList[] = { Engine::Ins()->cmdList.Get() };
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { DirectXBase::Ins()->cmdList_.Get() };
-	DirectXBase::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->cmdList_.Get() };
+	Engine::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
 
 	// グラフィックコマンドリストの完了待ち
-	DirectXBase::Ins()->cmdQueue_->Signal(DirectXBase::Ins()->fence_.Get(), ++DirectXBase::Ins()->fenceVal_);
-	if (DirectXBase::Ins()->fence_->GetCompletedValue() != DirectXBase::Ins()->fenceVal_) {
+	Engine::Ins()->cmdQueue_->Signal(Engine::Ins()->fence_.Get(), ++Engine::Ins()->fenceVal_);
+	if (Engine::Ins()->fence_->GetCompletedValue() != Engine::Ins()->fenceVal_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		DirectXBase::Ins()->fence_->SetEventOnCompletion(DirectXBase::Ins()->fenceVal_, event);
+		Engine::Ins()->fence_->SetEventOnCompletion(Engine::Ins()->fenceVal_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	// コマンドアロケータのリセット
-	DirectXBase::Ins()->cmdAllocator_->Reset();	//キューをクリア
+	Engine::Ins()->cmdAllocator_->Reset();	//キューをクリア
 
 	// コマンドリストのリセット
-	DirectXBase::Ins()->cmdList_->Reset(DirectXBase::Ins()->cmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+	Engine::Ins()->cmdList_->Reset(Engine::Ins()->cmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
 
 }

@@ -24,8 +24,8 @@ public:
 
 	// コンストラクタ
 	Vec3() :x_(0), y_(0), z_(0) {};
-	Vec3(const float& X, const float& Y, const float& Z) : x_(X), y_(Y), z_(Z) {};
-	Vec3(const float& X) :x_(X), y_(X), z_(X) {};
+	Vec3(float X, float Y, float Z) : x_(X), y_(Y), z_(Z) {};
+	Vec3(float X) :x_(X), y_(X), z_(X) {};
 	Vec3(const XMFLOAT3& Rhs) :x_(Rhs.x), y_(Rhs.y), z_(Rhs.z) {};
 	Vec3(const XMVECTOR& Rhs) :x_(Rhs.m128_f32[0]), y_(Rhs.m128_f32[1]), z_(Rhs.m128_f32[2]) {};
 
@@ -86,13 +86,13 @@ public:
 	Vec3 operator*(const Vec3& Rhs)const {
 		return Vec3(x_ * Rhs.x_, y_ * Rhs.y_, z_ * Rhs.z_);
 	};
-	Vec3 operator*(const float& Rhs)const {
+	Vec3 operator*(float Rhs)const {
 		return Vec3(x_ * Rhs, y_ * Rhs, z_ * Rhs);
 	};
 	Vec3 operator/(const Vec3& Rhs)const {
 		return Vec3(x_ / Rhs.x_, y_ / Rhs.y_, z_ / Rhs.z_);
 	};
-	Vec3 operator/(const float& Rhs)const {
+	Vec3 operator/(float Rhs)const {
 		return Vec3(x_ / Rhs, y_ / Rhs, z_ / Rhs);
 	};
 	Vec3 operator%(const Vec3& Rhs) const {
@@ -135,27 +135,27 @@ public:
 		z_ = fmodf(z_, Rhs.z_);
 	};
 
-	void operator+=(const float& Rhs) {
+	void operator+=(float Rhs) {
 		x_ += Rhs;
 		y_ += Rhs;
 		z_ += Rhs;
 	};
-	void operator-=(const float& Rhs) {
+	void operator-=(float Rhs) {
 		x_ -= Rhs;
 		y_ -= Rhs;
 		z_ -= Rhs;
 	};
-	void operator*=(const float& Rhs) {
+	void operator*=(float Rhs) {
 		x_ *= Rhs;
 		y_ *= Rhs;
 		z_ *= Rhs;
 	};
-	void operator/=(const float& Rhs) {
+	void operator/=(float Rhs) {
 		x_ /= Rhs;
 		y_ /= Rhs;
 		z_ /= Rhs;
 	};
-	void operator%=(const float& Rhs) {
+	void operator%=(float Rhs) {
 		x_ = fmodf(x_, Rhs);
 		y_ = fmodf(y_, Rhs);
 		z_ = fmodf(z_, Rhs);
@@ -291,8 +291,8 @@ public:
 
 	// コンストラクタ
 	Vec2() :x_(0), y_(0) {};
-	Vec2(const float& X, const float& Y) : x_(X), y_(Y) {};
-	Vec2(const float& X) :x_(X), y_(X) {};
+	Vec2(float X, float Y) : x_(X), y_(Y) {};
+	Vec2(float X) :x_(X), y_(X) {};
 	Vec2(const XMFLOAT2& Rhs) :x_(Rhs.x), y_(Rhs.y) {};
 
 	// 内積
@@ -340,13 +340,13 @@ public:
 	Vec2 operator*(const Vec2& Rhs)const {
 		return Vec2(x_ * Rhs.x_, y_ * Rhs.y_);
 	};
-	Vec2 operator*(const float& Rhs)const {
+	Vec2 operator*(float Rhs)const {
 		return Vec2(x_ * Rhs, y_ * Rhs);
 	};
 	Vec2 operator/(const Vec2& Rhs)const {
 		return Vec2(x_ / Rhs.x_, y_ / Rhs.y_);
 	};
-	Vec2 operator/(const float& Rhs)const {
+	Vec2 operator/(float Rhs)const {
 		return Vec2(x_ / Rhs, y_ / Rhs);
 	};
 	Vec2 operator%(const Vec2& Rhs) const {
@@ -383,23 +383,23 @@ public:
 		y_ = fmodf(y_, Rhs.y_);
 	};
 
-	void operator+=(const float& Rhs) {
+	void operator+=(float Rhs) {
 		x_ += Rhs;
 		y_ += Rhs;
 	};
-	void operator-=(const float& Rhs) {
+	void operator-=(float Rhs) {
 		x_ -= Rhs;
 		y_ -= Rhs;
 	};
-	void operator*=(const float& Rhs) {
+	void operator*=(float Rhs) {
 		x_ *= Rhs;
 		y_ *= Rhs;
 	};
-	void operator/=(const float& Rhs) {
+	void operator/=(float Rhs) {
 		x_ /= Rhs;
 		y_ /= Rhs;
 	};
-	void operator%=(const float& Rhs) {
+	void operator%=(float Rhs) {
 		x_ = fmodf(x_, Rhs);
 		y_ = fmodf(y_, Rhs);
 	};

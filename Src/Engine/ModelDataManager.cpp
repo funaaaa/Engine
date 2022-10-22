@@ -1,4 +1,5 @@
 #include "ModelDataManager.h"
+#include <array>
 #pragma warning(push)
 #pragma warning(disable:4099)
 #pragma warning(disable:4023)
@@ -10,6 +11,7 @@
 #pragma warning(disable:4267)
 #include <memory>
 #pragma warning(pop)
+#include "GLTF.h"
 
 void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, ObjectData& ObjectBuffer, bool IsSmoothing)
 {
@@ -136,7 +138,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				std::string materialFileName;
 				lineStream >> materialFileName;
 				// マテリアルの読み込み
-				LoadObjMaterial(DirectryPath + materialFileName, modelData_.at(modelData_.size() - 1));
+				LoadObjMaterial(DirectryPath, DirectryPath + materialFileName, modelData_.at(modelData_.size() - 1), ObjectBuffer);
 				ObjectBuffer.material_ = modelData_[modelData_.size() - 1].material_;
 
 			}
@@ -154,6 +156,10 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 			for (auto& index : position_) {
 				ObjectBuffer.vertex_.emplace_back();
 				ObjectBuffer.vertex_.back().pos_ = index;
+			}
+			for (auto& index : position_) {
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertex_.emplace_back();
+				modelData_[(static_cast<int>(modelData_.size()) - 1)].vertex_.back().pos_ = index;
 			}
 		}
 
@@ -173,7 +179,93 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 
 }
 
-void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, ModelData& ModelData)
+#include "FString.h"
+void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
+
+	/*===== GLTFをロード =====*/
+
+	// gltfファイルがロード済みかどうか
+	bool isLoad = false;
+	// ロード済みだった場合、何番目の要素に保存されているのかを取得する変数
+	int dataNumber = 0;
+
+	const int MODELDATA_SIZE = static_cast<int>(modelData_.size());
+	for (int index = 0; index < MODELDATA_SIZE; ++index) {
+		if (modelData_[index].modelName_ == FString::WStringToString(Path)) {
+			isLoad = true;
+			dataNumber = index;
+			break;
+		}
+	}
+
+	// gltfファイルが未ロードだったらロードする
+	if (!isLoad) {
+
+		modelData_.push_back({});
+		ModelDataManager::modelData_.at(ModelDataManager::modelData_.size() - 1).modelName_ = FString::WStringToString(Path);
+
+		gltf_.emplace_back(GLTF());
+		gltf_.back().LoadModel(Path);
+
+		// モデルのデータを取得。
+		GLTF::VertexAttributeVisitor vertexInfo = gltf_.back().GetVertexData();
+		filePath_.emplace_back(gltf_.back().GetFileName());
+		for (auto& index : vertexInfo.positionBuffer) {
+
+			Vertex buff;
+			buff.pos_ = index;
+			buff.normal_ = vertexInfo.normalBuffer[static_cast<int>(&index - &vertexInfo.positionBuffer[0])];
+			buff.uv_ = vertexInfo.texcoordBuffer[static_cast<int>(&index - &vertexInfo.positionBuffer[0])];
+
+			// 頂点の最大と最小を保存しておく。
+			SaveVertexMinMaxInfo(ObjectBuffer, buff.pos_);
+			SaveVertexMinMaxInfo(ObjectBuffer, buff.pos_);
+
+			ObjectBuffer.vertex_.emplace_back(buff);
+			modelData_.back().vertex_.emplace_back(buff);
+
+		}
+		for (auto& index : vertexInfo.indexBuffer) {
+
+			ObjectBuffer.index_.emplace_back(index);
+			modelData_.back().index_.emplace_back(index);
+
+		}
+		ObjectBuffer.textureHandle_ = gltf_.back().GetTextureIndex();
+
+		// マテリアルを保存。
+		ObjectBuffer.material_.baseColor_ = gltf_.back().GetMaterial().baseColor_;
+		ObjectBuffer.material_.metalness_ = gltf_.back().GetMaterial().metalness_;
+		ObjectBuffer.material_.roughness_ = gltf_.back().GetMaterial().roughness_;
+		ObjectBuffer.material_.specular_ = gltf_.back().GetMaterial().specular_;
+
+		modelData_.back().material_.baseColor_ = gltf_.back().GetMaterial().baseColor_;
+		modelData_.back().material_.metalness_ = gltf_.back().GetMaterial().metalness_;
+		modelData_.back().material_.roughness_ = gltf_.back().GetMaterial().roughness_;
+		modelData_.back().material_.specular_ = gltf_.back().GetMaterial().specular_;
+		modelData_.back().material_.textureHandle_ = ObjectBuffer.textureHandle_;
+
+
+		return;
+
+	}
+
+	// gltfのデータをObjectDataに入れる
+	for (auto& index_ : modelData_[dataNumber].index_) {
+		ObjectBuffer.index_.push_back(index_);
+	}
+	for (auto& index_ : modelData_[dataNumber].vertex_) {
+		ObjectBuffer.vertex_.push_back(index_);
+	}
+	ObjectBuffer.material_ = modelData_[dataNumber].material_;
+	ObjectBuffer.vertexMin_ = modelData_[dataNumber].vertexMin_;
+	ObjectBuffer.vertexMax_ = modelData_[dataNumber].vertexMax_;
+	ObjectBuffer.textureHandle_ = modelData_[dataNumber].material_.textureHandle_;
+
+}
+
+#include "TextureManager.h"
+void ModelDataManager::LoadObjMaterial(std::string DirectoryPath, const std::string& MaterialFileName, ModelData& ModelData, ObjectData& ObjectBuffer)
 {
 
 	// ファイルストリーム
@@ -201,23 +293,39 @@ void ModelDataManager::LoadObjMaterial(const std::string& MaterialFileName, Mode
 			// マテリアル名の読み込み
 			// lineStream >> ModelData.material.name;
 		}
-		// 先頭文字列がKaならアンビエント色
-		if (key == "Ka") {
-			lineStream >> ModelData.material_.ambient_.x_;
-			lineStream >> ModelData.material_.ambient_.y_;
-			lineStream >> ModelData.material_.ambient_.z_;
-		}
-		// 先頭文字列がKdならディフューズ色
+		//// 先頭文字列がKaならアンビエント色
+		//if (key == "Ka") {
+		//	lineStream >> ModelData.material_.ambient_.x_;
+		//	lineStream >> ModelData.material_.ambient_.y_;
+		//	lineStream >> ModelData.material_.ambient_.z_;
+		//}
+		//// 先頭文字列がKdならディフューズ色
 		if (key == "Kd") {
-			lineStream >> ModelData.material_.diffuse_.x_;
-			lineStream >> ModelData.material_.diffuse_.y_;
-			lineStream >> ModelData.material_.diffuse_.z_;
+			lineStream >> ModelData.material_.roughness_;
+			//	lineStream >> ModelData.material_.diffuse_.x_;
+			//	lineStream >> ModelData.material_.diffuse_.y_;
+			//	lineStream >> ModelData.material_.diffuse_.z_;
 		}
 		// 先頭文字がKsならスペキュラー色
 		if (key == "Ks") {
-			lineStream >> ModelData.material_.specular.x_;
-			lineStream >> ModelData.material_.specular.y_;
-			lineStream >> ModelData.material_.specular.z_;
+			lineStream >> ModelData.material_.metalness_;
+			//lineStream >> ModelData.material_.specular.y_;
+			//lineStream >> ModelData.material_.specular.z_;
+		}
+		// 先頭文字がmap_Kdならテクスチャ
+		if (key == "map_Kd") {
+
+			std::array<wchar_t, 128> wFilePath;
+
+			std::string fullPath;
+			lineStream >> fullPath;
+			fullPath = DirectoryPath + fullPath;
+
+			MultiByteToWideChar(CP_ACP, 0, fullPath.c_str(), -1, wFilePath.data(), static_cast<int>(wFilePath.size()));
+
+			// テクスチャをロード。
+			ObjectBuffer.textureHandle_ = TextureManager::Ins()->LoadTexture(wFilePath);
+
 		}
 	}
 }

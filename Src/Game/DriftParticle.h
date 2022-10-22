@@ -2,14 +2,18 @@
 #include "Vec.h"
 #include "ConstBuffers.h"
 #include <DirectXPackedVector.h>
+#include <memory>
+
+class PolygonMeshInstance;
+class BLAS;
 
 // ドリフト時のパーティクル
 class DriftParticle {
 
 private:
 
-	int particleIns_;		// パーティクルのインスタンスID
-	int blasIndex_;			// BLASのインデックス
+	std::weak_ptr<PolygonMeshInstance> instance_;	// パーティクルのインスタンスID
+	std::weak_ptr<BLAS> blas_;						// BLASのインデックス
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
 	Vec3 pos_;				// 座標
 	Vec3 forardVec_;		// 移動方向ベクトル
@@ -17,7 +21,7 @@ private:
 	bool isActive_;			// 有効化フラグ
 	bool isAppearingNow_;	// 出現中フラグ アルファ値を濃くする。
 	int appearingTimer_;	// 出現してから消えるまでのタイマー
-	int trackedID_;			// 追跡対象のID
+	std::weak_ptr<PolygonMeshInstance> trackedInstance;			// 追跡対象のID
 	bool isTrackRight_;		// どちら側のタイヤに追跡するか t:右 f:左
 
 	const int APPEARING_TIMER = 5;
@@ -86,7 +90,7 @@ public:
 
 private:
 
-	ID id_;
+	ID mode_;
 
 
 public:
@@ -95,22 +99,22 @@ public:
 	DriftParticle();
 
 	// セッティング処理
-	void Setting(const int& BlasIndex, const int ConstBufferIndex);
+	void Setting(std::weak_ptr<BLAS> Blas, const int ConstBufferIndex);
 
 	// 初期化処理
 	void Init();
 
 	// 生成処理
-	void GenerateSmoke(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData, const bool& IsBoost, Vec3 ForwardVec);
-	void GenerateFire(const int& BlasIndex, const Vec3& Pos, const DirectX::XMMATRIX MatRot, RayConstBufferData& ConstBufferData);
-	void GenerateAura(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, RayConstBufferData& ConstBufferData);
-	void GenerateDriftParticle(const int& BlasIndex, const int& TireInsIndex_, const ID& Id, const bool& IsBoostRight, const bool& IsLevelChange, RayConstBufferData& ConstBufferData);
-	void GenerateJumpEffect(const int& BlasIndex, const int& CarBodyInsIndex, RayConstBufferData& ConstBufferData);
+	void GenerateSmoke(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot,  bool IsBoost, Vec3 ForwardVec);
+	void GenerateFire(std::weak_ptr<BLAS> Blas, const Vec3& Pos, const DirectX::XMMATRIX MatRot);
+	void GenerateAura(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, bool IsBoostRight);
+	void GenerateDriftParticle(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> TireInstance, const ID& Id, bool IsBoostRight, bool IsLevelChange);
+	void GenerateJumpEffect(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> CarBodyInstance);
 
 	// 更新処理
-	void Update(RayConstBufferData& ConstBufferData);
+	void Update();
 
 	// アクセッサ
-	const bool& GetIsActive() { return isActive_; }
+	bool GetIsActive() { return isActive_; }
 
 };

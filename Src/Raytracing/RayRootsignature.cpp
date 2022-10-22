@@ -1,5 +1,5 @@
 #include "RayRootsignature.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 
 void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT ShaderRegister, UINT RegisterSpace)
 {
@@ -41,7 +41,7 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT Shade
 
 }
 
-void RayRootsignature::AddStaticSampler(const int& RegisterSpace) {
+void RayRootsignature::AddStaticSampler(int RegisterSpace) {
 
 	/*===== スタティックサンプラー追加処理 =====*/
 
@@ -57,7 +57,7 @@ void RayRootsignature::AddStaticSampler(const int& RegisterSpace) {
 
 }
 
-void RayRootsignature::Create(const bool& IsLocal, const wchar_t* Name)
+void RayRootsignature::Create(bool IsLocal, const wchar_t* Name)
 {
 
 	/*===== ルートシグネチャ生成処理 =====*/
@@ -83,7 +83,7 @@ void RayRootsignature::Create(const bool& IsLocal, const wchar_t* Name)
 		std::string a = static_cast<char*>(errBlob->GetBufferPointer());
 		_RPTF0(_CRT_WARN, a.c_str());
 	}
-	DirectXBase::Ins()->dev_->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
+	Engine::Ins()->dev_->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
 		IID_PPV_ARGS(&rootsignature_));
 
 	// 名前を設定

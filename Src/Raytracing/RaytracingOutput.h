@@ -23,14 +23,14 @@ public:
 	void Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 TextureSize = Vec2(1280, 720), D3D12_RESOURCE_STATES ResourceState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// ディスクリプタをセット。
-	void SetComputeRootDescriptorTalbe(const int& RootParamIndex);
+	void SetComputeRootDescriptorTalbe(int RootParamIndex);
 
 	// リソースバリア
 	void SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src);
 
 	// ゲッタ
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput_; }
-	const int& GetUAVIndex() { return uavDescriptorIndex_; }
+	int GetUAVIndex() { return uavDescriptorIndex_; }
 
 private:
 

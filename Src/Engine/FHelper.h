@@ -23,10 +23,10 @@ namespace FHelper {
 	/*----- 便利関数 -----*/
 
 	// 乱数取得
-	inline int GetRand(const int& Min, const int& Max) {
+	inline int GetRand(int Min, int Max) {
 		return (rand() % (Max - Min + 1)) + Min;
 	}
-	inline float GetRand(const float& Min, const float& Max) {
+	inline float GetRand(float Min, float Max) {
 
 		// 一旦最小値と最大値を10000倍してint型にする。
 		const float MUL = 10000.0f;
@@ -38,7 +38,7 @@ namespace FHelper {
 		return static_cast<float>(random) / MUL;
 
 	}
-	inline float GetRand(const float& Max) {
+	inline float GetRand(float Max) {
 
 		// 一旦最小値と最大値を10000倍してint型にする。
 		const float MUL = 10000.0f;
@@ -49,12 +49,12 @@ namespace FHelper {
 		return static_cast<float>(random) / MUL;
 
 	}
-	inline Vec3 GetRandVec3(const int& Min, const int& Max) {
+	inline Vec3 GetRandVec3(int Min, int Max) {
 		return Vec3(static_cast<float>(GetRand(Min, Max)), static_cast<float>(GetRand(Min, Max)), static_cast<float>(GetRand(Min, Max)));
 	}
 
 	// 指定の値の指定の値の範囲での0~1の割合を求める
-	inline float CalPercentageZeroToOne(const float& NowValue, const float& MinValue, const float& MaxValue) {
+	inline float CalPercentageZeroToOne(float NowValue, float MinValue, float MaxValue) {
 		float maxBuff = MaxValue;
 		float nowValueBuff = NowValue;
 		// 最小値が0未満の場合は最大値に足す
@@ -82,7 +82,7 @@ namespace FHelper {
 	}
 
 	// 01に納める。
-	inline float Saturate(const float& Value) {
+	inline float Saturate(float Value) {
 		float value = Value;
 		if (value < 0.0f) value = 0.0f;
 		if (1.0f < value) value = 1.0f;
@@ -131,7 +131,7 @@ namespace FHelper {
 	};
 
 	// 画面内に収まっているかを判定
-	inline bool CheckInScreen(const Vec3& CheckPos, const float& VirtualWidth, const float& VirtualHeight, const DirectX::XMMATRIX& MatView, const DirectX::XMMATRIX& MatPerspective) {
+	inline bool CheckInScreen(const Vec3& CheckPos, float VirtualWidth, float VirtualHeight, const DirectX::XMMATRIX& MatView, const DirectX::XMMATRIX& MatPerspective) {
 		float w = WINDOW_WIDTH / 2.0f;
 		float h = WINDOW_HEIGHT / 2.0f;
 		DirectX::XMMATRIX viewport = {
@@ -212,52 +212,52 @@ namespace FEasing {
 
 	//tは0~1の範囲
 
-	inline float EaseInSine(const float& Time) {
+	inline float EaseInSine(float Time) {
 
 		return 1.0f - cosf((Time * FHelper::F_PI_F) / 2.0f);
 
 	}
-	inline float EaseInCubic(const float& Time) {
+	inline float EaseInCubic(float Time) {
 
 		return Time * Time * Time;
 
 	}
 
-	inline float EaseInOutSine(const float& Time) {
+	inline float EaseInOutSine(float Time) {
 		return -(cosf(FHelper::F_PI_F * Time) - 1.0f) / 2.0f;
 	}
 
-	inline float EaseOutSine(const float& Time) {
+	inline float EaseOutSine(float Time) {
 
 		return sinf((Time * FHelper::F_PI_F) / 2.0f);
 
 	}
 
-	inline float EaseOutCubic(const float& Time) {
+	inline float EaseOutCubic(float Time) {
 		return 1.0f - powf(1 - Time, 3.0f);
 	}
 
-	inline float EaseOutQuar(const float& Time) {
+	inline float EaseOutQuar(float Time) {
 		return 1.0f - powf(1 - Time, 4.0f);
 	}
 
-	inline float EaseInOutQuint(const float& Time) {
+	inline float EaseInOutQuint(float Time) {
 		return Time < 0.5f ? 16.0f * Time * Time * Time * Time * Time : 1.0f - powf(-2.0f * Time + 2.0f, 5.0f) / 2.0f;
 	}
 
-	inline float EaseInQuint(const float& Time) {
+	inline float EaseInQuint(float Time) {
 		return Time * Time * Time * Time * Time;
 	}
 
-	inline float EaseOutQuint(const float& Time) {
+	inline float EaseOutQuint(float Time) {
 		return 1.0f - powf(1.0f - Time, 5);
 	}
 
-	//inline float EaseOutExpo(const float& Time) {
+	//inline float EaseOutExpo(float Time) {
 	//	return Time == 1.0f ? 1.0f : 1.0f - powf(2.0f, -10.0f * Time);
 	//}
 
-	//inline float EaseInExpo(const float& Time) {
+	//inline float EaseInExpo(float Time) {
 	//	return Time == 0.0f ? 0.0f : 1.0f - powf(2.0f, 10.0f * Time);
 	//}
 

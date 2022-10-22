@@ -1,12 +1,13 @@
 #include "ItemBoxObject.h"
 #include "PolygonInstanceRegister.h"
+#include "PolygonInstance.h"
 
-void ItemBoxObject::Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID)
+void ItemBoxObject::Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*===== セッティング処理 =====*/
 
-	BasicInit(ObjectID, CollisionID, InstanceID);
+	BasicInit(ObjectID, CollisionID, Instance);
 
 }
 
@@ -15,12 +16,12 @@ void ItemBoxObject::Destroy()
 
 	/*===== インスタンス破棄 =====*/
 
-	PolygonInstanceRegister::Ins()->DestroyInstance(insIndex_);
+	PolygonInstanceRegister::Ins()->DestroyInstance(instance_);
 	isActive_ = false;
 
 }
 
-void ItemBoxObject::Update(const int& Timer)
+void ItemBoxObject::Update(int Timer)
 {
 
 	/*===== 更新処理 =====*/
@@ -42,12 +43,12 @@ void ItemBoxObject::Update(const int& Timer)
 	}
 
 	// 回転させる。
-	PolygonInstanceRegister::Ins()->AddRotate(insIndex_, Vec3(0.01f, 0.02f, 0.0f));
+	instance_.lock()->AddRotate(Vec3(0.01f, 0.02f, 0.0f));
 
 
 }
 
-void ItemBoxObject::Disable(const int& TimerToActivation)
+void ItemBoxObject::Disable(int TimerToActivation)
 {
 
 	/*===== 無効化して再度有効化されるまでの時間をセット =====*/

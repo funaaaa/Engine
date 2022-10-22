@@ -17,7 +17,7 @@ public:
 
 	// ウェイポイントの配置のオフセット
 	enum class WAYPOINT_OFFSET {
-		LEFT_LEARNING,	// 左より
+		CENTER,	// 中心
 	};
 
 private:

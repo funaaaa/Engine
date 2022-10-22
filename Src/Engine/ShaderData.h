@@ -1,5 +1,5 @@
 #pragma once
-#include "DirectXBase.h"
+#include "Engine.h"
 #include <d3d12.h>
 #include "dxcapi.h"
 #include <string>
@@ -24,7 +24,7 @@ public:
 	/*-- メンバ関数 --*/
 
 	// コンストラクタ
-	ShaderData(const std::string& ShaderPath, const std::string& EntryPoint, const std::string& ShaderModel, const bool& IsDXC = false);
+	ShaderData(const std::string& ShaderPath, const std::string& EntryPoint, const std::string& ShaderModel, bool IsDXC = false);
 
 	// ロード処理
 	void LoadShader();

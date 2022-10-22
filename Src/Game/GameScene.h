@@ -1,7 +1,7 @@
 #pragma once
 #include "BaseScene.h"
 #include "ConstBuffers.h"
-#include "RaytracingPipline.h"
+#include "RaytracingPipeline.h"
 #include <memory>
 
 #include "OBB.h"
@@ -9,14 +9,16 @@
 
 class Character;
 class DynamicConstBuffer;
-class RaytracingPipline;
+class RaytracingPipeline;
 class TLAS;
 class RaytracingOutput;
 class Sprite;
 class BaseStage;
+class BLAS;
 class RayComputeShader;
 class CharacterMgr;
 class ConcentrationLineMgr;
+class PolygonMeshInstance;
 
 // ゲームシーン
 class GameScene : public BaseScene {
@@ -25,28 +27,18 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	RayConstBufferData constBufferData_;
-	std::shared_ptr<DynamicConstBuffer> constBuffer_;
-
-	// デノイズAO用のパイプラインを設定。
-	std::vector<RayPiplineShaderData> dAOuseShaders_;
-	std::shared_ptr<RaytracingPipline> pipline_;
-
-	// SPONZAを読み込む。
-	std::vector<int> sponzaInstance_;
-
 	// ライト用のスフィアを読み込む。
 	int sphereBlas_;
 	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns_;
 
 	// 天球用のスフィア
-	int skyDomeBlas_;
-	int skyDomeIns_;
+	std::weak_ptr<BLAS> skyDomeBlas_;
+	std::weak_ptr<PolygonMeshInstance> skyDomeIns_;
 
 	// ステージ関係。
 	std::vector<std::shared_ptr<BaseStage>> stages_;
 	enum STAGE_ID {
-		CIRCUIT,	// サーキット
+		MUGEN,	// 無限型ステージ
 		MAX_STAGE,	// ステージの最大数
 	};
 	STAGE_ID nowStageID;
@@ -74,30 +66,6 @@ private:
 	int transitionTimer;
 	const int TRANSION_TIME = 180;
 
-	// TLASを生成。
-	std::shared_ptr<TLAS> tlas_;
-
-	// AO出力用。
-	std::shared_ptr<RaytracingOutput> aoOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseAOOutput_;
-
-	// 色出力用クラス。
-	std::shared_ptr<RaytracingOutput> colorOutput_;
-
-	// ライト出力用。
-	std::shared_ptr<RaytracingOutput> lightOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseLightOutput_;
-
-	// GI出力用。
-	std::shared_ptr<RaytracingOutput> giOutput_;
-	std::shared_ptr<RaytracingOutput> denoiseGiOutput_;
-
-	// デノイズマスク用。
-	std::shared_ptr<RaytracingOutput> denoiseMaskOutput_;
-
-	// デノイズの結果出力用クラスをセット。
-	std::shared_ptr<RaytracingOutput> denoiseMixTextureOutput_;
-
 	// タイヤ痕出力用クラス
 	std::shared_ptr<RaytracingOutput> tireMaskTexture_;
 
@@ -116,6 +84,11 @@ private:
 
 	// キャラ管理クラス
 	std::shared_ptr<CharacterMgr> characterMgr_;
+
+
+	// PBRテスト用
+	std::weak_ptr<BLAS> pbrSphereBlas_;
+	std::weak_ptr<PolygonMeshInstance> pbrSphereIns_;
 
 
 	/*-- レース開始前の変数 --*/

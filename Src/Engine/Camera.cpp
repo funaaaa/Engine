@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include "FHelper.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 #include <d3d12.h>
 
 Camera::Camera() {
@@ -52,7 +52,7 @@ void Camera::Init()
 
 }
 
-void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec3& CharaUpVec, const float& CharaSpeedPer, const bool& IsBeforeStart, const bool& IsGameFinish)
+void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec3& CharaUpVec, float CharaSpeedPer, bool IsBeforeStart, bool IsGameFinish)
 {
 
 	/*===== çXêVèàóù =====*/

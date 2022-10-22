@@ -4,6 +4,7 @@
 #include "ConstBuffers.h"
 
 class StageObjectMgr;
+class PolygonMeshInstance;
 class OBB;
 
 class BaseStage {
@@ -24,7 +25,7 @@ public:
 		Vec3 targetUpVec_;				// 上ベクトル
 		std::weak_ptr<OBB> targetOBB_;	// 当たり判定を行うオブジェクトのOBB
 		float targetRotY_;				// 当たり判定を行うオブジェクトのY軸の回転量
-		int targetInsIndex_;			// 当たり判定を行うオブジェクトのインスタンスのインデックス
+		std::weak_ptr<PolygonMeshInstance> targetInstance_;			// 当たり判定を行うオブジェクトのインスタンスのインデックス
 		bool isInvalidateRotY_;			// 回転行列を求める際にY軸回転を無効化するフラグ
 		bool isPlayer_;					// プレイヤーかどうか アイテムボックスとの判定の有無を識別するために使用する。
 	};
@@ -50,11 +51,11 @@ public:
 
 	/*===== メンバ関数 =====*/
 
-	virtual void Setting(const int& TireMaskIndex) = 0;
+	virtual void Setting(int TireMaskIndex) = 0;
 	virtual void Destroy() = 0;
-	virtual void Update(RayConstBufferData& ConstBufferData) = 0;
+	virtual void Update() = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;
-	virtual void ChangeStageStatus(const int& Status) = 0;
+	virtual void ChangeStageStatus(int Status) = 0;
 
 	// ゴールの表示、非表示
 	virtual void DisplayGoal() = 0;

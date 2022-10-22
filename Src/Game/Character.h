@@ -13,6 +13,7 @@ class OBB;
 class PlayerTire;
 class BaseItem;
 class BaseOperationObject;
+class PolygonMeshInstance;
 class BaseStage;
 
 class Character {
@@ -25,6 +26,7 @@ public:
 	Vec3 pos_;				// 車の座標
 	Vec3 prevPos_;			// 車の前フレームの座標
 	Vec3 forwardVec_;		// 進行方向ベクトル
+	Vec3 cameraForwardVec_;	// 甲羅にあたった瞬間の正面ベクトル
 	Vec3 bottomVec;			// 下方向ベクトル
 	Vec3 upVec_;			// 上方向ベクトル
 	Vec3 size_;				// サイズ
@@ -37,6 +39,9 @@ public:
 	int returnDefPosTimer_;	// デフォルトの位置に戻るまでの時間 奈落に落ちた時用
 	int charaIndex_;
 	int canNotMoveTimer_;	// 操作不能のタイマー
+	int shellIndex_;
+	int timerToSkipShellCollider_;	// 甲羅の当たり判定を無効化するタイマー(甲羅を射った後に直ぐに自分に当たらないようにするため)
+	const int TIMER_TO_SKIP_SHELL_COLLIDER = 60;
 	const int CAN_NOT_MOVE_TIMER_SHELL_HIT = 60;
 	const int RETURN_DEFPOS_TIMER = 600;
 	bool isShotBehind_;		// 後ろ側に甲羅を投げるかのフラグ
@@ -59,6 +64,8 @@ public:
 
 	// アイテムクラス
 	std::shared_ptr<BaseItem> item_;
+
+	bool isHitJumpActionGimmick_;
 
 	bool IsTurningIndicatorRed_;// ウインカーの色が赤かどうか。
 	int turningIndicatorTimer_;	// ウインカーがチカチカするタイマー
@@ -214,11 +221,12 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// 初期化処理
-	Character(CHARA_ID CharaID, const int& CharaIndex, const int& Param);
+	Character(CHARA_ID CharaID, int CharaIndex, int Param);
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish);
+	void Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, bool IsGameFinish);
+	void UpdateTitle();
 
 	// 描画処理
 	void Draw();
@@ -249,10 +257,10 @@ public:
 private:
 
 	// 入力処理
-	void Input(RayConstBufferData& ConstBufferData, const bool& IsBeforeStart);
+	void Input(bool IsBeforeStart);
 
 	// 移動処理
-	void Move(const bool& IsBeforeStart);
+	void Move(bool IsBeforeStart);
 
 	// ドリフトに関する更新処理
 	void UpdateDrift();
@@ -270,6 +278,6 @@ private:
 	void UpdateGameFinish();
 
 	// ドリフトパーティクルの更新処理
-	void UpdateDriftParticle(RayConstBufferData& ConstBufferData, const bool& IsGameFinish, const bool& IsBeforeStart);
+	void UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart);
 
 };

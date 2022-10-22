@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec.h"
+#include "BaseItem.h"
 
 // 操作オブジェクト基底クラス
 class BaseOperationObject {
@@ -40,6 +41,10 @@ public:
 
 		Vec3 pos_;
 		Vec3 forwradVec_;
+		bool isHitJumpBoostGimmick_;
+		BaseItem::ItemID hasItemID_;
+
+		OperationInputData() :pos_({}), forwradVec_(Vec3(0, 0, 1)), isHitJumpBoostGimmick_(false), hasItemID_(BaseItem::ItemID::NONE) {};
 
 	};
 

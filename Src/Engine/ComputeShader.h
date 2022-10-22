@@ -16,7 +16,7 @@ private:
 	/*-- メンバ変数 --*/
 
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;	// ルートシグネチャ
-	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipline_;		// パイプライン
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> pipeline_;		// パイプライン
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descHeap_;		// ディスクリプタヒープ 情報とかが保存されているのはinputSBとoutputSBの中
 	D3D12_GPU_DESCRIPTOR_HANDLE srvGPUDescHeapHandle_;			// SRV開始ハンドル GPU
 	D3D12_GPU_DESCRIPTOR_HANDLE uavGPUDescHeapHandle_;			// UAV開始ハンドル GPU

@@ -1,6 +1,6 @@
 #include "RaytracingOutput.h"
 #include "DescriptorHeapMgr.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 #include "WindowsAPI.h"
 
 void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 TextureSize, D3D12_RESOURCE_STATES ResourceState)
@@ -18,11 +18,11 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 Text
 
 	// 先頭ハンドルを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	// ディスクリプタヒープにUAVを確保
 	uavDesc_.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-	DirectXBase::Ins()->dev_->CreateUnorderedAccessView(
+	Engine::Ins()->dev_->CreateUnorderedAccessView(
 		rayTracingOutput_.Get(), nullptr, &uavDesc_, basicHeapHandle);
 
 	// UAVのディスクリプタヒープのインデックスを取得
@@ -35,10 +35,10 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 Text
 
 }
 
-void RaytracingOutput::SetComputeRootDescriptorTalbe(const int& RootParamIndex)
+void RaytracingOutput::SetComputeRootDescriptorTalbe(int RootParamIndex)
 {
 
-	DirectXBase::Ins()->cmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex_));
+	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex_));
 
 }
 
@@ -53,7 +53,7 @@ void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOU
 			Src)
 	};
 
-	DirectXBase::Ins()->cmdList_->ResourceBarrier(1, barrierToUAV);
+	Engine::Ins()->cmdList_->ResourceBarrier(1, barrierToUAV);
 
 }
 
@@ -84,7 +84,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT Wi
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = Flags;
 
-	hr = DirectXBase::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

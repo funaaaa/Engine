@@ -1,12 +1,17 @@
 #include "BoostItem.h"
 
-void BoostItem::Generate(const int& CharaInsIndex)
+BoostItem::BoostItem()
+{
+	itemID_ = ItemID::NONE;
+}
+
+void BoostItem::Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)
 {
 
 	/*===== 生成処理 =====*/
 
 	itemID_ = BaseItem::ItemID::BOOST;
-	charaInsIndex_ = CharaInsIndex;
+	charaInstance = CharaInstance;
 
 }
 
@@ -17,7 +22,7 @@ void BoostItem::Update()
 
 }
 
-void BoostItem::Use(const float& CharaRotY, const int ParamID)
+int BoostItem::Use(float CharaRotY, const int ParamID)
 {
 
 	/*===== 使用処理 =====*/
@@ -25,5 +30,7 @@ void BoostItem::Use(const float& CharaRotY, const int ParamID)
 	// きのこアイテム自体では使用されたときは何もしない。
 	CharaRotY;
 	ParamID;
+
+	return 0;
 
 }

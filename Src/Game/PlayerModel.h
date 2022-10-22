@@ -1,5 +1,9 @@
 #pragma once
 #include <vector>
+#include <memory>
+
+class PolygonMeshInstance;
+class BLAS;
 
 class PlayerModel {
 
@@ -8,54 +12,54 @@ public:
 	/*===== メンバ変数 =====*/
 
 	// 車体
-	int carBodyBlasIndex_;		// 車のモデルのBLASのインデックス
-	int carBodyInsIndex_;		// 車のモデルのインスタンスのインデックス
+	std::weak_ptr<BLAS> carBodyBlas_;		// 車のモデルのBLASのインデックス
+	std::weak_ptr<PolygonMeshInstance> carBodyInstance;		// 車のモデルのインスタンスのインデックス
 	// バンパー
-	int carBumperBlasIndex_;
-	int carBumperInsIndex_;
+	std::weak_ptr<BLAS> carBumperBlas_;
+	std::weak_ptr<PolygonMeshInstance> carBumperInstance;
 	// ライト
-	int carLeftLightBlasIndex_;
-	int carLeftLightInsIndex_;
+	std::weak_ptr<BLAS> carLeftLightBlas_;
+	std::weak_ptr<PolygonMeshInstance> carLeftLightInstance;
 	// ライト
-	int carRightLightBlasIndex_;
-	int carRightLightInsIndex_;
+	std::weak_ptr<BLAS> carRightLightBlas_;
+	std::weak_ptr<PolygonMeshInstance> carRightLightInstance;
 	// ライト
-	int carFrontLightBlasIndex_;
-	int carFrontLightInsIndex_;
+	std::weak_ptr<BLAS> carFrontLightBlas_;
+	std::weak_ptr<PolygonMeshInstance> carFrontLightInstance;
 	// 鏡
-	int carMirrorBlasIndex_;
-	int carMirrorInsIndex_;
+	std::weak_ptr<BLAS> carMirrorBlas_;
+	std::weak_ptr<PolygonMeshInstance> carMirrorInstance;
 	// 鏡のカバー
-	int carMirrorCoverBlasIndex_;
-	int carMirrorCoverInsIndex_;
+	std::weak_ptr<BLAS> carMirrorCoverBlas_;
+	std::weak_ptr<PolygonMeshInstance> carMirrorCoverInstance;
 	// 窓
-	int carWindowBlasIndex_;
-	int carWindowInsIndex_;
+	std::weak_ptr<BLAS> carWindowBlas_;
+	std::weak_ptr<PolygonMeshInstance> carWindowInsInstance;
 	// 後ろタイヤ
-	int carBehindTireBlasIndex_;
-	int carBehindTireInsIndex_;
+	std::weak_ptr<BLAS> carBehindTireBlas_;
+	std::weak_ptr<PolygonMeshInstance> carBehindTireInstance;
 	// 後ろタイヤのフレーム
-	int carBehindTireFrameBlasIndex_;
-	int carBehindTireFrameInsIndex_;
+	std::weak_ptr<BLAS> carBehindTireFrameBlas_;
+	std::weak_ptr<PolygonMeshInstance> carBehindTireFrameInstance;
 	// 右前タイヤ
-	int carRightTireBlasIndex_;
-	int carRightTireInsIndex_;
+	std::weak_ptr<BLAS> carRightTireBlas_;
+	std::weak_ptr<PolygonMeshInstance> carRightTireInstance;
 	// 右前タイヤのフレーム
-	int carRightTireFrameBlasIndex_;
-	int carRightTireFrameInsIndex_;
+	std::weak_ptr<BLAS> carRightTireFrameBlas_;
+	std::weak_ptr<PolygonMeshInstance> carRightTireFrameInstance;
 	// 左前タイヤ
-	int carLeftTireBlasIndex_;
-	int carLeftTireInsIndex_;
+	std::weak_ptr<BLAS> carLeftTireBlas_;
+	std::weak_ptr<PolygonMeshInstance> carLeftTireInstance;
 	// 左前タイヤのフレーム
-	int carLeftTireFrameBlasIndex_;
-	int carLeftTireFrameInsIndex_;
+	std::weak_ptr<BLAS> carLeftTireFrameBlas_;
+	std::weak_ptr<PolygonMeshInstance> carLeftTireFrameInstance;
 
 	// 車体とタイヤで処理を分けるための変数
-	std::vector<int> bodyInsIndex_;
-	std::vector<int> tireInsIndex_;
-	
+	std::vector<std::weak_ptr<PolygonMeshInstance>> bodyInstance;
+	std::vector<std::weak_ptr<PolygonMeshInstance>> tireInstance;
+
 	// リトライ時BLAS解放用変数
-	std::vector<int> carBlasIndex_;
+	std::vector<std::weak_ptr<BLAS>> carBlasIndex_;
 
 public:
 
@@ -68,8 +72,16 @@ public:
 
 	};
 
+	enum class CHARA {
+
+		PLAYER,
+		GHOST,
+		AI,
+
+	};
+
 	// ロード
-	void Load(COLOR ColorID, bool IsGhost);
+	void Load(COLOR ColorID, CHARA Chara);
 	// 削除
 	void Delete();
 

@@ -4,6 +4,8 @@
 
 class OBB;
 class BaseStage;
+class PolygonMeshInstance;
+class BLAS;
 
 class ShellObject {
 
@@ -22,9 +24,9 @@ private:
 	/*===== メンバ変数 =====*/
 
 	// モデルデータ関係
-	int blasIndex_;			// BLASのインデックス
-	int insIndex_;			// INSTANCEのインデックス
-	int charaInsIndex_;		// 保持しているキャラのINSTANCEのインデックス
+	std::weak_ptr<BLAS> blas_;							// BLASのインデックス
+	std::weak_ptr<PolygonMeshInstance> instance;		// INSTANCEのインデックス
+	std::weak_ptr<PolygonMeshInstance> charaInstance;	// 保持しているキャラのINSTANCEのインデックス
 
 	// オブジェクト固有のパラメーター
 	Vec3 pos_;				// 座標
@@ -44,8 +46,9 @@ private:
 	std::shared_ptr<OBB> obb_;		// 当たり判定用OBB
 
 	const float SPEED = 50.0f;
+	const float SCALE = 20.0f;
 	const float MAX_GRAV = 10.0f;	// 重力の最大量
-	const float ADD_GRAV = 0.15f;	// 重力の加算量
+	const float ADD_GRAV = 3.0f;	// 重力の加算量
 	const int EXIT_TIMER = 180;		// 消滅までの時間
 
 
@@ -60,10 +63,13 @@ public:
 	void Destroy();
 
 	// 生成処理
-	void Generate(const Vec3& Pos, const Vec3& ForwardVec, const float& CharaRotY, const int& ShellID, const int& CharaInsIndex);
+	void Generate(const Vec3& Pos, const Vec3& ForwardVec, float CharaRotY, int ShellID, std::weak_ptr<PolygonMeshInstance> CharaInstance);
 
 	// 更新処理
 	void Update(std::weak_ptr<BaseStage> StageData);
+
+	// 甲羅のステータスを更新。
+	void ChangeStatus(const Vec3& ForwardVec, int ShellID);
 
 	// OBBとの当たり判定 キャラクターとの当たり判定で使用する。
 	bool CheckHitOBB(std::weak_ptr<OBB> CharaOBB);

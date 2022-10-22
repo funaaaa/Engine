@@ -55,18 +55,18 @@ public:
 	HitGroup();
 
 	// ê∂ê¨èàóù
-	void Generate(const HitGroupInitData& InputData, const int& RegisterSpace, const LPCWSTR& HitGroupName);
+	void Generate(const HitGroupInitData& InputData, int RegisterSpace, const LPCWSTR& HitGroupName);
 
 	// äeéÌÉQÉbÉ^
 	const LPCWSTR& GetCH() { return CH_.entryPoint_; }
 	const LPCWSTR& GetAH() { return AH_.entryPoint_; }
 	const LPCWSTR& GetIS() { return IS_.entryPoint_; }
-	const bool& GetCHFlag() { return CH_.isActive_; }
-	const bool& GetAHFlag() { return AH_.isActive_; }
-	const bool& GetISFlag() { return IS_.isActive_; }
-	const int& GetSRVCount() { return SRVcount_; }
-	const int& GetCBVCount() { return CBVcount_; }
-	const int& GetUAVCount() { return UAVcount_; }
+	bool GetCHFlag() { return CH_.isActive_; }
+	bool GetAHFlag() { return AH_.isActive_; }
+	bool GetISFlag() { return IS_.isActive_; }
+	int GetSRVCount() { return SRVcount_; }
+	int GetCBVCount() { return CBVcount_; }
+	int GetUAVCount() { return UAVcount_; }
 	const std::shared_ptr<RayRootsignature> GetLoacalRootSig() {return localRootSig_; };
 
 };

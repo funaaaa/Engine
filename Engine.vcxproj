@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -120,10 +120,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\glTF</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,10 +142,11 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\Dxcompiler</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Lib\glTF</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -169,15 +171,16 @@
     <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
     <ClCompile Include="Src\Engine\Camera.cpp" />
     <ClCompile Include="Src\Engine\ComputeShader.cpp" />
-    <ClCompile Include="Src\Engine\DirectXBase.cpp" />
+    <ClCompile Include="Src\Engine\Engine.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
+    <ClCompile Include="Src\Engine\GLTF.cpp" />
     <ClCompile Include="Src\Engine\StageObjectMgr.cpp" />
     <ClCompile Include="Src\Engine\Input.cpp" />
     <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
-    <ClCompile Include="Src\Engine\Pipline.cpp" />
-    <ClCompile Include="Src\Engine\PiplineManager.cpp" />
+    <ClCompile Include="Src\Engine\Pipeline.cpp" />
+    <ClCompile Include="Src\Engine\PipelineManager.cpp" />
     <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp" />
     <ClCompile Include="Src\Engine\ShaderData.cpp" />
     <ClCompile Include="Src\Engine\ShaderStorage.cpp" />
@@ -227,12 +230,17 @@
     <ClCompile Include="Src\Raytracing\RayComputeShader.cpp" />
     <ClCompile Include="Src\Raytracing\RayDenoiser.cpp" />
     <ClCompile Include="Src\Raytracing\RayDescriptor.cpp" />
+    <ClCompile Include="Src\Raytracing\RayEngine.cpp" />
     <ClCompile Include="Src\Raytracing\RayRootsignature.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
-    <ClCompile Include="Src\Raytracing\RaytracingPipline.cpp" />
+    <ClCompile Include="Src\Raytracing\RaytracingPipeline.cpp" />
     <ClCompile Include="Src\Raytracing\TLAS.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Lib\glTF\json.hpp" />
+    <ClInclude Include="Lib\glTF\stb_image.h" />
+    <ClInclude Include="Lib\glTF\stb_image_write.h" />
+    <ClInclude Include="Lib\glTF\tiny_gltf.h" />
     <ClInclude Include="lib\imgui\imconfig.h" />
     <ClInclude Include="lib\imgui\imgui.h" />
     <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
@@ -246,17 +254,18 @@
     <ClInclude Include="Src\Engine\BaseSprite.h" />
     <ClInclude Include="Src\Engine\Camera.h" />
     <ClInclude Include="Src\Engine\ComputeShader.h" />
-    <ClInclude Include="Src\Engine\DirectXBase.h" />
+    <ClInclude Include="Src\Engine\Engine.h" />
     <ClInclude Include="Src\Engine\dxcapi.h" />
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />
     <ClInclude Include="Src\Engine\FString.h" />
+    <ClInclude Include="Src\Engine\GLTF.h" />
     <ClInclude Include="Src\Engine\StageObjectMgr.h" />
     <ClInclude Include="Src\Engine\Input.h" />
     <ClInclude Include="Src\Engine\Joycon.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
-    <ClInclude Include="Src\Engine\Pipline.h" />
-    <ClInclude Include="Src\Engine\PiplineManager.h" />
+    <ClInclude Include="Src\Engine\Pipeline.h" />
+    <ClInclude Include="Src\Engine\PipelineManager.h" />
     <ClInclude Include="Src\Engine\RWStructuredBuffer.h" />
     <ClInclude Include="Src\Engine\ShaderData.h" />
     <ClInclude Include="Src\Engine\ShaderStorage.h" />
@@ -313,15 +322,17 @@
     <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />
     <ClInclude Include="Src\Raytracing\RayDescriptor.h" />
     <ClInclude Include="Src\Raytracing\RayDenoiser.h" />
+    <ClInclude Include="Src\Raytracing\RayEngine.h" />
     <ClInclude Include="Src\Raytracing\RayRootsignature.h" />
     <ClInclude Include="Src\Raytracing\RayComputeShader.h" />
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />
-    <ClInclude Include="Src\Raytracing\RaytracingPipline.h" />
+    <ClInclude Include="Src\Raytracing\RaytracingPipeline.h" />
     <ClInclude Include="Src\Raytracing\TLAS.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hid.dll" />
     <None Include="lib\imgui\imgui.ini" />
+    <None Include="Resource\ShaderFiles\RayTracing\RaytracingShaderHeader.hlsli" />
     <None Include="setupapi.dll" />
   </ItemGroup>
   <ItemGroup>
@@ -342,6 +353,22 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.4</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.4</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\TireMaskComputeShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>

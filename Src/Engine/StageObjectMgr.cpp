@@ -4,8 +4,10 @@
 #include "ItemBoxObject.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
+#include "PolygonInstance.h"
 #include "OBB.h"
 #include "BLAS.h"
+#include "BaseStageObject.h"
 
 void StageObjectMgr::Setting()
 {
@@ -20,7 +22,7 @@ void StageObjectMgr::Setting()
 
 }
 
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, std::vector<LPCWSTR> TexturePath, const std::wstring& HitGroupName, const UINT& ShaderID)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque)
 {
 
 	/*===== ギミックを追加 =====*/
@@ -64,19 +66,75 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	}
 
 	// Blasをロード
-	int blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, TexturePath);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, IsOpaque);
 	// Instanceを生成。
-	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
 	// オブジェクトを設定。
-	objects_[addIndex].first->Setting(ObjectID, CollisionID, instanceIndex);
+	objects_[addIndex].first->Setting(ObjectID, CollisionID, instance);
 	objects_[addIndex].second = true;
 
 	return addIndex;
 
 }
 
-void StageObjectMgr::Update(const int& Timer)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque)
+{
+
+	/*===== ギミックを追加 =====*/
+
+	// 空きオブジェクト検索。
+	int addIndex = -1;
+	for (auto& index : objects_) {
+
+		if (index.second) continue;
+
+		addIndex = static_cast<int>(&index - &objects_[0]);
+
+		break;
+
+	}
+
+	// -1だったらもう空きはないです。
+	if (addIndex == -1) {
+
+		assert(0);
+
+	}
+
+	// ふわふわ動く装飾オブジェクトだったら。
+	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
+
+		objects_[addIndex].first = std::make_shared<FloatingStageObject>();
+
+	}
+	// アイテムボックスオブジェクトだったら
+	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+
+		objects_[addIndex].first = std::make_shared<ItemBoxObject>();
+
+	}
+	// それ以外の通常のオブジェクトだったら。
+	else {
+
+		objects_[addIndex].first = std::make_shared<BasicStageObject>();
+
+	}
+
+	// Blasをロード
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateGLTF(ModelPath, HitGroupName, IsOpaque);
+	// Instanceを生成。
+	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+
+	// オブジェクトを設定。
+	objects_[addIndex].first->Setting(ObjectID, CollisionID, instance);
+	objects_[addIndex].second = true;
+
+	return addIndex;
+
+}
+
+void StageObjectMgr::Update(int Timer)
 {
 
 	/*===== 更新処理 =====*/
@@ -88,6 +146,15 @@ void StageObjectMgr::Update(const int& Timer)
 		index.first->Update(Timer);
 
 	}
+
+}
+
+void StageObjectMgr::ChangeNormalTexture(int Index, int NormalTexture)
+{
+
+	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
+
+	objects_[Index].first->ChangeNormalTexture(NormalTexture);
 
 }
 
@@ -176,7 +243,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ORNAMENT) {
 
 				// 一定以上離れていたら。 オブジェクトの配置をBlender基準でやっているため距離を頂点から持ってきているが、いずれは手動で配置して座標から距離を持ってこれるようにする
-				float distance = Vec3(Input.targetPos_ - PolygonInstanceRegister::Ins()->GetPos(index.first->GetInstanceIndex())).Length();
+				float distance = Vec3(Input.targetPos_ - index.first->GetInstance().lock()->GetPos()).Length();
 				float size = Vec3(Input.targetSize_ + index.first->GetOBB()->length_).Length();
 				if (size < distance) continue;
 
@@ -194,7 +261,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 
 }
 
-void StageObjectMgr::AddTrans(const int& Index, const Vec3& Trans)
+void StageObjectMgr::AddTrans(int Index, const Vec3& Trans)
 {
 
 	/*===== 移動を加算 =====*/
@@ -203,7 +270,7 @@ void StageObjectMgr::AddTrans(const int& Index, const Vec3& Trans)
 
 }
 
-void StageObjectMgr::ChangeTrans(const int& Index, const Vec3& Trans)
+void StageObjectMgr::ChangeTrans(int Index, const Vec3& Trans)
 {
 
 	/*===== 移動を代入 =====*/
@@ -212,7 +279,7 @@ void StageObjectMgr::ChangeTrans(const int& Index, const Vec3& Trans)
 
 }
 
-void StageObjectMgr::AddScale(const int& Index, const Vec3& Scale)
+void StageObjectMgr::AddScale(int Index, const Vec3& Scale)
 {
 
 	/*===== スケールを加算 =====*/
@@ -221,7 +288,7 @@ void StageObjectMgr::AddScale(const int& Index, const Vec3& Scale)
 
 }
 
-void StageObjectMgr::ChangeScale(const int& Index, const Vec3& Scale)
+void StageObjectMgr::ChangeScale(int Index, const Vec3& Scale)
 {
 
 	/*===== スケールを代入 =====*/
@@ -230,7 +297,7 @@ void StageObjectMgr::ChangeScale(const int& Index, const Vec3& Scale)
 
 }
 
-void StageObjectMgr::AddRotate(const int& Index, const Vec3& Rotate)
+void StageObjectMgr::AddRotate(int Index, const Vec3& Rotate)
 {
 
 	/*===== 回転を加算 =====*/
@@ -239,7 +306,7 @@ void StageObjectMgr::AddRotate(const int& Index, const Vec3& Rotate)
 
 }
 
-void StageObjectMgr::ChangeRotate(const int& Index, const Vec3& Rotate)
+void StageObjectMgr::ChangeRotate(int Index, const Vec3& Rotate)
 {
 
 	/*===== 回転を代入 =====*/
@@ -248,7 +315,7 @@ void StageObjectMgr::ChangeRotate(const int& Index, const Vec3& Rotate)
 
 }
 
-void StageObjectMgr::NonDisplay(const int& Index)
+void StageObjectMgr::NonDisplay(int Index)
 {
 
 	/*===== 非表示 =====*/
@@ -257,7 +324,7 @@ void StageObjectMgr::NonDisplay(const int& Index)
 
 }
 
-void StageObjectMgr::Display(const int& Index)
+void StageObjectMgr::Display(int Index)
 {
 
 	/*===== 表示 =====*/
@@ -266,7 +333,7 @@ void StageObjectMgr::Display(const int& Index)
 
 }
 
-void StageObjectMgr::DeleteIndex(const int& Index)
+void StageObjectMgr::DeleteIndex(int Index)
 {
 
 	/*===== 要素を削除 =====*/
@@ -279,27 +346,53 @@ void StageObjectMgr::DeleteIndex(const int& Index)
 
 }
 
-void StageObjectMgr::ChangeInstanceShaderID(const int& Index, const UINT& ShaderID)
+void StageObjectMgr::ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, UINT ShaderID)
 {
 
 	/*===== インスタンスのシェーダーIDを切り替える =====*/
 
-	if (Index < 0 || static_cast<int>(objects_.size()) <= Index) assert(0);
-	if (!objects_[Index].second) assert(0);
+	int index = Instance.lock()->GetInstanceIndex();
+	if (index < 0 || static_cast<int>(objects_.size()) <= index) assert(0);
+	if (!objects_[index].second) assert(0);
 
 	// 各要素を保存。
-	int blasIndex = PolygonInstanceRegister::Ins()->GetBLASIndex(objects_[Index].first->GetInstanceIndex());
-	BaseStageObject::COLLISION_ID CollisionID = objects_[Index].first->GetCollisionID();
-	BaseStageObject::OBJECT_ID ObjectID = objects_[Index].first->GetObjectID();
+	std::weak_ptr<BLAS> blasIndex = objects_[index].first->GetInstance().lock()->GetBLAS();
+	BaseStageObject::COLLISION_ID CollisionID = objects_[index].first->GetCollisionID();
+	BaseStageObject::OBJECT_ID ObjectID = objects_[index].first->GetObjectID();
 
 	// Instanceを破棄。
-	PolygonInstanceRegister::Ins()->DestroyInstance(objects_[Index].first->GetInstanceIndex());
+	PolygonInstanceRegister::Ins()->DestroyInstance(Instance);
 
 	// Instanceを生成。
-	int instanceIndex = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
 	// オブジェクトを設定。
-	objects_[Index].first->Setting(ObjectID, CollisionID, instanceIndex);
+	objects_[index].first->Setting(ObjectID, CollisionID, instance);
+
+}
+
+void StageObjectMgr::ChangeInstanceShaderID(int Index, UINT ShaderID)
+{
+
+	/*===== インスタンスのシェーダーIDを切り替える =====*/
+
+	int index = Index;
+	if (index < 0 || static_cast<int>(objects_.size()) <= index) assert(0);
+	if (!objects_[index].second) assert(0);
+
+	// 各要素を保存。
+	std::weak_ptr<BLAS> blasIndex = objects_[index].first->GetInstance().lock()->GetBLAS();
+	BaseStageObject::COLLISION_ID CollisionID = objects_[index].first->GetCollisionID();
+	BaseStageObject::OBJECT_ID ObjectID = objects_[index].first->GetObjectID();
+
+	// Instanceを破棄。
+	PolygonInstanceRegister::Ins()->DestroyInstance(index);
+
+	// Instanceを生成。
+	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
+
+	// オブジェクトを設定。
+	objects_[index].first->Setting(ObjectID, CollisionID, instance);
 
 }
 
@@ -322,7 +415,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 
 		// レイ用の設定を追加。
 		InputRayData.rayPos_ = Input.targetPos_;
-		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
+		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), Input.targetInstance_.lock()->GetRotate());
 
 		// 当たり判定を行う。
 		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
@@ -355,6 +448,23 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 				Output.isHitStageGrass_ = true;
 
 			}
+
+		}
+
+
+
+		// 移動量の線分の当たり判定。
+		InputRayData.rayPos_ = Input.targetPrevPos_;
+		InputRayData.rayDir_ = (Input.targetPos_ - Input.targetPrevPos_).GetNormal();
+
+		// 当たった距離がY軸のサイズよりも小さかったら。
+		isHit &= fabs(hitDistance) < (Input.targetPos_ - Input.targetPrevPos_).Length();
+
+		// 当たっていたら押し戻す。
+		if (isHit) {
+
+			// 法線方向に当たった分押し戻す。
+			Input.targetPos_ = impactPos + hitNormal * hitDistance;
 
 		}
 
@@ -412,7 +522,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 
 	// 貫通防止で正面方向にもレイを飛ばす。
 	InputRayData.rayPos_ = Input.targetPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), Input.targetInstance_.lock()->GetRotate());
 
 	// 当たり判定を行う。
 	isHit = false;
@@ -436,7 +546,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 
 	// 貫通防止で左方向にもレイを飛ばす。
 	InputRayData.rayPos_ = Input.targetPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), Input.targetInstance_.lock()->GetRotate());
 
 	// 当たり判定を行う。
 	isHit = false;
@@ -460,7 +570,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 
 	// 貫通防止で右方向にもレイを飛ばす。
 	InputRayData.rayPos_ = Input.targetPos_;
-	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), PolygonInstanceRegister::Ins()->GetRotate(Input.targetInsIndex_));
+	InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), Input.targetInstance_.lock()->GetRotate());
 
 	// 当たり判定を行う。
 	isHit = false;

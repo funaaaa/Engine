@@ -42,26 +42,26 @@ public:
 	// 配列数のゲッタ
 	int GetHitGroupCount() { return static_cast<int>(hitGroup_.size()); }
 	// CHのゲッタ
-	const LPCWSTR& GetCH(const int& Index);
-	const bool& GetCHFlag(const int& Index);
+	const LPCWSTR& GetCH(int Index);
+	bool GetCHFlag(int Index);
 	// AHのゲッタ
-	const LPCWSTR& GetAH(const int& Index);
-	const bool& GetAHFlag(const int& Index);
+	const LPCWSTR& GetAH(int Index);
+	bool GetAHFlag(int Index);
 	// ISのゲッタ
-	const LPCWSTR& GetIS(const int& Index);
-	const bool& GetISFlag(const int& Index);
+	const LPCWSTR& GetIS(int Index);
+	bool GetISFlag(int Index);
 	// 各種要素数のゲッタ
-	const int& GetSRVCount(const int& Index);
-	const int& GetCBVCount(const int& Index);
-	const int& GetUAVCount(const int& Index);
+	int GetSRVCount(int Index);
+	int GetCBVCount(int Index);
+	int GetUAVCount(int Index);
 	// ローカルルートシグネチャのゲッタ
-	const std::shared_ptr<RayRootsignature> GetLocalRootSig(const int& Index);
+	const std::shared_ptr<RayRootsignature> GetLocalRootSig(int Index);
 	// ヒットグループ名からヒットグループIDを取得する。
 	int GetHitGroupID(const LPCWSTR& HitGroupName);
 
 	// ヒットグループのSRVの数を取得する。
-	int GetHitGroupSRVCount(const int& HitGroupID);
+	int GetHitGroupSRVCount(int HitGroupID);
 	// ヒットグループのUAVの数を取得する。
-	int GetHitGroupUAVCount(const int& HitGroupID);
+	int GetHitGroupUAVCount(int HitGroupID);
 
 };

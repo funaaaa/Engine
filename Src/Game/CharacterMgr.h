@@ -23,10 +23,10 @@ public:
 
 	CharacterMgr();
 	void Init();
-	void Update(std::weak_ptr<BaseStage> Stage, RayConstBufferData& ConstBufferData, const bool& IsBeforeStart, const bool& IsGameFinish);
+	void Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bool IsGameFinish);
 	void Draw();
 
-	void AddChara(const int& CharaID, const bool& IsPlayer, int Param = 0);
+	void AddChara(int CharaID, bool IsPlayer, int Param = 0);
 	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<Character::TireMaskUV>& TireMaskUVData);
 	inline std::weak_ptr<Character> GetPlayerIns() { return character_[playerIndex_]; }
 

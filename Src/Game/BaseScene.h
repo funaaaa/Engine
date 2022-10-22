@@ -29,7 +29,7 @@ public:
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void Draw() = 0;
-	const bool& GetIsTransition() { return isTransition_; }
+	bool GetIsTransition() { return isTransition_; }
 	const SCENE_ID& GetNextScene() { return nextScene_; }
 
 };

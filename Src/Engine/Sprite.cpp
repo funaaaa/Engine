@@ -1,7 +1,7 @@
 #include "Sprite.h"
 #include "TextureManager.h"
-#include "DirectXBase.h"
-#include "PiplineManager.h"
+#include "Engine.h"
+#include "PipelineManager.h"
 #include "DescriptorHeapMgr.h"
 
 void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID)
@@ -15,7 +15,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
 	descHeapDesc.NumDescriptors = 2;										// CBV2つ
 	// ディスクリプタヒープの生成
-	DirectXBase::Ins()->dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&constDescHeap_));
+	Engine::Ins()->dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&constDescHeap_));
 
 	// 頂点バッファの生成
 	Vertex vertexBuff;
@@ -35,7 +35,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	// 頂点バッファビューの生成
 	CD3DX12_HEAP_PROPERTIES vtxHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC vtxResDesc = CD3DX12_RESOURCE_DESC::Buffer(vertex_.size() * sizeof(Vertex));
-	HRESULT result = DirectXBase::Ins()->dev_->CreateCommittedResource(
+	HRESULT result = Engine::Ins()->dev_->CreateCommittedResource(
 		&vtxHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&vtxResDesc,
@@ -52,7 +52,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	/*-----定数バッファの生成-----*/
 	CD3DX12_HEAP_PROPERTIES constHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC constResDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff);
-	result = DirectXBase::Ins()->dev_->CreateCommittedResource(
+	result = Engine::Ins()->dev_->CreateCommittedResource(
 		&constHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&constResDesc,
@@ -82,11 +82,11 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 	// CBVディスクリプタヒープの先頭アドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 0, DirectXBase::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 0, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 	cbvDesc.BufferLocation = constBuffB0_->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = (UINT)constBuffB0_->GetDesc().Width;
-	DirectXBase::Ins()->dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+	Engine::Ins()->dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 }
 
 void Sprite::GenerateForTexture(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, LPCWSTR FileName)
@@ -129,7 +129,7 @@ void Sprite::Draw()
 	if (isDisplay_ == false) return;
 
 	// パイプラインとルートシグネチャの設定
-	PiplineManager::Ins()->SetPipline(piplineID_);
+	PipelineManager::Ins()->SetPipline(piplineID_);
 
 	// 定数バッファB0構造体をマップ処理
 	MapConstDataB0(constBuffB0_, constBufferDataB0_);
@@ -138,21 +138,21 @@ void Sprite::Draw()
 	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);
 
 	// 定数バッファビュー設定コマンド
-	DirectXBase::Ins()->cmdList_->SetGraphicsRootConstantBufferView(0, constBuffB0_->GetGPUVirtualAddress());
+	Engine::Ins()->cmdList_->SetGraphicsRootConstantBufferView(0, constBuffB0_->GetGPUVirtualAddress());
 
 	// ディスクリプタヒープ設定コマンド
 	ID3D12DescriptorHeap* ppHeaps2[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-	DirectXBase::Ins()->cmdList_->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+	Engine::Ins()->cmdList_->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 
 	// シェーダーリソースビュー設定コマンド
 	for (int index = 0; index < textureID_.size(); ++index) {
-		DirectXBase::Ins()->cmdList_->SetGraphicsRootDescriptorTable(index + 1, TextureManager::Ins()->GetSRV(textureID_[index]));
+		Engine::Ins()->cmdList_->SetGraphicsRootDescriptorTable(index + 1, TextureManager::Ins()->GetSRV(textureID_[index]));
 	}
 
 	// 頂点バッファビュー設定コマンド
-	DirectXBase::Ins()->cmdList_->IASetVertexBuffers(0, 1, &vbView_);
+	Engine::Ins()->cmdList_->IASetVertexBuffers(0, 1, &vbView_);
 
 	// 描画コマンド
-	DirectXBase::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-	DirectXBase::Ins()->cmdList_->DrawInstanced(static_cast<UINT>(vertex_.size()), 1, 0, 0);
+	Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
+	Engine::Ins()->cmdList_->DrawInstanced(static_cast<UINT>(vertex_.size()), 1, 0, 0);
 }

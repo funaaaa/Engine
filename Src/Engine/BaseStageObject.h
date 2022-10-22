@@ -6,6 +6,8 @@
 #include "Vec.h"
 
 class OBB;
+class PolygonMeshInstance;
+class BLAS;
 
 class BaseStageObject {
 
@@ -39,8 +41,8 @@ public:
 
 protected:
 
-	int blasIndex_;		// BLASのインデックス
-	int insIndex_;		// Instanceのインデックス
+	std::weak_ptr<BLAS> blas_;			// BLASのインデックス
+	std::weak_ptr<PolygonMeshInstance> instance_;		// Instanceのインデックス
 	bool isActive_;		// 有効化フラグ
 	COLLISION_ID collisionID_;	// 当たり判定のID
 	OBJECT_ID objID_;			// オブジェクトのID
@@ -51,10 +53,10 @@ public:
 
 	/*===== メンバ関数 =====*/
 
-	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID) = 0;
+	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance) = 0;
 	virtual void Destroy() = 0;
-	virtual void Update(const int& Timer) = 0;
-	virtual void Disable(const int& TimerToActivation) = 0;
+	virtual void Update(int Timer) = 0;
+	virtual void Disable(int TimerToActivation) = 0;
 
 	// 有効化。
 	inline void Activate() { isActive_ = true; }
@@ -66,12 +68,16 @@ public:
 	void NonDisplay();
 
 	// ゲッタ
-	inline const int& GetBLASIndex() { return blasIndex_; }
-	inline const int& GetInstanceIndex() { return insIndex_; }
-	inline const bool& GetIsActive() { return isActive_; }
+	int GetBLASIndex();
+	int GetInstanceIndex();
+	std::weak_ptr<PolygonMeshInstance> GetInstance() { return instance_; }
+	inline bool GetIsActive() { return isActive_; }
 	inline std::shared_ptr<OBB> GetOBB() { return obb_; }
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }
 	inline const OBJECT_ID GetObjectID() { return objID_; }
+
+	// 法線マップを変更。
+	void ChangeNormalTexture(int Index);
 
 	// 移動関係
 	void AddTrans(const Vec3& Trans);
@@ -91,6 +97,6 @@ public:
 protected:
 
 	// 基底クラスのメンバ変数の初期化
-	void BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const int& InstanceID);
+	void BasicInit(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance);
 
 };

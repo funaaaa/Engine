@@ -21,7 +21,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	PlayerOperationObject(const int& ControllerIndex, const bool& IsWriteGhostInfo, Character* CharacterPointer);
+	PlayerOperationObject(int ControllerIndex, bool IsWriteGhostInfo, Character* CharacterPointer);
 
 	BaseOperationObject::Operation Input(const BaseOperationObject::OperationInputData& InputData)override;
 

@@ -1,9 +1,9 @@
 #include "FbxLoader.h"
-#include "DirectXBase.h"
+#include "Engine.h"
 #include <assert.h>
 #include "TextureManager.h"
 
-void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex)
+void FbxLoader::GetFbxData(int Index, std::vector<Vertex>& OutputVertex, std::vector<UINT>& OutputVertexIndex)
 {
 
 	// 指定されたインデックスが範囲外だったら何も返さない。
@@ -27,6 +27,15 @@ void FbxLoader::GetFbxData(const int& Index, std::vector<Vertex>& OutputVertex, 
 	for (int index = 0; index < INDEX_COUNT; ++index) {
 		OutputVertexIndex[index] = modelData_.indices_[index];
 	}
+
+}
+
+int FbxLoader::GetTextureIndex(int Index)
+{
+
+	/*===== テクスチャのインデックスを取得 =====*/
+
+	return fbxModelData_[Index].textureID_;
 
 }
 
@@ -86,6 +95,9 @@ int FbxLoader::LoadModelFromFile(const string& DirectryPath, const string& Model
 	// モデルを生成。
 	FbxModel modelData_;
 
+	// モデル名を保存。
+	modelData_.modelName_ = DirectryPath + ModelName;
+
 	// FBXノードの数を取得。
 	int nodeCount = fbxScene_->GetNodeCount();
 
@@ -121,7 +133,7 @@ void FbxLoader::ConvertMatrixFromFBX(DirectX::XMMATRIX& Dst, const FbxAMatrix& S
 
 }
 
-FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
+FbxLoader::SkinData FbxLoader::GetSkinMat(int Index)
 {
 
 	/*===== スキニング行列を取得 =====*/
@@ -157,7 +169,7 @@ FbxLoader::SkinData FbxLoader::GetSkinMat(const int& Index)
 
 }
 
-void FbxLoader::GetSkinComputeInput(const int& Index, std::vector<SkinComputeInput>& Input)
+void FbxLoader::GetSkinComputeInput(int Index, std::vector<SkinComputeInput>& Input)
 {
 
 	/*===== スキニングアニメーション用コンピュートシェーダーの入力構造体を取得 =====*/
@@ -438,7 +450,7 @@ void FbxLoader::ParseMeshMaterial(FbxModel& Model, FbxNode* InputFbxNode)
 					MultiByteToWideChar(CP_ACP, 0, fullPath.c_str(), -1, wFilePath.data(), static_cast<int>(wFilePath.size()));
 
 					// テクスチャ読み込み。
-					Model.textureID_ = TextureManager::Ins()->LoadTexture(wFilePath.data());
+					Model.textureID_ = TextureManager::Ins()->LoadTexture(wFilePath);
 
 					textureLoaded = true;
 
