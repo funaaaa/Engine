@@ -36,7 +36,7 @@ void RayEngine::Setting()
 
 	// 最終出力用クラスをセット。
 	denoiseMixTextureOutput_ = std::make_shared<RaytracingOutput>();
-	denoiseMixTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMixTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput", Vec2(1280, 720), D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	// デノイズAO用のパイプラインを設定。
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });

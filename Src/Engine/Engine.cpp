@@ -163,6 +163,7 @@ void Engine::Init() {
 		&resrouceClearValue,
 		IID_PPV_ARGS(&depthBuffer_)
 	);
+	depthBuffer_->SetName(L"DepthBuffer");
 
 	// 深度バッファビュー生成
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
