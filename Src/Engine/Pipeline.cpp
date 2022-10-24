@@ -38,6 +38,8 @@ Pipeline::Pipeline(
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
 	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	pipelinestate_->SetName(L"Pipline");
+
 }
 
 Pipeline::Pipeline(

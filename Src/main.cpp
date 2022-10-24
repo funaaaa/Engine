@@ -63,7 +63,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		if (Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
 
-			exit(0);
+			break;
 
 		}
 

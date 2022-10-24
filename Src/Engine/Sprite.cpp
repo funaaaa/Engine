@@ -155,4 +155,5 @@ void Sprite::Draw()
 	// •`‰æƒRƒ}ƒ“ƒh
 	Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
 	Engine::Ins()->cmdList_->DrawInstanced(static_cast<UINT>(vertex_.size()), 1, 0, 0);
+
 }

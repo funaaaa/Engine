@@ -81,6 +81,7 @@ void TitleScene::Update()
 	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
 		isTransition_ = true;
+		player_->Init();
 
 	}
 
@@ -132,6 +133,8 @@ void TitleScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPos_ = Vec3(0, -40 - offset, 0);
 	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
 	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
+	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightSize_ = 5.0f;
+	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isShadow_ = true;
 
 	// •ÀsŒõŒ¹‚ð–³Œø‰»B
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = false;

@@ -158,7 +158,7 @@ void Character::Init()
 
 	/*===== 初期化処理 =====*/
 
-		// 初期位置を設定。
+	// 初期位置を設定。
 	if (charaID_ == CHARA_ID::P1) {
 		DEF_POS = PLAYER_DEF_POS;
 	}
@@ -212,6 +212,7 @@ void Character::Init()
 	playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
 	cameraForwardVec_ = forwardVec_;
 
+	playerModel_.Delete();
 
 	// 臨時のバグ対策です。 最初の一回目のドリフトのときのみオーラが出ないので、ここで一回生成しておく。
 	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0);
@@ -1275,6 +1276,15 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		isJumpAction_ = true;
 
 	}
+
+
+	if (Input::Ins()->IsKeyTrigger(DIK_P)) {
+
+		++rapCount_;
+		isPassedMiddlePoint_ = true;
+
+	}
+
 
 	// その他の変数を初期化。
 	pos_ = output.resultPos_;

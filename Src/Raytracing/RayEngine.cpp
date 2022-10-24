@@ -195,20 +195,7 @@ void RayEngine::Draw()
 	};
 	Engine::Ins()->cmdList_->ResourceBarrier(_countof(barriers), barriers);
 
-	// デバッグ情報によって描画するデータを変える。
-	if (constBufferData_.debug_.isLightHitScene_ || constBufferData_.debug_.isMeshScene_ || constBufferData_.debug_.isNormalScene_) {
-
-		// デノイズされた通常の描画
-		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-		Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), lightOutput_->GetRaytracingOutput().Get());
-		lightOutput_->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	}
-	else {
-
-		Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
-
-	}
+	Engine::Ins()->cmdList_->CopyResource(Engine::Ins()->backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_->GetRaytracingOutput().Get());
 
 	// レンダーターゲットのリソースバリアをもとに戻す。
 	D3D12_RESOURCE_BARRIER endBarriers[] = {
