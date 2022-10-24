@@ -21,7 +21,7 @@ TitleScene::TitleScene()
 	isTransition_ = false;
 	nextScene_ = SCENE_ID::GAME;
 
-	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
+	//title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
 
 }
 
@@ -42,6 +42,28 @@ void TitleScene::Init()
 	player_ = std::make_shared<Character>(Character::CHARA_ID::P1, 0, 0);
 	player_->pos_ = Vec3(0, 10000, 0);
 
+	// 環境マップを生成。
+	envMap1Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap2Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap2Blas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/envMap2.dds"));
+	envMap3Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap3Blas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/envMap3.dds"));
+	envMap1_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap1Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
+	envMap1_.lock()->AddScale(Vec3(300, 300, 300));
+	envMap2_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap2Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
+	envMap2_.lock()->AddScale(Vec3(300, 300, 300));
+	envMap3_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap3Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
+	envMap3_.lock()->AddScale(Vec3(300, 300, 300));
+
+	pbrTestBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	pbrTest_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_, static_cast<int>(PolygonInstanceRegister::REFRACTION));
+	pbrTest_.lock()->AddScale(Vec3(30, 30, 30));
+	pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+
+	pbrTest2_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
+	pbrTest2_.lock()->AddScale(Vec3(30, 30, 30));
+	pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+
 	// コーネルボックスをロード
 	cornellBoxGreenBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxGreen.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
 	cornellBoxRedBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxRed.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
@@ -52,23 +74,16 @@ void TitleScene::Init()
 	cornellBoxRed_.lock()->AddScale(Vec3(100, 100, 100));
 	cornellBoxWhite_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxWhiteBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
 	cornellBoxWhite_.lock()->AddScale(Vec3(100, 100, 100));
-	cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 0, 0));
-	cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 0, 0));
-	cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 0, 0));
-
-	player_->pos_ = Vec3(0, -70, 0);
-
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isActive_ = true;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPos_ = Vec3(0, 70, 0);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
+	cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+	cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+	cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 
 	// TLASを生成。
 	RayEngine::Ins()->SettingTLAS();
 
 	cameraAngle = 0;
 	invMapIndex_ = 0;
-	objectIndex_ = 1;
+	objectIndex_ = 3;
 
 }
 
@@ -80,61 +95,170 @@ void TitleScene::Update()
 
 	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
-		isTransition_ = true;
-		player_->Init();
+		//isTransition_ = true;
 
 	}
 
-	ImGui::Text("Choose your level!");
+	ImGui::Text("SceneSelect");
 
-	// AIかゴーストかを選択する。
-	int mode = static_cast<int>(GameSceneMode::Ins()->mode_);
-	ImGui::RadioButton("AI", &mode, 1);
+	ImGui::RadioButton("Street", &invMapIndex_, 0);
 	ImGui::SameLine();
-	ImGui::RadioButton("GHOST", &mode, 3);
-	GameSceneMode::Ins()->mode_ = static_cast<GameSceneMode::MODE>(mode);
+	ImGui::RadioButton("Building", &invMapIndex_, 1);
+	ImGui::SameLine();
+	ImGui::RadioButton("Grasslands", &invMapIndex_, 2);
+	ImGui::SameLine();
+	ImGui::RadioButton("CornellBox", &invMapIndex_, 3);
 
-	// AIだったら。
-	if (mode == 1) {
+	ImGui::Text("SelectObject");
 
-		int level = GameSceneMode::Ins()->level_;
-		ImGui::RadioButton("Level : 1", &level, 0);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 2", &level, 1);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 3", &level, 2);
-		GameSceneMode::Ins()->level_ = level;
+	ImGui::RadioButton("ReflectionObject", &objectIndex_, 2);
+	ImGui::SameLine();
+	ImGui::RadioButton("Car", &objectIndex_, 3);
+
+	//if (objectIndex_ == 2) {
+
+	//	ImGui::SliderFloat("Metalness", &pbrTestBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
+	//	ImGui::SliderFloat("Specular", &pbrTestBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
+	//	ImGui::SliderFloat("Roughness", &pbrTestBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
+
+	//}
+
+	//// AIかゴーストかを選択する。
+	//int mode = static_cast<int>(GameSceneMode::Ins()->mode_);
+	//ImGui::RadioButton("AI", &mode, 1);
+	//ImGui::SameLine();
+	//ImGui::RadioButton("GHOST", &mode, 3);
+	//GameSceneMode::Ins()->mode_ = static_cast<GameSceneMode::MODE>(mode);
+
+	//envMap2Blas_.lock()->Update();
+	//envMap3Blas_.lock()->Update();
+
+	//// AIだったら。
+	//if (mode == 1) {
+
+	//	int level = GameSceneMode::Ins()->level_;
+	//	ImGui::RadioButton("Level : 1", &level, 0);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Level : 2", &level, 1);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Level : 3", &level, 2);
+	//	GameSceneMode::Ins()->level_ = level;
+
+	//}
+	//// GHOSTだったら。
+	//else if (mode == 3) {
+
+	//	int level = GameSceneMode::Ins()->level_;
+	//	ImGui::RadioButton("Level : 1", &level, 0);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Level : 2", &level, 1);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Level : 3", &level, 2);
+	//	ImGui::SameLine();
+	//	ImGui::RadioButton("Level : 4", &level, 3);
+	//	GameSceneMode::Ins()->level_ = level;
+
+	//}
+
+	// 環境マップを更新。
+	if (invMapIndex_ == 0) {
+
+		envMap1_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		invMapIndex_ = 0;
 
 	}
-	// GHOSTだったら。
-	else if (mode == 3) {
+	else if (invMapIndex_ == 1) {
 
-		int level = GameSceneMode::Ins()->level_;
-		ImGui::RadioButton("Level : 1", &level, 0);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 2", &level, 1);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 3", &level, 2);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 4", &level, 3);
-		GameSceneMode::Ins()->level_ = level;
+		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		invMapIndex_ = 1;
+
+	}
+	else if (invMapIndex_ == 2) {
+
+		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		invMapIndex_ = 2;
+
+	}
+	else if (invMapIndex_ == 3) {
+
+		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		envMap3_.lock()->ChangeTrans(Vec3(0, 1000, 0));
+		cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		invMapIndex_ = 3;
+
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isActive_ = true;
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPos_ = Vec3(0, 70, 0);
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
 
 	}
 
-	// コーネルボックスの位置を調整。
-	float offset = -40;
-	cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, offset, 0));
-	cornellBoxRed_.lock()->ChangeTrans(Vec3(0, offset, 0));
-	cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, offset, 0));
+	//if (Input::Ins()->IsKey(DIK_UP)) {
 
-	player_->pos_ = Vec3(0, -70 + offset, 0);
+	//	pbrTestBlas_.lock()->GetMaterial().metalness_ += 0.01f;
+	//	pbrTestBlas_.lock()->GetMaterial().roughness_ = 0.3f;
+	//	pbrTestBlas_.lock()->GetMaterial().metalness_ = FHelper::Saturate(pbrTestBlas_.lock()->GetMaterial().metalness_);
 
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isActive_ = true;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPos_ = Vec3(0, -40 - offset, 0);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightSize_ = 5.0f;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isShadow_ = true;
+	//}
+	//else if (Input::Ins()->IsKey(DIK_DOWN)) {
+
+
+	//	pbrTestBlas_.lock()->GetMaterial().metalness_ -= 0.01f;
+	//	pbrTestBlas_.lock()->GetMaterial().roughness_ = 0.3f;
+	//	pbrTestBlas_.lock()->GetMaterial().metalness_ = FHelper::Saturate(pbrTestBlas_.lock()->GetMaterial().metalness_);
+
+
+	//}
+
+	pbrTestBlas_.lock()->IsChangeMaterial();
+
+	if (objectIndex_ == 1) {
+
+		// プレイヤーを描画しないようにする。
+		player_->pos_ = Vec3(0, 10000, 0);
+		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		pbrTest_.lock()->ChangeTrans(Vec3(0, 0, 0));
+
+	}
+	else if (objectIndex_ == 2) {
+
+		pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		pbrTest2_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		player_->pos_ = Vec3(0, 10000, 0);
+
+
+	}
+	else if (objectIndex_ == 3) {
+
+		pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		player_->pos_ = Vec3(0, 0, 0);
+
+		// コーネルボックスだったら。
+		if (invMapIndex_ == 3) {
+			player_->pos_ = Vec3(0, -70, 0);
+		}
+
+
+	}
 
 	// 並行光源を無効化。
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = false;
@@ -153,9 +277,12 @@ void TitleScene::Update()
 
 	// カメラの角度から位置を求める。
 	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));
-	Camera::Ins()->eye_ = cameraDir * -500.0f;
-	Camera::Ins()->eye_.y_ = 70.0f;
-	Camera::Ins()->target_ = Vec3(0, 30, 0);
+	Camera::Ins()->eye_ = cameraDir * -150.0f;
+	if (invMapIndex_ == 3) {
+		Camera::Ins()->eye_ = cameraDir * -350.0f;
+	}
+	Camera::Ins()->eye_.y_ = 20.0f;
+	Camera::Ins()->target_ = Vec3(0, 0, 0);
 	Camera::Ins()->up_ = Vec3(0, 1, 0);
 	Camera::Ins()->GenerateMatView();
 
@@ -164,8 +291,21 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 
-	RayEngine::Ins()->Draw();
+	static bool isNoise = false;
+	if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
 
-	title_.Draw();
+	// レイトレーシングを実行。
+	if (isNoise) {
+
+		RayEngine::Ins()->NoiseDraw();
+
+	}
+	else {
+
+		RayEngine::Ins()->Draw();
+
+	}
+
+	//title_.Draw();
 
 }
