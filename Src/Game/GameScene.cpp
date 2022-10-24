@@ -272,6 +272,8 @@ void GameScene::Update()
 
 			characterMgr_->Init();
 
+			return;
+
 		}
 
 		//isTransition_ = true;

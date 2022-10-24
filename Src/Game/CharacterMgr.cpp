@@ -23,7 +23,6 @@ void CharacterMgr::Init()
 	for (auto& index : character_) {
 
 		index->DeleteInstance();
-		index.reset();
 
 	}
 
