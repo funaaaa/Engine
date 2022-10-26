@@ -196,9 +196,9 @@ void GameScene::Init()
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
 
 	// 天球用のスフィアを生成する。
-	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
-	skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
+	//skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	//skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
+	//skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
 
 	//// PBRテスト用
 	//pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
@@ -316,7 +316,7 @@ void GameScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
-	skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
+	//skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
 
 	// 甲羅を更新。
 	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::MUGEN]);

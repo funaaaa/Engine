@@ -361,13 +361,48 @@ void mainRayGen()
 
 // missシェーダー レイがヒットしなかった時に呼ばれるシェーダー
 [shader("miss")]
-void mainMS(inout Payload payload)
+void mainMS(inout Payload PayloadData)
 {
-
-    // 単色を返すようにする。
-   //payload.color_ = float3(0, 0, 0);
-    //payload.color = float3(0xFF / 255.0f, 0xFF / 255.0f, 0xE5 / 255.0f);
-    //payload.color = float3(0x32 / 255.0f, 0x90 / 255.0f, 0xD0 / 255.0f);
+    
+    if (PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_GI || PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW)
+        return;
+    
+    // ペイロード受け取り用変数。
+    Payload payloadBuff = PayloadData;
+    
+    // 影響度をかけつつ色を保存。
+    float3 mieColor = float3(1, 1, 1);
+    payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+    payloadBuff.color_ += AtmosphericScattering(WorldRayOrigin() + WorldRayDirection() * RayTCurrent(), mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
+    payloadBuff.ao_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+    payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
+        
+    // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
+    payloadBuff.denoiseMask_ = float3(1, 1, 1);
+        
+    // サンプリングした点の輝度を取得する。
+    float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
+        
+    // サンプリングした点が地上より下じゃなかったら。
+    if (t <= 0.9f)
+    {
+            
+        // サンプリングした輝度をもとに、暗かったら星空を描画する。
+        t = (1.0f - t);
+        if (t != 0.0f)
+        {
+            t = pow(t, 10.0f);
+            //t = pow(2.0f, 10.0f * t - 10.0f);
+        }
+        //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
+        //payloadBuff.color_ = saturate(payloadBuff.color_);
+            
+    }
+        
+    // 影響度を0にする。
+    payloadBuff.impactAmount_ = 0.0f;
+        
+    PayloadData = payloadBuff;
 
 }
 
@@ -445,45 +480,45 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
 
     
     // 当たったオブジェクトが天球だったら。
-    if (InstanceID == CHS_IDENTIFICATION_INSTNACE_AS)
-    {
-        float3 mieColor = float3(1, 1, 1);
+    //if (InstanceID == CHS_IDENTIFICATION_INSTNACE_AS)
+    //{
+    //    float3 mieColor = float3(1, 1, 1);
         
-        // 影響度をかけつつ色を保存。
-        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-        payloadBuff.color_ += AtmosphericScattering(WorldPos, mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
-        payloadBuff.ao_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-        payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
+    //    // 影響度をかけつつ色を保存。
+    //    payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+    //    payloadBuff.color_ += AtmosphericScattering(WorldPos, mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
+    //    payloadBuff.ao_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+    //    payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
         
-        // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
-        payloadBuff.denoiseMask_ = float3(1, 1, 1);
+    //    // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
+    //    payloadBuff.denoiseMask_ = float3(1, 1, 1);
         
-        // サンプリングした点の輝度を取得する。
-        float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
+    //    // サンプリングした点の輝度を取得する。
+    //    float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
         
-        // サンプリングした点が地上より下じゃなかったら。
-        if (t <= 0.9f)
-        {
+    //    // サンプリングした点が地上より下じゃなかったら。
+    //    if (t <= 0.9f)
+    //    {
             
-            // サンプリングした輝度をもとに、暗かったら星空を描画する。
-            t = (1.0f - t);
-            if (t != 0.0f)
-            {
-                t = pow(t, 10.0f);
-                //t = pow(2.0f, 10.0f * t - 10.0f);
-            }
-            payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
-            payloadBuff.color_ = saturate(payloadBuff.color_);
+    //        // サンプリングした輝度をもとに、暗かったら星空を描画する。
+    //        t = (1.0f - t);
+    //        if (t != 0.0f)
+    //        {
+    //            t = pow(t, 10.0f);
+    //            //t = pow(2.0f, 10.0f * t - 10.0f);
+    //        }
+    //        payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
+    //        payloadBuff.color_ = saturate(payloadBuff.color_);
             
-        }
+    //    }
         
-        // 影響度を0にする。
-        payloadBuff.impactAmount_ = 0.0f;
+    //    // 影響度を0にする。
+    //    payloadBuff.impactAmount_ = 0.0f;
         
-        PayloadData = payloadBuff;
+    //    PayloadData = payloadBuff;
         
-        return true;
-    }
+    //    return true;
+    //}
     
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
@@ -767,7 +802,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         else
         {
             // 拡散反射光を擬似的に再現するために明るさを少しだけ上げる。
-            payloadBuff.light_ += float3(0.3f,0.3f,0.3f);
+            payloadBuff.light_ += float3(0.3f, 0.3f, 0.3f);
             payloadBuff.light_ = saturate(payloadBuff.light_);
         }
         
