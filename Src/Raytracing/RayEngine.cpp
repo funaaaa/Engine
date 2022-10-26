@@ -212,24 +212,21 @@ void RayEngine::Draw()
 
 
 	// 最初のFはコピーリソースを行わない。
-	if (Engine::Ins()->frameIndex_ != 0) {
-
-		// バックバッファのインデックスを取得する。
-		UINT backBufferIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	//if (Engine::Ins()->frameIndex_ != 0) {
 
 		D3D12_RESOURCE_BARRIER barriers[] = {
 			CD3DX12_RESOURCE_BARRIER::Transition(
 			Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(),
-			D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
 			D3D12_RESOURCE_STATE_COPY_DEST),
 		};
 		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(barriers), barriers);
 
-		denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, Engine::Ins()->copyResourceCmdList_);
+		denoiseMixTextureOutput_[Engine::Ins()->pastQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, Engine::Ins()->copyResourceCmdList_);
 
-		Engine::Ins()->copyResourceCmdList_->CopyResource(Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get());
+		Engine::Ins()->copyResourceCmdList_->CopyResource(Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_[Engine::Ins()->pastQueueIndex_]->GetRaytracingOutput().Get());
 
-		denoiseMixTextureOutput_[!Engine::Ins()->currentQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, Engine::Ins()->copyResourceCmdList_);
+		denoiseMixTextureOutput_[Engine::Ins()->pastQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, Engine::Ins()->copyResourceCmdList_);
 
 		// レンダーターゲットのリソースバリアをもとに戻す。
 		D3D12_RESOURCE_BARRIER endBarriers[] = {
@@ -237,13 +234,13 @@ void RayEngine::Draw()
 		CD3DX12_RESOURCE_BARRIER::Transition(
 		Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(),
 		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_COMMON)
+		D3D12_RESOURCE_STATE_PRESENT)
 
 		};
 
 		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
 
-	}
+	//}
 
 	// RayDenoiserの描画後処理。
 	//Denoiser::Ins()->AfterDraw();

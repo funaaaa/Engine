@@ -82,18 +82,17 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> computeCmdQueue_;				// コンピュートキュー 主にデノイズを行う。
 
 	// フェンス
-	Microsoft::WRL::ComPtr<ID3D12Fence> GPUtoCPUFence_;							// mainGraphicsとCPUの同期をとるためのフェンス
-	UINT64 GPUtoCPUFenceVal_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> graphicsToCopyFence_;					// copyの処理をgraphicsの処理が終わった後に実行するためのフェンス。
-	UINT64 graphicsToCopyFenceVal_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> finishCopyFence_;						// copy終了監視用フェンス
-	UINT64 finishCopyFenceVal_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> graphicsToDenoiseFence_;				// mainGraphicsとdenoiseの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
-	UINT64 graphicsToDenoiseFenceVal_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> GPUtoCPUFence_;			// mainGraphicsとCPUの同期をとるためのフェンス
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> graphicsToCopyFence_;	// copyの処理をgraphicsの処理が終わった後に実行するためのフェンス。
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> finishCopyFence_;		// copy終了監視用フェンス
+	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> graphicsToDenoiseFence_;	// mainGraphicsとdenoiseの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
 	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> denoiseToCopyFence_;		// denoiseとCopyの同期をとるためのフェンス SwapChainのように裏と表を切り替えて使用する。
-	std::array<UINT64, 2> denoiseToCopyFenceVal_;
+	UINT64 fenceValue;
+	Microsoft::WRL::ComPtr<ID3D12Fence> asFence_;
+	UINT64 asfenceValue_;
 
 	// 現在Queueのインデックス。
+	int pastQueueIndex_;
 	int currentQueueIndex_;
 	int frameIndex_;
 

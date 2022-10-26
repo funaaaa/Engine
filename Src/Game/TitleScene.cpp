@@ -308,16 +308,7 @@ void TitleScene::Draw()
 	if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
 
 	// レイトレーシングを実行。
-	if (isNoise) {
-
-		RayEngine::Ins()->NoiseDraw();
-
-	}
-	else {
-
-		RayEngine::Ins()->Draw();
-
-	}
+	RayEngine::Ins()->Draw();
 
 	//title_.Draw();
 

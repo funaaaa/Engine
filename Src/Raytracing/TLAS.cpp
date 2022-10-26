@@ -263,15 +263,16 @@ void TLAS::CreateAccelerationStructure()
 	// 構築用関数を呼ぶ。
 	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
 	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
+	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->asFence_.Get(), ++Engine::Ins()->asfenceValue_);
 
 
 	/*-- リソースバリアを設定して書き込めないようにする --*/
 
-	//グラフィックコマンドリストの完了待ち
-	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->GPUtoCPUFence_.Get(), ++Engine::Ins()->GPUtoCPUFenceVal_);
-	if (Engine::Ins()->GPUtoCPUFence_->GetCompletedValue() != Engine::Ins()->GPUtoCPUFenceVal_) {
+	// グラフィックコマンドリストの完了待ち
+	UINT64 gpuFence = Engine::Ins()->asFence_->GetCompletedValue();
+	if (gpuFence != Engine::Ins()->asfenceValue_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		Engine::Ins()->GPUtoCPUFence_->SetEventOnCompletion(Engine::Ins()->GPUtoCPUFenceVal_, event);
+		Engine::Ins()->asFence_->SetEventOnCompletion(Engine::Ins()->asfenceValue_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}

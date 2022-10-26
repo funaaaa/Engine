@@ -174,41 +174,45 @@ void Engine::Init() {
 	// フェンスの生成。
 	{
 
+		// フェンスの値。
+		fenceValue = 1;
+		asfenceValue_ = 1;
+
 		// MainGraphicsの処理をCPU側で待つ際に使用するフェンス
-		GPUtoCPUFenceVal_ = 1;
-		result = device_.dev_->CreateFence(GPUtoCPUFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&GPUtoCPUFence_));
-		++GPUtoCPUFenceVal_;
-		GPUtoCPUFence_->SetName(L"GPUtoCPUFenceVal");
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&GPUtoCPUFence_[0]));
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&GPUtoCPUFence_[1]));
+		GPUtoCPUFence_[0]->SetName(L"GPUtoCPUFenceVal0");
+		GPUtoCPUFence_[1]->SetName(L"GPUtoCPUFenceVal1");
 
 		// MainGraphicsからDenoise表へのフェンスの生成
-		graphicsToCopyFenceVal_ = 1;
-		result = device_.dev_->CreateFence(graphicsToCopyFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToCopyFence_));
-		++graphicsToCopyFenceVal_;
-		graphicsToCopyFence_->SetName(L"MainGraphicsToCopyFence");
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToCopyFence_[0]));
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToCopyFence_[1]));
+		graphicsToCopyFence_[0]->SetName(L"MainGraphicsToCopyFence0");
+		graphicsToCopyFence_[1]->SetName(L"MainGraphicsToCopyFence1");
 
 		// MainGraphicsからDenoise表へのフェンスの生成
-		graphicsToDenoiseFenceVal_ = 1;
-		result = device_.dev_->CreateFence(graphicsToDenoiseFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToDenoiseFence_));
-		++graphicsToDenoiseFenceVal_;
-		graphicsToDenoiseFence_->SetName(L"MainGraphicsToDenoiseFence");
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToDenoiseFence_[0]));
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&graphicsToDenoiseFence_[1]));
+		graphicsToDenoiseFence_[0]->SetName(L"MainGraphicsToDenoiseFence0");
+		graphicsToDenoiseFence_[1]->SetName(L"MainGraphicsToDenoiseFence1");
 
 		// Denoise表からCopyへのフェンスの生成
-		denoiseToCopyFenceVal_[0] = 1;
-		result = device_.dev_->CreateFence(denoiseToCopyFenceVal_[0], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_[0]));
-		++denoiseToCopyFenceVal_[0];
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_[0]));
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_[1]));
 		denoiseToCopyFence_[0]->SetName(L"DenoiseToCopyFence0");
-
-		// Denoise裏からCopyへのフェンスの生成
-		denoiseToCopyFenceVal_[1] = 1;
-		result = device_.dev_->CreateFence(denoiseToCopyFenceVal_[1], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&denoiseToCopyFence_[1]));
-		++denoiseToCopyFenceVal_[1];
 		denoiseToCopyFence_[1]->SetName(L"DenoiseToCopyFence1");
 
 		// Copy終了監視用のフェンスの生成
-		finishCopyFenceVal_ = 1;
-		result = device_.dev_->CreateFence(finishCopyFenceVal_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&finishCopyFence_));
-		++finishCopyFenceVal_;
-		finishCopyFence_->SetName(L"FinishCopyFence");
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&finishCopyFence_[0]));
+		result = device_.dev_->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&finishCopyFence_[1]));
+		finishCopyFence_[0]->SetName(L"FinishCopyFence0");
+		finishCopyFence_[1]->SetName(L"FinishCopyFence1");
+
+		// 加速構造体生成用のフェンス
+		result = device_.dev_->CreateFence(asfenceValue_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&asFence_));
+		asFence_->SetName(L"AsFence");
+
+		++fenceValue;
 
 	}
 
@@ -221,6 +225,7 @@ void Engine::Init() {
 
 		// 現在のキューのインデックスと経過フレームを0で初期化。
 		currentQueueIndex_ = 1;	// 最初のFの先頭でフラグが切り替わるため、1で初期化しておくことで最初のFのインデックスが0になる。
+		pastQueueIndex_ = 0;
 		frameIndex_ = 0;
 
 	}
@@ -353,6 +358,7 @@ void Engine::Init() {
 void Engine::ProcessBeforeDrawing() {
 
 	// 現在のUAVインデックスを切り替える。
+	pastQueueIndex_ = currentQueueIndex_;
 	currentQueueIndex_ = currentQueueIndex_ ? 0 : 1;
 
 	// 全キーの入力状態を取得する
@@ -374,7 +380,6 @@ void Engine::ProcessBeforeDrawing() {
 		// 深度バッファ用のディスクリプタヒープの先頭アドレスを取得
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart();
 		copyResourceCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
-		mainGraphicsCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
 
 		// 画面クリア
 		// 初期化色
@@ -386,23 +391,14 @@ void Engine::ProcessBeforeDrawing() {
 
 		// 深度バッファのクリアコマンド
 		copyResourceCmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-		mainGraphicsCmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 		// ビューポート設定
 		CD3DX12_VIEWPORT viewportData = CD3DX12_VIEWPORT(0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT);
 		copyResourceCmdList_->RSSetViewports(1, &viewportData);
-		mainGraphicsCmdList_->RSSetViewports(1, &viewportData);
 
 		// シザリング矩形設定
 		CD3DX12_RECT rectData = CD3DX12_RECT(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 		copyResourceCmdList_->RSSetScissorRects(1, &rectData);
-		mainGraphicsCmdList_->RSSetScissorRects(1, &rectData);
-
-
-		// 次にBackBufferに書き込む処理は別のQueueにあるのでステートをCommonに変える。
-		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(swapchain_.backBuffers_[bbIndex].Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
-		copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 	}
 
@@ -440,25 +436,23 @@ void Engine::ProcessAfterDrawing() {
 	// 各フェンスの値を加算する。
 	{
 
-		// GPUからCPU間でのフェンスの値を加算。
-		++GPUtoCPUFenceVal_;
-
-		// MainGraphicsQueueからDenoiseQueue間でのフェンスの値を加算。
-		++graphicsToDenoiseFenceVal_;
-
-		// DenoiseQueueからCopy間でのフェンスの値を加算。
-		++denoiseToCopyFenceVal_[0];
-		++denoiseToCopyFenceVal_[1];
-
-		// MainGraphicsQueueからCopy間でのフェンスの値を加算。
-		++graphicsToCopyFenceVal_;
-
-		// Copyの終了監視用フェンスを加算。
-		++finishCopyFenceVal_;
+		// フェンスの値を加算。
+		++fenceValue;
 
 	}
 
-	// MainGraphicsCmdListの処理
+	// Indexを表示。
+	if (currentQueueIndex_) {
+
+		OutputDebugString(L"\nIndex : 1\n");
+	}
+	else {
+
+		OutputDebugString(L"\nIndex : 0\n");
+
+	}
+
+	// GraphicsQueueの処理
 	{
 
 		// コマンドリストに追加
@@ -469,167 +463,111 @@ void Engine::ProcessAfterDrawing() {
 		mainGraphicsCmdList_->Close();
 
 		// グラフィックスキューのコマンドを実行。
-		ID3D12CommandList* cmdLists[] = { mainGraphicsCmdList_.Get() }; // コマンドリストの配列
+		ID3D12CommandList* cmdLists[] = { mainGraphicsCmdList_.Get() };
 		graphicsCmdQueue_->ExecuteCommandLists(1, cmdLists);
 
 		// MainGraphicsの実行完了を通知。
-		graphicsCmdQueue_->Signal(GPUtoCPUFence_.Get(), GPUtoCPUFenceVal_);
-		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_.Get(), graphicsToDenoiseFenceVal_);
-		graphicsCmdQueue_->Signal(graphicsToCopyFence_.Get(), graphicsToCopyFenceVal_);
-		UINT64 graphicsFenceValue = GPUtoCPUFence_->GetCompletedValue();
-		UINT64 currentDenoizeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
+		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_[currentQueueIndex_].Get(), fenceValue);
 
+		// デバッグ情報
+		OutputDebugString(L"レイトレコマンドを実行。\n");
 
-		if (currentQueueIndex_) {
-			//OutputDebugString(L"1 のレイトレを実行&完了。\n");
-		}
-		else {
-			//OutputDebugString(L"0 のレイトレを実行&完了。\n");
-		}
+		// 1F以降だったらコピーを行う。
+		//if (frameIndex_ != 0) {
 
-
-		// グラフィックコマンドリストの完了待ち
-		if (graphicsFenceValue != GPUtoCPUFenceVal_) {
-			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-			GPUtoCPUFence_->SetEventOnCompletion(GPUtoCPUFenceVal_, event);
-			WaitForSingleObject(event, INFINITE);
-			CloseHandle(event);
-
+		// 前フレームのデノイズを待つ。
+		if (frameIndex_ != 0) {
+			graphicsCmdQueue_->Wait(denoiseToCopyFence_[pastQueueIndex_].Get(), fenceValue - 1);
 		}
 
-		// デバッグ用。フェンスの値を見る。
-		graphicsFenceValue = GPUtoCPUFence_->GetCompletedValue();
-		currentDenoizeFenceValue = graphicsToDenoiseFence_->GetCompletedValue();
-
-		// コマンドアロケータのリセット
-		mainGraphicsCmdAllocator_->Reset();							// キューをクリア
-
-		// コマンドリストのリセット
-		mainGraphicsCmdList_->Reset(mainGraphicsCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
-
-
-	}
-
-	// DenoiseCmdListの処理
-	{
-
-		// DenoiseCmdListが使用可能状態だったら。
-		if (canUseDenoiseCmdList_[currentQueueIndex_]) {
-
-			// コンピュートキューのデノイズコマンドを実行。
-			denoiseCmdList_[currentQueueIndex_]->Close();
-			ID3D12CommandList* computeCmdLists[] = { denoiseCmdList_[currentQueueIndex_].Get() }; // コマンドリストの配列
-			//computeCmdQueue_->Wait(graphicsToDenoiseFence_[currentQueueIndex_].Get(), graphicsToDenoiseFenceVal_[currentQueueIndex_]);	// MainGraphicsの処理が終わってから実行する。
-			computeCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
-
-
-			if (currentQueueIndex_) {
-				//OutputDebugString(L"1 のデノイズを実行。\n");
-			}
-			else {
-				//OutputDebugString(L"0 のデノイズを実行。\n");
-			}
-
-
-			// このコマンドリストを操作不可能にする。
-			canUseDenoiseCmdList_[currentQueueIndex_] = false;
-
-		}
-
-		for (int index = 0; index < 2; ++index) {
-
-			// このフラグがtrueの時はすでにResetしてあるということなので、二重リセットを回避するために処理を飛ばす。
-			if (canUseDenoiseCmdList_[index]) continue;
-
-			// デノイズコマンドリストの終了をCopyのフェンスに通知。
-			computeCmdQueue_->Signal(denoiseToCopyFence_[index].Get(), denoiseToCopyFenceVal_[index]);
-
-			UINT64 computeFenceValue = denoiseToCopyFence_[index]->GetCompletedValue();
-			if (computeFenceValue == denoiseToCopyFenceVal_[index]) {
-
-				// コマンドアロケータのリセット
-				denoiseCmdAllocator_[index]->Reset();							// キューをクリア
-
-				// コマンドリストのリセット
-				denoiseCmdList_[index]->Reset(denoiseCmdAllocator_[index].Get(), nullptr);	// 再びコマンドリストを貯める準備
-
-				// このコマンドリストを操作可能にする。
-				canUseDenoiseCmdList_[index] = true;
-
-				if (index) {
-					//	OutputDebugString(L"1 のデノイズが完了。\n");
-				}//
-				else {
-					//	OutputDebugString(L"0 のデノイズが完了。\n");
-				}
-
-			}
-
-		}
-
-	}
-
-	// CopyCmdListの処理 最初の1Fだったら実行しない。
-	if (frameIndex_ != 0) {
-
-		// 1F前のデノイズが終わっていたら。
-		//for (int index = 0; index < 2; ++index) {
-
-			//if (!canUseDenoiseCmdList_[index]) continue;
-
-
-		if (!currentQueueIndex_) {
-			//OutputDebugString(L"1 のコピーを実行。\n");
-		}
-		else {
-			//OutputDebugString(L"0 のコピーを実行。\n");
-		}
-
-
-		// コピーキューのデノイズコマンドを実行。
+		// コピーコマンドリストのクローズ
 		copyResourceCmdList_->Close();
 
-		ID3D12CommandList* computeCmdLists[] = { copyResourceCmdList_.Get() }; // コマンドリストの配列
-		//graphicsCmdQueue_->Wait(graphicsToCopyFence_.Get(), graphicsToCopyFenceVal_);	// MainGraphicsの処理が終わってから実行する。
-		graphicsCmdQueue_->ExecuteCommandLists(1, computeCmdLists);							// コマンドリストを実行。
+		// コピーを実行。
+		ID3D12CommandList* copyCmdLists[] = { copyResourceCmdList_.Get() };
+		graphicsCmdQueue_->ExecuteCommandLists(1, copyCmdLists);
 
-		// 画面バッファをフリップ
-		swapchain_.swapchain_->Present(1, 0);		// こいつを毎フレーム呼ばないと垂直同期が働かずに60FPSを超えてしまう。
+		// Copyの実行完了を通知。
+		graphicsCmdQueue_->Signal(GPUtoCPUFence_[currentQueueIndex_].Get(), fenceValue);
 
-		// コピーコマンドリストの終了をコピー終了監視用のフェンスに通知。
-		graphicsCmdQueue_->Signal(finishCopyFence_.Get(), finishCopyFenceVal_);
+		// デバッグ情報
+		OutputDebugString(L"コピーコマンドを実行。\n");
 
-		// グラフィックコマンドリストの完了待ち
-		UINT64 copyFenceValue = finishCopyFence_->GetCompletedValue();
-		if (copyFenceValue != finishCopyFenceVal_) {
-			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-			finishCopyFence_->SetEventOnCompletion(finishCopyFenceVal_, event);
-			WaitForSingleObject(event, INFINITE);
-			CloseHandle(event);
-		}
+		//}
+		//// 0Fだったらコピーを行わないので、MainGraphicsでCPUとGPUの同期を取る。
+		//else {
 
+		//	// MainGraphicsの実行完了を通知。
+		//	graphicsCmdQueue_->Signal(GPUtoCPUFence_[currentQueueIndex_].Get(), fenceValue);
 
-		if (!currentQueueIndex_) {
-			//OutputDebugString(L"1 のコピーが完了。\n");
-		}
-		else {
-			//OutputDebugString(L"0 のコピーが完了。\n");
-		}
-
-
-		// コマンドアロケータのリセット
-		copyResourceCmdAllocator_->Reset();							// キューをクリア
-
-		// コマンドリストのリセット
-		copyResourceCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
-
-		//	break;
 
 		//}
 
 	}
 
-	//OutputDebugString(L"--\n");
+	// ComputeQueueの処理
+	{
+
+		// コマンドリストを閉じる
+		denoiseCmdList_[currentQueueIndex_]->Close();
+
+		// レイトレの処理を待つ。
+		computeCmdQueue_->Wait(graphicsToDenoiseFence_[currentQueueIndex_].Get(), fenceValue - 0);
+
+		// デノイズを実行
+		ID3D12CommandList* cmdLists[] = { denoiseCmdList_[currentQueueIndex_].Get() };
+		computeCmdQueue_->ExecuteCommandLists(1, cmdLists);
+
+		// 実行完了を通知。
+		computeCmdQueue_->Signal(denoiseToCopyFence_[currentQueueIndex_].Get(), fenceValue);
+
+		// デバッグ情報
+		OutputDebugString(L"デノイズコマンドを実行。\n");
+
+	}
+
+
+	// SwapChainを反転させて、GPUの処理完了を待つ。
+	{
+
+
+		// 反転。
+		swapchain_.swapchain_->Present(1, 0);
+
+		// グラフィックコマンドリストの完了待ち
+		UINT64 gpuFence = GPUtoCPUFence_[currentQueueIndex_]->GetCompletedValue();
+		if (gpuFence != fenceValue) {
+			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+			GPUtoCPUFence_[currentQueueIndex_]->SetEventOnCompletion(fenceValue, event);
+			WaitForSingleObject(event, INFINITE);
+			CloseHandle(event);
+		}
+
+		// このフレームで使用したコマンドリストを初期化。
+		mainGraphicsCmdAllocator_->Reset();
+		mainGraphicsCmdList_->Reset(mainGraphicsCmdAllocator_.Get(), nullptr);
+		//if (frameIndex_ != 0) {
+
+			// 今フレームのコピーのコマンドを初期化。
+		copyResourceCmdAllocator_->Reset();
+		copyResourceCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);
+
+		// 前フレームのデノイズのコマンドを初期化。
+		denoiseCmdAllocator_[pastQueueIndex_]->Reset();
+		denoiseCmdList_[pastQueueIndex_]->Reset(denoiseCmdAllocator_[pastQueueIndex_].Get(), nullptr);
+
+		// デバッグ情報
+		OutputDebugString(L"コピーコマンド終了。\n");
+
+		//}
+
+		// デバッグ情報
+		OutputDebugString(L"レイトレコマンド終了。\n");
+
+	}
+
+	// デバッグ情報
+	OutputDebugString(L"\n--\n");
 
 	++frameIndex_;
 
