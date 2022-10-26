@@ -55,16 +55,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	/*----------ゲームループ----------*/
 	while (true) {
 
-		// メッセージ確認
-		if (PeekMessage(&Engine::Ins()->windowsAPI_->msg_, nullptr, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&Engine::Ins()->windowsAPI_->msg_);	// キー入力メッセージの処理
-			DispatchMessage(&Engine::Ins()->windowsAPI_->msg_);	// プロシージャにメッセージを送る
-		}
-		// ?ボタンで終了メッセージが来たらゲームループを抜ける
-		if (Engine::Ins()->windowsAPI_->msg_.message == WM_QUIT || Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
-			break;
-		}
-
 
 		// 描画前処理
 		Engine::Ins()->ProcessBeforeDrawing();
@@ -76,6 +66,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 		// 描画後処理
 		Engine::Ins()->ProcessAfterDrawing();
+
+
+		// メッセージ確認
+		if (PeekMessage(&Engine::Ins()->windowsAPI_->msg_, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&Engine::Ins()->windowsAPI_->msg_);	// キー入力メッセージの処理
+			DispatchMessage(&Engine::Ins()->windowsAPI_->msg_);	// プロシージャにメッセージを送る
+		}
+		// ?ボタンで終了メッセージが来たらゲームループを抜ける
+		if (Engine::Ins()->windowsAPI_->msg_.message == WM_QUIT || Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
+			break;
+		}
 
 	}
 

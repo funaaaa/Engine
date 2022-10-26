@@ -740,5 +740,14 @@
     <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
       <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
     </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurX.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurY.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseFinal.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -280,7 +280,7 @@ void TitleScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 乱数の種を更新。
-	RayEngine::Ins()->GetConstBufferData().debug_.seed_ = FHelper::GetRand(0, 1000);
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
 	// プレイヤーの位置を調整。
 	player_->UpdateTitle();

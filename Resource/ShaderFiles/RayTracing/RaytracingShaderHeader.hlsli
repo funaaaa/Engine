@@ -36,7 +36,7 @@ struct DirLightData
     float3 lightDir;
     int isActive;
     float3 lightColor;
-    float pad;
+    int seed;
 };
 static const int POINT_LIGHT_COUNT = 30;
 // ポイントライト用定数バッファ
@@ -56,31 +56,6 @@ struct LightConstBufferData
     DirLightData dirLight;
     PointLightData pointLight[POINT_LIGHT_COUNT];
 };
-
-// 大気散乱用定数バッファ
-struct ASConstBufferData
-{
-    float kr; // レイリー散乱定数
-    float km; // ミー散乱定数
-    float samples; // サンプル数
-    float outerRadius; // 大気の外周
-    float innerRadius; // 地上の外周
-    float eSun; // 太陽光線の強さ
-    float g; // 散乱定数
-    float aveHeight; // 平均大気密度を取得する高さ
-};
-// デバッグ用のパラメーター定数バッファ
-struct DebugConstBufferData
-{
-    int seed;
-    int isNoiseScene; // ノイズのみのシーンを描画するかのフラグ
-    int isLightHitScene; // ライトに当たった面のみを描画するフラグ
-    int isNormalScene; // 法線情報を描画するフラグ
-    int isMeshScene; // メッシュ情報を描画するフラグ
-    int isNoAO;
-    int isNoGI; // GIの処理を行わないフラグ
-    int isGIOnlyScene;
-};
 // アルファ値転送用の定数バッファ
 struct AlphaData
 {
@@ -98,8 +73,6 @@ struct ConstBufferData
 {
     CameraConstBufferData camera;
     LightConstBufferData light;
-    ASConstBufferData as;
-    DebugConstBufferData debug;
     AlphaConstBufferData alphaData_;
 };
 

@@ -210,7 +210,6 @@ void RayEngine::Draw()
 
 	}
 
-
 	// 最初のFはコピーリソースを行わない。
 	//if (Engine::Ins()->frameIndex_ != 0) {
 
@@ -239,6 +238,7 @@ void RayEngine::Draw()
 		};
 
 		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
+
 
 	//}
 

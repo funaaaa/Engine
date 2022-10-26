@@ -36,12 +36,12 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnd
     }
 
     // レイリー散乱定数
-    float kr = gSceneParam.as.kr;
+    float kr = 0.0025f;
     // ミー散乱定数
-    float km = gSceneParam.as.km;
+    float km = 0.005f;
 
     // 大気中の線分をサンプリングする数。
-    float fSamples = gSceneParam.as.samples;
+    float fSamples = 2.0f;
 
     // 謎の色 色的には薄めの茶色
     float3 three_primary_colors = float3(0.68f, 0.55f, 0.44f);
@@ -49,12 +49,12 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnd
     float3 v3InvWaveLength = 1.0f / pow(three_primary_colors, 4.0f);
 
     // 大気圏の一番上の高さ。
-    float fOuterRadius = gSceneParam.as.outerRadius;
+    float fOuterRadius = 10250.0f;
     // 地球全体の地上の高さ。
-    float fInnerRadius = gSceneParam.as.innerRadius;
+    float fInnerRadius = 10000.0f;
 
     // 太陽光の強さ？
-    float fESun = gSceneParam.as.eSun;
+    float fESun = 20.0f;
     // 太陽光の強さにレイリー散乱定数をかけてレイリー散乱の強さを求めている。
     float fKrESun = kr * fESun;
     // 太陽光の強さにミー散乱定数をかけてレイリー散乱の強さを求めている。
@@ -68,12 +68,12 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnd
     // 地球全体での大気の割合。
     float fScale = 1.0f / (fOuterRadius - fInnerRadius);
     // 平均大気密度を求める高さ。
-    float fScaleDepth = gSceneParam.as.aveHeight;
+    float fScaleDepth = 0.35f;
     // 地球全体での大気の割合を平均大気密度で割った値。
     float fScaleOverScaleDepth = fScale / fScaleDepth;
 
     // 散乱定数を求める際に使用する値。
-    float g = gSceneParam.as.g;
+    float g = -0.999f;
     // 散乱定数を求める際に使用する値を二乗したもの。なぜ。
     float g2 = g * g;
 
@@ -533,26 +533,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         
     }
     
-    // メッシュ情報を返す。デバッグ機能。
-    if (gSceneParam.debug.isMeshScene)
-    {
-        PayloadData.light_ = CalcBarycentrics(Attrib.barys);
-        
-        // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
-        return true;
-    }
-    
-    // 法線情報を返す。デバッグ機能。
-    if (gSceneParam.debug.isNormalScene)
-    {
-        PayloadData.light_ = WorldNormal;
-        
-        // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
-        return true;
-    }
-    
     return false;
     
 }
@@ -777,26 +757,20 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         }
         
     }
-    
         
-    // AOを行わないデバッグ機能がついていたらAOを行わない。
-    if (!gSceneParam.debug.isNoAO)
+    // AOの計算。
     {
-       
+     
         int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
         float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
         
-        // AOのレイを飛ばす。
         float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 15, gRtScene);
         
         float NoL = saturate(dot(WorldNormal, sampleDir));
-        float pdf = 1.0 / (2.0 * PI);
+        float pdf = 1.0f / (2.0f * PI);
         aoLightVisibility += aoLightVisibilityBuff;
         
     }
-        
-   
-        
     
     
     // ライトの総合隠蔽度を求める。
@@ -814,7 +788,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 {
     
     // 当たったオブジェクトがGIを行うオブジェクトで、GIを行うフラグが立っていたら。
-    if ((InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK) && !gSceneParam.debug.isNoGI)
+    if ((InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK))
     {
         if (0.0f < PayloadData.impactAmount_)
         {
