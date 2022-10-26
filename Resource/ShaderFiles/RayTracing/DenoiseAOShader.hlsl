@@ -25,15 +25,8 @@ RWTexture2D<float4> giOutput : register(u3);
 RWTexture2D<float4> denoiseMaskoutput : register(u4);
 
 // 大気散乱
-float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnderGround)
+float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
 {
-
-    // 地平線以下は真っ黒にする。
-    if (pos.y < -10)
-    {
-        isUnderGround = true;
-        return float3(0.1f, 0.1f, 0.1f);
-    }
 
     // レイリー散乱定数
     float kr = 0.0025f;
@@ -121,7 +114,7 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor, inout bool isUnd
 
     // 色情報
     float3 v3FrontColor = 0.0f;
-    for (int n = 0; n < int(fSamples); n++)
+    for (int n = 0; n < int(fSamples); ++n)
     {
         // サンプルポイントの高さ。どちらにせよ原点は地球の中心なので、この値が現在位置の高さになる。
         float fHeight = length(v3SamplePoint);
@@ -390,10 +383,13 @@ void shadowMS(inout Payload payload)
 bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute Attrib, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
 {
     
+    // ペイロード受け取り用変数。
+    Payload payloadBuff = PayloadData;
+    
     // デノイズ用のマスクに使用するテクスチャに法線の色とInstanceIndexをかけたものを書き込む。
-    if (PayloadData.recursive_ == 1)
+    if (payloadBuff.recursive_ == 1)
     {
-        PayloadData.denoiseMask_ = (WorldNormal);
+        payloadBuff.denoiseMask_ = (WorldNormal);
     }
     
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
@@ -413,7 +409,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     }
     
     // 今発射されているレイのIDがGI用だったら
-    if (PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_GI)
+    if (payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_GI)
     {
         
         // レイの長さを求める。
@@ -440,7 +436,9 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         //    giBuff /= 2.0f;
         //}
         
-        PayloadData.gi_ += giBuff;
+        payloadBuff.gi_ += giBuff;
+        
+        PayloadData = payloadBuff;
         
         return true;
     }
@@ -450,22 +448,21 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     if (InstanceID == CHS_IDENTIFICATION_INSTNACE_AS)
     {
         float3 mieColor = float3(1, 1, 1);
-        bool isUnderGround = false;
         
         // 影響度をかけつつ色を保存。
-        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += AtmosphericScattering(WorldPos, mieColor, isUnderGround) * PayloadData.impactAmount_ * PayloadData.impactAmount_;
-        PayloadData.ao_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.gi_ += float3(0, 0, 0) * PayloadData.impactAmount_;
+        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+        payloadBuff.color_ += AtmosphericScattering(WorldPos, mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
+        payloadBuff.ao_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+        payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
         
         // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
-        PayloadData.denoiseMask_ = float3(1, 1, 1);
+        payloadBuff.denoiseMask_ = float3(1, 1, 1);
         
         // サンプリングした点の輝度を取得する。
-        float t = dot(PayloadData.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
+        float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
         
         // サンプリングした点が地上より下じゃなかったら。
-        if (!isUnderGround && t <= 0.9f)
+        if (t <= 0.9f)
         {
             
             // サンプリングした輝度をもとに、暗かったら星空を描画する。
@@ -475,26 +472,30 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
                 t = pow(t, 10.0f);
                 //t = pow(2.0f, 10.0f * t - 10.0f);
             }
-            PayloadData.color_ += (float3) TexColor * t * PayloadData.impactAmount_;
-            PayloadData.color_ = saturate(PayloadData.color_);
+            payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
+            payloadBuff.color_ = saturate(payloadBuff.color_);
             
         }
         
         // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
+        payloadBuff.impactAmount_ = 0.0f;
+        
+        PayloadData = payloadBuff;
         
         return true;
     }
     
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
-        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.ao_ += 1 * PayloadData.impactAmount_;
-        PayloadData.gi_ += float3(0, 0, 0);
+        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+        payloadBuff.color_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+        payloadBuff.ao_ += 1 * payloadBuff.impactAmount_;
+        payloadBuff.gi_ += float3(0, 0, 0);
         
         // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
+        payloadBuff.impactAmount_ = 0.0f;
+        
+        PayloadData = payloadBuff;
         
         return true;
     }
@@ -502,13 +503,15 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
     {
-        PayloadData.light_ += float3(1, 1, 1) * PayloadData.impactAmount_;
-        PayloadData.color_ += (float3) TexColor * PayloadData.impactAmount_;
-        PayloadData.ao_ += 1 * PayloadData.impactAmount_;
-        PayloadData.gi_ += float3(0, 0, 0);
+        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+        payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
+        payloadBuff.ao_ += 1 * payloadBuff.impactAmount_;
+        payloadBuff.gi_ += float3(0, 0, 0);
         
         // 影響度を0にする。
-        PayloadData.impactAmount_ = 0.0f;
+        payloadBuff.impactAmount_ = 0.0f;
+        
+        PayloadData = payloadBuff;
         
         return true;
     }
@@ -519,15 +522,17 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     {
         
         // 完全反射用のレイを発射。
-        ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
+        ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
         
         // 色を少しだけ明るくする。
         //PayloadData.color += 0.1f;
         
-        PayloadData.color_ = saturate(PayloadData.color_);
+        payloadBuff.color_ = saturate(payloadBuff.color_);
         
         //// 残った影響度を入れる。
         //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
+        
+        PayloadData = payloadBuff;
         
         return true;
         
@@ -664,6 +669,9 @@ float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal)
 bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Vertex Vtx, float4 TexColor)
 {
     
+    // Payload一時受け取り用変数。
+    Payload payloadBuff = PayloadData;
+    
     // 乱数の種となる値を取得。
     uint2 pixldx = DispatchRaysIndex().xy;
     uint2 numPix = DispatchRaysDimensions().xy;
@@ -707,7 +715,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
                 rate = 1.0f - rate;
                 
 
-                PayloadData.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate * PayloadData.impactAmount_;
+                payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate * PayloadData.impactAmount_;
 
             }
         
@@ -748,11 +756,10 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             
             // 大気散乱の色
             float3 mieColor = float3(1, 1, 1);
-            bool isUnderGround = false;
-            float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor, isUnderGround);
+            float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
             
-            PayloadData.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) + BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
-            PayloadData.light_ = saturate(PayloadData.light_);
+            payloadBuff.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) + BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
+            payloadBuff.light_ = saturate(payloadBuff.light_);
             
         }
         
@@ -777,7 +784,9 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     float aoVisibility = aoLightVisibility;
     
     // 各色を設定。
-    PayloadData.ao_ += aoVisibility * PayloadData.impactAmount_;
+    payloadBuff.ao_ += aoVisibility * payloadBuff.impactAmount_;
+    
+    PayloadData = payloadBuff;
     
     return false;
     
@@ -787,17 +796,20 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
 void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
 {
     
+    // Payload一時受け取り用変数。
+    Payload payloadBuff = PayloadData;
+    
     // 当たったオブジェクトがGIを行うオブジェクトで、GIを行うフラグが立っていたら。
     if ((InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK))
     {
-        if (0.0f < PayloadData.impactAmount_)
+        if (0.0f < payloadBuff.impactAmount_)
         {
-            ShootGIRay(Vtx, 300, PayloadData);
-            PayloadData.gi_ = (PayloadData.gi_ * PayloadData.impactAmount_);
-            PayloadData.gi_ = saturate(PayloadData.gi_);
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
+            ShootGIRay(Vtx, 150, payloadBuff);
+            payloadBuff.gi_ = (payloadBuff.gi_ * payloadBuff.impactAmount_);
+            payloadBuff.gi_ = saturate(payloadBuff.gi_);
+            payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;
         
-            PayloadData.impactAmount_ = 0.0f;
+            payloadBuff.impactAmount_ = 0.0f;
         }
         
     }
@@ -826,18 +838,18 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA)
         {
         
-            if (PayloadData.impactAmount_ < alpha * TexColor.w)
+            if (payloadBuff.impactAmount_ < alpha * TexColor.w)
             {
-                PayloadData.color_.xyz += (float3) TexColor * TexColor.w * PayloadData.impactAmount_;
-                PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
-                PayloadData.impactAmount_ = 0.0f;
+                payloadBuff.color_.xyz += (float3) TexColor * TexColor.w * payloadBuff.impactAmount_;
+                payloadBuff.light_ += float3(1 * payloadBuff.impactAmount_, 1 * payloadBuff.impactAmount_, 1 * payloadBuff.impactAmount_);
+                payloadBuff.impactAmount_ = 0.0f;
 
             }
             else
             {
-                PayloadData.color_.xyz += (float3) TexColor * TexColor.w * alpha;
-                PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
-                PayloadData.impactAmount_ -= alpha * TexColor.w;
+                payloadBuff.color_.xyz += (float3) TexColor * TexColor.w * alpha;
+                payloadBuff.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
+                payloadBuff.impactAmount_ -= alpha * TexColor.w;
             }
             
         }
@@ -845,38 +857,38 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         else if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
         {
             
-            PayloadData.light_ = float3(TexColor.w, TexColor.w, TexColor.w);
+            payloadBuff.light_ = float3(TexColor.w, TexColor.w, TexColor.w);
             
-            if (PayloadData.impactAmount_ < alpha * TexColor.w)
+            if (payloadBuff.impactAmount_ < alpha * TexColor.w)
             {
-                PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
-                PayloadData.light_ += float3(1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_, 1 * PayloadData.impactAmount_);
-                PayloadData.impactAmount_ = 0.0f;
+                payloadBuff.color_.xyz += (float3) TexColor * TexColor.w;
+                payloadBuff.light_ += float3(1 * payloadBuff.impactAmount_, 1 * payloadBuff.impactAmount_, 1 * payloadBuff.impactAmount_);
+                payloadBuff.impactAmount_ = 0.0f;
 
             }
             else
             {
-                PayloadData.color_.xyz += (float3) TexColor * TexColor.w;
-                PayloadData.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
-                PayloadData.impactAmount_ -= alpha * TexColor.w;
+                payloadBuff.color_.xyz += (float3) TexColor * TexColor.w;
+                payloadBuff.light_ += float3(1 * alpha * TexColor.w, 1 * alpha * TexColor.w, 1 * alpha * TexColor.w);
+                payloadBuff.impactAmount_ -= alpha * TexColor.w;
             }
         }
         
         // アルファが一定以下だったら。
         if (alpha < 0.5f)
         {
-            ++PayloadData.alphaCounter_;
-            if (3 <= PayloadData.alphaCounter_)
+            ++payloadBuff.alphaCounter_;
+            if (3 <= payloadBuff.alphaCounter_)
             {
-                PayloadData.isCullingAlpha_ = true;
+                payloadBuff.isCullingAlpha_ = true;
             }
         }
             
-        if (0.0f < PayloadData.impactAmount_)
+        if (0.0f < payloadBuff.impactAmount_)
         {
                 
             // 反射レイを飛ばす。
-            ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, WorldRayDirection(), PayloadData, gRtScene);
+            ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, WorldRayDirection(), payloadBuff, gRtScene);
             
         }
         
@@ -885,16 +897,16 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     else if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
     {
         
-        if (PayloadData.impactAmount_ < metalness)
+        if (payloadBuff.impactAmount_ < metalness)
         {
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-            PayloadData.impactAmount_ = 0.0f;
+            payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;
+            payloadBuff.impactAmount_ = 0.0f;
 
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * metalness;
-            PayloadData.impactAmount_ -= metalness;
+            payloadBuff.color_.xyz += (float3) TexColor * metalness;
+            payloadBuff.impactAmount_ -= metalness;
         }
 
         float refractVal = 1.4f;
@@ -918,10 +930,10 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
       
         }
             
-        if (0.0f < PayloadData.impactAmount_)
+        if (0.0f < payloadBuff.impactAmount_)
         {
                 
-            ShootRay(CHS_IDENTIFICATION_RAYID_REFRACTION, WorldPos, rayDir, PayloadData, gRtScene);
+            ShootRay(CHS_IDENTIFICATION_RAYID_REFRACTION, WorldPos, rayDir, payloadBuff, gRtScene);
             
         }
 
@@ -930,27 +942,29 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     else
     {
         
-        if (PayloadData.impactAmount_ < metalness)
+        if (payloadBuff.impactAmount_ < metalness)
         {
-            PayloadData.color_.xyz += (float3) TexColor * PayloadData.impactAmount_;
-            PayloadData.impactAmount_ = 0.0f;
+            payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;
+            payloadBuff.impactAmount_ = 0.0f;
         }
         else
         {
-            PayloadData.color_.xyz += (float3) TexColor * metalness;
-            PayloadData.impactAmount_ -= metalness;
+            payloadBuff.color_.xyz += (float3) TexColor * metalness;
+            payloadBuff.impactAmount_ -= metalness;
             
-            if (0.0f < PayloadData.impactAmount_)
+            if (0.0f < payloadBuff.impactAmount_)
             {
                 
                 // 反射レイを飛ばす。
-                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), PayloadData, gRtScene);
+                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
                 
             }
         
         }
         
     }
+    
+    PayloadData = payloadBuff;
     
 }
 
@@ -966,24 +980,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     // 影用レイだったら。
     if (payload.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW)
     {
-        
-        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_ALPHA || InstanceID() == CHS_IDENTIFICATION_INSTANCE_ADD)
-        {
-                
-            payload.impactAmount_ = 1;
-            
-            return;
-
-        }
-        
-        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
-        {
-            
-            payload.impactAmount_ = 0.3f;
-            
-            return;
-
-        }
                 
         payload.impactAmount_ = 0.0f;
         
@@ -994,13 +990,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     ++payload.recursive_;
     if (5 < payload.recursive_ || payload.impactAmount_ <= 0 || payload.isCullingAlpha_)
     {
-        
-        if (0.0f < payload.impactAmount_)
-        {
-            
-            //payload.color_ = normalize(payload.color_);
-            
-        }
         
         return;
     }

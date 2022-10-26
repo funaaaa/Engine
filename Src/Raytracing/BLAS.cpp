@@ -680,6 +680,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
 					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+					//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
 
 				}
 
@@ -689,6 +690,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+				//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
 
 			}
 
