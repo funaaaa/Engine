@@ -30,7 +30,7 @@ private:
 	std::shared_ptr<RayComputeShader> mixColorAndLuminance_;
 
 	// 重みテーブル
-	static const int GAUSSIAN_WEIGHTS_COUNT = 8;
+	static const int GAUSSIAN_WEIGHTS_COUNT = 4;
 	std::array<float, GAUSSIAN_WEIGHTS_COUNT> gaussianWeights_;
 
 	// 重み定数バッファ

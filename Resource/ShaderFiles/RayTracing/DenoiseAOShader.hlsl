@@ -537,6 +537,8 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         return true;
         
     }
+        
+    PayloadData = payloadBuff;
     
     return false;
     
@@ -735,7 +737,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
         
         // ディレクショナルライトの明るさが一定以上だったら
-        if (0 < dirLightVisibility)
+        if (0.0f < dirLightVisibility)
         {
             
             const float SKYDOME_RADIUS = 15000.0f;
@@ -762,6 +764,13 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             payloadBuff.light_ = saturate(payloadBuff.light_);
             
         }
+        else
+        {
+            // 拡散反射光を擬似的に再現するために明るさを少しだけ上げる。
+            payloadBuff.light_ += float3(0.3f,0.3f,0.3f);
+            payloadBuff.light_ = saturate(payloadBuff.light_);
+        }
+        
         
     }
         
