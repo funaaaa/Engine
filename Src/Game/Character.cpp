@@ -25,6 +25,7 @@
 #include "DriftParticleMgr.h"
 #include "DriftParticle.h"
 #include "MugenStage.h"
+#include "RadialBlur.h"
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -332,6 +333,15 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 
 	// ブースト量が一定以上だったら集中線を出す。
 	isConcentrationLine_ = (MAX_BOOST_SPEED / 2.0f < boostSpeed_) || (JUMP_BOOST_SPEED / 2.0f < jumpBoostSpeed_);
+
+	// ブーストの割合に応じてラジアルブラーをかける。
+	if (charaID_ == CHARA_ID::P1) {
+	
+		RadialBlur::Ins()->SetBlurPower(boostSpeed_ / MAX_BOOST_SPEED + 0.1f);
+
+		//_RPTFN(_CRT_WARN, "%f\n", boostSpeed_ / MAX_BOOST_SPEED);
+
+	}
 
 	// 接地フラグを保存。
 	onGroundPrev_ = onGround_;

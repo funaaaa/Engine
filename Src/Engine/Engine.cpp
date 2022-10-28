@@ -18,10 +18,10 @@ Engine::Engine() {
 void Engine::Init() {
 #ifdef _DEBUG
 	// デバッグレイヤーの有効化
-	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.debugController_))))
-	//{
-	//	debug_.debugController_->EnableDebugLayer();
-	//}
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.debugController_))))
+	{
+		debug_.debugController_->EnableDebugLayer();
+	}
 	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.shaderDebugController_))))
 	//{
 	//	debug_.shaderDebugController_->SetEnableGPUBasedValidation(true);
@@ -218,10 +218,6 @@ void Engine::Init() {
 
 	// その他GPUの非同期処理の際に必要な変数の初期化。
 	{
-
-		// 各コマンドリストが使用可能状態にする。
-		canUseDenoiseCmdList_[0] = true;
-		canUseDenoiseCmdList_[1] = true;
 
 		// 現在のキューのインデックスと経過フレームを0で初期化。
 		currentQueueIndex_ = 1;	// 最初のFの先頭でフラグが切り替わるため、1で初期化しておくことで最初のFのインデックスが0になる。
@@ -441,17 +437,6 @@ void Engine::ProcessAfterDrawing() {
 
 	}
 
-	// Indexを表示。
-	if (currentQueueIndex_) {
-
-		OutputDebugString(L"\nIndex : 1\n");
-	}
-	else {
-
-		OutputDebugString(L"\nIndex : 0\n");
-
-	}
-
 	// GraphicsQueueの処理
 	{
 
@@ -468,9 +453,6 @@ void Engine::ProcessAfterDrawing() {
 
 		// MainGraphicsの実行完了を通知。
 		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_[currentQueueIndex_].Get(), fenceValue);
-
-		// デバッグ情報
-		OutputDebugString(L"レイトレコマンドを実行。\n");
 
 		// 1F以降だったらコピーを行う。
 		//if (frameIndex_ != 0) {
@@ -489,9 +471,6 @@ void Engine::ProcessAfterDrawing() {
 
 		// Copyの実行完了を通知。
 		graphicsCmdQueue_->Signal(GPUtoCPUFence_[currentQueueIndex_].Get(), fenceValue);
-
-		// デバッグ情報
-		OutputDebugString(L"コピーコマンドを実行。\n");
 
 		//}
 		//// 0Fだったらコピーを行わないので、MainGraphicsでCPUとGPUの同期を取る。
@@ -521,9 +500,6 @@ void Engine::ProcessAfterDrawing() {
 		// 実行完了を通知。
 		computeCmdQueue_->Signal(denoiseToCopyFence_[currentQueueIndex_].Get(), fenceValue);
 
-		// デバッグ情報
-		OutputDebugString(L"デノイズコマンドを実行。\n");
-
 	}
 
 
@@ -546,28 +522,18 @@ void Engine::ProcessAfterDrawing() {
 		// このフレームで使用したコマンドリストを初期化。
 		mainGraphicsCmdAllocator_->Reset();
 		mainGraphicsCmdList_->Reset(mainGraphicsCmdAllocator_.Get(), nullptr);
-		//if (frameIndex_ != 0) {
 
-			// 今フレームのコピーのコマンドを初期化。
+		// 今フレームのコピーのコマンドを初期化。
 		copyResourceCmdAllocator_->Reset();
 		copyResourceCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);
 
 		// 前フレームのデノイズのコマンドを初期化。
-		denoiseCmdAllocator_[pastQueueIndex_]->Reset();
-		denoiseCmdList_[pastQueueIndex_]->Reset(denoiseCmdAllocator_[pastQueueIndex_].Get(), nullptr);
-
-		// デバッグ情報
-		OutputDebugString(L"コピーコマンド終了。\n");
-
-		//}
-
-		// デバッグ情報
-		OutputDebugString(L"レイトレコマンド終了。\n");
+		if (frameIndex_ != 0) {
+			denoiseCmdAllocator_[pastQueueIndex_]->Reset();
+			denoiseCmdList_[pastQueueIndex_]->Reset(denoiseCmdAllocator_[pastQueueIndex_].Get(), nullptr);
+		}
 
 	}
-
-	// デバッグ情報
-	OutputDebugString(L"\n--\n");
 
 	++frameIndex_;
 

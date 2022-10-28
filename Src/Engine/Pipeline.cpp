@@ -125,20 +125,20 @@ Pipeline::Pipeline(
 void Pipeline::SetPipline()
 {
 	//パイプラインステート設定コマンド
-	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState(pipelinestate_.Get());
+	Engine::Ins()->copyResourceCmdList_->SetPipelineState(pipelinestate_.Get());
 
 	//ルートシグネチャ設定コマンド
-	Engine::Ins()->mainGraphicsCmdList_->SetGraphicsRootSignature(rootsignature_.Get());
+	Engine::Ins()->copyResourceCmdList_->SetGraphicsRootSignature(rootsignature_.Get());
 
 	//プリミティブ形状設定コマンド
 	if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) {
-		Engine::Ins()->mainGraphicsCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) {
-		Engine::Ins()->mainGraphicsCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 	}
 	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) {
-		Engine::Ins()->mainGraphicsCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	}
 }
 

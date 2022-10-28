@@ -138,21 +138,21 @@ void Sprite::Draw()
 	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);
 
 	// 定数バッファビュー設定コマンド
-	Engine::Ins()->mainGraphicsCmdList_->SetGraphicsRootConstantBufferView(0, constBuffB0_->GetGPUVirtualAddress());
+	Engine::Ins()->copyResourceCmdList_->SetGraphicsRootConstantBufferView(0, constBuffB0_->GetGPUVirtualAddress());
 
 	// ディスクリプタヒープ設定コマンド
 	ID3D12DescriptorHeap* ppHeaps2[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-	Engine::Ins()->mainGraphicsCmdList_->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
+	Engine::Ins()->copyResourceCmdList_->SetDescriptorHeaps(_countof(ppHeaps2), ppHeaps2);
 
 	// シェーダーリソースビュー設定コマンド
 	for (int index = 0; index < textureID_.size(); ++index) {
-		Engine::Ins()->mainGraphicsCmdList_->SetGraphicsRootDescriptorTable(index + 1, TextureManager::Ins()->GetSRV(textureID_[index]));
+		Engine::Ins()->copyResourceCmdList_->SetGraphicsRootDescriptorTable(index + 1, TextureManager::Ins()->GetSRV(textureID_[index]));
 	}
 
 	// 頂点バッファビュー設定コマンド
-	Engine::Ins()->mainGraphicsCmdList_->IASetVertexBuffers(0, 1, &vbView_);
+	Engine::Ins()->copyResourceCmdList_->IASetVertexBuffers(0, 1, &vbView_);
 
 	// 描画コマンド
-	Engine::Ins()->mainGraphicsCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
-	Engine::Ins()->mainGraphicsCmdList_->DrawInstanced(static_cast<UINT>(vertex_.size()), 1, 0, 0);
+	Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//ここの引数を変えることで頂点を利用してどんな図形を描くかを設定できる 資料3_3
+	Engine::Ins()->copyResourceCmdList_->DrawInstanced(static_cast<UINT>(vertex_.size()), 1, 0, 0);
 }

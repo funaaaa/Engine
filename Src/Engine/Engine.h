@@ -96,9 +96,6 @@ public:
 	int currentQueueIndex_;
 	int frameIndex_;
 
-	// 各コマンドリストに処理を詰むことができるかを判断するフラグ
-	std::array<bool, 2> canUseDenoiseCmdList_;					// DenoiseCmdListにコマンドを詰むことができる状態かのフラグ SwapChainのように裏と表を切り替えて使用する。
-
 
 public:
 	// コンストラクタ

@@ -304,7 +304,7 @@ void GameScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
-	sunAngle_ += sunSpeed_;
+	sunAngle_ = 1.0f;
 	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
 		sunAngle_ += sunSpeed_;
@@ -409,29 +409,29 @@ void GameScene::Draw()
 	static int firstTime = 0;
 	if (firstTime != 0) {
 
-		//concentrationLine_->Draw();
+		concentrationLine_->Draw();
 
-		//// 左上のアイテムのui。
-		//itemFrameUI_->Draw();
+		// 左上のアイテムのui。
+		itemFrameUI_->Draw();
 
-		//// コインの取得数のui。
-		//coinCountUI_[0]->Draw();
-		//coinCountUI_[1]->Draw();
+		// コインの取得数のui。
+		coinCountUI_[0]->Draw();
+		coinCountUI_[1]->Draw();
 
-		//// 現在のラップ数のui。
-		//nowRapCountUI_->Draw();
-		//slashUI_->Draw();
-		//maxRapCountUI_->Draw();
+		// 現在のラップ数のui。
+		nowRapCountUI_->Draw();
+		slashUI_->Draw();
+		maxRapCountUI_->Draw();
 
-		//// 左下のuiのフレーム。
-		//coinUI_->Draw();
-		//rapUI_->Draw();
+		// 左下のuiのフレーム。
+		coinUI_->Draw();
+		rapUI_->Draw();
 
-		//// カウントダウン用のui。
-		//countDownSprite_->Draw();
+		// カウントダウン用のui。
+		countDownSprite_->Draw();
 
-		//// カウントダウン終了時のgoのui。
-		//goSprite_->Draw();
+		// カウントダウン終了時のgoのui。
+		goSprite_->Draw();
 
 	}
 	if (firstTime == 0) ++firstTime;

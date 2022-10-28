@@ -226,6 +226,7 @@
     <ClCompile Include="Src\Raytracing\RayEngine.cpp">
       <Filter>レイトレーシング\基礎\エンジン</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\RadialBlur.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -501,6 +502,9 @@
     <ClInclude Include="Src\Raytracing\RayEngine.h">
       <Filter>レイトレーシング\基礎\エンジン</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\RadialBlur.h">
+      <Filter>エンジン\エフェクト\ラジアルブラー\コード</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -706,6 +710,18 @@
     <Filter Include="レイトレーシング\基礎\エンジン">
       <UniqueIdentifier>{31c9ec33-b50a-4f1a-b277-48f67b8935a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="エンジン\エフェクト">
+      <UniqueIdentifier>{9ebd42c7-c989-4b14-a425-621d85c153a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\エフェクト\ラジアルブラー">
+      <UniqueIdentifier>{83297a75-a47d-455b-90ec-c3acad080e4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\エフェクト\ラジアルブラー\コード">
+      <UniqueIdentifier>{29b0f9e5-c3eb-48e5-957f-8b09ff07c544}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\エフェクト\ラジアルブラー\シェーダー">
+      <UniqueIdentifier>{e6c019a3-4656-4bd5-8559-46841b0bf98a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SetupAPI.Lib">
@@ -748,6 +764,9 @@
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseFinal.hlsl">
       <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RadialBlur.hlsl">
+      <Filter>エンジン\エフェクト\ラジアルブラー\シェーダー</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

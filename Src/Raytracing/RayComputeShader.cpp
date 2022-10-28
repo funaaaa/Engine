@@ -51,6 +51,7 @@ void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int U
 		//¶¬‚ÉŽ¸”s‚µ‚½
 		assert(0);
 	}
+	pipeline_->SetName(L"ComputePipline");
 
 }
 

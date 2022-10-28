@@ -1,0 +1,72 @@
+
+// デノイズをかける対象のテクスチャ
+RWTexture2D<float4> InputImg : register(u0);
+
+// 出力先UAV
+RWTexture2D<float4> OutputImg : register(u1);
+
+// ガウシアンブラーの重み
+cbuffer GaussianWeight : register(b0)
+{
+    float4 weight;
+};
+
+// テクスチャの色を取得
+float4 GetPixelColor(int2 Pos)
+{
+    uint2 texSize = uint2(1280, 720);
+    
+    Pos.x = clamp(Pos.x, 0, texSize.x);
+    Pos.y = clamp(Pos.y, 0, texSize.y);
+
+    return InputImg[uint2(Pos.x, Pos.y)];
+}
+
+
+[numthreads(32, 32, 1)]
+void main(uint3 DTid : SV_DispatchThreadID)
+{
+    
+    // 画面中央。
+    float2 WIN_CENTER = float2(1280.0f / 2.0f, 720.0f / 2.0f);
+    
+    // 距離の最大量。
+    float MAX_LENGTH = length(WIN_CENTER);
+    
+    // 最終的な色。
+    float4 color = float4(0, 0, 0, 0);
+    
+    // 現在のピクセルの位置。
+    uint2 basepos = uint2(DTid.x * 1, DTid.y);
+    
+    // 画面中央までのベクトル。
+    float2 blurDir = normalize(WIN_CENTER - basepos);
+    
+    // 中心までの距離。
+    float centerLength = length(WIN_CENTER - basepos);
+    
+    // 割合。
+    float blurRate = saturate(centerLength / MAX_LENGTH);
+    
+    // 割合にイージングをかける。
+    //blurRate = 1.0f - sqrt(1.0f - pow(blurRate, 2.0f));
+    
+    // ブラーの回数。
+    int blurCount = (32.0f * blurRate) * weight.x + 1.0f;
+    
+    // ブラーをかける。
+    for (int index = 0; index < blurCount; ++index)
+    {
+        
+        color += GetPixelColor(basepos + blurDir * index);
+        
+    }
+    
+    // ブラーの回数で割る。
+    color /= blurCount;
+    
+    // 色のオーバーフローを防ぐ。
+    color = saturate(color);
+    OutputImg[DTid.xy] = color;
+    
+}

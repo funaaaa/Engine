@@ -50,11 +50,17 @@ void RayEngine::Setting()
 	denoiseMaskOutput_[1] = std::make_shared<RaytracingOutput>();
 	denoiseMaskOutput_[1]->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
-	// 最終出力用クラスをセット。
+	// デノイズ最終出力用クラスをセット。
 	denoiseMixTextureOutput_[0] = std::make_shared<RaytracingOutput>();
 	denoiseMixTextureOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseMixTextureOutput_[1] = std::make_shared<RaytracingOutput>();
 	denoiseMixTextureOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+	// 最終出力用クラスをセット。
+	finalOutputTexture_[0] = std::make_shared<RaytracingOutput>();
+	finalOutputTexture_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FinalOutputTexture0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	finalOutputTexture_[1] = std::make_shared<RaytracingOutput>();
+	finalOutputTexture_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FinalOutputTexture1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// デノイズAO用のパイプラインを設定。
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
@@ -98,6 +104,7 @@ void RayEngine::Update()
 
 #include "RayDenoiser.h"
 #include "Camera.h"
+#include "RadialBlur.h"
 void RayEngine::Draw()
 {
 
@@ -119,10 +126,8 @@ void RayEngine::Draw()
 	Engine::Ins()->mainGraphicsCmdList_->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 	// コンピュートキューにも詰む。
-	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
-		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
-	}
+	Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+	Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetComputeRootSignature(pipeline_->GetGlobalRootSig()->GetRootSig().Get());
 
 	// TLASを設定。
 	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(RayEngine::Ins()->tlas_->GetDescriptorHeapIndex()));
@@ -146,7 +151,7 @@ void RayEngine::Draw()
 
 
 	// DenoiseQueueが実行可能状態だったら。
-	if (Engine::Ins()->canUseDenoiseCmdList_[Engine::Ins()->currentQueueIndex_]) {
+	{
 
 
 		// ライト情報にデノイズをかける。
@@ -208,42 +213,49 @@ void RayEngine::Draw()
 		// デノイズをかけたライティング情報と色情報を混ぜる。
 		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
 
+
+		{
+
+			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+				denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+				finalOutputTexture_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
+			};
+
+			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(2, barrierToUAV);
+
+			// ラジアルブラーをかける。
+			RadialBlur::Ins()->Blur(denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), finalOutputTexture_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
+
+		}
+
 	}
 
-	// 最初のFはコピーリソースを行わない。
-	//if (Engine::Ins()->frameIndex_ != 0) {
 
-		D3D12_RESOURCE_BARRIER barriers[] = {
-			CD3DX12_RESOURCE_BARRIER::Transition(
-			Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET,
-			D3D12_RESOURCE_STATE_COPY_DEST),
-		};
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(barriers), barriers);
-
-		denoiseMixTextureOutput_[Engine::Ins()->pastQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, Engine::Ins()->copyResourceCmdList_);
-
-		Engine::Ins()->copyResourceCmdList_->CopyResource(Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(), denoiseMixTextureOutput_[Engine::Ins()->pastQueueIndex_]->GetRaytracingOutput().Get());
-
-		denoiseMixTextureOutput_[Engine::Ins()->pastQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, Engine::Ins()->copyResourceCmdList_);
-
-		// レンダーターゲットのリソースバリアをもとに戻す。
-		D3D12_RESOURCE_BARRIER endBarriers[] = {
-
+	D3D12_RESOURCE_BARRIER barriers[] = {
 		CD3DX12_RESOURCE_BARRIER::Transition(
 		Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(),
-		D3D12_RESOURCE_STATE_COPY_DEST,
-		D3D12_RESOURCE_STATE_PRESENT)
+		D3D12_RESOURCE_STATE_RENDER_TARGET,
+		D3D12_RESOURCE_STATE_COPY_DEST),
+	};
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(barriers), barriers);
 
-		};
+	finalOutputTexture_[Engine::Ins()->pastQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE, Engine::Ins()->copyResourceCmdList_);
 
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
+	Engine::Ins()->copyResourceCmdList_->CopyResource(Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(), finalOutputTexture_[Engine::Ins()->pastQueueIndex_]->GetRaytracingOutput().Get());
 
+	finalOutputTexture_[Engine::Ins()->pastQueueIndex_]->SetResourceBarrier(D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, Engine::Ins()->copyResourceCmdList_);
 
-	//}
+	// レンダーターゲットのリソースバリアをもとに戻す。
+	D3D12_RESOURCE_BARRIER endBarriers[] = {
 
-	// RayDenoiserの描画後処理。
-	//Denoiser::Ins()->AfterDraw();
+	CD3DX12_RESOURCE_BARRIER::Transition(
+	Engine::Ins()->swapchain_.backBuffers_[backBufferIndex].Get(),
+	D3D12_RESOURCE_STATE_COPY_DEST,
+	D3D12_RESOURCE_STATE_PRESENT)
+
+	};
+
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(_countof(endBarriers), endBarriers);
 
 }
 

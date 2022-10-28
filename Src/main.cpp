@@ -10,6 +10,7 @@
 #include "Input.h"
 #include "BLASRegister.h"
 #include "RayEngine.h"
+#include "RadialBlur.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -50,6 +51,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// レイトレエンジンを設定。
 	RayEngine::Ins()->Setting();
+
+	// ブラー用クラスを設定。
+	RadialBlur::Ins()->Setting();
 
 
 	/*----------ゲームループ----------*/
