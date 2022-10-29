@@ -31,13 +31,13 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float2 WIN_CENTER = float2(1280.0f / 2.0f, 720.0f / 2.0f);
     
     // 距離の最大量。
-    float MAX_LENGTH = length(WIN_CENTER);
+    float MAX_LENGTH = length(WIN_CENTER) / 2.0f;
     
     // 最終的な色。
     float4 color = float4(0, 0, 0, 0);
     
     // 現在のピクセルの位置。
-    uint2 basepos = uint2(DTid.x * 1, DTid.y);
+    float2 basepos = float2(DTid.x, DTid.y);
     
     // 画面中央までのベクトル。
     float2 blurDir = normalize(WIN_CENTER - basepos);
@@ -55,18 +55,29 @@ void main(uint3 DTid : SV_DispatchThreadID)
     int blurCount = (32.0f * blurRate) * weight.x + 1.0f;
     
     // ブラーをかける。
-    for (int index = 0; index < blurCount; ++index)
+    if (DTid.y < WIN_CENTER.y)
     {
+        for (int index = 0; index < blurCount; ++index)
+        {
         
-        color += GetPixelColor(basepos + blurDir * index);
+            color += GetPixelColor(basepos + ceil(blurDir * index));
         
+        }
+    }
+    else
+    {
+        for (int index = 0; index < blurCount; ++index)
+        {
+        
+            color += GetPixelColor(basepos + floor(blurDir * index));
+        
+        }
     }
     
     // ブラーの回数で割る。
     color /= blurCount;
     
-    // 色のオーバーフローを防ぐ。
-    color = saturate(color);
+    // 色を保存。
     OutputImg[DTid.xy] = color;
     
 }
