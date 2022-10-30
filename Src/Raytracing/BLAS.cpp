@@ -716,6 +716,11 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 			Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 		}
+		else {
+
+			Dst += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+
+		}
 
 	}
 

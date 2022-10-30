@@ -44,7 +44,7 @@ float4 LightLeakageCountermeasures(float4 baseMaskColor, float4 targetMaskColor,
     float subG = abs(baseMaskColor.y - targetMaskColor.y);
     float subB = abs(baseMaskColor.z - targetMaskColor.z);
     const float SUB_NEAR = 0.1f;
-    if (subR < SUB_NEAR && subG < SUB_NEAR && subB < SUB_NEAR)
+    if (subR + subG + subB < SUB_NEAR * 3.0f)
     {
         return targetColor * weight;
     }

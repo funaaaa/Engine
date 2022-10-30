@@ -17,13 +17,19 @@ void MugenStage::Setting(int TireMaskIndex)
 	stageObjectMgr_ = std::make_shared<StageObjectMgr>();
 	stageObjectMgr_->Setting();
 
-	// ステージをセット。
+	// 当たり判定用のステージをセット。
 	int indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/Stage/MugenStage/", "MugenStage.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+	PolygonInstanceRegister::Ins()->NonDisplay(stageObjectMgr_->GetInstanceIndex(0));
+
+	// 描画用のステージをセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageDraw.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/NormalMap.dds"));
-	//BLASRegister::Ins()->GetBlasSpecificationIndex(stageObjectMgr_->GetBlasIndex(indexBuff)).lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/wayGray.png"));
 
 	// ステージにタイヤ痕用マスクをセット。
 	BLASRegister::Ins()->GetBLAS()[stageObjectMgr_->GetBlasIndex(indexBuff)]->AddUAVTex(TireMaskIndex);
