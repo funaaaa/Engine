@@ -304,7 +304,7 @@ void GameScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
-	sunAngle_ = 0.8f;
+	sunAngle_ += sunSpeed_;
 	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
 		sunAngle_ += sunSpeed_;

@@ -49,6 +49,9 @@ void RayRootsignature::AddStaticSampler(int RegisterSpace) {
 	buff.Init(0,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR
 	);
+	buff.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	buff.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	buff.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	buff.RegisterSpace = RegisterSpace;
 	buff.ShaderRegister = 0;
 	sampler_[samplerCount_] = buff;

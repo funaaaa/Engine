@@ -241,11 +241,11 @@ bool ShootDirShadow(Vertex vtx, float length)
 }
 
 // GI
-void ShootGIRay(Vertex vtx, float length, inout Payload PayloadData)
+void ShootGIRay(Vertex vtx, float length, inout Payload PayloadData, float3 WorldNormal)
 {
     float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     float3 worldRayDir = WorldRayDirection();
-    float3 reflectDir = reflect(worldRayDir, vtx.Normal);
+    float3 reflectDir = reflect(worldRayDir, WorldNormal);
     
     // レイのフラグを設定。
     RAY_FLAG flag = RAY_FLAG_NONE;
@@ -848,7 +848,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     {
         if (0.0f < payloadBuff.impactAmount_)
         {
-            ShootGIRay(Vtx, 150, payloadBuff);
+            ShootGIRay(Vtx, 150, payloadBuff, WorldNormal);
             payloadBuff.gi_ = (payloadBuff.gi_ * payloadBuff.impactAmount_);
             payloadBuff.gi_ = saturate(payloadBuff.gi_);
             payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;

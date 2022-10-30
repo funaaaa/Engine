@@ -19,9 +19,10 @@ void MugenStage::Setting(int TireMaskIndex)
 
 	// ステージをセット。
 	int indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/Stage/MugenStage/", "MugenStage.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
+		"Resource/Game/Stage/MugenStage/", "MugenStageUVTest.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/stageTex/Asphalt01_4K_Normal.png"));
 	//BLASRegister::Ins()->GetBlasSpecificationIndex(stageObjectMgr_->GetBlasIndex(indexBuff)).lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/wayGray.png"));
 
 	// ステージにタイヤ痕用マスクをセット。

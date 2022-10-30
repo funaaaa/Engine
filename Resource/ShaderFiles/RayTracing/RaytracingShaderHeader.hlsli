@@ -388,6 +388,9 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
         v.Normal += vertexBuffer[index].Normal * w;
         v.uv += vertexBuffer[index].uv * w;
     }
+    
+    v.uv.x -= (int) v.uv.x;
+    v.uv.y -= (int) v.uv.y;
 
     return v;
 }
