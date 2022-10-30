@@ -29,8 +29,6 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 		}
 	}
 
-	float maxUV = 0;
-
 	// objファイルが未ロードだったらロードする
 	if (!isLoad) {
 		// 同じ頂点を指し示している頂点インデックスを保存しておくためのマップ
@@ -88,13 +86,6 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				lineStream >> texcoord.y_;
 				// V方向反転
 				texcoord.y_ = 1.0f - texcoord.y_;
-
-				if (maxUV < std::fabs(texcoord.x_)) maxUV = std::fabs(texcoord.x_);
-				if (maxUV < std::fabs(texcoord.y_)) maxUV = std::fabs(texcoord.y_);
-
-
-				texcoord.x_ *= 1.0f;
-				texcoord.y_ *= 1.0f;
 
 				// テクスチャ座標データに追加
 				uv_.push_back(texcoord);
