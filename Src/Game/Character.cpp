@@ -337,7 +337,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 	// ブーストの割合に応じてラジアルブラーをかける。
 	if (charaID_ == CHARA_ID::P1) {
 	
-		RadialBlur::Ins()->SetBlurPower(boostSpeed_ / MAX_BOOST_SPEED);
+		RadialBlur::Ins()->SetBlurPower(FHelper::Saturate(boostSpeed_ / MAX_BOOST_SPEED));
 
 		//_RPTFN(_CRT_WARN, "%f\n", boostSpeed_ / MAX_BOOST_SPEED);
 
