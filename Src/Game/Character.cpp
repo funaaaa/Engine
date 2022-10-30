@@ -1026,6 +1026,9 @@ void Character::Move(bool IsBeforeStart)
 
 		boostSpeed_ -= SUB_BOOST_SPEED;
 
+		// デフォルトの移動量をマックスにする。
+		speed_ = MAX_SPEED;
+
 	}
 	else {
 
