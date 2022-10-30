@@ -42,6 +42,7 @@ public:
 	void Blur(int InImg, int OutImg);
 
 	inline void SetBlurPower(float BlurPower) { blurPower_ = BlurPower; }
+	inline float GetBlurPower() { return blurPower_; }
 
 private:
 
