@@ -20,8 +20,8 @@ public:
 	int level_;
 
 	GameSceneMode() {
-		mode_ = MODE::AI;
-		level_;
+		mode_ = MODE::GHOST;
+		level_ = 0;
 	}
 
 };

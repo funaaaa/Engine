@@ -41,7 +41,7 @@ void PlayerModel::Load(COLOR ColorID, CHARA Chara)
 		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	case PlayerModel::CHARA::GHOST:
-		shaderID = PolygonInstanceRegister::SHADER_ID::REFRACTION;
+		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	case PlayerModel::CHARA::AI:
 		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;

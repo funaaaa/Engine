@@ -38,6 +38,37 @@ GameScene::GameScene()
 	/*===== 初期化処理 =====*/
 
 
+
+
+
+
+
+
+
+
+
+	// 臨時の処理!!!!!!!!!!!!!!!!!!!
+	GameSceneMode::Ins()->mode_ = GameSceneMode::MODE::GHOST;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	// 甲羅オブジェクトをセッティング。
 	ShellObjectMgr::Ins()->Setting();
 
@@ -409,6 +440,11 @@ void GameScene::Draw()
 	static int firstTime = 0;
 	if (firstTime != 0) {
 
+		UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+
 		concentrationLine_->Draw();
 
 		// 左上のアイテムのui。
@@ -432,6 +468,10 @@ void GameScene::Draw()
 
 		// カウントダウン終了時のgoのui。
 		goSprite_->Draw();
+
+		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 	}
 	if (firstTime == 0) ++firstTime;
