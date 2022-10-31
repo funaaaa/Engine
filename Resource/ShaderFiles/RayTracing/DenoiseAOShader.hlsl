@@ -1026,8 +1026,23 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     // 影用レイだったら。
     if (payload.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW)
     {
-                
+        
+        // アルファのオブジェクトだったら
+        if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_ALPHA)
+        {
+            
+            // テクスチャの色を取得。
+            Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
+            float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
+        
+            payload.impactAmount_ = 1.0f - texColor.a;
+            
+            return;
+            
+        }
+           
         payload.impactAmount_ = 0.0f;
+        
         
         return;
     }
