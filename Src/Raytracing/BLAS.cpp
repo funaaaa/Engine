@@ -66,6 +66,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 		buff.normal_ = dataBuff.vertex_[index].normal_;
 		buff.position_ = dataBuff.vertex_[index].pos_;
 		buff.uv_ = dataBuff.vertex_[index].uv_;
+		buff.subUV_ = dataBuff.vertex_[index].uv_;
 
 		// データを保存。
 		vertex_.push_back(buff);
@@ -140,8 +141,8 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	defVertex_ = vertex_;
 
 	// ダーティフラグ
-	isChangeVertex = true;
-	isChangeTexture = true;
+	isChangeVertex_ = true;
+	isChangeTexture_ = true;
 
 	isGenerate_ = true;
 
@@ -283,8 +284,8 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	defVertex_ = vertex_;
 
 	// ダーティフラグ
-	isChangeVertex = true;
-	isChangeTexture = true;
+	isChangeVertex_ = true;
+	isChangeTexture_ = true;
 
 	isGenerate_ = true;
 
@@ -431,8 +432,8 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 	defVertex_ = vertex_;
 
 	// ダーティフラグ
-	isChangeVertex = true;
-	isChangeTexture = true;
+	isChangeVertex_ = true;
+	isChangeTexture_ = true;
 
 	isGenerate_ = true;
 
@@ -567,13 +568,13 @@ void BLAS::IsChangeMaterial()
 	// 確保したバッファにマテリアルデータを書き込む。
 	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
 
-	isChangeVertex = true;
+	isChangeVertex_ = true;
 
 }
 void BLAS::ChangeBaseTexture(int Index)
 {
 	baseTextureHandle_ = Index;
-	isChangeTexture = true;
+	isChangeTexture_ = true;
 }
 #include "HitGroupMgr.h"
 #include <assert.h>
@@ -612,7 +613,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	}
 
 	// 頂点関係のデータが変更されていたら。
-	if (isChangeVertex) {
+	if (isChangeVertex_) {
 
 		// シェーダー識別子を書き込む。
 		memcpy(Dst, mode_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
@@ -628,7 +629,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		// マテリアル用のバッファをセット。
 		Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
 
-		isChangeVertex = false;
+		isChangeVertex_ = false;
 
 	}
 	else {
@@ -650,7 +651,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
 	// テクスチャ関係が変更されていたら。
-	if (isChangeTexture) {
+	if (isChangeTexture_) {
 
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
@@ -696,7 +697,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 		}
 
-		isChangeTexture = false;
+		isChangeTexture_ = false;
 
 	}
 	else {
@@ -791,6 +792,25 @@ void BLAS::MulVec3Vertex(Vec3 Vec)
 
 	// 確保したバッファに頂点データを書き込む。
 	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+}
+
+void BLAS::AssignUV(const std::vector<RayVertex>& UV)
+{
+
+	/*===== 指定のUVを代入する =====*/
+
+	for (auto& index : vertex_) {
+
+		index.subUV_ = UV[static_cast<int>(&index - &vertex_[0])].uv_;
+
+	}
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	// 頂点を書き換えたフラグを立てる。
+	isChangeVertex_ = true;
 
 }
 

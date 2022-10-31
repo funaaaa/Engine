@@ -24,7 +24,7 @@ public:
 	void Setting();
 
 	// 追加する。
-	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = true);
+	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = true, bool IsNewGenerate = false);
 	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = true);
 
 	// 更新処理
@@ -64,6 +64,8 @@ public:
 	void ChangeInstanceShaderID(std::weak_ptr<PolygonMeshInstance> Instance, UINT ShaderID);
 	void ChangeInstanceShaderID(int Index, UINT ShaderID);
 
+	// 指定のBLASのUVを指定のBLASのSUBUVに代入する。
+	void AssignmentUVToSubUV(int AssigningBLASIndex, int AssignedBLASIndex);
 
 private:
 

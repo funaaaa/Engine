@@ -14,6 +14,7 @@ struct RayVertex {
 	Vec3 position_;
 	Vec3 normal_;
 	Vec2 uv_;
+	Vec2 subUV_;
 
 };
 
@@ -57,8 +58,8 @@ private:
 
 	bool isOpaque_;							// 不透明フラグ
 
-	bool isChangeTexture;
-	bool isChangeVertex;
+	bool isChangeTexture_;
+	bool isChangeVertex_;
 
 	bool isGenerate_;
 
@@ -117,7 +118,7 @@ public:
 	void ChangeBaseTexture(int Index);
 	void ChangeNormalTexture(int Index) {
 		normalMapHandle_ = Index;
-		isChangeTexture = true;
+		isChangeTexture_ = true;
 	}
 	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
 
@@ -129,6 +130,9 @@ public:
 
 	// 全ての頂点にVec3情報をかける。 重い処理なので動的には呼ばない。
 	void MulVec3Vertex(Vec3 Vec);
+
+	// 指定のUVをSUBUVに代入する。
+	void AssignUV(const std::vector<RayVertex>& UV);
 
 	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer_; }
@@ -144,7 +148,6 @@ public:
 	bool GetIsGenerate() { return isGenerate_; }
 	int GetBlasIndex() { return blasIndex_; }
 
-	// デバッグ用
 	std::vector<RayVertex> GetVertex() { return vertex_; }
 	const std::vector<Vec3>& GetVertexPos() { return vertexPos_; }
 	const std::vector<Vec3>& GetVertexNormal() { return vertexNormal_; }

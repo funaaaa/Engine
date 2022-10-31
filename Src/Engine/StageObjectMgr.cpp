@@ -22,7 +22,7 @@ void StageObjectMgr::Setting()
 
 }
 
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque, bool IsNewGenerate)
 {
 
 	/*===== ギミックを追加 =====*/
@@ -66,7 +66,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	}
 
 	// Blasをロード
-	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, IsOpaque);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, IsOpaque, IsNewGenerate);
 	// Instanceを生成。
 	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
@@ -393,6 +393,16 @@ void StageObjectMgr::ChangeInstanceShaderID(int Index, UINT ShaderID)
 
 	// オブジェクトを設定。
 	objects_[index].first->Setting(ObjectID, CollisionID, instance);
+
+}
+
+#include "BLASRegister.h"
+void StageObjectMgr::AssignmentUVToSubUV(int AssigningBLASIndex, int AssignedBLASIndex)
+{
+
+	/*===== 指定のBLASのUVを指定のBLASのSUBUVに代入する処理 =====*/
+
+	BLASRegister::Ins()->GetBLAS()[objects_[AssignedBLASIndex].first->GetBLASIndex()]->AssignUV(BLASRegister::Ins()->GetBLAS()[objects_[AssigningBLASIndex].first->GetBLASIndex()]->GetVertex());
 
 }
 

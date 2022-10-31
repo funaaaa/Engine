@@ -92,6 +92,7 @@ struct Vertex
     float3 Position;
     float3 Normal;
     float2 uv;
+    float2 subUV;
 };
 
 // ペイロード
@@ -387,10 +388,14 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
         v.Position += vertexBuffer[index].Position * w;
         v.Normal += vertexBuffer[index].Normal * w;
         v.uv += vertexBuffer[index].uv * w;
+        v.subUV += vertexBuffer[index].subUV * w;
     }
     
     v.uv.x -= (int) v.uv.x;
     v.uv.y -= (int) v.uv.y;
+    
+    v.subUV.x -= (int) v.subUV.x;
+    v.subUV.y -= (int) v.subUV.y;
 
     return v;
 }
