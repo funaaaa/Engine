@@ -457,9 +457,20 @@ void Engine::ProcessAfterDrawing() {
 			graphicsCmdQueue_->Wait(denoiseToCopyFence_[pastQueueIndex_].Get(), fenceValue - 1);
 		}
 
+
+
+		UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+
 		// コマンドリストに追加
 		copyResourceCmdList_->SetDescriptorHeaps(1, heapForImgui_.GetAddressOf());
 		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), copyResourceCmdList_.Get());
+
+		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 		// コピーコマンドリストのクローズ
 		copyResourceCmdList_->Close();

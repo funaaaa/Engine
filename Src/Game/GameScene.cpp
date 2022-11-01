@@ -37,38 +37,6 @@ GameScene::GameScene()
 
 	/*===== 初期化処理 =====*/
 
-
-
-
-
-
-
-
-
-
-
-	// 臨時の処理!!!!!!!!!!!!!!!!!!!
-	GameSceneMode::Ins()->mode_ = GameSceneMode::MODE::GHOST;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	// 甲羅オブジェクトをセッティング。
 	ShellObjectMgr::Ins()->Setting();
 
@@ -180,6 +148,7 @@ void GameScene::Init()
 	/*===== 初期化処理 =====*/
 
 	// インスタンスを初期化。
+	BLASRegister::Ins()->Setting();
 	PolygonInstanceRegister::Ins()->Setting();
 
 	nextScene_ = SCENE_ID::RESULT;

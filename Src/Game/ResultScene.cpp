@@ -40,9 +40,17 @@ void ResultScene::Update()
 
 }
 
+#include "Engine.h"
 void ResultScene::Draw()
 {
 
+
 	result_.Draw();
+
+	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+
 
 }
