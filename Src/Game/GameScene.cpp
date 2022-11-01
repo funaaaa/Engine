@@ -270,16 +270,16 @@ void GameScene::Update()
 	Input();
 
 	// ウィンドウの名前を更新。
-	if (true) {
+	//if (true) {
 
-		FPS();
+	//	FPS();
 
-	}
-	else {
+	//}
+	//else {
 
-		SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, L"LE3A_21_フナクラベ_タクミ");
+	SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, L"LE3A_20_フナクラベ_タクミ");
 
-	}
+	//}
 
 	// キャラを更新。
 	characterMgr_->Update(stages_[STAGE_ID::MUGEN], isBeforeStart_, isGameFinish_);
@@ -300,6 +300,10 @@ void GameScene::Update()
 		if (TRANSION_TIME < transitionTimer) {
 
 			isTransition_ = true;
+
+			characterMgr_->Init();
+
+			return;
 
 		}
 

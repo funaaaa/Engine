@@ -307,7 +307,13 @@ void RaytracingPipeline::MapHitGroupInfo()
 	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
 
 	void* mapped = nullptr;
-	shaderTable_->Map(0, nullptr, &mapped);
+	HRESULT result = shaderTable_->Map(0, nullptr, &mapped);
+	if (result != S_OK) {
+
+		int a = 0;
+		++a;
+
+	}
 	uint8_t* pStart = static_cast<uint8_t*>(mapped);
 
 	// Hit Group 用のシェーダーレコードを書き込み。

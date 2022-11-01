@@ -16,19 +16,6 @@ private:
 
 	Sprite title_;
 
-	// 環境マップ3種類
-	std::weak_ptr<PolygonMeshInstance> envMap1_;
-	std::weak_ptr<PolygonMeshInstance> envMap2_;
-	std::weak_ptr<PolygonMeshInstance> envMap3_;
-	std::weak_ptr<BLAS> envMap1Blas_;
-	std::weak_ptr<BLAS> envMap2Blas_;
-	std::weak_ptr<BLAS> envMap3Blas_;
-
-	// PBRテスト用球2種類
-	std::weak_ptr<PolygonMeshInstance> pbrTest_;
-	std::weak_ptr<PolygonMeshInstance> pbrTest2_;
-	std::weak_ptr<BLAS> pbrTestBlas_;
-
 	// コーネルボックス用
 	std::weak_ptr<BLAS> cornellBoxWhiteBlas_;
 	std::weak_ptr<BLAS> cornellBoxGreenBlas_;

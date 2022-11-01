@@ -67,6 +67,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		SceneMgr::Ins()->Update();
 		SceneMgr::Ins()->Draw();
 
+		if (Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
+
+			break;
+
+		}
 
 		// 描画後処理
 		Engine::Ins()->ProcessAfterDrawing();
