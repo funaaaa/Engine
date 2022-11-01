@@ -24,6 +24,9 @@ private:
 	std::weak_ptr<PolygonMeshInstance> cornellBoxGreen_;
 	std::weak_ptr<PolygonMeshInstance> cornellBoxRed_;
 
+	std::weak_ptr<BLAS> skydomeBlas_;
+	std::weak_ptr<PolygonMeshInstance> skydome_;
+
 	float cameraAngle;
 	int invMapIndex_;
 	int objectIndex_;

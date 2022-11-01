@@ -12,6 +12,8 @@
 
 Engine::Engine() {
 	swapchain_.backBuffers_.resize(2);
+	isGameEndReservation_ = false;
+	isGameEnd_ = false;
 }
 
 #include "RayDenoiser.h"
@@ -438,7 +440,7 @@ void Engine::ProcessAfterDrawing() {
 	}
 
 	// GraphicsQueueの処理
-	{
+	if (!isGameEndReservation_) {
 
 		// コマンドリストに追加
 		mainGraphicsCmdList_->SetDescriptorHeaps(1, heapForImgui_.GetAddressOf());
@@ -453,9 +455,6 @@ void Engine::ProcessAfterDrawing() {
 
 		// MainGraphicsの実行完了を通知。
 		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_[currentQueueIndex_].Get(), fenceValue);
-
-		// 1F以降だったらコピーを行う。
-		//if (frameIndex_ != 0) {
 
 		// 前フレームのデノイズを待つ。
 		if (frameIndex_ != 0) {
@@ -472,20 +471,10 @@ void Engine::ProcessAfterDrawing() {
 		// Copyの実行完了を通知。
 		graphicsCmdQueue_->Signal(GPUtoCPUFence_[currentQueueIndex_].Get(), fenceValue);
 
-		//}
-		//// 0Fだったらコピーを行わないので、MainGraphicsでCPUとGPUの同期を取る。
-		//else {
-
-		//	// MainGraphicsの実行完了を通知。
-		//	graphicsCmdQueue_->Signal(GPUtoCPUFence_[currentQueueIndex_].Get(), fenceValue);
-
-
-		//}
-
 	}
 
 	// ComputeQueueの処理
-	{
+	if (!isGameEndReservation_) {
 
 		// コマンドリストを閉じる
 		denoiseCmdList_[currentQueueIndex_]->Close();
@@ -504,7 +493,7 @@ void Engine::ProcessAfterDrawing() {
 
 
 	// SwapChainを反転させて、GPUの処理完了を待つ。
-	{
+	if (!isGameEndReservation_) {
 
 
 		// 反転。
@@ -532,6 +521,24 @@ void Engine::ProcessAfterDrawing() {
 			denoiseCmdAllocator_[pastQueueIndex_]->Reset();
 			denoiseCmdList_[pastQueueIndex_]->Reset(denoiseCmdAllocator_[pastQueueIndex_].Get(), nullptr);
 		}
+
+	}
+	// ゲームの終了が予約されていたら、前フレームのデノイズが終わるのを待ってからゲーム画面を閉じる。
+	else {
+
+
+		UINT64 gpuFence = denoiseToCopyFence_[pastQueueIndex_]->GetCompletedValue();
+		if (gpuFence != fenceValue - 1) {
+			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+			denoiseToCopyFence_[pastQueueIndex_]->SetEventOnCompletion(fenceValue - 1, event);
+			WaitForSingleObject(event, INFINITE);
+			CloseHandle(event);
+		}
+
+		denoiseCmdAllocator_[pastQueueIndex_]->Reset();
+		denoiseCmdList_[pastQueueIndex_]->Reset(denoiseCmdAllocator_[pastQueueIndex_].Get(), nullptr);
+
+		isGameEnd_ = true;
 
 	}
 

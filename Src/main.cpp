@@ -67,11 +67,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		SceneMgr::Ins()->Update();
 		SceneMgr::Ins()->Draw();
 
-		if (Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
-
-			break;
-
-		}
 
 		// 描画後処理
 		Engine::Ins()->ProcessAfterDrawing();
@@ -84,10 +79,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 		// ?ボタンで終了メッセージが来たらゲームループを抜ける
 		if (Engine::Ins()->windowsAPI_->msg_.message == WM_QUIT || Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
+			Engine::Ins()->isGameEndReservation_ = true;
+		}
+
+		// ゲーム終了フラグが立っていたら。
+		if (Engine::Ins()->isGameEnd_) {
 			break;
 		}
 
 	}
+
+	ImGui::DestroyContext();
 
 	return 0;
 

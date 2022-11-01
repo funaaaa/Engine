@@ -37,7 +37,7 @@ Pipeline::Pipeline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
-	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	Engine::Ins()->device_.dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 	pipelinestate_->SetName(L"Pipline");
 
 }

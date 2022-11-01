@@ -96,6 +96,10 @@ public:
 	int currentQueueIndex_;
 	int frameIndex_;
 
+	// ゲーム終了フラグ
+	bool isGameEndReservation_;
+	bool isGameEnd_;
+
 
 public:
 	// コンストラクタ

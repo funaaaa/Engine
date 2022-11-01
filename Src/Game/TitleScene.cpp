@@ -46,11 +46,14 @@ void TitleScene::Init()
 	cornellBoxGreenBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxGreen.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
 	cornellBoxRedBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxRed.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
 	cornellBoxWhiteBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxWhite.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	skydomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
 	cornellBoxGreen_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxGreenBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
 	cornellBoxGreen_.lock()->AddScale(Vec3(100, 100, 100));
 	cornellBoxRed_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxRedBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
 	cornellBoxRed_.lock()->AddScale(Vec3(100, 100, 100));
 	cornellBoxWhite_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxWhiteBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
+	skydome_ = PolygonInstanceRegister::Ins()->CreateInstance(skydomeBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
+	skydome_.lock()->AddScale(Vec3(100, 100, 100));
 	cornellBoxWhite_.lock()->AddScale(Vec3(100, 100, 100));
 	cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 0, 0));
 	cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 0, 0));
@@ -72,42 +75,11 @@ void TitleScene::Init()
 
 }
 
-#pragma comment (lib, "winmm.lib")
-
-void FPS()
-{
-
-	/*===== タイトルバーにFPS表示 =====*/
-
-	static DWORD prev_time = timeGetTime();	// 前回の時間
-	static int frame_count = 0;		// フレームカウント
-	DWORD now_time = timeGetTime();		// 今回のフレームの時間
-
-	frame_count++;	// フレーム数をカウントする
-
-	// 経過時間が１秒を超えたらカウントと時間をリセット
-	if (now_time - prev_time >= 1000)
-	{
-		wchar_t fps[1000];
-		_itow_s(frame_count, fps, 10);
-		wchar_t moji[] = L"FPS";
-		wcscat_s(fps, moji);
-		SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, fps);
-		//OutputDebugString(fps);
-
-		prev_time = now_time;
-		frame_count = 0;
-	}
-
-}
-
 #include "Camera.h"
 void TitleScene::Update()
 {
 
 	/*===== 更新処理 =====*/
-
-	FPS();
 
 	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
@@ -197,6 +169,15 @@ void TitleScene::Draw()
 
 	RayEngine::Ins()->Draw();
 
+	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+
 	title_.Draw();
+
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 }
