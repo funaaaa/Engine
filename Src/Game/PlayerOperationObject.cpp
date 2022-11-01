@@ -77,14 +77,12 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 		operation.isDrift_ = true;
 	}
 
+	// ドリフトのトリガー判定。
+	operation.isDriftTrigger_ = !InputData.isPrevFrameDrift_ && operation.isDrift_;
+
 	// アイテムが入手されていたら。
 	if (character_->GetIsGetItem()) {
 		operation.isGetItem_ = true;
-	}
-
-	// ジャンプアクションのトリガー判定。
-	if (Input::Ins()->IsKeyTrigger(DIK_SPACE) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_RIGHT_SHOULDER)) {
-		operation.isJumpActionTrigger_ = true;
 	}
 
 	// ゴースト情報の書き込みが有効化されていたら。
@@ -205,6 +203,9 @@ void PlayerOperationObject::WriteGhostInfo(BaseOperationObject::Operation Operat
 		wfile << "D:" << std::to_string(static_cast<int>(Operation.isDrift_)) << " ";
 
 	}
+	if (Operation.isDriftTrigger_) {
+		wfile << "DT:" << std::to_string(static_cast<int>(Operation.isDriftTrigger_)) << " ";
+	}
 	if (Operation.isGetItem_) {
 
 		wfile << "G:" << std::to_string(static_cast<int>(Operation.isGetItem_)) << " ";
@@ -219,9 +220,6 @@ void PlayerOperationObject::WriteGhostInfo(BaseOperationObject::Operation Operat
 
 		wfile << "UR:" << std::to_string(static_cast<int>(Operation.isUseItemRelease_)) << " ";
 
-	}
-	if (Operation.isJumpActionTrigger_) {
-		wfile << "JT:" << std::to_string(static_cast<int>(Operation.isJumpActionTrigger_)) << " ";
 	}
 
 	wfile << std::endl;

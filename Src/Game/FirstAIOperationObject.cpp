@@ -40,7 +40,7 @@ BaseOperationObject::Operation FirstAIOperationObject::Input(const BaseOperation
 
 	operation.handleDriveRate_ = waypointMgr_->LeftRightCheck(InputData.pos_, InputData.forwradVec_);
 
-	operation.isJumpActionTrigger_ = InputData.isHitJumpBoostGimmick_;
+	operation.isDriftTrigger_ = InputData.isHitJumpBoostGimmick_;
 
 	operation.isUseItemTrigger_ = InputData.hasItemID_ == BaseItem::ItemID::BOOST;
 

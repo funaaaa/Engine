@@ -343,7 +343,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 
 	// ブーストの割合に応じてラジアルブラーをかける。
 	if (charaID_ == CHARA_ID::P1) {
-	
+
 		RadialBlur::Ins()->SetBlurPower(FHelper::Saturate(boostSpeed_ / MAX_BOOST_SPEED));
 
 		//_RPTFN(_CRT_WARN, "%f\n", boostSpeed_ / MAX_BOOST_SPEED);
@@ -744,6 +744,7 @@ void Character::Input(bool IsBeforeStart)
 		operationInputData.hasItemID_ = item_->GetItemID();
 	}
 	operationInputData.isHitJumpBoostGimmick_ = isHitJumpActionGimmick_;
+	operationInputData.isPrevFrameDrift_ = isDrift_;
 	BaseOperationObject::Operation operation = operationObject_->Input(operationInputData);
 
 	// タイヤのマスクのフラグを初期化する。
@@ -993,7 +994,7 @@ void Character::Input(bool IsBeforeStart)
 	}
 
 	// ジャンプアクションのトリガー判定。
-	isJumpActionTrigger_ = operation.isJumpActionTrigger_;
+	isJumpActionTrigger_ = operation.isDriftTrigger_;
 
 	// 入力を保存する。
 	handleAmount_ = operation.handleDriveRate_;

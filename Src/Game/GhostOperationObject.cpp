@@ -53,6 +53,11 @@ GhostOperationObject::GhostOperationObject(std::string GhostFilePath)
 					operationElementData.operationID_ = OPERATION_ID::DRIFT;
 					continue;
 				}
+				// DTだったらドリフトトリガー。
+				if (operationString == "DT") {
+					operationElementData.operationID_ = OPERATION_ID::DRIFTTRIGGER;
+					continue;
+				}
 				// Gだったらアイテム獲得。
 				if (operationString == "G") {
 					operationElementData.operationID_ = OPERATION_ID::GETITEM;
@@ -66,11 +71,6 @@ GhostOperationObject::GhostOperationObject(std::string GhostFilePath)
 				// URだったらアイテム使用リリース。
 				if (operationString == "UR") {
 					operationElementData.operationID_ = OPERATION_ID::USERELEASE;
-					continue;
-				}
-				// JTだったらジャンプアクショントリガーリリース。
-				if (operationString == "JT") {
-					operationElementData.operationID_ = OPERATION_ID::JUMPACTIONTRIGGER;
 					continue;
 				}
 
@@ -126,6 +126,9 @@ BaseOperationObject::Operation GhostOperationObject::Input(const BaseOperationOb
 			case GhostOperationObject::OPERATION_ID::DRIFT:
 				operation.isDrift_ = index.operationValue_;
 				break;
+			case GhostOperationObject::OPERATION_ID::DRIFTTRIGGER:
+				operation.isDriftTrigger_ = index.operationValue_;
+				break;
 			case GhostOperationObject::OPERATION_ID::GETITEM:
 				operation.isGetItem_ = index.operationValue_;
 				break;
@@ -134,9 +137,6 @@ BaseOperationObject::Operation GhostOperationObject::Input(const BaseOperationOb
 				break;
 			case GhostOperationObject::OPERATION_ID::USERELEASE:
 				operation.isUseItemRelease_ = index.operationValue_;
-				break;
-			case GhostOperationObject::OPERATION_ID::JUMPACTIONTRIGGER:
-				operation.isJumpActionTrigger_ = index.operationValue_;
 				break;
 			default:
 				break;
