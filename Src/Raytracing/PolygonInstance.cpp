@@ -167,6 +167,15 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 }
 
+Vec3 PolygonMeshInstance::GetScaleVec3()
+{
+
+	Vec3 defSize = blas_.lock()->GetVertexMax();
+	defSize = FHelper::MulMat(defSize, scaleMat_);
+
+	return defSize;
+}
+
 void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 {
 

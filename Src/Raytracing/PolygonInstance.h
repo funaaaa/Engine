@@ -70,6 +70,7 @@ public:
 	// Šg‘å(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddScale(const Vec3& Scale);
 	DirectX::XMMATRIX GetScale() { return scaleMat_; }
+	Vec3 GetScaleVec3();
 
 	// Šg‘å(ˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeScale(const Vec3& Scale);

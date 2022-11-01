@@ -226,6 +226,20 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			}
 
 		}
+		// 当たり判定が球だったら。
+		else if (indexCollisionID == BaseStageObject::COLLISION_ID::SPHERE) {
+
+			// 当たり判定を行う。
+			bool isHit = Vec3(Input.targetPos_ - index.first->GetInstance().lock()->GetPos()).Length() <= Input.targetSize_.x_ + index.first->GetInstance().lock()->GetScaleVec3().x_;
+
+			if (!isHit) continue;
+
+			// アイテムボックスを一時的に無効化。
+			index.first->Disable(180);
+
+			output.isHitItemBox_ = true;
+
+		}
 		// 当たり判定がMESHだったら。
 		else if (indexCollisionID == BaseStageObject::COLLISION_ID::MESH) {
 

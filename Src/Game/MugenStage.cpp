@@ -239,7 +239,7 @@ void MugenStage::Setting(int TireMaskIndex)
 	int itemBoxCount = itemBoxData.GetVertexSize();
 	for (int index = 0; index < itemBoxCount; ++index) {
 
-		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::OBB,
+		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ITEM_BOX, BaseStageObject::COLLISION_ID::SPHERE,
 			"Resource/Game/Gimmick/", "itemBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 		stageObjectMgr_->ChangeTrans(indexBuff, itemBoxData.GetVertex(index));
 		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
