@@ -77,7 +77,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
 
-		std::string filePath = "Resource/Game/CharaGhostData/Dev_";
+		std::string filePath = "Resource/Game/CharaGhostData/Ghost_";
 		std::string dottxt = ".txt";
 		std::string number = std::to_string(Param);
 

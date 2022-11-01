@@ -155,7 +155,7 @@ void MugenStage::Setting(int TireMaskIndex)
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/OrnamentGroundNormalMap.dds"));
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(2144.0f, -14.0f, -5519.0f));
+	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(2144.0f, 0.0f, -5519.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.0f, -0.363f, 0.0f));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(350.0f, 200.0f, 200.0f));
 

@@ -164,7 +164,7 @@ void PlayerOperationObject::DecideFileName()
 
 	// ƒpƒX‚ğİ’è‚·‚éB
 	std::string directoryPath = "Resource/Game/CharaGhostData/";
-	std::string ghostCode = "Dev_";
+	std::string ghostCode = "Ghost_";
 	std::string number = std::to_string(maxNumber);
 	std::string extension = ".txt";
 	filePath_ = directoryPath + ghostCode + number + extension;
