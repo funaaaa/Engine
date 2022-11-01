@@ -293,6 +293,11 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 			upVec_ = Vec3(0, 1, 0);
 			returnDefPosTimer_ = 0;
 
+			handleRotQ_ = DirectX::XMVECTOR();
+			nowHandleRotQ_ = DirectX::XMVECTOR();
+			boostRotQ_ = DirectX::XMVECTOR();
+			nowBoostRotQ_ = DirectX::XMVECTOR();
+
 		}
 
 	}

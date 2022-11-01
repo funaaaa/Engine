@@ -418,9 +418,6 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	Vec3 hitNormal;
 	Vec2 hitUV;
 
-	// 前後左右の四方向にレイを飛ばして当たり判定を行う。
-	Output = Decision4Way(Input, InputRayData, Output, ObjectID);
-
 	if (ObjectID != BaseStageObject::OBJECT_ID::WALL) {
 
 		// レイ用の設定を追加。
@@ -479,6 +476,9 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 		}
 
 	}
+
+	// 前後左右の四方向にレイを飛ばして当たり判定を行う。
+	Output = Decision4Way(Input, InputRayData, Output, ObjectID);
 
 	return Output;
 
@@ -709,13 +709,3 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 	}
 
 }
-
-
-/*
-
-・甲羅を後ろに持つ機能を追加。
-・甲羅とプレイヤーの当たり判定を追加。
-　→当たった際のエフェクトも追加。
-・アイテムボックスを追加。
-
-*/
