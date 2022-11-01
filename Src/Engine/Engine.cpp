@@ -442,10 +442,6 @@ void Engine::ProcessAfterDrawing() {
 	// GraphicsQueueの処理
 	if (!isGameEndReservation_) {
 
-		// コマンドリストに追加
-		mainGraphicsCmdList_->SetDescriptorHeaps(1, heapForImgui_.GetAddressOf());
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), mainGraphicsCmdList_.Get());
-
 		// グラフィックコマンドリストのクローズ
 		mainGraphicsCmdList_->Close();
 
@@ -460,6 +456,10 @@ void Engine::ProcessAfterDrawing() {
 		if (frameIndex_ != 0) {
 			graphicsCmdQueue_->Wait(denoiseToCopyFence_[pastQueueIndex_].Get(), fenceValue - 1);
 		}
+
+		// コマンドリストに追加
+		copyResourceCmdList_->SetDescriptorHeaps(1, heapForImgui_.GetAddressOf());
+		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), copyResourceCmdList_.Get());
 
 		// コピーコマンドリストのクローズ
 		copyResourceCmdList_->Close();
