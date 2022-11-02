@@ -77,6 +77,7 @@ private:
 	float sunAngle_;
 	float sunSpeed_;
 
+
 	// ƒLƒƒƒ‰ŠÇ—ƒNƒ‰ƒX
 	std::shared_ptr<CharacterMgr> characterMgr_;
 

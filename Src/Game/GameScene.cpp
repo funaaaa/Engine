@@ -208,7 +208,7 @@ void GameScene::Init()
 	countDownStartTimer_ = 0;
 	transitionTimer = 0;
 	countDownNumber_ = 2;
-	sunAngle_ = 0.3f;
+	sunAngle_ = 0.8f;
 
 }
 
@@ -223,12 +223,12 @@ void GameScene::Update()
 	// ウィンドウの名前を更新。
 	//if (true) {
 
-	//	FPS();
+		FPS();
 
 	//}
 	//else {
 
-	SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, L"LE3A_20_フナクラベ_タクミ");
+	//SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, L"LE3A_20_フナクラベ_タクミ");
 
 	//}
 
@@ -290,14 +290,14 @@ void GameScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
-	sunAngle_ = 0.8f;
-	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
+	//sunAngle_ = 0.8f;
+	//if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
-		sunAngle_ += sunSpeed_;
-		sunAngle_ += sunSpeed_;
-		sunAngle_ += sunSpeed_;
+	//	sunAngle_ += sunSpeed_;
+	//	sunAngle_ += sunSpeed_;
+	//	sunAngle_ += sunSpeed_;
 
-	}
+	//}
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
@@ -446,6 +446,8 @@ void GameScene::InputImGUI()
 	/*===== IMGUI更新 =====*/
 
 	ImGui::Text("Let's do three laps!");
+
+	ImGui::DragFloat("SunAngle", &sunAngle_, 0.01f);
 
 	//// 太陽の移動速度を更新。
 	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");

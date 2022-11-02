@@ -12,7 +12,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 256> objects_;
+	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 512> objects_;
 
 
 
@@ -37,7 +37,7 @@ public:
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input);
 
 	// ギミック集を追加。
-	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 256> GetGimmickData() { return objects_; }
+	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 512> GetGimmickData() { return objects_; }
 
 	// 移動関係
 	void AddTrans(int Index, const Vec3& Trans);
