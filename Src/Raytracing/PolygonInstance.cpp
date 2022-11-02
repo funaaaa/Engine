@@ -49,6 +49,45 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr
 
 }
 
+D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::ReCreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex)
+{
+
+	/*===== インスタンスを生成する処理 =====*/
+
+	instanceIndex_ = InstanceIndex;
+
+	D3D12_RAYTRACING_INSTANCE_DESC instanceDesc;
+
+	// 行列を設定。
+	XMStoreFloat3x4(
+		reinterpret_cast<DirectX::XMFLOAT3X4*>(&instanceDesc.Transform),
+		worldMat_);
+
+	shaderID_ = ShaderID;
+
+	// インスタンスの詳細を設定。
+	instanceDesc.InstanceID = ShaderID;
+	instanceDesc.InstanceMask = 0xFF;
+	instanceDesc.InstanceContributionToHitGroupIndex = Blas.lock()->GetBlasIndex();
+	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
+	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer()->GetGPUVirtualAddress();
+
+
+	// BLASのIndexを保存。
+	blasIndex_ = Blas.lock()->GetBlasIndex();
+	blas_ = Blas;
+
+	isActive_ = true;
+	childCount_ = 0;
+	haveMeshCollisionData_ = HaveMeshCollisionData;
+	if (haveMeshCollisionData_) {
+		CalMeshCollisionData();
+	}
+
+	return instanceDesc;
+
+}
+
 void PolygonMeshInstance::AddTrans(const Vec3& Pos)
 {
 

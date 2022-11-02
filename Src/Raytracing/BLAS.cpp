@@ -584,7 +584,7 @@ BLAS::BLAS()
 	isGenerate_ = false;
 	baseTextureHandle_ = -1;
 	normalMapHandle_ = -1;
-
+	metalnessMapHandle_ = -1;
 }
 
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
@@ -686,6 +686,25 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 				}
 
 			}
+			// 2番目はmetalnessマップテクスチャ。
+			else if (index == 2) {
+
+				if (metalnessMapHandle_ != -1) {
+
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(metalnessMapHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+				}
+				else {
+
+					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+					//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
+
+				}
+
+			}
 			// それ以降は通常テクスチャを書き込んでメモリの隙間を埋める。
 			else {
 
@@ -745,6 +764,7 @@ void BLAS::Init()
 	isGenerate_ = false;
 	baseTextureHandle_ = -1;
 	normalMapHandle_ = -1;
+	metalnessMapHandle_ = -1;
 
 }
 

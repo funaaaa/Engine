@@ -175,6 +175,16 @@ public:
 
 
 
+
+	std::array<std::weak_ptr<BLAS>, 4> rocketBlas_;
+	std::array<std::weak_ptr<PolygonMeshInstance>, 4 > rocketIns_;
+	float rocketEasingTimer_;
+	float rocketRotationY_;
+	float rocketAddRotationY_;
+	bool isDisplayRocket_;
+
+
+
 public:
 
 	struct TireUVSet {

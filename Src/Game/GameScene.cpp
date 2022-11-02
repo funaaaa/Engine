@@ -122,10 +122,6 @@ GameScene::GameScene()
 	maxRapCountUI_ = std::make_shared<Sprite>();
 	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(381, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
 
-	itemFrameUI_ = std::make_shared<Sprite>();
-	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/boostItem.png");
-	itemFrameEasingTimer_ = 1;
-
 	// 集中線
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
 
@@ -195,19 +191,6 @@ void GameScene::Init()
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
 
-	// 天球用のスフィアを生成する。
-	//skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	//skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
-	//skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
-
-	//// PBRテスト用
-	//pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	//pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
-	//pbrSphereIns_.lock()->AddScale(Vec3(50, 50, 50));
-	//pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
-	//pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
-
-
 
 	// TLASを生成。
 	RayEngine::Ins()->SettingTLAS();
@@ -226,7 +209,6 @@ void GameScene::Init()
 	transitionTimer = 0;
 	countDownNumber_ = 2;
 	sunAngle_ = 0.3f;
-	itemFrameEasingTimer_ = 1;
 
 }
 
@@ -334,41 +316,6 @@ void GameScene::Update()
 	}
 	concentrationLine_->Update();
 
-
-
-	// アイテムを取得した瞬間や使った瞬間にイージングタイマーを初期化。
-	if (characterMgr_->GetPlayerIns().lock()->GetIsGetItem() || characterMgr_->GetPlayerIns().lock()->GetUseItem()) {
-
-		itemFrameEasingTimer_ = 0;
-
-	}
-
-	// アイテムのフレームの位置を更新。
-	itemFrameEasingTimer_ += 0.05f;
-	if (1.0f < itemFrameEasingTimer_) itemFrameEasingTimer_ = 1.0f;
-	if (characterMgr_->GetPlayerIns().lock()->GetIsItem()) {
-
-		// UIのテクスチャを変更。
-		if (characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST) {
-			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/boostItem.png"), 0);
-		}
-		else {
-			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/shellItem.dds"), 0);
-		}
-
-		// イージング量を求める。
-		float easingAmount = FEasing::EaseOutQuint(itemFrameEasingTimer_);
-		itemFrameUI_->ChangePosition(ITEM_FRAME_OUT_POS + (ITEM_FRAME_IN_POS - ITEM_FRAME_OUT_POS) * easingAmount);
-
-	}
-	else {
-
-		// イージング量を求める。
-		float easingAmount = FEasing::EaseInQuint(itemFrameEasingTimer_);
-		itemFrameUI_->ChangePosition(ITEM_FRAME_IN_POS + (ITEM_FRAME_OUT_POS - ITEM_FRAME_IN_POS) * easingAmount);
-
-	}
-
 }
 
 void GameScene::Draw()
@@ -419,9 +366,6 @@ void GameScene::Draw()
 		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 		concentrationLine_->Draw();
-
-		// 左上のアイテムのui。
-		itemFrameUI_->Draw();
 
 		// コインの取得数のui。
 		coinCountUI_[0]->Draw();

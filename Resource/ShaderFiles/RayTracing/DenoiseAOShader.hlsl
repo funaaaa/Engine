@@ -13,6 +13,7 @@ StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 StructuredBuffer<Material> material : register(t2, space1);
 Texture2D<float4> texture : register(t3, space1);
 Texture2D<float4> normalTexture : register(t4, space1);
+Texture2D<float4> metalnessTexture : register(t5, space1);
 RWTexture2D<float4> tireMaskTexture : register(u0, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
@@ -988,15 +989,25 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     else
     {
         
-        if (payloadBuff.impactAmount_ < metalness)
+        // metalnessマップの色を取得。
+        float3 metalnessMapColor = (float3) metalnessTexture.SampleLevel(smp, Vtx.uv, 0.0f);
+        float metal = metalness;
+        
+        // metalnessマップの色とテクスチャの色が同じじゃなかったらmetallnessマップの色を再取得。(metalnessマップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
+        if (!(TexColor.x == metalnessMapColor.x && TexColor.y == metalnessMapColor.y && TexColor.z == metalnessMapColor.z))
+        {
+            metal = saturate(metal + ((1.0f - metal) * (1.0f - metalnessMapColor.x)));
+        }
+        
+        if (payloadBuff.impactAmount_ < metal)
         {
             payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;
             payloadBuff.impactAmount_ = 0.0f;
         }
         else
         {
-            payloadBuff.color_.xyz += (float3) TexColor * metalness;
-            payloadBuff.impactAmount_ -= metalness;
+            payloadBuff.color_.xyz += (float3) TexColor * metal;
+            payloadBuff.impactAmount_ -= metal;
             
             if (0.0f < payloadBuff.impactAmount_)
             {

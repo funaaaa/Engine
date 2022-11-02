@@ -65,6 +65,7 @@ private:
 
 	int baseTextureHandle_;				// 使用するテクスチャのハンドル
 	int normalMapHandle_;
+	int metalnessMapHandle_;
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
 	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
@@ -118,6 +119,10 @@ public:
 	void ChangeBaseTexture(int Index);
 	void ChangeNormalTexture(int Index) {
 		normalMapHandle_ = Index;
+		isChangeTexture_ = true;
+	}
+	void ChangeMetalnessTexture(int Index) {
+		metalnessMapHandle_ = Index;
 		isChangeTexture_ = true;
 	}
 	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }

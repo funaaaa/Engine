@@ -49,6 +49,7 @@ public:
 
 	// Ins¶¬ŠÖ”
 	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex);
+	D3D12_RAYTRACING_INSTANCE_DESC ReCreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex);
 
 	// ˆÚ“®(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddTrans(const Vec3& Pos);

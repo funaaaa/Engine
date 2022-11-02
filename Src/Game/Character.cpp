@@ -26,6 +26,7 @@
 #include "DriftParticle.h"
 #include "MugenStage.h"
 #include "RadialBlur.h"
+#include <SceneMgr.h>
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -99,6 +100,23 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInstance, true));
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInstance, true));
 
+	if (SceneMgr::Ins()->nowScene_ != BaseScene::SCENE_ID::TITLE) {
+
+		// ロケットを生成。
+		rocketBlas_[0] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketHead.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		rocketBlas_[1] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketBody.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		rocketBlas_[2] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketLegs.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		rocketBlas_[3] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		for (int index = 0; index < 4; ++index) {
+			rocketIns_[index] = PolygonInstanceRegister::Ins()->CreateInstance(rocketBlas_[index], PolygonInstanceRegister::DEF);
+			rocketIns_[index].lock()->ChangeScale(Vec3(30, 30, 30));
+			rocketBlas_[index].lock()->ChangeMetalnessTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/metalness2.png"));
+			//PolygonInstanceRegister::Ins()->NonDisplay(rocketIns_[index].lock()->GetInstanceIndex());
+		}
+
+	}
+
+
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
 	pos_ = DEF_POS;
@@ -130,6 +148,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	IsTurningIndicatorRed_ = false;
 	isRotRightSide_ = false;
 	isDriftJumpPrev_ = false;
+	isDisplayRocket_ = false;
 	turningIndicatorTimer_ = 0;
 	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
@@ -147,6 +166,9 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	driftRotTimer_ = 0;
 	baseBoostRot_ = 0;
 	nowBoostRot_ = 0;
+	rocketEasingTimer_ = 0.0f;
+	rocketAddRotationY_ = 0.0f;
+	rocketRotationY_ = 0.0f;
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -212,6 +234,10 @@ void Character::Init()
 	isJumpActionTrigger_ = false;
 	playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
 	cameraForwardVec_ = forwardVec_;
+	rocketEasingTimer_ = 0.0f;
+	rocketAddRotationY_ = 0.0f;
+	rocketRotationY_ = 0.0f;
+	isDisplayRocket_ = false;
 
 	playerModel_.Delete();
 
@@ -355,6 +381,99 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 
 	// ゲーム開始前フラグを保存。
 	isBeforeStartPrev_ = IsBeforeStart;
+
+
+	// ロケットをカメラの左上に移動させる。
+	Vec3 nowRocketPos = rocketIns_[0].lock()->GetPos();
+	Vec3 rocketPos = GetPos();
+	rocketPos -= forwardVec_ * 60.0f;
+	rocketPos -= upVec_ * 20.0f;
+	// 補間する。
+	nowRocketPos += (rocketPos - nowRocketPos) / 3.0f;
+	for (auto& index : rocketIns_) {
+
+		index.lock()->ChangeTrans(nowRocketPos);
+
+	}
+
+	// 回転量を本来の値に補間する。
+	const float ADD_ROTATION_Y = 0.8f;
+	const float MIN_ROTATION_Y = 0.05f;
+	rocketAddRotationY_ += (MIN_ROTATION_Y - rocketAddRotationY_) / 10.0f;
+	// 回転させる。
+	rocketRotationY_ += rocketAddRotationY_;
+
+	// ロケットを斜めにする。
+	for (auto& index : rocketIns_) {
+
+		// 初期の回転に戻す。
+		index.lock()->ChangeRotate(Vec3(0.4f, 0.0f, 0.0f));
+
+		// カメラ上ベクトル方向のクォータニオンを求める。
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(Camera::Ins()->up_.ConvertXMVECTOR(), rocketRotationY_);
+
+		// 求めたクォータニオンを行列に治す。
+		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
+
+		// 回転を加算する。
+		index.lock()->AddRotate(quaternionMat);
+
+	}
+
+	// アイテムを取得した瞬間や使った瞬間にイージングタイマーを初期化。
+	bool prevFrameDisplayRocket = isDisplayRocket_;
+	if (isGetItem_ || isUseItem_) {
+
+		rocketEasingTimer_ = 0;
+		rocketAddRotationY_ = ADD_ROTATION_Y;
+
+		if (!isDisplayRocket_) {
+			isDisplayRocket_ = true;
+		}
+
+	}
+
+	// アイテムのロケットのサイズを更新。
+	const float MAX_SCALE = 12.0f;
+	rocketEasingTimer_ += 0.06f;
+	if (1.0f < rocketEasingTimer_) rocketEasingTimer_ = 1.0f;
+	if (GetIsItem()) {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseOutQuint(rocketEasingTimer_);
+		float scale = MAX_SCALE * easingAmount;
+		for (auto& index : rocketIns_) {
+			index.lock()->ChangeScale(Vec3(scale, scale, scale));
+		}
+
+	}
+	else {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseInQuint(rocketEasingTimer_);
+		float scale = MAX_SCALE - MAX_SCALE * easingAmount;
+		for (auto& index : rocketIns_) {
+			index.lock()->ChangeScale(Vec3(scale, scale, scale));
+		}
+		if (isDisplayRocket_ && scale <= 0) {
+			isDisplayRocket_ = false;
+		}
+
+	}
+
+	// 描画始まったトリガーだったら描画する。
+	if (!prevFrameDisplayRocket && isDisplayRocket_) {
+		for (auto& index : rocketIns_) {
+			PolygonInstanceRegister::Ins()->Display(index.lock()->GetInstanceIndex());
+		}
+	}
+
+	// 描画終わったトリガーだったら描画を消す。
+	if ((prevFrameDisplayRocket && !isDisplayRocket_) || (!isDisplayRocket_ && rocketIns_[0].lock()->GetScaleVec3().x_ <= 0)) {
+		for (auto& index : rocketIns_) {
+			PolygonInstanceRegister::Ins()->NonDisplay(index.lock()->GetInstanceIndex());
+		}
+	}
 
 }
 
