@@ -175,6 +175,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitItemBox_ = false;
 	output.isHitStepBoostGimmick_ = false;
 	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
+	output.resultPos_ = Input.targetPos_;
 
 	for (auto& index : objects_) {
 
@@ -432,6 +433,9 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	Vec3 hitNormal;
 	Vec2 hitUV;
 
+	// 前後左右の四方向にレイを飛ばして当たり判定を行う。
+	Output = Decision4Way(Input, InputRayData, Output, ObjectID);
+
 	if (ObjectID != BaseStageObject::OBJECT_ID::WALL) {
 
 		// レイ用の設定を追加。
@@ -490,9 +494,6 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 		}
 
 	}
-
-	// 前後左右の四方向にレイを飛ばして当たり判定を行う。
-	Output = Decision4Way(Input, InputRayData, Output, ObjectID);
 
 	return Output;
 
@@ -562,7 +563,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 		Vec3 pushBackVec = (Input.targetPos_ - impactPos).GetNormal();
 
 		// 法線方向に当たった分押し戻す。
-		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.z_;
+		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.x_;
 		Output.resultPos_ = Input.targetPos_;
 		Output.upVec_ = Input.targetUpVec_;
 

@@ -287,10 +287,10 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
 
 			pos_ = DEF_POS;
-			playerModel_.carBodyInstance.lock()->ChangeTrans(Vec3(0, 0, 0));
-			playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
-			forwardVec_ = Vec3(0, 0, -1);
 			rotY_ = -0.367411435f;
+			playerModel_.carBodyInstance.lock()->ChangeTrans(DEF_POS);
+			playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, rotY_, 0));
+			forwardVec_ = Vec3(0, 0, -1);
 			upVec_ = Vec3(0, 1, 0);
 			returnDefPosTimer_ = 0;
 

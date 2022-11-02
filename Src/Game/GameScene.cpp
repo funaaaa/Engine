@@ -123,7 +123,7 @@ GameScene::GameScene()
 	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(381, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
 
 	itemFrameUI_ = std::make_shared<Sprite>();
-	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/boostItem.dds");
+	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/boostItem.png");
 	itemFrameEasingTimer_ = 1;
 
 	// 集中線
@@ -350,7 +350,7 @@ void GameScene::Update()
 
 		// UIのテクスチャを変更。
 		if (characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST) {
-			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/boostItem.dds"), 0);
+			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/boostItem.png"), 0);
 		}
 		else {
 			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/shellItem.dds"), 0);
