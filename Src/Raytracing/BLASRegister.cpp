@@ -68,7 +68,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, c
 
 	/*===== BLASを生成 =====*/
 
-
+	IsNewGenerate;
 	//// すでにロード済みかをチェックする。
 	//bool isLoaded = false;
 	//int blasIndex_ = 0;

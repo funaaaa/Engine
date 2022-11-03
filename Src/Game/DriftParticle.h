@@ -12,6 +12,24 @@ class DriftParticle {
 
 private:
 
+
+	/*-- パーティクルに関する変数 --*/
+
+	DirectX::XMVECTOR particleMatQ_;
+	Vec3 particlePos_;	// この値をposに加算する。
+	Vec3 particlePrevPos_;
+	Vec3 particlePrevMoveVec_;
+	Vec3 particleVec_;
+	Vec2 particleNowScale_;
+	float particleSpeed_;
+	const Vec2 PARTICLE_SCALE = Vec2(0.3f, 3.0f);
+	const Vec2 PARTICLE_SCALE_LEVEL_CHANGE = Vec2(0.35f, 3.5f);
+	const float MAX_PARTICLE_SPEED = 2.5f;
+	const float MAX_PARTICLE_SPEED_LEVEL_CHANGE = 5.0f;
+	float grav;
+	const float ADD_GRAV = 0.4f;
+	const float MAX_GRAV = 8.0f;
+
 	std::weak_ptr<PolygonMeshInstance> instance_;	// パーティクルのインスタンスID
 	std::weak_ptr<BLAS> blas_;						// BLASのインデックス
 	int constBufferIndex_;	// このパーティクルのライティングのみを行う定数バッファのインデックス番号
@@ -47,24 +65,6 @@ private:
 
 	// オーラの位置を左右にずらす量
 	const float AURA_SIDE_SIZE = 23.0f;
-
-
-	/*-- パーティクルに関する変数 --*/
-
-	DirectX::XMVECTOR particleMatQ_;
-	Vec3 particlePos_;	// この値をposに加算する。
-	Vec3 particlePrevPos_;
-	Vec3 particlePrevMoveVec_;
-	Vec3 particleVec_;
-	Vec2 particleNowScale_;
-	float particleSpeed_;
-	const Vec2 PARTICLE_SCALE = Vec2(0.3f, 3.0f);
-	const Vec2 PARTICLE_SCALE_LEVEL_CHANGE = Vec2(0.35f, 3.5f);
-	const float MAX_PARTICLE_SPEED = 2.5f;
-	const float MAX_PARTICLE_SPEED_LEVEL_CHANGE = 5.0f;
-	float grav;
-	const float ADD_GRAV = 0.4f;
-	const float MAX_GRAV = 8.0f;
 
 
 	/*-- ジャンプアクションエフェクトに関する変数 --*/

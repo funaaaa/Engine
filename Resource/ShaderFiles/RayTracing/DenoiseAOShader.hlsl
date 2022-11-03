@@ -375,7 +375,7 @@ void mainMS(inout Payload PayloadData)
     float3 mieColor = float3(1, 1, 1);
     payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
     payloadBuff.color_ += AtmosphericScattering(WorldRayOrigin() + WorldRayDirection() * RayTCurrent(), mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
-    payloadBuff.ao_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+    payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
     payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
         
     // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
@@ -1092,12 +1092,11 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
         
         // 説空間行列を求める。
-        float4x4 mat =
+        float3x3 mat =
         {
-            float4(tan, 0.0f),
-            float4(bnorm, 0.0f),
-            float4(vtx.Normal, 0.0f),
-            { 0, 0, 0, 1 }
+            float3(tan),
+            float3(bnorm),
+            float3(vtx.Normal)
         };
         
         worldNormal = mul(worldNormal, mat);

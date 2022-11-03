@@ -55,7 +55,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     int blurCount = (32.0f * blurRate) * weight.x + 1.0f;
     
     // ƒuƒ‰[‚ğ‚©‚¯‚éB
-    if (DTid.y < WIN_CENTER.y)
+    if ((uint) DTid.y < (uint) WIN_CENTER.y)
     {
         for (int index = 0; index < blurCount; ++index)
         {

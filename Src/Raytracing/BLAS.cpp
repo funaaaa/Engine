@@ -245,8 +245,8 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
-	isOpaque_ = true;
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
+	isOpaque_ = IsOpaque;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);

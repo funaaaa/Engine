@@ -11,6 +11,7 @@
 #pragma warning(push)
 #pragma warning(disable:4023)
 #pragma warning(disable:4099)
+#pragma warning(disable:4324)
 #include "fbxsdk.h"
 #pragma warning(pop)
 

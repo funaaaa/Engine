@@ -242,7 +242,6 @@ void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> 
 		particleGenerateDelay_ = 0;
 
 		// ê∂ê¨Ç∑ÇÈêî
-		const int MAX = 5;
 		const int GENERATE_COUNT = static_cast<int>(5 * DriftRate);
 		int generateCounter = 0;
 

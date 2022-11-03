@@ -303,9 +303,6 @@ void RaytracingPipeline::MapHitGroupInfo()
 
 	/*===== HitGroup‚Ìî•ñ‚ð“]‘— =====*/
 
-	// ¶¬‚³‚ê‚½BLAS‚Ì”B
-	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
-
 	void* mapped = nullptr;
 	HRESULT result = shaderTable_->Map(0, nullptr, &mapped);
 	if (result != S_OK) {
