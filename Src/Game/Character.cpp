@@ -389,7 +389,12 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 	rocketPos -= forwardVec_ * 60.0f;
 	rocketPos -= upVec_ * 20.0f;
 	// 補間する。
-	nowRocketPos += (rocketPos - nowRocketPos) / 3.0f;
+	if (charaID_ == CHARA_ID::P1) {
+		nowRocketPos += (rocketPos - nowRocketPos) / 3.0f;
+	}
+	else {
+		nowRocketPos += (rocketPos - nowRocketPos);
+	}
 	for (auto& index : rocketIns_) {
 
 		index.lock()->ChangeTrans(nowRocketPos);
@@ -1024,7 +1029,7 @@ void Character::Input(bool IsBeforeStart)
 
 	// ドリフトボタンの入力がトリガーだったら。
 	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
-	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.0f;
+	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.1f;
 	bool isOnGround = onGround_ || IsBeforeStart;	// 設置していたら ゲームが始まっていない場合、キャラは空中に浮いているので、接地判定を取る。
 	if (triggerDriftBottom && notJump && isOnGround && canNotMoveTimer_ <= 0) {
 
@@ -1071,6 +1076,12 @@ void Character::Input(bool IsBeforeStart)
 
 		item_ = std::make_shared<BoostItem>();
 		item_->Generate(playerModel_.carBodyInstance);
+		isGetItem_ = true;
+
+	}
+	else if (charaID_ == CHARA_ID::GHOST) {
+
+		isGetItem_ = false;
 
 	}
 
@@ -1397,7 +1408,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		}
 
 	}
-	else {
+	else if (charaID_ != CHARA_ID::GHOST) {
 
 		// アイテムを取得しなかった
 		isGetItem_ = false;

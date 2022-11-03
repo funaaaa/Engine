@@ -1046,7 +1046,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
             float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
         
-            payload.impactAmount_ = 1.0f - texColor.a;
+            payload.impactAmount_ = texColor.a;
             
             return;
             

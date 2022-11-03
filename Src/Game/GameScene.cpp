@@ -447,7 +447,7 @@ void GameScene::InputImGUI()
 
 	ImGui::Text("Let's do three laps!");
 
-	ImGui::DragFloat("SunAngle", &sunAngle_, 0.01f);
+	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
 
 	//// 太陽の移動速度を更新。
 	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
