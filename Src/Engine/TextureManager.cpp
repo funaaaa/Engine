@@ -60,22 +60,94 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 
 	// テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
-	CD3DX12_HEAP_PROPERTIES texHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
+	CD3DX12_HEAP_PROPERTIES texHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	result = Engine::Ins()->device_.dev_->CreateCommittedResource(&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_RESOURCE_STATE_COPY_DEST,
 		nullptr,
 		IID_PPV_ARGS(&texbuff));
 
-	// データ転送
-	result = texbuff->WriteToSubresource(
-		0,
-		nullptr,							// 全領域コピー
-		img->pixels,						// 元データの先頭アドレス
-		static_cast<UINT>(img->rowPitch),	// 一ラインのサイズ
-		static_cast<UINT>(img->slicePitch)	// いちまいのサイズ
-	);
+
+	// ここから追記。
+
+	// Footprint(コピー可能なリソースのレイアウト)を取得。
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
+	UINT64 totalBytes = 0;
+	Engine::Ins()->device_.dev_->GetCopyableFootprints(&texresDesc, 0, 1, 0, &footprint, nullptr, nullptr, &totalBytes);
+
+	// Upload用のバッファを作成する。
+	D3D12_RESOURCE_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	desc.Width = totalBytes;
+	desc.Height = 1;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.SampleDesc.Count = 1;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	D3D12_HEAP_PROPERTIES heap;
+	memset(&heap, 0, sizeof(heap));
+	heap.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+	ID3D12Resource* iUploadBuffer = nullptr;
+	Engine::Ins()->device_.dev_->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&iUploadBuffer));
+
+	// UploadBufferへの書き込み。
+	void* ptr = nullptr;
+	iUploadBuffer->Map(0, nullptr, &ptr);
+	memcpy(reinterpret_cast<unsigned char*>(ptr) + footprint.Offset, img->pixels, img->slicePitch);
+
+	// Copyコマンドの作成
+	D3D12_TEXTURE_COPY_LOCATION dest;
+	memset(&dest, 0, sizeof(dest));
+	dest.pResource = texbuff.Get();
+	dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+	dest.SubresourceIndex = 0;
+
+	D3D12_TEXTURE_COPY_LOCATION  src;
+	memset(&src, 0, sizeof(src));
+	src.pResource = iUploadBuffer;
+	src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+	src.PlacedFootprint = footprint;
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyTextureRegion(&dest, 0, 0, 0, &src, nullptr);
+
+	// リソースバリア。
+	D3D12_RESOURCE_BARRIER  barrier;
+	memset(&barrier, 0, sizeof(barrier));
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Transition.pResource = texbuff.Get();
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+
+	// コピーコマンドの実行。
+	Engine::Ins()->mainGraphicsCmdList_->Close();
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
+	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
+	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->asFence_.Get(), ++Engine::Ins()->asfenceValue_);
+
+	// グラフィックコマンドリストの完了待ち
+	UINT64 gpuFence = Engine::Ins()->asFence_->GetCompletedValue();
+	if (gpuFence != Engine::Ins()->asfenceValue_) {
+		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+		Engine::Ins()->asFence_->SetEventOnCompletion(Engine::Ins()->asfenceValue_, event);
+		WaitForSingleObject(event, INFINITE);
+		CloseHandle(event);
+	}
+
+	// コマンドアロケータのリセット
+	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();	//キューをクリア
+
+	// コマンドリストのリセット
+	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+
+
+	// ここまで追記。
 
 	// テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
 	proTexture.metadata_ = metadata_;
@@ -155,18 +227,90 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 	result = Engine::Ins()->device_.dev_->CreateCommittedResource(&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
-		D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_RESOURCE_STATE_COPY_DEST,
 		nullptr,
 		IID_PPV_ARGS(&texbuff));
 
-	// データ転送
-	result = texbuff->WriteToSubresource(
-		0,
-		nullptr,							// 全領域コピー
-		img->pixels,						// 元データの先頭アドレス
-		static_cast<UINT>(img->rowPitch),	// 一ラインのサイズ
-		static_cast<UINT>(img->slicePitch)	// いちまいのサイズ
-	);
+
+	// ここから追記。
+
+	// Footprint(コピー可能なリソースのレイアウト)を取得。
+	D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint;
+	UINT64 totalBytes = 0;
+	Engine::Ins()->device_.dev_->GetCopyableFootprints(&texresDesc, 0, 1, 0, &footprint, nullptr, nullptr, &totalBytes);
+
+	// Upload用のバッファを作成する。
+	D3D12_RESOURCE_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+	desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	desc.Width = totalBytes;
+	desc.Height = 1;
+	desc.DepthOrArraySize = 1;
+	desc.MipLevels = 1;
+	desc.SampleDesc.Count = 1;
+	desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	D3D12_HEAP_PROPERTIES heap;
+	memset(&heap, 0, sizeof(heap));
+	heap.Type = D3D12_HEAP_TYPE_UPLOAD;
+
+	ID3D12Resource* iUploadBuffer = nullptr;
+	Engine::Ins()->device_.dev_->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&iUploadBuffer));
+
+	// UploadBufferへの書き込み。
+	void* ptr = nullptr;
+	iUploadBuffer->Map(0, nullptr, &ptr);
+	memcpy(reinterpret_cast<unsigned char*>(ptr) + footprint.Offset, img->pixels, img->slicePitch);
+
+	// Copyコマンドの作成
+	D3D12_TEXTURE_COPY_LOCATION dest;
+	memset(&dest, 0, sizeof(dest));
+	dest.pResource = texbuff.Get();
+	dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+	dest.SubresourceIndex = 0;
+
+	D3D12_TEXTURE_COPY_LOCATION  src;
+	memset(&src, 0, sizeof(src));
+	src.pResource = iUploadBuffer;
+	src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+	src.PlacedFootprint = footprint;
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyTextureRegion(&dest, 0, 0, 0, &src, nullptr);
+
+	// リソースバリア。
+	D3D12_RESOURCE_BARRIER  barrier;
+	memset(&barrier, 0, sizeof(barrier));
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier.Transition.pResource = texbuff.Get();
+	barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+
+	// コピーコマンドの実行。
+	Engine::Ins()->mainGraphicsCmdList_->Close();
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
+	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
+	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->asFence_.Get(), ++Engine::Ins()->asfenceValue_);
+
+	// グラフィックコマンドリストの完了待ち
+	UINT64 gpuFence = Engine::Ins()->asFence_->GetCompletedValue();
+	if (gpuFence != Engine::Ins()->asfenceValue_) {
+		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+		Engine::Ins()->asFence_->SetEventOnCompletion(Engine::Ins()->asfenceValue_, event);
+		WaitForSingleObject(event, INFINITE);
+		CloseHandle(event);
+	}
+
+	// コマンドアロケータのリセット
+	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();	//キューをクリア
+
+	// コマンドリストのリセット
+	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+
+
+	// ここまで追記。
 
 	// テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
 	proTexture.metadata_ = metadata_;
