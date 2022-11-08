@@ -92,7 +92,7 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 	srvDesc.Format = metadata_.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MipLevels = UINT_MAX;
 	// ヒープにシェーダーリソースビュー生成
 	Engine::Ins()->device_.dev_->CreateShaderResourceView(
 		texbuff.Get(),
@@ -132,11 +132,13 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 	// ロードしていなかったらロードする
 	DirectX::TexMetadata metadata_;
 	DirectX::ScratchImage scratchImg_;
-	HRESULT result = LoadFromWICFile(
-		proTexture.filePath_,
-		DirectX::WIC_FLAGS_NONE,
-		&metadata_, scratchImg_
-	);
+	HRESULT result = LoadFromDDSFile(proTexture.filePath_, DDS_FLAGS_NONE, &metadata_, scratchImg_);
+	if (FAILED(result)) {
+		result = LoadFromWICFile(proTexture.filePath_, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata_, scratchImg_);
+	}
+	if (FAILED(result)) {
+		assert(0);
+	}
 	const DirectX::Image* img = scratchImg_.GetImage(0, 0, 0);
 
 	// リソース設定
@@ -149,7 +151,7 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 
 	// テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
-	CD3DX12_HEAP_PROPERTIES texHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_WRITE_BACK, D3D12_MEMORY_POOL_L0);
+	CD3DX12_HEAP_PROPERTIES texHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
 	result = Engine::Ins()->device_.dev_->CreateCommittedResource(&texHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&texresDesc,
@@ -181,7 +183,7 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 	srvDesc.Format = metadata_.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MipLevels = UINT_MAX;
 	// ヒープにシェーダーリソースビュー生成
 	Engine::Ins()->device_.dev_->CreateShaderResourceView(
 		texbuff.Get(),
