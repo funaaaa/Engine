@@ -139,38 +139,38 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 	proTexture.filePath_ = FileName;
 
 	//// ロードしていなかったらロードする
-	//DirectX::TexMetadata metadata_;
-	//DirectX::ScratchImage scratchImg_;
+	//DirectX::TexMetadata metadata;
+	//DirectX::ScratchImage scratchImg;
 	//HRESULT result = LoadFromWICFile(
 	//	FileName,
 	//	DirectX::WIC_FLAGS_NONE,
-	//	&metadata_, scratchImg_
+	//	&metadata, scratchImg
 	//);
 
-	DirectX::TexMetadata metadata_;
-	DirectX::ScratchImage scratchImg_;
-	HRESULT result = LoadFromDDSFile(FileName, DDS_FLAGS_NONE, &metadata_, scratchImg_);
+	DirectX::TexMetadata metadata;
+	DirectX::ScratchImage scratchImg;
+	HRESULT result = LoadFromDDSFile(FileName, DDS_FLAGS_NONE, &metadata, scratchImg);
 	if (FAILED(result)) {
-		result = LoadFromWICFile(FileName, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata_, scratchImg_);
+		result = LoadFromWICFile(FileName, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
 	}
 	if (FAILED(result)) {
 		assert(0);
 	}
 
-	const DirectX::Image* img = scratchImg_.GetImage(0, 0, 0);
+	const DirectX::Image* img = scratchImg.GetImage(0, 0, 0);
 
 	// MipMapを取得。
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 	result = PrepareUpload(
-		Engine::Ins()->device_.dev_.Get(), img, scratchImg_.GetImageCount(), metadata_, subresources);
+		Engine::Ins()->device_.dev_.Get(), img, scratchImg.GetImageCount(), metadata, subresources);
 
 	// リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-		metadata_.format,
-		static_cast<UINT>(metadata_.width),
-		static_cast<UINT>(metadata_.height),
-		static_cast<UINT16>(metadata_.arraySize),
-		static_cast<UINT16>(metadata_.mipLevels));
+		metadata.format,
+		static_cast<UINT>(metadata.width),
+		static_cast<UINT>(metadata.height),
+		static_cast<UINT16>(metadata.arraySize),
+		static_cast<UINT16>(metadata.mipLevels));
 	texresDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
 
 	// テクスチャバッファの生成
@@ -186,13 +186,13 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 
 	// ここから追記。
 
-	WriteTextureData(texresDesc, metadata_, img, texbuff, subresources);
+	WriteTextureData(texresDesc, metadata, img, texbuff, subresources);
 
 	// ここまで追記。
 
 	// テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
-	proTexture.metadata_ = metadata_;
-	proTexture.scratchImg_ = &scratchImg_;
+	proTexture.metadata_ = metadata;
+	proTexture.scratchImg_ = &scratchImg;
 	proTexture.texBuff_ = texbuff;
 	texture_.emplace_back(proTexture);
 	descriptorHeadMgrIndex_.emplace_back(DescriptorHeapMgr::Ins()->GetHead());
@@ -202,10 +202,10 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	// シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata_.format;
+	srvDesc.Format = metadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = metadata_.mipLevels;
+	srvDesc.Texture2D.MipLevels = metadata.mipLevels;
 	// ヒープにシェーダーリソースビュー生成
 	Engine::Ins()->device_.dev_->CreateShaderResourceView(
 		texbuff.Get(),
@@ -243,36 +243,36 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 	proTexture.filePath_ = proTexture.filePathP_.data();
 
 	// ロードしていなかったらロードする
-	DirectX::TexMetadata metadata_;
-	DirectX::ScratchImage scratchImg_;
+	DirectX::TexMetadata metadata;
+	DirectX::ScratchImage scratchImg;
 	bool isDDS = false;
-	HRESULT result = LoadFromDDSFile(proTexture.filePath_, DDS_FLAGS_NONE, &metadata_, scratchImg_);
+	HRESULT result = LoadFromDDSFile(proTexture.filePath_, DDS_FLAGS_NONE, &metadata, scratchImg);
 	isDDS = result == S_OK;
 	if (FAILED(result)) {
-		result = LoadFromWICFile(proTexture.filePath_, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata_, scratchImg_);
+		result = LoadFromWICFile(proTexture.filePath_, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
 	}
 	if (FAILED(result)) {
 		assert(0);
 	}
-	const DirectX::Image* img = scratchImg_.GetImage(0, 0, 0);
+	const DirectX::Image* img = scratchImg.GetImage(0, 0, 0);
 
 	// DDSだったらMipMapを取得。
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 	if (isDDS) {
 
 		result = PrepareUpload(
-			Engine::Ins()->device_.dev_.Get(), img, scratchImg_.GetImageCount(), metadata_, subresources);
+			Engine::Ins()->device_.dev_.Get(), img, scratchImg.GetImageCount(), metadata, subresources);
 
 
 	}
 
 	// リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
-		metadata_.format,
-		static_cast<UINT>(metadata_.width),
-		static_cast<UINT>(metadata_.height),
-		static_cast<UINT16>(metadata_.arraySize),
-		static_cast<UINT16>(metadata_.mipLevels));
+		metadata.format,
+		static_cast<UINT>(metadata.width),
+		static_cast<UINT>(metadata.height),
+		static_cast<UINT16>(metadata.arraySize),
+		static_cast<UINT16>(metadata.mipLevels));
 
 	// テクスチャバッファの生成
 	Microsoft::WRL::ComPtr<ID3D12Resource> texbuff = nullptr;
@@ -287,13 +287,13 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 
 	// ここから
 
-	WriteTextureData(texresDesc, metadata_, img, texbuff, subresources);
+	WriteTextureData(texresDesc, metadata, img, texbuff, subresources);
 
 	// ここまで追記。
 
 	// テクスチャ配列の最後尾にロードしたテクスチャ情報を記録
-	proTexture.metadata_ = metadata_;
-	proTexture.scratchImg_ = &scratchImg_;
+	proTexture.metadata_ = metadata;
+	proTexture.scratchImg_ = &scratchImg;
 	proTexture.texBuff_ = texbuff;
 	texture_.emplace_back(proTexture);
 	descriptorHeadMgrIndex_.emplace_back(DescriptorHeapMgr::Ins()->GetHead());
@@ -303,10 +303,10 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	// シェーダーリソースビューの生成
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata_.format;
+	srvDesc.Format = metadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = metadata_.mipLevels;
+	srvDesc.Texture2D.MipLevels = metadata.mipLevels;
 	// ヒープにシェーダーリソースビュー生成
 	Engine::Ins()->device_.dev_->CreateShaderResourceView(
 		texbuff.Get(),
