@@ -50,12 +50,6 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 
 		memcpy(uploadStart, sourceStart, sourceSlicePtich);
 
-		//for (uint32_t height = 0; height < footprint[mip].Footprint.Height; ++height) {
-
-		//	memcpy(uploadStart + height * footprint[mip].Footprint.RowPitch, sourceStart + height * sourcePtich, sourcePtich);
-
-		//}
-
 	}
 
 	iUploadBuffer->Unmap(0, nullptr);
