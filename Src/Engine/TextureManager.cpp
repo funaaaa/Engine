@@ -46,9 +46,13 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 
 		uint8_t* uploadStart = reinterpret_cast<uint8_t*>(ptr) + footprint[mip].Offset;
 		const void* sourceStart = Subresource[mip].pData;
-		uint32_t sourceSlicePtich = Subresource[mip].SlicePitch;
+		uint32_t sourceRowPtich = Subresource[mip].RowPitch;
 
-		memcpy(uploadStart, sourceStart, sourceSlicePtich);
+		for (uint32_t height = 0; height < footprint[mip].Footprint.Height; ++height) {
+
+			memcpy(uploadStart + height * footprint[mip].Footprint.RowPitch, reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(sourceStart) + height * sourceRowPtich), sourceRowPtich);
+
+		}
 
 	}
 
