@@ -3,6 +3,7 @@
 #include "DescriptorHeapMgr.h"
 #include <array>
 #include <DirectXTex/DirectXTexDDS.cpp>
+#include <cassert>
 
 TextureManager::TextureManager() {
 }
@@ -13,9 +14,9 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 	// Footprint(コピー可能なリソースのレイアウト)を取得。
 	std::array<D3D12_PLACED_SUBRESOURCE_FOOTPRINT, 16> footprint;
 	UINT64 totalBytes = 0;
-	UINT64 rowSizeInBytes = 0;
-	Engine::Ins()->device_.dev_->GetCopyableFootprints(&TexresDesc, 0, MetaData.mipLevels, 0, footprint.data(), nullptr, &rowSizeInBytes, &totalBytes);
-	totalBytes = rowSizeInBytes * TexresDesc.Height;
+	std::array<UINT64, 16> rowSizeInBytes = { 0 };
+	std::array<UINT, 16> numRow = { 0 };
+	Engine::Ins()->device_.dev_->GetCopyableFootprints(&TexresDesc, 0, MetaData.mipLevels, 0, footprint.data(), numRow.data(), rowSizeInBytes.data(), &totalBytes);
 
 	// Upload用のバッファを作成する。
 	D3D12_RESOURCE_DESC desc;
@@ -40,17 +41,18 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 	iUploadBuffer->Map(0, nullptr, &ptr);
 
 	// 1ピクセルのサイズ
-	UINT pixelSize = rowSizeInBytes / MetaData.width;
+	//UINT pixelSize = rowSizeInBytes / MetaData.width;
 
 	for (uint32_t mip = 0; mip < MetaData.mipLevels; ++mip) {
 
+		assert(Subresource[mip].RowPitch == rowSizeInBytes[mip]);
+		assert(Subresource[mip].RowPitch <= footprint[mip].Footprint.RowPitch);
+
 		uint8_t* uploadStart = reinterpret_cast<uint8_t*>(ptr) + footprint[mip].Offset;
-		const void* sourceStart = Subresource[mip].pData;
-		uint32_t sourceRowPtich = Subresource[mip].RowPitch;
 
-		for (uint32_t height = 0; height < footprint[mip].Footprint.Height; ++height) {
+		for (uint32_t height = 0; height < numRow[mip]; ++height) {
 
-			memcpy(uploadStart + height * footprint[mip].Footprint.RowPitch, reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(sourceStart) + height * sourceRowPtich), sourceRowPtich);
+			memcpy(uploadStart + height * footprint[mip].Footprint.RowPitch, reinterpret_cast<const void*>(reinterpret_cast<uintptr_t>(Subresource[mip].pData) + height * Subresource[mip].RowPitch), Subresource[mip].RowPitch);
 
 		}
 
@@ -157,12 +159,14 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 		assert(0);
 	}
 
-	const DirectX::Image* img = scratchImg.GetImage(0, 0, 0);
+	const DirectX::Image* img = scratchImg.GetImages();
 
 	// MipMapを取得。
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 	result = PrepareUpload(
 		Engine::Ins()->device_.dev_.Get(), img, scratchImg.GetImageCount(), metadata, subresources);
+
+	auto pixelSize = scratchImg.GetPixelsSize();
 
 	// リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
@@ -245,9 +249,7 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 	// ロードしていなかったらロードする
 	DirectX::TexMetadata metadata;
 	DirectX::ScratchImage scratchImg;
-	bool isDDS = false;
 	HRESULT result = LoadFromDDSFile(proTexture.filePath_, DDS_FLAGS_NONE, &metadata, scratchImg);
-	isDDS = result == S_OK;
 	if (FAILED(result)) {
 		result = LoadFromWICFile(proTexture.filePath_, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
 	}
@@ -258,13 +260,8 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 
 	// DDSだったらMipMapを取得。
 	std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-	if (isDDS) {
-
-		result = PrepareUpload(
-			Engine::Ins()->device_.dev_.Get(), img, scratchImg.GetImageCount(), metadata, subresources);
-
-
-	}
+	result = PrepareUpload(
+		Engine::Ins()->device_.dev_.Get(), img, scratchImg.GetImageCount(), metadata, subresources);
 
 	// リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(

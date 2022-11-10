@@ -1072,11 +1072,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     float3 worldNormal = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3()));
 
     // テクスチャの色を取得。
-    float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
-    
-    //payload.color_ = texColor;
-    //payload.light_ = float3(1, 1, 1);
-    //return;
+    float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 1.0f);   
     
     // 法線マップの色を取得。
     float3 normalMapColor = (float3) normalTexture.SampleLevel(smp, vtx.uv, 0.0f);
