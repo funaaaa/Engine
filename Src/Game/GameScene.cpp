@@ -35,6 +35,9 @@
 GameScene::GameScene()
 {
 
+	TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/mip_colors_1024_chadwick.dds");
+
+
 	/*===== 初期化処理 =====*/
 
 	// 甲羅オブジェクトをセッティング。
