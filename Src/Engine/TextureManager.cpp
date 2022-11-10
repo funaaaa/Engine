@@ -45,14 +45,16 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 	for (uint32_t mip = 0; mip < MetaData.mipLevels; ++mip) {
 
 		uint8_t* uploadStart = reinterpret_cast<uint8_t*>(ptr) + footprint[mip].Offset;
-		uint8_t* sourceStart = Img->pixels + footprint[mip].Offset;
-		uint32_t sourcePtich = (footprint[mip].Footprint.Width * pixelSize);
+		const void* sourceStart = Subresource[mip].pData;
+		uint32_t sourceSlicePtich = Subresource[mip].SlicePitch;
 
-		for (uint32_t height = 0; height < footprint[mip].Footprint.Height; ++height) {
+		memcpy(uploadStart, sourceStart, sourceSlicePtich);
 
-			memcpy(uploadStart + height * footprint[mip].Footprint.RowPitch, sourceStart + height * sourcePtich, sourcePtich);
+		//for (uint32_t height = 0; height < footprint[mip].Footprint.Height; ++height) {
 
-		}
+		//	memcpy(uploadStart + height * footprint[mip].Footprint.RowPitch, sourceStart + height * sourcePtich, sourcePtich);
+
+		//}
 
 	}
 
@@ -61,20 +63,20 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 	// コピーする。
 	for (uint32_t mip = 0; mip < MetaData.mipLevels; ++mip) {
 
-		D3D12_TEXTURE_COPY_LOCATION copyLocation;
-		copyLocation.pResource = TexBuff.Get();
-		copyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-		copyLocation.SubresourceIndex = mip;
+		D3D12_TEXTURE_COPY_LOCATION copyDestLocation;
+		copyDestLocation.pResource = TexBuff.Get();
+		copyDestLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+		copyDestLocation.SubresourceIndex = mip;
 
-		D3D12_TEXTURE_COPY_LOCATION destLocation;
-		destLocation.pResource = iUploadBuffer.Get();
-		destLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-		destLocation.PlacedFootprint = footprint[mip];
+		D3D12_TEXTURE_COPY_LOCATION copySrcLocation;
+		copySrcLocation.pResource = iUploadBuffer.Get();
+		copySrcLocation.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+		copySrcLocation.PlacedFootprint = footprint[mip];
 
 		Engine::Ins()->mainGraphicsCmdList_->CopyTextureRegion(
-			&copyLocation,
+			&copyDestLocation,
 			0, 0, 0,
-			&destLocation,
+			&copySrcLocation,
 			nullptr
 		);
 
