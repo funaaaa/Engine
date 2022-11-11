@@ -381,10 +381,10 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
         barycentrics.x, barycentrics.y, barycentrics.z
     };
 
-    for (int i = 0; i < 3; ++i)
+    for (int index = 0; index < 3; ++index)
     {
-        uint index = indexBuffer[vertexId + i];
-        float w = weights[i];
+        uint index = indexBuffer[vertexId + index];
+        float w = weights[index];
         v.Position += vertexBuffer[index].Position * w;
         v.Normal += vertexBuffer[index].Normal * w;
         v.uv += vertexBuffer[index].uv * w;
@@ -398,6 +398,61 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
     v.subUV.y -= (int) v.subUV.y;
 
     return v;
+}
+
+// 指定の頂点の衝突したメッシュ上での重心座標を求める。
+float3 CalcVertexBarys(float3 VertexPos, StructuredBuffer<Vertex> VertexBuffer, StructuredBuffer<uint> IndexBuffer)
+{
+    
+    // 衝突したBLASのIndexを取得。
+    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
+    
+    // 衝突した三角形を取得。
+    float3 hitVertex[3];
+    for (int index = 0; index < 3; ++index)
+    {
+        uint index = IndexBuffer[vertexId + index];
+        hitVertex[index] = VertexBuffer[index].Position;
+
+    }
+    
+    // 取得した三角形の面積を求める。
+    float area = length(cross(hitVertex[2] - hitVertex[0], hitVertex[1] - hitVertex[0])) / 2.0f;
+
+	// 重心座標を求める。
+    float3 bary;
+    bary.x = length(cross(hitVertex[0] - VertexPos, hitVertex[1] - VertexPos)) / 2.0f / area;
+    bary.y = length(cross(hitVertex[1] - VertexPos, hitVertex[2] - VertexPos)) / 2.0f / area;
+    bary.z = length(cross(hitVertex[2] - VertexPos, hitVertex[0] - VertexPos)) / 2.0f / area;
+
+    return bary;
+    
+}
+
+// 重心座標を指定して衝突したメッシュでのUVを求める。
+float2 CalcUVByBary(float3 Bary, StructuredBuffer<Vertex> VertexBuffer, StructuredBuffer<uint> IndexBuffer)
+{
+    
+    // 衝突したBLASのIndexを取得。
+    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
+    
+    // 指定された重心座標を配列に直す。
+    float weights[3] =
+    {
+        Bary.x, Bary.y, Bary.z
+    };
+    
+    // UV
+    float2 uv = float2(0, 0);
+    for (int index = 0; index < 3; ++index)
+    {
+        uint index = IndexBuffer[vertexId + index];
+        float w = weights[index];
+        uv += VertexBuffer[index].uv * w;
+    }
+    
+    return uv;
+    
 }
 
 void GetHitMeshInfo(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer, inout Vertex meshInfo[3])

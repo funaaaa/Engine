@@ -1070,9 +1070,65 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     uint instanceID = InstanceID();
     float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     float3 worldNormal = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3()));
+    
+    
+    
+    // MipLevel計算処理
+    //float2 ddxUV;
+    //float2 ddyUV;
+    //{
+        
+    //    // レイの発射ベクトルを求めるのに必要な変数たち
+    //    matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
+    //    matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
+    //    float2 dims = float2(DispatchRaysDimensions().xy);
+    //    float aspect = dims.x / dims.y;
+        
+    //    // 現在のレイからX+方向の発射ベクトル
+    //    uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
+    //    float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
+    //    float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
+    //    float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
+        
+    //    // 現在のレイからY+方向の発射ベクトル
+    //    launchIndex = DispatchRaysIndex().xy + uint2(0, 1);
+    //    d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
+    //    target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
+    //    float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
+        
+    //    // 現在の衝突地点の法線方向を向いた平面を求めるための係数dimensionを求める。
+    //    float dimension = -dot(worldNormal, worldPos);
+        
+    //    // レイの射出地点。
+    //    float worldRayOrigin = WorldRayOrigin();
+        
+    //    // ベクトルXが平面に当たるまでの長さと衝突地点を求める。
+    //    float lengthX = (-dot(worldNormal, worldRayOrigin) - dimension) / dot(worldNormal, rayDirX);
+    //    float3 impPosX = rayDirX * lengthX + worldRayOrigin;
+        
+    //    // ベクトルYが平面に当たるまでの長さと衝突地点を求める。
+    //    float lengthY = (-dot(worldNormal, worldRayOrigin) - dimension) / dot(worldNormal, rayDirY);
+    //    float3 impPosY = rayDirX * lengthY + worldRayOrigin;
+        
+    //    // XYの重心座標を求める。
+    //    float3 baryX = CalcVertexBarys(impPosX, vertexBuffer, indexBuffer);
+    //    float3 baryY = CalcVertexBarys(impPosY, vertexBuffer, indexBuffer);
+        
+    //    // UVを求めて、その差分を取得する。
+    //    float2 uvX = CalcUVByBary(baryX, vertexBuffer, indexBuffer);
+    //    float2 uvY = CalcUVByBary(baryY, vertexBuffer, indexBuffer);
+    //    float3x2 uvMat = float3x2(vtx.uv, uvX, uvY);
+    //    ddxUV = mul(baryX, uvMat) - vtx.uv;
+    //    ddyUV = mul(baryY, uvMat) - vtx.uv;
+        
+    //}
+    
+    
+    
+    
 
     // テクスチャの色を取得。
-    float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 1.0f);   
+    float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
     
     // 法線マップの色を取得。
     float3 normalMapColor = (float3) normalTexture.SampleLevel(smp, vtx.uv, 0.0f);
