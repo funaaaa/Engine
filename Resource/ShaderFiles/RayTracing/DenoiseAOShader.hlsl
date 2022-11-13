@@ -1043,7 +1043,8 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         {
             
             // テクスチャの色を取得。
-            Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
+            Vertex meshInfo[3];
+            Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer, meshInfo);
             float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
         
             payload.impactAmount_ = texColor.a;
@@ -1066,7 +1067,8 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         return;
     }
     
-    Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
+    Vertex meshInfo[3];
+    Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer, meshInfo);
     uint instanceID = InstanceID();
     float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     float3 worldNormal = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3()));
@@ -1074,73 +1076,73 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     
     
     // MipLevel計算処理
-    //float2 ddxUV;
-    //float2 ddyUV;
-    //{
+    float2 ddxUV;
+    float2 ddyUV;
+    {
         
-    //    // レイの発射ベクトルを求めるのに必要な変数たち
-    //    matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
-    //    matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
-    //    float2 dims = float2(DispatchRaysDimensions().xy);
-    //    float aspect = dims.x / dims.y;
+        // レイの発射ベクトルを求めるのに必要な変数たち
+        matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
+        matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
+        float2 dims = float2(DispatchRaysDimensions().xy);
+        float aspect = dims.x / dims.y;
         
-    //    // 現在のレイからX+方向の発射ベクトル
-    //    uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
-    //    float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
-    //    float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-    //    float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
+        // 現在のレイからX+方向の発射ベクトル
+        uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
+        float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
+        float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
+        float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         
-    //    // 現在のレイからY+方向の発射ベクトル
-    //    launchIndex = DispatchRaysIndex().xy + uint2(0, 1);
-    //    d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
-    //    target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-    //    float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
+        // 現在のレイからY+方向の発射ベクトル
+        launchIndex = DispatchRaysIndex().xy + uint2(0, 1);
+        d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
+        target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
+        float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         
-    //    // 現在の衝突地点の法線方向を向いた平面を求めるための係数dimensionを求める。
-    //    float dimension = -dot(worldNormal, worldPos);
+        // レイの射出地点。
+        float3 worldRayOrigin = WorldRayOrigin() + (RayTMin() * WorldRayDirection());
         
-    //    // レイの射出地点。
-    //    float worldRayOrigin = WorldRayOrigin();
+        // 衝突したポリゴンの情報。
+        float3 triangleNormal = -normalize(cross(meshInfo[2].Position - meshInfo[0].Position, meshInfo[1].Position - meshInfo[0].Position));
         
-    //    // ベクトルXが平面に当たるまでの長さと衝突地点を求める。
-    //    float lengthX = (-dot(worldNormal, worldRayOrigin) - dimension) / dot(worldNormal, rayDirX);
-    //    float3 impPosX = rayDirX * lengthX + worldRayOrigin;
+        // ベクトルXが平面に当たるまでの長さと衝突地点を求める。
+        float lengthX = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirX);
+        float3 impPosX = rayDirX * lengthX + worldRayOrigin;
         
-    //    // ベクトルYが平面に当たるまでの長さと衝突地点を求める。
-    //    float lengthY = (-dot(worldNormal, worldRayOrigin) - dimension) / dot(worldNormal, rayDirY);
-    //    float3 impPosY = rayDirX * lengthY + worldRayOrigin;
+        // ベクトルYが平面に当たるまでの長さと衝突地点を求める。
+        float lengthY = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirY);
+        float3 impPosY = rayDirY * lengthY + worldRayOrigin;
         
-    //    // XYの重心座標を求める。
-    //    float3 baryX = CalcVertexBarys(impPosX, vertexBuffer, indexBuffer);
-    //    float3 baryY = CalcVertexBarys(impPosY, vertexBuffer, indexBuffer);
+        // XYの重心座標を求める。
+        float3 baryX = CalcVertexBarys(impPosX, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
+        float3 baryY = CalcVertexBarys(impPosY, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
         
-    //    // UVを求めて、その差分を取得する。
-    //    float2 uvX = CalcUVByBary(baryX, vertexBuffer, indexBuffer);
-    //    float2 uvY = CalcUVByBary(baryY, vertexBuffer, indexBuffer);
-    //    float3x2 uvMat = float3x2(vtx.uv, uvX, uvY);
-    //    ddxUV = mul(baryX, uvMat) - vtx.uv;
-    //    ddyUV = mul(baryY, uvMat) - vtx.uv;
+        // UVを求めて、その差分を取得する。
+        float2 uvX = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
+        float2 uvY = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
+        ddxUV = abs(uvX - vtx.uv);
+        ddyUV = abs(uvY - vtx.uv);
         
-    //}
-    
-    
-    
-    
+        
+    }
 
     // テクスチャの色を取得。
-    float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
+    float4 texColor;
+    if (gSceneParam.light.pointLight[0].pad.x)
+    {
+        texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
+    }
+    else
+    {
+        texColor = (float4) texture.SampleGrad(smp, vtx.uv, 0, 0);
+    }
     
     // 法線マップの色を取得。
-    float3 normalMapColor = (float3) normalTexture.SampleLevel(smp, vtx.uv, 0.0f);
+    float3 normalMapColor = (float3) normalTexture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
     
     // 法線マップの色とテクスチャの色が同じじゃなかったら法線マップの色を再取得。(法線マップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
     if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
     {
         worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
-        
-        // 当たったメッシュの情報を取得。
-        Vertex meshInfo[3];
-        GetHitMeshInfo(attrib, vertexBuffer, indexBuffer, meshInfo);
         
         // 接空間変換用
         float3 tan;
@@ -1200,7 +1202,8 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     attrib)
 {
         
-    Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer);
+    Vertex meshInfo[3];
+    Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer, meshInfo);
     float4 diffuse = texture.SampleLevel(smp, vtx.uv, 0);
     if (diffuse.w < 0.1f)
     {

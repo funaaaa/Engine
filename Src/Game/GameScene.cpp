@@ -35,10 +35,17 @@
 GameScene::GameScene()
 {
 
-	TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/mip_colors_1024_chadwick.dds");
-
-
 	/*===== 初期化処理 =====*/
+
+	Vec3 triangleNormal = Vec3(100, 100, 0).GetNormal();
+	Vec3 worldRayOrigin = Vec3(100, 100, 0);
+	Vec3 worldPosition = Vec3(0, 0, 0);
+	Vec3 rayDirX = Vec3(-100, -100, 0).GetNormal();
+
+	float lengthX = Vec3(-triangleNormal).Dot(worldRayOrigin - worldPosition) / triangleNormal.Dot(rayDirX);
+	Vec3 impPosX = rayDirX * lengthX + worldRayOrigin;
+
+
 
 	// 甲羅オブジェクトをセッティング。
 	ShellObjectMgr::Ins()->Setting();
@@ -451,6 +458,9 @@ void GameScene::InputImGUI()
 	ImGui::Text("Let's do three laps!");
 
 	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
+	bool isMip = RayEngine::Ins()->constBufferData_.light_.pointLight_[0].pad_.x;
+	ImGui::Checkbox("MipFlag", &isMip);
+	RayEngine::Ins()->constBufferData_.light_.pointLight_[0].pad_.x = isMip;
 
 	//// 太陽の移動速度を更新。
 	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
