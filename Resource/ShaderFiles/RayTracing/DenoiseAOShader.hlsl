@@ -376,31 +376,31 @@ void mainMS(inout Payload PayloadData)
     // 影響度をかけつつ色を保存。
     float3 mieColor = float3(1, 1, 1);
     payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-    payloadBuff.color_ += AtmosphericScattering(WorldRayOrigin() + WorldRayDirection() * RayTCurrent(), mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
+    payloadBuff.color_ += float3(0, 0, 0);
     payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
     payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
         
     // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
     payloadBuff.denoiseMask_ = float3(1, 1, 1);
         
-    // サンプリングした点の輝度を取得する。
-    float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
+    //// サンプリングした点の輝度を取得する。
+    //float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
         
-    // サンプリングした点が地上より下じゃなかったら。
-    if (t <= 0.9f)
-    {
+    //// サンプリングした点が地上より下じゃなかったら。
+    //if (t <= 0.9f)
+    //{
             
-        // サンプリングした輝度をもとに、暗かったら星空を描画する。
-        t = (1.0f - t);
-        if (t != 0.0f)
-        {
-            t = pow(t, 10.0f);
-            //t = pow(2.0f, 10.0f * t - 10.0f);
-        }
-        //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
-        //payloadBuff.color_ = saturate(payloadBuff.color_);
+    //    // サンプリングした輝度をもとに、暗かったら星空を描画する。
+    //    t = (1.0f - t);
+    //    if (t != 0.0f)
+    //    {
+    //        t = pow(t, 10.0f);
+    //        //t = pow(2.0f, 10.0f * t - 10.0f);
+    //    }
+    //    //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
+    //    //payloadBuff.color_ = saturate(payloadBuff.color_);
             
-    }
+    //}
         
     // 影響度を0にする。
     payloadBuff.impactAmount_ = 0.0f;
@@ -995,7 +995,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         float3 metalnessMapColor = (float3) metalnessTexture.SampleLevel(smp, Vtx.uv, 0.0f);
         float metal = metalness;
         float rougness = material[0].roughness_;
-        payloadBuff.roughnessOffset_ = rougness * 100.0f;
+        payloadBuff.roughnessOffset_ = rougness * 1500.0f;
         
         // metalnessマップの色とテクスチャの色が同じじゃなかったらmetallnessマップの色を再取得。(metalnessマップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
         if (!(TexColor.x == metalnessMapColor.x && TexColor.y == metalnessMapColor.y && TexColor.z == metalnessMapColor.z))
