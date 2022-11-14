@@ -37,6 +37,16 @@ GameScene::GameScene()
 
 	/*===== 初期化処理 =====*/
 
+	Vec3 triangleNormal = Vec3(100, 100, 0).GetNormal();
+	Vec3 worldRayOrigin = Vec3(100, 100, 0);
+	Vec3 worldPosition = Vec3(0, 0, 0);
+	Vec3 rayDirX = Vec3(-100, -100, 0).GetNormal();
+
+	float lengthX = Vec3(-triangleNormal).Dot(worldRayOrigin - worldPosition) / triangleNormal.Dot(rayDirX);
+	Vec3 impPosX = rayDirX * lengthX + worldRayOrigin;
+
+
+
 	// 甲羅オブジェクトをセッティング。
 	ShellObjectMgr::Ins()->Setting();
 
@@ -223,7 +233,7 @@ void GameScene::Update()
 	// ウィンドウの名前を更新。
 	//if (true) {
 
-		//FPS();
+	FPS();
 
 	//}
 	//else {
@@ -440,6 +450,7 @@ void GameScene::Input()
 }
 
 #include "BaseItem.h"
+#include "Character.h"
 void GameScene::InputImGUI()
 {
 

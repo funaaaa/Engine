@@ -108,7 +108,8 @@ struct Payload
     float3 denoiseMask_; // デノイズのマスクの色情報
     uint alphaCounter_; // 薄いアルファのオブジェクトに当たった数
     uint isCullingAlpha_; // 薄いアルファのオブジェクトに一定以上当たったら次からアルファを無効化するフラグ。
-    float2 pad_;
+    float roughnessOffset_;
+    float pad_;
 };
 
 struct MyAttribute
@@ -210,6 +211,8 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     payloadData.light_ = float3(0, 0, 0);
     payloadData.isCullingAlpha_ = false;
     payloadData.alphaCounter_ = 0;
+    payloadData.roughnessOffset_ = 1.0f;
+    payloadData.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -250,6 +253,8 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;
+    payload.roughnessOffset_ = 1.0f;
+    payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -294,6 +299,8 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;
+    payload.roughnessOffset_ = 1.0f;
+    payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -370,7 +377,7 @@ uint InitRand(uint Val0, uint Val1, uint Backoff = 16)
 
 
 // 当たった位置の情報を取得する関数
-Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
+Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer, inout Vertex meshInfo[3])
 {
     Vertex v = (Vertex) 0;
     float3 barycentrics = CalcBarycentrics(attrib.barys);
@@ -381,46 +388,41 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
         barycentrics.x, barycentrics.y, barycentrics.z
     };
 
-    for (int i = 0; i < 3; ++i)
+    for (int index = 0; index < 3; ++index)
     {
-        uint index = indexBuffer[vertexId + i];
-        float w = weights[i];
-        v.Position += vertexBuffer[index].Position * w;
-        v.Normal += vertexBuffer[index].Normal * w;
-        v.uv += vertexBuffer[index].uv * w;
-        v.subUV += vertexBuffer[index].subUV * w;
+        uint vtxIndex = indexBuffer[vertexId + index];
+        float w = weights[index];
+        v.Position += vertexBuffer[vtxIndex].Position * w;
+        v.Normal += vertexBuffer[vtxIndex].Normal * w;
+        v.uv += vertexBuffer[vtxIndex].uv * w;
+        v.subUV += vertexBuffer[vtxIndex].subUV * w;
+        
+        // メッシュの情報を保存。
+        meshInfo[index].Position = mul(float4(vertexBuffer[vtxIndex].Position, 1), ObjectToWorld4x3());
+        meshInfo[index].Normal = normalize(mul(vertexBuffer[vtxIndex].Normal, (float3x3) ObjectToWorld4x3()));
+        meshInfo[index].uv = vertexBuffer[vtxIndex].uv;
     }
-    
-    v.uv.x -= (int) v.uv.x;
-    v.uv.y -= (int) v.uv.y;
-    
-    v.subUV.x -= (int) v.subUV.x;
-    v.subUV.y -= (int) v.subUV.y;
 
     return v;
 }
 
-void GetHitMeshInfo(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer, inout Vertex meshInfo[3])
+// 指定の頂点の衝突したメッシュ上での重心座標を求める。
+float3 CalcVertexBarys(float3 HitVertex, float3 VertexA, float3 VertexB, float3 VertexC)
 {
     
-    Vertex v = (Vertex) 0;
-    float3 barycentrics = CalcBarycentrics(attrib.barys);
-    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
-
-    float weights[3] =
-    {
-        barycentrics.x, barycentrics.y, barycentrics.z
-    };
-
-    for (int i = 0; i < 3; ++i)
-    {
-        uint index = indexBuffer[vertexId + i];
-        
-        meshInfo[i].Position = vertexBuffer[index].Position;
-        meshInfo[i].Normal = vertexBuffer[index].Normal;
-        meshInfo[i].uv = vertexBuffer[index].uv;
-       
-    }
+    float3 e0 = VertexB - VertexA;
+    float3 e1 = VertexC - VertexA;
+    float3 e2 = HitVertex - VertexA;
+    float d00 = dot(e0, e0);
+    float d01 = dot(e0, e1);
+    float d11 = dot(e1, e1);
+    float d20 = dot(e2, e0);
+    float d21 = dot(e2, e1);
+    float denom = 1.0 / (d00 * d11 - d01 * d01);
+    float v = (d11 * d20 - d01 * d21) * denom;
+    float w = (d00 * d21 - d01 * d20) * denom;
+    float u = 1.0 - v - w;
+    return float3(u, v, w);
     
 }
 

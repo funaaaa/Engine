@@ -429,7 +429,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 	bool prevFrameDisplayRocket = isDisplayRocket_;
 	if (isGetItem_ || isUseItem_) {
 
-		rocketEasingTimer_ = 0;
+		rocketEasingTimer_ = 0.1f;
 		rocketAddRotationY_ = ADD_ROTATION_Y;
 
 		if (!isDisplayRocket_) {
@@ -447,6 +447,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 		// イージング量を求める。
 		float easingAmount = FEasing::EaseOutQuint(rocketEasingTimer_);
 		float scale = MAX_SCALE * easingAmount;
+		if (scale <= 0) scale = 0.01f;
 		for (auto& index : rocketIns_) {
 			index.lock()->ChangeScale(Vec3(scale, scale, scale));
 		}
@@ -457,6 +458,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 		// イージング量を求める。
 		float easingAmount = FEasing::EaseInQuint(rocketEasingTimer_);
 		float scale = MAX_SCALE - MAX_SCALE * easingAmount;
+		if (scale <= 0) scale = 0.01f;
 		for (auto& index : rocketIns_) {
 			index.lock()->ChangeScale(Vec3(scale, scale, scale));
 		}
