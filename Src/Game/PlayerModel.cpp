@@ -34,29 +34,34 @@ void PlayerModel::Load(COLOR ColorID, CHARA Chara)
 		break;
 	}
 
-	PolygonInstanceRegister::SHADER_ID shaderID;
+	PolygonInstanceRegister::SHADER_ID shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 	switch (Chara)
 	{
 	case PlayerModel::CHARA::PLAYER:
 		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	case PlayerModel::CHARA::GHOST:
-		shaderID = PolygonInstanceRegister::SHADER_ID::REFRACTION;
+		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	case PlayerModel::CHARA::AI:
 		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	default:
+		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	}
 
 	// 車のボディをロード
 	carBodyBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"body.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carBodyBlas_.lock()->GetMaterial().roughness_ = 0.8f;
+	carBodyBlas_.lock()->IsChangeMaterial();
 	carBodyInstance = PolygonInstanceRegister::Ins()->CreateInstance(carBodyBlas_, shaderID);
 	carBodyInstance.lock()->AddScale(Vec3(25, 25, 25));
 
 	// 車のバンパーをロード
 	carBumperBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"bumper.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carBumperBlas_.lock()->GetMaterial().roughness_ = 1.0f;
+	carBumperBlas_.lock()->IsChangeMaterial();
 	carBumperInstance = PolygonInstanceRegister::Ins()->CreateInstance(carBumperBlas_, shaderID);
 	carBumperInstance.lock()->SetParentInstance(carBodyInstance);
 

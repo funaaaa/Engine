@@ -19,7 +19,7 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	static const int MAX_INSTANCE = 256;	// インスタンスの最大数。
+	static const int MAX_INSTANCE = 512;	// インスタンスの最大数。
 
 
 private:
@@ -27,6 +27,13 @@ private:
 	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance_;
 
 	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc_;
+
+	struct MatData {
+		DirectX::XMMATRIX matRot_;
+		DirectX::XMMATRIX matScale_;
+		DirectX::XMMATRIX matTrans_;
+	};
+	std::array<MatData, MAX_INSTANCE> savedInstanceData_;
 
 	using XMMATRIX = DirectX::XMMATRIX;
 
@@ -43,6 +50,7 @@ public:
 
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
+	void CalWorldMat(int Index);
 
 	// インスタンスを破棄。
 	void DestroyInstance(std::weak_ptr<PolygonMeshInstance> Instance);

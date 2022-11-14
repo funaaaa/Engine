@@ -35,13 +35,13 @@ public:
 		~Node() {};
 
 	public:
-		std::wstring name;
 		DirectX::XMVECTOR translation;
 		DirectX::XMVECTOR rotation;
 		DirectX::XMVECTOR scale;
 		DirectX::XMMATRIX mtxLocal;
 		DirectX::XMMATRIX mtxWorld;
 		std::vector<int> children;
+		std::wstring name;
 		Node* parent = nullptr;
 		int meshIndex = -1;
 	};

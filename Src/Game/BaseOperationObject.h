@@ -25,14 +25,14 @@ public:
 		float accelerationRate_;	// 加速の割合
 		float handleDriveRate_;		// 左右のハンドル操作の割合 -1 ~ 1
 		bool isDrift_;				// ドリフト状態か
+		bool isDriftTrigger_;		// ドリフト状態のトリガーか
 		bool isShotBehind_;			// アイテムを後ろに投げる状態か。
 		bool isUseItemTrigger_;		// アイテムを使用するか。
 		bool isUseItemRelease_;		// アイテムを使用するか。
 		bool isGetItem_;			// アイテムを取得したかどうか
-		bool isJumpActionTrigger_;	// ジャンプアクションボタンのトリガー判定があるかどうか。
 
-		Operation() : accelerationRate_(0), handleDriveRate_(0), isDrift_(false), isShotBehind_(false), isUseItemTrigger_(false), isUseItemRelease_(false), isGetItem_(false), isJumpActionTrigger_(false) {};
-		bool CheckInput() { return accelerationRate_ != 0 || handleDriveRate_ != 0 || isDrift_ || isShotBehind_ || isUseItemTrigger_ || isUseItemRelease_ || isGetItem_ || isJumpActionTrigger_; }
+		Operation() : accelerationRate_(0), handleDriveRate_(0), isDrift_(false), isShotBehind_(false), isUseItemTrigger_(false), isUseItemRelease_(false), isGetItem_(false), isDriftTrigger_(false) {};
+		bool CheckInput() { return accelerationRate_ != 0 || handleDriveRate_ != 0 || isDrift_ || isShotBehind_ || isUseItemTrigger_ || isUseItemRelease_ || isGetItem_ || isDriftTrigger_; }
 
 	};
 
@@ -42,9 +42,10 @@ public:
 		Vec3 pos_;
 		Vec3 forwradVec_;
 		bool isHitJumpBoostGimmick_;
+		bool isPrevFrameDrift_;
 		BaseItem::ItemID hasItemID_;
 
-		OperationInputData() :pos_({}), forwradVec_(Vec3(0, 0, 1)), isHitJumpBoostGimmick_(false), hasItemID_(BaseItem::ItemID::NONE) {};
+		OperationInputData() :pos_({}), forwradVec_(Vec3(0, 0, 1)), isHitJumpBoostGimmick_(false), isPrevFrameDrift_(false), hasItemID_(BaseItem::ItemID::NONE) {};
 
 	};
 

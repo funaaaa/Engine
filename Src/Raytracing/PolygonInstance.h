@@ -49,6 +49,7 @@ public:
 
 	// Ins¶¬ŠÖ”
 	D3D12_RAYTRACING_INSTANCE_DESC CreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex);
+	D3D12_RAYTRACING_INSTANCE_DESC ReCreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex);
 
 	// ˆÚ“®(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddTrans(const Vec3& Pos);
@@ -70,6 +71,7 @@ public:
 	// Šg‘å(ˆø”‚ğ‰ÁZ)ŠÖ”
 	void AddScale(const Vec3& Scale);
 	DirectX::XMMATRIX GetScale() { return scaleMat_; }
+	Vec3 GetScaleVec3();
 
 	// Šg‘å(ˆø”‚ğ‘ã“ü)ŠÖ”
 	void ChangeScale(const Vec3& Scale);

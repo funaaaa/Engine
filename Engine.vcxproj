@@ -203,6 +203,7 @@
     <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
     <ClCompile Include="Src\Game\MugenStage.cpp" />
     <ClCompile Include="Src\Game\PlayerOperationObject.cpp" />
+    <ClCompile Include="Src\Game\RadialBlur.cpp" />
     <ClCompile Include="Src\Game\ShellItem.cpp" />
     <ClCompile Include="Src\Game\ShellObject.cpp" />
     <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
@@ -295,6 +296,7 @@
     <ClInclude Include="Src\Game\ItemBoxObject.h" />
     <ClInclude Include="Src\Game\MugenStage.h" />
     <ClInclude Include="Src\Game\PlayerOperationObject.h" />
+    <ClInclude Include="Src\Game\RadialBlur.h" />
     <ClInclude Include="Src\Game\ShellItem.h" />
     <ClInclude Include="Src\Game\ShellObject.h" />
     <ClInclude Include="Src\Game\ShellObjectMgr.h" />
@@ -353,6 +355,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Resource\ShaderFiles\RadialBlur.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
@@ -362,6 +374,24 @@
       </EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.4</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurX.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurY.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseFinal.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>

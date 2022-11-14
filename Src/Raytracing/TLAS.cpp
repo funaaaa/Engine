@@ -26,8 +26,8 @@ void TLAS::GenerateTLAS()
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.RaytracingAccelerationStructure.Location = tlasBuffer->GetGPUVirtualAddress();
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
-	Engine::Ins()->dev_->CreateShaderResourceView(nullptr, &srvDesc,
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	Engine::Ins()->device_.dev_->CreateShaderResourceView(nullptr, &srvDesc,
 		basicHeapHandle);
 
 	// ディスクリプタヒープをインクリメント
@@ -81,7 +81,7 @@ void TLAS::Update()
 	asDesc.ScratchAccelerationStructureData = tlasUpdateBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -147,7 +147,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -180,6 +180,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD);
+	instanceDescBuffer->SetName(L"InstanceDescBuffer");
 
 	// 生成したバッファにデータを書き込む。
 	WriteToMemory(instanceDescBuffer, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
@@ -195,7 +196,7 @@ void TLAS::SettingAccelerationStructure()
 
 	// メモリ量を求める関数を実行する。
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO tlasPrebuild{};
-	Engine::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
+	Engine::Ins()->device_.dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &tlasPrebuild
 	);
 
@@ -208,6 +209,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	scratchBuffer_->SetName(L"TLASScratchBuffer");
 
 	// TLAS用メモリ(バッファ)を確保。
 	tlasBuffer = CreateBuffer(
@@ -216,6 +218,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	tlasBuffer->SetName(L"TLASBuffer");
 
 	// TLAS更新用メモリ(バッファ)を確保。
 	tlasUpdateBuffer = CreateBuffer(
@@ -224,6 +227,7 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	tlasUpdateBuffer->SetName(L"TLASUpdateBuffer");
 
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 
@@ -232,7 +236,7 @@ void TLAS::SettingAccelerationStructure()
 	buildASDesc.DestAccelerationStructureData = tlasBuffer->GetGPUVirtualAddress();
 
 	// コマンドリストに積んで実行する。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr
 	);
 
@@ -250,32 +254,33 @@ void TLAS::CreateAccelerationStructure()
 
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer.Get());
-	Engine::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
-	Engine::Ins()->cmdList_->Close();
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->Close();
 
 	// TLASを構築。
 	//ID3D12CommandList* pCmdList[] = { Engine::Ins()->cmdList.Get() };
 
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { Engine::Ins()->cmdList_.Get() };
-	Engine::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
+	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
+	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->asFence_.Get(), ++Engine::Ins()->asfenceValue_);
 
 
 	/*-- リソースバリアを設定して書き込めないようにする --*/
 
-	//グラフィックコマンドリストの完了待ち
-	Engine::Ins()->cmdQueue_->Signal(Engine::Ins()->fence_.Get(), ++Engine::Ins()->fenceVal_);
-	if (Engine::Ins()->fence_->GetCompletedValue() != Engine::Ins()->fenceVal_) {
+	// グラフィックコマンドリストの完了待ち
+	UINT64 gpuFence = Engine::Ins()->asFence_->GetCompletedValue();
+	if (gpuFence != Engine::Ins()->asfenceValue_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		Engine::Ins()->fence_->SetEventOnCompletion(Engine::Ins()->fenceVal_, event);
+		Engine::Ins()->asFence_->SetEventOnCompletion(Engine::Ins()->asfenceValue_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	//コマンドアロケータのリセット
-	Engine::Ins()->cmdAllocator_->Reset();						//キューをクリア
+	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();						//キューをクリア
 
 	//コマンドリストのリセット
-	Engine::Ins()->cmdList_->Reset(Engine::Ins()->cmdAllocator_.Get(), nullptr);		//再びコマンドリストを貯める準備
+	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }

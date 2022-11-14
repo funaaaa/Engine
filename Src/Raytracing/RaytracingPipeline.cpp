@@ -152,7 +152,7 @@ void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& Input
 	pipelineConfig->Config(ReflectionCount);
 
 	// 生成する。
-	Engine::Ins()->dev_->CreateStateObject(
+	Engine::Ins()->device_.dev_->CreateStateObject(
 		subobjects, IID_PPV_ARGS(stateObject_.ReleaseAndGetAddressOf())
 	);
 
@@ -303,11 +303,14 @@ void RaytracingPipeline::MapHitGroupInfo()
 
 	/*===== HitGroupの情報を転送 =====*/
 
-	// 生成されたBLASの数。
-	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
-
 	void* mapped = nullptr;
-	shaderTable_->Map(0, nullptr, &mapped);
+	HRESULT result = shaderTable_->Map(0, nullptr, &mapped);
+	if (result != S_OK) {
+
+		int a = 0;
+		++a;
+
+	}
 	uint8_t* pStart = static_cast<uint8_t*>(mapped);
 
 	// Hit Group 用のシェーダーレコードを書き込み。
@@ -379,7 +382,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipeline::CreateBuffer(size_t s
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 	resDesc.Flags = flags;
 
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

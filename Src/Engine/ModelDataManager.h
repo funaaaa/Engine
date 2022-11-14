@@ -52,7 +52,7 @@ public:
 	struct ModelData {
 		std::string modelName_;				//モデルファイル名
 		Material material_;					//マテリアル
-		std::vector<unsigned short> index_;	//頂点インデックス
+		std::vector<UINT> index_;	//頂点インデックス
 		std::vector<Vertex> vertex_;			//頂点
 		Vec3 vertexMax_;	// 頂点における各軸の最大の位置
 		Vec3 vertexMin_;	// 頂点における各軸の最小の位置

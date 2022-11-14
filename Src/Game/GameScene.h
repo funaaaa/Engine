@@ -52,11 +52,6 @@ private:
 	std::shared_ptr<Sprite> maxRapCountUI_;
 	std::array<int, 11> numFontHandle_;
 
-	std::shared_ptr<Sprite> itemFrameUI_;
-	float itemFrameEasingTimer_;
-	const Vec3 ITEM_FRAME_OUT_POS = Vec3(128.0f, -200.0f, 1.0f);
-	const Vec3 ITEM_FRAME_IN_POS = Vec3(128.0f, 125.0f, 1.0f);
-
 	// 集中線
 	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
 
@@ -81,6 +76,7 @@ private:
 	// 太陽の角度
 	float sunAngle_;
 	float sunSpeed_;
+
 
 	// キャラ管理クラス
 	std::shared_ptr<CharacterMgr> characterMgr_;

@@ -77,6 +77,11 @@ void PolygonInstanceRegister::CalWorldMat()
 
 }
 
+void PolygonInstanceRegister::CalWorldMat(int Index)
+{
+	instance_[Index]->CalWorldMat(instanceDesc_[Index]);
+}
+
 void PolygonInstanceRegister::DestroyInstance(std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
@@ -113,12 +118,10 @@ void PolygonInstanceRegister::Display(std::weak_ptr<PolygonMeshInstance> Instanc
 
 	// 行列を保存しておく。
 	int index = Instance.lock()->GetInstanceIndex();
-	DirectX::XMMATRIX matRot = Instance.lock()->GetRotate();
-	DirectX::XMMATRIX matScale = Instance.lock()->GetScale();
-	DirectX::XMMATRIX matTrans = Instance.lock()->GetTrans();
+	DirectX::XMMATRIX matRot = savedInstanceData_[index].matRot_;
+	DirectX::XMMATRIX matScale = savedInstanceData_[index].matScale_;
+	DirectX::XMMATRIX matTrans = savedInstanceData_[index].matTrans_;
 	bool haveMeshCollisionData = Instance.lock()->GetHaveMeshCollisionData();
-
-	instanceDesc_[index] = instance_[index]->CreateInstance(BLASRegister::Ins()->GetBlasSpecificationIndex(instance_[index]->GetBLASIndex()), instance_[index]->GetShaderID(), haveMeshCollisionData, index);
 
 	// 保存していた行列をセット。
 	Instance.lock()->ChangeRotate(matRot);
@@ -126,6 +129,9 @@ void PolygonInstanceRegister::Display(std::weak_ptr<PolygonMeshInstance> Instanc
 	Instance.lock()->ChangeTrans(matTrans);
 
 	instance_[index]->CalWorldMat(instanceDesc_[index]);
+
+	instanceDesc_[index] = instance_[index]->ReCreateInstance(BLASRegister::Ins()->GetBlasSpecificationIndex(instance_[index]->GetBLASIndex()), instance_[index]->GetShaderID(), haveMeshCollisionData, index);
+
 
 }
 
@@ -135,12 +141,10 @@ void PolygonInstanceRegister::Display(int Index)
 	/*====== 非表示 ======*/
 
 	// 行列を保存しておく。
-	DirectX::XMMATRIX matRot = instance_[Index]->GetRotate();
-	DirectX::XMMATRIX matScale = instance_[Index]->GetScale();
-	DirectX::XMMATRIX matTrans = instance_[Index]->GetTrans();
+	DirectX::XMMATRIX matRot = savedInstanceData_[Index].matRot_;
+	DirectX::XMMATRIX matScale = savedInstanceData_[Index].matScale_;
+	DirectX::XMMATRIX matTrans = savedInstanceData_[Index].matTrans_;
 	bool haveMeshCollisionData = instance_[Index]->GetHaveMeshCollisionData();
-
-	instanceDesc_[Index] = instance_[Index]->CreateInstance(BLASRegister::Ins()->GetBlasSpecificationIndex(instance_[Index]->GetBLASIndex()), instance_[Index]->GetShaderID(), haveMeshCollisionData, Index);
 
 	// 保存していた行列をセット。
 	instance_[Index]->ChangeRotate(matRot);
@@ -149,12 +153,21 @@ void PolygonInstanceRegister::Display(int Index)
 
 	instance_[Index]->CalWorldMat(instanceDesc_[Index]);
 
+	instanceDesc_[Index] = instance_[Index]->ReCreateInstance(BLASRegister::Ins()->GetBlasSpecificationIndex(instance_[Index]->GetBLASIndex()), instance_[Index]->GetShaderID(), haveMeshCollisionData, Index);
+
+
 }
 
 void PolygonInstanceRegister::NonDisplay(std::weak_ptr<PolygonMeshInstance> Instance)
 {
 
 	/*====== 非表示 ======*/
+
+	CalWorldMat(Instance.lock()->GetInstanceIndex());
+
+	savedInstanceData_[Instance.lock()->GetInstanceIndex()].matRot_ = Instance.lock()->GetRotate();
+	savedInstanceData_[Instance.lock()->GetInstanceIndex()].matScale_ = Instance.lock()->GetScale();
+	savedInstanceData_[Instance.lock()->GetInstanceIndex()].matTrans_ = Instance.lock()->GetTrans();
 
 	instanceDesc_[Instance.lock()->GetInstanceIndex()] = {};
 
@@ -164,6 +177,12 @@ void PolygonInstanceRegister::NonDisplay(int Index)
 {
 
 	/*====== 非表示 ======*/
+
+	CalWorldMat(Index);
+
+	savedInstanceData_[Index].matRot_ = instance_[Index]->GetRotate();
+	savedInstanceData_[Index].matScale_ = instance_[Index]->GetScale();
+	savedInstanceData_[Index].matTrans_ = instance_[Index]->GetTrans();
 
 	instanceDesc_[Index] = {};
 

@@ -24,8 +24,6 @@ std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, c
 	int blasIndex_ = 0;
 	for (auto& index_ : blas_) {
 
-		if (isLoaded) break;
-
 		// 未生成だったら処理を飛ばす。
 		if (!index_->GetIsGenerate()) continue;
 
@@ -34,6 +32,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, c
 
 		isLoaded = true;
 		blasIndex_ = static_cast<int>(&index_ - &blas_[0]);
+		break;
 
 	}
 
@@ -69,7 +68,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, c
 
 	/*===== BLASを生成 =====*/
 
-
+	IsNewGenerate;
 	//// すでにロード済みかをチェックする。
 	//bool isLoaded = false;
 	//int blasIndex_ = 0;

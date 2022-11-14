@@ -12,10 +12,10 @@ void RayDescriptor::CreateStructuredSRV(Microsoft::WRL::ComPtr<ID3D12Resource> R
 	srvDesc.Buffer.StructureByteStride = Stride;
 
 	hCpu_ = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		descHeap_->GetCPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		descHeap_->GetCPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	hGpu_ = CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		descHeap_->GetGPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		descHeap_->GetGPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
-	Engine::Ins()->dev_->CreateShaderResourceView(Resource.Get(), &srvDesc, hCpu_);
+	Engine::Ins()->device_.dev_->CreateShaderResourceView(Resource.Get(), &srvDesc, hCpu_);
 
 }

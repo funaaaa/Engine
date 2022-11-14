@@ -22,7 +22,7 @@ void StageObjectMgr::Setting()
 
 }
 
-int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque)
+int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque, bool IsNewGenerate)
 {
 
 	/*===== ギミックを追加 =====*/
@@ -66,7 +66,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 	}
 
 	// Blasをロード
-	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, IsOpaque);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, IsOpaque, IsNewGenerate);
 	// Instanceを生成。
 	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, ShaderID, CollisionID == BaseStageObject::COLLISION_ID::MESH);
 
@@ -175,6 +175,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitItemBox_ = false;
 	output.isHitStepBoostGimmick_ = false;
 	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
+	output.resultPos_ = Input.targetPos_;
 
 	for (auto& index : objects_) {
 
@@ -224,6 +225,20 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 				output.isHitItemBox_ = true;
 
 			}
+
+		}
+		// 当たり判定が球だったら。
+		else if (indexCollisionID == BaseStageObject::COLLISION_ID::SPHERE) {
+
+			// 当たり判定を行う。
+			bool isHit = Vec3(Input.targetPos_ - index.first->GetInstance().lock()->GetPos()).Length() <= Input.targetSize_.x_ + index.first->GetInstance().lock()->GetScaleVec3().x_;
+
+			if (!isHit) continue;
+
+			// アイテムボックスを一時的に無効化。
+			index.first->Disable(180);
+
+			output.isHitItemBox_ = true;
 
 		}
 		// 当たり判定がMESHだったら。
@@ -396,6 +411,16 @@ void StageObjectMgr::ChangeInstanceShaderID(int Index, UINT ShaderID)
 
 }
 
+#include "BLASRegister.h"
+void StageObjectMgr::AssignmentUVToSubUV(int AssigningBLASIndex, int AssignedBLASIndex)
+{
+
+	/*===== 指定のBLASのUVを指定のBLASのSUBUVに代入する処理 =====*/
+
+	BLASRegister::Ins()->GetBLAS()[objects_[AssignedBLASIndex].first->GetBLASIndex()]->AssignUV(BLASRegister::Ins()->GetBLAS()[objects_[AssigningBLASIndex].first->GetBLASIndex()]->GetVertex());
+
+}
+
 BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID)
 {
 
@@ -538,7 +563,7 @@ BaseStage::ColliderOutput StageObjectMgr::Decision4Way(BaseStage::ColliderInput&
 		Vec3 pushBackVec = (Input.targetPos_ - impactPos).GetNormal();
 
 		// 法線方向に当たった分押し戻す。
-		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.z_;
+		Input.targetPos_ = impactPos + pushBackVec * Input.targetSize_.x_;
 		Output.resultPos_ = Input.targetPos_;
 		Output.upVec_ = Input.targetUpVec_;
 
@@ -699,13 +724,3 @@ void StageObjectMgr::RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3&
 	}
 
 }
-
-
-/*
-
-・甲羅を後ろに持つ機能を追加。
-・甲羅とプレイヤーの当たり判定を追加。
-　→当たった際のエフェクトも追加。
-・アイテムボックスを追加。
-
-*/

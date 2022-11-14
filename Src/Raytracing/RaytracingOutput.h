@@ -26,7 +26,7 @@ public:
 	void SetComputeRootDescriptorTalbe(int RootParamIndex);
 
 	// リソースバリア
-	void SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src);
+	void SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> CmdList = nullptr);
 
 	// ゲッタ
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetRaytracingOutput() { return rayTracingOutput_; }

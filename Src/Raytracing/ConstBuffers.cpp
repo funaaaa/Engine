@@ -41,40 +41,41 @@ void RayLightConstBufferData::Init()
 	dirLight_.lightColor_ = Vec3{ 1.0f,1.0f,1.0f };
 	dirLight_.lihgtDir_ = Vec3{ -0.5f,-0.2f,0 };
 	dirLight_.lihgtDir_.Normalize();
+	dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
 }
 
-void AtmosphericScatteringConstBufferData::Init()
-{
+//void AtmosphericScatteringConstBufferData::Init()
+//{
+//
+//	/*===== 大気散乱用定数バッファを初期化 =====*/
+//
+//	eSun_ = 20.0f;
+//	g_ = -0.999f;
+//	innerRadius_ = 10000.0f;
+//	outerRadius_ = 10250.0f;
+//	km_ = 0.005f;
+//	kr_ = 0.0025f;
+//	samples_ = 2.0f;
+//	aveHeight_ = 0.35f;
+//
+//}
 
-	/*===== 大気散乱用定数バッファを初期化 =====*/
-
-	eSun_ = 20.0f;
-	g_ = -0.999f;
-	innerRadius_ = 10000.0f;
-	outerRadius_ = 10250.0f;
-	km_ = 0.005f;
-	kr_ = 0.0025f;
-	samples_ = 2.0f;
-	aveHeight_ = 0.35f;
-
-}
-
-void DebugConstBufferData::Init()
-{
-
-	/*===== デバッグ用定数バッファを初期化 =====*/
-
-	seed_ = FHelper::GetRand(0, 1000);
-	isLightHitScene_ = false;
-	isNormalScene_ = false;
-	isMeshScene_ = false;
-	isNoAO_ = false;
-	isNoGI_ = false;
-	isGIOnlyScene_ = false;
-	isNoiseScene_ = false;
-
-}
+//void DebugConstBufferData::Init()
+//{
+//
+//	/*===== デバッグ用定数バッファを初期化 =====*/
+//
+//	seed_ = FHelper::GetRand(0, 1000);
+//	isLightHitScene_ = false;
+//	isNormalScene_ = false;
+//	isMeshScene_ = false;
+//	isNoAO_ = false;
+//	isNoGI_ = false;
+//	isGIOnlyScene_ = false;
+//	isNoiseScene_ = false;
+//
+//}
 
 void RayConstBufferData::Init()
 {
@@ -83,8 +84,8 @@ void RayConstBufferData::Init()
 
 	camera_.Init();
 	light_.Init();
-	as_.Init();
-	debug_.Init();
+	//as_.Init();
+	//debug_.Init();
 	alphaData_.Init();
 
 }

@@ -37,7 +37,9 @@ Pipeline::Pipeline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
-	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	Engine::Ins()->device_.dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	pipelinestate_->SetName(L"Pipline");
+
 }
 
 Pipeline::Pipeline(
@@ -75,7 +77,7 @@ Pipeline::Pipeline(
 	gpipeline.PS = CD3DX12_SHADER_BYTECODE(psBlob.Get());
 	SetPiplineDescDepth(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat, dxgiFormat2);
 	isMRT;
-	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	Engine::Ins()->device_.dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
 Pipeline::Pipeline(
@@ -119,26 +121,26 @@ Pipeline::Pipeline(
 
 	SetPiplineDesc(gpipeline, inputLayout, inputLayoutCount, rootparam_, rootparamCount_, blendID, cullMode, dxgiFormat);
 
-	Engine::Ins()->dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
+	Engine::Ins()->device_.dev_->CreateGraphicsPipelineState(&gpipeline, IID_PPV_ARGS(&pipelinestate_));
 }
 
 void Pipeline::SetPipline()
 {
 	//パイプラインステート設定コマンド
-	Engine::Ins()->cmdList_->SetPipelineState(pipelinestate_.Get());
+	Engine::Ins()->copyResourceCmdList_->SetPipelineState(pipelinestate_.Get());
 
 	//ルートシグネチャ設定コマンド
-	Engine::Ins()->cmdList_->SetGraphicsRootSignature(rootsignature_.Get());
+	Engine::Ins()->copyResourceCmdList_->SetGraphicsRootSignature(rootsignature_.Get());
 
 	//プリミティブ形状設定コマンド
 	if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE) {
-		Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	}
 	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE) {
-		Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 	}
 	else if (primitive_ == D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT) {
-		Engine::Ins()->cmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 	}
 }
 
@@ -200,7 +202,7 @@ void Pipeline::SetPiplineDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipelineDesc,
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = Engine::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
+	result = Engine::Ins()->device_.dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
 
 	//パイプラインにルートシグネチャをセット
 	gpipelineDesc.pRootSignature = rootsignature_.Get();
@@ -265,7 +267,7 @@ void Pipeline::SetPiplineDescDepth(D3D12_GRAPHICS_PIPELINE_STATE_DESC& gpipeline
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	HRESULT result = D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1_0, &rootSigBlob, &errorBlob);
 	//ルートシグネチャの生成
-	result = Engine::Ins()->dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
+	result = Engine::Ins()->device_.dev_->CreateRootSignature(0, rootSigBlob->GetBufferPointer(), rootSigBlob->GetBufferSize(), IID_PPV_ARGS(&rootsignature_));
 
 	//パイプラインにルートシグネチャをセット
 	gpipelineDesc.pRootSignature = rootsignature_.Get();

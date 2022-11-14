@@ -8,6 +8,7 @@
 #include <array>
 #include <DirectXTex/DirectXTex.h>
 #include <string>
+#include <DirectXTex/d3dx12.h>
 
 struct Texture {
 	LPCWSTR filePath_;								// ファイル名
@@ -40,4 +41,6 @@ public:
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSRV(int IDNum);
 	// 指定の番号のテクスチャを返す。
 	Texture GetTexture(int ID);
+private:
+	void WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX::TexMetadata& MetaData, const DirectX::Image* Img, Microsoft::WRL::ComPtr<ID3D12Resource>& TexBuff, std::vector<D3D12_SUBRESOURCE_DATA> Subresource);
 };

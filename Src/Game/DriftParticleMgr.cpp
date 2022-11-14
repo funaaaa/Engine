@@ -27,27 +27,6 @@ void DriftParticleMgr::Setting()
 	}
 
 
-	// パーティクル用のスフィアのBLASを生成する。
-	smokeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	smokeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smoke.dds"));
-	fireBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	fireBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/fireBall.dds"));
-	bigAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	bigAuraBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/bigAura.dds"));
-	smallAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	smallAuraBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smallAura.dds"));
-	driftParticleBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	driftParticleBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/driftParticle.dds"));
-	bigAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	bigAuraOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/bigAuraOrange.dds"));
-	smallAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	smallAuraOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smallAuraOrange.dds"));
-	driftParticleOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	driftParticleOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/driftParticleOrange.dds"));
-	jumpEffectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-	jumpEffectBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/jumpEffect.dds"));
-
-
 	for (auto& index : driftParticle_) {
 
 		index = std::make_shared<DriftParticle>();
@@ -80,6 +59,27 @@ void DriftParticleMgr::Init()
 		index->Init();
 
 	}
+
+	// パーティクル用のスフィアのBLASを生成する。
+	smokeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	smokeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smoke.dds"));
+	fireBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	fireBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/fireBall.dds"));
+	bigAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	bigAuraBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/bigAura.dds"));
+	smallAuraBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	smallAuraBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smallAura.dds"));
+	driftParticleBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	driftParticleBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/driftParticle.dds"));
+	bigAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	bigAuraOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/bigAuraOrange.dds"));
+	smallAuraOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	smallAuraOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/smallAuraOrange.dds"));
+	driftParticleOrangeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	driftParticleOrangeBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/driftParticleOrange.dds"));
+	jumpEffectBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/DriftParticle/", "plane.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	jumpEffectBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/DriftParticle/jumpEffect.dds"));
+
 
 }
 
@@ -242,7 +242,6 @@ void DriftParticleMgr::GenerateDriftParticle(std::weak_ptr<PolygonMeshInstance> 
 		particleGenerateDelay_ = 0;
 
 		// 生成する数
-		const int MAX = 5;
 		const int GENERATE_COUNT = static_cast<int>(5 * DriftRate);
 		int generateCounter = 0;
 

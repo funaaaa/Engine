@@ -86,6 +86,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				lineStream >> texcoord.y_;
 				// V方向反転
 				texcoord.y_ = 1.0f - texcoord.y_;
+
 				// テクスチャ座標データに追加
 				uv_.push_back(texcoord);
 			}
@@ -140,6 +141,8 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 				// マテリアルの読み込み
 				LoadObjMaterial(DirectryPath, DirectryPath + materialFileName, modelData_.at(modelData_.size() - 1), ObjectBuffer);
 				ObjectBuffer.material_ = modelData_[modelData_.size() - 1].material_;
+				ObjectBuffer.material_.textureHandle_ = ObjectBuffer.textureHandle_;
+				modelData_[modelData_.size() - 1].material_.textureHandle_ = ObjectBuffer.textureHandle_;
 
 			}
 		}
@@ -173,6 +176,7 @@ void ModelDataManager::LoadObj(std::string DirectryPath, std::string FileName, O
 	for (auto& index_ : modelData_[dataNumber].vertex_) {
 		ObjectBuffer.vertex_.push_back(index_);
 	}
+	ObjectBuffer.textureHandle_ = modelData_[dataNumber].material_.textureHandle_;
 	ObjectBuffer.material_ = modelData_[dataNumber].material_;
 	ObjectBuffer.vertexMin_ = modelData_[dataNumber].vertexMin_;
 	ObjectBuffer.vertexMax_ = modelData_[dataNumber].vertexMax_;
@@ -257,10 +261,10 @@ void ModelDataManager::LoadGLTF(std::wstring Path, ObjectData& ObjectBuffer) {
 	for (auto& index_ : modelData_[dataNumber].vertex_) {
 		ObjectBuffer.vertex_.push_back(index_);
 	}
+	ObjectBuffer.textureHandle_ = modelData_[dataNumber].material_.textureHandle_;
 	ObjectBuffer.material_ = modelData_[dataNumber].material_;
 	ObjectBuffer.vertexMin_ = modelData_[dataNumber].vertexMin_;
 	ObjectBuffer.vertexMax_ = modelData_[dataNumber].vertexMax_;
-	ObjectBuffer.textureHandle_ = modelData_[dataNumber].material_.textureHandle_;
 
 }
 

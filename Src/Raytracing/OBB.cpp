@@ -25,12 +25,12 @@ void OBB::Setting(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> I
 	// デバッグ用のOBB本体をロード。
 	ModelDataManager::ObjectData objectData;
 	int hitGroupID = static_cast<int>(HitGroupMgr::Ins()->DEF);
-	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[hitGroupID], { L"Resource/Game/black.png" }, false, true, true);
+	blasIndex_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Debug/", "wireFrameBox.obj", HitGroupMgr::Ins()->hitGroupNames[hitGroupID]);
 
 	blasIndex_.lock()->MulVec3Vertex(length_);
 	blasIndex_.lock()->Update();
 
-	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::DEF);
+	insIndex_ = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex_, PolygonInstanceRegister::SHADER_ID::TEXCOLOR);
 
 #endif
 
@@ -43,6 +43,7 @@ void OBB::SetMat(std::weak_ptr<PolygonMeshInstance> Instance)
 
 	pos_ = Instance.lock()->GetPos();
 	length_ = FHelper::MulMat(defLength_, Instance.lock()->GetScale());
+	length_ *= 1.5f;
 	DirectX::XMMATRIX matRot_ = Instance.lock()->GetRotate();
 	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);

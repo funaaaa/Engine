@@ -18,11 +18,11 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 Text
 
 	// 先頭ハンドルを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	// ディスクリプタヒープにUAVを確保
 	uavDesc_.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-	Engine::Ins()->dev_->CreateUnorderedAccessView(
+	Engine::Ins()->device_.dev_->CreateUnorderedAccessView(
 		rayTracingOutput_.Get(), nullptr, &uavDesc_, basicHeapHandle);
 
 	// UAVのディスクリプタヒープのインデックスを取得
@@ -38,11 +38,11 @@ void RaytracingOutput::Setting(DXGI_FORMAT Format, LPCWSTR BufferName, Vec2 Text
 void RaytracingOutput::SetComputeRootDescriptorTalbe(int RootParamIndex)
 {
 
-	Engine::Ins()->cmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex_));
+	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootDescriptorTable(RootParamIndex, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavDescriptorIndex_));
 
 }
 
-void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src)
+void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOURCE_STATES Src, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> CmdList)
 {
 
 	/*===== リソースバリアを遷移 =====*/
@@ -53,7 +53,16 @@ void RaytracingOutput::SetResourceBarrier(D3D12_RESOURCE_STATES Dst, D3D12_RESOU
 			Src)
 	};
 
-	Engine::Ins()->cmdList_->ResourceBarrier(1, barrierToUAV);
+	if (CmdList == nullptr) {
+
+		Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, barrierToUAV);
+
+	}
+	else {
+
+		CmdList->ResourceBarrier(1, barrierToUAV);
+
+	}
 
 }
 
@@ -84,7 +93,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingOutput::CreateTexture2D(UINT Wi
 	resDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 	resDesc.Flags = Flags;
 
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,

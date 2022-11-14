@@ -46,11 +46,12 @@ void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int U
 	psoDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 	psoDesc.NodeMask = 0;
 
-	auto hr = Engine::Ins()->dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipeline_));
+	auto hr = Engine::Ins()->device_.dev_->CreateComputePipelineState(&psoDesc, IID_PPV_ARGS(&pipeline_));
 	if (FAILED(hr)) {
 		//生成に失敗した
 		assert(0);
 	}
+	pipeline_->SetName(L"ComputePipline");
 
 }
 
@@ -65,7 +66,7 @@ void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, 
 		cmdList = CmdList;
 	}
 	else {
-		cmdList = Engine::Ins()->cmdList_;
+		cmdList = Engine::Ins()->mainGraphicsCmdList_;
 	}
 
 	// ルートシグネチャをセット。
