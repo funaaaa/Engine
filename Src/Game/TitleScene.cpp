@@ -55,15 +55,25 @@ void TitleScene::Init()
 	envMap3_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap3Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
 	envMap3_.lock()->AddScale(Vec3(300, 300, 300));
 
-	pbrTestBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	pbrTestBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/white.png"));
-	pbrTest_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
-	pbrTest_.lock()->AddScale(Vec3(30, 30, 30));
-	pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+	for (auto& height : pbrTestBlas_) {
+		for (auto& width : height) {
 
-	pbrTest2_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
-	pbrTest2_.lock()->AddScale(Vec3(30, 30, 30));
-	pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+			width = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+			width.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/red.png"));
+
+		}
+	}
+	for (int height = 0; height < 5; ++height) {
+		for (int width = 0; width < 5; ++width) {
+
+			pbrTest_[height][width] = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_[height][width], static_cast<int>(PolygonInstanceRegister::PBR_TEST));
+			pbrTest_[height][width].lock()->AddScale(Vec3(10, 10, 10));
+			pbrTest_[height][width].lock()->ChangeTrans(Vec3(0, 10000, 0));
+
+		}
+	}
+
+
 
 	// コーネルボックスをロード
 	cornellBoxGreenBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxGreen.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
@@ -85,6 +95,8 @@ void TitleScene::Init()
 	cameraAngle = 0;
 	invMapIndex_ = 0;
 	objectIndex_ = 3;
+
+	isStopRotate_ = false;
 
 }
 
@@ -112,16 +124,23 @@ void TitleScene::Update()
 
 	ImGui::Text("SelectObject");
 
-	ImGui::RadioButton("ReflectionObject", &objectIndex_, 2);
+	if (invMapIndex_ == 3) {
+		ImGui::RadioButton("SoftShadow", &objectIndex_, 2);
+	}
+	else {
+		ImGui::RadioButton("ReflectionObject", &objectIndex_, 2);
+	}
 	ImGui::SameLine();
 	ImGui::RadioButton("Car", &objectIndex_, 3);
 
-	ImGui::SliderFloat("Roughness", &pbrTestBlas_.lock()->GetMaterial().roughness_, 0.001f, 0.999f);
-	ImGui::SliderFloat("Metalness", &pbrTestBlas_.lock()->GetMaterial().metalness_, 0.001f, 0.999f);
-	ImGui::SliderFloat("Specular", &pbrTestBlas_.lock()->GetMaterial().specular_, 0.001f, 0.999f);
+	ImGui::Checkbox("StopRotation", &isStopRotate_);
 
+
+
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
 
 	// 環境マップを更新。
+	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 1.0f, 1.0f);
 	if (invMapIndex_ == 0) {
 
 		envMap1_.lock()->ChangeTrans(Vec3(0, 0, 0));
@@ -154,6 +173,7 @@ void TitleScene::Update()
 		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		invMapIndex_ = 2;
 
+
 	}
 	else if (invMapIndex_ == 3) {
 
@@ -170,31 +190,73 @@ void TitleScene::Update()
 		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
 		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
 
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = false;
+
+
 	}
 
+	if (objectIndex_ == 2) {
 
-	pbrTestBlas_.lock()->IsChangeMaterial();
+		// スケールを元に戻す。
+		pbrTest_[0][0].lock()->ChangeScale(Vec3(10, 10, 10));
 
-	if (objectIndex_ == 1) {
+		player_->pos_ = Vec3(0, 1000, 0);
 
-		// プレイヤーを描画しないようにする。
-		player_->pos_ = Vec3(0, 10000, 0);
-		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
-		pbrTest_.lock()->ChangeTrans(Vec3(0, 0, 0));
+		// コーネルボックスだったら
+		if (invMapIndex_ == 3) {
 
-	}
-	else if (objectIndex_ == 2) {
+			for (int height = 0; height < 5; ++height) {
+				for (int width = 0; width < 5; ++width) {
 
-		pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
-		pbrTest2_.lock()->ChangeTrans(Vec3(0, 0, 0));
-		player_->pos_ = Vec3(0, 10000, 0);
+					pbrTest_[height][width].lock()->ChangeTrans(Vec3(0, 10000, 0));
 
+				}
+			}
+
+			pbrTest_[0][0].lock()->ChangeTrans(Vec3(0, 0, 0));
+			pbrTest_[0][0].lock()->ChangeScale(Vec3(30, 30, 30));
+			pbrTestBlas_[0][0].lock()->GetMaterial().metalness_ = 0.021f;
+			pbrTestBlas_[0][0].lock()->GetMaterial().roughness_ = 0.390f;
+			pbrTestBlas_[0][0].lock()->GetMaterial().specular_ = 0.999f;
+			pbrTestBlas_[0][0].lock()->IsChangeMaterial();
+
+		}
+		else {
+
+			float interval = 20.0f;
+			Vec3 offsetPos = Vec3(-interval * 2.5f, -interval * 2.5f + 10.0f, 0.0f);
+			for (int height = 0; height < 5; ++height) {
+				for (int width = 0; width < 5; ++width) {
+
+					pbrTest_[height][width].lock()->ChangeTrans(offsetPos + Vec3(width * interval, height * interval, 0));
+
+					float roughness = (1.0f / 5.0f) * height;
+					if (roughness <= 0.0f) roughness = 0.001f;
+					if (1.0f <= roughness) roughness = 0.999f;
+					pbrTestBlas_[height][width].lock()->GetMaterial().roughness_ = roughness;
+					float metalness = (1.0f / 5.0f) * (5 - width);
+					if (metalness <= 0.0f) metalness = 0.001f;
+					if (1.0f <= metalness) metalness = 0.999f;
+					pbrTestBlas_[height][width].lock()->GetMaterial().metalness_ = metalness;
+					pbrTestBlas_[height][width].lock()->IsChangeMaterial();
+
+				}
+
+			}
+
+		}
 
 	}
 	else if (objectIndex_ == 3) {
 
-		pbrTest_.lock()->ChangeTrans(Vec3(0, 10000, 0));
-		pbrTest2_.lock()->ChangeTrans(Vec3(0, 10000, 0));
+		for (auto& height : pbrTest_) {
+			for (auto& width : height) {
+
+				width.lock()->ChangeTrans(Vec3(0, 1000, 0));
+
+			}
+		}
+
 		player_->pos_ = Vec3(0, 0, 0);
 
 		// コーネルボックスだったら。
@@ -205,9 +267,6 @@ void TitleScene::Update()
 
 	}
 
-	// 並行光源を無効化。
-	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = false;
-
 	// TLASやパイプラインを更新。
 	RayEngine::Ins()->Update();
 
@@ -217,8 +276,12 @@ void TitleScene::Update()
 	// プレイヤーの位置を調整。
 	player_->UpdateTitle();
 
-	// カメラの位置を調整。
-	cameraAngle += 0.01f;
+	if (!isStopRotate_) {
+
+		// カメラの位置を調整。
+		cameraAngle += 0.01f;
+
+	}
 
 	// カメラの角度から位置を求める。
 	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));

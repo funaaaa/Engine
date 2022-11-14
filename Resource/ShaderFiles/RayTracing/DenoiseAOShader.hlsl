@@ -770,7 +770,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     float3 sunDir = normalize(sunPos - WorldPos);
     
     // ディレクショナルライトの色
-    if (gSceneParam.light.dirLight.isActive && gSceneParam.light.dirLight.lightDir.y < 0.2f)
+    if (gSceneParam.light.dirLight.isActive)
     {
         
         // ディレクショナルライトの方向にレイを飛ばす。
@@ -803,6 +803,8 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             payloadBuff.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) + BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
             payloadBuff.light_ = saturate(payloadBuff.light_);
             
+            payloadBuff.light_ = float3(1.0f, 1.0f, 1.0f);
+            
         }
         else
         {
@@ -810,7 +812,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             payloadBuff.light_ += float3(0.3f, 0.3f, 0.3f);
             payloadBuff.light_ = saturate(payloadBuff.light_);
         }
-        
         
     }
         
@@ -1080,6 +1081,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     // MipLevel計算処理
     float2 ddxUV;
     float2 ddyUV;
+    float4 texColor;
     if (payload.rayID_ != CHS_IDENTIFICATION_RAYID_DEF)
     {
         
@@ -1130,53 +1132,58 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         ddxUV = abs(uvX - vtx.uv);
         ddyUV = abs(uvY - vtx.uv);
         
+
+        // テクスチャの色を取得。
+        texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
         
     }
     else
     {
-        // レイの発射ベクトルを求めるのに必要な変数たち
-        matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
-        matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
-        float2 dims = float2(DispatchRaysDimensions().xy);
-        float aspect = dims.x / dims.y;
+        //// レイの発射ベクトルを求めるのに必要な変数たち
+        //matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
+        //matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
+        //float2 dims = float2(DispatchRaysDimensions().xy);
+        //float aspect = dims.x / dims.y;
         
-        // 現在のレイからX+方向の発射ベクトル
-        uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
-        float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
-        float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-        float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
+        //// 現在のレイからX+方向の発射ベクトル
+        //uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
+        //float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
+        //float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
+        //float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         
-        // 現在のレイからY+方向の発射ベクトル
-        launchIndex -= uint2(1, -1);
-        d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
-        target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-        float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
+        //// 現在のレイからY+方向の発射ベクトル
+        //launchIndex -= uint2(1, -1);
+        //d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
+        //target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
+        //float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         
-        // レイの射出地点。
-        float3 worldRayOrigin = WorldRayOrigin() + (RayTMin() * WorldRayDirection());
+        //// レイの射出地点。
+        //float3 worldRayOrigin = WorldRayOrigin() + (RayTMin() * WorldRayDirection());
         
-        // ベクトルXが平面に当たるまでの長さと衝突地点を求める。
-        float lengthX = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirX);
-        float3 impPosX = rayDirX * lengthX + worldRayOrigin;
+        //// ベクトルXが平面に当たるまでの長さと衝突地点を求める。
+        //float lengthX = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirX);
+        //float3 impPosX = rayDirX * lengthX + worldRayOrigin;
         
-        // ベクトルYが平面に当たるまでの長さと衝突地点を求める。
-        float lengthY = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirY);
-        float3 impPosY = rayDirY * lengthY + worldRayOrigin;
+        //// ベクトルYが平面に当たるまでの長さと衝突地点を求める。
+        //float lengthY = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirY);
+        //float3 impPosY = rayDirY * lengthY + worldRayOrigin;
         
-        // XYの重心座標を求める。
-        float3 baryX = CalcVertexBarys(impPosX, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
-        float3 baryY = CalcVertexBarys(impPosY, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
+        //// XYの重心座標を求める。
+        //float3 baryX = CalcVertexBarys(impPosX, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
+        //float3 baryY = CalcVertexBarys(impPosY, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
         
-        // uvを求めて、その差分を取得する。
-        float2 uvX = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
-        float2 uvY = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
-        ddxUV = abs(uvX - vtx.uv);
-        ddyUV = abs(uvY - vtx.uv);
+        //// uvを求めて、その差分を取得する。
+        //float2 uvX = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
+        //float2 uvY = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
+        //ddxUV = abs(uvX - vtx.uv);
+        //ddyUV = abs(uvY - vtx.uv);
+        
+        
+
+        // テクスチャの色を取得。
+        texColor = (float4) texture.SampleLevel(smp, vtx.uv, 2);
         
     }
-
-    // テクスチャの色を取得。
-    float4 texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
     
     // 法線マップの色を取得。
     float3 normalMapColor = (float3) normalTexture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
@@ -1256,7 +1263,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     int instanceID = InstanceID();
     
     // 当たったオブジェクトのInstanceIDがライト用or不可視のオブジェクトだったら当たり判定を棄却
-    if (instanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT || instanceID == CHS_IDENTIFICATION_INSTANCE_INVISIBILITY)
+    if (instanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT || instanceID == CHS_IDENTIFICATION_INSTANCE_INVISIBILITY || (payload.rayID_ != CHS_IDENTIFICATION_RAYID_DEF && instanceID == CHS_IDENTIFICATION_INSTANCE_PBR_TEST))
     {
         IgnoreHit();
 

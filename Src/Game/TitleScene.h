@@ -2,6 +2,7 @@
 #include "BaseScene.h"
 #include "Sprite.h"
 #include <memory>
+#include <array>
 
 class Character;
 class PolygonMeshInstance;
@@ -25,9 +26,8 @@ private:
 	std::weak_ptr<BLAS> envMap3Blas_;
 
 	// PBRテスト用球2種類
-	std::weak_ptr<PolygonMeshInstance> pbrTest_;
-	std::weak_ptr<PolygonMeshInstance> pbrTest2_;
-	std::weak_ptr<BLAS> pbrTestBlas_;
+	std::array < std::array < std::weak_ptr<PolygonMeshInstance>, 5>, 5> pbrTest_;
+	std::array<std::array<std::weak_ptr<BLAS>, 5>, 5> pbrTestBlas_;
 
 	// コーネルボックス用
 	std::weak_ptr<BLAS> cornellBoxWhiteBlas_;
@@ -43,6 +43,8 @@ private:
 	float cameraAngle;
 	int invMapIndex_;
 	int objectIndex_;
+
+	bool isStopRotate_;
 
 	std::shared_ptr<Character> player_;
 
