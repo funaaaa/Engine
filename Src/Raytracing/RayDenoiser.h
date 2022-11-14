@@ -30,20 +30,12 @@ private:
 	std::shared_ptr<RayComputeShader> mixColorAndLuminance_;
 
 	// 重みテーブル
-	static const int GAUSSIAN_WEIGHTS_COUNT = 8;
+	static const int GAUSSIAN_WEIGHTS_COUNT = 4;
 	std::array<float, GAUSSIAN_WEIGHTS_COUNT> gaussianWeights_;
 
 	// 重み定数バッファ
 	std::shared_ptr<DynamicConstBuffer> weightTableCBX_;
 	std::shared_ptr<DynamicConstBuffer> weightTableCBY_;
-
-	// コンピュートキュー
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> cmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> cmdList_;
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> cmdQueue_;
-	Microsoft::WRL::ComPtr<ID3D12Fence> fence_;
-	UINT64 fenceVal_;
-
 
 public:
 
@@ -69,8 +61,6 @@ public:
 
 	// コマンドリストをクローズ。
 	void CloseCommandList();
-
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> GetCommandList() { return cmdList_; }
 
 private:
 

@@ -49,6 +49,9 @@ void RayRootsignature::AddStaticSampler(int RegisterSpace) {
 	buff.Init(0,
 		D3D12_FILTER_MIN_MAG_MIP_LINEAR
 	);
+	buff.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	buff.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	buff.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	buff.RegisterSpace = RegisterSpace;
 	buff.ShaderRegister = 0;
 	sampler_[samplerCount_] = buff;
@@ -83,7 +86,7 @@ void RayRootsignature::Create(bool IsLocal, const wchar_t* Name)
 		std::string a = static_cast<char*>(errBlob->GetBufferPointer());
 		_RPTF0(_CRT_WARN, a.c_str());
 	}
-	Engine::Ins()->dev_->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
+	Engine::Ins()->device_.dev_->CreateRootSignature(0, blob->GetBufferPointer(), blob->GetBufferSize(),
 		IID_PPV_ARGS(&rootsignature_));
 
 	// ñºëOÇê›íË

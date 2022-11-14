@@ -131,7 +131,6 @@ void GLTF::LoadMesh(const tinygltf::Model& inModel, VertexAttributeVisitor& visi
 			auto indexStart = static_cast<UINT>(indexBuffer.size());
 			auto vertexStart = static_cast<UINT>(positionBuffer.size());
 			UINT indexCount = 0, vertexCount = 0;
-			bool hasSkin = false;
 
 			const auto& notfound = primitive.attributes.end();
 			auto attr = primitive.attributes.find("POSITION");
@@ -256,13 +255,13 @@ void GLTF::LoadMaterial(const tinygltf::Model& inModel)
 
 		material_.name_ = ConvertFromUTF8(inMaterial.name);
 
-		material_.baseColor_ = Vec3(inMaterial.pbrMetallicRoughness.baseColorFactor[0], inMaterial.pbrMetallicRoughness.baseColorFactor[1], inMaterial.pbrMetallicRoughness.baseColorFactor[2]);
+		material_.baseColor_ = Vec3(static_cast<float>(inMaterial.pbrMetallicRoughness.baseColorFactor[0]), static_cast<float>(inMaterial.pbrMetallicRoughness.baseColorFactor[1]), static_cast<float>(inMaterial.pbrMetallicRoughness.baseColorFactor[2]));
 
 		// BaseColorÇÕàÍíUê^Ç¡îíÇ…Ç∑ÇÈÅB
 		material_.baseColor_ = Vec3(1, 1, 1);
 
-		material_.metalness_ = inMaterial.pbrMetallicRoughness.metallicFactor;
-		material_.roughness_ = inMaterial.pbrMetallicRoughness.roughnessFactor;
+		material_.metalness_ = static_cast<float>(inMaterial.pbrMetallicRoughness.metallicFactor);
+		material_.roughness_ = static_cast<float>(inMaterial.pbrMetallicRoughness.roughnessFactor);
 		material_.specular_ = 0.5f;
 
 	}

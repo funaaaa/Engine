@@ -22,7 +22,7 @@ void SceneMgr::Init()
 
 	// シーン番号を設定。
 	nowScene_ = BaseScene::SCENE_ID::TITLE;
-	nextScene_ = BaseScene::SCENE_ID::TITLE;
+	nextScene_ = BaseScene::SCENE_ID::GAME;
 
 	// シーンを初期化。
 	scenes_[nowScene_]->Init();
@@ -33,9 +33,6 @@ void SceneMgr::Update()
 {
 
 	/*===== 更新処理 =====*/
-
-	// シーンの更新を行う。
-	scenes_[nowScene_]->Update();
 
 	// 現在更新中のシーンで遷移フラグが立ったら。
 	if (scenes_[nowScene_]->GetIsTransition()) {
@@ -50,6 +47,9 @@ void SceneMgr::Update()
 		nextScene_ = scenes_[nowScene_]->GetNextScene();
 
 	}
+
+	// シーンの更新を行う。
+	scenes_[nowScene_]->Update();
 
 }
 

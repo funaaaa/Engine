@@ -66,6 +66,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 		buff.normal_ = dataBuff.vertex_[index].normal_;
 		buff.position_ = dataBuff.vertex_[index].pos_;
 		buff.uv_ = dataBuff.vertex_[index].uv_;
+		buff.subUV_ = dataBuff.vertex_[index].uv_;
 
 		// データを保存。
 		vertex_.push_back(buff);
@@ -86,6 +87,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 		static_cast<size_t>(vertexStride_ * vertexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	vertexBuffer_->SetName(L"VertexBuffer");
 
 	// 確保したバッファに頂点データを書き込む。
 	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
@@ -139,8 +141,8 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	defVertex_ = vertex_;
 
 	// ダーティフラグ
-	isChangeVertex = true;
-	isChangeTexture = true;
+	isChangeVertex_ = true;
+	isChangeTexture_ = true;
 
 	isGenerate_ = true;
 
@@ -224,6 +226,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 		static_cast<size_t>(indexStride_ * indexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	indexBuffer_->SetName(L"IndexBuffer");
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
 	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
@@ -242,8 +245,8 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	/*-- BLASバッファを生成する --*/
 
 	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(true);
-	isOpaque_ = true;
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
+	isOpaque_ = IsOpaque;
 
 	// BLASバッファを設定、構築する。
 	SettingAccelerationStructure(geomDesc);
@@ -281,8 +284,8 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	defVertex_ = vertex_;
 
 	// ダーティフラグ
-	isChangeVertex = true;
-	isChangeTexture = true;
+	isChangeVertex_ = true;
+	isChangeTexture_ = true;
 
 	isGenerate_ = true;
 
@@ -429,8 +432,8 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 	defVertex_ = vertex_;
 
 	// ダーティフラグ
-	isChangeVertex = true;
-	isChangeTexture = true;
+	isChangeVertex_ = true;
+	isChangeTexture_ = true;
 
 	isGenerate_ = true;
 
@@ -491,7 +494,7 @@ void BLAS::Update()
 	asDesc.ScratchAccelerationStructureData = updateBuffer_->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
@@ -565,13 +568,13 @@ void BLAS::IsChangeMaterial()
 	// 確保したバッファにマテリアルデータを書き込む。
 	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
 
-	isChangeVertex = true;
+	isChangeVertex_ = true;
 
 }
 void BLAS::ChangeBaseTexture(int Index)
 {
 	baseTextureHandle_ = Index;
-	isChangeTexture = true;
+	isChangeTexture_ = true;
 }
 #include "HitGroupMgr.h"
 #include <assert.h>
@@ -581,7 +584,7 @@ BLAS::BLAS()
 	isGenerate_ = false;
 	baseTextureHandle_ = -1;
 	normalMapHandle_ = -1;
-
+	metalnessMapHandle_ = -1;
 }
 
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
@@ -610,7 +613,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	}
 
 	// 頂点関係のデータが変更されていたら。
-	if (isChangeVertex) {
+	if (isChangeVertex_) {
 
 		// シェーダー識別子を書き込む。
 		memcpy(Dst, mode_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
@@ -626,7 +629,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		// マテリアル用のバッファをセット。
 		Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
 
-		isChangeVertex = false;
+		isChangeVertex_ = false;
 
 	}
 	else {
@@ -648,7 +651,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
 	// テクスチャ関係が変更されていたら。
-	if (isChangeTexture) {
+	if (isChangeTexture_) {
 
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
@@ -678,6 +681,26 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
 					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+					//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
+
+				}
+
+			}
+			// 2番目はmetalnessマップテクスチャ。
+			else if (index == 2) {
+
+				if (metalnessMapHandle_ != -1) {
+
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(metalnessMapHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+				}
+				else {
+
+					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
+					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+					//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
 
 				}
 
@@ -687,12 +710,13 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+				//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
 
 			}
 
 		}
 
-		isChangeTexture = false;
+		isChangeTexture_ = false;
 
 	}
 	else {
@@ -710,6 +734,11 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavHandle_[index]);
 			Dst += WriteGPUDescriptor(Dst, &texDescHandle);
+
+		}
+		else {
+
+			Dst += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
 
 		}
 
@@ -735,6 +764,7 @@ void BLAS::Init()
 	isGenerate_ = false;
 	baseTextureHandle_ = -1;
 	normalMapHandle_ = -1;
+	metalnessMapHandle_ = -1;
 
 }
 
@@ -782,6 +812,25 @@ void BLAS::MulVec3Vertex(Vec3 Vec)
 
 	// 確保したバッファに頂点データを書き込む。
 	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+}
+
+void BLAS::AssignUV(const std::vector<RayVertex>& UV)
+{
+
+	/*===== 指定のUVを代入する =====*/
+
+	for (auto& index : vertex_) {
+
+		index.subUV_ = UV[static_cast<int>(&index - &vertex_[0])].uv_;
+
+	}
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	// 頂点を書き換えたフラグを立てる。
+	isChangeVertex_ = true;
 
 }
 
@@ -842,7 +891,7 @@ Microsoft::WRL::ComPtr<ID3D12Resource> BLAS::CreateBuffer(size_t Size, D3D12_RES
 	resDesc.Flags = Flags;
 
 	// バッファ生成命令を出す。
-	hr = Engine::Ins()->dev_->CreateCommittedResource(
+	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&heapProps,
 		D3D12_HEAP_FLAG_NONE,
 		&resDesc,
@@ -906,7 +955,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 
 	// 関数を使って必要なメモリ量を求める.
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
-	Engine::Ins()->dev_->GetRaytracingAccelerationStructurePrebuildInfo(
+	Engine::Ins()->device_.dev_->GetRaytracingAccelerationStructurePrebuildInfo(
 		&inputs, &blasPrebuild
 	);
 
@@ -917,6 +966,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	scratchBuffer_->SetName(L"BLASScratchBuffer");
 
 	// BLASのバッファを生成する。
 	blasBuffer_ = CreateBuffer(
@@ -925,6 +975,7 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	blasBuffer_->SetName(L"BLASBuffer");
 
 	// 更新用バッファを生成する。
 	updateBuffer_ = CreateBuffer(
@@ -933,12 +984,13 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	updateBuffer_->SetName(L"BLASUpdateBuffer");
 
 	// AccelerationStructureの構築。
 	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
 	buildASDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
-	Engine::Ins()->cmdList_->BuildRaytracingAccelerationStructure(
+	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
 
@@ -956,28 +1008,30 @@ void BLAS::CreateAccelerationStructure()
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
 	uavBarrier.UAV.pResource = blasBuffer_.Get();
-	Engine::Ins()->cmdList_->ResourceBarrier(1, &uavBarrier);
-	Engine::Ins()->cmdList_->Close();
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->Close();
 
 	// BLASを構築。
 	//ID3D12CommandList* pCmdList[] = { Engine::Ins()->cmdList.Get() };
 	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { Engine::Ins()->cmdList_.Get() };
-	Engine::Ins()->cmdQueue_->ExecuteCommandLists(1, commandLists);
+	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
+	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
+	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->asFence_.Get(), ++Engine::Ins()->asfenceValue_);
+
 
 	// グラフィックコマンドリストの完了待ち
-	Engine::Ins()->cmdQueue_->Signal(Engine::Ins()->fence_.Get(), ++Engine::Ins()->fenceVal_);
-	if (Engine::Ins()->fence_->GetCompletedValue() != Engine::Ins()->fenceVal_) {
+	UINT64 gpuFence = Engine::Ins()->asFence_->GetCompletedValue();
+	if (gpuFence != Engine::Ins()->asfenceValue_) {
 		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		Engine::Ins()->fence_->SetEventOnCompletion(Engine::Ins()->fenceVal_, event);
+		Engine::Ins()->asFence_->SetEventOnCompletion(Engine::Ins()->asfenceValue_, event);
 		WaitForSingleObject(event, INFINITE);
 		CloseHandle(event);
 	}
 
 	// コマンドアロケータのリセット
-	Engine::Ins()->cmdAllocator_->Reset();	//キューをクリア
+	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();	//キューをクリア
 
 	// コマンドリストのリセット
-	Engine::Ins()->cmdList_->Reset(Engine::Ins()->cmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
 
 }

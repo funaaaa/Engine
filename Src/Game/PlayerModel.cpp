@@ -34,19 +34,20 @@ void PlayerModel::Load(COLOR ColorID, CHARA Chara)
 		break;
 	}
 
-	PolygonInstanceRegister::SHADER_ID shaderID;
+	PolygonInstanceRegister::SHADER_ID shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 	switch (Chara)
 	{
 	case PlayerModel::CHARA::PLAYER:
 		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	case PlayerModel::CHARA::GHOST:
-		shaderID = PolygonInstanceRegister::SHADER_ID::REFRACTION;
+		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	case PlayerModel::CHARA::AI:
 		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	default:
+		shaderID = PolygonInstanceRegister::SHADER_ID::DEF;
 		break;
 	}
 

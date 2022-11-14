@@ -10,10 +10,12 @@
 #include "Input.h"
 #include "BLASRegister.h"
 #include "RayEngine.h"
+#include "RadialBlur.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	/*----------DirectX初期化処理----------*/
+
 	Engine::Ins()->Init();									// DirectX基盤の初期化
 	SoundManager::Ins()->SettingSoundManager();	// サウンドマネージャーをセットする
 
@@ -25,6 +27,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// ディスクリプタヒープを初期化。
 	DescriptorHeapMgr::Ins()->GenerateDescriptorHeap();
+
+	// デノイズ用のクラスを初期化。
+	Denoiser::Ins()->Setting();
 
 	// BLASを準備。
 	BLASRegister::Ins()->Setting();
@@ -38,9 +43,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// ヒットグループを設定。
 	HitGroupMgr::Ins()->Setting();
 
-	// デノイズ用のクラスを初期化。
-	Denoiser::Ins()->Setting();
-
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
@@ -50,9 +52,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// レイトレエンジンを設定。
 	RayEngine::Ins()->Setting();
 
+	// ブラー用クラスを設定。
+	RadialBlur::Ins()->Setting();
+
 
 	/*----------ゲームループ----------*/
 	while (true) {
+
 
 		// 描画前処理
 		Engine::Ins()->ProcessBeforeDrawing();
@@ -61,17 +67,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		SceneMgr::Ins()->Update();
 		SceneMgr::Ins()->Draw();
 
-		if (Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
-
-			break;
-
-		}
-
 
 		// 描画後処理
 		Engine::Ins()->ProcessAfterDrawing();
 
+
+		// メッセージ確認
+		if (PeekMessage(&Engine::Ins()->windowsAPI_->msg_, nullptr, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&Engine::Ins()->windowsAPI_->msg_);	// キー入力メッセージの処理
+			DispatchMessage(&Engine::Ins()->windowsAPI_->msg_);	// プロシージャにメッセージを送る
+		}
+		// ?ボタンで終了メッセージが来たらゲームループを抜ける
+		if (Engine::Ins()->windowsAPI_->msg_.message == WM_QUIT || Input::Ins()->IsKeyTrigger(DIK_ESCAPE)) {
+			Engine::Ins()->isGameEndReservation_ = true;
+		}
+
+		// ゲーム終了フラグが立っていたら。
+		if (Engine::Ins()->isGameEnd_) {
+			break;
+		}
+
 	}
 
+	ImGui::DestroyContext();
+
 	return 0;
+
 }

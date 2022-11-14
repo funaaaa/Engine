@@ -37,6 +37,15 @@ GameScene::GameScene()
 
 	/*===== 初期化処理 =====*/
 
+	Vec3 triangleNormal = Vec3(100, 100, 0).GetNormal();
+	Vec3 worldRayOrigin = Vec3(100, 100, 0);
+	Vec3 worldPosition = Vec3(0, 0, 0);
+	Vec3 rayDirX = Vec3(-100, -100, 0).GetNormal();
+
+	float lengthX = Vec3(-triangleNormal).Dot(worldRayOrigin - worldPosition) / triangleNormal.Dot(rayDirX);
+	Vec3 impPosX = rayDirX * lengthX + worldRayOrigin;
+
+
 
 	// 甲羅オブジェクトをセッティング。
 	ShellObjectMgr::Ins()->Setting();
@@ -123,10 +132,6 @@ GameScene::GameScene()
 	maxRapCountUI_ = std::make_shared<Sprite>();
 	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(381, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
 
-	itemFrameUI_ = std::make_shared<Sprite>();
-	itemFrameUI_->GenerateForTexture(Vec3(-100, -100, 0.1f), Vec2(129 * 0.5f, 127 * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/boostItem.dds");
-	itemFrameEasingTimer_ = 1;
-
 	// 集中線
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
 
@@ -149,6 +154,7 @@ void GameScene::Init()
 	/*===== 初期化処理 =====*/
 
 	// インスタンスを初期化。
+	BLASRegister::Ins()->Setting();
 	PolygonInstanceRegister::Ins()->Setting();
 
 	nextScene_ = SCENE_ID::RESULT;
@@ -195,19 +201,6 @@ void GameScene::Init()
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
 
-	// 天球用のスフィアを生成する。
-	skyDomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	skyDomeIns_ = PolygonInstanceRegister::Ins()->CreateInstance(skyDomeBlas_, PolygonInstanceRegister::SHADER_ID::AS);
-	skyDomeIns_.lock()->AddScale(Vec3(1000, 1000, 1000));
-
-	//// PBRテスト用
-	//pbrSphereBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	//pbrSphereIns_ = PolygonInstanceRegister::Ins()->CreateInstance(pbrSphereBlas_, PolygonInstanceRegister::SHADER_ID::DEF);
-	//pbrSphereIns_.lock()->AddScale(Vec3(50, 50, 50));
-	//pbrSphereIns_.lock()->AddTrans(Vec3(0, 100, 0));
-	//pbrSphereIns_.lock()->AddRotate(Vec3(0, 0, 0));
-
-
 
 	// TLASを生成。
 	RayEngine::Ins()->SettingTLAS();
@@ -225,8 +218,7 @@ void GameScene::Init()
 	countDownStartTimer_ = 0;
 	transitionTimer = 0;
 	countDownNumber_ = 2;
-	sunAngle_ = 0.3f;
-	itemFrameEasingTimer_ = 1;
+	sunAngle_ = 0.8f;
 
 }
 
@@ -241,12 +233,12 @@ void GameScene::Update()
 	// ウィンドウの名前を更新。
 	//if (true) {
 
-	//	FPS();
+	FPS();
 
 	//}
 	//else {
 
-	SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, L"LE3A_20_フナクラベ_タクミ");
+	//SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, L"LE3A_20_フナクラベ_タクミ");
 
 	//}
 
@@ -254,7 +246,7 @@ void GameScene::Update()
 	characterMgr_->Update(stages_[STAGE_ID::MUGEN], isBeforeStart_, isGameFinish_);
 
 	// 乱数の種を更新。
-	RayEngine::Ins()->GetConstBufferData().debug_.seed_ = FHelper::GetRand(0, 1000);
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
 	// カメラを更新。
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
@@ -308,19 +300,19 @@ void GameScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
-	sunAngle_ += sunSpeed_;
-	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
+	//sunAngle_ = 0.8f;
+	//if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
-		sunAngle_ += sunSpeed_;
-		sunAngle_ += sunSpeed_;
-		sunAngle_ += sunSpeed_;
+	//	sunAngle_ += sunSpeed_;
+	//	sunAngle_ += sunSpeed_;
+	//	sunAngle_ += sunSpeed_;
 
-	}
+	//}
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 	// 天球自体も回転させる。
-	skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
+	//skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
 
 	// 甲羅を更新。
 	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::MUGEN]);
@@ -334,41 +326,6 @@ void GameScene::Update()
 	}
 	concentrationLine_->Update();
 
-
-
-	// アイテムを取得した瞬間や使った瞬間にイージングタイマーを初期化。
-	if (characterMgr_->GetPlayerIns().lock()->GetIsGetItem() || characterMgr_->GetPlayerIns().lock()->GetUseItem()) {
-
-		itemFrameEasingTimer_ = 0;
-
-	}
-
-	// アイテムのフレームの位置を更新。
-	itemFrameEasingTimer_ += 0.05f;
-	if (1.0f < itemFrameEasingTimer_) itemFrameEasingTimer_ = 1.0f;
-	if (characterMgr_->GetPlayerIns().lock()->GetIsItem()) {
-
-		// UIのテクスチャを変更。
-		if (characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST) {
-			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/boostItem.dds"), 0);
-		}
-		else {
-			itemFrameUI_->ChangeTextureID(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/shellItem.dds"), 0);
-		}
-
-		// イージング量を求める。
-		float easingAmount = FEasing::EaseOutQuint(itemFrameEasingTimer_);
-		itemFrameUI_->ChangePosition(ITEM_FRAME_OUT_POS + (ITEM_FRAME_IN_POS - ITEM_FRAME_OUT_POS) * easingAmount);
-
-	}
-	else {
-
-		// イージング量を求める。
-		float easingAmount = FEasing::EaseInQuint(itemFrameEasingTimer_);
-		itemFrameUI_->ChangePosition(ITEM_FRAME_IN_POS + (ITEM_FRAME_OUT_POS - ITEM_FRAME_IN_POS) * easingAmount);
-
-	}
-
 }
 
 void GameScene::Draw()
@@ -376,20 +333,8 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
-	static bool isNoise = false;
-	//if (Input::Ins()->IsKeyTrigger(DIK_SPACE)) isNoise = isNoise ? false : true;
-
 	// レイトレーシングを実行。
-	if (isNoise) {
-
-		RayEngine::Ins()->NoiseDraw();
-
-	}
-	else {
-
-		RayEngine::Ins()->Draw();
-
-	}
+	RayEngine::Ins()->Draw();
 
 
 	// 床を白塗り
@@ -408,15 +353,15 @@ void GameScene::Draw()
 	if (isWriteTireMask) {
 
 		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
-		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
+		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
 						tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
 						tireMaskTextureOutput_->GetRaytracingOutput().Get())
 			};
 
-			Engine::Ins()->cmdList_->ResourceBarrier(2, barrierToUAV);
+			Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(2, barrierToUAV);
 		}
 
 	}
@@ -425,33 +370,35 @@ void GameScene::Draw()
 	static int firstTime = 0;
 	if (firstTime != 0) {
 
-		//nowRapCountSprite_->Draw();
-		//maxRapCountSprite_->Draw();
-		//rapSlashSprite_->Draw();
+		UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 		concentrationLine_->Draw();
 
-		// 左上のアイテムのUI。
-		itemFrameUI_->Draw();
-
-		// コインの取得数のUI。
+		// コインの取得数のui。
 		coinCountUI_[0]->Draw();
 		coinCountUI_[1]->Draw();
 
-		// 現在のラップ数のUI。
+		// 現在のラップ数のui。
 		nowRapCountUI_->Draw();
 		slashUI_->Draw();
 		maxRapCountUI_->Draw();
 
-		// 左下のUIのフレーム。
+		// 左下のuiのフレーム。
 		coinUI_->Draw();
 		rapUI_->Draw();
 
-		// カウントダウン用のUI。
+		// カウントダウン用のui。
 		countDownSprite_->Draw();
 
-		// カウントダウン終了時のGOのUI。
+		// カウントダウン終了時のgoのui。
 		goSprite_->Draw();
+
+		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 	}
 	if (firstTime == 0) ++firstTime;
@@ -509,6 +456,11 @@ void GameScene::InputImGUI()
 	/*===== IMGUI更新 =====*/
 
 	ImGui::Text("Let's do three laps!");
+
+	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
+	bool isMip = RayEngine::Ins()->constBufferData_.light_.pointLight_[0].pad_.x;
+	ImGui::Checkbox("MipFlag", &isMip);
+	RayEngine::Ins()->constBufferData_.light_.pointLight_[0].pad_.x = isMip;
 
 	//// 太陽の移動速度を更新。
 	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");

@@ -28,6 +28,13 @@ private:
 
 	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc_;
 
+	struct MatData {
+		DirectX::XMMATRIX matRot_;
+		DirectX::XMMATRIX matScale_;
+		DirectX::XMMATRIX matTrans_;
+	};
+	std::array<MatData, MAX_INSTANCE> savedInstanceData_;
+
 	using XMMATRIX = DirectX::XMMATRIX;
 
 
@@ -43,6 +50,7 @@ public:
 
 	// インスタンスのワールド行列を求める。
 	void CalWorldMat();
+	void CalWorldMat(int Index);
 
 	// インスタンスを破棄。
 	void DestroyInstance(std::weak_ptr<PolygonMeshInstance> Instance);

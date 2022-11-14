@@ -19,6 +19,7 @@ public:
 	// “–‚½‚è”»’èID
 	enum class COLLISION_ID {
 		OBB,	// OBB‚Ì”»’è
+		SPHERE,	// ‹…‚Ì“–‚½‚è”»’è
 		MESH,	// ƒƒbƒVƒ…‚Ì”»’è
 		NONE,	// “–‚½‚è”»’è‚ðs‚í‚È‚¢
 	};

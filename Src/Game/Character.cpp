@@ -25,6 +25,8 @@
 #include "DriftParticleMgr.h"
 #include "DriftParticle.h"
 #include "MugenStage.h"
+#include "RadialBlur.h"
+#include <SceneMgr.h>
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -76,7 +78,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
 
-		std::string filePath = "Resource/Game/CharaGhostData/Dev_";
+		std::string filePath = "Resource/Game/CharaGhostData/Ghost_";
 		std::string dottxt = ".txt";
 		std::string number = std::to_string(Param);
 
@@ -97,6 +99,23 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carLeftTireInstance, false));
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInstance, true));
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInstance, true));
+
+	if (SceneMgr::Ins()->nowScene_ != BaseScene::SCENE_ID::TITLE) {
+
+		// ロケットを生成。
+		rocketBlas_[0] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketHead.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		rocketBlas_[1] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketBody.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		rocketBlas_[2] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketLegs.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		rocketBlas_[3] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		for (int index = 0; index < 4; ++index) {
+			rocketIns_[index] = PolygonInstanceRegister::Ins()->CreateInstance(rocketBlas_[index], PolygonInstanceRegister::DEF);
+			rocketIns_[index].lock()->ChangeScale(Vec3(30, 30, 30));
+			rocketBlas_[index].lock()->ChangeMetalnessTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/metalness2.png"));
+			//PolygonInstanceRegister::Ins()->NonDisplay(rocketIns_[index].lock()->GetInstanceIndex());
+		}
+
+	}
+
 
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
@@ -129,6 +148,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	IsTurningIndicatorRed_ = false;
 	isRotRightSide_ = false;
 	isDriftJumpPrev_ = false;
+	isDisplayRocket_ = false;
 	turningIndicatorTimer_ = 0;
 	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
@@ -146,6 +166,9 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	driftRotTimer_ = 0;
 	baseBoostRot_ = 0;
 	nowBoostRot_ = 0;
+	rocketEasingTimer_ = 0.0f;
+	rocketAddRotationY_ = 0.0f;
+	rocketRotationY_ = 0.0f;
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -211,9 +234,14 @@ void Character::Init()
 	isJumpActionTrigger_ = false;
 	playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
 	cameraForwardVec_ = forwardVec_;
+	rocketEasingTimer_ = 0.0f;
+	rocketAddRotationY_ = 0.0f;
+	rocketRotationY_ = 0.0f;
+	isDisplayRocket_ = false;
 
 	playerModel_.Delete();
 
+	DriftParticleMgr::Ins()->Init();
 	// 臨時のバグ対策です。 最初の一回目のドリフトのときのみオーラが出ないので、ここで一回生成しておく。
 	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0);
 	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= 0);
@@ -285,12 +313,17 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
 
 			pos_ = DEF_POS;
-			playerModel_.carBodyInstance.lock()->ChangeTrans(Vec3(0, 0, 0));
-			playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
-			forwardVec_ = Vec3(0, 0, -1);
 			rotY_ = -0.367411435f;
+			playerModel_.carBodyInstance.lock()->ChangeTrans(DEF_POS);
+			playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, rotY_, 0));
+			forwardVec_ = Vec3(0, 0, -1);
 			upVec_ = Vec3(0, 1, 0);
 			returnDefPosTimer_ = 0;
+
+			handleRotQ_ = DirectX::XMVECTOR();
+			nowHandleRotQ_ = DirectX::XMVECTOR();
+			boostRotQ_ = DirectX::XMVECTOR();
+			nowBoostRotQ_ = DirectX::XMVECTOR();
 
 		}
 
@@ -334,11 +367,120 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 	// ブースト量が一定以上だったら集中線を出す。
 	isConcentrationLine_ = (MAX_BOOST_SPEED / 2.0f < boostSpeed_) || (JUMP_BOOST_SPEED / 2.0f < jumpBoostSpeed_);
 
+	// ブーストの割合に応じてラジアルブラーをかける。
+	if (charaID_ == CHARA_ID::P1) {
+
+		RadialBlur::Ins()->SetBlurPower(FHelper::Saturate(boostSpeed_ / MAX_BOOST_SPEED));
+
+		//_RPTFN(_CRT_WARN, "%f\n", boostSpeed_ / MAX_BOOST_SPEED);
+
+	}
+
 	// 接地フラグを保存。
 	onGroundPrev_ = onGround_;
 
 	// ゲーム開始前フラグを保存。
 	isBeforeStartPrev_ = IsBeforeStart;
+
+
+	// ロケットをカメラの左上に移動させる。
+	Vec3 nowRocketPos = rocketIns_[0].lock()->GetPos();
+	Vec3 rocketPos = GetPos();
+	rocketPos -= forwardVec_ * 60.0f;
+	rocketPos -= upVec_ * 20.0f;
+	// 補間する。
+	if (charaID_ == CHARA_ID::P1) {
+		nowRocketPos += (rocketPos - nowRocketPos) / 3.0f;
+	}
+	else {
+		nowRocketPos += (rocketPos - nowRocketPos);
+	}
+	for (auto& index : rocketIns_) {
+
+		index.lock()->ChangeTrans(nowRocketPos);
+
+	}
+
+	// 回転量を本来の値に補間する。
+	const float ADD_ROTATION_Y = 0.8f;
+	const float MIN_ROTATION_Y = 0.05f;
+	rocketAddRotationY_ += (MIN_ROTATION_Y - rocketAddRotationY_) / 10.0f;
+	// 回転させる。
+	rocketRotationY_ += rocketAddRotationY_;
+
+	// ロケットを斜めにする。
+	for (auto& index : rocketIns_) {
+
+		// 初期の回転に戻す。
+		index.lock()->ChangeRotate(Vec3(0.4f, 0.0f, 0.0f));
+
+		// カメラ上ベクトル方向のクォータニオンを求める。
+		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(Camera::Ins()->up_.ConvertXMVECTOR(), rocketRotationY_);
+
+		// 求めたクォータニオンを行列に治す。
+		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
+
+		// 回転を加算する。
+		index.lock()->AddRotate(quaternionMat);
+
+	}
+
+	// アイテムを取得した瞬間や使った瞬間にイージングタイマーを初期化。
+	bool prevFrameDisplayRocket = isDisplayRocket_;
+	if (isGetItem_ || isUseItem_) {
+
+		rocketEasingTimer_ = 0.1f;
+		rocketAddRotationY_ = ADD_ROTATION_Y;
+
+		if (!isDisplayRocket_) {
+			isDisplayRocket_ = true;
+		}
+
+	}
+
+	// アイテムのロケットのサイズを更新。
+	const float MAX_SCALE = 12.0f;
+	rocketEasingTimer_ += 0.06f;
+	if (1.0f < rocketEasingTimer_) rocketEasingTimer_ = 1.0f;
+	if (GetIsItem()) {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseOutQuint(rocketEasingTimer_);
+		float scale = MAX_SCALE * easingAmount;
+		if (scale <= 0) scale = 0.01f;
+		for (auto& index : rocketIns_) {
+			index.lock()->ChangeScale(Vec3(scale, scale, scale));
+		}
+
+	}
+	else {
+
+		// イージング量を求める。
+		float easingAmount = FEasing::EaseInQuint(rocketEasingTimer_);
+		float scale = MAX_SCALE - MAX_SCALE * easingAmount;
+		if (scale <= 0) scale = 0.01f;
+		for (auto& index : rocketIns_) {
+			index.lock()->ChangeScale(Vec3(scale, scale, scale));
+		}
+		if (isDisplayRocket_ && scale <= 0) {
+			isDisplayRocket_ = false;
+		}
+
+	}
+
+	// 描画始まったトリガーだったら描画する。
+	if (!prevFrameDisplayRocket && isDisplayRocket_) {
+		for (auto& index : rocketIns_) {
+			PolygonInstanceRegister::Ins()->Display(index.lock()->GetInstanceIndex());
+		}
+	}
+
+	// 描画終わったトリガーだったら描画を消す。
+	if ((prevFrameDisplayRocket && !isDisplayRocket_) || (!isDisplayRocket_ && rocketIns_[0].lock()->GetScaleVec3().x_ <= 0)) {
+		for (auto& index : rocketIns_) {
+			PolygonInstanceRegister::Ins()->NonDisplay(index.lock()->GetInstanceIndex());
+		}
+	}
 
 }
 
@@ -728,6 +870,7 @@ void Character::Input(bool IsBeforeStart)
 		operationInputData.hasItemID_ = item_->GetItemID();
 	}
 	operationInputData.isHitJumpBoostGimmick_ = isHitJumpActionGimmick_;
+	operationInputData.isPrevFrameDrift_ = isDrift_;
 	BaseOperationObject::Operation operation = operationObject_->Input(operationInputData);
 
 	// タイヤのマスクのフラグを初期化する。
@@ -888,7 +1031,7 @@ void Character::Input(bool IsBeforeStart)
 
 	// ドリフトボタンの入力がトリガーだったら。
 	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
-	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.0f;
+	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.1f;
 	bool isOnGround = onGround_ || IsBeforeStart;	// 設置していたら ゲームが始まっていない場合、キャラは空中に浮いているので、接地判定を取る。
 	if (triggerDriftBottom && notJump && isOnGround && canNotMoveTimer_ <= 0) {
 
@@ -935,6 +1078,12 @@ void Character::Input(bool IsBeforeStart)
 
 		item_ = std::make_shared<BoostItem>();
 		item_->Generate(playerModel_.carBodyInstance);
+		isGetItem_ = true;
+
+	}
+	else if (charaID_ == CHARA_ID::GHOST) {
+
+		isGetItem_ = false;
 
 	}
 
@@ -977,7 +1126,7 @@ void Character::Input(bool IsBeforeStart)
 	}
 
 	// ジャンプアクションのトリガー判定。
-	isJumpActionTrigger_ = operation.isJumpActionTrigger_;
+	isJumpActionTrigger_ = operation.isDriftTrigger_;
 
 	// 入力を保存する。
 	handleAmount_ = operation.handleDriveRate_;
@@ -1016,6 +1165,9 @@ void Character::Move(bool IsBeforeStart)
 	if (0 < boostSpeed_) {
 
 		boostSpeed_ -= SUB_BOOST_SPEED;
+
+		// デフォルトの移動量をマックスにする。
+		speed_ = MAX_SPEED;
 
 	}
 	else {
@@ -1258,7 +1410,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		}
 
 	}
-	else {
+	else if (charaID_ != CHARA_ID::GHOST) {
 
 		// アイテムを取得しなかった
 		isGetItem_ = false;

@@ -36,7 +36,7 @@ struct DirLightData
     float3 lightDir;
     int isActive;
     float3 lightColor;
-    float pad;
+    int seed;
 };
 static const int POINT_LIGHT_COUNT = 30;
 // ポイントライト用定数バッファ
@@ -56,31 +56,6 @@ struct LightConstBufferData
     DirLightData dirLight;
     PointLightData pointLight[POINT_LIGHT_COUNT];
 };
-
-// 大気散乱用定数バッファ
-struct ASConstBufferData
-{
-    float kr; // レイリー散乱定数
-    float km; // ミー散乱定数
-    float samples; // サンプル数
-    float outerRadius; // 大気の外周
-    float innerRadius; // 地上の外周
-    float eSun; // 太陽光線の強さ
-    float g; // 散乱定数
-    float aveHeight; // 平均大気密度を取得する高さ
-};
-// デバッグ用のパラメーター定数バッファ
-struct DebugConstBufferData
-{
-    int seed;
-    int isNoiseScene; // ノイズのみのシーンを描画するかのフラグ
-    int isLightHitScene; // ライトに当たった面のみを描画するフラグ
-    int isNormalScene; // 法線情報を描画するフラグ
-    int isMeshScene; // メッシュ情報を描画するフラグ
-    int isNoAO;
-    int isNoGI; // GIの処理を行わないフラグ
-    int isGIOnlyScene;
-};
 // アルファ値転送用の定数バッファ
 struct AlphaData
 {
@@ -98,8 +73,6 @@ struct ConstBufferData
 {
     CameraConstBufferData camera;
     LightConstBufferData light;
-    ASConstBufferData as;
-    DebugConstBufferData debug;
     AlphaConstBufferData alphaData_;
 };
 
@@ -119,6 +92,7 @@ struct Vertex
     float3 Position;
     float3 Normal;
     float2 uv;
+    float2 subUV;
 };
 
 // ペイロード
@@ -266,7 +240,7 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     rayDesc.TMax = TMax;
 
     Payload payload;
-    payload.impactAmount_ = 0;
+    payload.impactAmount_ = 1;
     payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
     payload.recursive_ = 0;
     payload.ao_ = 0;
@@ -396,7 +370,7 @@ uint InitRand(uint Val0, uint Val1, uint Backoff = 16)
 
 
 // 当たった位置の情報を取得する関数
-Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer)
+Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer, inout Vertex meshInfo[3])
 {
     Vertex v = (Vertex) 0;
     float3 barycentrics = CalcBarycentrics(attrib.barys);
@@ -407,39 +381,52 @@ Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, S
         barycentrics.x, barycentrics.y, barycentrics.z
     };
 
-    for (int i = 0; i < 3; ++i)
+    for (int index = 0; index < 3; ++index)
     {
-        uint index = indexBuffer[vertexId + i];
-        float w = weights[i];
-        v.Position += vertexBuffer[index].Position * w;
-        v.Normal += vertexBuffer[index].Normal * w;
-        v.uv += vertexBuffer[index].uv * w;
+        uint vtxIndex = indexBuffer[vertexId + index];
+        float w = weights[index];
+        v.Position += vertexBuffer[vtxIndex].Position * w;
+        v.Normal += vertexBuffer[vtxIndex].Normal * w;
+        v.uv += vertexBuffer[vtxIndex].uv * w;
+        v.subUV += vertexBuffer[vtxIndex].subUV * w;
+        
+        // メッシュの情報を保存。
+        meshInfo[index].Position = mul(float4(vertexBuffer[vtxIndex].Position, 1), ObjectToWorld4x3());
+        meshInfo[index].Normal = normalize(mul(vertexBuffer[vtxIndex].Normal, (float3x3) ObjectToWorld4x3()));
+        meshInfo[index].uv = vertexBuffer[vtxIndex].uv;
     }
 
     return v;
 }
 
-void GetHitMeshInfo(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer, inout Vertex meshInfo[3])
+// 指定の頂点の衝突したメッシュ上での重心座標を求める。
+float3 CalcVertexBarys(float3 HitVertex, float3 VertexA, float3 VertexB, float3 VertexC)
 {
     
-    Vertex v = (Vertex) 0;
-    float3 barycentrics = CalcBarycentrics(attrib.barys);
-    uint vertexId = PrimitiveIndex() * 3; // Triangle List のため.
+    float3 e0 = VertexB - VertexA;
+    float3 e1 = VertexC - VertexA;
+    float3 e2 = HitVertex - VertexA;
+    float d00 = dot(e0, e0);
+    float d01 = dot(e0, e1);
+    float d11 = dot(e1, e1);
+    float d20 = dot(e2, e0);
+    float d21 = dot(e2, e1);
+    float denom = 1.0 / (d00 * d11 - d01 * d01);
+    float v = (d11 * d20 - d01 * d21) * denom;
+    float w = (d00 * d21 - d01 * d20) * denom;
+    float u = 1.0 - v - w;
+    return float3(u, v, w);
+    
+ //   // 取得した三角形の面積を求める。
+ //   float area = length(cross(hitVertex[2] - hitVertex[0], hitVertex[1] - hitVertex[0])) / 2.0f;
 
-    float weights[3] =
-    {
-        barycentrics.x, barycentrics.y, barycentrics.z
-    };
+	//// 重心座標を求める。
+ //   float3 bary;
+ //   bary.x = length(cross(hitVertex[0] - VertexPos, hitVertex[1] - VertexPos)) / 2.0f / area;
+ //   bary.y = length(cross(hitVertex[1] - VertexPos, hitVertex[2] - VertexPos)) / 2.0f / area;
+ //   bary.z = length(cross(hitVertex[2] - VertexPos, hitVertex[0] - VertexPos)) / 2.0f / area;
 
-    for (int i = 0; i < 3; ++i)
-    {
-        uint index = indexBuffer[vertexId + i];
-        
-        meshInfo[i].Position = vertexBuffer[index].Position;
-        meshInfo[i].Normal = vertexBuffer[index].Normal;
-        meshInfo[i].uv = vertexBuffer[index].uv;
-       
-    }
+ //   return bary;
     
 }
 
