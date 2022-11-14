@@ -108,7 +108,8 @@ struct Payload
     float3 denoiseMask_; // デノイズのマスクの色情報
     uint alphaCounter_; // 薄いアルファのオブジェクトに当たった数
     uint isCullingAlpha_; // 薄いアルファのオブジェクトに一定以上当たったら次からアルファを無効化するフラグ。
-    float2 pad_;
+    float roughnessOffset_;
+    float pad_;
 };
 
 struct MyAttribute
@@ -210,6 +211,8 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     payloadData.light_ = float3(0, 0, 0);
     payloadData.isCullingAlpha_ = false;
     payloadData.alphaCounter_ = 0;
+    payloadData.roughnessOffset_ = 1.0f;
+    payloadData.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -250,6 +253,8 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;
+    payload.roughnessOffset_ = 1.0f;
+    payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -294,6 +299,8 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;
+    payload.roughnessOffset_ = 1.0f;
+    payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
@@ -416,17 +423,6 @@ float3 CalcVertexBarys(float3 HitVertex, float3 VertexA, float3 VertexB, float3 
     float w = (d00 * d21 - d01 * d20) * denom;
     float u = 1.0 - v - w;
     return float3(u, v, w);
-    
- //   // 取得した三角形の面積を求める。
- //   float area = length(cross(hitVertex[2] - hitVertex[0], hitVertex[1] - hitVertex[0])) / 2.0f;
-
-	//// 重心座標を求める。
- //   float3 bary;
- //   bary.x = length(cross(hitVertex[0] - VertexPos, hitVertex[1] - VertexPos)) / 2.0f / area;
- //   bary.y = length(cross(hitVertex[1] - VertexPos, hitVertex[2] - VertexPos)) / 2.0f / area;
- //   bary.z = length(cross(hitVertex[2] - VertexPos, hitVertex[0] - VertexPos)) / 2.0f / area;
-
- //   return bary;
     
 }
 
