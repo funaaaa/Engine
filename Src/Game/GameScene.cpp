@@ -450,6 +450,7 @@ void GameScene::Input()
 }
 
 #include "BaseItem.h"
+#include "Character.h"
 void GameScene::InputImGUI()
 {
 
@@ -458,9 +459,6 @@ void GameScene::InputImGUI()
 	ImGui::Text("Let's do three laps!");
 
 	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
-	bool isMip = RayEngine::Ins()->constBufferData_.light_.pointLight_[0].pad_.x;
-	ImGui::Checkbox("MipFlag", &isMip);
-	RayEngine::Ins()->constBufferData_.light_.pointLight_[0].pad_.x = isMip;
 
 	//// 太陽の移動速度を更新。
 	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
