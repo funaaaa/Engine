@@ -118,50 +118,8 @@ void TitleScene::Update()
 	ImGui::SameLine();
 	ImGui::RadioButton("Car", &objectIndex_, 3);
 
-	//if (objectIndex_ == 2) {
+	ImGui::SliderFloat("Roughness", &pbrTestBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
 
-	//	ImGui::SliderFloat("Metalness", &pbrTestBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
-	//	ImGui::SliderFloat("Specular", &pbrTestBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
-	//	ImGui::SliderFloat("Roughness", &pbrTestBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
-
-	//}
-
-	//// AIかゴーストかを選択する。
-	//int mode = static_cast<int>(GameSceneMode::Ins()->mode_);
-	//ImGui::RadioButton("AI", &mode, 1);
-	//ImGui::SameLine();
-	//ImGui::RadioButton("GHOST", &mode, 3);
-	//GameSceneMode::Ins()->mode_ = static_cast<GameSceneMode::MODE>(mode);
-
-	//envMap2Blas_.lock()->Update();
-	//envMap3Blas_.lock()->Update();
-
-	//// AIだったら。
-	//if (mode == 1) {
-
-	//	int level = GameSceneMode::Ins()->level_;
-	//	ImGui::RadioButton("Level : 1", &level, 0);
-	//	ImGui::SameLine();
-	//	ImGui::RadioButton("Level : 2", &level, 1);
-	//	ImGui::SameLine();
-	//	ImGui::RadioButton("Level : 3", &level, 2);
-	//	GameSceneMode::Ins()->level_ = level;
-
-	//}
-	//// GHOSTだったら。
-	//else if (mode == 3) {
-
-	//	int level = GameSceneMode::Ins()->level_;
-	//	ImGui::RadioButton("Level : 1", &level, 0);
-	//	ImGui::SameLine();
-	//	ImGui::RadioButton("Level : 2", &level, 1);
-	//	ImGui::SameLine();
-	//	ImGui::RadioButton("Level : 3", &level, 2);
-	//	ImGui::SameLine();
-	//	ImGui::RadioButton("Level : 4", &level, 3);
-	//	GameSceneMode::Ins()->level_ = level;
-
-	//}
 
 	// 環境マップを更新。
 	if (invMapIndex_ == 0) {
@@ -214,22 +172,6 @@ void TitleScene::Update()
 
 	}
 
-	//if (Input::Ins()->IsKey(DIK_UP)) {
-
-	//	pbrTestBlas_.lock()->GetMaterial().metalness_ += 0.01f;
-	//	pbrTestBlas_.lock()->GetMaterial().roughness_ = 0.3f;
-	//	pbrTestBlas_.lock()->GetMaterial().metalness_ = FHelper::Saturate(pbrTestBlas_.lock()->GetMaterial().metalness_);
-
-	//}
-	//else if (Input::Ins()->IsKey(DIK_DOWN)) {
-
-
-	//	pbrTestBlas_.lock()->GetMaterial().metalness_ -= 0.01f;
-	//	pbrTestBlas_.lock()->GetMaterial().roughness_ = 0.3f;
-	//	pbrTestBlas_.lock()->GetMaterial().metalness_ = FHelper::Saturate(pbrTestBlas_.lock()->GetMaterial().metalness_);
-
-
-	//}
 
 	pbrTestBlas_.lock()->IsChangeMaterial();
 
