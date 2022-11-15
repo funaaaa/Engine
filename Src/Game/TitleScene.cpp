@@ -43,10 +43,10 @@ void TitleScene::Init()
 	player_->pos_ = Vec3(0, 10000, 0);
 
 	// 環境マップを生成。
-	envMap1Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	envMap2Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap1Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	envMap2Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
 	envMap2Blas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/envMap2.dds"));
-	envMap3Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	envMap3Blas_ = BLASRegister::Ins()->GenerateObj("Resource/Title/", "envMap.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
 	envMap3Blas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/envMap3.dds"));
 	envMap1_ = PolygonInstanceRegister::Ins()->CreateInstance(envMap1Blas_, static_cast<int>(PolygonInstanceRegister::TEXCOLOR));
 	envMap1_.lock()->AddScale(Vec3(300, 300, 300));
@@ -112,6 +112,12 @@ void TitleScene::Update()
 
 	}
 
+	static int counter = 0;
+	if (counter == 0) {
+		++counter;
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(0.5f, 0.5f, 0.5f).GetNormal();
+	}
+
 	ImGui::Text("SceneSelect");
 
 	ImGui::RadioButton("Street", &invMapIndex_, 0);
@@ -138,6 +144,19 @@ void TitleScene::Update()
 
 
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
+	ImGui::SliderFloat("DirLightX", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.x_, -0.999f, 0.999f);
+	ImGui::SliderFloat("DirLightY", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_, -0.899f, 0.999f);
+	ImGui::SliderFloat("DirLightZ", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.z_, -0.999f, 0.999f);
+
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
+
+	if (RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_ <= -0.85f) {
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_ = -0.84f;
+	}
+
+	if (std::isnan(RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.x_)) {
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(0.5f, 0.5f, 0.5f);
+	}
 
 	// 環境マップを更新。
 	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 1.0f, 1.0f);

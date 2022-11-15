@@ -261,8 +261,8 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
     //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
-    flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
+    flags |= RAY_FLAG_CULL_FRONT_FACING_TRIANGLES;
+    flags |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderを実行
     
     // ???C?g????O?B
     uint rayMask = ~(0x08);

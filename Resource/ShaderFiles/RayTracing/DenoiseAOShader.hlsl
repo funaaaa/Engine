@@ -760,6 +760,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
                 payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate * PayloadData.impactAmount_;
 
             }
+            
         
         }
     }
@@ -780,30 +781,9 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         if (0.0f < dirLightVisibility)
         {
             
-            const float SKYDOME_RADIUS = 15000.0f;
-            const float SAMPLING_POS_Y = 0.0f;
-            
-            // 天球の色をサンプリング
-            //float3 samplingVec = normalize(float3(1.0f, 0.1f, 0.1f)) * SKYDOME_RADIUS;
-            float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir * float3(1.0f, 0.0f, 1.0f)) * SKYDOME_RADIUS;
-            samplingVec.y = 0.1f;
-            
-            // サンプリングするベクトル
-            samplingVec.y = SAMPLING_POS_Y;
-            samplingVec = normalize(samplingVec);
-            
-            // サンプリングする座標
-            float3 samplingPos;
-            samplingPos = samplingVec * SKYDOME_RADIUS;
-            
-            // 大気散乱の色
-            float3 mieColor = float3(1, 1, 1);
-            float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
-            
-            payloadBuff.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) + BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
+            payloadBuff.light_ += float3(1.0f, 1.0f, 1.0f) * BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal);
             payloadBuff.light_ = saturate(payloadBuff.light_);
             
-            payloadBuff.light_ = float3(1.0f, 1.0f, 1.0f);
             
         }
         else
@@ -814,6 +794,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         }
         
     }
+    //payloadBuff.color_ = float3(0, 1, 0);
         
     // AOの計算。
     {
@@ -1139,49 +1120,9 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     }
     else
     {
-        //// レイの発射ベクトルを求めるのに必要な変数たち
-        //matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
-        //matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
-        //float2 dims = float2(DispatchRaysDimensions().xy);
-        //float aspect = dims.x / dims.y;
-        
-        //// 現在のレイからX+方向の発射ベクトル
-        //uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
-        //float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
-        //float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-        //float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
-        
-        //// 現在のレイからY+方向の発射ベクトル
-        //launchIndex -= uint2(1, -1);
-        //d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
-        //target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-        //float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
-        
-        //// レイの射出地点。
-        //float3 worldRayOrigin = WorldRayOrigin() + (RayTMin() * WorldRayDirection());
-        
-        //// ベクトルXが平面に当たるまでの長さと衝突地点を求める。
-        //float lengthX = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirX);
-        //float3 impPosX = rayDirX * lengthX + worldRayOrigin;
-        
-        //// ベクトルYが平面に当たるまでの長さと衝突地点を求める。
-        //float lengthY = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirY);
-        //float3 impPosY = rayDirY * lengthY + worldRayOrigin;
-        
-        //// XYの重心座標を求める。
-        //float3 baryX = CalcVertexBarys(impPosX, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
-        //float3 baryY = CalcVertexBarys(impPosY, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
-        
-        //// uvを求めて、その差分を取得する。
-        //float2 uvX = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
-        //float2 uvY = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
-        //ddxUV = abs(uvX - vtx.uv);
-        //ddyUV = abs(uvY - vtx.uv);
-        
-        
 
         // テクスチャの色を取得。
-        texColor = (float4) texture.SampleLevel(smp, vtx.uv, 2);
+        texColor = (float4) texture.SampleLevel(smp, vtx.uv, 1);
         
     }
     
