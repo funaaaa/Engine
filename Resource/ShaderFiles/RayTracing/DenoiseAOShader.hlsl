@@ -1063,7 +1063,15 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     float2 ddxUV;
     float2 ddyUV;
     float4 texColor;
-    if (payload.rayID_ != CHS_IDENTIFICATION_RAYID_DEF)
+
+    if (gSceneParam.light.pointLight[0].pad.x)
+    {
+
+        // テクスチャの色を取得。
+        texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0);
+        
+    }
+    else if (payload.rayID_ != CHS_IDENTIFICATION_RAYID_DEF)
     {
         
         // レイの発射ベクトルを求めるのに必要な変数たち

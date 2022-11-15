@@ -140,7 +140,10 @@ void TitleScene::Update()
 	ImGui::RadioButton("Car", &objectIndex_, 3);
 
 	ImGui::Checkbox("StopRotation", &isStopRotate_);
-
+	ImGui::SameLine();
+	bool isMipmap = !RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x;
+	ImGui::Checkbox("MipmapFlag", &isMipmap);
+	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x = !isMipmap;
 
 
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
