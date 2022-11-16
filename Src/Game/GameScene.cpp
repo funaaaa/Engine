@@ -233,7 +233,7 @@ void GameScene::Update()
 	// ウィンドウの名前を更新。
 	//if (true) {
 
-	//FPS();
+	FPS();
 
 	//}
 	//else {
