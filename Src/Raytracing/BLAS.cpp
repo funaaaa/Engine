@@ -86,20 +86,42 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	vertexBuffer_ = CreateBuffer(
 		static_cast<size_t>(vertexStride_ * vertexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
 	vertexBuffer_->SetName(L"VertexBuffer");
 
+	// アップロード用頂点バッファを生成する。
+	vertexUploadBuffer_ = CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	vertexUploadBuffer_->SetName(L"VertexUploadBuffer");
+
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+
 
 	// 頂点インデックスバッファを生成する。
 	indexBuffer_ = CreateBuffer(
 		static_cast<size_t>(indexStride_ * indexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+	indexBuffer_->SetName(L"IndexBuffer");
+
+	// アップロード用頂点インデックスバッファを生成する。
+	indexUploadBuffer_ = CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	indexUploadBuffer_->SetName(L"IndexUploadBuffer");
 
 	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
+	WriteToMemory(indexUploadBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_.Get(), indexUploadBuffer_.Get());
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
