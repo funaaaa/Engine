@@ -451,6 +451,7 @@ void GameScene::Input()
 
 #include "BaseItem.h"
 #include "Character.h"
+#include "BLAS.h"
 void GameScene::InputImGUI()
 {
 
@@ -459,6 +460,17 @@ void GameScene::InputImGUI()
 	ImGui::Text("Let's do three laps!");
 
 	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
+
+	ImGui::SliderFloat("Metalness", &BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().metalness_, 0.0f, 1.0f);
+	ImGui::SliderFloat("Roughness", &BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().roughness_, 0.0f, 1.0f);
+	ImGui::SliderFloat("Specular", &BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().specular_, 0.0f, 1.0f);
+	float baseColor[3] = { BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.x_, BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.y_, BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.z_};
+	ImGui::SliderFloat3("BaseColor", baseColor, 0.0f, 1.0f);
+	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.x_ = baseColor[0];
+	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.y_ = baseColor[1];
+	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.z_ = baseColor[2];
+
+	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->IsChangeMaterial();
 
 	//// 太陽の移動速度を更新。
 	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");

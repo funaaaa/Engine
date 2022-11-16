@@ -609,17 +609,17 @@ float3 SchlickFresnel3(float3 F0, float3 F90, float Cosine)
 }
 
 // ディズニーのフレネル計算
-float3 DisneyFresnel(float LdotH)
+float3 DisneyFresnel(float LdotH, float3 BaseColor)
 {
     
     // 輝度
-    float luminance = 0.3f * material[0].baseColor_.r + 0.6f * material[0].baseColor_.g + 0.1f * material[0].baseColor_.b;
+    float luminance = 0.3f * BaseColor.r + 0.6f * BaseColor.g + 0.1f * BaseColor.b;
     // 色合い
-    float3 tintColor = material[0].baseColor_ / luminance;
+    float3 tintColor = BaseColor / luminance;
     // 非金属の鏡面反射色を計算
     float3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
     // metalnessによる色補完 金属の場合はベースカラー
-    float3 specularColor = lerp(nonMetalColor, material[0].baseColor_, material[0].metalness_);
+    float3 specularColor = lerp(nonMetalColor, BaseColor, material[0].metalness_);
     // NdotHの割合でSchlickFresnel補間
     return SchlickFresnel3(specularColor, float3(1.0f, 1.0f, 1.0f), LdotH);
     
@@ -634,14 +634,14 @@ float GeometricSmith(float Cosine)
 }
 
 // 鏡面反射の計算
-float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH)
+float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH, float3 BaseColor)
 {
     
     // D項(分布:Distribution)
     float Ds = DistributionGGX(material[0].roughness_ * material[0].roughness_, NdotH);
     
     // F項(フレネル:Fresnel)
-    float3 Fs = DisneyFresnel(LdotH);
+    float3 Fs = DisneyFresnel(LdotH, BaseColor);
     
     // G項(幾何減衰:Geometry attenuation)
     float Gs = GeometricSmith(NdotL) * GeometricSmith(NdotV);
@@ -655,7 +655,7 @@ float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH)
 }
 
 // 双方向反射分布関数
-float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal)
+float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal, float3 BaseColor)
 {
     // 法線とライト方向の内積
     float NdotL = dot(Normal, LightVec);
@@ -698,10 +698,10 @@ float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal)
     float FD = FL * FV * energyFactor;
     
     // 拡散反射項
-    float3 diffuseColor = diffuseReflectance * FD * material[0].baseColor_ * (1.0f - material[0].metalness_);
+    float3 diffuseColor = diffuseReflectance * FD * BaseColor * (1.0f - material[0].metalness_);
     
     // 鏡面反射項
-    float3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH);
+    float3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH, BaseColor);
     
     return diffuseColor + specularColor;
     
@@ -757,7 +757,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
                 rate = 1.0f - rate;
                 
 
-                payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate * PayloadData.impactAmount_;
+                payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal, material[0].baseColor_) * rate * PayloadData.impactAmount_;
 
             }
         
@@ -800,7 +800,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             float3 mieColor = float3(1, 1, 1);
             float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
             
-            payloadBuff.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) + BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
+            payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal, float3(1, 1, 1)) * PayloadData.impactAmount_;
             payloadBuff.light_ = saturate(payloadBuff.light_);
             
         }
@@ -1182,26 +1182,26 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     float3 normalMapColor = (float3) normalTexture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
     
     // 法線マップの色とテクスチャの色が同じじゃなかったら法線マップの色を再取得。(法線マップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
-    if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
-    {
-        worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
+    //if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
+    //{
+    //    worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
         
-        // 接空間変換用
-        float3 tan;
-        float3 bnorm;
-        CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
+    //    // 接空間変換用
+    //    float3 tan;
+    //    float3 bnorm;
+    //    CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
         
-        // 説空間行列を求める。
-        float3x3 mat =
-        {
-            float3(tan),
-            float3(bnorm),
-            float3(vtx.Normal)
-        };
+    //    // 説空間行列を求める。
+    //    float3x3 mat =
+    //    {
+    //        float3(tan),
+    //        float3(bnorm),
+    //        float3(vtx.Normal)
+    //    };
         
-        worldNormal = mul(worldNormal, mat);
+    //    worldNormal = mul(worldNormal, mat);
 
-    }
+    //}
     
 
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。
