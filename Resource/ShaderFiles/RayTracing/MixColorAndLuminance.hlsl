@@ -23,12 +23,12 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     // GI????
     float4 gi = InputGI[DTid.xy];
-    // ???C?g???????????GI??????B
+    // –¾‚é‚¢•”•ª‚Ì‚İ”½Ë‚ğ‹­‚ß‚éB
     gi.x *= saturate(aoLuminance.x + lightLuminance.x);
     gi.y *= saturate(aoLuminance.y + lightLuminance.y);
     gi.z *= saturate(aoLuminance.z + lightLuminance.z);
     
     // ??I?I??S???e?N?X?`??????????????B
-    OutputImg[DTid.xy] = (lightLuminance + gi - (1.0f - aoLuminance) / 5.0f) * (color);
+    OutputImg[DTid.xy] = (aoLuminance + lightLuminance + gi) * (color);
     
 }

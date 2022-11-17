@@ -73,7 +73,7 @@ GameScene::GameScene()
 	DriftParticleMgr::Ins()->Setting();
 
 	// ‘¾—z‚ÉŠÖ‚·‚é•Ï”
-	sunAngle_ = 0.1f;
+	sunAngle_ = 0.25f;
 	sunSpeed_ = 0.01f;
 
 	isDisplayFPS_ = false;
