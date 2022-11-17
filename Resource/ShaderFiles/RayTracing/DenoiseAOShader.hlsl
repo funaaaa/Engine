@@ -387,20 +387,20 @@ void mainMS(inout Payload PayloadData)
     float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
         
     // サンプリングした点が地上より下じゃなかったら。
-    if (t <= 0.9f)
-    {
+    //if (t <= 0.9f)
+    //{
             
-        // サンプリングした輝度をもとに、暗かったら星空を描画する。
-        t = (1.0f - t);
-        if (t != 0.0f)
-        {
-            t = pow(t, 10.0f);
-            //t = pow(2.0f, 10.0f * t - 10.0f);
-        }
-        //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
-        //payloadBuff.color_ = saturate(payloadBuff.color_);
+    //    // サンプリングした輝度をもとに、暗かったら星空を描画する。
+    //    t = (1.0f - t);
+    //    if (t != 0.0f)
+    //    {
+    //        t = pow(t, 10.0f);
+    //        //t = pow(2.0f, 10.0f * t - 10.0f);
+    //    }
+    //    //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
+    //    //payloadBuff.color_ = saturate(payloadBuff.color_);
             
-    }
+    //}
         
     // 影響度を0にする。
     payloadBuff.impactAmount_ = 0.0f;
@@ -525,23 +525,8 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     //    return true;
     //}
     
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
-    {
-        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-        payloadBuff.color_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-        payloadBuff.ao_ += 1 * payloadBuff.impactAmount_;
-        payloadBuff.gi_ += float3(0, 0, 0);
-        
-        // 影響度を0にする。
-        payloadBuff.impactAmount_ = 0.0f;
-        
-        PayloadData = payloadBuff;
-        
-        return true;
-    }
-    
     // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
         payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
         payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
@@ -807,8 +792,8 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         else
         {
             // 拡散反射光を擬似的に再現するために明るさを少しだけ上げる。
-            payloadBuff.light_ += float3(0.3f, 0.3f, 0.3f);
-            payloadBuff.light_ = saturate(payloadBuff.light_);
+            //payloadBuff.light_ += float3(0.3f, 0.3f, 0.3f);
+            //payloadBuff.light_ = saturate(payloadBuff.light_);
         }
         
         
