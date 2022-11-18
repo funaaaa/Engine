@@ -32,6 +32,7 @@ public:
 
 	// 指定のインデックスの法線ベクトルを変更。
 	void ChangeNormalTexture(int Index, int NormalTexture);
+	void ChangeMetalnessTexture(int Index, int MetalnessTexture);
 
 	// 当たり判定
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input);

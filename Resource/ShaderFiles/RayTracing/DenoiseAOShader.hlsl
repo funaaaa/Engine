@@ -805,11 +805,12 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
         float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
         
-        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 15, gRtScene);
+        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 5, gRtScene);
         
         float NoL = saturate(dot(WorldNormal, sampleDir));
         float pdf = 1.0f / (2.0f * PI);
         aoLightVisibility += aoLightVisibilityBuff;
+        aoLightVisibility = clamp(aoLightVisibility, 0.3f, 1.0f);
         
     }
     
@@ -827,7 +828,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
 }
 
 // ライティング後処理
-void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
+void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, float4 DefTexColor, inout float4 TexColor, uint InstanceID)
 {
     
     // Payload一時受け取り用変数。
@@ -983,9 +984,9 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         payloadBuff.roughnessOffset_ = rougness * 100.0f;
         
         // metalnessマップの色とテクスチャの色が同じじゃなかったらmetallnessマップの色を再取得。(metalnessマップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
-        if (!(TexColor.x == metalnessMapColor.x && TexColor.y == metalnessMapColor.y && TexColor.z == metalnessMapColor.z))
+        if (!(DefTexColor.x == metalnessMapColor.x && DefTexColor.y == metalnessMapColor.y && DefTexColor.z == metalnessMapColor.z))
         {
-            metal = saturate(metal + ((1.0f - metal) * (1.0f - metalnessMapColor.x)));
+            //metal = saturate((1.0f - metalnessMapColor.x));
         }
         
         if (payloadBuff.impactAmount_ < metal)
@@ -1162,11 +1163,12 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
     // テクスチャの色を取得。
     float4 texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
+    float4 defTexColor = texColor;
     
-    // 法線マップの色を取得。
-    float3 normalMapColor = (float3) normalTexture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
+    //// 法線マップの色を取得。
+    //float3 normalMapColor = (float3) normalTexture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
     
-    // 法線マップの色とテクスチャの色が同じじゃなかったら法線マップの色を再取得。(法線マップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
+    //// 法線マップの色とテクスチャの色が同じじゃなかったら法線マップの色を再取得。(法線マップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
     //if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
     //{
     //    worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
@@ -1206,7 +1208,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     }
     
     // ライティング後の処理を実行。 ----- ライティングの結果を合成する処理や反射や屈折等の再びレイを飛ばす必要があるオブジェクトの処理。
-    ProccessingAfterLighting(payload, vtx, worldPos, worldNormal, texColor, instanceID);
+    ProccessingAfterLighting(payload, vtx, worldPos, worldNormal, defTexColor, texColor, instanceID);
     
 }
 
