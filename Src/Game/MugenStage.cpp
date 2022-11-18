@@ -44,14 +44,6 @@ void MugenStage::Setting(int TireMaskIndex)
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
-	//{
-	//	// ステージの坂セット。
-	//	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
-	//		"Resource/Game/Stage/MugenStage/", "KariBlock.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	//	// ステージのパラメーターを設定。
-	//	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-	//}
-
 	// ステージの白線をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageWhiteLine.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
@@ -69,18 +61,6 @@ void MugenStage::Setting(int TireMaskIndex)
 		"Resource/Game/Stage/MugenStage/", "MugenStageSidewalk.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-
-	// ステージのビルをセット。
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/MugenStage/Building/", "Building1.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	// ステージのパラメーターを設定。
-	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-
-	//// ステージの坂セット。
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
-	//	"Resource/Game/Stage/MugenStage/", "MugenStageTunnelSlope.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
-	//// ステージのパラメーターを設定。
-	//stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
@@ -213,41 +193,8 @@ void MugenStage::Setting(int TireMaskIndex)
 
 	}
 
-	//// 木
-	//ConvertGimmickInfoFromBlender treeData;
-	//treeData.Convert("Resource/Game/Stage/MugenStage/", "MugenStageTree.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(120, 120, 120));
-
-	//int treeCount = treeData.GetVertexSize();
-	//for (int index = 0; index < treeCount; ++index) {
-
-	//	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//		"Resource/Game/Stage/Tree/", "mapleLeaf.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, false);
-	//	stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index) + Vec3(0, -10, 0));
-	//	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-	//	stageObjectMgr_->ChangeScale(indexBuff, Vec3(20, 20, 20));
-	//	BLASRegister::Ins()->GetBlasSpecificationIndex(stageObjectMgr_->GetBlasIndex(indexBuff)).lock()->ChangeNormalTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/Tree/maple_leaf_normal.dds"));
-
-	//	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//		"Resource/Game/Stage/Tree/", "mapleBark.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	//	stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index) + Vec3(0, -10, 0));
-	//	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-	//	stageObjectMgr_->ChangeScale(indexBuff, Vec3(20, 20, 20));
-
-	//}
-
-	// フェンスを生成。
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence01.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence02.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence03.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence04.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
+	// ビルをロード
+	LoadBuilding();
 
 	// 点光源
 	ConvertGimmickInfoFromBlender pointLightData;
@@ -383,5 +330,169 @@ void MugenStage::NonDisplayGoal()
 	/*===== ゴールの非表示 =====*/
 
 	//PolygonInstanceRegister::Ins()->NonDisplay(goalInsIndex);
+
+}
+
+#include <fstream>
+#include <iostream>
+#include <sstream>
+void MugenStage::LoadBuilding()
+{
+
+	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData.txt");
+	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData2.txt");
+
+}
+
+void MugenStage::GetBuildingData(std::string FilePath)
+{
+
+	// ファイルを開く。
+	std::ifstream file(FilePath);
+
+	// 失敗を検出。
+	if (!file) {
+		assert(0);
+	}
+
+	// 1行を読み取る。
+	std::string cutLine;
+	int objType = 0;
+	Vec3 pos;
+	Vec3 rotate;
+	Vec3 scale;
+	OBJ_DATA_ID lineDataID = OBJ_DATA_ID::ID;
+	while (std::getline(file, cutLine, '\n')) {
+
+		std::istringstream line(cutLine);
+		std::string cutElement;
+		while (std::getline(line, cutElement, ' ')) {
+
+			std::istringstream operationElement(cutElement);
+			std::string operationString;
+
+			// Positionだったら座標データ
+			if (cutElement == "Position") {
+				lineDataID = OBJ_DATA_ID::POSITION;
+				continue;
+			}
+			// Scaleだったら座標データ
+			if (cutElement == "Scale") {
+				lineDataID = OBJ_DATA_ID::SCALE;
+				continue;
+			}
+			// Rotationだったら座標データ
+			if (cutElement == "Rotation") {
+				lineDataID = OBJ_DATA_ID::ROTATE;
+				continue;
+			}
+
+			if (cutElement == "--") {
+				int indexBuff = 0;
+				if (objType == 0) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingLow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 1) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingLow2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 2) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 3) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 4) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingHigh.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				stageObjectMgr_->ChangeScale(indexBuff, scale);
+				stageObjectMgr_->ChangeRotate(indexBuff, rotate);
+				stageObjectMgr_->ChangeTrans(indexBuff, pos);
+				continue;
+			}
+
+
+			OBJ_DATA_ID id = OBJ_DATA_ID::ID;
+			while (std::getline(operationElement, operationString, ':')) {
+
+				// IDだったらビルのID。
+				if (operationString == "ID") {
+					id = OBJ_DATA_ID::ID;
+					continue;
+				}
+
+				if (operationString == "X") {
+					id = OBJ_DATA_ID::X;
+					continue;
+				}
+				if (operationString == "Y") {
+					id = OBJ_DATA_ID::Y;
+					continue;
+				}
+				if (operationString == "Z") {
+					id = OBJ_DATA_ID::Z;
+					continue;
+				}
+
+				// IDがIDだったらビルのIDなので、保存する。
+				if (id == OBJ_DATA_ID::ID) {
+					objType = std::stoi(operationString);
+					continue;
+				}
+
+				// 行でのデータIDによってどのデータを保存するかを決める。
+				if (lineDataID == OBJ_DATA_ID::POSITION) {
+
+					if (id == OBJ_DATA_ID::X) {
+						pos.x_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Y) {
+						pos.y_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Z) {
+						pos.z_ = std::stof(operationString);
+					}
+
+				}
+				else if (lineDataID == OBJ_DATA_ID::SCALE) {
+
+					if (id == OBJ_DATA_ID::X) {
+						scale.x_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Y) {
+						scale.y_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Z) {
+						scale.z_ = std::stof(operationString);
+					}
+
+				}
+				else if (lineDataID == OBJ_DATA_ID::ROTATE) {
+
+					if (id == OBJ_DATA_ID::X) {
+						rotate.x_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Y) {
+						rotate.y_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Z) {
+						rotate.z_ = std::stof(operationString);
+					}
+
+				}
+
+
+			}
+
+		}
+
+	}
+
+	// ファイルを閉じる。
+	file.close();
 
 }

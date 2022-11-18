@@ -849,7 +849,11 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 	}
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST));
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
 
 	// 頂点を書き換えたフラグを立てる。
 	isChangeVertex_ = true;

@@ -106,6 +106,16 @@ private:
 	Vec3 COUNT_DOWN_START_POS = Vec3(1280.0f / 2.0f, 720.0f / 2.0f - 300.0f, 0.1f);
 
 
+	std::weak_ptr<BLAS> low_;
+	std::weak_ptr<BLAS> low2_;
+	std::weak_ptr<BLAS> middle_;
+	std::weak_ptr<BLAS> middle2_;
+	std::weak_ptr<BLAS> high_;
+	std::vector<std::weak_ptr<PolygonMeshInstance>> obj_;
+	std::vector<int> objID_;
+	int instanceIndex_;
+
+
 public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/

@@ -26,6 +26,8 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr
 
 	shaderID_ = ShaderID;
 
+	scale_ = Vec3(1, 1, 1);
+
 	// インスタンスの詳細を設定。
 	instanceDesc.InstanceID = ShaderID;
 	instanceDesc.InstanceMask = 0xFF;
@@ -200,6 +202,8 @@ void PolygonMeshInstance::AddScale(const Vec3& Scale)
 
 	scaleMat_ *= buff;
 
+	scale_ += Scale;
+
 	if (haveMeshCollisionData_) {
 		CalMeshCollisionData();
 	}
@@ -225,6 +229,8 @@ void PolygonMeshInstance::ChangeScale(const Vec3& Scale)
 	buff = DirectX::XMMatrixScaling(Scale.x_, Scale.y_, Scale.z_);
 
 	scaleMat_ = buff;
+
+	scale_ = Scale;
 
 	if (haveMeshCollisionData_) {
 		CalMeshCollisionData();
