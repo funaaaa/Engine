@@ -223,16 +223,6 @@ void GameScene::Init()
 	Camera::Ins()->eye_ = Vec3(0, 0, 0);
 	Camera::Ins()->target_ = Vec3(10, 0, 0);
 
-	//low_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Stage/MugenStage/Building/", "BuildingLow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	//low2_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Stage/MugenStage/Building/", "BuildingLow2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	//middle_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	//middle2_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	//high_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Stage/MugenStage/Building/", "BuildingHigh.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	//obj_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(low_, PolygonInstanceRegister::DEF));
-	//obj_.back().lock()->ChangeScale(Vec3(120, 120, 120));
-	//objID_.emplace_back(0);
-	//instanceIndex_ = 0;
-
 }
 
 #include <ostream>
@@ -266,55 +256,6 @@ void GameScene::Update()
 
 	// カメラを更新。
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
-
-	//Vec3 eye = Camera::Ins()->eye_;
-	//Vec3 target = Camera::Ins()->target_;
-	//target.y_ = eye.y_;
-
-	//const float EYE_TARGET_DISTANCE = 10.0f;
-
-	//Vec3 eyeTargetVec = (target - eye).GetNormal();
-	//float eyeTargetAngle = atan2f(eyeTargetVec.z_, eyeTargetVec.x_);
-
-	//float speed = 20.0f;
-	//if (Input::Ins()->IsKey(DIK_W)) {
-	//	eye += eyeTargetVec * speed;
-	//	target += eyeTargetVec * speed;
-	//}
-	//if (Input::Ins()->IsKey(DIK_S)) {
-	//	eye -= eyeTargetVec * speed;
-	//	target -= eyeTargetVec * speed;
-	//}
-	//if (Input::Ins()->IsKey(DIK_A)) {
-	//	float moveAngle = eyeTargetAngle + DirectX::XM_PIDIV2;
-	//	Vec3 aa = Vec3(cosf(moveAngle), 0.0f, sinf(moveAngle));
-	//	eye += Vec3(cosf(moveAngle), 0.0f, sinf(moveAngle)) * speed;
-	//	target += Vec3(cosf(moveAngle), 0.0f, sinf(moveAngle)) * speed;
-	//}
-	//if (Input::Ins()->IsKey(DIK_D)) {
-	//	float moveAngle = eyeTargetAngle - DirectX::XM_PIDIV2;
-	//	eye += Vec3(cosf(moveAngle), 0.0f, sinf(moveAngle)) * speed;
-	//	target += Vec3(cosf(moveAngle), 0.0f, sinf(moveAngle)) * speed;
-	//}
-	//if (Input::Ins()->IsKey(DIK_LSHIFT)) {
-	//	eye.y_ += speed;
-	//	target.y_ += speed;
-	//}
-	//if (Input::Ins()->IsKey(DIK_SPACE)) {
-	//	eye.y_ -= speed;
-	//	target.y_ -= speed;
-	//}
-	//if (Input::Ins()->IsKey(DIK_LEFT)) {
-	//	eyeTargetAngle += DirectX::XM_PIDIV2 / 50.0f;
-	//}
-	//if (Input::Ins()->IsKey(DIK_RIGHT)) {
-	//	eyeTargetAngle -= DirectX::XM_PIDIV2 / 50.0f;
-	//}
-
-	//Camera::Ins()->eye_ = eye;
-	//Camera::Ins()->target_ = eye + Vec3(cosf(eyeTargetAngle), -0.5f, sinf(eyeTargetAngle)).GetNormal() * EYE_TARGET_DISTANCE;
-	//Camera::Ins()->GenerateMatView();
-
 
 	// いずれかのキャラがゴールしていたらリザルトシーンに移動する。
 	if (characterMgr_->CheckGoal()) {
@@ -390,107 +331,6 @@ void GameScene::Update()
 		concentrationLine_->Generate();
 	}
 	concentrationLine_->Update();
-
-	//// 追加するObjの種類。
-	//static int objType = 0;
-	//ImGui::RadioButton("LOW", &objType, 0);
-	//ImGui::SameLine();
-	//ImGui::RadioButton("LOW2", &objType, 1);
-	//ImGui::SameLine();
-	//ImGui::RadioButton("MIDDLE", &objType, 2);
-	//ImGui::SameLine();
-	//ImGui::RadioButton("MIDDLE2", &objType, 3);
-	//ImGui::SameLine();
-	//ImGui::RadioButton("HIGH", &objType, 4);
-
-	//// Objを追加。
-	//bool isGenerate = false;
-	//ImGui::Checkbox("Generate", &isGenerate);
-	//if (isGenerate) {
-
-	//	std::weak_ptr<BLAS> generateBlas = low_;
-	//	if (objType == 1) {
-	//		generateBlas = low2_;
-	//	}
-	//	if (objType == 2) {
-	//		generateBlas = middle_;
-	//	}
-	//	if (objType == 3) {
-	//		generateBlas = middle2_;
-	//	}
-	//	if (objType == 4) {
-	//		generateBlas = high_;
-	//	}
-
-	//	obj_.emplace_back(PolygonInstanceRegister::Ins()->CreateInstance(generateBlas, PolygonInstanceRegister::DEF));
-	//	obj_.back().lock()->ChangeScale(Vec3(120, 120, 120));
-	//	obj_.back().lock()->ChangeTrans(Vec3());
-	//	obj_.back().lock()->ChangeRotate(Vec3());
-	//	objID_.emplace_back(objType);
-
-	//}
-
-	//// Instanceを選択する。
-	//const int INSTANCE_COUNT = static_cast<int>(obj_.size());
-	//ImGui::SliderInt("InstanceIndex", &instanceIndex_, 0, INSTANCE_COUNT - 1);
-
-	//// 座標を動かす。
-	//Vec3 pos = obj_[instanceIndex_].lock()->GetPos();
-	//float position[3] = { pos.x_, pos.y_, pos.z_ };
-	//ImGui::DragFloat3("Pos", position, 0.5f);
-	//obj_[instanceIndex_].lock()->ChangeTrans(Vec3(position[0], position[1], position[2]));
-
-	//// 回転させる。
-	//Vec3 rotate = obj_[instanceIndex_].lock()->GetRotateVec3();
-	//float rotation[3] = { rotate.x_, rotate.y_, rotate.z_ };
-	//ImGui::DragFloat3("Rotate", rotation, 0.01f);
-	//obj_[instanceIndex_].lock()->ChangeRotate(Vec3(rotation[0], rotation[1], rotation[2]));
-
-
-
-	//// ファイルに書き込む。
-	//bool isWrite = false;
-	//ImGui::Checkbox("WriteData", &isWrite);
-	//if (isWrite) {
-
-	//	std::ofstream wfile;
-
-	//	// ファイルを開く。未生成だったらファイルを生成する。
-	//	wfile.open("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData3.txt", std::ios::app);
-
-	//	for (int index = 0; index < INSTANCE_COUNT; ++index) {
-
-	//		// OBJ識別子
-	//		wfile << "ID:" << objID_[index] << std::endl;
-
-	//		// 座標を取得する。
-	//		Vec3 pos = obj_[index].lock()->GetPos();
-
-	//		// 座標を書き込む。
-	//		wfile<< "Position" << " " << "X:" << pos.x_ << " " << "Y:" << pos.y_ << " " << "Z:" << pos.z_ << " \n" << std::endl;
-
-	//		// 回転を取得する。
-	//		Vec3 rotate = obj_[index].lock()->GetRotateVec3();
-
-	//		// 回転を書き込む。
-	//		wfile << "Rotation" << " " << "X:" << rotate.x_ << " " << "Y:" << rotate.y_ << " " << "Z:" << rotate.z_ << " \n" << std::endl;
-
-	//		// 大きさを取得する。
-	//		Vec3 scale = obj_[index].lock()->GetChangeScale();
-
-	//		// 大きさを書き込む。
-	//		wfile << "Scale" << " " << "X:" << scale.x_ << " " << "Y:" << scale.y_ << " " << "Z:" << scale.z_ << " \n" << std::endl;
-
-	//		// Instance情報の区切り用文字を書き込む。
-	//		wfile << "\n\n--\n" << std::endl;
-
-
-	//	}
-
-	//	// ファイルを閉じる。
-	//	wfile.close();
-
-	//}
 
 
 }
@@ -606,11 +446,11 @@ void GameScene::Input()
 
 	/*===== 入力処理 =====*/
 
-	//if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
-	//	isTransition_ = true;
+		isTransition_ = true;
 
-	//}
+	}
 
 	InputImGUI();
 
