@@ -20,6 +20,7 @@ private:
 	/*===== メンバ変数 =====*/
 
 	Sprite title_;
+	Sprite titleOperation_;
 
 	// ステージ関係。
 	std::vector<std::shared_ptr<BaseStage>> stages_;
@@ -56,6 +57,12 @@ private:
 	float cameraAngle_;			// カメラを回転させるときの角度。主にスタート時のカメラで使用する。
 	float cameraHeight_;		// カメラの高さのオフセット。主にスタート時のカメラで使用する。
 	float cameraDistance_;		// カメラとプレイヤーの距離。主にスタート時のカメラで使用する。
+
+	// 操作方法のUI用
+	bool isExp;
+	const float ADD_EASING_TIMER_UI = 0.05f;
+	float easingTimerUI_;
+
 
 public:
 

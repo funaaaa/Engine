@@ -27,6 +27,7 @@ TitleScene::TitleScene()
 	nextScene_ = SCENE_ID::GAME;
 
 	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
+	titleOperation_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/titleOperation.png");
 
 	// ステージをセッティングする。
 	stages_.emplace_back(std::make_shared<MugenStage>());
@@ -78,6 +79,8 @@ void TitleScene::Init()
 	cameraHeight_ = 0.0f;
 	cameraDistance_ = 0.0f;
 	transitionCounter_ = 0.0f;
+	isExp = false;
+	easingTimerUI_ = 0.0f;
 
 }
 
@@ -276,6 +279,25 @@ void TitleScene::Update()
 
 	Camera::Ins()->GenerateMatView();
 
+
+	// 操作方法のUIの更新処理
+	easingTimerUI_ += ADD_EASING_TIMER_UI;
+	if (1.0f < easingTimerUI_) {
+		easingTimerUI_ = 0.0f;
+		isExp = isExp ? false : true;
+	}
+
+	// イージングでアルファを変える。
+	float easingValue = 0;
+	if (isExp) {
+		easingValue = FEasing::EaseOutQuint(easingTimerUI_);
+	}
+	else {
+		easingValue = 1.0f - FEasing::EaseInQuint(easingTimerUI_);
+	}
+	titleOperation_.SetColor(DirectX::XMFLOAT4(1, 1, 1, easingValue));
+
+
 }
 
 void TitleScene::Draw()
@@ -289,6 +311,7 @@ void TitleScene::Draw()
 	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 	title_.Draw();
+	titleOperation_.Draw();
 
 	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
