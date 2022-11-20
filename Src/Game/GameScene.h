@@ -31,10 +31,6 @@ private:
 	int sphereBlas_;
 	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns_;
 
-	// 天球用のスフィア
-	std::weak_ptr<BLAS> skyDomeBlas_;
-	std::weak_ptr<PolygonMeshInstance> skyDomeIns_;
-
 	// ステージ関係。
 	std::vector<std::shared_ptr<BaseStage>> stages_;
 	enum STAGE_ID {
@@ -63,8 +59,6 @@ private:
 
 	// タイヤ痕出力用クラス
 	std::shared_ptr<RaytracingOutput> tireMaskTexture_;
-
-	// タイヤ痕出テスト用クラス
 	std::shared_ptr<RaytracingOutput> tireMaskTextureOutput_;
 	std::shared_ptr<RayComputeShader> tireMaskComputeShader_;
 	std::shared_ptr<RayComputeShader> whiteOutComputeShader_;
@@ -105,15 +99,6 @@ private:
 	Vec3 WINDOW_CENTER = Vec3(1280.0f / 2.0f, 720.0f / 2.0f, 0.1f);
 	Vec3 COUNT_DOWN_START_POS = Vec3(1280.0f / 2.0f, 720.0f / 2.0f - 300.0f, 0.1f);
 
-
-	std::weak_ptr<BLAS> low_;
-	std::weak_ptr<BLAS> low2_;
-	std::weak_ptr<BLAS> middle_;
-	std::weak_ptr<BLAS> middle2_;
-	std::weak_ptr<BLAS> high_;
-	std::vector<std::weak_ptr<PolygonMeshInstance>> obj_;
-	std::vector<int> objID_;
-	int instanceIndex_;
 
 
 public:

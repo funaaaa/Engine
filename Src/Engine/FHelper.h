@@ -88,6 +88,11 @@ namespace FHelper {
 		if (1.0f < value) value = 1.0f;
 		return value;
 	}
+	inline float Clamp(float Value, float Min, float Max) {
+		if (Value < Min) Value = Min;
+		if (Max < Value) Value = Max;
+		return Value;
+	}
 
 	// ‰æ–Ê’†‰›
 	inline Vec3 WindowCenterPos() {

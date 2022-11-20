@@ -100,20 +100,16 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireFrameInstance, true));
 	tires_.emplace_back(std::make_shared<PlayerTire>(playerModel_.carBehindTireInstance, true));
 
-	if (SceneMgr::Ins()->nowScene_ != BaseScene::SCENE_ID::TITLE) {
-
-		// ロケットを生成。
-		rocketBlas_[0] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketHead.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-		rocketBlas_[1] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketBody.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-		rocketBlas_[2] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketLegs.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-		rocketBlas_[3] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-		for (int index = 0; index < 4; ++index) {
-			rocketIns_[index] = PolygonInstanceRegister::Ins()->CreateInstance(rocketBlas_[index], PolygonInstanceRegister::DEF);
-			rocketIns_[index].lock()->ChangeScale(Vec3(30, 30, 30));
-			rocketBlas_[index].lock()->ChangeMetalnessTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/metalness2.png"));
-			//PolygonInstanceRegister::Ins()->NonDisplay(rocketIns_[index].lock()->GetInstanceIndex());
-		}
-
+	// ロケットを生成。
+	rocketBlas_[0] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketHead.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	rocketBlas_[1] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketBody.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	rocketBlas_[2] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketLegs.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	rocketBlas_[3] = BLASRegister::Ins()->GenerateObj("Resource/Game/UI/", "RocketWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	for (int index = 0; index < 4; ++index) {
+		rocketIns_[index] = PolygonInstanceRegister::Ins()->CreateInstance(rocketBlas_[index], PolygonInstanceRegister::DEF);
+		rocketIns_[index].lock()->ChangeScale(Vec3(30, 30, 30));
+		rocketBlas_[index].lock()->ChangeMetalnessTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/metalness2.png"));
+		//PolygonInstanceRegister::Ins()->NonDisplay(rocketIns_[index].lock()->GetInstanceIndex());
 	}
 
 

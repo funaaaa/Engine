@@ -12,6 +12,11 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 #include "HitGroupMgr.h"
+#include "MugenStage.h"
+#include "BaseStage.h"
+#include "RayComputeShader.h"
+#include "RaytracingOutput.h"
+#include "DriftParticleMgr.h"
 
 TitleScene::TitleScene()
 {
@@ -22,6 +27,22 @@ TitleScene::TitleScene()
 	nextScene_ = SCENE_ID::GAME;
 
 	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
+
+	// ステージをセッティングする。
+	stages_.emplace_back(std::make_shared<MugenStage>());
+
+	// タイヤ痕用クラスをセット。
+	tireMaskTexture_ = std::make_shared<RaytracingOutput>();
+	tireMaskTexture_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	tireMaskTextureOutput_ = std::make_shared<RaytracingOutput>();
+	tireMaskTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
+	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
+	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
+	tireMaskConstBuffer_->Generate(sizeof(Character::TireMaskUV) * 2, L"TireMaskUV");
+
+	// 設定
+	DriftParticleMgr::Ins()->Setting();
 
 }
 
@@ -39,39 +60,24 @@ void TitleScene::Init()
 	PolygonInstanceRegister::Ins()->Setting();
 
 	// プレイヤーを生成。
-	player_ = std::make_shared<Character>(Character::CHARA_ID::P1, 0, 0);
-	player_->pos_ = Vec3(0, 10000, 0);
+	player_ = std::make_shared<Character>(Character::CHARA_ID::GHOST, 0, 0);
 
-	// コーネルボックスをロード
-	cornellBoxGreenBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxGreen.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	cornellBoxRedBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxRed.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	cornellBoxWhiteBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Title/cornellBoxWhite.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	skydomeBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/SkyDome/", "skydome.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
-	cornellBoxGreen_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxGreenBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
-	cornellBoxGreen_.lock()->AddScale(Vec3(100, 100, 100));
-	cornellBoxRed_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxRedBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
-	cornellBoxRed_.lock()->AddScale(Vec3(100, 100, 100));
-	cornellBoxWhite_ = PolygonInstanceRegister::Ins()->CreateInstance(cornellBoxWhiteBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
-	skydome_ = PolygonInstanceRegister::Ins()->CreateInstance(skydomeBlas_, static_cast<int>(PolygonInstanceRegister::DEF));
-	skydome_.lock()->AddScale(Vec3(100, 100, 100));
-	cornellBoxWhite_.lock()->AddScale(Vec3(100, 100, 100));
-	cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, 0, 0));
-	cornellBoxRed_.lock()->ChangeTrans(Vec3(0, 0, 0));
-	cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 0, 0));
+	// 一旦サーキットステージを有効化する。
+	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
 
-	player_->pos_ = Vec3(0, -70, 0);
-
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isActive_ = true;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPos_ = Vec3(0, 70, 0);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
+	// 設定
+	DriftParticleMgr::Ins()->Init();
 
 	// TLASを生成。
 	RayEngine::Ins()->SettingTLAS();
 
-	cameraAngle = 0;
-	invMapIndex_ = 0;
-	objectIndex_ = 1;
+	// カメラの初期状態を設定。
+	cameraMode_ = CAMERA_MODE::START;
+	cameraTimer_ = 0;
+	cameraAngle_ = 0.0f;
+	cameraHeight_ = 0.0f;
+	cameraDistance_ = 0.0f;
+	transitionCounter_ = 0.0f;
 
 }
 
@@ -124,24 +130,6 @@ void TitleScene::Update()
 
 	}
 
-	// コーネルボックスの位置を調整。
-	float offset = -40;
-	cornellBoxGreen_.lock()->ChangeTrans(Vec3(0, offset, 0));
-	cornellBoxRed_.lock()->ChangeTrans(Vec3(0, offset, 0));
-	cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, offset, 0));
-
-	player_->pos_ = Vec3(0, -70 + offset, 0);
-
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isActive_ = true;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPos_ = Vec3(0, -40 - offset, 0);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 0.2f, 0.2f);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightPower_ = 250.0f;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightSize_ = 5.0f;
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].isShadow_ = true;
-
-	// 並行光源を無効化。
-	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = false;
-
 	// TLASやパイプラインを更新。
 	RayEngine::Ins()->Update();
 
@@ -149,17 +137,143 @@ void TitleScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
 	// プレイヤーの位置を調整。
-	player_->UpdateTitle();
+	player_->Update(stages_[0], false, false);
 
-	// カメラの位置を調整。
-	cameraAngle += 0.01f;
+	// カメラの情報。
+	Vec3& eye = Camera::Ins()->eye_;
+	Vec3& target = Camera::Ins()->target_;
+	Vec3& up = Camera::Ins()->up_;
 
-	// カメラの角度から位置を求める。
-	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));
-	Camera::Ins()->eye_ = cameraDir * -500.0f;
-	Camera::Ins()->eye_.y_ = 70.0f;
-	Camera::Ins()->target_ = Vec3(0, 30, 0);
-	Camera::Ins()->up_ = Vec3(0, 1, 0);
+	// カメラの状態によって処理を変える。
+	switch (cameraMode_)
+	{
+	case TitleScene::CAMERA_MODE::START:
+	{
+
+		/*-- 開始時用カメラだったら --*/
+
+		// 高さを上げて回転させる。
+		const float MAX_HEIGHT = 200.0f;
+		const float ADD_HEIGHT = MAX_HEIGHT / CAMERA_TIMER[static_cast<int>(TitleScene::CAMERA_MODE::START)];
+		const float ADD_ANGLE = 0.03f;
+		const float MAX_DISTANCE = 200.0f;
+		const float ADD_DISTANCE = MAX_DISTANCE / CAMERA_TIMER[static_cast<int>(TitleScene::CAMERA_MODE::START)];;
+		cameraHeight_ = FHelper::Clamp(cameraHeight_ + ADD_HEIGHT, 0.0f, MAX_HEIGHT);
+		cameraAngle_ += ADD_ANGLE;
+		cameraDistance_ = FHelper::Clamp(cameraDistance_ + ADD_DISTANCE, 0.0f, MAX_DISTANCE);
+
+		// 角度をベクトルに直す。
+		Vec3 cameraVec = Vec3(cosf(cameraAngle_), 0.0f, sinf(cameraAngle_));
+
+		// カメラの位置を求める。
+		target = player_->GetPos();
+		eye = target + cameraVec * cameraDistance_ + Vec3(0, cameraHeight_, 0);
+		up = player_->GetUpVec();
+
+		break;
+
+	}
+	case TitleScene::CAMERA_MODE::PUT_BEFORE:
+	{
+
+		/*-- 前設置用カメラだったら --*/
+
+		float divCount = 10.0f;
+		if (transitionCounter_ == 1) {
+			divCount = 30.0f;
+		}
+
+		eye += (cameraPutBeforePos_ - eye) / divCount;
+		target = player_->GetPos();
+
+		break;
+
+	}
+	case TitleScene::CAMERA_MODE::UP_CLOSE:
+	{
+
+		/*-- 超接近カメラだったら --*/
+
+		const float CAMERA_FOCUS = 300.0f;
+		const float CAMERA_DISTANCE = 25.0f;
+		const float CAMERA_BEHIND_DISTANCE = 10.0f;
+
+		Vec3 baseEye = player_->GetPos() + Vec3(0, 1, 0) * CAMERA_DISTANCE + player_->GetForwardVec() * CAMERA_BEHIND_DISTANCE;
+		Vec3 baseTarget = player_->GetPos() + player_->GetForwardVec() * CAMERA_FOCUS;
+		up = player_->GetUpVec();
+
+		// 座標を補間する。
+		eye += (baseEye - eye) / 10.0f;
+		target += (baseTarget - target) / 10.0f;
+
+		break;
+
+	}
+	case TitleScene::CAMERA_MODE::FROM_FRONT:
+	{
+
+		/*-- 前追尾用カメラだったら --*/
+
+		const Vec3 CAMERA_DIR = Vec3(2.5f, 1.0f, 0).GetNormal();
+
+		// カメラの各ステータスを設定。
+		target = player_->GetPos();
+		float nowDistance = UPCLOSE_DISTANCE_MIN + (UPCLOSE_DISTANCE_MAX - UPCLOSE_DISTANCE_MIN) * (static_cast<float>(cameraTimer_) / CAMERA_TIMER[static_cast<int>(cameraMode_)]);
+		Vec3 baseEye = target + CAMERA_DIR * nowDistance;
+		eye += (baseEye - eye) / 10.0f;
+		up = Vec3(0, 1, 0);
+
+		break;
+
+	}
+	default:
+		break;
+	}
+
+	// カメラのタイマーを更新してカメラの状態を変える。
+	++cameraTimer_;
+	if (CAMERA_TIMER[static_cast<int>(cameraMode_)] <= cameraTimer_) {
+
+		// 乱数でカメラを変える。
+		if (cameraMode_ == CAMERA_MODE::START) {
+			cameraMode_ = CAMERA_MODE::PUT_BEFORE;
+		}
+		else {
+
+			// 前フレームと同じにならないようにする。
+			while (1) {
+				CAMERA_MODE randomMode = static_cast<CAMERA_MODE>(FHelper::GetRand(1, 3));
+				if (randomMode != cameraMode_) {
+					cameraMode_ = randomMode;
+					break;
+				}
+			}
+		}
+
+		// カメラ用変数を初期化。
+		cameraHeight_ = 0.0f;
+		cameraAngle_ = 0.0f;
+		cameraDistance_ = 0.0f;
+		cameraTimer_ = 0.0f;
+		++transitionCounter_;
+
+		// モードごとの初期化処理
+		switch (cameraMode_)
+		{
+		case TitleScene::CAMERA_MODE::PUT_BEFORE:
+			cameraPutBeforePos_ = player_->GetPos() + player_->GetForwardVec() * 1000.0f + Vec3(100, 100, 0);
+			break;
+		case TitleScene::CAMERA_MODE::UP_CLOSE:
+			cameraDistance_ = UPCLOSE_DISTANCE_MIN;
+			break;
+		case TitleScene::CAMERA_MODE::FROM_FRONT:
+			break;
+		default:
+			break;
+		}
+
+	}
+
 	Camera::Ins()->GenerateMatView();
 
 }
