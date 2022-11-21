@@ -35,8 +35,6 @@ void MugenStage::Setting(int TireMaskIndex)
 		"Resource/Game/Stage/MugenStage/", "MugenStageDraw.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-	//stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/NormalMap.dds"));
-	//stageObjectMgr_->ChangeMetalnessTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/StageTex/Road/MetalnessMap.png"));
 	// 当たり判定用のステージのUVをSubUVとして代入する。
 	stageObjectMgr_->AssignmentUVToSubUV(1, 2);
 
@@ -289,53 +287,6 @@ BaseStage::ColliderOutput MugenStage::Collider(BaseStage::ColliderInput Input)
 	output = stageObjectMgr_->Collider(Input);
 
 	return output;
-
-}
-
-void MugenStage::ChangeStageStatus(int Status)
-{
-
-	/*===== ステージのステータスを変更 =====*/
-	Status;
-	//// 前フレームがDEFで、今フレームがREFLECTIONだったら。
-	//if (status_ == STATUS::DEF && static_cast<STATUS>(Status) == STATUS::REFLECTION) {
-
-	//	stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
-
-	//	// ステージのパラメーターを設定。
-	//	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
-
-
-	//}
-	//else if (status_ == STATUS::REFLECTION && static_cast<STATUS>(Status) == STATUS::DEF) {
-
-	//	stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
-
-	//	// ステージのパラメーターを設定。
-	//	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
-
-	//}
-
-	//// ステータスを保存。
-	//status_ = static_cast<STATUS>(Status);
-
-}
-
-void MugenStage::DisplayGoal()
-{
-
-	/*===== ゴールの表示 =====*/
-
-	//PolygonInstanceRegister::Ins()->Display(goalInsIndex);
-
-}
-
-void MugenStage::NonDisplayGoal()
-{
-
-	/*===== ゴールの非表示 =====*/
-
-	//PolygonInstanceRegister::Ins()->NonDisplay(goalInsIndex);
 
 }
 

@@ -257,9 +257,6 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     
@@ -303,9 +300,6 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderをスキップ
     

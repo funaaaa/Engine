@@ -118,9 +118,6 @@ public:
 	void Input();
 	void InputImGUI();
 
-	// ギミックを生成。
-	void GenerateGimmick();
-
 private:
 
 	// ゲーム開始前の更新処理

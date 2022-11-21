@@ -9,7 +9,6 @@
 #include "Camera.h"
 #include "HitGroupMgr.h"
 #include "OBB.h"
-#include "CircuitStage.h"
 #include "TextureManager.h"
 #include "PlayerTire.h"
 #include "BoostItem.h"
@@ -1303,18 +1302,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
 		if (isPassedMiddlePoint_) {
 			isPassedMiddlePoint_ = false;
 			++rapCount_;
-
-			// ステージの状態を変える。
-			if (rapCount_ == 1 && charaID_ == CHARA_ID::P1) {
-
-				StageData.lock()->ChangeStageStatus(static_cast<int>(MugenStage::STATUS::REFLECTION));
-
-			}
-			else if (charaID_ == CHARA_ID::P1) {
-
-				StageData.lock()->ChangeStageStatus(static_cast<int>(MugenStage::STATUS::DEF));
-
-			}
 
 			// 三周以上にならないようにする。
 			if (3 <= rapCount_) rapCount_ = 3;

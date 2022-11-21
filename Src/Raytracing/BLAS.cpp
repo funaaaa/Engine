@@ -471,28 +471,31 @@ void BLAS::Update()
 	// 生成していなかったら処理を飛ばす。
 	if (!isGenerate_) return;
 
-	//// モデルがアニメーションを持っていたら。
-	//if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation) {
+	// この処理はFBXのアニメーションが必要になった際に戻す。
+	{
+		//// モデルがアニメーションを持っていたら。
+		//if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation) {
 
-	//	// アニメーションの更新処理
-	//	auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex_);
-	//	if (model.isPlay) {
+		//	// アニメーションの更新処理
+		//	auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex_);
+		//	if (model.isPlay) {
 
-	//		model.currentTime += model.frameTime;
+		//		model.currentTime += model.frameTime;
 
-	//		// 最後まで再生したら先頭に戻す。
-	//		if (model.endTime < model.currentTime) {
+		//		// 最後まで再生したら先頭に戻す。
+		//		if (model.endTime < model.currentTime) {
 
-	//			model.currentTime = model.startTime;
+		//			model.currentTime = model.startTime;
 
-	//		}
+		//		}
 
-	//		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-	//		FbxLoader::Ins()->GetSkinComputeInput(modelIndex_, skinComputeInput_);
+		//		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
+		//		FbxLoader::Ins()->GetSkinComputeInput(modelIndex_, skinComputeInput_);
 
-	//	}
+		//	}
 
-	//};
+		//};
+	}
 
 	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
 	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
@@ -717,7 +720,6 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
 					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-					//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
 
 				}
 
@@ -736,7 +738,6 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
 					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-					//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
 
 				}
 
@@ -746,7 +747,6 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-				//Dst += static_cast<UINT>((sizeof(CD3DX12_GPU_DESCRIPTOR_HANDLE*)));
 
 			}
 

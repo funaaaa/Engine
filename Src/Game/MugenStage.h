@@ -38,11 +38,6 @@ public:
 	void Destroy()override;
 	void Update()override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
-	void ChangeStageStatus(int Status)override;
-
-	// ゴールの表示、非表示
-	void DisplayGoal()override;
-	void NonDisplayGoal()override;
 
 
 private:

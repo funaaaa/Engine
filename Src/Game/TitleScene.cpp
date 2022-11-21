@@ -101,10 +101,6 @@ void TitleScene::Update()
 
 	// AIかゴーストかを選択する。
 	int mode = static_cast<int>(GameSceneMode::Ins()->mode_);
-	//ImGui::RadioButton("AI", &mode, 1);
-	//ImGui::SameLine();
-	//ImGui::RadioButton("WRITE_GHOST", &mode, 2);
-	//ImGui::SameLine();
 	ImGui::RadioButton("GHOST", &mode, 3);
 	GameSceneMode::Ins()->mode_ = static_cast<GameSceneMode::MODE>(mode);
 

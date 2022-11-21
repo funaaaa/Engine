@@ -55,10 +55,5 @@ public:
 	virtual void Destroy() = 0;
 	virtual void Update() = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;
-	virtual void ChangeStageStatus(int Status) = 0;
-
-	// ゴールの表示、非表示
-	virtual void DisplayGoal() = 0;
-	virtual void NonDisplayGoal() = 0;
 
 };

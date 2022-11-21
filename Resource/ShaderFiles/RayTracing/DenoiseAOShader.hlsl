@@ -221,20 +221,6 @@ bool ShootDirShadow(Vertex vtx, float length)
     float3 dirLightVec = dirLightPos - worldPosition;
     dirLightVec = normalize(dirLightVec);
 
-    //// 光源の端を求める。
-    //float3 toLightEdge = ((worldPosition + dirLightPos) + perpL * 10000) - worldPosition;
-    //toLightEdge = normalize(toLightEdge);
-
-    //// 角度を求める。
-    //float coneAngle = acos(dot(dirLightVec, toLightEdge)) * 2.0f;
-
-    //// 乱数の種を求める。
-    //uint2 pixldx = DispatchRaysIndex().xy;
-    //uint2 numPix = DispatchRaysDimensions().xy;
-    //int randSeed = InitRand(DispatchRaysIndex().x + (worldPosition.x * gSceneParam.light.dirLight.lightDir.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
-
-    //// レイを撃つベクトル
-    //float3 shadowRayDir = GetConeSample(randSeed, dirLightVec, coneAngle);
     float3 shadowRayDir = dirLightVec;
     
     return ShootShadowRayNoAH(worldPosition + normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3())) * 2.0f, shadowRayDir, length, gRtScene);
@@ -434,16 +420,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
     {
         float4 tiremasktex = (float4) tireMaskTexture[uint2((uint) (Vtx.subUV.x * 4096.0f), (uint) (Vtx.subUV.y * 4096.0f))];
-        //if (tiremasktex.x == 0)
-        //{
-        //    TexColor = tiremasktex;
-        //}
-        //else if (tiremasktex.x != 1)
-        //{
-        //    TexColor += tiremasktex;
-        //    TexColor = normalize(TexColor);
-
-        //}
         TexColor += tiremasktex * tiremasktex.a;
         TexColor = normalize(TexColor);
     }
@@ -463,18 +439,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         rate = 1.0f - saturate(rate);
         
         float3 giBuff = (float3) TexColor * rate * (1.0f - material[0].metalness_);
-        
-        //// 当たったオブジェクトが完全反射だったらGIの色を黒くする。(完全反射で色がないから。黒は色として反映されない。)
-        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-        //{
-        //    giBuff = float3(0, 0, 0);
-        //}
-        
-        //// 当たったオブジェクトが反射だったらGIの色を薄くする。
-        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
-        //{
-        //    giBuff /= 2.0f;
-        //}
+
         
         payloadBuff.gi_ += giBuff;
         
@@ -482,48 +447,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         
         return true;
     }
-
-    
-    // 当たったオブジェクトが天球だったら。
-    //if (InstanceID == CHS_IDENTIFICATION_INSTNACE_AS)
-    //{
-    //    float3 mieColor = float3(1, 1, 1);
-        
-    //    // 影響度をかけつつ色を保存。
-    //    payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-    //    payloadBuff.color_ += AtmosphericScattering(WorldPos, mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
-    //    payloadBuff.ao_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-    //    payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
-        
-    //    // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
-    //    payloadBuff.denoiseMask_ = float3(1, 1, 1);
-        
-    //    // サンプリングした点の輝度を取得する。
-    //    float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
-        
-    //    // サンプリングした点が地上より下じゃなかったら。
-    //    if (t <= 0.9f)
-    //    {
-            
-    //        // サンプリングした輝度をもとに、暗かったら星空を描画する。
-    //        t = (1.0f - t);
-    //        if (t != 0.0f)
-    //        {
-    //            t = pow(t, 10.0f);
-    //            //t = pow(2.0f, 10.0f * t - 10.0f);
-    //        }
-    //        payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
-    //        payloadBuff.color_ = saturate(payloadBuff.color_);
-            
-    //    }
-        
-    //    // 影響度を0にする。
-    //    payloadBuff.impactAmount_ = 0.0f;
-        
-    //    PayloadData = payloadBuff;
-        
-    //    return true;
-    //}
     
     // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
@@ -549,13 +472,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         // 完全反射用のレイを発射。
         ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
         
-        // 色を少しだけ明るくする。
-        //PayloadData.color += 0.1f;
-        
         payloadBuff.color_ = saturate(payloadBuff.color_);
-        
-        //// 残った影響度を入れる。
-        //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
         
         PayloadData = payloadBuff;
         
@@ -788,12 +705,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal, float3(1, 1, 1)) * PayloadData.impactAmount_;
             payloadBuff.light_ = saturate(payloadBuff.light_);
             
-        }
-        else
-        {
-            // 拡散反射光を擬似的に再現するために明るさを少しだけ上げる。
-            //payloadBuff.light_ += float3(0.3f, 0.3f, 0.3f);
-            //payloadBuff.light_ = saturate(payloadBuff.light_);
         }
         
         
@@ -1165,32 +1076,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     float4 texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
     float4 defTexColor = texColor;
     
-    //// 法線マップの色を取得。
-    //float3 normalMapColor = (float3) normalTexture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
-    
-    //// 法線マップの色とテクスチャの色が同じじゃなかったら法線マップの色を再取得。(法線マップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
-    //if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
-    //{
-    //    worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
-        
-    //    // 接空間変換用
-    //    float3 tan;
-    //    float3 bnorm;
-    //    CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
-        
-    //    // 説空間行列を求める。
-    //    float3x3 mat =
-    //    {
-    //        float3(tan),
-    //        float3(bnorm),
-    //        float3(vtx.Normal)
-    //    };
-        
-    //    worldNormal = mul(worldNormal, mat);
-
-    //}
-    
-
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。
     if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, texColor, instanceID))
     {
@@ -1292,7 +1177,5 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
         
     }
-    
-    //AcceptHitAndEndSearch();
     
 }

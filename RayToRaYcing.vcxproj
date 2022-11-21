@@ -147,7 +147,6 @@
     <ClCompile Include="Src\Game\ShellItem.cpp" />
     <ClCompile Include="Src\Game\ShellObject.cpp" />
     <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
-    <ClCompile Include="Src\Game\CircuitStage.cpp" />
     <ClCompile Include="Src\Game\DriftParticle.cpp" />
     <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
     <ClCompile Include="Src\Game\FloatingStageObject.cpp" />
@@ -240,7 +239,6 @@
     <ClInclude Include="Src\Game\ShellItem.h" />
     <ClInclude Include="Src\Game\ShellObject.h" />
     <ClInclude Include="Src\Game\ShellObjectMgr.h" />
-    <ClInclude Include="Src\Game\CircuitStage.h" />
     <ClInclude Include="Src\Game\DriftParticle.h" />
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />
     <ClInclude Include="Src\Game\FloatingStageObject.h" />

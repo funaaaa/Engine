@@ -132,16 +132,6 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 	/*===== 生成処理 =====*/
 
-	//// 生成する遅延タイマーを更新し、一定時間経過していたらパーティクルを生成する。
-	//++fireGenerateDelay_;
-
-	//// 遅延の条件式。
-	//bool canGenerate = GENERATE_DELAY_FIRE < fireGenerateDelay_;
-
-	//if (canGenerate) {
-
-	//fireGenerateDelay_ = 0;
-
 	int generateCount = 0;
 
 	// 生成する。
