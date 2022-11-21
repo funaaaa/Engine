@@ -54,6 +54,7 @@ TitleScene::TitleScene()
 
 	// 設定
 	DriftParticleMgr::Ins()->Setting();
+	logoTimer_ = 0;
 
 }
 
@@ -120,8 +121,13 @@ void TitleScene::Update()
 	/*===== 更新処理 =====*/
 
 	if (!isFinishSceneTransition_) {
-		isFinishSceneTransition_ = true;
 		SceneTransition::Ins()->Exit();
+
+		// ロゴを一定時間表示し続ける。
+		++logoTimer_;
+		if (LOGO_TIMER <= logoTimer_) {
+			isFinishSceneTransition_ = true;
+		}
 	}
 
 	// 入力処理

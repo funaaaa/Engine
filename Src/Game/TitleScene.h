@@ -103,6 +103,9 @@ private:
 	bool isFinishSceneTransition_;
 	bool isAppear_;		// 現在スプライトがでている状態か。
 
+	int logoTimer_;	// 起動時のみロゴを長めにだす。
+	const int LOGO_TIMER = 30;
+
 
 public:
 
