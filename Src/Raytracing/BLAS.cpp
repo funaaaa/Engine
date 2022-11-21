@@ -100,7 +100,8 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 
 	// 頂点インデックスバッファを生成する。
@@ -121,7 +122,8 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	WriteToMemory(indexUploadBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
 
 	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_.Get(), indexUploadBuffer_.Get());
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
@@ -607,6 +609,18 @@ BLAS::BLAS()
 	baseTextureHandle_ = -1;
 	normalMapHandle_ = -1;
 	metalnessMapHandle_ = -1;
+	blasIndex_ = -1;
+	indexCount_ = 0;
+	indexDescriptor_ = {};
+	indexStride_ = {};
+	isChangeTexture_ = false;
+	isChangeVertex_ = false;
+	isOpaque_ = false;
+	materialDescriptor_ = {};
+	modelIndex_ = 0;
+	vertexCount_ = 0;
+	vertexDescriptor_ = {};
+	vertexStride_ = 0;
 }
 
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
@@ -851,9 +865,11 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 	// 確保したバッファに頂点データを書き込む。
 	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST));
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE));
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 	// 頂点を書き換えたフラグを立てる。
 	isChangeVertex_ = true;

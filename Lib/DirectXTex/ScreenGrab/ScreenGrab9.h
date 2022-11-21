@@ -23,7 +23,12 @@
 
 #include <d3d9.h>
 
+#if defined(NTDDI_WIN10_FE) || defined(__MINGW32__)
+#include <ocidl.h>
+#else
 #include <OCIdl.h>
+#endif
+
 #include <functional>
 
 

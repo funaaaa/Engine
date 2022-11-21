@@ -18,7 +18,6 @@ private:
 
 	const int CBV_SRV_UAV_COUNT = 4096;	// CBV,SRV,UAV用ディスクリプタの数
 
-
 public:
 
 	/*===== メンバ関数 =====*/
@@ -49,10 +48,10 @@ public:
 	inline void IncrementHead() { ++head_; }
 
 	// 指定のインデックスのCPUハンドルを取得
-	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(int Index){
+	CD3DX12_GPU_DESCRIPTOR_HANDLE GetGPUHandleIncrement(int Index) {
 
-	return CD3DX12_GPU_DESCRIPTOR_HANDLE(
-		descriptorHeap_.Get()->GetGPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		return CD3DX12_GPU_DESCRIPTOR_HANDLE(
+			descriptorHeap_.Get()->GetGPUDescriptorHandleForHeapStart(), Index, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 
 	}
 

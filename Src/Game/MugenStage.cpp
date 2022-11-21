@@ -29,7 +29,7 @@ void MugenStage::Setting(int TireMaskIndex)
 		"Resource/Game/Stage/MugenStage/", "MugenStageDraw.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK, true, true);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/NormalMap.dds"));
+	//stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/NormalMap.dds"));
 	//stageObjectMgr_->ChangeMetalnessTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/StageTex/Road/MetalnessMap.png"));
 	// 当たり判定用のステージのUVをSubUVとして代入する。
 	stageObjectMgr_->AssignmentUVToSubUV(0, 1);

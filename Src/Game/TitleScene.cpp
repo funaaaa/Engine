@@ -78,7 +78,7 @@ void TitleScene::Init()
 	cameraAngle_ = 0.0f;
 	cameraHeight_ = 0.0f;
 	cameraDistance_ = 0.0f;
-	transitionCounter_ = 0.0f;
+	transitionCounter_ = 0;
 	isExp = false;
 	easingTimerUI_ = 0.0f;
 
@@ -257,7 +257,7 @@ void TitleScene::Update()
 		cameraHeight_ = 0.0f;
 		cameraAngle_ = 0.0f;
 		cameraDistance_ = 0.0f;
-		cameraTimer_ = 0.0f;
+		cameraTimer_ = 0;
 		++transitionCounter_;
 
 		// ƒ‚[ƒh‚²‚Æ‚Ì‰Šú‰»ˆ—

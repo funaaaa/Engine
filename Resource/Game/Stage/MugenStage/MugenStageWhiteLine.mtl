@@ -9,5 +9,5 @@ Kd 0.0 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
-map_Kd StageTex/Stagetex/WhiteLine/BaseColor.png
+map_Kd StageTex/Stagetex/WhiteLine/BaseColor.dds
 

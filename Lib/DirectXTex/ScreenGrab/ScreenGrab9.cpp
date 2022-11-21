@@ -23,10 +23,22 @@
 #include <cstring>
 #include <memory>
 #include <new>
+#include <tuple>
 
 #include <wincodec.h>
 
 #include <wrl\client.h>
+
+#ifdef _MSC_VER
+// Off by default warnings
+#pragma warning(disable : 4619 4616 4061 4062 4623 4626 5027)
+// C4619/4616 #pragma warning warnings
+// C4061 enumerator 'x' in switch of enum 'y' is not explicitly handled by a case label
+// C4062 enumerator 'x' in switch of enum 'y' is not handled
+// C4623 default constructor was implicitly defined as deleted
+// C4626 assignment operator was implicitly defined as deleted
+// C5027 move assignment operator was implicitly defined as deleted
+#endif
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wcovered-switch-default"
@@ -39,7 +51,7 @@ using Microsoft::WRL::ComPtr;
 // Macros
 //--------------------------------------------------------------------------------------
 #ifndef MAKEFOURCC
-    #define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
+#define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
                 ((uint32_t)(uint8_t)(ch0) | ((uint32_t)(uint8_t)(ch1) << 8) |       \
                 ((uint32_t)(uint8_t)(ch2) << 16) | ((uint32_t)(uint8_t)(ch3) << 24 ))
 #endif /* defined(MAKEFOURCC) */
@@ -51,9 +63,9 @@ using Microsoft::WRL::ComPtr;
 //--------------------------------------------------------------------------------------
 namespace
 {
-    #pragma pack(push,1)
+#pragma pack(push,1)
 
-    #define DDS_MAGIC 0x20534444 // "DDS "
+#define DDS_MAGIC 0x20534444 // "DDS "
 
     struct DDS_PIXELFORMAT
     {
@@ -67,21 +79,21 @@ namespace
         uint32_t    ABitMask;
     };
 
-    #define DDS_FOURCC        0x00000004  // DDPF_FOURCC
-    #define DDS_RGB           0x00000040  // DDPF_RGB
-    #define DDS_RGBA          0x00000041  // DDPF_RGB | DDPF_ALPHAPIXELS
-    #define DDS_LUMINANCE     0x00020000  // DDPF_LUMINANCE
-    #define DDS_LUMINANCEA    0x00020001  // DDPF_LUMINANCE | DDPF_ALPHAPIXELS
-    #define DDS_ALPHA         0x00000002  // DDPF_ALPHA
-    #define DDS_BUMPDUDV      0x00080000  // DDPF_BUMPDUDV
-    #define DDS_BUMPLUMINANCE 0x00040000  // DDPF_BUMPLUMINANCE
+#define DDS_FOURCC        0x00000004  // DDPF_FOURCC
+#define DDS_RGB           0x00000040  // DDPF_RGB
+#define DDS_RGBA          0x00000041  // DDPF_RGB | DDPF_ALPHAPIXELS
+#define DDS_LUMINANCE     0x00020000  // DDPF_LUMINANCE
+#define DDS_LUMINANCEA    0x00020001  // DDPF_LUMINANCE | DDPF_ALPHAPIXELS
+#define DDS_ALPHA         0x00000002  // DDPF_ALPHA
+#define DDS_BUMPDUDV      0x00080000  // DDPF_BUMPDUDV
+#define DDS_BUMPLUMINANCE 0x00040000  // DDPF_BUMPLUMINANCE
 
-    #define DDS_HEADER_FLAGS_TEXTURE        0x00001007  // DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT 
-    #define DDS_HEADER_FLAGS_MIPMAP         0x00020000  // DDSD_MIPMAPCOUNT
-    #define DDS_HEADER_FLAGS_PITCH          0x00000008  // DDSD_PITCH
-    #define DDS_HEADER_FLAGS_LINEARSIZE     0x00080000  // DDSD_LINEARSIZE
+#define DDS_HEADER_FLAGS_TEXTURE        0x00001007  // DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT
+#define DDS_HEADER_FLAGS_MIPMAP         0x00020000  // DDSD_MIPMAPCOUNT
+#define DDS_HEADER_FLAGS_PITCH          0x00000008  // DDSD_PITCH
+#define DDS_HEADER_FLAGS_LINEARSIZE     0x00080000  // DDSD_LINEARSIZE
 
-    #define DDS_SURFACE_FLAGS_TEXTURE 0x00001000 // DDSCAPS_TEXTURE
+#define DDS_SURFACE_FLAGS_TEXTURE 0x00001000 // DDSCAPS_TEXTURE
 
     struct DDS_HEADER
     {
@@ -101,7 +113,7 @@ namespace
         uint32_t        reserved2;
     };
 
-    #pragma pack(pop)
+#pragma pack(pop)
 
     const DDS_PIXELFORMAT DDSPF_DXT1 =
     { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('D','X','T','1'), 0, 0, 0, 0, 0 };
@@ -225,7 +237,7 @@ namespace
             {
                 FILE_DISPOSITION_INFO info = {};
                 info.DeleteFile = TRUE;
-                (void)SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
+                std::ignore = SetFileInformationByHandle(m_handle, FileDispositionInfo, &info, sizeof(info));
             }
         }
 
@@ -304,9 +316,9 @@ namespace
         case D3DFMT_INDEX32:
         case D3DFMT_G16R16F:
         case D3DFMT_R32F:
-#if !defined(D3D_DISABLE_9EX)
+        #if !defined(D3D_DISABLE_9EX)
         case D3DFMT_D32_LOCKABLE:
-#endif
+        #endif
             return 32;
 
         case D3DFMT_R8G8B8:
@@ -342,9 +354,9 @@ namespace
         case D3DFMT_P8:
         case D3DFMT_L8:
         case D3DFMT_A4L4:
-#if !defined(D3D_DISABLE_9EX)
+        #if !defined(D3D_DISABLE_9EX)
         case D3DFMT_S8_LOCKABLE:
-#endif
+        #endif
             return 8;
 
         case D3DFMT_DXT1:
@@ -362,10 +374,10 @@ namespace
         case MAKEFOURCC('Y', 'V', '1', '2'):
             return 12;
 
-#if !defined(D3D_DISABLE_9EX)
+        #if !defined(D3D_DISABLE_9EX)
         case D3DFMT_A1:
             return 1;
-#endif
+        #endif
 
         default:
             return 0;
@@ -462,7 +474,7 @@ namespace
         }
         else
         {
-            size_t bpp = BitsPerPixel(fmt);
+            const size_t bpp = BitsPerPixel(fmt);
             if (!bpp)
                 return E_INVALIDARG;
 
@@ -471,13 +483,13 @@ namespace
             numBytes = rowBytes * height;
         }
 
-#if defined(_M_IX86) || defined(_M_ARM) || defined(_M_HYBRID_X86_ARM64)
+    #if defined(_M_IX86) || defined(_M_ARM) || defined(_M_HYBRID_X86_ARM64)
         static_assert(sizeof(size_t) == 4, "Not a 32-bit platform!");
         if (numBytes > UINT32_MAX || rowBytes > UINT32_MAX || numRows > UINT32_MAX)
             return HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
-#else
+    #else
         static_assert(sizeof(size_t) == 8, "Not a 64-bit platform!");
-#endif
+    #endif
 
         if (outNumBytes)
         {
@@ -501,7 +513,7 @@ namespace
 
     BOOL WINAPI InitializeWICFactory(PINIT_ONCE, PVOID, PVOID* ifactory) noexcept
     {
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
+    #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
         HRESULT hr = CoCreateInstance(
             CLSID_WICImagingFactory2,
             nullptr,
@@ -527,17 +539,17 @@ namespace
             );
             return SUCCEEDED(hr) ? TRUE : FALSE;
         }
-#else
+    #else
         return SUCCEEDED(CoCreateInstance(
             CLSID_WICImagingFactory,
             nullptr,
             CLSCTX_INPROC_SERVER,
             __uuidof(IWICImagingFactory),
             ifactory)) ? TRUE : FALSE;
-#endif
+    #endif
     }
 
-    IWICImagingFactory* _GetWIC()
+    IWICImagingFactory* GetWIC()
     {
         static INIT_ONCE s_initOnce = INIT_ONCE_STATIC_INIT;
 
@@ -593,13 +605,13 @@ HRESULT DirectX::SaveDDSTextureToFile(
     auto_delete_file delonfail(hFile.get());
 
     // Setup header
-    const size_t MAX_HEADER_SIZE = sizeof(uint32_t) + sizeof(DDS_HEADER);
+    constexpr size_t MAX_HEADER_SIZE = sizeof(uint32_t) + sizeof(DDS_HEADER);
     uint8_t fileHeader[MAX_HEADER_SIZE] = {};
 
     *reinterpret_cast<uint32_t*>(&fileHeader[0]) = DDS_MAGIC;
 
     auto header = reinterpret_cast<DDS_HEADER*>(&fileHeader[0] + sizeof(uint32_t));
-    size_t headerSize = sizeof(uint32_t) + sizeof(DDS_HEADER);
+    constexpr size_t headerSize = sizeof(uint32_t) + sizeof(DDS_HEADER);
     header->size = sizeof(DDS_HEADER);
     header->flags = DDS_HEADER_FLAGS_TEXTURE | DDS_HEADER_FLAGS_MIPMAP;
     header->height = desc.Height;
@@ -701,7 +713,7 @@ HRESULT DirectX::SaveDDSTextureToFile(
 
     uint8_t* dptr = pixels.get();
 
-    size_t msize = std::min<size_t>(rowPitch, static_cast<size_t>(lockedRect.Pitch));
+    const size_t msize = std::min<size_t>(rowPitch, static_cast<size_t>(lockedRect.Pitch));
     for (size_t h = 0; h < rowCount; ++h)
     {
         memcpy_s(dptr, rowPitch, sptr, msize);
@@ -758,7 +770,7 @@ HRESULT DirectX::SaveWICTextureToFile(
         return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
     }
 
-    auto pWIC = _GetWIC();
+    auto pWIC = GetWIC();
     if (!pWIC)
         return E_NOINTERFACE;
 
@@ -783,14 +795,14 @@ HRESULT DirectX::SaveWICTextureToFile(
     case D3DFMT_R32F:           pfGuid = GUID_WICPixelFormat32bppGrayFloat; break;
     case D3DFMT_A32B32G32R32F:  pfGuid = GUID_WICPixelFormat128bppRGBAFloat; break;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
+    #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
     case D3DFMT_X8B8G8R8:
         if (g_WIC2)
             pfGuid = GUID_WICPixelFormat32bppRGB;
         else
             HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
         break;
-#endif
+    #endif
 
     default:
         return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
@@ -831,7 +843,7 @@ HRESULT DirectX::SaveWICTextureToFile(
         VARIANT varValue;
         varValue.vt = VT_BOOL;
         varValue.boolVal = VARIANT_TRUE;
-        (void)props->Write(1, &option, &varValue);
+        std::ignore = props->Write(1, &option, &varValue);
     }
 
     if (setCustomProps)
@@ -862,7 +874,7 @@ HRESULT DirectX::SaveWICTextureToFile(
         // Screenshots don't typically include the alpha channel of the render target
         switch (desc.Format)
         {
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
+        #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8) || defined(_WIN7_PLATFORM_UPDATE)
         case D3DFMT_A32B32G32R32F:
         case D3DFMT_A16B16G16R16F:
             if (g_WIC2)
@@ -874,7 +886,7 @@ HRESULT DirectX::SaveWICTextureToFile(
                 targetGuid = GUID_WICPixelFormat24bppBGR;
             }
             break;
-#endif
+        #endif
 
         case D3DFMT_A16B16G16R16: targetGuid = GUID_WICPixelFormat48bppBGR; break;
         case D3DFMT_R5G6B5:       targetGuid = GUID_WICPixelFormat16bppBGR565; break;
@@ -923,12 +935,12 @@ HRESULT DirectX::SaveWICTextureToFile(
         if (memcmp(&guidContainerFormat, &GUID_ContainerFormatPng, sizeof(GUID)) == 0)
         {
             // Set Software name
-            (void)metawriter->SetMetadataByName(L"/tEXt/{str=Software}", &value);
+            std::ignore = metawriter->SetMetadataByName(L"/tEXt/{str=Software}", &value);
         }
         else
         {
             // Set Software name
-            (void)metawriter->SetMetadataByName(L"System.ApplicationName", &value);
+            std::ignore = metawriter->SetMetadataByName(L"System.ApplicationName", &value);
         }
     }
 
@@ -937,7 +949,7 @@ HRESULT DirectX::SaveWICTextureToFile(
     if (FAILED(hr))
         return hr;
 
-    uint64_t imageSize = uint64_t(lockedRect.Pitch) * uint64_t(desc.Height);
+    const uint64_t imageSize = uint64_t(lockedRect.Pitch) * uint64_t(desc.Height);
     if (imageSize > UINT32_MAX)
     {
         pSource->UnlockRect();
