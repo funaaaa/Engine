@@ -10,6 +10,8 @@ private:
 	/*===== ƒƒ“ƒo•Ï” =====*/
 
 	Sprite result_;
+	bool isFinishTransition_;
+	bool isStartTransition_;
 
 public:
 

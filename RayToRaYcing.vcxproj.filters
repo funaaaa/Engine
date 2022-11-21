@@ -226,6 +226,7 @@
     <ClCompile Include="Src\Game\RadialBlur.cpp">
       <Filter>エンジン\エフェクト\ラジアルブラー\コード</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\SceneTransition.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -501,6 +502,9 @@
     <ClInclude Include="Src\Game\RadialBlur.h">
       <Filter>エンジン\エフェクト\ラジアルブラー\コード</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\SceneTransition.h">
+      <Filter>アプリケーション\シーン管理\遷移</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -717,6 +721,9 @@
     </Filter>
     <Filter Include="エンジン\エフェクト\ラジアルブラー\シェーダー">
       <UniqueIdentifier>{e6c019a3-4656-4bd5-8559-46841b0bf98a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\シーン管理\遷移">
+      <UniqueIdentifier>{cfb2932d-8d70-41cd-961b-4d9672ed5344}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

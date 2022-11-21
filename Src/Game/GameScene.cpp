@@ -30,6 +30,7 @@
 #include "RayEngine.h"
 
 #include "GLTF.h"
+#include "SceneTransition.h"
 
 GameScene::GameScene()
 {
@@ -156,7 +157,7 @@ void GameScene::Init()
 	BLASRegister::Ins()->Setting();
 	PolygonInstanceRegister::Ins()->Setting();
 
-	nextScene_ = SCENE_ID::RESULT;
+	nextScene_ = SCENE_ID::TITLE;
 	isTransition_ = false;
 
 	concentrationLine_->Init();
@@ -214,10 +215,12 @@ void GameScene::Init()
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
 	isGameFinish_ = false;
+	isStartTransition_ = false;
 	countDownStartTimer_ = 0;
 	transitionTimer = 0;
 	countDownNumber_ = 2;
 	sunAngle_ = 0.8f;
+	isFinishTransition_ = false;
 
 	Camera::Ins()->eye_ = Vec3(0, 0, 0);
 	Camera::Ins()->target_ = Vec3(10, 0, 0);
@@ -231,6 +234,12 @@ void GameScene::Update()
 {
 
 	/*===== 更新処理 =====*/
+
+	// シーン遷移を終わらせていなかったら終わらせる。
+	if (!isFinishTransition_) {
+		SceneTransition::Ins()->Exit();
+		isFinishTransition_ = true;
+	}
 
 	// 入力処理
 	Input();
@@ -253,15 +262,12 @@ void GameScene::Update()
 		++transitionTimer;
 		if (TRANSION_TIME < transitionTimer) {
 
-			isTransition_ = true;
-
-			characterMgr_->Init();
-
-			return;
+			if (!isStartTransition_) {
+				isStartTransition_ = true;
+				SceneTransition::Ins()->Appear();
+			}
 
 		}
-
-		//isTransition_ = true;
 
 	}
 
@@ -311,6 +317,14 @@ void GameScene::Update()
 	}
 	concentrationLine_->Update();
 
+	// シーン遷移の処理
+	if (isStartTransition_ && SceneTransition::Ins()->GetIsFinish()) {
+		isTransition_ = true;
+
+		characterMgr_->Init();
+
+	}
+
 
 }
 
@@ -319,16 +333,17 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
+
 	// レイトレーシングを実行。
 	RayEngine::Ins()->Draw();
 
 
 	// 床を白塗り
-	static int a = 0;
-	if (Input::Ins()->IsKeyTrigger(DIK_R) || a == 0) {
+	static int firstTimeClean = 0;
+	if (Input::Ins()->IsKeyTrigger(DIK_R) || firstTimeClean == 0) {
 
-		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
-		++a;
+		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex()); \
+			++firstTimeClean;
 
 	}
 
@@ -353,41 +368,38 @@ void GameScene::Draw()
 	}
 
 	// UIを描画
-	static int firstTime = 0;
-	if (firstTime != 0) {
+	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
-		UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
-		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	concentrationLine_->Draw();
 
-		concentrationLine_->Draw();
+	// コインの取得数のui。
+	coinCountUI_[0]->Draw();
+	coinCountUI_[1]->Draw();
 
-		// コインの取得数のui。
-		coinCountUI_[0]->Draw();
-		coinCountUI_[1]->Draw();
+	// 現在のラップ数のui。
+	nowRapCountUI_->Draw();
+	slashUI_->Draw();
+	maxRapCountUI_->Draw();
 
-		// 現在のラップ数のui。
-		nowRapCountUI_->Draw();
-		slashUI_->Draw();
-		maxRapCountUI_->Draw();
+	// 左下のuiのフレーム。
+	coinUI_->Draw();
+	rapUI_->Draw();
 
-		// 左下のuiのフレーム。
-		coinUI_->Draw();
-		rapUI_->Draw();
+	// カウントダウン用のui。
+	countDownSprite_->Draw();
 
-		// カウントダウン用のui。
-		countDownSprite_->Draw();
+	// カウントダウン終了時のgoのui。
+	goSprite_->Draw();
 
-		// カウントダウン終了時のgoのui。
-		goSprite_->Draw();
+	// シーン遷移の画像を描画。
+	SceneTransition::Ins()->Draw();
 
-		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
-
-	}
-	if (firstTime == 0) ++firstTime;
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 }
 
@@ -427,7 +439,10 @@ void GameScene::Input()
 
 	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
-		isTransition_ = true;
+		if (!isStartTransition_) {
+			isStartTransition_ = true;
+			SceneTransition::Ins()->Appear();
+		}
 
 	}
 
@@ -443,20 +458,7 @@ void GameScene::InputImGUI()
 
 	/*===== IMGUI更新 =====*/
 
-	ImGui::Text("Let's do three laps!");
-
 	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
-
-	ImGui::SliderFloat("Metalness", &BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().metalness_, 0.0f, 1.0f);
-	ImGui::SliderFloat("Roughness", &BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().roughness_, 0.0f, 1.0f);
-	ImGui::SliderFloat("Specular", &BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().specular_, 0.0f, 1.0f);
-	float baseColor[3] = { BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.x_, BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.y_, BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.z_ };
-	ImGui::SliderFloat3("BaseColor", baseColor, 0.0f, 1.0f);
-	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.x_ = baseColor[0];
-	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.y_ = baseColor[1];
-	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->GetMaterial().baseColor_.z_ = baseColor[2];
-
-	BLASRegister::Ins()->GetBLAS()[stages_[0]->stageObjectMgr_->GetBlasIndex(1)]->IsChangeMaterial();
 
 }
 

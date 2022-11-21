@@ -17,6 +17,7 @@
 #include "RayComputeShader.h"
 #include "RaytracingOutput.h"
 #include "DriftParticleMgr.h"
+#include "SceneTransition.h"
 
 TitleScene::TitleScene()
 {
@@ -26,8 +27,17 @@ TitleScene::TitleScene()
 	isTransition_ = false;
 	nextScene_ = SCENE_ID::GAME;
 
-	title_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
-	titleOperation_.GenerateForTexture(FHelper::WindowCenterPos(), FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/titleOperation.png");
+	titleSpritePos_ = FHelper::WindowCenterPos();
+	title_.GenerateForTexture(titleSpritePos_, FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/title.png");
+	titleOperation_.GenerateForTexture(titleSpritePos_, FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/titleOperation.png");
+
+	redSprite_.GenerateForTexture(titleSpritePos_, FHelper::WindowHalfSize(), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/red.png");
+	redSprite_.SetColor(DirectX::XMFLOAT4(1, 1, 1, 0));
+
+	levelSprite_[0].GenerateForTexture(FHelper::WindowCenterPos(), LEVEL_SPRITE_SCALE, Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/level1.png");
+	levelSprite_[1].GenerateForTexture(FHelper::WindowCenterPos(), LEVEL_SPRITE_SCALE, Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/level2.png");
+	levelSprite_[2].GenerateForTexture(FHelper::WindowCenterPos(), LEVEL_SPRITE_SCALE, Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Title/level3.png");
+
 
 	// ステージをセッティングする。
 	stages_.emplace_back(std::make_shared<MugenStage>());
@@ -78,9 +88,28 @@ void TitleScene::Init()
 	cameraAngle_ = 0.0f;
 	cameraHeight_ = 0.0f;
 	cameraDistance_ = 0.0f;
+	sinTimer_ = 0.0f;
 	transitionCounter_ = 0;
+	nowSelectLevel_ = 0;
+	redSpriteAlpha_ = 0.0f;
+	redSpriteScaleRate_ = 0.0f;
+	redSpriteExpSpan_ = 0;
 	isExp = false;
 	easingTimerUI_ = 0.0f;
+	titleStat_ = TITLE_STAT::TITLE;
+	nextStat_ = TITLE_STAT::SELECT_LEVEL;
+	transitionEasingTimer_ = 0;
+	isExitSprite_ = false;
+	isStatTransition_ = false;
+	isFinishSceneTransition_ = false;
+	isStartSceneTransition_ = false;
+	isAppear_ = false;
+	isReservationTransition_ = false;
+	for (int index = 0; index < 3; ++index) {
+		levelScaleRate_[index] = 0.5f;
+		levelPos_[index] = Vec3(-1000, -1000, 0.1f);
+	}
+	titleSpritePos_ = FHelper::WindowCenterPos();
 
 }
 
@@ -90,44 +119,13 @@ void TitleScene::Update()
 
 	/*===== 更新処理 =====*/
 
-	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
-
-		isTransition_ = true;
-		player_->Init();
-
+	if (!isFinishSceneTransition_) {
+		isFinishSceneTransition_ = true;
+		SceneTransition::Ins()->Exit();
 	}
 
-	ImGui::Text("Choose your level!");
-
-	// AIかゴーストかを選択する。
-	int mode = static_cast<int>(GameSceneMode::Ins()->mode_);
-	ImGui::RadioButton("GHOST", &mode, 3);
-	GameSceneMode::Ins()->mode_ = static_cast<GameSceneMode::MODE>(mode);
-
-	// AIだったら。
-	if (mode == 1) {
-
-		int level = GameSceneMode::Ins()->level_;
-		ImGui::RadioButton("Level : 1", &level, 0);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 2", &level, 1);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 3", &level, 2);
-		GameSceneMode::Ins()->level_ = level;
-
-	}
-	// GHOSTだったら。
-	else if (mode == 3) {
-
-		int level = GameSceneMode::Ins()->level_;
-		ImGui::RadioButton("Level : 1", &level, 0);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 2", &level, 1);
-		ImGui::SameLine();
-		ImGui::RadioButton("Level : 3", &level, 2);
-		GameSceneMode::Ins()->level_ = level;
-
-	}
+	// 入力処理
+	Input();
 
 	// TLASやパイプラインを更新。
 	RayEngine::Ins()->Update();
@@ -138,7 +136,116 @@ void TitleScene::Update()
 	// プレイヤーの位置を調整。
 	player_->Update(stages_[0], false, false);
 
-	// カメラの情報。
+	// カメラの更新処理
+	CameraUpdate();
+
+	// タイトルのステータスごとの更新処理
+	UpdateTitleStat();
+
+
+}
+
+void TitleScene::Draw()
+{
+
+	RayEngine::Ins()->Draw();
+
+	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+
+	// タイトル画像を描画
+	title_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
+	title_.Draw();
+	titleOperation_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
+	titleOperation_.Draw();
+
+
+	// レベル選択のUIを描画
+	for (int index = 0; index < 3; ++index) {
+		levelSprite_[index].ChangePosition(levelPos_[index]);
+		levelSprite_[index].Draw();
+	}
+	redSprite_.Draw();
+
+	SceneTransition::Ins()->Draw();
+
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+
+}
+
+void TitleScene::Input()
+{
+
+	/*===== 入力処理 =====*/
+
+	switch (titleStat_)
+	{
+	case TitleScene::TITLE_STAT::TITLE:
+	{
+
+		/*-- タイトル画像が出ている状態 --*/
+
+		if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+
+			isStatTransition_ = true;
+			isAppear_ = false;
+			nextStat_ = TITLE_STAT::SELECT_LEVEL;
+			transitionEasingTimer_ = 0.0f;
+
+		}
+
+		break;
+
+	}
+	case TitleScene::TITLE_STAT::SELECT_LEVEL:
+	{
+
+		/*-- レベル選択画像が出ている状態 --*/
+
+		// 左が入力されたら。
+		if (Input::Ins()->IsKeyTrigger(DIK_LEFT) || Input::Ins()->IsPadStickTrigger(XINPUT_THUMB_LEFTVERT)) {
+
+			--nowSelectLevel_;
+
+		}
+		// 右が入力されたら。
+		if (Input::Ins()->IsKeyTrigger(DIK_RIGHT) || Input::Ins()->IsPadStickTrigger(XINPUT_THUMB_RIGHTVERT)) {
+
+			++nowSelectLevel_;
+
+		}
+
+		// 決定されたら。
+		if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+
+			isStatTransition_ = true;
+			isReservationTransition_ = true;
+			isAppear_ = false;
+			nextStat_ = TITLE_STAT::SELECT_LEVEL;
+			transitionEasingTimer_ = 0.0f;
+
+		}
+
+		nowSelectLevel_ = static_cast<int>(FHelper::Clamp(static_cast<float>(nowSelectLevel_), LEVEL_RANGE.x_, LEVEL_RANGE.y_));
+
+		break;
+
+	}
+	default:
+		break;
+	}
+}
+
+void TitleScene::CameraUpdate()
+{
+
+	/*===== カメラの更新処理 =====*/
+
+		// カメラの情報。
 	Vec3& eye = Camera::Ins()->eye_;
 	Vec3& target = Camera::Ins()->target_;
 	Vec3& up = Camera::Ins()->up_;
@@ -275,42 +382,192 @@ void TitleScene::Update()
 
 	Camera::Ins()->GenerateMatView();
 
-
-	// 操作方法のUIの更新処理
-	easingTimerUI_ += ADD_EASING_TIMER_UI;
-	if (1.0f < easingTimerUI_) {
-		easingTimerUI_ = 0.0f;
-		isExp = isExp ? false : true;
-	}
-
-	// イージングでアルファを変える。
-	float easingValue = 0;
-	if (isExp) {
-		easingValue = FEasing::EaseOutQuint(easingTimerUI_);
-	}
-	else {
-		easingValue = 1.0f - FEasing::EaseInQuint(easingTimerUI_);
-	}
-	titleOperation_.SetColor(DirectX::XMFLOAT4(1, 1, 1, easingValue));
-
-
 }
 
-void TitleScene::Draw()
+void TitleScene::UpdateTitleStat()
 {
 
-	RayEngine::Ins()->Draw();
+	/*===== タイトルのステータスごとの更新処理 =====*/
 
-	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
-	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	switch (titleStat_)
+	{
+	case TitleScene::TITLE_STAT::TITLE:
+	{
 
-	title_.Draw();
-	titleOperation_.Draw();
+		/*-- タイトル画像を描画 --*/
 
-	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+		// 操作方法のUIの更新処理
+		easingTimerUI_ += ADD_EASING_TIMER_UI;
+		if (1.0f < easingTimerUI_) {
+			easingTimerUI_ = 0.0f;
+			isExp = isExp ? false : true;
+		}
+
+		// イージングでアルファを変える。
+		float easingValue = 0;
+		if (isExp) {
+			easingValue = FEasing::EaseOutQuint(easingTimerUI_);
+		}
+		else {
+			easingValue = 1.0f - FEasing::EaseInQuint(easingTimerUI_);
+		}
+		titleOperation_.SetColor(DirectX::XMFLOAT4(1, 1, 1, easingValue));
+
+		// 遷移中だったら。
+		if (isStatTransition_) {
+
+			// タイマーを更新してイージングさせる。
+			transitionEasingTimer_ += TRANSITION_EASING_ADD;
+			if (1.0f < transitionEasingTimer_) {
+
+				// 出現中だったら
+				if (isAppear_) {
+					isStatTransition_ = false;
+				}
+				else {
+					titleStat_ = nextStat_;
+					isAppear_ = true;
+				}
+
+				transitionEasingTimer_ = 0.0f;
+
+			}
+			else {
+
+				// 出現中だったら。
+				if (isAppear_) {
+					float easingAmount = FEasing::EaseOutQuint(transitionEasingTimer_);
+					titleSpritePos_ = FHelper::WindowCenterPos() + Vec3(0, SPRITE_EXIT_POS_Y - (SPRITE_EXIT_POS_Y * easingAmount), 0);
+				}
+				else {
+					float easingAmount = FEasing::EaseInQuint(transitionEasingTimer_);
+					titleSpritePos_ = FHelper::WindowCenterPos() + Vec3(0, SPRITE_EXIT_POS_Y * easingAmount, 0);
+				}
+
+			}
+
+		}
+
+		break;
+
+	}
+	case TitleScene::TITLE_STAT::SELECT_LEVEL:
+	{
+
+		/*-- レベルを選択する画面。 --*/
+
+		const float NOT_SELECTED_IMAGE_SIZE_RATE = 0.5f;
+		const float SELECTED_IMAGE_SIZE_RATE = 1.0f;
+
+		// サイン波で選択されているレベルのUIを拡縮させるようタイマー
+		sinTimer_ += ADD_SIN_TIMER;
+		float sinAmount = sinf(sinTimer_);
+		float sinExpRate = sinAmount * SIN_SCALE_RATE;
+
+
+		// 選択されている画像を大きくして、選択されていない画像を小さく暗くする。
+		for (int index = 0; index < 3; ++index) {
+
+			// 選択されていたら。
+			if (nowSelectLevel_ == index) {
+				levelScaleRate_[index] += ((sinExpRate + SELECTED_IMAGE_SIZE_RATE) - levelScaleRate_[index]) / 3.0f;
+			}
+			else {
+				levelScaleRate_[index] += (NOT_SELECTED_IMAGE_SIZE_RATE - levelScaleRate_[index]) / 3.0f;
+			}
+			levelSprite_[index].ChangeScale(LEVEL_SPRITE_SCALE.x_ * levelScaleRate_[index], LEVEL_SPRITE_SCALE.y_ * levelScaleRate_[index], 1.0f);
+			levelSprite_[index].SetColor(DirectX::XMFLOAT4(levelScaleRate_[index], levelScaleRate_[index], levelScaleRate_[index], levelScaleRate_[index]));
+
+		}
+
+		// レベルのUIのうらの赤いやつを更新する。
+		redSprite_.ChangePosition(levelSprite_[nowSelectLevel_].GetPos());
+
+		// 一定間隔で赤いやつを出すようにする。
+		const int RED_SPRITE_EXP_SPAN = 12;
+		++redSpriteExpSpan_;
+		if (RED_SPRITE_EXP_SPAN <= redSpriteExpSpan_) {
+			redSpriteExpSpan_ = 0;
+			redSpriteAlpha_ = 1.0f;
+			redSpriteScaleRate_ = 0.0f;
+		}
+
+		// 赤いやつのサイズをアルファを更新。
+		const float SUB_REDSPRITE_ALPHA = 0.09f;
+		const float SUB_REDSPRITE_SCALE_RATE = 0.09f;
+		redSpriteAlpha_ = FHelper::Clamp(redSpriteAlpha_ - SUB_REDSPRITE_ALPHA, 0.0f, 1.0f);
+		redSpriteScaleRate_ = FHelper::Clamp(redSpriteScaleRate_ + SUB_REDSPRITE_SCALE_RATE, 0.0f, 1.0f);
+		redSprite_.SetColor(DirectX::XMFLOAT4(1, 1, 1, redSpriteAlpha_));
+		redSprite_.ChangeScale(Vec3((LEVEL_SPRITE_SCALE * 1.5f).x_ * redSpriteScaleRate_, (LEVEL_SPRITE_SCALE * 1.5f).y_ * redSpriteScaleRate_, 1.0f));
+
+
+
+		// 遷移中だったら。
+		if (isStatTransition_) {
+
+			// タイマーを更新してイージングさせる。
+			transitionEasingTimer_ += TRANSITION_EASING_ADD;
+			if (1.0f < transitionEasingTimer_) {
+
+				// 出現中だったら
+				if (isAppear_) {
+					isStatTransition_ = false;
+					transitionEasingTimer_ = 0.0f;
+				}
+				else {
+
+					// シーン遷移が予約されていたら遷移する。
+					if (isReservationTransition_) {
+
+						// 遷移演出が始まっていなかったら演出をつける。
+						if (!isStartSceneTransition_) {
+							SceneTransition::Ins()->Appear();
+							isStartSceneTransition_ = true;
+						}
+
+						// 遷移演出が終わっていたら次へ。
+						if (isStartSceneTransition_ && SceneTransition::Ins()->GetIsFinish()) {
+
+							isTransition_ = true;
+							GameSceneMode::Ins()->level_ = nowSelectLevel_;
+
+						}
+
+					}
+					else {
+						transitionEasingTimer_ = 0.0f;
+						titleStat_ = nextStat_;
+						isAppear_ = true;
+					}
+
+				}
+
+			}
+			else {
+
+				// 出現中だったら。
+				if (isAppear_) {
+					float easingAmount = FEasing::EaseOutQuint(transitionEasingTimer_);
+					levelPos_[0] = LEVEL_POS[0] + Vec3(0, SPRITE_EXIT_POS_Y - (SPRITE_EXIT_POS_Y * easingAmount), 0);
+					levelPos_[1] = LEVEL_POS[1] + Vec3(0, SPRITE_EXIT_POS_Y - (SPRITE_EXIT_POS_Y * easingAmount), 0);
+					levelPos_[2] = LEVEL_POS[2] + Vec3(0, SPRITE_EXIT_POS_Y - (SPRITE_EXIT_POS_Y * easingAmount), 0);
+				}
+				else {
+					float easingAmount = FEasing::EaseInQuint(transitionEasingTimer_);
+					levelPos_[0] = LEVEL_POS[0] + Vec3(0, SPRITE_EXIT_POS_Y * easingAmount, 0);
+					levelPos_[1] = LEVEL_POS[1] + Vec3(0, SPRITE_EXIT_POS_Y * easingAmount, 0);
+					levelPos_[2] = LEVEL_POS[2] + Vec3(0, SPRITE_EXIT_POS_Y * easingAmount, 0);
+				}
+
+			}
+
+		}
+
+		break;
+
+	}
+	default:
+		break;
+	}
 
 }

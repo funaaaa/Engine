@@ -51,6 +51,10 @@ private:
 	// 集中線
 	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
 
+	// 遷移演出を終わらせる処理を通したかフラグ。
+	bool isFinishTransition_;
+	bool isStartTransition_;
+
 
 	// ゴール関係
 	bool isGameFinish_;
