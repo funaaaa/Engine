@@ -69,32 +69,6 @@ std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, c
 	/*===== BLASを生成 =====*/
 
 	IsNewGenerate;
-	//// すでにロード済みかをチェックする。
-	//bool isLoaded = false;
-	//int blasIndex_ = 0;
-	//for (auto& index_ : blas_) {
-
-	//	if (isLoaded) break;
-
-	//	// 未生成だったら処理を飛ばす。
-	//	if (!index_->GetIsGenerate()) continue;
-
-	//	// モデルの名前が同じかどうかをチェックする。
-	//	if (!(index_->GetModelPath() == DirectryPath + ModelName)) continue;
-
-	//	isLoaded = true;
-	//	blasIndex_ = static_cast<int>(&index_ - &blas_[0]);
-
-	//}
-
-	//// ロードされていたら
-	//if (isLoaded && !IsNewGenerate) {
-
-	//	return blas_[blasIndex_];
-
-	//}
-	//else {
-
 	for (auto& index : blas_) {
 
 		if (index->GetIsGenerate()) continue;

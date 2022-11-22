@@ -31,10 +31,6 @@ private:
 	int sphereBlas_;
 	std::array<int, RayLightConstBufferData::POINT_LIGHT_COUNT> sphereIns_;
 
-	// 天球用のスフィア
-	std::weak_ptr<BLAS> skyDomeBlas_;
-	std::weak_ptr<PolygonMeshInstance> skyDomeIns_;
-
 	// ステージ関係。
 	std::vector<std::shared_ptr<BaseStage>> stages_;
 	enum STAGE_ID {
@@ -55,6 +51,10 @@ private:
 	// 集中線
 	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
 
+	// 遷移演出を終わらせる処理を通したかフラグ。
+	bool isFinishTransition_;
+	bool isStartTransition_;
+
 
 	// ゴール関係
 	bool isGameFinish_;
@@ -63,8 +63,6 @@ private:
 
 	// タイヤ痕出力用クラス
 	std::shared_ptr<RaytracingOutput> tireMaskTexture_;
-
-	// タイヤ痕出テスト用クラス
 	std::shared_ptr<RaytracingOutput> tireMaskTextureOutput_;
 	std::shared_ptr<RayComputeShader> tireMaskComputeShader_;
 	std::shared_ptr<RayComputeShader> whiteOutComputeShader_;
@@ -106,6 +104,7 @@ private:
 	Vec3 COUNT_DOWN_START_POS = Vec3(1280.0f / 2.0f, 720.0f / 2.0f - 300.0f, 0.1f);
 
 
+
 public:
 
 	/*===== メンバ関数 =====*/
@@ -122,9 +121,6 @@ public:
 	// 入力操作
 	void Input();
 	void InputImGUI();
-
-	// ギミックを生成。
-	void GenerateGimmick();
 
 private:
 

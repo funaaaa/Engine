@@ -221,20 +221,6 @@ bool ShootDirShadow(Vertex vtx, float length)
     float3 dirLightVec = dirLightPos - worldPosition;
     dirLightVec = normalize(dirLightVec);
 
-    //// 光源の端を求める。
-    //float3 toLightEdge = ((worldPosition + dirLightPos) + perpL * 10000) - worldPosition;
-    //toLightEdge = normalize(toLightEdge);
-
-    //// 角度を求める。
-    //float coneAngle = acos(dot(dirLightVec, toLightEdge)) * 2.0f;
-
-    //// 乱数の種を求める。
-    //uint2 pixldx = DispatchRaysIndex().xy;
-    //uint2 numPix = DispatchRaysDimensions().xy;
-    //int randSeed = InitRand(DispatchRaysIndex().x + (worldPosition.x * gSceneParam.light.dirLight.lightDir.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
-
-    //// レイを撃つベクトル
-    //float3 shadowRayDir = GetConeSample(randSeed, dirLightVec, coneAngle);
     float3 shadowRayDir = dirLightVec;
     
     return ShootShadowRayNoAH(worldPosition + normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3())) * 2.0f, shadowRayDir, length, gRtScene);
@@ -387,20 +373,20 @@ void mainMS(inout Payload PayloadData)
     float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
         
     // サンプリングした点が地上より下じゃなかったら。
-    if (t <= 0.9f)
-    {
+    //if (t <= 0.9f)
+    //{
             
-        // サンプリングした輝度をもとに、暗かったら星空を描画する。
-        t = (1.0f - t);
-        if (t != 0.0f)
-        {
-            t = pow(t, 10.0f);
-            //t = pow(2.0f, 10.0f * t - 10.0f);
-        }
-        //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
-        //payloadBuff.color_ = saturate(payloadBuff.color_);
+    //    // サンプリングした輝度をもとに、暗かったら星空を描画する。
+    //    t = (1.0f - t);
+    //    if (t != 0.0f)
+    //    {
+    //        t = pow(t, 10.0f);
+    //        //t = pow(2.0f, 10.0f * t - 10.0f);
+    //    }
+    //    //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
+    //    //payloadBuff.color_ = saturate(payloadBuff.color_);
             
-    }
+    //}
         
     // 影響度を0にする。
     payloadBuff.impactAmount_ = 0.0f;
@@ -431,22 +417,13 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     }
     
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK)
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK)
     {
         float4 tiremasktex = (float4) tireMaskTexture[uint2((uint) (Vtx.subUV.x * 4096.0f), (uint) (Vtx.subUV.y * 4096.0f))];
-        //if (tiremasktex.x == 0)
-        //{
-        //    TexColor = tiremasktex;
-        //}
-        //else if (tiremasktex.x != 1)
-        //{
-        //    TexColor += tiremasktex;
-        //    TexColor = normalize(TexColor);
-
-        //}
         TexColor += tiremasktex * tiremasktex.a;
         TexColor = normalize(TexColor);
     }
+
     
     // 今発射されているレイのIDがGI用だったら
     if (payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_GI)
@@ -463,18 +440,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         rate = 1.0f - saturate(rate);
         
         float3 giBuff = (float3) TexColor * rate * (1.0f - material[0].metalness_);
-        
-        //// 当たったオブジェクトが完全反射だったらGIの色を黒くする。(完全反射で色がないから。黒は色として反映されない。)
-        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_COMPLETE_REFLECTION)
-        //{
-        //    giBuff = float3(0, 0, 0);
-        //}
-        
-        //// 当たったオブジェクトが反射だったらGIの色を薄くする。
-        //if (InstanceID == CHS_IDENTIFICATION_ISNTANCE_REFLECTION)
-        //{
-        //    giBuff /= 2.0f;
-        //}
+
         
         payloadBuff.gi_ += giBuff;
         
@@ -482,66 +448,9 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         
         return true;
     }
-
-    
-    // 当たったオブジェクトが天球だったら。
-    //if (InstanceID == CHS_IDENTIFICATION_INSTNACE_AS)
-    //{
-    //    float3 mieColor = float3(1, 1, 1);
-        
-    //    // 影響度をかけつつ色を保存。
-    //    payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-    //    payloadBuff.color_ += AtmosphericScattering(WorldPos, mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
-    //    payloadBuff.ao_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-    //    payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
-        
-    //    // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
-    //    payloadBuff.denoiseMask_ = float3(1, 1, 1);
-        
-    //    // サンプリングした点の輝度を取得する。
-    //    float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
-        
-    //    // サンプリングした点が地上より下じゃなかったら。
-    //    if (t <= 0.9f)
-    //    {
-            
-    //        // サンプリングした輝度をもとに、暗かったら星空を描画する。
-    //        t = (1.0f - t);
-    //        if (t != 0.0f)
-    //        {
-    //            t = pow(t, 10.0f);
-    //            //t = pow(2.0f, 10.0f * t - 10.0f);
-    //        }
-    //        payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
-    //        payloadBuff.color_ = saturate(payloadBuff.color_);
-            
-    //    }
-        
-    //    // 影響度を0にする。
-    //    payloadBuff.impactAmount_ = 0.0f;
-        
-    //    PayloadData = payloadBuff;
-        
-    //    return true;
-    //}
-    
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
-    {
-        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-        payloadBuff.color_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
-        payloadBuff.ao_ += 1 * payloadBuff.impactAmount_;
-        payloadBuff.gi_ += float3(0, 0, 0);
-        
-        // 影響度を0にする。
-        payloadBuff.impactAmount_ = 0.0f;
-        
-        PayloadData = payloadBuff;
-        
-        return true;
-    }
     
     // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
-    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR)
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
         payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
         payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
@@ -564,13 +473,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         // 完全反射用のレイを発射。
         ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
         
-        // 色を少しだけ明るくする。
-        //PayloadData.color += 0.1f;
-        
         payloadBuff.color_ = saturate(payloadBuff.color_);
-        
-        //// 残った影響度を入れる。
-        //PayloadData.rayData_[RayDataIndex].impactRate_ = 0.0f;
         
         PayloadData = payloadBuff;
         
@@ -609,17 +512,17 @@ float3 SchlickFresnel3(float3 F0, float3 F90, float Cosine)
 }
 
 // ディズニーのフレネル計算
-float3 DisneyFresnel(float LdotH)
+float3 DisneyFresnel(float LdotH, float3 BaseColor)
 {
     
     // 輝度
-    float luminance = 0.3f * material[0].baseColor_.r + 0.6f * material[0].baseColor_.g + 0.1f * material[0].baseColor_.b;
+    float luminance = 0.3f * BaseColor.r + 0.6f * BaseColor.g + 0.1f * BaseColor.b;
     // 色合い
-    float3 tintColor = material[0].baseColor_ / luminance;
+    float3 tintColor = BaseColor / luminance;
     // 非金属の鏡面反射色を計算
     float3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
     // metalnessによる色補完 金属の場合はベースカラー
-    float3 specularColor = lerp(nonMetalColor, material[0].baseColor_, material[0].metalness_);
+    float3 specularColor = lerp(nonMetalColor, BaseColor, material[0].metalness_);
     // NdotHの割合でSchlickFresnel補間
     return SchlickFresnel3(specularColor, float3(1.0f, 1.0f, 1.0f), LdotH);
     
@@ -634,14 +537,14 @@ float GeometricSmith(float Cosine)
 }
 
 // 鏡面反射の計算
-float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH)
+float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH, float3 BaseColor)
 {
     
     // D項(分布:Distribution)
     float Ds = DistributionGGX(material[0].roughness_ * material[0].roughness_, NdotH);
     
     // F項(フレネル:Fresnel)
-    float3 Fs = DisneyFresnel(LdotH);
+    float3 Fs = DisneyFresnel(LdotH, BaseColor);
     
     // G項(幾何減衰:Geometry attenuation)
     float Gs = GeometricSmith(NdotL) * GeometricSmith(NdotV);
@@ -655,7 +558,7 @@ float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH)
 }
 
 // 双方向反射分布関数
-float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal)
+float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal, float3 BaseColor)
 {
     // 法線とライト方向の内積
     float NdotL = dot(Normal, LightVec);
@@ -698,10 +601,10 @@ float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal)
     float FD = FL * FV * energyFactor;
     
     // 拡散反射項
-    float3 diffuseColor = diffuseReflectance * FD * material[0].baseColor_ * (1.0f - material[0].metalness_);
+    float3 diffuseColor = diffuseReflectance * FD * BaseColor * (1.0f - material[0].metalness_);
     
     // 鏡面反射項
-    float3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH);
+    float3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH, BaseColor);
     
     return diffuseColor + specularColor;
     
@@ -757,7 +660,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
                 rate = 1.0f - rate;
                 
 
-                payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal) * rate * PayloadData.impactAmount_;
+                payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal, material[0].baseColor_) * rate * PayloadData.impactAmount_;
 
             }
         
@@ -800,15 +703,9 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             float3 mieColor = float3(1, 1, 1);
             float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
             
-            payloadBuff.light_ += (mieColor * float3(1.0f, 0.5f, 0.5f)) + BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal) * PayloadData.impactAmount_;
+            payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal, float3(1, 1, 1)) * PayloadData.impactAmount_;
             payloadBuff.light_ = saturate(payloadBuff.light_);
             
-        }
-        else
-        {
-            // 拡散反射光を擬似的に再現するために明るさを少しだけ上げる。
-            payloadBuff.light_ += float3(0.3f, 0.3f, 0.3f);
-            payloadBuff.light_ = saturate(payloadBuff.light_);
         }
         
         
@@ -820,11 +717,12 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
         float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
         
-        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 15, gRtScene);
+        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 5, gRtScene);
         
         float NoL = saturate(dot(WorldNormal, sampleDir));
         float pdf = 1.0f / (2.0f * PI);
         aoLightVisibility += aoLightVisibilityBuff;
+        aoLightVisibility = clamp(aoLightVisibility, 0.3f, 1.0f);
         
     }
     
@@ -842,7 +740,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
 }
 
 // ライティング後処理
-void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
+void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, float4 DefTexColor, inout float4 TexColor, uint InstanceID)
 {
     
     // Payload一時受け取り用変数。
@@ -998,9 +896,9 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         payloadBuff.roughnessOffset_ = rougness * 100.0f;
         
         // metalnessマップの色とテクスチャの色が同じじゃなかったらmetallnessマップの色を再取得。(metalnessマップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
-        if (!(TexColor.x == metalnessMapColor.x && TexColor.y == metalnessMapColor.y && TexColor.z == metalnessMapColor.z))
+        if (!(DefTexColor.x == metalnessMapColor.x && DefTexColor.y == metalnessMapColor.y && DefTexColor.z == metalnessMapColor.z))
         {
-            metal = saturate(metal + ((1.0f - metal) * (1.0f - metalnessMapColor.x)));
+            //metal = saturate((1.0f - metalnessMapColor.x));
         }
         
         if (payloadBuff.impactAmount_ < metal)
@@ -1177,33 +1075,8 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
     // テクスチャの色を取得。
     float4 texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
+    float4 defTexColor = texColor;
     
-    // 法線マップの色を取得。
-    float3 normalMapColor = (float3) normalTexture.SampleGrad(smp, vtx.uv, ddxUV, ddyUV);
-    
-    // 法線マップの色とテクスチャの色が同じじゃなかったら法線マップの色を再取得。(法線マップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
-    if (!(texColor.x == normalMapColor.x && texColor.y == normalMapColor.y && texColor.z == normalMapColor.z))
-    {
-        worldNormal = normalize(mul(normalMapColor, (float3x3) ObjectToWorld4x3()));
-        
-        // 接空間変換用
-        float3 tan;
-        float3 bnorm;
-        CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
-        
-        // 説空間行列を求める。
-        float3x3 mat =
-        {
-            float3(tan),
-            float3(bnorm),
-            float3(vtx.Normal)
-        };
-        
-        worldNormal = mul(worldNormal, mat);
-
-    }
-    
-
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。
     if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, texColor, instanceID))
     {
@@ -1221,7 +1094,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     }
     
     // ライティング後の処理を実行。 ----- ライティングの結果を合成する処理や反射や屈折等の再びレイを飛ばす必要があるオブジェクトの処理。
-    ProccessingAfterLighting(payload, vtx, worldPos, worldNormal, texColor, instanceID);
+    ProccessingAfterLighting(payload, vtx, worldPos, worldNormal, defTexColor, texColor, instanceID);
     
 }
 
@@ -1305,7 +1178,5 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
         
     }
-    
-    //AcceptHitAndEndSearch();
     
 }

@@ -32,7 +32,7 @@ struct Bone {
 	// クラスター(FBX側のボーン情報)
 	FbxCluster* fbxCluster_;
 	// コンストラクタ
-	Bone(const std::string& Name) : name_(Name) {};
+	Bone(const std::string& Name) : name_(Name), fbxCluster_(nullptr), invInitialPose_({}) {};
 };
 
 // ノード構造体

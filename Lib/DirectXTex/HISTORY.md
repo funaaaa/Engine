@@ -6,6 +6,74 @@ Release available for download on [GitHub](https://github.com/microsoft/DirectXT
 
 ## Release History
 
+### October 17, 2022
+* Minor fix for ``CompileShaders.cmd`` to address additional 'paths with spaces' issues
+* Minor CMake and CMakePresets updates
+* Code review
+
+### July 29, 2022
+* Added ``MakeLinear`` DXGI_FORMAT utility function.
+* *breaking change* ``CreateTextureEx`` and ``CreateShaderResourceViewEx`` functions now use ``CREATETEX_FLAGS`` instead of a ``bool forceSRGB`` parameter.
+* Updates for MinGW ABI fixes for DirectX12 in the latest DirectX-Headers.
+* CMake and MSBuild project updates
+* Code review
+* `DDSTextureLoader11` and ``DDSTextureLoader12`` sync'd up with *DirectX Tool Kit* July 2022 changes.
+
+### May 9, 2022
+* TGA reader updated to support 24-bit paletted uncompressed color-mapped images (used by a DCC application)
+* Added `IsBGR` utility method
+* Workaround for driver issue on some systems using DirectX 11 `Capture` method
+* Fix for problem with resizing/mipmaps generation for HDR content using box/fant filter which should avoid going through WIC code paths
+* Minor updates for VS 2022 (17.2)
+* CMake project updates (now supports MSVC, clang/LLVM, and MinGW)
+* Updated D3DX12 internal copy with latest changes from DirectX-Headers GitHub
+* Retired VS 2017 projects
+* Code cleanup
+* Reformat source using updated .editorconfig settings
+* texconv: Improve `-nmap` handling for 16-bit sources going to BC formats
+
+### March 24, 2022
+* Fixed end-point bounds issue with BC6H CPU compressor if none of the pixels are in 0-1 range
+* Fixed bug in alpha-to-coverage computation
+* Add support for installable WIC codecs for HEIF and WEBP (if present)
+* Update build switches for SDL recommendations
+* CMake project updates and UWP platform CMakePresets
+* Code cleaup for tools
+* Optional C++17 usage in a few places
+
+### February 28, 2022
+* Updated D3DX12 internal copy with latest changes from GitHub
+* Code and project review including fixing clang v13 warnings
+* Added CMakePresets.json
+
+### November 8, 2021
+* VS 2022 support
+* Updated D3DX12 internal copy with latest change from GitHubf
+* Minor code and project review
+* VS 2017 projects updated to require the Windows 10 SDK (19401)
+* texassemble/texconv: Updated with 12.2 for ``-fl`` switch
+* texassemble/texconv/texdiag: Fixed potential locale issue with ``-flist``
+
+### September 28, 2021
+* Minor code and project cleanup
+
+### August 1, 2021
+* Fixed weighting bug in custom linear filtering for wrap/mirroring
+* Added VS 2022 Preview projects
+* texconv: Made default output extension to be lower-case like most Windows applications
+* texconv: updated colorspace rotation names for -rotatecolor switch
+* texassemble, texconv: Order of operations fix for -swizzle using 0, 1
+* Minor code review
+
+### June 9, 2021
+* Minor bug fix for metadata behavior when using ``DDS_FLAGS_NO_16BPP`` flag for B5G6R5 content
+* texdiag: added ``-c`` and ``-t`` switches for diff command
+* texconv: Fixed bug in ``-m`` switch handling when resizing changes the max mipmap count
+* texconv et al: improved ``-flist`` switch to support wildcards and file exclusions
+* texconv et al: Added 'BGR' alias to ``-f`` switch for the B8G8R8X8_UNORM format
+* WICTextureLoader / DDSTextureLoader12 updated to use typed enum bitmask flags for loadFlags parameter
+* Minor code review
+
 ### April 6, 2021
 * DDS reader updated to accept nVidia Texture Tool v1 single-channel and dual-channel files marked as RGB instead of LUMINANCE
 * Fixed TGA reader regression with files smaller than 26 bytes total

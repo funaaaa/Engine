@@ -13,6 +13,7 @@ static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI = 8; // instanceID í èÌÇÃèàó
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK = 9; // instanceID í èÌÇÃèàóù + GI + É^ÉCÉÑç≠
 static const int CHS_IDENTIFICATION_INSTANCE_ALPHA = 10; // instanceID îºìßñæ
 static const int CHS_IDENTIFICATION_INSTANCE_ADD = 11; // instanceID â¡éZçáê¨
+static const int CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK = 12; // instanceID í èÌÇÃèàóù + É^ÉCÉÑç≠
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // ÉfÉtÉHÉãÉgÇÃÉåÉC
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GIópÇÃÉåÉC
@@ -257,9 +258,6 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderÇÉXÉLÉbÉv
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderÇÉXÉLÉbÉv
     
@@ -303,9 +301,6 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     payload.pad_ = 0.0f;
 
     RAY_FLAG flags = RAY_FLAG_NONE;
-    //flags |= RAY_FLAG_SKIP_CLOSEST_HIT_SHADER;
-    //flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    //flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderÇÉXÉLÉbÉv
     flags |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     flags |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderÇÉXÉLÉbÉv
     

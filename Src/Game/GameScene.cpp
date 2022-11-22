@@ -15,7 +15,6 @@
 #include "Sprite.h"
 #include "Pipeline.h"
 #include "WindowsAPI.h"
-#include "CircuitStage.h"
 #include "MugenStage.h"
 #include "RayComputeShader.h"
 #include "StageObjectMgr.h"
@@ -31,6 +30,7 @@
 #include "RayEngine.h"
 
 #include "GLTF.h"
+#include "SceneTransition.h"
 
 GameScene::GameScene()
 {
@@ -73,7 +73,7 @@ GameScene::GameScene()
 	DriftParticleMgr::Ins()->Setting();
 
 	// 太陽に関する変数
-	sunAngle_ = 0.1f;
+	sunAngle_ = 0.25f;
 	sunSpeed_ = 0.01f;
 
 	isDisplayFPS_ = false;
@@ -157,7 +157,7 @@ void GameScene::Init()
 	BLASRegister::Ins()->Setting();
 	PolygonInstanceRegister::Ins()->Setting();
 
-	nextScene_ = SCENE_ID::RESULT;
+	nextScene_ = SCENE_ID::TITLE;
 	isTransition_ = false;
 
 	concentrationLine_->Init();
@@ -215,38 +215,40 @@ void GameScene::Init()
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
 	isGameFinish_ = false;
+	isStartTransition_ = false;
 	countDownStartTimer_ = 0;
 	transitionTimer = 0;
 	countDownNumber_ = 2;
 	sunAngle_ = 0.8f;
+	isFinishTransition_ = false;
+
+	Camera::Ins()->eye_ = Vec3(0, 0, 0);
+	Camera::Ins()->target_ = Vec3(10, 0, 0);
 
 }
 
+#include <ostream>
+#include <iostream>
+#include <fstream>
 void GameScene::Update()
 {
 
 	/*===== 更新処理 =====*/
 
+	// シーン遷移を終わらせていなかったら終わらせる。
+	if (!isFinishTransition_) {
+		SceneTransition::Ins()->Exit();
+		isFinishTransition_ = true;
+	}
+
 	// 入力処理
 	Input();
-
-	// ウィンドウの名前を更新。
-	//if (true) {
-
-	FPS();
-
-	//}
-	//else {
-
-	//SetWindowText(Engine::Ins()->windowsAPI_->hwnd_, L"LE3A_20_フナクラベ_タクミ");
-
-	//}
 
 	// キャラを更新。
 	characterMgr_->Update(stages_[STAGE_ID::MUGEN], isBeforeStart_, isGameFinish_);
 
 	// 乱数の種を更新。
-	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 100000);
 
 	// カメラを更新。
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
@@ -260,15 +262,12 @@ void GameScene::Update()
 		++transitionTimer;
 		if (TRANSION_TIME < transitionTimer) {
 
-			isTransition_ = true;
-
-			characterMgr_->Init();
-
-			return;
+			if (!isStartTransition_) {
+				isStartTransition_ = true;
+				SceneTransition::Ins()->Appear();
+			}
 
 		}
-
-		//isTransition_ = true;
 
 	}
 
@@ -287,14 +286,6 @@ void GameScene::Update()
 
 	// ステージを更新。
 	stages_[STAGE_ID::MUGEN]->Update();
-
-	// ゴールの表示非表示を切り替え。
-	if (characterMgr_->GetPlayerIns().lock()->GetIsPassedMiddlePoint()) {
-		stages_[STAGE_ID::MUGEN]->DisplayGoal();
-	}
-	else {
-		stages_[STAGE_ID::MUGEN]->NonDisplayGoal();
-	}
 
 	// TLASやパイプラインを更新。
 	RayEngine::Ins()->Update();
@@ -326,6 +317,15 @@ void GameScene::Update()
 	}
 	concentrationLine_->Update();
 
+	// シーン遷移の処理
+	if (isStartTransition_ && SceneTransition::Ins()->GetIsFinish()) {
+		isTransition_ = true;
+
+		characterMgr_->Init();
+
+	}
+
+
 }
 
 void GameScene::Draw()
@@ -333,16 +333,17 @@ void GameScene::Draw()
 
 	/*===== 描画処理 =====*/
 
+
 	// レイトレーシングを実行。
 	RayEngine::Ins()->Draw();
 
 
 	// 床を白塗り
-	static int a = 0;
-	if (Input::Ins()->IsKeyTrigger(DIK_R) || a == 0) {
+	static int firstTimeClean = 0;
+	if (Input::Ins()->IsKeyTrigger(DIK_R) || firstTimeClean == 0) {
 
-		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex());
-		++a;
+		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex()); \
+			++firstTimeClean;
 
 	}
 
@@ -367,41 +368,38 @@ void GameScene::Draw()
 	}
 
 	// UIを描画
-	static int firstTime = 0;
-	if (firstTime != 0) {
+	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
-		UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
-		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	concentrationLine_->Draw();
 
-		concentrationLine_->Draw();
+	// コインの取得数のui。
+	coinCountUI_[0]->Draw();
+	coinCountUI_[1]->Draw();
 
-		// コインの取得数のui。
-		coinCountUI_[0]->Draw();
-		coinCountUI_[1]->Draw();
+	// 現在のラップ数のui。
+	nowRapCountUI_->Draw();
+	slashUI_->Draw();
+	maxRapCountUI_->Draw();
 
-		// 現在のラップ数のui。
-		nowRapCountUI_->Draw();
-		slashUI_->Draw();
-		maxRapCountUI_->Draw();
+	// 左下のuiのフレーム。
+	coinUI_->Draw();
+	rapUI_->Draw();
 
-		// 左下のuiのフレーム。
-		coinUI_->Draw();
-		rapUI_->Draw();
+	// カウントダウン用のui。
+	countDownSprite_->Draw();
 
-		// カウントダウン用のui。
-		countDownSprite_->Draw();
+	// カウントダウン終了時のgoのui。
+	goSprite_->Draw();
 
-		// カウントダウン終了時のgoのui。
-		goSprite_->Draw();
+	// シーン遷移の画像を描画。
+	SceneTransition::Ins()->Draw();
 
-		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
-
-	}
-	if (firstTime == 0) ++firstTime;
+	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 }
 
@@ -441,7 +439,10 @@ void GameScene::Input()
 
 	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
-		isTransition_ = true;
+		if (!isStartTransition_) {
+			isStartTransition_ = true;
+			SceneTransition::Ins()->Appear();
+		}
 
 	}
 
@@ -451,160 +452,13 @@ void GameScene::Input()
 
 #include "BaseItem.h"
 #include "Character.h"
+#include "BLAS.h"
 void GameScene::InputImGUI()
 {
 
 	/*===== IMGUI更新 =====*/
 
-	ImGui::Text("Let's do three laps!");
-
 	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
-
-	//// 太陽の移動速度を更新。
-	//ImGui::SliderFloat("Sun Speed", &sunSpeed_, 0.0f, 0.1f, "%.5f");
-
-	//// メッシュを表示する。
-	//bool isMesh = constBufferData_.debug_.isMeshScene_;
-	//ImGui::Checkbox("Mesh Scene", &isMesh);
-	//constBufferData_.debug_.isMeshScene_ = isMesh;
-
-	//// 法線を表示する。
-	//bool isNormal = constBufferData_.debug_.isNormalScene_;
-	//ImGui::Checkbox("Normal Scene", &isNormal);
-	//constBufferData_.debug_.isNormalScene_ = isNormal;
-
-	//// ライトがあたった面だけ表示するフラグを更新。
-	//bool isLightHit = constBufferData_.debug_.isLightHitScene_;
-	//ImGui::Checkbox("LightHit Scene", &isLightHit);
-	//constBufferData_.debug_.isLightHitScene_ = isLightHit;
-
-	//// デバッグ用でノイズ画面を出すためのフラグをセット。
-	//bool isNoise = constBufferData_.debug_.isNoiseScene_;
-	//ImGui::Checkbox("Noise Scene", &isNoise);
-	//constBufferData_.debug_.isNoiseScene_ = isNoise;
-
-	//// AOを行うかのフラグをセット。
-	//bool isNoAO_ = constBufferData_.debug_.isNoAO_;
-	//ImGui::Checkbox("NoAO Scene", &isNoAO_);
-	//constBufferData_.debug_.isNoAO_ = isNoAO_;
-
-	//// GIを行うかのフラグをセット。
-	//bool isNoGI_ = constBufferData_.debug_.isNoGI_;
-	//ImGui::Checkbox("NoGI Scene", &isNoGI_);
-	//constBufferData_.debug_.isNoGI_ = isNoGI_;
-
-	//// GIのみを描画するかのフラグをセット。
-	//bool isGIOnlyScene_ = constBufferData_.debug_.isGIOnlyScene_;
-	//ImGui::Checkbox("GIOnly Scene", &isGIOnlyScene_);
-	//constBufferData_.debug_.isGIOnlyScene_ = isGIOnlyScene_;
-
-	//// FPSを表示するかのフラグをセット。
-	//ImGui::Checkbox("Display FPS", &isDisplayFPS_);
-
-	//// アイテムデバッグ用。
-	//bool haveItem = characterMgr_->GetPlayerIns().lock()->item_.operator bool();
-
-	//if (haveItem) {
-
-	//	bool haveBoostItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::BOOST;
-
-	//	ImGui::Checkbox("BoostItem", &haveBoostItem);
-
-	//	bool haveShellItem = characterMgr_->GetPlayerIns().lock()->item_->GetItemID() == BaseItem::ItemID::SHELL;
-
-	//	ImGui::Checkbox("ShellItem", &haveShellItem);
-
-	//}
-
-	//Vec3 position = itemFrameUI_->GetPos();
-	//float pos[3] = { position.x_, position.y_, position.z_ };
-
-	//ImGui::DragFloat3("Position", pos, 1.0f);
-
-	//position = Vec3(pos[0], pos[1], pos[2]);
-	//itemFrameUI_->ChangePosition(position);
-
-
-
-	//int index = 37;
-
-	//Vec3 pos = PolygonInstanceRegister::Ins()->GetPos(index);
-
-	//float posArray[3] = { pos.x_, pos.y_, pos.z_ };
-
-	//ImGui::DragFloat3("Pos", posArray, 1.0f);
-
-	//pos.x_ = posArray[0];
-	//pos.y_ = posArray[1];
-	//pos.z_ = posArray[2];
-
-	//PolygonInstanceRegister::Ins()->ChangeTrans(index, pos);
-
-
-	//Vec3 rotate = PolygonInstanceRegister::Ins()->GetRotateVec3(index);
-
-	//float rotateArray[3] = { rotate.x_, rotate.y_, rotate.z_ };
-
-	//ImGui::DragFloat3("Rotate", rotateArray, 0.001f);
-
-	//rotate.x_ = rotateArray[0];
-	//rotate.y_ = rotateArray[1];
-	//rotate.z_ = rotateArray[2];
-
-	//PolygonInstanceRegister::Ins()->ChangeRotate(index, rotate);
-
-
-	//DirectX::XMMATRIX scale = PolygonInstanceRegister::Ins()->GetScale(index);
-
-	//float scaleArray[3] = { scale.r[0].m128_f32[0], scale.r[1].m128_f32[1], scale.r[2].m128_f32[2] };
-
-	//ImGui::DragFloat3("Scale", scaleArray, 1.0f);
-
-	//Vec3 scaleVec3;
-	//scaleVec3.x_ = scaleArray[0];
-	//scaleVec3.y_ = scaleArray[1];
-	//scaleVec3.z_ = scaleArray[2];
-
-	//PolygonInstanceRegister::Ins()->ChangeScale(index, scaleVec3);
-
-
-
-	//// デバッグ用
-	//if (Input::Ins()->IsKey(DIK_U)) {
-
-	//	PolygonInstanceRegister::Ins()->ChangeTrans(index, characterMgr_->GetPlayerIns().lock()->GetPos());
-
-	//}
-
-	// マテリアルの値を書き換える。
-	//ImGui::Text("MaterialData");
-	//ImGui::SliderFloat("Metalness", &pbrSphereBlas_.lock()->GetMaterial().metalness_, 0.0f, 1.0f);
-	//ImGui::SliderFloat("Specular", &pbrSphereBlas_.lock()->GetMaterial().specular_, 0.0f, 1.0f);
-	//ImGui::SliderFloat("Roughness", &pbrSphereBlas_.lock()->GetMaterial().roughness_, 0.0f, 1.0f);
-	//RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
-
-	//pbrSphereBlas_.lock()->IsChangeMaterial();
-
-
-}
-
-void GameScene::GenerateGimmick()
-{
-
-	//// 1個目
-	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
-
-	//// 2個目
-	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
-
-	//// 3個目
-	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
-
-	//// 4個目
-	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
-
-	//// 5個目
-	//GimmickMgr::Ins()->AddGimmick(BaseStageObject::ID::BOOST, "Resource/Game/", "goal.obj", { L"Resource/Game/yellow.png" }, HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::SHADER_ID::DEF);
 
 }
 

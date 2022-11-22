@@ -28,11 +28,7 @@ cbuffer WriteUV : register(b0)
 // 書き込む関数
 void WriteColor(uint2 WriteUV, float4 color)
 {
-    // アルファ値が1じゃなかったら
-    //if (length(OutputImg[WriteUV].xyz) != 0)
-    //{
-        OutputImg[WriteUV] = color;
-    //}
+    OutputImg[WriteUV] = color;
 }
 
 // 書き込む
@@ -84,23 +80,6 @@ void Interpolation(uint2 WriteUV, uint2 PrevWriteUV)
     WriteOutputImg(WriteUV * 0.8f + PrevWriteUV * 0.2f);
     WriteOutputImg(WriteUV * 0.9f + PrevWriteUV * 0.1f);
     
-    //if (1000000 < interpolationLength)
-    //{
-    //    OutputImg[uint2(WriteUV.x, WriteUV.y)] = float4(1, 0, 0, 1);
-    //}
-    //else
-    //{
-    
-    //    // 補間して書き込む。
-    //    for (int index = 0; index < interpolationLength; ++index)
-    //    {
-        
-    //        WriteOutputImg(PrevWriteUV + uint2(interpolationVec * index));
-        
-    //    }
-        
-    //}
-    
 };
 
 [numthreads(2, 1, 1)]
@@ -117,13 +96,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
         // 二個目
         Interpolation(uint2((uint) (playerCar_.forwardRight_.uv_.x * 4096.0f), (uint) (playerCar_.forwardRight_.uv_.y * 4096.0f)), uint2((uint) (playerCar_.forwardRight_.prevuv_.x * 4096.0f), (uint) (playerCar_.forwardRight_.prevuv_.y * 4096.0f)));
-     
-        // 三個目
-        //Interpolation(uint2((uint) (playerCar_.behindLeft_.uv_.x * 4096.0f), (uint) (playerCar_.behindLeft_.uv_.y * 4096.0f)), uint2((uint) (playerCar_.behindLeft_.prevuv_.x * 4096.0f), (uint) (playerCar_.behindLeft_.prevuv_.y * 4096.0f)));
-    
-        // 四個目
-        //Interpolation(uint2((uint) (playerCar_.behindRight_.uv_.x * 4096.0f), (uint) (playerCar_.behindRight_.uv_.y * 4096.0f)), uint2((uint) (playerCar_.behindRight_.prevuv_.x * 4096.0f), (uint) (playerCar_.behindRight_.prevuv_.y * 4096.0f)));
-    
+
     }
     else if (DTid.x == 1)
     {
@@ -136,12 +109,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
         // 二個目
         Interpolation(uint2((uint) (aiCar_.forwardRight_.uv_.x * 4096.0f), (uint) (aiCar_.forwardRight_.uv_.y * 4096.0f)), uint2((uint) (aiCar_.forwardRight_.prevuv_.x * 4096.0f), (uint) (aiCar_.forwardRight_.prevuv_.y * 4096.0f)));
      
-        // 三個目
-       /// Interpolation(uint2((uint) (aiCar_.behindLeft_.uv_.x * 4096.0f), (uint) (aiCar_.behindLeft_.uv_.y * 4096.0f)), uint2((uint) (aiCar_.behindLeft_.prevuv_.x * 4096.0f), (uint) (aiCar_.behindLeft_.prevuv_.y * 4096.0f)));
-    
-        // 四個目
-        //Interpolation(uint2((uint) (aiCar_.behindRight_.uv_.x * 4096.0f), (uint) (aiCar_.behindRight_.uv_.y * 4096.0f)), uint2((uint) (aiCar_.behindRight_.prevuv_.x * 4096.0f), (uint) (aiCar_.behindRight_.prevuv_.y * 4096.0f)));
-       
     }
     
 }

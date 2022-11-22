@@ -297,22 +297,23 @@ void ModelDataManager::LoadObjMaterial(std::string DirectoryPath, const std::str
 			// マテリアル名の読み込み
 			// lineStream >> ModelData.material.name;
 		}
-		//// 先頭文字列がKaならアンビエント色
-		//if (key == "Ka") {
-		//	lineStream >> ModelData.material_.ambient_.x_;
-		//	lineStream >> ModelData.material_.ambient_.y_;
-		//	lineStream >> ModelData.material_.ambient_.z_;
-		//}
-		//// 先頭文字列がKdならディフューズ色
-		if (key == "Kd") {
+		// 先頭文字列がKaならアンビエント色
+		if (key == "Ka") {
 			lineStream >> ModelData.material_.roughness_;
+			//lineStream >> ModelData.material_.ambient_.x_;
+			//lineStream >> ModelData.material_.ambient_.y_;
+			//lineStream >> ModelData.material_.ambient_.z_;
+		}
+		// 先頭文字列がKdならディフューズ色
+		if (key == "Kd") {
+			lineStream >> ModelData.material_.metalness_;
 			//	lineStream >> ModelData.material_.diffuse_.x_;
 			//	lineStream >> ModelData.material_.diffuse_.y_;
 			//	lineStream >> ModelData.material_.diffuse_.z_;
 		}
 		// 先頭文字がKsならスペキュラー色
 		if (key == "Ks") {
-			lineStream >> ModelData.material_.metalness_;
+			lineStream >> ModelData.material_.specular_;
 			//lineStream >> ModelData.material_.specular.y_;
 			//lineStream >> ModelData.material_.specular.z_;
 		}

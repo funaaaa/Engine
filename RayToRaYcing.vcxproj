@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{480cd1bd-fca4-42c6-9af0-eef98fb95f49}</ProjectGuid>
+    <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>RayToRaYcing</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\Dxcompiler;$(ProjectDir)lib\fbx_sdk\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\fbx_sdk\lib;$(ProjectDir)lib\Dxcompiler;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\glTF</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4099 /ignore:4820 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\Dxcompiler\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib\hid;$(SolutionDir)Lib\DirectXTex;$(SolutionDir)Lib\fbx_sdk;$(SolutionDir)Lib\imgui;$(SolutionDir)Src;$(SolutionDir)Src\Engine;$(SolutionDir)Src\Raytracing;$(SolutionDir)Lib;$(SolutionDir)Src\Game;$(SolutionDir)Lib\Dxcompiler;$(SolutionDir)Lib\glTF</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libfbxsdk-mt.lib;libxml2-mt.lib;zlib-mt.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/ignore:4049 /ignore:4099 /ignore:4820 /ignore:4324 %(AdditionalOptions)</AdditionalOptions>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <AdditionalLibraryDirectories>$(ProjectDir)lib\Dxcompiler\</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="lib\imgui\imgui.cpp" />
+    <ClCompile Include="lib\imgui\imgui_demo.cpp" />
+    <ClCompile Include="lib\imgui\imgui_draw.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="lib\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="lib\imgui\imgui_tables.cpp" />
+    <ClCompile Include="lib\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Src\Engine\BaseDrawData.cpp" />
+    <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
+    <ClCompile Include="Src\Engine\Camera.cpp" />
+    <ClCompile Include="Src\Engine\ComputeShader.cpp" />
+    <ClCompile Include="Src\Engine\Engine.cpp" />
+    <ClCompile Include="Src\Engine\FbxLoader.cpp" />
+    <ClCompile Include="Src\Engine\FHelper.cpp" />
+    <ClCompile Include="Src\Engine\GLTF.cpp" />
+    <ClCompile Include="Src\Engine\StageObjectMgr.cpp" />
+    <ClCompile Include="Src\Engine\Input.cpp" />
+    <ClCompile Include="Src\Engine\Joycon.cpp" />
+    <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
+    <ClCompile Include="Src\Engine\Pipeline.cpp" />
+    <ClCompile Include="Src\Engine\PipelineManager.cpp" />
+    <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp" />
+    <ClCompile Include="Src\Engine\ShaderData.cpp" />
+    <ClCompile Include="Src\Engine\ShaderStorage.cpp" />
+    <ClCompile Include="Src\Engine\SoundManager.cpp" />
+    <ClCompile Include="Src\Engine\Sprite.cpp" />
+    <ClCompile Include="Src\Engine\StructuredBuffer.cpp" />
+    <ClCompile Include="Src\Engine\TextureManager.cpp" />
+    <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
+    <ClCompile Include="Src\Game\BasicStageObject.cpp" />
+    <ClCompile Include="Src\Game\BoostItem.cpp" />
+    <ClCompile Include="Src\Game\Character.cpp" />
+    <ClCompile Include="Src\Game\CharacterMgr.cpp" />
+    <ClCompile Include="Src\Game\ConcentrationLine.cpp" />
+    <ClCompile Include="Src\Game\ConcentrationLineMgr.cpp" />
+    <ClCompile Include="Src\Game\ConvertGimmickInfoFromBlender.cpp" />
+    <ClCompile Include="Src\Game\FirstAIOperationObject.cpp" />
+    <ClCompile Include="Src\Game\FirstAIWayPoint.cpp" />
+    <ClCompile Include="Src\Game\FirstAIWaypointMgr.cpp" />
+    <ClCompile Include="Src\Game\GhostOperationObject.cpp" />
+    <ClCompile Include="Src\Game\ItemBoxObject.cpp" />
+    <ClCompile Include="Src\Game\MugenStage.cpp" />
+    <ClCompile Include="Src\Game\PlayerOperationObject.cpp" />
+    <ClCompile Include="Src\Game\RadialBlur.cpp" />
+    <ClCompile Include="Src\Game\SceneTransition.cpp" />
+    <ClCompile Include="Src\Game\ShellItem.cpp" />
+    <ClCompile Include="Src\Game\ShellObject.cpp" />
+    <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
+    <ClCompile Include="Src\Game\DriftParticle.cpp" />
+    <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
+    <ClCompile Include="Src\Game\FloatingStageObject.cpp" />
+    <ClCompile Include="Src\Game\GameScene.cpp" />
+    <ClCompile Include="Src\Game\PlayerModel.cpp" />
+    <ClCompile Include="Src\Game\PlayerTire.cpp" />
+    <ClCompile Include="Src\Game\ResultScene.cpp" />
+    <ClCompile Include="Src\Game\SceneMgr.cpp" />
+    <ClCompile Include="Src\Game\TitleScene.cpp" />
+    <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Raytracing\BLAS.cpp" />
+    <ClCompile Include="Src\Raytracing\BLASRegister.cpp" />
+    <ClCompile Include="Src\Raytracing\ConstBuffers.cpp" />
+    <ClCompile Include="Src\Raytracing\DynamicConstBuffer.cpp" />
+    <ClCompile Include="Src\Raytracing\HitGroup.cpp" />
+    <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp" />
+    <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp" />
+    <ClCompile Include="Src\Raytracing\OBB.cpp" />
+    <ClCompile Include="Src\Raytracing\PolygonInstance.cpp" />
+    <ClCompile Include="Src\Raytracing\PolygonInstanceRegister.cpp" />
+    <ClCompile Include="Src\Raytracing\RayComputeShader.cpp" />
+    <ClCompile Include="Src\Raytracing\RayDenoiser.cpp" />
+    <ClCompile Include="Src\Raytracing\RayDescriptor.cpp" />
+    <ClCompile Include="Src\Raytracing\RayEngine.cpp" />
+    <ClCompile Include="Src\Raytracing\RayRootsignature.cpp" />
+    <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
+    <ClCompile Include="Src\Raytracing\RaytracingPipeline.cpp" />
+    <ClCompile Include="Src\Raytracing\TLAS.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Lib\glTF\json.hpp" />
+    <ClInclude Include="Lib\glTF\stb_image.h" />
+    <ClInclude Include="Lib\glTF\stb_image_write.h" />
+    <ClInclude Include="Lib\glTF\tiny_gltf.h" />
+    <ClInclude Include="lib\imgui\imconfig.h" />
+    <ClInclude Include="lib\imgui\imgui.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_dx12.h" />
+    <ClInclude Include="lib\imgui\imgui_impl_win32.h" />
+    <ClInclude Include="lib\imgui\imgui_internal.h" />
+    <ClInclude Include="lib\imgui\imstb_rectpack.h" />
+    <ClInclude Include="lib\imgui\imstb_textedit.h" />
+    <ClInclude Include="lib\imgui\imstb_truetype.h" />
+    <ClInclude Include="Src\Engine\BaseDrawData.h" />
+    <ClInclude Include="Src\Engine\BaseStageObject.h" />
+    <ClInclude Include="Src\Engine\BaseSprite.h" />
+    <ClInclude Include="Src\Engine\Camera.h" />
+    <ClInclude Include="Src\Engine\ComputeShader.h" />
+    <ClInclude Include="Src\Engine\Engine.h" />
+    <ClInclude Include="Src\Engine\dxcapi.h" />
+    <ClInclude Include="Src\Engine\FbxLoader.h" />
+    <ClInclude Include="Src\Engine\FHelper.h" />
+    <ClInclude Include="Src\Engine\FString.h" />
+    <ClInclude Include="Src\Engine\GLTF.h" />
+    <ClInclude Include="Src\Engine\StageObjectMgr.h" />
+    <ClInclude Include="Src\Engine\Input.h" />
+    <ClInclude Include="Src\Engine\Joycon.h" />
+    <ClInclude Include="Src\Engine\ModelDataManager.h" />
+    <ClInclude Include="Src\Engine\Pipeline.h" />
+    <ClInclude Include="Src\Engine\PipelineManager.h" />
+    <ClInclude Include="Src\Engine\RWStructuredBuffer.h" />
+    <ClInclude Include="Src\Engine\ShaderData.h" />
+    <ClInclude Include="Src\Engine\ShaderStorage.h" />
+    <ClInclude Include="Src\Engine\Singleton.h" />
+    <ClInclude Include="Src\Engine\SoundManager.h" />
+    <ClInclude Include="Src\Engine\Sprite.h" />
+    <ClInclude Include="Src\Engine\StructuredBuffer.h" />
+    <ClInclude Include="Src\Engine\TextureManager.h" />
+    <ClInclude Include="Src\Engine\Vec.h" />
+    <ClInclude Include="Src\Engine\WindowsAPI.h" />
+    <ClInclude Include="Src\Game\BaseItem.h" />
+    <ClInclude Include="Src\Game\BaseOperationObject.h" />
+    <ClInclude Include="Src\Game\BaseScene.h" />
+    <ClInclude Include="Src\Game\BaseStage.h" />
+    <ClInclude Include="Src\Game\BasicStageObject.h" />
+    <ClInclude Include="Src\Game\BoostItem.h" />
+    <ClInclude Include="Src\Game\Character.h" />
+    <ClInclude Include="Src\Game\CharacterMgr.h" />
+    <ClInclude Include="Src\Game\ConcentrationLine.h" />
+    <ClInclude Include="Src\Game\ConcentrationLineMgr.h" />
+    <ClInclude Include="Src\Game\ConvertGimmickInfoFromBlender.h" />
+    <ClInclude Include="Src\Game\FileName.h" />
+    <ClInclude Include="Src\Game\FirstAIOperationObject.h" />
+    <ClInclude Include="Src\Game\FirstAIWaypointMgr.h" />
+    <ClInclude Include="Src\Game\GameSceneMode.h" />
+    <ClInclude Include="Src\Game\GhostOperationObject.h" />
+    <ClInclude Include="Src\Game\ItemBoxObject.h" />
+    <ClInclude Include="Src\Game\MugenStage.h" />
+    <ClInclude Include="Src\Game\PlayerOperationObject.h" />
+    <ClInclude Include="Src\Game\RadialBlur.h" />
+    <ClInclude Include="Src\Game\SceneTransition.h" />
+    <ClInclude Include="Src\Game\ShellItem.h" />
+    <ClInclude Include="Src\Game\ShellObject.h" />
+    <ClInclude Include="Src\Game\ShellObjectMgr.h" />
+    <ClInclude Include="Src\Game\DriftParticle.h" />
+    <ClInclude Include="Src\Game\DriftParticleMgr.h" />
+    <ClInclude Include="Src\Game\FloatingStageObject.h" />
+    <ClInclude Include="Src\Game\GameScene.h" />
+    <ClInclude Include="Src\Game\PlayerModel.h" />
+    <ClInclude Include="Src\Game\PlayerTire.h" />
+    <ClInclude Include="Src\Game\ResultScene.h" />
+    <ClInclude Include="Src\Game\SceneMgr.h" />
+    <ClInclude Include="Src\Game\TitleScene.h" />
+    <ClInclude Include="Src\Game\FirstAIWayPoint.h" />
+    <ClInclude Include="Src\Raytracing\BLAS.h" />
+    <ClInclude Include="Src\Raytracing\BLASRegister.h" />
+    <ClInclude Include="Src\Raytracing\ConstBuffers.h" />
+    <ClInclude Include="Src\Raytracing\DescriptorHeapMgr.h" />
+    <ClInclude Include="Src\Raytracing\DynamicConstBuffer.h" />
+    <ClInclude Include="Src\Raytracing\HitGroup.h" />
+    <ClInclude Include="Src\Raytracing\HitGroupMgr.h" />
+    <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h" />
+    <ClInclude Include="Src\Raytracing\OBB.h" />
+    <ClInclude Include="Src\Raytracing\PolygonInstance.h" />
+    <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />
+    <ClInclude Include="Src\Raytracing\RayDescriptor.h" />
+    <ClInclude Include="Src\Raytracing\RayDenoiser.h" />
+    <ClInclude Include="Src\Raytracing\RayEngine.h" />
+    <ClInclude Include="Src\Raytracing\RayRootsignature.h" />
+    <ClInclude Include="Src\Raytracing\RayComputeShader.h" />
+    <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />
+    <ClInclude Include="Src\Raytracing\RaytracingPipeline.h" />
+    <ClInclude Include="Src\Raytracing\TLAS.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="hid.dll" />
+    <None Include="lib\imgui\imgui.ini" />
+    <None Include="Resource\ShaderFiles\RayTracing\RaytracingShaderHeader.hlsli" />
+    <None Include="setupapi.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="runxmlconf.log" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="SetupAPI.Lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="icon.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resource\ShaderFiles\RadialBlur.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">6.4</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.4</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurX.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurY.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseFinal.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\TireMaskComputeShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\WhiteMakeUpShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Lib\DirectXTex\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
+      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

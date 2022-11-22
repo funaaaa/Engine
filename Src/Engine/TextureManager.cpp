@@ -8,7 +8,7 @@
 TextureManager::TextureManager() {
 }
 
-void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX::TexMetadata& MetaData, const DirectX::Image* Img, Microsoft::WRL::ComPtr<ID3D12Resource>& TexBuff,
+void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX::TexMetadata& MetaData, Microsoft::WRL::ComPtr<ID3D12Resource>& TexBuff,
 	std::vector<D3D12_SUBRESOURCE_DATA> Subresource) {
 
 	// Footprint(コピー可能なリソースのレイアウト)を取得。
@@ -16,7 +16,7 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 	UINT64 totalBytes = 0;
 	std::array<UINT64, 16> rowSizeInBytes = { 0 };
 	std::array<UINT, 16> numRow = { 0 };
-	Engine::Ins()->device_.dev_->GetCopyableFootprints(&TexresDesc, 0, MetaData.mipLevels, 0, footprint.data(), numRow.data(), rowSizeInBytes.data(), &totalBytes);
+	Engine::Ins()->device_.dev_->GetCopyableFootprints(&TexresDesc, 0, static_cast<UINT>(MetaData.mipLevels), 0, footprint.data(), numRow.data(), rowSizeInBytes.data(), &totalBytes);
 
 	// Upload用のバッファを作成する。
 	D3D12_RESOURCE_DESC desc;
@@ -45,7 +45,7 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 
 	for (uint32_t mip = 0; mip < MetaData.mipLevels; ++mip) {
 
-		assert(Subresource[mip].RowPitch == rowSizeInBytes[mip]);
+		assert(Subresource[mip].RowPitch == static_cast<LONG_PTR>(rowSizeInBytes[mip]));
 		assert(Subresource[mip].RowPitch <= footprint[mip].Footprint.RowPitch);
 
 		uint8_t* uploadStart = reinterpret_cast<uint8_t*>(ptr) + footprint[mip].Offset;
@@ -166,8 +166,6 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 	result = PrepareUpload(
 		Engine::Ins()->device_.dev_.Get(), img, scratchImg.GetImageCount(), metadata, subresources);
 
-	auto pixelSize = scratchImg.GetPixelsSize();
-
 	// リソース設定
 	CD3DX12_RESOURCE_DESC texresDesc = CD3DX12_RESOURCE_DESC::Tex2D(
 		metadata.format,
@@ -190,7 +188,7 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 
 	// ここから追記。
 
-	WriteTextureData(texresDesc, metadata, img, texbuff, subresources);
+	WriteTextureData(texresDesc, metadata, texbuff, subresources);
 
 	// ここまで追記。
 
@@ -209,7 +207,7 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 	srvDesc.Format = metadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = metadata.mipLevels;
+	srvDesc.Texture2D.MipLevels = static_cast<UINT>(metadata.mipLevels);
 	// ヒープにシェーダーリソースビュー生成
 	Engine::Ins()->device_.dev_->CreateShaderResourceView(
 		texbuff.Get(),
@@ -284,7 +282,7 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 
 	// ここから
 
-	WriteTextureData(texresDesc, metadata, img, texbuff, subresources);
+	WriteTextureData(texresDesc, metadata, texbuff, subresources);
 
 	// ここまで追記。
 
@@ -303,7 +301,7 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 	srvDesc.Format = metadata.format;
 	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = metadata.mipLevels;
+	srvDesc.Texture2D.MipLevels = static_cast<UINT>(metadata.mipLevels);
 	// ヒープにシェーダーリソースビュー生成
 	Engine::Ins()->device_.dev_->CreateShaderResourceView(
 		texbuff.Get(),

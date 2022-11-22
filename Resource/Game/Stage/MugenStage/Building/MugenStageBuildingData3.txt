@@ -1,0 +1,253 @@
+ID:0
+Position X:38 Y:-18.5 Z:1200.5 
+
+Rotation X:0 Y:-0.21 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:2
+Position X:286 Y:0 Z:622 
+
+Rotation X:0 Y:0 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-811.5 Y:-25.5 Z:440.5 
+
+Rotation X:0 Y:0.01 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:3
+Position X:20 Y:-18.5 Z:-5.5 
+
+Rotation X:0 Y:-0.22 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:1
+Position X:-1016.5 Y:0 Z:1588 
+
+Rotation X:0 Y:-0.23 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-1422.5 Y:-15.5 Z:2732 
+
+Rotation X:0 Y:-0.69 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:1
+Position X:-1810.5 Y:0 Z:2391 
+
+Rotation X:0 Y:-1.2 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:2
+Position X:-1715 Y:-8.5 Z:3230.5 
+
+Rotation X:0 Y:-2.05 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-3297.5 Y:-17 Z:2765 
+
+Rotation X:0 Y:-1.88 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:3
+Position X:-2245 Y:0 Z:5049 
+
+Rotation X:0 Y:-2.8 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:2
+Position X:-3854.5 Y:-0.5 Z:2275.5 
+
+Rotation X:0 Y:4.36 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-4270 Y:-24 Z:1912 
+
+Rotation X:0 Y:2.2 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-4349 Y:-22 Z:1539.5 
+
+Rotation X:0 Y:2.2 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-4445.5 Y:-21 Z:1131 
+
+Rotation X:0 Y:2.2 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:2
+Position X:-4022 Y:-72 Z:498.5 
+
+Rotation X:0 Y:2.92 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:1
+Position X:-3478 Y:-226 Z:665.5 
+
+Rotation X:0 Y:2.99 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-4149.5 Y:-230 Z:-524 
+
+Rotation X:0 Y:2.03 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:4
+Position X:-1617 Y:13.5 Z:-1650.5 
+
+Rotation X:0 Y:-0.32 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:2
+Position X:-929.5 Y:8.5 Z:-1871 
+
+Rotation X:0 Y:1.15 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-476 Y:0 Z:-1550.5 
+
+Rotation X:0 Y:6.63 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-2211 Y:-10 Z:-1524.5 
+
+Rotation X:0 Y:-0.29 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-2892 Y:-10 Z:-1275 
+
+Rotation X:0 Y:-0.29 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:0
+Position X:-3524 Y:0 Z:-1120 
+
+Rotation X:0 Y:-0.29 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+

@@ -19,46 +19,56 @@ void MugenStage::Setting(int TireMaskIndex)
 
 	// 当たり判定用のステージをセット。
 	int indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/Stage/MugenStage/", "MugenStage.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK);
+		"Resource/Game/Stage/MugenStage/", "MugenStage.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 	PolygonInstanceRegister::Ins()->NonDisplay(stageObjectMgr_->GetInstanceIndex(0));
 
+	// タイヤ痕用のステージをセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/Stage/MugenStage/", "MugenStageTireMaskUV.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
+	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+	PolygonInstanceRegister::Ins()->NonDisplay(stageObjectMgr_->GetInstanceIndex(1));
+	
 	// 描画用のステージをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
-		"Resource/Game/Stage/MugenStage/", "MugenStageDraw.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI_TIREMASK, true, true);
+		"Resource/Game/Stage/MugenStage/", "MugenStageDraw.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_TIREMASK, true, true);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
-	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/NormalMap.dds"));
 	// 当たり判定用のステージのUVをSubUVとして代入する。
-	stageObjectMgr_->AssignmentUVToSubUV(0, 1);
+	stageObjectMgr_->AssignmentUVToSubUV(1, 2);
 
 	// ステージにタイヤ痕用マスクをセット。
 	BLASRegister::Ins()->GetBLAS()[stageObjectMgr_->GetBlasIndex(indexBuff)]->AddUAVTex(TireMaskIndex);
 
 	// ステージの坂セット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/Stage/MugenStage/", "MugenStageSlope.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
+		"Resource/Game/Stage/MugenStage/", "MugenStageSlope.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/SlopeNormalMap.dds"));
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
-	//// ステージの坂セット。
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
-	//	"Resource/Game/Stage/MugenStage/", "MugenStageTunnelSlope.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_GI);
-	//// ステージのパラメーターを設定。
-	//stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+	// ステージの白線をセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
+		"Resource/Game/Stage/MugenStage/", "MugenStageWhiteLine.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
-	// ステージの草をセット。
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/Stage/MugenStage/", "MugenStageGrass1.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/GrassNormalMap.dds"));
+	// ステージの縁石をセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
+		"Resource/Game/Stage/MugenStage/", "MugenStageCurbStone.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+
+	// ステージの歩道をセット。
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
+		"Resource/Game/Stage/MugenStage/", "MugenStageSidewalk.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
-		"Resource/Game/Stage/MugenStage/", "MugenStageGrass2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+		"Resource/Game/Stage/MugenStage/", "MugenStageGrass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/GrassNormalMap.dds"));
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
@@ -167,69 +177,9 @@ void MugenStage::Setting(int TireMaskIndex)
 
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(2824.0f, 57.0f, -7561.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.057f, -0.663f, -0.404f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(168.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(4144.0f, 100.0f, -7956.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.114f, -1.724f, -0.465f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(242.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(5455.0f, 107.0f, -7594.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.059f, -1.907f, -0.580f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(240.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(6326.0f, 134.0f, -6730.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.314f, -2.162f, -0.643f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(252.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(6602.0f, 48.0f, -5278.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-0.748f, -2.632f, -0.637f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(260.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(208.0f, -752.0f, -1366.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-1.571f, -3.486f, -0.908f));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(122.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-3889.0f, -18.0f, 360.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-2.508f, -3.171f, -1.001f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(120.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-4108.0f, 143.0f, 1654.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.187f, -2.794f, -0.836f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(198.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-3254.0f, 161.0f, 2876.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.257f, -2.281f, -0.718f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(241.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-2049.0f, 151.0f, 3062.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.816f, -2.020f, -0.830f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(247.0f, 200.0f, 200.0f));
-
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
-		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(-735.0f, 70.0f, 2264.0f));
-	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(-3.430f, -0.708f, -0.510f));
-	stageObjectMgr_->ChangeScale(indexBuff, Vec3(176.0f, 200.0f, 200.0f));
 
 
 	// アイテムボックス
@@ -247,41 +197,8 @@ void MugenStage::Setting(int TireMaskIndex)
 
 	}
 
-	// 木
-	ConvertGimmickInfoFromBlender treeData;
-	treeData.Convert("Resource/Game/Stage/MugenStage/", "MugenStageTree.obj", DirectX::XMMatrixIdentity(), DirectX::XMMatrixIdentity(), DirectX::XMMatrixScaling(120, 120, 120));
-
-	int treeCount = treeData.GetVertexSize();
-	for (int index = 0; index < treeCount; ++index) {
-
-		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			"Resource/Game/Stage/Tree/", "mapleLeaf.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, false);
-		stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index) + Vec3(0, -10, 0));
-		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-		stageObjectMgr_->ChangeScale(indexBuff, Vec3(20, 20, 20));
-		BLASRegister::Ins()->GetBlasSpecificationIndex(stageObjectMgr_->GetBlasIndex(indexBuff)).lock()->ChangeNormalTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/Tree/maple_leaf_normal.dds"));
-
-		indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-			"Resource/Game/Stage/Tree/", "mapleBark.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-		stageObjectMgr_->ChangeTrans(indexBuff, treeData.GetVertex(index) + Vec3(0, -10, 0));
-		stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0, 0, 0));
-		stageObjectMgr_->ChangeScale(indexBuff, Vec3(20, 20, 20));
-
-	}
-
-	// フェンスを生成。
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence01.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence02.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence03.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
-	//indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-	//	"Resource/Game/Stage/Fence/", "fence04.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
-	//stageObjectMgr_->ChangeScale(indexBuff, Vec3(120, 120, 120));
+	// ビルをロード
+	LoadBuilding();
 
 	// 点光源
 	ConvertGimmickInfoFromBlender pointLightData;
@@ -373,49 +290,167 @@ BaseStage::ColliderOutput MugenStage::Collider(BaseStage::ColliderInput Input)
 
 }
 
-void MugenStage::ChangeStageStatus(int Status)
+#include <fstream>
+#include <iostream>
+#include <sstream>
+void MugenStage::LoadBuilding()
 {
 
-	/*===== ステージのステータスを変更 =====*/
-	Status;
-	//// 前フレームがDEFで、今フレームがREFLECTIONだったら。
-	//if (status_ == STATUS::DEF && static_cast<STATUS>(Status) == STATUS::REFLECTION) {
-
-	//	stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
-
-	//	// ステージのパラメーターを設定。
-	//	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
-
-
-	//}
-	//else if (status_ == STATUS::REFLECTION && static_cast<STATUS>(Status) == STATUS::DEF) {
-
-	//	stageObjectMgr_->ChangeInstanceShaderID(tunnelIndex_, PolygonInstanceRegister::DEF);
-
-	//	// ステージのパラメーターを設定。
-	//	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
-
-	//}
-
-	//// ステータスを保存。
-	//status_ = static_cast<STATUS>(Status);
+	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData.txt");		// 直線周り
+	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData2.txt");		// 大きい方のカーブ周り
+	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData3.txt");		// 小さい方のカーブ周り
 
 }
 
-void MugenStage::DisplayGoal()
+void MugenStage::GetBuildingData(std::string FilePath)
 {
 
-	/*===== ゴールの表示 =====*/
+	// ファイルを開く。
+	std::ifstream file(FilePath);
 
-	//PolygonInstanceRegister::Ins()->Display(goalInsIndex);
+	// 失敗を検出。
+	if (!file) {
+		assert(0);
+	}
 
-}
+	// 1行を読み取る。
+	std::string cutLine;
+	int objType = 0;
+	Vec3 pos;
+	Vec3 rotate;
+	Vec3 scale;
+	OBJ_DATA_ID lineDataID = OBJ_DATA_ID::ID;
+	while (std::getline(file, cutLine, '\n')) {
 
-void MugenStage::NonDisplayGoal()
-{
+		std::istringstream line(cutLine);
+		std::string cutElement;
+		while (std::getline(line, cutElement, ' ')) {
 
-	/*===== ゴールの非表示 =====*/
+			std::istringstream operationElement(cutElement);
+			std::string operationString;
 
-	//PolygonInstanceRegister::Ins()->NonDisplay(goalInsIndex);
+			// Positionだったら座標データ
+			if (cutElement == "Position") {
+				lineDataID = OBJ_DATA_ID::POSITION;
+				continue;
+			}
+			// Scaleだったら座標データ
+			if (cutElement == "Scale") {
+				lineDataID = OBJ_DATA_ID::SCALE;
+				continue;
+			}
+			// Rotationだったら座標データ
+			if (cutElement == "Rotation") {
+				lineDataID = OBJ_DATA_ID::ROTATE;
+				continue;
+			}
+
+			if (cutElement == "--") {
+				int indexBuff = 0;
+				if (objType == 0) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingLow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 1) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingLow2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 2) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 3) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				else if (objType == 4) {
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/", "BuildingHigh.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+				}
+				stageObjectMgr_->ChangeScale(indexBuff, scale);
+				stageObjectMgr_->ChangeRotate(indexBuff, rotate);
+				stageObjectMgr_->ChangeTrans(indexBuff, pos);
+				continue;
+			}
+
+
+			OBJ_DATA_ID id = OBJ_DATA_ID::ID;
+			while (std::getline(operationElement, operationString, ':')) {
+
+				// IDだったらビルのID。
+				if (operationString == "ID") {
+					id = OBJ_DATA_ID::ID;
+					continue;
+				}
+
+				if (operationString == "X") {
+					id = OBJ_DATA_ID::X;
+					continue;
+				}
+				if (operationString == "Y") {
+					id = OBJ_DATA_ID::Y;
+					continue;
+				}
+				if (operationString == "Z") {
+					id = OBJ_DATA_ID::Z;
+					continue;
+				}
+
+				// IDがIDだったらビルのIDなので、保存する。
+				if (id == OBJ_DATA_ID::ID) {
+					objType = std::stoi(operationString);
+					continue;
+				}
+
+				// 行でのデータIDによってどのデータを保存するかを決める。
+				if (lineDataID == OBJ_DATA_ID::POSITION) {
+
+					if (id == OBJ_DATA_ID::X) {
+						pos.x_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Y) {
+						pos.y_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Z) {
+						pos.z_ = std::stof(operationString);
+					}
+
+				}
+				else if (lineDataID == OBJ_DATA_ID::SCALE) {
+
+					if (id == OBJ_DATA_ID::X) {
+						scale.x_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Y) {
+						scale.y_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Z) {
+						scale.z_ = std::stof(operationString);
+					}
+
+				}
+				else if (lineDataID == OBJ_DATA_ID::ROTATE) {
+
+					if (id == OBJ_DATA_ID::X) {
+						rotate.x_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Y) {
+						rotate.y_ = std::stof(operationString);
+					}
+					else if (id == OBJ_DATA_ID::Z) {
+						rotate.z_ = std::stof(operationString);
+					}
+
+				}
+
+
+			}
+
+		}
+
+	}
+
+	// ファイルを閉じる。
+	file.close();
 
 }

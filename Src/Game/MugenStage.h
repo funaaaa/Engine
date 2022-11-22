@@ -2,6 +2,7 @@
 #include "BaseStage.h"
 #include "Vec.h"
 #include <vector>
+#include <string>
 
 // 無限型ステージ
 class MugenStage : public BaseStage {
@@ -37,10 +38,20 @@ public:
 	void Destroy()override;
 	void Update()override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
-	void ChangeStageStatus(int Status)override;
 
-	// ゴールの表示、非表示
-	void DisplayGoal()override;
-	void NonDisplayGoal()override;
+
+private:
+
+	enum class OBJ_DATA_ID {
+		ID,
+		POSITION,
+		SCALE,
+		ROTATE,
+		X,
+		Y,
+		Z,
+	};
+	void LoadBuilding();
+	void GetBuildingData(std::string FilePath);
 
 };

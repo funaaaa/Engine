@@ -35,6 +35,7 @@ private:
 
 	Vec3 pos_;
 	Vec3 rotate_;		// 装飾オブジェクト配置用
+	Vec3 scale_;		// 上に同じ
 
 	UINT blasIndex_;
 	std::weak_ptr<BLAS> blas_;
@@ -72,6 +73,7 @@ public:
 	void AddScale(const Vec3& Scale);
 	DirectX::XMMATRIX GetScale() { return scaleMat_; }
 	Vec3 GetScaleVec3();
+	Vec3 GetChangeScale() { return scale_; }
 
 	// 拡大(引数を代入)関数
 	void ChangeScale(const Vec3& Scale);

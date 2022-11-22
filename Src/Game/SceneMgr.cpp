@@ -2,11 +2,14 @@
 #include "TitleScene.h"
 #include "GameScene.h"
 #include "ResultScene.h"
+#include "SceneTransition.h"
 
 SceneMgr::SceneMgr()
 {
 
 	/*===== コンストラクタ =====*/
+
+	SceneTransition::Ins()->Setting();
 
 }
 
@@ -50,6 +53,9 @@ void SceneMgr::Update()
 
 	// シーンの更新を行う。
 	scenes_[nowScene_]->Update();
+
+	// シーン遷移の更新処理
+	SceneTransition::Ins()->Update();
 
 }
 

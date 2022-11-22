@@ -20,6 +20,8 @@
 .vs
 [Bb]in
 packages
+/DDSView/Shaders/*.inc
+/DDSView/Shaders/*.pdb
 /DirectXTex/Shaders/Compiled/*.inc
 /DirectXTex/Shaders/Compiled/*.pdb
 /ipch
@@ -34,8 +36,4 @@ x64
 /Tests
 /wiki
 /out
-/CMakeCache.txt
-/CMakeFiles
-/Makefile
-/cmake
-/cmake_install.cmake
+/CMakeUserPresets.json

@@ -42,5 +42,5 @@ public:
 	// 指定の番号のテクスチャを返す。
 	Texture GetTexture(int ID);
 private:
-	void WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX::TexMetadata& MetaData, const DirectX::Image* Img, Microsoft::WRL::ComPtr<ID3D12Resource>& TexBuff, std::vector<D3D12_SUBRESOURCE_DATA> Subresource);
+	void WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX::TexMetadata& MetaData, Microsoft::WRL::ComPtr<ID3D12Resource>& TexBuff, std::vector<D3D12_SUBRESOURCE_DATA> Subresource);
 };

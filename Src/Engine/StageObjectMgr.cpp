@@ -158,6 +158,15 @@ void StageObjectMgr::ChangeNormalTexture(int Index, int NormalTexture)
 
 }
 
+void StageObjectMgr::ChangeMetalnessTexture(int Index, int MetalnessTexture)
+{
+
+	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
+
+	objects_[Index].first->ChangeMetalnessTexture(MetalnessTexture);
+
+}
+
 BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Input)
 {
 

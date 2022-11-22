@@ -79,6 +79,7 @@ public:
 
 	// 法線マップを変更。
 	void ChangeNormalTexture(int Index);
+	void ChangeMetalnessTexture(int Index);
 
 	// 移動関係
 	void AddTrans(const Vec3& Trans);

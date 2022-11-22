@@ -43,6 +43,15 @@ void BaseStageObject::ChangeNormalTexture(int Index)
 
 }
 
+void BaseStageObject::ChangeMetalnessTexture(int Index)
+{
+
+	/*===== 法線マップを変更 =====*/
+
+	blas_.lock()->ChangeMetalnessTexture(Index);
+
+}
+
 void BaseStageObject::AddTrans(const Vec3& Trans)
 {
 
