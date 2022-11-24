@@ -20,7 +20,7 @@ void OBB::Setting(std::weak_ptr<BLAS> Blas, std::weak_ptr<PolygonMeshInstance> I
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 
 	// デバッグ用のOBB本体をロード。
 	ModelDataManager::ObjectData objectData;
@@ -48,7 +48,7 @@ void OBB::SetMat(std::weak_ptr<PolygonMeshInstance> Instance)
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);
 	dir_[2] = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), matRot_);
 
-#ifdef _DEBUG
+#ifdef DEBUG
 
 	insIndex_.lock()->ChangeRotate(Instance.lock()->GetRotate());
 	insIndex_.lock()->ChangeScale(Instance.lock()->GetScale());

@@ -30,6 +30,8 @@ void CharacterMgr::Init()
 
 }
 
+#include "OBB.h"
+#include "imgui.h"
 void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bool IsGameFinish)
 {
 
@@ -40,6 +42,22 @@ void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bo
 		index->Update(Stage, IsBeforeStart, IsGameFinish);
 
 	}
+
+	bool isHit = false;
+	for (auto& src : character_) {
+
+		for (auto& dst : character_) {
+
+			// 同じオブジェクトだったら処理を飛ばす。
+			if (src == dst) continue;
+
+			// 当たり判定を行う。
+			isHit |= src->obb_->CheckHitOBB(dst->obb_);
+
+		}
+
+	}
+	ImGui::Checkbox("IsHit", &isHit);
 
 }
 
