@@ -77,7 +77,7 @@ public:
 	const float HANDLE_NORMAL = 0.03f;	// 通常時のハンドリングの角度
 	const float MAX_GRAV = 8.0f;		// 重力の最大量
 	const float ADD_GRAV = 0.4f;		// 重力の加算量
-	Vec3 DEF_POS = Vec3(0, 30, -30);
+	Vec3 defPos_ = Vec3(0, 30, -30);
 	const Vec3 PLAYER_DEF_POS = Vec3(99, 30, -34);
 	const Vec3 GHOST_DEF_POS = Vec3(-59, 30, -106);
 

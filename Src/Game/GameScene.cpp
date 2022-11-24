@@ -241,8 +241,18 @@ void GameScene::Update()
 		isFinishTransition_ = true;
 	}
 
+	// FPSを表示。
+	FPS();
+
 	// 入力処理
 	Input();
+
+	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
+
+		// AIを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
+
+	}
 
 	// キャラを更新。
 	characterMgr_->Update(stages_[STAGE_ID::MUGEN], isBeforeStart_, isGameFinish_);

@@ -47,7 +47,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, false, this);
 
 		// 初期位置を設定。
-		DEF_POS = PLAYER_DEF_POS;
+		defPos_ = PLAYER_DEF_POS;
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::RED, PlayerModel::CHARA::PLAYER);
@@ -58,7 +58,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, true, this);
 
 		// 初期位置を設定。
-		DEF_POS = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS;
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::RED, PlayerModel::CHARA::PLAYER);
@@ -69,7 +69,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER), Param);
 
 		// 初期位置を設定。
-		DEF_POS = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS;
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::AI);
@@ -84,7 +84,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		operationObject_ = std::make_shared<GhostOperationObject>(filePath + number + dottxt);
 
 		// 初期位置を設定。
-		DEF_POS = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS;
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::GHOST);
@@ -114,7 +114,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
-	pos_ = DEF_POS;
+	pos_ = defPos_;
 	prevPos_ = pos_;
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
@@ -178,21 +178,21 @@ void Character::Init()
 
 	// 初期位置を設定。
 	if (charaID_ == CHARA_ID::P1) {
-		DEF_POS = PLAYER_DEF_POS;
+		defPos_ = PLAYER_DEF_POS;
 	}
 	else if (charaID_ == CHARA_ID::P1_WGHOST) {
-		DEF_POS = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS;
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
-		DEF_POS = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS;
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
-		DEF_POS = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS;
 	}
 
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
-	pos_ = DEF_POS;
+	pos_ = defPos_;
 	prevPos_ = pos_;
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
@@ -278,8 +278,8 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 	if (IsBeforeStart) {
 
 		// プレイヤーの位置を初期位置に戻す。
-		pos_.x_ = DEF_POS.x_;
-		pos_.z_ = DEF_POS.z_;
+		pos_.x_ = defPos_.x_;
+		pos_.z_ = defPos_.z_;
 
 	}
 
@@ -307,9 +307,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 
 		if (RETURN_DEFPOS_TIMER < returnDefPosTimer_) {
 
-			pos_ = DEF_POS;
+			pos_ = defPos_;
 			rotY_ = -0.367411435f;
-			playerModel_.carBodyInstance.lock()->ChangeTrans(DEF_POS);
+			playerModel_.carBodyInstance.lock()->ChangeTrans(defPos_);
 			playerModel_.carBodyInstance.lock()->ChangeRotate(Vec3(0, rotY_, 0));
 			forwardVec_ = Vec3(0, 0, -1);
 			upVec_ = Vec3(0, 1, 0);
