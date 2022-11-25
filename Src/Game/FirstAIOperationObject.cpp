@@ -50,7 +50,8 @@ BaseOperationObject::Operation FirstAIOperationObject::Input(const BaseOperation
 
 	}
 
-	return operation;
+	//return operation;
+	return BaseOperationObject::Operation();
 
 }
 

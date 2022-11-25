@@ -55,6 +55,10 @@ public:
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
+	// 別な車との当たり判定用のヒットボックス
+	std::weak_ptr<BLAS> hitBoxBlas_;
+	std::weak_ptr<PolygonMeshInstance> hitBox_;
+
 	std::vector<std::shared_ptr<PlayerTire>> tires_;
 
 	bool isGetItem_;	// アイテムを取得したフレームの判定
@@ -175,7 +179,7 @@ public:
 
 
 
-
+	// ロケットアイテム関係
 	std::array<std::weak_ptr<BLAS>, 4> rocketBlas_;
 	std::array<std::weak_ptr<PolygonMeshInstance>, 4 > rocketIns_;
 	float rocketEasingTimer_;
