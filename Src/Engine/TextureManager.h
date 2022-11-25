@@ -6,9 +6,9 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <array>
-#include <DirectXTex/DirectXTex.h>
+#include <DirectXTex/DirectXTex/include/DirectXTex.h>
 #include <string>
-#include <DirectXTex/d3dx12.h>
+#include <DirectXTex/DirectXTex/include/d3dx12.h>
 
 struct Texture {
 	LPCWSTR filePath_;								// ƒtƒ@ƒCƒ‹–¼

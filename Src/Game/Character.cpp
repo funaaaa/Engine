@@ -108,33 +108,43 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		rocketIns_[index] = PolygonInstanceRegister::Ins()->CreateInstance(rocketBlas_[index], PolygonInstanceRegister::DEF);
 		rocketIns_[index].lock()->ChangeScale(Vec3(30, 30, 30));
 		rocketBlas_[index].lock()->ChangeMetalnessTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/metalness2.png"));
-		//PolygonInstanceRegister::Ins()->NonDisplay(rocketIns_[index].lock()->GetInstanceIndex());
 	}
 
 	// 車との当たり判定用のチェックボックスをロード
 	hitBoxBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Car/collision/", "carHitBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
 	hitBox_ = PolygonInstanceRegister::Ins()->CreateInstance(hitBoxBlas_, PolygonInstanceRegister::DEF, true);
 
-
+	// ラップ数関係
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
+	
+	// 座標関係
 	pos_ = defPos_;
 	prevPos_ = pos_;
+
+	// 方向ベクトル関係
 	forwardVec_ = Vec3(0, 0, -1);
 	bottomVec = Vec3(0, -1, 0);
 	upVec_ = Vec3(0, 1, 0);
+
+	// サイズ、回転、移動関係
 	size_ = Vec3(50, 30, 50);
 	rotY_ = DEF_ROTY;
 	speed_ = 0;
 	gravity_ = 0;
-	beforeStartSmokeTimer_ = 0;
 	jumpBoostSpeed_ = 0;
+
+	// ドリフト関係
+	isDrift_ = false;
+	isTireMask_ = false;
+	isDriftJumpPrev_ = false;
+
+	beforeStartSmokeTimer_ = 0;
 	engineWaveTimer_ = 0;
 	engineWaveAmount_ = 0;
 	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
 	boostTimer_ = 0;
-	isDrift_ = false;
 	onGround_ = true;
 	isBeforeStartPrev_ = false;
 	onGroundPrev_ = false;
@@ -142,11 +152,9 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	onGrass_ = false;
 	isGameFinish_ = false;
 	isGetItem_ = false;
-	isTireMask_ = false;
 	isUseItem_ = false;
 	IsTurningIndicatorRed_ = false;
 	isRotRightSide_ = false;
-	isDriftJumpPrev_ = false;
 	isDisplayRocket_ = false;
 	turningIndicatorTimer_ = 0;
 	tireLollingAmount_ = 0;
@@ -281,7 +289,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 	// 開始前だったら
 	if (IsBeforeStart) {
 
-		// プレイヤーの位置を初期位置に戻す。
+		// プレイヤーを強制的に初期位置に戻す。
 		pos_.x_ = defPos_.x_;
 		pos_.z_ = defPos_.z_;
 

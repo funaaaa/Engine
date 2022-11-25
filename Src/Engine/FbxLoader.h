@@ -5,7 +5,7 @@
 #include <string>
 #include <array>
 #include <DirectXMath.h>
-#include <DirectXTex/DirectXTex.h>
+#include <DirectXTex/DirectXTex/include/DirectXTex.h>
 #include "Vec.h"
 
 #pragma warning(push)

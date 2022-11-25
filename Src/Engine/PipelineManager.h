@@ -3,7 +3,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <DirectXTex/d3dx12.h>
+#include <DirectXTex/DirectXTex/include/d3dx12.h>
 #include "Singleton.h"
 #include "Pipeline.h"
 

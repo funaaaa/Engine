@@ -2,7 +2,7 @@
 #include "Engine.h"
 #include "DescriptorHeapMgr.h"
 #include <array>
-#include <DirectXTex/DirectXTexDDS.cpp>
+#include <DirectXTex/DirectXTex/include/DDS.h>
 #include <cassert>
 
 TextureManager::TextureManager() {
@@ -151,9 +151,9 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 
 	DirectX::TexMetadata metadata;
 	DirectX::ScratchImage scratchImg;
-	HRESULT result = LoadFromDDSFile(FileName, DDS_FLAGS_NONE, &metadata, scratchImg);
+	HRESULT result = LoadFromDDSFile(FileName, DirectX::DDS_FLAGS::DDS_FLAGS_NONE, &metadata, scratchImg);
 	if (FAILED(result)) {
-		result = LoadFromWICFile(FileName, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
+		result = LoadFromWICFile(FileName, DirectX::WIC_FLAGS::WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
 	}
 	if (FAILED(result)) {
 		assert(0);
@@ -247,9 +247,9 @@ int TextureManager::LoadTexture(std::array<wchar_t, 128> FileName)
 	// ロードしていなかったらロードする
 	DirectX::TexMetadata metadata;
 	DirectX::ScratchImage scratchImg;
-	HRESULT result = LoadFromDDSFile(proTexture.filePath_, DDS_FLAGS_NONE, &metadata, scratchImg);
+	HRESULT result = LoadFromDDSFile(proTexture.filePath_, DirectX::DDS_FLAGS::DDS_FLAGS_NONE, &metadata, scratchImg);
 	if (FAILED(result)) {
-		result = LoadFromWICFile(proTexture.filePath_, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
+		result = LoadFromWICFile(proTexture.filePath_, DirectX::WIC_FLAGS::WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
 	}
 	if (FAILED(result)) {
 		assert(0);
@@ -350,9 +350,9 @@ int TextureManager::LoadTexture(std::wstring FileName, const void* Src, const UI
 	DirectX::ScratchImage scratchImg;
 
 	HRESULT hr = E_FAIL;
-	hr = LoadFromDDSMemory(Src, Size, DDS_FLAGS_NONE, &metadata, scratchImg);
+	hr = LoadFromDDSMemory(Src, Size, DirectX::DDS_FLAGS::DDS_FLAGS_NONE, &metadata, scratchImg);
 	if (FAILED(hr)) {
-		hr = LoadFromWICMemory(Src, Size, WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
+		hr = LoadFromWICMemory(Src, Size, DirectX::WIC_FLAGS::WIC_FLAGS_NONE/*WIC_FLAGS_FORCE_RGB*/, &metadata, scratchImg);
 	}
 	if (FAILED(hr)) {
 		assert(0);
