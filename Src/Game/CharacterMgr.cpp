@@ -45,10 +45,37 @@ void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bo
 
 	}
 
+	static int charaIndex = 0;
+	ImGui::SliderInt("CharaIndex", &charaIndex, 0, static_cast<int>(character_.size()) - 1);
+	ImGui::DragFloat("PosX", &character_[charaIndex]->pos_.x_, 1.0f);
+	ImGui::DragFloat("PosZ", &character_[charaIndex]->pos_.z_, 1.0f);
+
 }
 
 void CharacterMgr::Draw()
 {
+}
+
+void CharacterMgr::SettingStartPos()
+{
+
+	/*===== 初期地点を設定する =====*/
+
+	int counter = 0;
+	for (auto& index : character_) {
+
+		// プレイヤーだったら。
+		if (index->charaID_ == Character::CHARA_ID::P1) {
+			index->defPos_ = index->PLAYER_DEF_POS;
+			continue;
+		}
+
+		// それ以外のキャラは順番に場所を設定する。
+		index->defPos_ = index->GHOST_DEF_POS[counter];
+		++counter;
+
+	}
+
 }
 
 void CharacterMgr::AddChara(int CharaID, bool IsPlayer, int Param)

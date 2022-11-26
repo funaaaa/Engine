@@ -83,8 +83,8 @@ public:
 	const float MAX_GRAV = 8.0f;		// 重力の最大量
 	const float ADD_GRAV = 0.4f;		// 重力の加算量
 	Vec3 defPos_ = Vec3(0, 30, -30);
-	const Vec3 PLAYER_DEF_POS = Vec3(99, 30, -34);
-	const Vec3 GHOST_DEF_POS = Vec3(-59, 30, -106);
+	const Vec3 PLAYER_DEF_POS = Vec3(-141.943f, 30.0f, 100.0f);
+	const std::array<Vec3, 3> GHOST_DEF_POS = { Vec3(-59, 30, -106), Vec3(99, 30, -34), Vec3(23.775f, 30.0f, 166.0f)};
 
 
 	/*-- ドリフト、加速時の車体の回転に関する変数 --*/
@@ -226,7 +226,7 @@ public:
 	};
 
 
-private:
+public:
 
 	CHARA_ID charaID_;
 

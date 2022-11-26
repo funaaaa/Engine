@@ -174,6 +174,8 @@ void GameScene::Init()
 
 		// AIを生成。
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
 
 	}
 	else if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::DEF) {
@@ -197,6 +199,9 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, GameSceneMode::Ins()->level_);
 
 	}
+
+	// キャラの初期位置を設定。
+	characterMgr_->SettingStartPos();
 
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
@@ -262,6 +267,11 @@ void GameScene::Update()
 
 	// カメラを更新。
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
+
+	//Camera::Ins()->eye_ = characterMgr_->GetPlayerIns().lock()->GetPos() + Vec3(0, 800, 0);
+	//Camera::Ins()->target_ = characterMgr_->GetPlayerIns().lock()->GetPos();
+	//Camera::Ins()->up_ = characterMgr_->GetPlayerIns().lock()->forwardVec_;
+	//Camera::Ins()->GenerateMatView();
 
 	// いずれかのキャラがゴールしていたらリザルトシーンに移動する。
 	if (characterMgr_->CheckGoal()) {

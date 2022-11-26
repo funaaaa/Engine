@@ -58,7 +58,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		operationObject_ = std::make_shared<PlayerOperationObject>(0, true, this);
 
 		// 初期位置を設定。
-		defPos_ = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS[0];
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::RED, PlayerModel::CHARA::PLAYER);
@@ -69,7 +69,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER), Param);
 
 		// 初期位置を設定。
-		defPos_ = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS[0];
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::AI);
@@ -84,7 +84,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 		operationObject_ = std::make_shared<GhostOperationObject>(filePath + number + dottxt);
 
 		// 初期位置を設定。
-		defPos_ = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS[0];
 
 		// 車のモデルをロード
 		playerModel_.Load(PlayerModel::COLOR::BLUE, PlayerModel::CHARA::GHOST);
@@ -114,11 +114,6 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	hitBoxBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Car/collision/", "carHitBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
 	hitBox_ = PolygonInstanceRegister::Ins()->CreateInstance(hitBoxBlas_, PolygonInstanceRegister::DEF, true);
 	PolygonInstanceRegister::Ins()->NonDisplay(hitBox_);
-
-	// デバッグ用
-	if (charaID_ != CHARA_ID::P1) {
-		hitBoxBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/car/OBJ/Red/bodyColor.png"));
-	}
 
 	// ラップ数関係
 	rapCount_ = 0;
@@ -199,13 +194,13 @@ void Character::Init()
 		defPos_ = PLAYER_DEF_POS;
 	}
 	else if (charaID_ == CHARA_ID::P1_WGHOST) {
-		defPos_ = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS[0];
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
-		defPos_ = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS[0];
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
-		defPos_ = GHOST_DEF_POS;
+		defPos_ = GHOST_DEF_POS[0];
 	}
 
 	rapCount_ = 0;
