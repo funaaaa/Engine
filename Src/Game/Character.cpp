@@ -111,13 +111,19 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	}
 
 	// 車との当たり判定用のチェックボックスをロード
-	hitBoxBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Car/collision/", "carHitBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+	hitBoxBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Car/collision/", "carHitBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
 	hitBox_ = PolygonInstanceRegister::Ins()->CreateInstance(hitBoxBlas_, PolygonInstanceRegister::DEF, true);
+	PolygonInstanceRegister::Ins()->NonDisplay(hitBox_);
+
+	// デバッグ用
+	if (charaID_ != CHARA_ID::P1) {
+		hitBoxBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/car/OBJ/Red/bodyColor.png"));
+	}
 
 	// ラップ数関係
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
-	
+
 	// 座標関係
 	pos_ = defPos_;
 	prevPos_ = pos_;
@@ -257,7 +263,7 @@ void Character::Init()
 
 }
 
-void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, bool IsGameFinish)
+void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shared_ptr<Character>> CharaData, bool IsBeforeStart, bool IsGameFinish)
 {
 
 
@@ -284,7 +290,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, b
 	Move(IsBeforeStart);
 
 	// 当たり判定
-	CheckHit(StageData);
+	CheckHit(StageData, CharaData);
 
 	// 開始前だったら
 	if (IsBeforeStart) {
@@ -1280,10 +1286,13 @@ void Character::UpdateDrift()
 
 }
 
-void Character::CheckHit(std::weak_ptr<BaseStage> StageData)
+void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::shared_ptr<Character>> CharaData)
 {
 
 	/*===== 当たり判定 =====*/
+
+	// 他の車との当たり判定。
+	CheckHitOtherCar(CharaData);
 
 	// 当たり判定関数に入れる値を設定。
 	BaseStage::ColliderInput input;
@@ -1968,3 +1977,99 @@ void Character::UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart)
 	}
 
 }
+
+void Character::CheckHitOtherCar(std::vector<std::shared_ptr<Character>> CharaData)
+{
+
+	/*===== 他の車との当たり判定 =====*/
+
+	for (auto& index : CharaData) {
+
+		// 今の自分と同じ車だったら処理を飛ばす。
+		if (index.get() == this) continue;
+
+		// 一定距離内にいたら当たり判定を行う。
+		float distance = Vec3(GetPos() - index->GetPos()).Length();
+
+		const float RANGE_IGNORE_CHECK_HIT = 150.0f;	// 当たり判定を棄却する距離。
+		if (RANGE_IGNORE_CHECK_HIT <= distance) continue;
+
+		// メッシュの当たり判定用構造体。
+		FHelper::RayToModelCollisionData collisionData;
+
+		// 全方向共通の当たり判定用データを入力。
+		collisionData.rayPos_ = GetPos();
+		collisionData.targetPolygonData_ = index->hitBox_.lock()->GetMeshCollisionData();
+
+		// 当たり判定用サイズ
+		const Vec3 CHECK_HIT_SIZE = Vec3(63.0f, 0.0f, 27.0f);
+
+		// 正面
+		{
+
+			// 当たり判定用データを入力。
+			collisionData.rayDir_ = forwardVec_;
+
+			CheckHitCar(collisionData, index, CHECK_HIT_SIZE.x_);
+
+		}
+
+		// 背面
+		{
+
+			// 当たり判定用データを入力。
+			collisionData.rayDir_ *= -1.0f;
+
+			CheckHitCar(collisionData, index, CHECK_HIT_SIZE.x_);
+
+		}
+
+		// 右面
+		{
+
+			// 当たり判定用データを入力。
+			collisionData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
+
+			CheckHitCar(collisionData, index, CHECK_HIT_SIZE.z_);
+
+		}
+
+		// 左面
+		{
+
+			// 当たり判定用データを入力。
+			collisionData.rayDir_ *= -1.0f;
+
+			CheckHitCar(collisionData, index, CHECK_HIT_SIZE.z_);
+
+		}
+
+	}
+
+}
+
+void Character::CheckHitCar(const FHelper::RayToModelCollisionData& CollisionData, std::weak_ptr<Character> IndexCharacter, float CheckHitSize)
+{
+
+	/*===== 車との当たり判定 =====*/
+
+	// 当たり判定結果受け取り用変数
+	Vec3 impactPos;
+	Vec3 hitNormal;
+	Vec2 hitUV;
+	float impactLength;
+
+	// 当たり判定を行う。
+	bool isHit = FHelper::RayToModelCollision(CollisionData, impactPos, impactLength, hitNormal, hitUV);
+
+	// 衝突していなかったら処理を飛ばす。
+	if (!isHit) return;
+
+	// 衝突点までの長さが0より下 or レイの最大の長さより大きかったら処理を飛ばす。
+	if (impactLength < 0 || CheckHitSize < impactLength) return;
+
+	// 押し戻す。
+	pos_ += (GetPos() - IndexCharacter.lock()->GetPos()).GetNormal() * (CheckHitSize - impactLength);
+
+}
+

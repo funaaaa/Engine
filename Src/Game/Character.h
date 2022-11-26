@@ -4,6 +4,7 @@
 #include <vector>
 #include "PlayerModel.h"
 #include <memory>
+#include "FHelper.h"
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -239,7 +240,7 @@ public:
 	void Init();
 
 	// 更新処理
-	void Update(std::weak_ptr<BaseStage> StageData, bool IsBeforeStart, bool IsGameFinish);
+	void Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shared_ptr<Character>> CharaData, bool IsBeforeStart, bool IsGameFinish);
 	void UpdateTitle();
 
 	// 描画処理
@@ -280,7 +281,7 @@ private:
 	void UpdateDrift();
 
 	// 当たり判定
-	void CheckHit(std::weak_ptr<BaseStage> StageData);
+	void CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::shared_ptr<Character>> CharaData);
 
 	// 車体傾けの処理
 	void InclineCarBody();
@@ -293,5 +294,11 @@ private:
 
 	// ドリフトパーティクルの更新処理
 	void UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart);
+
+	// 車と車の押し戻し判定
+	void CheckHitOtherCar(std::vector<std::shared_ptr<Character>> CharaData);
+
+	// 車との当たり判定
+	void CheckHitCar(const FHelper::RayToModelCollisionData& CollisionData, std::weak_ptr<Character> IndexCharacter, float CheckHitSize);
 
 };

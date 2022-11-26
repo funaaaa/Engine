@@ -140,7 +140,9 @@ void TitleScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
 	// プレイヤーの位置を調整。
-	player_->Update(stages_[0], false, false);
+	std::vector<std::shared_ptr<Character>> character;
+	character.emplace_back(player_);
+	player_->Update(stages_[0], character, false, false);
 
 	// カメラの更新処理
 	CameraUpdate();
