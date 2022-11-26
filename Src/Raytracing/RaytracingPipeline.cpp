@@ -1,5 +1,5 @@
 #include "RaytracingPipeline.h"
-#include <DirectXTex/DirectXTex/include/d3dx12.h>
+#include <DirectXTex/include/d3dx12.h>
 #include "ShaderStorage.h"
 #include "HitGroupMgr.h"
 #include "RayRootsignature.h"

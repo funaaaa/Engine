@@ -1,5 +1,5 @@
 #pragma once
-#include <DirectXTex/DirectXTex/include/d3dx12.h>
+#include <DirectXTex/include/d3dx12.h>
 #include <array>
 #include <wrl.h>
 

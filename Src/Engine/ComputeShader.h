@@ -1,6 +1,6 @@
 #pragma once
 #include <wrl.h>
-#include <DirectXTex/DirectXTex/include/d3dx12.h>
+#include <DirectXTex/include/d3dx12.h>
 #include <memory>
 
 class StructuredBuffer;

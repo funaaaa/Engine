@@ -2,7 +2,7 @@
 #include "Engine.h"
 #include "DescriptorHeapMgr.h"
 #include <array>
-#include <DirectXTex/DirectXTex/include/DDS.h>
+#include <DirectXTex/include/DDS.h>
 #include <cassert>
 
 TextureManager::TextureManager() {

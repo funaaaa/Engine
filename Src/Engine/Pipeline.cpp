@@ -1,7 +1,7 @@
 #include "Pipeline.h"
 #include "ShaderStorage.h"
 #include "Engine.h"
-#include <DirectXTex/DirectXTex/include/d3dx12.h>
+#include <DirectXTex/include/d3dx12.h>
 
 Pipeline::Pipeline(
 	PIPLINE_ID piplineID_,
