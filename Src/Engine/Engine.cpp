@@ -21,10 +21,10 @@ Engine::Engine() {
 void Engine::Init() {
 #ifdef _DEBUG
 	// デバッグレイヤーの有効化
-	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.debugController_))))
-	{
-		debug_.debugController_->EnableDebugLayer();
-	}
+	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.debugController_))))
+	//{
+	//	debug_.debugController_->EnableDebugLayer();
+	//}
 	//if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_.shaderDebugController_))))
 	//{
 	//	debug_.shaderDebugController_->SetEnableGPUBasedValidation(true);

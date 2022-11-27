@@ -107,7 +107,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	for (int index = 0; index < 4; ++index) {
 		rocketIns_[index] = PolygonInstanceRegister::Ins()->CreateInstance(rocketBlas_[index], PolygonInstanceRegister::DEF);
 		rocketIns_[index].lock()->ChangeScale(Vec3(30, 30, 30));
-		rocketBlas_[index].lock()->ChangeMetalnessTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/metalness2.png"));
+		rocketBlas_[index].lock()->ChangeMapTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/metalness2.png"), BLAS::MAP_PARAM::SPECULAR);
 	}
 
 	// 車との当たり判定用のチェックボックスをロード

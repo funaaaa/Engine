@@ -134,6 +134,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 }
 
+#include "Camera.h"
 void StageObjectMgr::Update(int Timer)
 {
 
@@ -145,25 +146,33 @@ void StageObjectMgr::Update(int Timer)
 
 		index.first->Update(Timer);
 
+		if (index.first->GetObjectID() != BaseStageObject::OBJECT_ID::ORNAMENT) continue;
+
+		//// 視錐台カリング
+		//bool inScreen = FHelper::CheckInScreen(index.first->GetInstance().lock()->GetPos(), 500.0f, 500.0f, Camera::Ins()->matView_, Camera::Ins()->matPerspective_);
+
+		//// カリングする。
+		//if (true) {
+
+		//	index.first->Display();
+
+		//}
+		//else {
+
+		//	index.first->NonDisplay();
+
+		//}
+
 	}
 
 }
 
-void StageObjectMgr::ChangeNormalTexture(int Index, int NormalTexture)
+void StageObjectMgr::ChangeMapTexture(int Index, int TextureIndex, BLAS::MAP_PARAM MapParam)
 {
 
 	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
 
-	objects_[Index].first->ChangeNormalTexture(NormalTexture);
-
-}
-
-void StageObjectMgr::ChangeMetalnessTexture(int Index, int MetalnessTexture)
-{
-
-	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
-
-	objects_[Index].first->ChangeMetalnessTexture(MetalnessTexture);
+	objects_[Index].first->ChangeMapTexture(TextureIndex, static_cast<int>(MapParam));
 
 }
 

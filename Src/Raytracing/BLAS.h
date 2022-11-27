@@ -67,8 +67,7 @@ private:
 	bool isGenerate_;
 
 	int baseTextureHandle_;				// 使用するテクスチャのハンドル
-	int normalMapHandle_;
-	int metalnessMapHandle_;
+	int mapTextureHandle_;
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
 	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
@@ -85,6 +84,15 @@ private:
 private:
 
 	std::vector<FbxLoader::SkinComputeInput> skinComputeInput_;
+
+public:
+
+	enum class MAP_PARAM {
+		NONE,
+		NORMAL,
+		SPECULAR,
+		AO
+	};
 
 
 public:
@@ -120,14 +128,7 @@ public:
 
 	// テクスチャを追加。
 	void ChangeBaseTexture(int Index);
-	void ChangeNormalTexture(int Index) {
-		normalMapHandle_ = Index;
-		isChangeTexture_ = true;
-	}
-	void ChangeMetalnessTexture(int Index) {
-		metalnessMapHandle_ = Index;
-		isChangeTexture_ = true;
-	}
+	void ChangeMapTexture(int Index, MAP_PARAM MapParam);
 	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。

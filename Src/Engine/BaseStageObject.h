@@ -77,9 +77,8 @@ public:
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }
 	inline const OBJECT_ID GetObjectID() { return objID_; }
 
-	// 法線マップを変更。
-	void ChangeNormalTexture(int Index);
-	void ChangeMetalnessTexture(int Index);
+	// マップを変更。
+	void ChangeMapTexture(int Index, int MapParam);
 
 	// 移動関係
 	void AddTrans(const Vec3& Trans);

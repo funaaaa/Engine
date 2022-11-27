@@ -34,21 +34,12 @@ int BaseStageObject::GetInstanceIndex()
 	return instance_.lock()->GetInstanceIndex();
 }
 
-void BaseStageObject::ChangeNormalTexture(int Index)
+void BaseStageObject::ChangeMapTexture(int Index, int MapParam)
 {
 
 	/*===== 法線マップを変更 =====*/
 
-	blas_.lock()->ChangeNormalTexture(Index);
-
-}
-
-void BaseStageObject::ChangeMetalnessTexture(int Index)
-{
-
-	/*===== 法線マップを変更 =====*/
-
-	blas_.lock()->ChangeMetalnessTexture(Index);
+	blas_.lock()->ChangeMapTexture(Index, static_cast<BLAS::MAP_PARAM>(MapParam));
 
 }
 

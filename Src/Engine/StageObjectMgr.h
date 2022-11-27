@@ -5,6 +5,7 @@
 #include "Singleton.h"
 #include "BaseStage.h"
 #include "FHelper.h"
+#include "BLAS.h"
 
 class StageObjectMgr {
 
@@ -30,9 +31,8 @@ public:
 	// 更新処理
 	void Update(int Timer);
 
-	// 指定のインデックスの法線ベクトルを変更。
-	void ChangeNormalTexture(int Index, int NormalTexture);
-	void ChangeMetalnessTexture(int Index, int MetalnessTexture);
+	// 指定のインデックスのマップ用テクスチャを変更。
+	void ChangeMapTexture(int Index, int TextureIndex, BLAS::MAP_PARAM MapParam);
 
 	// 当たり判定
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input);

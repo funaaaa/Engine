@@ -41,6 +41,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr
 	blas_ = Blas;
 
 	isActive_ = true;
+	isDisplay_ = true;
 	childCount_ = 0;
 	haveMeshCollisionData_ = HaveMeshCollisionData;
 	if (haveMeshCollisionData_) {

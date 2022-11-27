@@ -647,7 +647,11 @@ void BLAS::IsChangeMaterial()
 	/*===== マテリアルを書き換えた際の処理 =====*/
 
 	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 	isChangeVertex_ = true;
 
@@ -657,6 +661,13 @@ void BLAS::ChangeBaseTexture(int Index)
 	baseTextureHandle_ = Index;
 	isChangeTexture_ = true;
 }
+void BLAS::ChangeMapTexture(int Index, MAP_PARAM MapParam)
+{
+	mapTextureHandle_ = Index;
+	material_.mapParam_ = static_cast<int>(MapParam);
+	isChangeTexture_ = true;
+	IsChangeMaterial();
+}
 #include "HitGroupMgr.h"
 #include <assert.h>
 BLAS::BLAS()
@@ -664,8 +675,7 @@ BLAS::BLAS()
 
 	isGenerate_ = false;
 	baseTextureHandle_ = -1;
-	normalMapHandle_ = -1;
-	metalnessMapHandle_ = -1;
+	mapTextureHandle_ = -1;
 	blasIndex_ = -1;
 	indexCount_ = 0;
 	indexDescriptor_ = {};
@@ -763,27 +773,9 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 			// 1番目は法線マップテクスチャ。
 			else if (index == 1) {
 
-				if (normalMapHandle_ != -1) {
+				if (mapTextureHandle_ != -1) {
 
-					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(normalMapHandle_);
-					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-
-				}
-				else {
-
-					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
-					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
-					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-
-				}
-
-			}
-			// 2番目はmetalnessマップテクスチャ。
-			else if (index == 2) {
-
-				if (metalnessMapHandle_ != -1) {
-
-					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(metalnessMapHandle_);
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(mapTextureHandle_);
 					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 				}
@@ -853,8 +845,7 @@ void BLAS::Init()
 	vertIndex_.clear();
 	isGenerate_ = false;
 	baseTextureHandle_ = -1;
-	normalMapHandle_ = -1;
-	metalnessMapHandle_ = -1;
+	mapTextureHandle_ = -1;
 
 }
 

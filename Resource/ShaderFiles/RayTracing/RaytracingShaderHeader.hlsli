@@ -77,6 +77,11 @@ struct ConstBufferData
     AlphaConstBufferData alphaData_;
 };
 
+static int MAP_NONE = 0;
+static int MAP_NORMAL = 1;
+static int MAP_SPECULAR = 2;
+static int MAP_AO = 3;
+
 // マテリアル情報
 struct Material
 {
@@ -84,7 +89,8 @@ struct Material
     float metalness_;
     float specular_;
     float roughness_;
-    float2 pad_;
+    int mapParam_; // マテリアルの追加情報。追加のテクスチャをどう使用するかを判断する。
+    int pad_;
 };
 
 // 頂点情報

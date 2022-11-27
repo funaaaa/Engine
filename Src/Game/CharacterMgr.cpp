@@ -34,6 +34,8 @@ void CharacterMgr::Init()
 #include "imgui.h"
 #include "FHelper.h"
 #include "PolygonInstance.h"
+#include "PolygonInstanceRegister.h"
+#include "Camera.h"
 void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bool IsGameFinish)
 {
 
@@ -43,12 +45,22 @@ void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bo
 
 		index->Update(Stage, character_, IsBeforeStart, IsGameFinish);
 
-	}
+		// 視錐台カリング
+		bool inScreen = FHelper::CheckInScreen(index->GetPos(), 100.0f, 100.0f, Camera::Ins()->matView_, Camera::Ins()->matPerspective_);
 
-	static int charaIndex = 0;
-	ImGui::SliderInt("CharaIndex", &charaIndex, 0, static_cast<int>(character_.size()) - 1);
-	ImGui::DragFloat("PosX", &character_[charaIndex]->pos_.x_, 1.0f);
-	ImGui::DragFloat("PosZ", &character_[charaIndex]->pos_.z_, 1.0f);
+		// カリングする。
+		if (inScreen) {
+
+			index->playerModel_.Display();
+
+		}
+		else {
+
+			index->playerModel_.NonDisplay();
+
+		}
+
+	}
 
 }
 

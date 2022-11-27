@@ -85,4 +85,9 @@ public:
 	// íœ
 	void Delete();
 
+	// •\¦
+	void Display();
+	// ”ñ•\¦
+	void NonDisplay();
+
 };

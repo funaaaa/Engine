@@ -44,7 +44,7 @@ void MugenStage::Setting(int TireMaskIndex)
 	// ステージの坂セット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/Stage/MugenStage/", "MugenStageSlope.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/SlopeNormalMap.dds"));
+	stageObjectMgr_->ChangeMapTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/SlopeNormalMap.dds"), BLAS::MAP_PARAM::NORMAL);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
@@ -69,21 +69,21 @@ void MugenStage::Setting(int TireMaskIndex)
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/Stage/MugenStage/", "MugenStageGrass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/GrassNormalMap.dds"));
+	stageObjectMgr_->ChangeMapTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/GrassNormalMap.dds"), BLAS::MAP_PARAM::NORMAL);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
 	// ステージの山をセット。
-	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageOrnament.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 	//stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/OrnamentGroundNormalMap.dds"));
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
 	// トンネルをセット。
-	tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+	tunnelIndex_ = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageTunnel.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeNormalTexture(tunnelIndex_, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/TunnelNormalMap.dds"));
+	stageObjectMgr_->ChangeMapTexture(tunnelIndex_, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/TunnelNormalMap.dds"), BLAS::MAP_PARAM::NORMAL);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
 
@@ -164,7 +164,7 @@ void MugenStage::Setting(int TireMaskIndex)
 	// 加速ギミックをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,
 		"Resource/Game/Gimmick/", "goal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/OrnamentGroundNormalMap.dds"));
+	stageObjectMgr_->ChangeMapTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/OrnamentGroundNormalMap.dds"), BLAS::MAP_PARAM::NORMAL);
 	stageObjectMgr_->ChangeTrans(indexBuff, Vec3(2144.0f, 0.0f, -5519.0f));
 	stageObjectMgr_->ChangeRotate(indexBuff, Vec3(0.0f, -0.363f, 0.0f));
 	stageObjectMgr_->ChangeScale(indexBuff, Vec3(350.0f, 200.0f, 200.0f));
@@ -214,7 +214,7 @@ void MugenStage::Setting(int TireMaskIndex)
 	// ゴールをセット。
 	goalInsIndex = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageGoal.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::REFRACTION);
-	stageObjectMgr_->ChangeNormalTexture(goalInsIndex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/grassNormal.png"));
+	stageObjectMgr_->ChangeMapTexture(goalInsIndex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/grassNormal.png"), BLAS::MAP_PARAM::NORMAL);
 	// ゴールのパラメーターを設定。
 	stageObjectMgr_->AddScale(goalInsIndex, Vec3(120.0f, 120.0f, 120.0f));
 

@@ -26,7 +26,8 @@ private:
 	DirectX::XMMATRIX matRot_;
 	DirectX::XMMATRIX scaleMat_;
 
-	bool isActive_;	// このインスタンスが有効化されているかどうか。
+	bool isActive_;		// このインスタンスが有効化されているかどうか。
+	bool isDisplay_;	// 描画しているかどうか。
 
 	int childCount_;	// このインスタンスと親子関係を結んでいる子供の数。
 
@@ -106,6 +107,8 @@ public:
 	// instanceを無効化する。
 	void Disable();
 	inline const bool GetIsActive() { return isActive_; }
+	void ChangeDisplayFlag(bool Flag) { isDisplay_ = Flag; }
+	bool GetIsDisplay() { return isDisplay_; }
 
 	// メッシュの当たり判定のデータを返す。
 	const std::vector<FHelper::CheckHitPorygon>& GetMeshCollisionData() { return meshCollisionData_; }

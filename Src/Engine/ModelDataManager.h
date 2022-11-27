@@ -32,8 +32,9 @@ public:
 		float specular_;
 		float roughness_;
 		int textureHandle_;
-		Vec2 pad_;
-		Material() :baseColor_(Vec3(1, 1, 1)), metalness_(0.1f), specular_(0.1f), roughness_(0.0f), textureHandle_(-1) {};
+		int mapParam_;		// マテリアルの追加情報。レイトレでは追加のテクスチャをどう使用するかで使用する。例:法線マップやスペキュラマップ等。
+		int pad_;
+		Material() :baseColor_(Vec3(1, 1, 1)), metalness_(0.1f), specular_(0.1f), roughness_(0.0f), textureHandle_(-1), mapParam_(0) {};
 	};
 
 	// データを渡す構造体

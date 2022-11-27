@@ -111,7 +111,7 @@ void HitGroupMgr::Setting()
 	initData.CH_ = { L"mainCHS",true };
 	initData.AH_ = { L"mainAnyHit",true };
 	initData.IS_ = { L"",false };
-	initData.SRVcount_ = 6;
+	initData.SRVcount_ = 5;
 	initData.UAVcount_ = 1;
 	initData.CBVcount_ = 0;
 	hitGroup_.push_back(std::make_shared<HitGroup>());

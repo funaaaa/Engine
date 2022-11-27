@@ -116,6 +116,10 @@ void PolygonInstanceRegister::Display(std::weak_ptr<PolygonMeshInstance> Instanc
 
 	/*====== 非表示 ======*/
 
+	if (Instance.lock()->GetIsDisplay()) return;
+
+	Instance.lock()->ChangeDisplayFlag(true);
+
 	// 行列を保存しておく。
 	int index = Instance.lock()->GetInstanceIndex();
 	DirectX::XMMATRIX matRot = savedInstanceData_[index].matRot_;
@@ -140,6 +144,10 @@ void PolygonInstanceRegister::Display(int Index)
 
 	/*====== 非表示 ======*/
 
+	if (instance_[Index]->GetIsDisplay()) return;
+
+	instance_[Index]->ChangeDisplayFlag(true);
+
 	// 行列を保存しておく。
 	DirectX::XMMATRIX matRot = savedInstanceData_[Index].matRot_;
 	DirectX::XMMATRIX matScale = savedInstanceData_[Index].matScale_;
@@ -163,6 +171,10 @@ void PolygonInstanceRegister::NonDisplay(std::weak_ptr<PolygonMeshInstance> Inst
 
 	/*====== 非表示 ======*/
 
+	if (!Instance.lock()->GetIsDisplay()) return;
+
+	Instance.lock()->ChangeDisplayFlag(false);
+
 	CalWorldMat(Instance.lock()->GetInstanceIndex());
 
 	savedInstanceData_[Instance.lock()->GetInstanceIndex()].matRot_ = Instance.lock()->GetRotate();
@@ -177,6 +189,10 @@ void PolygonInstanceRegister::NonDisplay(int Index)
 {
 
 	/*====== 非表示 ======*/
+
+	if (!instance_[Index]->GetIsDisplay()) return;
+
+	instance_[Index]->ChangeDisplayFlag(false);
 
 	CalWorldMat(Index);
 

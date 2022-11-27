@@ -12,8 +12,7 @@ StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 StructuredBuffer<Material> material : register(t2, space1);
 Texture2D<float4> texture : register(t3, space1);
-Texture2D<float4> normalTexture : register(t4, space1);
-Texture2D<float4> metalnessTexture : register(t5, space1);
+Texture2D<float4> mapTexture : register(t4, space1);
 RWTexture2D<float4> tireMaskTexture : register(u0, space1);
 // サンプラー
 SamplerState smp : register(s0, space1);
@@ -452,10 +451,10 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
-        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+        payloadBuff.light_ += float3(1.0f, 1.0f, 1.0f) * payloadBuff.impactAmount_;
         payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
-        payloadBuff.ao_ += 1 * payloadBuff.impactAmount_;
-        payloadBuff.gi_ += float3(0, 0, 0);
+        payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
+        payloadBuff.gi_ += float3(0.0f, 0.0f, 0.0f);
         
         // 影響度を0にする。
         payloadBuff.impactAmount_ = 0.0f;
@@ -463,22 +462,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         PayloadData = payloadBuff;
         
         return true;
-    }
-    
-    // 当たったオブジェクトのInstanceIDが完全反射だったら。
-    float metalness = 1.0f - material[0].metalness_;
-    if (metalness <= 0.0f)
-    {
-        
-        // 完全反射用のレイを発射。
-        ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
-        
-        payloadBuff.color_ = saturate(payloadBuff.color_);
-        
-        PayloadData = payloadBuff;
-        
-        return true;
-        
     }
         
     PayloadData = payloadBuff;
@@ -624,48 +607,50 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     // 各光源の明るさ情報
     float aoLightVisibility = 0;
     
-    for (int index = 0; index < POINT_LIGHT_COUNT; ++index)
-    {
-        
-        // ポイントライトが有効化されていなかったら処理を飛ばす。
-        if (!gSceneParam.light.pointLight[index].isActive)
-        {
-            continue;
-        }
-        
-        // 光源までの長さ
-        float lightLength = length(gSceneParam.light.pointLight[index].lightPos - WorldPos);
+    // 点光源は一旦使ってないのでコメントアウト。後で戻す。
     
-        // 光源までの長さが点光源の強さより小さかったら処理を飛ばす。
-        if (lightLength < gSceneParam.light.pointLight[index].lightPower && gSceneParam.light.pointLight[index].isActive)
-        {
-            
-            // ライトの隠蔽度
-            float pointLightVisibilityBuff = 0;
-            if (gSceneParam.light.pointLight[index].isShadow)
-            {
-                pointLightVisibilityBuff = SoftShadow(Vtx, gSceneParam.light.pointLight[index].lightSize, lightLength, index);
-            }
+    //for (int index = 0; index < POINT_LIGHT_COUNT; ++index)
+    //{
         
-            // ライトの明るさが一定以上だったらスペキュラーなどを計算する。
-            if (0 < pointLightVisibilityBuff)
-            {
-                
-                float3 pointLightDir = WorldPos - gSceneParam.light.pointLight[index].lightPos;
-                pointLightDir = normalize(pointLightDir);
+    //    // ポイントライトが有効化されていなかったら処理を飛ばす。
+    //    if (!gSceneParam.light.pointLight[index].isActive)
+    //    {
+    //        continue;
+    //    }
+        
+    //    // 光源までの長さ
+    //    float lightLength = length(gSceneParam.light.pointLight[index].lightPos - WorldPos);
+    
+    //    // 光源までの長さが点光源の強さより小さかったら処理を飛ばす。
+    //    if (lightLength < gSceneParam.light.pointLight[index].lightPower && gSceneParam.light.pointLight[index].isActive)
+    //    {
             
-                // ライトまでの距離の割合
-                float rate = lightLength / gSceneParam.light.pointLight[index].lightPower;
-                rate = pow(rate, 5);
-                rate = 1.0f - rate;
+    //        // ライトの隠蔽度
+    //        float pointLightVisibilityBuff = 0;
+    //        if (gSceneParam.light.pointLight[index].isShadow)
+    //        {
+    //            pointLightVisibilityBuff = SoftShadow(Vtx, gSceneParam.light.pointLight[index].lightSize, lightLength, index);
+    //        }
+        
+    //        // ライトの明るさが一定以上だったらスペキュラーなどを計算する。
+    //        if (0 < pointLightVisibilityBuff)
+    //        {
+                
+    //            float3 pointLightDir = WorldPos - gSceneParam.light.pointLight[index].lightPos;
+    //            pointLightDir = normalize(pointLightDir);
+            
+    //            // ライトまでの距離の割合
+    //            float rate = lightLength / gSceneParam.light.pointLight[index].lightPower;
+    //            rate = pow(rate, 5);
+    //            rate = 1.0f - rate;
                 
 
-                payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal, material[0].baseColor_) * rate * PayloadData.impactAmount_;
+    //            payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal, material[0].baseColor_) * rate * PayloadData.impactAmount_;
 
-            }
+    //        }
         
-        }
-    }
+    //    }
+    //}
     
             
     // 太陽の位置とベクトル
@@ -710,8 +695,13 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         
         
     }
-        
-    // AOの計算。
+    
+    // AOの計算。 一定以上の距離の場合はAOの計算を行わない。
+    if (1000.0f < RayTCurrent() || payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_RECLECTION)
+    {
+        payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
+    }
+    else
     {
      
         int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
@@ -723,15 +713,15 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         float pdf = 1.0f / (2.0f * PI);
         aoLightVisibility += aoLightVisibilityBuff;
         aoLightVisibility = clamp(aoLightVisibility, 0.3f, 1.0f);
+    
+        // ライトの総合隠蔽度を求める。
+        float aoVisibility = aoLightVisibility;
+    
+        // 各色を設定。
+        payloadBuff.ao_ += aoVisibility * payloadBuff.impactAmount_;
         
     }
     
-    
-    // ライトの総合隠蔽度を求める。
-    float aoVisibility = aoLightVisibility;
-    
-    // 各色を設定。
-    payloadBuff.ao_ += aoVisibility * payloadBuff.impactAmount_;
     
     PayloadData = payloadBuff;
     
@@ -885,19 +875,26 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
 
     }
+    if (5000.0f < RayTCurrent())
+    {
+        
+        payloadBuff.color_ = TexColor;
+        payloadBuff.impactAmount_ = 0.0f;
+        
+    }
     // 反射の処理
     else
     {
         
-        // metalnessマップの色を取得。
-        float3 metalnessMapColor = (float3) metalnessTexture.SampleLevel(smp, Vtx.uv, 0.0f);
         float metal = metalness;
         float rougness = material[0].roughness_;
         payloadBuff.roughnessOffset_ = rougness * 100.0f;
         
-        // metalnessマップの色とテクスチャの色が同じじゃなかったらmetallnessマップの色を再取得。(metalnessマップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
-        if (!(DefTexColor.x == metalnessMapColor.x && DefTexColor.y == metalnessMapColor.y && DefTexColor.z == metalnessMapColor.z))
+        // metalnessマップの取得。
+        if (material[0].mapParam_ == MAP_SPECULAR)
         {
+            // metalnessマップの色を取得。
+            float3 metalnessMapColor = (float3) mapTexture.SampleLevel(smp, Vtx.uv, 0.0f);
             //metal = saturate((1.0f - metalnessMapColor.x));
         }
         
@@ -1076,6 +1073,13 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     // テクスチャの色を取得。
     float4 texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
     float4 defTexColor = texColor;
+    
+    // 追加のマップがAO用だったら
+    if (material[0].mapParam_ == MAP_AO)
+    {
+        float mapColor = (float4) mapTexture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
+        texColor *= mapColor;
+    }
     
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。
     if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, texColor, instanceID))

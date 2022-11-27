@@ -153,6 +153,12 @@ namespace FHelper {
 
 		Vec3 tmp;
 		tmp = worldPos;
+
+		// Zが-だと視錐台に収まっていない。
+		if (tmp.z_ < -1000) {
+			return false;
+		}
+
 		// zで割って-1~1の範囲に収める
 		// スクリーン変換
 		Vec3 viewVec = DirectX::XMVectorSet(tmp.x_ / tmp.z_, tmp.y_ / tmp.z_, 1.0f, 1.0f);

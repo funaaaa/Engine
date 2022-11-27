@@ -195,3 +195,23 @@ void PlayerModel::Delete()
 	}
 
 }
+
+void PlayerModel::Display()
+{
+	for (auto& index : bodyInstance_) {
+		PolygonInstanceRegister::Ins()->Display(index);
+	}
+	for (auto& index : tireInstance_) {
+		PolygonInstanceRegister::Ins()->Display(index);
+	}
+}
+
+void PlayerModel::NonDisplay()
+{
+	for (auto& index : bodyInstance_) {
+		PolygonInstanceRegister::Ins()->NonDisplay(index);
+	}
+	for (auto& index : tireInstance_) {
+		PolygonInstanceRegister::Ins()->NonDisplay(index);
+	}
+}
