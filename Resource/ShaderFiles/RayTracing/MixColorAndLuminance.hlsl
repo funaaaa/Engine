@@ -33,6 +33,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     // ??I?I??S???e?N?X?`??????????????B
     OutputImg[DTid.xy] = (aoLuminance + lightLuminance + gi) * (color);
-    OutputImg[DTid.xy] = emissive;
+    OutputImg[DTid.xy] += emissive;
     
 }

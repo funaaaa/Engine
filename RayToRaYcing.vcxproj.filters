@@ -226,7 +226,12 @@
     <ClCompile Include="Src\Game\RadialBlur.cpp">
       <Filter>エンジン\エフェクト\ラジアルブラー\コード</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\SceneTransition.cpp" />
+    <ClCompile Include="Src\Game\SceneTransition.cpp">
+      <Filter>アプリケーション\シーン管理\遷移</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\Bloom.cpp">
+      <Filter>レイトレーシング\ポストエフェクト</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -505,6 +510,9 @@
     <ClInclude Include="Src\Game\SceneTransition.h">
       <Filter>アプリケーション\シーン管理\遷移</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Raytracing\Bloom.h">
+      <Filter>レイトレーシング\ポストエフェクト</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -725,6 +733,9 @@
     <Filter Include="アプリケーション\シーン管理\遷移">
       <UniqueIdentifier>{cfb2932d-8d70-41cd-961b-4d9672ed5344}</UniqueIdentifier>
     </Filter>
+    <Filter Include="レイトレーシング\ポストエフェクト">
+      <UniqueIdentifier>{dfb1cc77-996b-4573-9ca2-f6a263e0f1e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SetupAPI.Lib">
@@ -770,6 +781,18 @@
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RadialBlur.hlsl">
       <Filter>エンジン\エフェクト\ラジアルブラー\シェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurX.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurY.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurFinal.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomMix.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

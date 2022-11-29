@@ -341,9 +341,9 @@ void mainRayGen()
     //payloadData.gi_ = pow(payloadData.gi_, 1.0f / 2.2f);
     
     // 輝度の高い部分をエミッシブに書き込む。
-    if (1.5f < length(payloadData.light_))
+    if (3.0f < length(payloadData.light_))
     {
-        payloadData.emissive_ += payloadData.light_;
+        //payloadData.emissive_ += payloadData.light_;
     }
 
     // 結果格納
@@ -373,6 +373,7 @@ void mainMS(inout Payload PayloadData)
     payloadBuff.color_ += AtmosphericScattering(WorldRayOrigin() + WorldRayDirection() * RayTCurrent(), mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
     payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
     payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
+    payloadBuff.emissive_ = float3(0, 0, 0);
         
     // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
     payloadBuff.denoiseMask_ = float3(1, 1, 1);

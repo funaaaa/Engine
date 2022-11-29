@@ -69,7 +69,6 @@ public:
 	void Update();
 
 	void Draw();
-	void NoiseDraw();
 
 	RayConstBufferData& GetConstBufferData() { return constBufferData_; }
 

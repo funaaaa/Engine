@@ -160,6 +160,7 @@
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Raytracing\BLAS.cpp" />
     <ClCompile Include="Src\Raytracing\BLASRegister.cpp" />
+    <ClCompile Include="Src\Raytracing\Bloom.cpp" />
     <ClCompile Include="Src\Raytracing\ConstBuffers.cpp" />
     <ClCompile Include="Src\Raytracing\DynamicConstBuffer.cpp" />
     <ClCompile Include="Src\Raytracing\HitGroup.cpp" />
@@ -253,6 +254,7 @@
     <ClInclude Include="Src\Game\FirstAIWayPoint.h" />
     <ClInclude Include="Src\Raytracing\BLAS.h" />
     <ClInclude Include="Src\Raytracing\BLASRegister.h" />
+    <ClInclude Include="Src\Raytracing\Bloom.h" />
     <ClInclude Include="Src\Raytracing\ConstBuffers.h" />
     <ClInclude Include="Src\Raytracing\DescriptorHeapMgr.h" />
     <ClInclude Include="Src\Raytracing\DynamicConstBuffer.h" />
@@ -291,6 +293,30 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resource\ShaderFiles\RadialBlur.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurFinal.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurX.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurY.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomMix.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>

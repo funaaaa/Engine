@@ -35,41 +35,33 @@ void Denoiser::Setting()
 	mixColorAndLuminance_->Setting(L"Resource/ShaderFiles/RayTracing/MixColorAndLuminance.hlsl", 0, 0, 5, { 0,0 });
 
 	// ガウシアンブラーの重みテーブルを計算。
-	CalcWeightsTableFromGaussian(10);
+	CalcDenoiseWeightsTableFromGaussian(10);
 
 	// 定数バッファを生成。
-	weightTableCBX_ = std::make_shared<DynamicConstBuffer>();
-	weightTableCBX_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBX");
-	weightTableCBY_ = std::make_shared<DynamicConstBuffer>();
-	weightTableCBY_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBY");
-
-	// ブルーム中間テクスチャを生成。
-	for (auto& index : emissiveIntermediateTexture_) {
-
-		index = std::make_shared<RaytracingOutput>();
-		index->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"EmissiveIntermediateTexture", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
-	}
+	denoiseWeightTableCBX_ = std::make_shared<DynamicConstBuffer>();
+	denoiseWeightTableCBX_->Generate(sizeof(float) * DENOISE_GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBX");
+	denoiseWeightTableCBY_ = std::make_shared<DynamicConstBuffer>();
+	denoiseWeightTableCBY_->Generate(sizeof(float) * DENOISE_GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBY");
 
 }
 
-void Denoiser::ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower)
+void Denoiser::ApplyDenoiseGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower)
 {
 
 	/*===== デノイズ処理 =====*/
 
 	// 重みテーブルを計算。
-	CalcWeightsTableFromGaussian(static_cast<float>(BlurPower));
+	CalcDenoiseWeightsTableFromGaussian(static_cast<float>(BlurPower));
 
 	// 重みテーブルを書き込む。
-	weightTableCBX_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
-	weightTableCBY_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
+	denoiseWeightTableCBX_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), denoiseGaussianWeights_.data(), sizeof(float) * DENOISE_GAUSSIAN_WEIGHTS_COUNT);
+	denoiseWeightTableCBY_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), denoiseGaussianWeights_.data(), sizeof(float) * DENOISE_GAUSSIAN_WEIGHTS_COUNT);
 
 	// コンピュートシェーダーを実行。
 	blurX_->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
 	blurY_->ChangeInputUAVIndex({ blurXOutput_->GetUAVIndex(), DenoiseMaskIndex });
-	blurX_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), blurXOutput_->GetUAVIndex(), { weightTableCBX_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
-	blurY_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 1.0f) / 32) + 1, static_cast<UINT>((WINDOW_HEIGHT / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { weightTableCBY_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
+	blurX_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), blurXOutput_->GetUAVIndex(), { denoiseWeightTableCBX_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
+	blurY_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 1.0f) / 32) + 1, static_cast<UINT>((WINDOW_HEIGHT / 1.0f) / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, { denoiseWeightTableCBY_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
 
 }
 
@@ -93,15 +85,15 @@ void Denoiser::Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoiseP
 	if (DenoiseCount == 1) {
 
 		// ガウシアンブラーをかける。
-		ApplyGaussianBlur(InImg, DenoiseMaskIndex, OutImg, DenoisePower);
+		ApplyDenoiseGaussianBlur(InImg, DenoiseMaskIndex, OutImg, DenoisePower);
 
 	}
 	// デノイズする数が2回だったら。
 	else if (DenoiseCount == 2) {
 
 		// ガウシアンブラーをかける。
-		ApplyGaussianBlur(InImg, DenoiseMaskIndex, denoiseOutput_->GetUAVIndex(), DenoisePower);
-		ApplyGaussianBlur(denoiseOutput_->GetUAVIndex(), DenoiseMaskIndex, OutImg, DenoisePower);
+		ApplyDenoiseGaussianBlur(InImg, DenoiseMaskIndex, denoiseOutput_->GetUAVIndex(), DenoisePower);
+		ApplyDenoiseGaussianBlur(denoiseOutput_->GetUAVIndex(), DenoiseMaskIndex, OutImg, DenoisePower);
 
 	}
 	else {
@@ -111,18 +103,18 @@ void Denoiser::Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoiseP
 			// デノイズが最初の一回だったら。
 			if (index == 0) {
 
-				ApplyGaussianBlur(InImg, DenoiseMaskIndex, denoiseOutput_->GetUAVIndex(), DenoisePower);
+				ApplyDenoiseGaussianBlur(InImg, DenoiseMaskIndex, denoiseOutput_->GetUAVIndex(), DenoisePower);
 
 			}
 			// デノイズの最終段階だったら。
 			else if (index == DenoiseCount - 1) {
 
-				ApplyGaussianBlur(denoiseOutput_->GetUAVIndex(), DenoiseMaskIndex, OutImg, DenoisePower);
+				ApplyDenoiseGaussianBlur(denoiseOutput_->GetUAVIndex(), DenoiseMaskIndex, OutImg, DenoisePower);
 
 			}
 			else {
 
-				ApplyGaussianBlur(denoiseOutput_->GetUAVIndex(), DenoiseMaskIndex, denoiseOutput_->GetUAVIndex(), DenoisePower);
+				ApplyDenoiseGaussianBlur(denoiseOutput_->GetUAVIndex(), DenoiseMaskIndex, denoiseOutput_->GetUAVIndex(), DenoisePower);
 
 			}
 
@@ -133,55 +125,7 @@ void Denoiser::Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoiseP
 
 }
 
-void Denoiser::AfterDraw()
-{
-
-	/*===== 描画後処理 =====*/
-
-	////グラフィックコマンドリストの実行
-	//ID3D12CommandList* cmdLists[] = { cmdList_.Get() }; // コマンドリストの配列
-	//cmdQueue_->ExecuteCommandLists(1, cmdLists);
-
-	// グラフィックコマンドリストの完了待ち
-	//computeCmdQueue_->Signal(computeFence_.Get(), ++computeFenceVal_);
-	//if (fence_->GetCompletedValue() != fenceVal_) {
-	//	HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-	//	fence_->SetEventOnCompletion(fenceVal_, event);
-	//	WaitForSingleObject(event, INFINITE);
-	//	CloseHandle(event);
-	//}
-
-	//// コマンドアロケータのリセット
-	//denoiseCmdAllocator_->Reset();							// キューをクリア
-
-	//// コマンドリストのリセット
-	//denoiseCmdList_->Reset(denoiseCmdAllocator_.Get(), nullptr);	// 再びコマンドリストを貯める準備
-
-	assert(0);		// この関数は呼んじゃダメ！！！！！
-
-}
-
-void Denoiser::BeforeDraw()
-{
-
-	/*===== 描画前処理 =====*/
-
-	ID3D12DescriptorHeap* descriptorHeaps[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };
-	Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-
-}
-
-void Denoiser::CloseCommandList()
-{
-
-	/*===== コマンドリストを閉める =====*/
-
-	// グラフィックコマンドリストのクローズ
-	Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->Close();
-
-}
-
-void Denoiser::CalcWeightsTableFromGaussian(float Power)
+void Denoiser::CalcDenoiseWeightsTableFromGaussian(float Power)
 {
 
 	/*===== ガウシアンブラーの重みを計算 =====*/
@@ -191,16 +135,16 @@ void Denoiser::CalcWeightsTableFromGaussian(float Power)
 
 	// ここからガウス関数を用いて重みを計算している。
 	// ループ変数のxが基準テクセルからの距離。
-	for (int x_ = 0; x_ < GAUSSIAN_WEIGHTS_COUNT; x_++)
+	for (int x = 0; x < DENOISE_GAUSSIAN_WEIGHTS_COUNT; x++)
 	{
-		gaussianWeights_[x_] = expf(-0.5f * static_cast<float>(x_ * x_) / Power);
-		total += 2.0f * gaussianWeights_.at(x_);
+		denoiseGaussianWeights_[x] = expf(-0.5f * static_cast<float>(x * x) / Power);
+		total += 2.0f * denoiseGaussianWeights_.at(x);
 	}
 
 	// 重みの合計で除算することで、重みの合計を1にしている。
-	for (int i = 0; i < GAUSSIAN_WEIGHTS_COUNT; i++)
+	for (int i = 0; i < DENOISE_GAUSSIAN_WEIGHTS_COUNT; i++)
 	{
-		gaussianWeights_[i] /= total;
+		denoiseGaussianWeights_[i] /= total;
 	}
 
 }

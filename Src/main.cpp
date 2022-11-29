@@ -11,6 +11,7 @@
 #include "BLASRegister.h"
 #include "RayEngine.h"
 #include "RadialBlur.h"
+#include "Bloom.h"
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
@@ -30,6 +31,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	// デノイズ用のクラスを初期化。
 	Denoiser::Ins()->Setting();
+
+	// ブルームクラスを初期化。
+	Bloom::Ins()->Setting();
 
 	// BLASを準備。
 	BLASRegister::Ins()->Setting();
