@@ -23,6 +23,7 @@ RWTexture2D<float4> lightingOutput : register(u1);
 RWTexture2D<float4> colorOutput : register(u2);
 RWTexture2D<float4> giOutput : register(u3);
 RWTexture2D<float4> denoiseMaskoutput : register(u4);
+RWTexture2D<float4> emissiveOutput : register(u5);
 
 // 大気散乱
 float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
@@ -302,6 +303,7 @@ void mainRayGen()
     payloadData.denoiseMask_ = float3(0, 0, 0);
     payloadData.gi_ = float3(0, 0, 0);
     payloadData.light_ = float3(0, 0, 0);
+    payloadData.emissive_ = float3(0, 0, 0);
     payloadData.isCullingAlpha_ = false;
     payloadData.alphaCounter_ = 0;
     payloadData.roughnessOffset_ = 1.0f;
@@ -337,13 +339,20 @@ void mainRayGen()
     payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
     //payloadData.color_ = pow(payloadData.color_, 1.0f / 2.2f);
     //payloadData.gi_ = pow(payloadData.gi_, 1.0f / 2.2f);
+    
+    // 輝度の高い部分をエミッシブに書き込む。
+    if (1.5f < length(payloadData.light_))
+    {
+        payloadData.emissive_ += payloadData.light_;
+    }
 
     // 結果格納
-    lightingOutput[launchIndex.xy] = float4(saturate(payloadData.light_), 1);
-    aoOutput[launchIndex.xy] = float4(saturate(payloadData.ao_), saturate(payloadData.ao_), saturate(payloadData.ao_), 1);
-    colorOutput[launchIndex.xy] = float4(saturate(payloadData.color_), 1);
-    giOutput[launchIndex.xy] = float4(saturate(payloadData.gi_), 1);
+    lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);
+    aoOutput[launchIndex.xy] = float4((payloadData.ao_), (payloadData.ao_), (payloadData.ao_), 1);
+    colorOutput[launchIndex.xy] = float4((payloadData.color_), 1);
+    giOutput[launchIndex.xy] = float4((payloadData.gi_), 1);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
+    emissiveOutput[launchIndex.xy] = float4(payloadData.emissive_, 1);
 
 }
 
@@ -370,22 +379,6 @@ void mainMS(inout Payload PayloadData)
         
     // サンプリングした点の輝度を取得する。
     float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
-        
-    // サンプリングした点が地上より下じゃなかったら。
-    //if (t <= 0.9f)
-    //{
-            
-    //    // サンプリングした輝度をもとに、暗かったら星空を描画する。
-    //    t = (1.0f - t);
-    //    if (t != 0.0f)
-    //    {
-    //        t = pow(t, 10.0f);
-    //        //t = pow(2.0f, 10.0f * t - 10.0f);
-    //    }
-    //    //payloadBuff.color_ += (float3) TexColor * t * payloadBuff.impactAmount_;
-    //    //payloadBuff.color_ = saturate(payloadBuff.color_);
-            
-    //}
         
     // 影響度を0にする。
     payloadBuff.impactAmount_ = 0.0f;
@@ -455,6 +448,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
         payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
         payloadBuff.gi_ += float3(0.0f, 0.0f, 0.0f);
+        payloadBuff.emissive_ += payloadBuff.light_;
         
         // 影響度を0にする。
         payloadBuff.impactAmount_ = 0.0f;
@@ -548,14 +542,6 @@ float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal, float3 BaseColor)
     
     // 法線とカメラ方向の内積
     float NdotV = dot(Normal, ViewVec);
-    
-    // どちらかが90度以上であれば真っ黒を返す。
-    if (NdotL < 0.0f || NdotV < 0.0f)
-    {
-        
-        return float3(0.0f, 0.0f, 0.0f);
-        
-    }
     
     // ライト方向とカメラ方向の中間であるハーフベクトル
     float3 halfVec = normalize(LightVec + ViewVec);
@@ -672,7 +658,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             const float SAMPLING_POS_Y = 0.0f;
             
             // 天球の色をサンプリング
-            //float3 samplingVec = normalize(float3(1.0f, 0.1f, 0.1f)) * SKYDOME_RADIUS;
             float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir * float3(1.0f, 0.0f, 1.0f)) * SKYDOME_RADIUS;
             samplingVec.y = 0.1f;
             
@@ -689,7 +674,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
             float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
             
             payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal, float3(1, 1, 1)) * PayloadData.impactAmount_;
-            payloadBuff.light_ = saturate(payloadBuff.light_);
             
         }
         
@@ -744,7 +728,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         {
             ShootGIRay(Vtx, 150, payloadBuff, WorldNormal);
             payloadBuff.gi_ = (payloadBuff.gi_ * payloadBuff.impactAmount_);
-            payloadBuff.gi_ = saturate(payloadBuff.gi_);
+            payloadBuff.gi_ = payloadBuff.gi_;
             payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;
         
             payloadBuff.impactAmount_ = 0.0f;
@@ -1084,7 +1068,25 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     // 追加のマップが法線用だったら
     if (material[0].mapParam_ == MAP_NORMAL)
     {
-        float normalColor = (float4) mapTexture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
+        float3 normalColor = (float4) mapTexture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
+        
+        worldNormal = normalColor;
+        
+        // 接空間変換用
+        float3 tan;
+        float3 bnorm;
+        CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
+        
+        // 説空間行列を求める。
+        float3x3 mat =
+        {
+            float3(tan),
+            float3(bnorm),
+            float3(vtx.Normal)
+        };
+        
+        worldNormal = mul(worldNormal, mat);
+        
     }
     
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。

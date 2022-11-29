@@ -56,6 +56,12 @@ void RayEngine::Setting()
 	denoiseMixTextureOutput_[1] = std::make_shared<RaytracingOutput>();
 	denoiseMixTextureOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseMixTextureOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
+	// ブルーム用エミッシブ
+	emissiveOutput_[0] = std::make_shared<RaytracingOutput>();
+	emissiveOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"EmissiveOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	emissiveOutput_[1] = std::make_shared<RaytracingOutput>();
+	emissiveOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"EmissiveOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
 	// 最終出力用クラスをセット。
 	finalOutputTexture_[0] = std::make_shared<RaytracingOutput>();
 	finalOutputTexture_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FinalOutputTexture0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
@@ -64,9 +70,9 @@ void RayEngine::Setting()
 
 	// デノイズAO用のパイプラインを設定。
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
+	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 5 + sizeof(int) * 2 + sizeof(Vec2);
 	pipeline_ = std::make_shared<RaytracingPipeline>();
-	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
+	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 6, payloadSize, sizeof(Vec2), 6);
 
 	// シェーダーテーブルを生成。
 	pipeline_->ConstructionShaderTable();
@@ -141,6 +147,7 @@ void RayEngine::Draw()
 	colorOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(4);	// テクスチャの色情報出力用
 	giOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);		// giの結果出力用
 	denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
+	emissiveOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(7);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
 	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject().Get());
@@ -211,7 +218,9 @@ void RayEngine::Draw()
 		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(),
+			denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(),
+			emissiveOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
 
 
 		// ラジアルブラーをかける。

@@ -113,6 +113,7 @@ struct Payload
     float3 gi_; // GI情報
     float3 light_; // ライティングの色情報
     float3 denoiseMask_; // デノイズのマスクの色情報
+    float3 emissive_; // エミッシブ出力用
     uint alphaCounter_; // 薄いアルファのオブジェクトに当たった数
     uint isCullingAlpha_; // 薄いアルファのオブジェクトに一定以上当たったら次からアルファを無効化するフラグ。
     float roughnessOffset_;

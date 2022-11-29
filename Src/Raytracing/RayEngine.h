@@ -45,7 +45,10 @@ public:
 	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseMixTextureOutput_;
 
 	// デノイズをかけてエフェクトもつけた最終出力用クラス。
-	std::array<std::shared_ptr<RaytracingOutput>, 2> finalOutputTexture_;;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> finalOutputTexture_;
+
+	// ブルーム用エミッシブ出力
+	std::array<std::shared_ptr<RaytracingOutput>, 2> emissiveOutput_;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPipelineShaderData> pipelineShaders_;

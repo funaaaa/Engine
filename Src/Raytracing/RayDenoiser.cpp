@@ -32,7 +32,7 @@ void Denoiser::Setting()
 	blurX_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurX.hlsl", 0, 1, 2, { 0 });
 	blurY_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurY.hlsl", 0, 1, 2, { blurXOutput_->GetUAVIndex() });
 	blurFinal_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseFinal.hlsl", 0, 0, 1, { blurYOutput_->GetUAVIndex() });
-	mixColorAndLuminance_->Setting(L"Resource/ShaderFiles/RayTracing/MixColorAndLuminance.hlsl", 0, 0, 4, { 0,0 });
+	mixColorAndLuminance_->Setting(L"Resource/ShaderFiles/RayTracing/MixColorAndLuminance.hlsl", 0, 0, 5, { 0,0 });
 
 	// ガウシアンブラーの重みテーブルを計算。
 	CalcWeightsTableFromGaussian(10);
@@ -65,13 +65,13 @@ void Denoiser::ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int Ou
 
 }
 
-void Denoiser::MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex, int InputLightLuminanceIndex, int InputGIIndex, int OutputUAVIndex)
+void Denoiser::MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex, int InputLightLuminanceIndex, int InputGIIndex, int InputEmissiveIndex, int OutputUAVIndex)
 {
 
 	/*===== 色情報と明るさ情報の乗算 =====*/
 
 	// コンピュートシェーダーを実行。
-	mixColorAndLuminance_->ChangeInputUAVIndex({ InputColorIndex,InputLuminanceIndex, InputLightLuminanceIndex, InputGIIndex });
+	mixColorAndLuminance_->ChangeInputUAVIndex({ InputColorIndex,InputLuminanceIndex, InputLightLuminanceIndex, InputGIIndex, InputEmissiveIndex });
 	mixColorAndLuminance_->Dispatch(WINDOW_WIDTH / 32, WINDOW_HEIGHT / 32 + 1, 1, OutputUAVIndex, {}, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
 
 }

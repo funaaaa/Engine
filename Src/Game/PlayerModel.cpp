@@ -128,6 +128,8 @@ void PlayerModel::Load(COLOR ColorID, CHARA Chara)
 
 	// 車のウィンドウをロード
 	carWindowBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"window.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carWindowBlas_.lock()->GetMaterial().metalness_ = 0.5f;
+	carWindowBlas_.lock()->IsChangeMaterial();
 	carWindowInsInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carWindowBlas_, shaderID);
 	carWindowInsInstance_.lock()->SetParentInstance(carBodyInstance_);
 

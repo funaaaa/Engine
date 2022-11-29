@@ -4,9 +4,10 @@ RWTexture2D<float4> InputColor : register(u0);
 RWTexture2D<float4> InputAOLuminance : register(u1);
 RWTexture2D<float4> InputLightLuminance : register(u2);
 RWTexture2D<float4> InputGI : register(u3);
+RWTexture2D<float4> InputEmissive : register(u4);
 
 // ?o???UAV  
-RWTexture2D<float4> OutputImg : register(u4);
+RWTexture2D<float4> OutputImg : register(u5);
 
 [numthreads(32, 32, 1)]
 void main(uint3 DTid : SV_DispatchThreadID)
@@ -17,6 +18,8 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     // ???C?e?B???O?????
     float4 lightLuminance = InputLightLuminance[DTid.xy];
+    
+    float4 emissive = InputEmissive[DTid.xy];
     
     // ?e?N?X?`????F???
     float4 color = InputColor[DTid.xy];
@@ -30,6 +33,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     // ??I?I??S???e?N?X?`??????????????B
     OutputImg[DTid.xy] = (aoLuminance + lightLuminance + gi) * (color);
-    OutputImg[DTid.xy] = lightLuminance;
+    OutputImg[DTid.xy] = emissive;
     
 }
