@@ -29,6 +29,9 @@ private:
 	// 影テクスチャと色テクスチャを混ぜ合わせるシェーダー
 	std::shared_ptr<RayComputeShader> mixColorAndLuminance_;
 
+	// ブルーム用中間テクスチャ
+	std::array<std::shared_ptr<RaytracingOutput>, 8> emissiveIntermediateTexture_;
+
 	// 重みテーブル
 	static const int GAUSSIAN_WEIGHTS_COUNT = 4;
 	std::array<float, GAUSSIAN_WEIGHTS_COUNT> gaussianWeights_;

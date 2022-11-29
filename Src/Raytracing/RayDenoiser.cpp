@@ -43,6 +43,14 @@ void Denoiser::Setting()
 	weightTableCBY_ = std::make_shared<DynamicConstBuffer>();
 	weightTableCBY_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBY");
 
+	// ブルーム中間テクスチャを生成。
+	for (auto& index : emissiveIntermediateTexture_) {
+
+		index = std::make_shared<RaytracingOutput>();
+		index->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"EmissiveIntermediateTexture", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+	}
+
 }
 
 void Denoiser::ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower)
