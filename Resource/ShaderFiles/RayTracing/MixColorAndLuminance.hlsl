@@ -29,6 +29,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     gi.z *= saturate(aoLuminance.z + lightLuminance.z);
     
     // ??I?I??S???e?N?X?`??????????????B
-    OutputImg[DTid.xy] = saturate(aoLuminance + lightLuminance + gi) * (color);
+    OutputImg[DTid.xy] = (aoLuminance + lightLuminance + gi) * (color);
+    OutputImg[DTid.xy] = lightLuminance;
     
 }
