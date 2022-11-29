@@ -29,7 +29,7 @@ void MugenStage::Setting(int TireMaskIndex)
 		"Resource/Game/Stage/MugenStage/", "MugenStageTireMaskUV.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF, true, true);
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 	PolygonInstanceRegister::Ins()->NonDisplay(stageObjectMgr_->GetInstanceIndex(1));
-	
+
 	// 描画用のステージをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageDraw.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_TIREMASK, true, true);
@@ -349,27 +349,41 @@ void MugenStage::GetBuildingData(std::string FilePath)
 				int indexBuff = 0;
 				if (objType == 0) {
 					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-						"Resource/Game/Stage/MugenStage/Building/", "BuildingLow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+						"Resource/Game/Stage/MugenStage/Building/Low/", "BuildingLow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/Low/", "BuildingLowWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 				}
 				else if (objType == 1) {
 					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-						"Resource/Game/Stage/MugenStage/Building/", "BuildingLow2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+						"Resource/Game/Stage/MugenStage/Building/Low/", "BuildingLow2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/Low/", "BuildingLow2Window.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 				}
 				else if (objType == 2) {
 					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-						"Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+						"Resource/Game/Stage/MugenStage/Building/Middle/", "BuildingMiddle.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/Middle/", "BuildingMiddleWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 				}
 				else if (objType == 3) {
 					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-						"Resource/Game/Stage/MugenStage/Building/", "BuildingMiddle2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+						"Resource/Game/Stage/MugenStage/Building/Middle/", "BuildingMiddle2.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/Middle/", "BuildingMiddle2Window.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 				}
 				else if (objType == 4) {
 					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
-						"Resource/Game/Stage/MugenStage/Building/", "BuildingHigh.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+						"Resource/Game/Stage/MugenStage/Building/High/", "BuildingHigh.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+					indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::ORNAMENT, BaseStageObject::COLLISION_ID::NONE,
+						"Resource/Game/Stage/MugenStage/Building/High/", "BuildingHighWindow.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
 				}
+				BLASRegister::Ins()->GetBLAS()[stageObjectMgr_->GetBlasIndex(indexBuff - 1)]->ChangeMapTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/Building/AOMap.dds"), BLAS::MAP_PARAM::AO);
 				stageObjectMgr_->ChangeScale(indexBuff, scale);
 				stageObjectMgr_->ChangeRotate(indexBuff, rotate);
 				stageObjectMgr_->ChangeTrans(indexBuff, pos);
+				stageObjectMgr_->ChangeScale(indexBuff - 1, scale);
+				stageObjectMgr_->ChangeRotate(indexBuff - 1, rotate);
+				stageObjectMgr_->ChangeTrans(indexBuff - 1, pos);
 				continue;
 			}
 

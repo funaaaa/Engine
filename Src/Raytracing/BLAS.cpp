@@ -34,27 +34,31 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	vertexMin_ = dataBuff.vertexMin_;
 
 	// マテリアル情報を保存。
-	material_ = dataBuff.material_;
+	material_.baseColor_ = dataBuff.material_.baseColor_;
+	material_.mapParam_ = dataBuff.material_.mapParam_;
+	material_.roughness_ = dataBuff.material_.roughness_;
+	material_.metalness_ = dataBuff.material_.metalness_;
+	material_.specular_ = dataBuff.material_.specular_;
 
 	// テクスチャを保存。
 	baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// マテリアルバッファを生成する。
 	materialBuffer_ = CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
 	materialBuffer_->SetName(L"MaterialBuffer");
 
 	// アップロード用マテリアルバッファを生成する。
 	materialUploadBuffer_ = CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 	materialUploadBuffer_->SetName(L"MaterialUploadBuffer");
 
 	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
 
 	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -62,7 +66,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	// マテリアルデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点数を求める。
@@ -208,16 +212,16 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 
 	// マテリアル用定数バッファを生成。
 	materialBuffer_ = CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 
 	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
 
 	// マテリアルデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点数を求める。
@@ -363,27 +367,31 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 	vertexMin_ = dataBuff.vertexMin_;
 
 	// マテリアル情報を保存。
-	material_ = dataBuff.material_;
+	material_.baseColor_ = dataBuff.material_.baseColor_;
+	material_.mapParam_ = dataBuff.material_.mapParam_;
+	material_.roughness_ = dataBuff.material_.roughness_;
+	material_.metalness_ = dataBuff.material_.metalness_;
+	material_.specular_ = dataBuff.material_.specular_;
 
 	// テクスチャを保存。
 	baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// マテリアルバッファを生成する。
 	materialBuffer_ = CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
 	materialBuffer_->SetName(L"MaterialBuffer");
 
 	// アップロード用マテリアルバッファを生成する。
 	materialUploadBuffer_ = CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::Material)),
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 	materialUploadBuffer_->SetName(L"MaterialUploadBuffer");
 
 	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
 
 	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -391,7 +399,7 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 
 	// マテリアルデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::Material), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点数を求める。
@@ -647,10 +655,11 @@ void BLAS::IsChangeMaterial()
 	/*===== マテリアルを書き換えた際の処理 =====*/
 
 	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::Material)));
+	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
 
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 	isChangeVertex_ = true;

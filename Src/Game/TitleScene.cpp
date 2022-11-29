@@ -139,6 +139,12 @@ void TitleScene::Update()
 	// 乱数の種を更新。
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
+	// 太陽の角度を更新。
+	const float SUN_ANGLE = 0.495f;
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(SUN_ANGLE), -sin(SUN_ANGLE), 0.5f);
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
+
 	// プレイヤーの位置を調整。
 	std::vector<std::shared_ptr<Character>> character;
 	character.emplace_back(player_);

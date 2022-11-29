@@ -36,7 +36,7 @@ private:
 	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
 
 	// マテリアル情報用定数バッファ
-	ModelDataManager::Material material_;
+	ModelDataManager::GPUMaterial material_;
 
 	// BLASのインデックス。
 	int blasIndex_;
@@ -121,7 +121,7 @@ public:
 	void StopAnimation();	// 停止
 
 	// マテリアルの参照を取得。
-	ModelDataManager::Material& GetMaterial() { return material_; }
+	ModelDataManager::GPUMaterial& GetMaterial() { return material_; }
 
 	// マテリアルを書き換えた判定。
 	void IsChangeMaterial();

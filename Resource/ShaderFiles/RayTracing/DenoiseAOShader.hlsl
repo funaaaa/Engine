@@ -699,26 +699,27 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     // AOの計算。 一定以上の距離の場合はAOの計算を行わない。
     if (1000.0f < RayTCurrent() || payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_RECLECTION)
     {
-        payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
+        payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
     }
     else
     {
      
-        int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
-        float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
+        //int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
+        //float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
         
-        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 5, gRtScene);
+        //float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 5, gRtScene);
         
-        float NoL = saturate(dot(WorldNormal, sampleDir));
-        float pdf = 1.0f / (2.0f * PI);
-        aoLightVisibility += aoLightVisibilityBuff;
-        aoLightVisibility = clamp(aoLightVisibility, 0.3f, 1.0f);
+        //float NoL = saturate(dot(WorldNormal, sampleDir));
+        //float pdf = 1.0f / (2.0f * PI);
+        //aoLightVisibility += aoLightVisibilityBuff;
+        //aoLightVisibility = clamp(aoLightVisibility, 0.3f, 1.0f);
     
-        // ライトの総合隠蔽度を求める。
-        float aoVisibility = aoLightVisibility;
+        //// ライトの総合隠蔽度を求める。
+        //float aoVisibility = aoLightVisibility;
     
-        // 各色を設定。
-        payloadBuff.ao_ += aoVisibility * payloadBuff.impactAmount_;
+        //// 各色を設定。
+        //payloadBuff.ao_ += aoVisibility * payloadBuff.impactAmount_;
+        payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
         
     }
     

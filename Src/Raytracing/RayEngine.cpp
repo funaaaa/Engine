@@ -10,39 +10,39 @@ void RayEngine::Setting()
 
 	// AO出力用クラスをセット。
 	aoOutput_[0] = std::make_shared<RaytracingOutput>();
-	aoOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	aoOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"AOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseAOOutput_[0] = std::make_shared<RaytracingOutput>();
-	denoiseAOOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseAOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseAOOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseAOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	aoOutput_[1] = std::make_shared<RaytracingOutput>();
-	aoOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"AOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	aoOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"AOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseAOOutput_[1] = std::make_shared<RaytracingOutput>();
-	denoiseAOOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseAOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseAOOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseAOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// 色出力用クラスをセット。
 	colorOutput_[0] = std::make_shared<RaytracingOutput>();
-	colorOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"ColorOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	colorOutput_[1] = std::make_shared<RaytracingOutput>();
-	colorOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"ColorOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// 明るさ情報出力用クラスをセット。
 	lightOutput_[0] = std::make_shared<RaytracingOutput>();
-	lightOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"LightOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	lightOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"LightOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseLightOutput_[0] = std::make_shared<RaytracingOutput>();
-	denoiseLightOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseLightOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseLightOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	lightOutput_[1] = std::make_shared<RaytracingOutput>();
-	lightOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"LightOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	lightOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"LightOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseLightOutput_[1] = std::make_shared<RaytracingOutput>();
-	denoiseLightOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseLightOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseLightOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseLightOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// GI出力用クラスをセット。
 	giOutput_[0] = std::make_shared<RaytracingOutput>();
-	giOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	giOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"GIOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseGiOutput_[0] = std::make_shared<RaytracingOutput>();
-	denoiseGiOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseGiOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseGIOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	giOutput_[1] = std::make_shared<RaytracingOutput>();
-	giOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"GIOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	giOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"GIOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseGiOutput_[1] = std::make_shared<RaytracingOutput>();
-	denoiseGiOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseGIOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseGiOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseGIOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// デノイズマスク用クラスをセット。
 	denoiseMaskOutput_[0] = std::make_shared<RaytracingOutput>();
@@ -52,9 +52,9 @@ void RayEngine::Setting()
 
 	// デノイズ最終出力用クラスをセット。
 	denoiseMixTextureOutput_[0] = std::make_shared<RaytracingOutput>();
-	denoiseMixTextureOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMixTextureOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseMixTextureOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseMixTextureOutput_[1] = std::make_shared<RaytracingOutput>();
-	denoiseMixTextureOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"DenoiseMixTextureOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMixTextureOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseMixTextureOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// 最終出力用クラスをセット。
 	finalOutputTexture_[0] = std::make_shared<RaytracingOutput>();

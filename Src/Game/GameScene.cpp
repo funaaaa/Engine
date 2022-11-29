@@ -73,7 +73,7 @@ GameScene::GameScene()
 	DriftParticleMgr::Ins()->Setting();
 
 	// ‘¾—z‚ÉŠÖ‚·‚é•Ï”
-	sunAngle_ = 0.25f;
+	sunAngle_ = 0.495f;
 	sunSpeed_ = 0.01f;
 
 	isDisplayFPS_ = false;
@@ -224,7 +224,7 @@ void GameScene::Init()
 	countDownStartTimer_ = 0;
 	transitionTimer = 0;
 	countDownNumber_ = 2;
-	sunAngle_ = 0.8f;
+	sunAngle_ = 0.495f;
 	isFinishTransition_ = false;
 
 	Camera::Ins()->eye_ = Vec3(0, 0, 0);
@@ -344,7 +344,6 @@ void GameScene::Update()
 		characterMgr_->Init();
 
 	}
-
 
 }
 
