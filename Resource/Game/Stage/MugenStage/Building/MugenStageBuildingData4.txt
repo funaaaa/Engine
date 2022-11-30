@@ -1,0 +1,33 @@
+ID:0
+Position X:2351.5 Y:-18.5 Z:-7174.5 
+
+Rotation X:0 Y:2.69 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:1
+Position X:1871.5 Y:-18 Z:-7696.5 
+
+Rotation X:0 Y:1.05 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+
+ID:2
+Position X:3044.5 Y:0 Z:-7842 
+
+Rotation X:0 Y:0.85 Z:0 
+
+Scale X:120 Y:120 Z:120 
+
+
+
+--
+

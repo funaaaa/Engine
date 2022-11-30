@@ -299,6 +299,7 @@ void MugenStage::LoadBuilding()
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData.txt");		// 直線周り
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData2.txt");		// 大きい方のカーブ周り
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData3.txt");		// 小さい方のカーブ周り
+	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData4.txt");		// 小道を作ろうとしていたところ
 
 }
 
