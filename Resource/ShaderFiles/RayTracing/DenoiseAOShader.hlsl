@@ -45,10 +45,10 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
     // 大気圏の一番上の高さ。
     float fOuterRadius = 10250.0f;
     // 地球全体の地上の高さ。
-    float fInnerRadius = 10000.0f;
+    float fInnerRadius = 10200.0f;
 
     // 太陽光の強さ？
-    float fESun = 20.0f;
+    float fESun = 10.0f;
     // 太陽光の強さにレイリー散乱定数をかけてレイリー散乱の強さを求めている。
     float fKrESun = kr * fESun;
     // 太陽光の強さにミー散乱定数をかけてレイリー散乱の強さを求めている。
