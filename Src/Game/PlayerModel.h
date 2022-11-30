@@ -17,10 +17,10 @@ public:
 	// バンパー
 	std::weak_ptr<BLAS> carBumperBlas_;
 	std::weak_ptr<PolygonMeshInstance> carBumperInstance_;
-	// ライト
+	// 左後ろのライト
 	std::weak_ptr<BLAS> carLeftLightBlas_;
 	std::weak_ptr<PolygonMeshInstance> carLeftLightInstance_;
-	// ライト
+	// 右後ろのライト
 	std::weak_ptr<BLAS> carRightLightBlas_;
 	std::weak_ptr<PolygonMeshInstance> carRightLightInstance_;
 	// ライト

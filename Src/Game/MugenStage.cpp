@@ -7,6 +7,9 @@
 #include "BLAS.h"
 #include "ConvertGimmickInfoFromBlender.h"
 #include "TextureManager.h"
+#include <algorithm>
+
+using namespace std;
 
 void MugenStage::Setting(int TireMaskIndex)
 {
@@ -33,6 +36,7 @@ void MugenStage::Setting(int TireMaskIndex)
 	// 描画用のステージをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageDraw.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF_TIREMASK, true, true);
+	stageObjectMgr_->ChangeMapTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/StageTex/Road/NormalMap.png"), BLAS::MAP_PARAM::NORMAL);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 	// 当たり判定用のステージのUVをSubUVとして代入する。
@@ -70,14 +74,14 @@ void MugenStage::Setting(int TireMaskIndex)
 	// ステージの草をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE_GRASS, BaseStageObject::COLLISION_ID::MESH,
 		"Resource/Game/Stage/MugenStage/", "MugenStageGrass.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	stageObjectMgr_->ChangeMapTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/GrassNormalMap.dds"), BLAS::MAP_PARAM::NORMAL);
+	stageObjectMgr_->ChangeMapTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/GrassNormalMap.png"), BLAS::MAP_PARAM::NORMAL);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
 	// ステージの山をセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STAGE, BaseStageObject::COLLISION_ID::NONE,
 		"Resource/Game/Stage/MugenStage/", "MugenStageOrnament.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
-	//stageObjectMgr_->ChangeNormalTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/OrnamentGroundNormalMap.dds"));
+	stageObjectMgr_->ChangeMapTexture(indexBuff, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/StageTex/OrnamentGroundNormalMap.png"), BLAS::MAP_PARAM::NORMAL);
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
 
@@ -296,7 +300,7 @@ BaseStage::ColliderOutput MugenStage::Collider(BaseStage::ColliderInput Input)
 void MugenStage::LoadBuilding()
 {
 
-	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData.txt");		// 直線周り
+	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData.txt");		// 直線周り<
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData2.txt");		// 大きい方のカーブ周り
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData3.txt");		// 小さい方のカーブ周り
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData4.txt");		// 小道を作ろうとしていたところ

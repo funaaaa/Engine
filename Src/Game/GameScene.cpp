@@ -309,7 +309,7 @@ void GameScene::Update()
 	sunAngle_ += sunSpeed_;
 	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
-		sunAngle_ += sunSpeed_ * 30.0f;
+		sunAngle_ += sunSpeed_ * 10.0f;
 
 	}
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;

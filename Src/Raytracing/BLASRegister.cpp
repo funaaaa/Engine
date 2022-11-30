@@ -140,6 +140,28 @@ std::weak_ptr<BLAS> BLASRegister::GenerateGLTF(const std::wstring& Path, const s
 
 }
 
+std::weak_ptr<BLAS> BLASRegister::GenerateData(const ModelDataManager::ObjectData& ModelData, bool IsOpaque)
+{
+
+	/*===== BLASを生成 =====*/
+
+	for (auto& index : blas_) {
+
+		if (index->GetIsGenerate()) continue;
+
+		index->GenerateBLASData(ModelData, static_cast<int>(&index - &blas_[0]), IsOpaque);
+
+		return index;
+
+	}
+
+	// 要素数をオーバーしました！
+	assert(0);
+
+	return std::weak_ptr<BLAS>();
+
+}
+
 uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
 {
 

@@ -5,6 +5,7 @@
 #include "PlayerModel.h"
 #include <memory>
 #include "FHelper.h"
+#include "TailLampVertexMgr.h"
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -54,6 +55,10 @@ public:
 	bool isJumpActionTrigger_;	// ジャンプアクションのトリガー
 	bool isJumpAction_;			// ジャンプアクションが行われたか。
 
+	// テールランプ関係
+	TailLampVertexMgr leftTailLampVertex_;
+	TailLampVertexMgr rightTailLampVertex_;
+
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 
 	// 別な車との当たり判定用のヒットボックス
@@ -84,7 +89,7 @@ public:
 	const float ADD_GRAV = 0.4f;		// 重力の加算量
 	Vec3 defPos_ = Vec3(0, 30, -30);
 	const Vec3 PLAYER_DEF_POS = Vec3(-141.943f, 30.0f, 100.0f);
-	const std::array<Vec3, 3> GHOST_DEF_POS = { Vec3(-59, 30, -106), Vec3(99, 30, -34), Vec3(23.775f, 30.0f, 166.0f)};
+	const std::array<Vec3, 3> GHOST_DEF_POS = { Vec3(-59, 30, -106), Vec3(99, 30, -34), Vec3(23.775f, 30.0f, 166.0f) };
 
 
 	/*-- ドリフト、加速時の車体の回転に関する変数 --*/

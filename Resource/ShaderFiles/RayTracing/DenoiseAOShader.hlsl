@@ -339,12 +339,6 @@ void mainRayGen()
     payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
     //payloadData.color_ = pow(payloadData.color_, 1.0f / 2.2f);
     //payloadData.gi_ = pow(payloadData.gi_, 1.0f / 2.2f);
-    
-    // 輝度の高い部分をエミッシブに書き込む。
-    if (3.0f < length(payloadData.light_))
-    {
-        //payloadData.emissive_ += payloadData.light_;
-    }
 
     // 結果格納
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);

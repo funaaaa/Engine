@@ -108,6 +108,7 @@ public:
 	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
 	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
 	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
+	void GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int BlasIndex, bool IsOpaque = false);
 
 	// BLASの更新
 	void Update();
@@ -142,6 +143,9 @@ public:
 
 	// 指定のUVをSUBUVに代入する。
 	void AssignUV(const std::vector<RayVertex>& UV);
+
+	// 頂点情報の座標成分のみを変更。
+	void ChangeVertexPosition(int Index, const Vec3& Pos);
 
 	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer_; }

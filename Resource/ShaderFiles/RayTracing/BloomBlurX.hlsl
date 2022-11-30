@@ -26,6 +26,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     uint2 basepos = uint2(DTid.x * 2, DTid.y);
     
     float4 color;
+
     
     color = GetPixelColor(basepos.x, basepos.y, float2(1280, 720)) * weights[0].x;
     color += GetPixelColor(basepos.x + 1, basepos.y, float2(1280, 720)) * weights[0].y;
