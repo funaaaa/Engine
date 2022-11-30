@@ -14,6 +14,7 @@ static const int CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK = 9; // instanceID 
 static const int CHS_IDENTIFICATION_INSTANCE_ALPHA = 10; // instanceID 半透明
 static const int CHS_IDENTIFICATION_INSTANCE_ADD = 11; // instanceID 加算合成
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK = 12; // instanceID 通常の処理 + タイヤ痕
+static const int CHS_IDENTIFICATION_INSTANCE_DEF_TAILLAMP = 13; // instanceID 通常の処理 + エミッシブ + マテリアルアルファ
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // デフォルトのレイ
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI用のレイ
@@ -90,7 +91,7 @@ struct Material
     float specular_;
     float roughness_;
     int mapParam_; // マテリアルの追加情報。追加のテクスチャをどう使用するかを判断する。
-    int pad_;
+    float alpha_;
 };
 
 // 頂点情報

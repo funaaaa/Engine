@@ -233,11 +233,15 @@
       <Filter>レイトレーシング\ポストエフェクト</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\TailLampVertex.cpp">
-      <Filter>アプリケーション\キャラクター\テールランプ\テールランプ頂点</Filter>
+      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\TailLampVertexMgr.cpp">
-      <Filter>アプリケーション\キャラクター\テールランプ\テールランプ頂点</Filter>
+      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\TailLamp.cpp">
+      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\TailLampMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -520,10 +524,16 @@
       <Filter>レイトレーシング\ポストエフェクト</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\TailLampVertex.h">
-      <Filter>アプリケーション\キャラクター\テールランプ\テールランプ頂点</Filter>
+      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\TailLampVertexMgr.h">
-      <Filter>アプリケーション\キャラクター\テールランプ\テールランプ頂点</Filter>
+      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\TailLamp.h">
+      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\TailLampMgr.h">
+      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -751,7 +761,10 @@
     <Filter Include="アプリケーション\キャラクター\テールランプ">
       <UniqueIdentifier>{2a910e41-aa1d-4b42-9080-9545a42a104b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="アプリケーション\キャラクター\テールランプ\テールランプ頂点">
+    <Filter Include="アプリケーション\キャラクター\テールランプ\形">
+      <UniqueIdentifier>{af850c01-8a5c-4403-9c7c-439a80d5b757}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\キャラクター\テールランプ\頂点">
       <UniqueIdentifier>{beccf10b-8453-4f89-abfd-efb4ef759503}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

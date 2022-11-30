@@ -16,7 +16,7 @@ private:
 
 	/*===== 定数 =====*/
 
-	const int CBV_SRV_UAV_COUNT = 4096;	// CBV,SRV,UAV用ディスクリプタの数
+	const int CBV_SRV_UAV_COUNT = 4096 * 2;	// CBV,SRV,UAV用ディスクリプタの数
 
 public:
 

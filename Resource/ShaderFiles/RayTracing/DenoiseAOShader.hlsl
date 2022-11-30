@@ -443,10 +443,49 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
         payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
         payloadBuff.gi_ += float3(0.0f, 0.0f, 0.0f);
-        payloadBuff.emissive_ += payloadBuff.color_;
+        payloadBuff.emissive_ += payloadBuff.color_ * payloadBuff.impactAmount_;
         
         // 影響度を0にする。
         payloadBuff.impactAmount_ = 0.0f;
+        
+        PayloadData = payloadBuff;
+        
+        return true;
+    }
+    
+    
+    // テールランプだったら
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TAILLAMP)
+    {
+        
+        // エミッシブを書き込む。
+        float mul = material[0].alpha_;
+        payloadBuff.emissive_ = TexColor * float4(mul, mul, mul, mul);
+        payloadBuff.light_ = float3(1, 1, 1);
+        payloadBuff.color_ += (float3) TexColor * material[0].alpha_;
+        payloadBuff.ao_ += 1.0f * material[0].alpha_;
+        payloadBuff.gi_ += float3(0.0f, 0.0f, 0.0f);
+        
+        
+        if (payloadBuff.impactAmount_ < material[0].alpha_)
+        {
+            payloadBuff.color_.xyz += (float3) TexColor * material[0].alpha_;
+            payloadBuff.impactAmount_ = 0.0f;
+        }
+        else
+        {
+            payloadBuff.color_.xyz += (float3) TexColor * material[0].alpha_;
+            payloadBuff.impactAmount_ -= material[0].alpha_;
+            
+            if (0.0f < payloadBuff.impactAmount_)
+            {
+                
+                // 反射レイを飛ばす。
+                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
+                
+            }
+        
+        }
         
         PayloadData = payloadBuff;
         
@@ -855,7 +894,8 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
 
     }
-    if (5000.0f < RayTCurrent())
+    // 一定以上離れていると反射を行わない。
+    else if (5000.0f < RayTCurrent())
     {
         
         payloadBuff.color_ = TexColor;

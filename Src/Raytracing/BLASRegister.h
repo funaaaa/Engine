@@ -15,7 +15,7 @@ private:
 
 	/*===== ƒƒ“ƒo•Ï” =====*/
 
-	static const int BLAS_COUNT = 1024;
+	static const int BLAS_COUNT = 1024 / 2;
 	std::array<std::shared_ptr<BLAS>, BLAS_COUNT> blas_;	// ‰Á‘¬\‘¢‘Ì
 
 

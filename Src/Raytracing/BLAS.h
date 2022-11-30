@@ -66,6 +66,8 @@ private:
 
 	bool isGenerate_;
 
+	bool isUseVertexUploadBuffer_;	// Upload用のバッファを使うか。
+
 	int baseTextureHandle_;				// 使用するテクスチャのハンドル
 	int mapTextureHandle_;
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
@@ -160,6 +162,7 @@ public:
 	const Vec3& GetVertexMax() { return vertexMax_; }
 	bool GetIsGenerate() { return isGenerate_; }
 	int GetBlasIndex() { return blasIndex_; }
+	int GetBaseTexture() { return baseTextureHandle_; }
 
 	std::vector<RayVertex> GetVertex() { return vertex_; }
 	const std::vector<Vec3>& GetVertexPos() { return vertexPos_; }

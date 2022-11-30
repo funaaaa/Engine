@@ -5,7 +5,7 @@
 #include "PlayerModel.h"
 #include <memory>
 #include "FHelper.h"
-#include "TailLampVertexMgr.h"
+#include "TailLampMgr.h"
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -56,8 +56,8 @@ public:
 	bool isJumpAction_;			// ジャンプアクションが行われたか。
 
 	// テールランプ関係
-	TailLampVertexMgr leftTailLampVertex_;
-	TailLampVertexMgr rightTailLampVertex_;
+	std::shared_ptr<TailLampMgr> leftTailLamp_;
+	std::shared_ptr<TailLampMgr> rightTailLamp_;
 
 	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
 

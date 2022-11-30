@@ -19,7 +19,7 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	static const int MAX_INSTANCE = 1024;	// インスタンスの最大数。
+	static const int MAX_INSTANCE = 1024 / 2;	// インスタンスの最大数。
 
 
 private:
@@ -87,6 +87,7 @@ public:
 		ALPHA = 10,			// 半透明 定数バッファを登録する必要有り。
 		ADD = 11,			// 加算合成 定数バッファを登録する必要有り。
 		DEF_TIREMASK = 12,	// 通常ライティングとタイヤ痕
+		DEF_TAILLAMP = 13,	// 通常ライティングとエミッシブとマテリアルアルファ
 
 	};
 

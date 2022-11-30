@@ -82,36 +82,48 @@ void PlayerModel::Load(COLOR ColorID, CHARA Chara)
 
 	// 車の後ろタイヤをロード
 	carBehindTireBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"behindTire.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carBehindTireBlas_.lock()->GetMaterial().metalness_ = 0.0f;
+	carBehindTireBlas_.lock()->IsChangeMaterial();
 	carBehindTireInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carBehindTireBlas_, shaderID);
 	carBehindTireInstance_.lock()->SetParentInstance(carBodyInstance_);
 	carBehindTireInstance_.lock()->AddTrans(Vec3(-0.089f, -0.882f, 1.101f));
 
 	// 車の後ろタイヤのフレームをロード
 	carBehindTireFrameBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"behindTireFrame.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carBehindTireFrameBlas_.lock()->GetMaterial().metalness_ = 0.0f;
+	carBehindTireFrameBlas_.lock()->IsChangeMaterial();
 	carBehindTireFrameInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carBehindTireFrameBlas_, shaderID);
 	carBehindTireFrameInstance_.lock()->SetParentInstance(carBodyInstance_);
 	carBehindTireFrameInstance_.lock()->AddTrans(Vec3(-0.089f, -0.882f, 1.101f));
 
 	// 右前タイヤをロード
 	carRightTireBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"rightTire.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carRightTireBlas_.lock()->GetMaterial().metalness_ = 0.0f;
+	carRightTireBlas_.lock()->IsChangeMaterial();
 	carRightTireInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carRightTireBlas_, shaderID);
 	carRightTireInstance_.lock()->SetParentInstance(carBodyInstance_);
 	carRightTireInstance_.lock()->AddTrans(Vec3(0.84f, -0.87f, -1.55f));
 
 	// 右前タイヤのフレームをロード
 	carRightTireFrameBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"rightTireFrame.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carRightTireFrameBlas_.lock()->GetMaterial().metalness_ = 0.0f;
+	carRightTireFrameBlas_.lock()->IsChangeMaterial();
 	carRightTireFrameInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carRightTireFrameBlas_, shaderID);
 	carRightTireFrameInstance_.lock()->SetParentInstance(carBodyInstance_);
 	carRightTireFrameInstance_.lock()->AddTrans(Vec3(0.85f, -0.86f, -1.55f));
 
 	// 左前タイヤをロード
 	carLeftTireBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"leftTire.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carLeftTireBlas_.lock()->GetMaterial().metalness_ = 0.0f;
+	carLeftTireBlas_.lock()->IsChangeMaterial();
 	carLeftTireInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carLeftTireBlas_, shaderID);
 	carLeftTireInstance_.lock()->SetParentInstance(carBodyInstance_);
 	carLeftTireInstance_.lock()->AddTrans(Vec3(-0.94f, -0.86f, -1.57f));
 
 	// 左前タイヤのフレームをロード
 	carLeftTireFrameBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"leftTireFrame.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carLeftTireFrameBlas_.lock()->GetMaterial().metalness_ = 0.0f;
+	carLeftTireFrameBlas_.lock()->IsChangeMaterial();
 	carLeftTireFrameInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carLeftTireFrameBlas_, shaderID);
 	carLeftTireFrameInstance_.lock()->SetParentInstance(carBodyInstance_);
 	carLeftTireFrameInstance_.lock()->AddTrans(Vec3(-0.95f, -0.85f, -1.55f));
@@ -123,12 +135,14 @@ void PlayerModel::Load(COLOR ColorID, CHARA Chara)
 
 	// 車の鏡のカバーをロード
 	carMirrorCoverBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"mirrorCover.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
+	carMirrorCoverBlas_.lock()->GetMaterial().metalness_ = 0.0f;
+	carMirrorCoverBlas_.lock()->IsChangeMaterial();
 	carMirrorCoverInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carMirrorBlas_, shaderID);
 	carMirrorCoverInstance_.lock()->SetParentInstance(carBodyInstance_);
 
 	// 車のウィンドウをロード
 	carWindowBlas_ = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Car/GLTF/" + folder + L"window.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], true, true);
-	carWindowBlas_.lock()->GetMaterial().metalness_ = 0.5f;
+	carWindowBlas_.lock()->GetMaterial().metalness_ = 0.0f;
 	carWindowBlas_.lock()->IsChangeMaterial();
 	carWindowInsInstance_ = PolygonInstanceRegister::Ins()->CreateInstance(carWindowBlas_, shaderID);
 	carWindowInsInstance_.lock()->SetParentInstance(carBodyInstance_);

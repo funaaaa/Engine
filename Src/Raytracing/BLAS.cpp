@@ -186,6 +186,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	isChangeTexture_ = true;
 
 	isGenerate_ = true;
+	isUseVertexUploadBuffer_ = true;
 
 }
 
@@ -329,6 +330,7 @@ void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& M
 	isChangeTexture_ = true;
 
 	isGenerate_ = true;
+	isUseVertexUploadBuffer_ = true;
 
 	// 最小と最大の頂点を保存。
 	ModelDataManager::ObjectData dataBuff;
@@ -516,6 +518,7 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 	// ダーティフラグ
 	isChangeVertex_ = true;
 	isChangeTexture_ = true;
+	isUseVertexUploadBuffer_ = true;
 
 	isGenerate_ = true;
 
@@ -608,22 +611,11 @@ void BLAS::GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int B
 	vertexBuffer_ = CreateBuffer(
 		static_cast<size_t>(vertexStride_ * vertexCount_),
 		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
 	vertexBuffer_->SetName(L"VertexBuffer");
 
-	// アップロード用頂点バッファを生成する。
-	vertexUploadBuffer_ = CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	vertexUploadBuffer_->SetName(L"VertexUploadBuffer");
-
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 
 	// 頂点インデックスバッファを生成する。
@@ -689,6 +681,7 @@ void BLAS::GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int B
 	// ダーティフラグ
 	isChangeVertex_ = true;
 	isChangeTexture_ = true;
+	isUseVertexUploadBuffer_ = false;
 
 	isGenerate_ = true;
 
@@ -728,13 +721,22 @@ void BLAS::Update()
 		//};
 	}
 
-	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
-	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+	if (isUseVertexUploadBuffer_) {
 
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+		// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
+		WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+		Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
+		barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+
+	}
+	else {
+
+		WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	}
 
 	// 更新のための値を設定。
 	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_);

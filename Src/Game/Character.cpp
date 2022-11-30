@@ -182,8 +182,8 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	obb_ = std::make_shared<OBB>();
 	obb_->Setting(playerModel_.carBodyBlas_, playerModel_.carBodyInstance_);
 
-	leftTailLampVertex_.Init();
-	rightTailLampVertex_.Init();
+	leftTailLamp_ = std::make_shared<TailLampMgr>();
+	rightTailLamp_ = std::make_shared<TailLampMgr>();
 
 }
 
@@ -259,8 +259,8 @@ void Character::Init()
 
 	DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
-	leftTailLampVertex_.Init();
-	rightTailLampVertex_.Init();
+	leftTailLamp_->Init();
+	rightTailLamp_->Init();
 
 }
 
@@ -499,9 +499,40 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 		}
 	}
 
+	if (8.0f <= jumpBoostSpeed_) {
+
+		// テールランプを生成。
+		static const int VERTEX_SIZE = 4;
+		{
+			// 右後ろのテールランプ
+			DirectX::XMMATRIX matWorld = playerModel_.carRightLightInstance_.lock()->GetWorldMat();
+			std::array<Vec3, VERTEX_SIZE> vertex;
+			vertex[0] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[10], matWorld);	// ライトの頂点を設定。いずれは各頂点の最小と最大から自動で設定できるようにしたい。
+			vertex[1] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[11], matWorld);
+			vertex[2] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[1], matWorld);
+			vertex[3] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[2], matWorld);
+			// 生成
+			leftTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - 8.0f) / (JUMP_BOOST_SPEED - 8.0f));
+
+		}
+		{
+			// 左後ろのテールランプ
+			DirectX::XMMATRIX matWorld = playerModel_.carLeftLightInstance_.lock()->GetWorldMat();
+			std::array<Vec3, VERTEX_SIZE> vertex;
+			vertex[3] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[3], matWorld);
+			vertex[2] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[11], matWorld);
+			vertex[1] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[8], matWorld);
+			vertex[0] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[2], matWorld);
+			// 生成
+			rightTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - 8.0f) / (JUMP_BOOST_SPEED - 8.0f));
+
+		}
+
+	}
+
 	// テールランプを更新。
-	leftTailLampVertex_.Update();
-	rightTailLampVertex_.Update();
+	leftTailLamp_->Update();
+	rightTailLamp_->Update();
 
 }
 
@@ -912,38 +943,6 @@ void Character::Input(bool IsBeforeStart)
 	if (0 < operation.accelerationRate_ && onGround_ && !IsBeforeStart) {
 
 		speed_ += operation.accelerationRate_ * ADD_SPEED;
-
-		if (charaID_ == CHARA_ID::P1) {
-
-			// テールランプを生成。
-			static const int VERTEX_SIZE = 4;
-			{
-				// 右後ろのテールランプ
-				DirectX::XMMATRIX matWorld = playerModel_.carRightLightInstance_.lock()->GetWorldMat();
-				std::array<Vec3, VERTEX_SIZE> vertex;
-				vertex[0] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[0], matWorld);
-				vertex[1] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[1], matWorld);
-				vertex[2] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[2], matWorld);
-				vertex[3] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[4], matWorld);
-				// 生成
-				leftTailLampVertex_.Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/green.png"));
-
-			}
-			{
-				// 左後ろのテールランプ
-				DirectX::XMMATRIX matWorld = playerModel_.carLeftLightInstance_.lock()->GetWorldMat();
-				std::array<Vec3, VERTEX_SIZE> vertex;
-				vertex[0] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[0], matWorld);
-				vertex[1] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[1], matWorld);
-				vertex[2] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[2], matWorld);
-				vertex[3] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[8], matWorld);
-				// 生成
-				leftTailLampVertex_.Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/green.png"));
-
-			}
-
-		}
-
 
 	}
 	// 甲羅にあたっていたら。
@@ -1470,14 +1469,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 		jumpBoostSpeed_ = JUMP_BOOST_SPEED;
 
 		isJumpAction_ = true;
-
-	}
-
-
-	if (Input::Ins()->IsKeyTrigger(DIK_P)) {
-
-		++rapCount_;
-		isPassedMiddlePoint_ = true;
 
 	}
 

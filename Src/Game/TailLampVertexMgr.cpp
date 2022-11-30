@@ -13,6 +13,7 @@ TailLampVertexMgr::TailLampVertexMgr()
 	}
 
 	prevGenerateIndex_ = 0;
+	nowGenerateIndex_ = 0;
 
 }
 
@@ -28,21 +29,23 @@ void TailLampVertexMgr::Init()
 	}
 
 	prevGenerateIndex_ = 0;
+	nowGenerateIndex_ = 0;
 
 }
 
-void TailLampVertexMgr::Generate(std::array<Vec3, 4> Vertex, int TextureHandle)
+void TailLampVertexMgr::Generate(std::array<Vec3, 4> Vertex, float ScaleOffsetRate)
 {
 
 	/*===== ¶¬ˆ— =====*/
 
+	prevGenerateIndex_ = nowGenerateIndex_;
 	for (auto& index : tailLampVertex_) {
 
 		if (index->GetIsActive()) continue;
 
-		index->Generate(Vertex, TextureHandle);
+		index->Generate(Vertex, ScaleOffsetRate);
 
-		prevGenerateIndex_ = static_cast<int>(&index - &tailLampVertex_[0]);
+		nowGenerateIndex_ = static_cast<int>(&index - &tailLampVertex_[0]);
 
 		break;
 
