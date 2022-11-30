@@ -1,9 +1,4 @@
 #include "TailLampVertex.h"
-#include "BLASRegister.h"
-#include "BLAS.h"
-#include "PolygonInstanceRegister.h"
-#include "PolygonInstance.h"
-#include "ModelDataManager.h"
 
 TailLampVertex::TailLampVertex()
 {
@@ -21,12 +16,6 @@ void TailLampVertex::Init()
 
 	isActive_ = false;
 	startScaleDownTimer_ = 0;
-	if (!blas_.expired()) {
-		blas_.lock()->Init();
-	}
-	if (!ins_.expired()) {
-		PolygonInstanceRegister::Ins()->DestroyInstance(ins_);
-	}
 
 }
 
@@ -39,46 +28,46 @@ void TailLampVertex::Generate(std::array<Vec3, 4> Vertex, int TextureHandle)
 	startScaleDownTimer_ = START_SCALE_DOWN_TIMER;
 	vertex_ = Vertex;
 
-	// BLASを生成する。
-	{
-		// モデルデータを書き込む。
-		ModelDataManager::ObjectData data;
+	//// BLASを生成する。
+	//{
+	//	// モデルデータを書き込む。
+	//	ModelDataManager::ObjectData data;
 
-		// 頂点を書き込む。
-		const int VERTEX_SIZE = 4;
-		for (int index = 0; index < VERTEX_SIZE; ++index) {
+	//	// 頂点を書き込む。
+	//	const int VERTEX_SIZE = 4;
+	//	for (int index = 0; index < VERTEX_SIZE; ++index) {
 
-			ModelDataManager::Vertex vert;
+	//		ModelDataManager::Vertex vert;
 
-			vert.pos_ = Vertex[index];
-			vert.normal_ = Vertex[0].Cross(Vertex[1]).GetNormal();
-			vert.uv_ = Vec2(0.5f, 0.5f);
+	//		vert.pos_ = Vertex[index];
+	//		vert.normal_ = Vertex[0].Cross(Vertex[1]).GetNormal();
+	//		vert.uv_ = Vec2(0.5f, 0.5f);
 
-			data.vertex_.emplace_back(vert);
+	//		data.vertex_.emplace_back(vert);
 
-		}
+	//	}
 
-		// 頂点インデックスを書き込む。
-		{
-			data.index_.emplace_back(0);
-			data.index_.emplace_back(1);
-			data.index_.emplace_back(2);
+	//	// 頂点インデックスを書き込む。
+	//	{
+	//		data.index_.emplace_back(0);
+	//		data.index_.emplace_back(1);
+	//		data.index_.emplace_back(2);
 
-			data.index_.emplace_back(2);
-			data.index_.emplace_back(3);
-			data.index_.emplace_back(0);
-		}
+	//		data.index_.emplace_back(2);
+	//		data.index_.emplace_back(3);
+	//		data.index_.emplace_back(0);
+	//	}
 
-		// その他情報を書き込む。
-		data.material_.textureHandle_ = TextureHandle;
+	//	// その他情報を書き込む。
+	//	data.material_.textureHandle_ = TextureHandle;
 
-		// BLASを生成する。
-		blas_ = BLASRegister::Ins()->GenerateData(data, true);
+	//	// BLASを生成する。
+	//	blas_ = BLASRegister::Ins()->GenerateData(data, true);
 
-	}
+	//}
 
-	// Instanceを生成する。
-	ins_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::Ins()->TEXCOLOR);
+	//// Instanceを生成する。
+	//ins_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::Ins()->TEXCOLOR);
 
 }
 
@@ -118,14 +107,6 @@ void TailLampVertex::Update()
 			float length = Vec3(vertex_[1] - vertex_[3]).Length() / 2.0f;
 			vertex_[3] += dir * (length / 5.0f);
 		}
-
-		// 頂点を書き換える。
-		const int VERTEX_SIZE = 4;
-		for (int index = 0; index < VERTEX_SIZE; ++index) {
-			blas_.lock()->ChangeVertexPosition(index, vertex_[index]);
-		}
-
-		blas_.lock()->Update();
 
 		// 距離の差が一定以下になったら終了
 		if (Vec3(vertex_[0] - vertex_[1]).Length() < 1.0f) {
