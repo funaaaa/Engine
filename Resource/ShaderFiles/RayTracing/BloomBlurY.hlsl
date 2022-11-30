@@ -46,7 +46,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     color += GetPixelColor(basepos.x, basepos.y - 7, float2(1280 / 2.0f, 720)) * weights[1].w;
     
     
-    color = saturate(color);
+    color = (color);
     
     OutputImg[DTid.xy] = color;
     

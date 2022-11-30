@@ -74,7 +74,7 @@ GameScene::GameScene()
 
 	// 太陽に関する変数
 	sunAngle_ = 0.495f;
-	sunSpeed_ = 0.01f;
+	sunSpeed_ = 0.001f;
 
 	isDisplayFPS_ = false;
 
@@ -268,11 +268,6 @@ void GameScene::Update()
 	// カメラを更新。
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
 
-	//Camera::Ins()->eye_ = characterMgr_->GetPlayerIns().lock()->GetPos() + Vec3(0, 800, 0);
-	//Camera::Ins()->target_ = characterMgr_->GetPlayerIns().lock()->GetPos();
-	//Camera::Ins()->up_ = characterMgr_->GetPlayerIns().lock()->forwardVec_;
-	//Camera::Ins()->GenerateMatView();
-
 	// いずれかのキャラがゴールしていたらリザルトシーンに移動する。
 	if (characterMgr_->CheckGoal()) {
 
@@ -311,14 +306,12 @@ void GameScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
-	//sunAngle_ = 0.8f;
-	//if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
+	sunAngle_ += sunSpeed_;
+	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
-	//	sunAngle_ += sunSpeed_;
-	//	sunAngle_ += sunSpeed_;
-	//	sunAngle_ += sunSpeed_;
+		sunAngle_ += sunSpeed_ * 30.0f;
 
-	//}
+	}
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();

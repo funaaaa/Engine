@@ -28,10 +28,11 @@ private:
 	std::shared_ptr<RayComputeShader> mixEmissive_;
 
 	// ブルーム用中間テクスチャ
-	static const int BLOOM_GAUSSIAN_WEIGHTS_COUNT = 4;
-	std::array<std::shared_ptr<RaytracingOutput>, BLOOM_GAUSSIAN_WEIGHTS_COUNT> emissiveIntermediateTexture_;
+	static const int EMISSIVE_COUNT = 4;
+	std::array<std::shared_ptr<RaytracingOutput>, EMISSIVE_COUNT> emissiveIntermediateTexture_;
 
 	// 重みテーブル
+	static const int BLOOM_GAUSSIAN_WEIGHTS_COUNT = 8;
 	std::array<float, BLOOM_GAUSSIAN_WEIGHTS_COUNT> bloomGaussianWeights_;
 
 	// 重み定数バッファ
@@ -39,7 +40,7 @@ private:
 	std::shared_ptr<DynamicConstBuffer> bloomWeightTableCBY_;
 
 	// ガウシアンブラーの強さ
-	const float BLUR_POWER = 100.0f;
+	const float BLUR_POWER = 1000.0f;
 
 
 public:
@@ -55,7 +56,7 @@ public:
 private:
 
 	// ガウシアンブラーをかける。
-	void ApplyBloomGaussianBlur(int InputUAVIndex, int OutputUAVIndex);
+	void ApplyBloomGaussianBlur(int InputUAVIndex, int SourceUAVIndex, int OutputUAVIndex);
 
 	// ガウシアンブラーの重みを計算する。
 	void CalcBloomWeightsTableFromGaussian(float Power);

@@ -47,7 +47,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
     
     //OutputImg[DTid.xy] = float4(1, 0, 0, 1);
     //OutputImg[DTid.xy] = InputImg[DTid.xy];
-    color = saturate(color);
+    color = (color);
     OutputImg[DTid.xy] = color;
     
 }

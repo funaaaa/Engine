@@ -56,14 +56,14 @@ void Bloom::ApplyBloom(int InOutImg)
 
 	/*===== ブルームをかける =====*/
 
-	for (int index = 0; index < BLOOM_GAUSSIAN_WEIGHTS_COUNT; ++index) {
+	for (int index = 0; index < EMISSIVE_COUNT; ++index) {
 
 		// 最初の一回目だったら
 		if (index == 0) {
-			ApplyBloomGaussianBlur(InOutImg, emissiveIntermediateTexture_[index]->GetUAVIndex());
+			ApplyBloomGaussianBlur(InOutImg, InOutImg, emissiveIntermediateTexture_[index]->GetUAVIndex());
 		}
 		else {
-			ApplyBloomGaussianBlur(emissiveIntermediateTexture_[index - 1]->GetUAVIndex(), emissiveIntermediateTexture_[index]->GetUAVIndex());
+			ApplyBloomGaussianBlur(emissiveIntermediateTexture_[index - 1]->GetUAVIndex(), InOutImg, emissiveIntermediateTexture_[index]->GetUAVIndex());
 		}
 
 	}
@@ -75,7 +75,7 @@ void Bloom::ApplyBloom(int InOutImg)
 
 }
 
-void Bloom::ApplyBloomGaussianBlur(int InputUAVIndex, int OutputUAVIndex)
+void Bloom::ApplyBloomGaussianBlur(int InputUAVIndex, int SourceUAVIndex, int OutputUAVIndex)
 {
 
 	/*===== ブルーム用のガウシアンブラーを実行 =====*/

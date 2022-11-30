@@ -449,7 +449,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
         payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
         payloadBuff.gi_ += float3(0.0f, 0.0f, 0.0f);
-        payloadBuff.emissive_ += payloadBuff.light_;
+        payloadBuff.emissive_ += payloadBuff.color_;
         
         // ‰e‹¿“x‚ğ0‚É‚·‚éB
         payloadBuff.impactAmount_ = 0.0f;
