@@ -90,12 +90,12 @@ void CharacterMgr::SettingStartPos()
 
 }
 
-void CharacterMgr::AddChara(int CharaID, bool IsPlayer, int Param)
+void CharacterMgr::AddChara(int CharaID, bool IsPlayer, int Level, int CharaPersonality)
 {
 
 	/*===== キャラクターを追加 =====*/
 
-	character_.emplace_back(std::make_shared<Character>(static_cast<Character::CHARA_ID>(CharaID), static_cast<int>(character_.size()), Param));
+	character_.emplace_back(std::make_shared<Character>(static_cast<Character::CHARA_ID>(CharaID), static_cast<int>(character_.size()), Level, CharaPersonality));
 
 	if (IsPlayer) playerIndex_ = static_cast<int>(character_.size()) - 1;
 

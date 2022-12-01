@@ -241,7 +241,7 @@ public:
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
 	// ‰Šú‰»ˆ—
-	Character(CHARA_ID CharaID, int CharaIndex, int Param);
+	Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPersonality = 0);
 	void Init();
 
 	// XVˆ—

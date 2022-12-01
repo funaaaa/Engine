@@ -173,9 +173,9 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
 
 		// AI‚ğ¶¬B
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_, 0);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_, 1);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_, 2);
 
 	}
 	else if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::DEF) {
@@ -250,7 +250,7 @@ void GameScene::Update()
 	}
 
 	// FPS‚ğ•\¦B
-	FPS();
+	//FPS();
 
 	// “ü—Íˆ—
 	Input();

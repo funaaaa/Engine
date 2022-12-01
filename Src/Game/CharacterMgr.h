@@ -29,7 +29,7 @@ public:
 
 	// ‰Šú’n“_‚ğİ’èB
 	void SettingStartPos();
-	void AddChara(int CharaID, bool IsPlayer, int Param = 0);
+	void AddChara(int CharaID, bool IsPlayer, int Param = 0, int CharaPersonality = 0);
 	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<Character::TireMaskUV>& TireMaskUVData);
 	inline std::weak_ptr<Character> GetPlayerIns() { return character_[playerIndex_]; }
 

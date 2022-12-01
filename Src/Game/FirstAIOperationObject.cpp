@@ -1,8 +1,9 @@
 #include "FirstAIOperationObject.h"
 #include "FirstAIWaypointMgr.h"
 #include "FirstAIWayPoint.h"
+#include "FHelper.h"
 
-FirstAIOperationObject::FirstAIOperationObject(int WayPointOffset, int Level)
+FirstAIOperationObject::FirstAIOperationObject(int WayPointOffset, int Level, int CharaPersonality)
 {
 
 	/*===== コンストラクタ =====*/
@@ -11,6 +12,7 @@ FirstAIOperationObject::FirstAIOperationObject(int WayPointOffset, int Level)
 	waypointMgr_->Setting(static_cast<FirstAIWayPointMgr::WAYPOINT_OFFSET>(WayPointOffset));
 
 	level_ = Level;
+	charaPersonality_ = CharaPersonality;
 
 }
 
@@ -38,9 +40,25 @@ BaseOperationObject::Operation FirstAIOperationObject::Input(const BaseOperation
 
 	}
 
+	// 個性によって速度を変える。
+	operation.accelerationRate_ += charaPersonality_ * 0.3f;
+
 	operation.handleDriveRate_ = waypointMgr_->LeftRightCheck(InputData.pos_, InputData.forwradVec_);
 
-	operation.isDriftTrigger_ = InputData.isHitJumpBoostGimmick_;
+	// 個性によってジャンプアクションを行うかどうかのフラグを切り替える。
+	bool isJumpAction = InputData.isHitJumpBoostGimmick_;
+	if (isJumpAction) {
+		if (charaPersonality_ == 0) {
+			isJumpAction = FHelper::GetRand(0, 3) == 0;
+		}
+		else if (charaPersonality_ == 1) {
+			isJumpAction = FHelper::GetRand(0, 2) == 0;
+		}
+		else {
+			isJumpAction = true;
+		}
+	}
+	operation.isDriftTrigger_ = isJumpAction;
 
 	operation.isUseItemTrigger_ = InputData.hasItemID_ == BaseItem::ItemID::BOOST;
 

@@ -31,7 +31,7 @@
 #pragma warning(push)
 #pragma warning(disable:4324)
 
-Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
+Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPersonality)
 {
 
 	/*===== ‰Šú‰»ˆ— =====*/
@@ -67,7 +67,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	}
 	else if (charaID_ == CHARA_ID::AI1) {
 
-		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER), Param);
+		operationObject_ = std::make_shared<FirstAIOperationObject>(static_cast<int>(FirstAIWayPointMgr::WAYPOINT_OFFSET::CENTER), Level, CharaPersonality);
 
 		// ‰ŠúˆÊ’u‚ğİ’èB
 		defPos_ = GHOST_DEF_POS[0];
@@ -80,7 +80,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 
 		std::string filePath = "Resource/Game/CharaGhostData/Ghost_";
 		std::string dottxt = ".txt";
-		std::string number = std::to_string(Param);
+		std::string number = std::to_string(Level);
 
 		operationObject_ = std::make_shared<GhostOperationObject>(filePath + number + dottxt);
 
