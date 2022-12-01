@@ -228,6 +228,7 @@
     <ClInclude Include="Src\Game\BaseStage.h" />
     <ClInclude Include="Src\Game\BasicStageObject.h" />
     <ClInclude Include="Src\Game\BoostItem.h" />
+    <ClInclude Include="Src\Game\BrightnessParam.h" />
     <ClInclude Include="Src\Game\Character.h" />
     <ClInclude Include="Src\Game\CharacterMgr.h" />
     <ClInclude Include="Src\Game\ConcentrationLine.h" />

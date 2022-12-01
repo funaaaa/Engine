@@ -92,6 +92,20 @@ void MugenStage::Setting(int TireMaskIndex)
 	// ステージのパラメーターを設定。
 	stageObjectMgr_->AddScale(tunnelIndex_, Vec3(120.0f, 120.0f, 120.0f));
 
+	// 明るさの壁
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/Stage/MugenStage/", "MugenStageBrightness.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+	stageObjectMgr_->NonDisplay(indexBuff);
+
+	// 暗さの壁
+	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::DARKNESS_WALL, BaseStageObject::COLLISION_ID::MESH,
+		"Resource/Game/Stage/MugenStage/", "MugenStageDarkness.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], PolygonInstanceRegister::DEF);
+	// ステージのパラメーターを設定。
+	stageObjectMgr_->AddScale(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+	stageObjectMgr_->NonDisplay(indexBuff);
+
 
 	// 段差加速ギミックをセット。
 	indexBuff = stageObjectMgr_->AddObject(BaseStageObject::OBJECT_ID::STEP_BOOST_GIMMICK, BaseStageObject::COLLISION_ID::OBB,

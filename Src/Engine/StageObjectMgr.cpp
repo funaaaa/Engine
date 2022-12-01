@@ -192,6 +192,8 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitStage_ = false;
 	output.isHitItemBox_ = false;
 	output.isHitStepBoostGimmick_ = false;
+	output.isHitBrightnessWall_ = false;
+	output.isHitDarknessWall_ = false;
 	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
 	output.resultPos_ = Input.targetPos_;
 
@@ -273,6 +275,9 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			if (indexObjID == BaseStageObject::OBJECT_ID::STAGE || indexObjID == BaseStageObject::OBJECT_ID::STAGE_GRASS || indexObjID == BaseStageObject::OBJECT_ID::WALL) {
 				output = StageMeshCollider(Input, InputRayData, output, indexObjID);
 			}
+			else if (Input.isPlayer_ && (indexObjID == BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL || indexObjID == BaseStageObject::OBJECT_ID::DARKNESS_WALL)) {
+				output = OrnamentMeshCollider(Input, InputRayData, output, indexObjID);
+			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ORNAMENT) {
 
 				// 一定以上離れていたら。 オブジェクトの配置をBlender基準でやっているため距離を頂点から持ってきているが、いずれは手動で配置して座標から距離を持ってこれるようにする
@@ -280,7 +285,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 				float size = Vec3(Input.targetSize_ + index.first->GetOBB()->length_).Length();
 				if (size < distance) continue;
 
-				output = OrnamentMeshCollider(Input, InputRayData, output);
+				output = OrnamentMeshCollider(Input, InputRayData, output, indexObjID);
 			}
 
 		}
@@ -454,7 +459,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	// 前後左右の四方向にレイを飛ばして当たり判定を行う。
 	Output = Decision4Way(Input, InputRayData, Output, ObjectID);
 
-	if (ObjectID != BaseStageObject::OBJECT_ID::WALL) {
+	if (ObjectID != BaseStageObject::OBJECT_ID::WALL && ObjectID != BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL && ObjectID != BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL) {
 
 		// レイ用の設定を追加。
 		InputRayData.rayPos_ = Input.targetPos_;
@@ -517,7 +522,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 
 }
 
-BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output)
+BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID)
 {
 
 	/*===== ステージ装飾オブジェクトとの当たり判定 =====*/
@@ -539,10 +544,18 @@ BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::Collid
 	// 当たっていたら押し戻す。
 	if (isHit) {
 
-		// 法線方向に当たった分押し戻す。
-		Input.targetPos_ = impactPos + hitNormal * hitDistance;
-		Output.isHitOrnament_ = true;
-		Output.ornamentHitNormal_ = hitNormal;
+		if (ObjectID == BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL) {
+			Output.isHitDarknessWall_ = true;
+		}
+		else if (ObjectID == BaseStageObject::OBJECT_ID::DARKNESS_WALL) {
+			Output.isHitBrightnessWall_ = true;
+		}
+		else {
+			// 法線方向に当たった分押し戻す。
+			Input.targetPos_ = impactPos + hitNormal * hitDistance;
+			Output.isHitOrnament_ = true;
+			Output.ornamentHitNormal_ = hitNormal;
+		}
 
 	}
 

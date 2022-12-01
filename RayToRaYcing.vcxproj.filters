@@ -537,6 +537,9 @@
     <ClInclude Include="Src\Game\TailLampMgr.h">
       <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\BrightnessParam.h">
+      <Filter>アプリケーション\トンネル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -768,6 +771,9 @@
     </Filter>
     <Filter Include="アプリケーション\キャラクター\テールランプ\頂点">
       <UniqueIdentifier>{beccf10b-8453-4f89-abfd-efb4ef759503}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\トンネル">
+      <UniqueIdentifier>{fcbc1d1f-9dc3-450e-9d71-e8ca08baa9c8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

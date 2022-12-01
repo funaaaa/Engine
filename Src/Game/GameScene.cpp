@@ -26,6 +26,7 @@
 #include "ConcentrationLineMgr.h"
 #include "PolygonInstance.h"
 #include "BaseItem.h"
+#include "BrightnessParam.h"
 
 #include "RayEngine.h"
 
@@ -89,7 +90,7 @@ GameScene::GameScene()
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
 	isGameFinish_ = false;
-
+	BrightnessParam::Ins()->isBright_ = false;
 
 
 	// フォントをロード
@@ -215,6 +216,7 @@ void GameScene::Init()
 
 	DriftParticleMgr::Ins()->Init();
 
+	BrightnessParam::Ins()->isBright_ = false;
 	isBeforeStart_ = true;
 	isCountDown_ = false;
 	countDownEasingTimer_ = 0;
@@ -341,9 +343,6 @@ void GameScene::Update()
 
 	}
 
-	static bool inTunnel = false;
-
-	ImGui::Checkbox("InTunnel", &inTunnel);
 
 	const float PARAM_A_MIN = 2.4f;
 	const float PARAM_A_MAX = 10.4f;
@@ -351,7 +350,7 @@ void GameScene::Update()
 	const float PARAM_B_MAX = 1.204f;
 
 	float div = 10.0f;
-	if (inTunnel) {
+	if (BrightnessParam::Ins()->isBright_) {
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ += (PARAM_A_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_) / div;
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
 	}

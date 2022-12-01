@@ -44,6 +44,8 @@ public:
 		bool isHitOrnament_;		// 装飾オブジェクトと当たった判定
 		bool isHitItemBox_;			// アイテムボックスと当たった判定
 		bool isHitStepBoostGimmick_;// 段差加速ギミックと当たった判定
+		bool isHitBrightnessWall_;
+		bool isHitDarknessWall_;
 	};
 
 

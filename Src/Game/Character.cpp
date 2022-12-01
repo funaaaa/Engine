@@ -1314,6 +1314,7 @@ void Character::UpdateDrift()
 
 }
 
+#include "BrightnessParam.h"
 void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::shared_ptr<Character>> CharaData)
 {
 
@@ -1332,7 +1333,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 	input.targetRotY_ = rotY_;
 	input.targetSize_ = size_;
 	input.isInvalidateRotY_ = false;
-	input.isPlayer_ = true;
+	input.isPlayer_ = charaID_ == CHARA_ID::P1;
 
 	// 当たり判定関数から返ってくる値。
 	BaseStage::ColliderOutput output;
@@ -1492,6 +1493,14 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 
 	}
 
+
+	// プレイヤーかつ明るさの壁にあたっていたら。
+	if (charaID_ == CHARA_ID::P1 && output.isHitBrightnessWall_) {
+		BrightnessParam::Ins()->isBright_ = true;
+	}
+	if (charaID_ == CHARA_ID::P1 && output.isHitDarknessWall_) {
+		BrightnessParam::Ins()->isBright_ = false;
+	}
 
 
 	jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
