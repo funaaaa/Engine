@@ -241,7 +241,9 @@
     <ClCompile Include="Src\Game\TailLamp.cpp">
       <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\TailLampMgr.cpp" />
+    <ClCompile Include="Src\Game\TailLampMgr.cpp">
+      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -795,7 +797,7 @@
     <FxCompile Include="Resource\ShaderFiles\RayTracing\TireMaskComputeShader.hlsl">
       <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\RaytracingShader.hlsl">
       <Filter>レイトレーシング\シェーダー</Filter>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">

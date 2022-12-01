@@ -59,7 +59,7 @@ void RayEngine::Setting()
 	finalOutputTexture_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FinalOutputTexture1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// デノイズAO用のパイプラインを設定。
-	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
+	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/RaytracingShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
 	pipeline_ = std::make_shared<RaytracingPipeline>();
 	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
