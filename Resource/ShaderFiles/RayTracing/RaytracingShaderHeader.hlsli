@@ -15,6 +15,8 @@ static const int CHS_IDENTIFICATION_INSTANCE_ALPHA = 10; // instanceID 半透明
 static const int CHS_IDENTIFICATION_INSTANCE_ADD = 11; // instanceID 加算合成
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK = 12; // instanceID 通常の処理 + タイヤ痕
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_TAILLAMP = 13; // instanceID 通常の処理 + エミッシブ + マテリアルアルファ
+static const int CHS_IDENTIFICATION_INSTANCE_DEF_AO = 14; // instanceID 通常の処理 + AO
+static const int CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK_AO = 15; // instanceID 通常の処理 + タイヤ痕 + AO
 
 static const int CHS_IDENTIFICATION_RAYID_DEF = 100; // デフォルトのレイ
 static const int CHS_IDENTIFICATION_RAYID_GI = 101; // GI用のレイ
@@ -22,6 +24,7 @@ static const int CHS_IDENTIFICATION_RAYID_RECLECTION = 102; // 反射用のレイ
 static const int CHS_IDENTIFICATION_RAYID_COMPLETE_RECLECTION = 103; // 完全反射のレイ
 static const int CHS_IDENTIFICATION_RAYID_REFRACTION = 104; // 屈折のレイ
 static const int CHS_IDENTIFICATION_RAYID_SHADOW = 105; // 影用のレイ
+static const int CHS_IDENTIFICATION_RAYID_AO_SHADOW = 106; // AO影用のレイ
 
 // カメラ用の定数バッファ
 struct CameraConstBufferData
@@ -241,7 +244,7 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
 
     return payloadData.impactAmount_;
 }
-bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
+float ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
     rayDesc.Origin = Origin;
@@ -250,7 +253,7 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
     rayDesc.TMax = TMax;
 
     Payload payload;
-    payload.impactAmount_ = 1;
+    payload.impactAmount_ = 1.0f;
     payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
     payload.recursive_ = 0;
     payload.ao_ = 0;
@@ -284,7 +287,7 @@ bool ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, RaytracingA
 }
 
 // AO用の影レイを射出
-bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
+float ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
     RayDesc rayDesc;
     rayDesc.Origin = Origin;
@@ -293,8 +296,8 @@ bool ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAcc
     rayDesc.TMax = TMax;
 
     Payload payload;
-    payload.impactAmount_ = 0;
-    payload.rayID_ = CHS_IDENTIFICATION_RAYID_SHADOW;
+    payload.impactAmount_ = 1.0f;
+    payload.rayID_ = CHS_IDENTIFICATION_RAYID_AO_SHADOW;
     payload.recursive_ = 0;
     payload.ao_ = 0;
     payload.color_ = float3(0, 0, 0);

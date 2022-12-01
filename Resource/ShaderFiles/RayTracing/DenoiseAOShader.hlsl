@@ -170,7 +170,7 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
 }
 
 // 太陽光の影チェック用レイの準備関数 戻り値は太陽光の色
-bool ShootDirShadow(Vertex vtx, float length)
+float ShootDirShadow(Vertex vtx, float length)
 {
     float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
 
@@ -281,8 +281,7 @@ void mainRayGen()
     
     RAY_FLAG flag = RAY_FLAG_NONE;
     flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    //flag |= RAY_FLAG_FORCE_NON_OPAQUE; // AnyHitShaderを実行。
-
+    
     // レイを発射
     TraceRay(
     gRtScene, // TLAS
@@ -304,8 +303,6 @@ void mainRayGen()
     // Linear -> sRGB
     payloadData.light_ = 1.055f * pow(payloadData.light_, 1.0f / 2.4f) - 0.055f;
     payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
-    //payloadData.color_ = pow(payloadData.color_, 1.0f / 2.2f);
-    //payloadData.gi_ = pow(payloadData.gi_, 1.0f / 2.2f);
 
     // 結果格納
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);
@@ -358,7 +355,7 @@ void shadowMS(inout Payload payload)
 }
 
 // ライティング前処理
-bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute Attrib, float3 WorldPos, float3 WorldNormal, inout float4 TexColor, uint InstanceID)
+bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute Attrib, float3 WorldPos, float3 WorldNormal, float3 NormalMap, inout float4 TexColor, uint InstanceID)
 {
     
     // ペイロード受け取り用変数。
@@ -367,7 +364,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     // デノイズ用のマスクに使用するテクスチャに法線の色とInstanceIndexをかけたものを書き込む。
     if (payloadBuff.recursive_ == 1)
     {
-        payloadBuff.denoiseMask_ = (WorldNormal);
+        payloadBuff.denoiseMask_ = (NormalMap);
     }
     
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
@@ -448,7 +445,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
             {
                 
                 // 反射レイを飛ばす。
-                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
+                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), NormalMap), payloadBuff, gRtScene);
                 
             }
         
@@ -581,7 +578,7 @@ float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal, float3 BaseColor)
 }
 
 // ライティング処理
-bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Vertex Vtx, float4 TexColor)
+bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vertex Vtx, float4 TexColor)
 {
     
     // Payload一時受け取り用変数。
@@ -590,9 +587,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     // 乱数の種となる値を取得。
     uint2 pixldx = DispatchRaysIndex().xy;
     uint2 numPix = DispatchRaysDimensions().xy;
-    
-    // 各光源の明るさ情報
-    float aoLightVisibility = 0;
             
     // 太陽の位置とベクトル
     float3 sunPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
@@ -606,58 +600,59 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
         float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
         
         // ディレクショナルライトの明るさが一定以上だったら
-        if (0.0f < dirLightVisibility)
-        {
+        const float SKYDOME_RADIUS = 15000.0f;
+        const float SAMPLING_POS_Y = 0.0f;
             
-            const float SKYDOME_RADIUS = 15000.0f;
-            const float SAMPLING_POS_Y = 0.0f;
+        // 天球の色をサンプリング
+        float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir * float3(1.0f, 0.0f, 1.0f)) * SKYDOME_RADIUS;
+        samplingVec.y = 0.1f;
             
-            // 天球の色をサンプリング
-            float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir * float3(1.0f, 0.0f, 1.0f)) * SKYDOME_RADIUS;
-            samplingVec.y = 0.1f;
+        // サンプリングするベクトル
+        samplingVec.y = SAMPLING_POS_Y;
+        samplingVec = normalize(samplingVec);
             
-            // サンプリングするベクトル
-            samplingVec.y = SAMPLING_POS_Y;
-            samplingVec = normalize(samplingVec);
+        // サンプリングする座標
+        float3 samplingPos;
+        samplingPos = samplingVec * SKYDOME_RADIUS;
             
-            // サンプリングする座標
-            float3 samplingPos;
-            samplingPos = samplingVec * SKYDOME_RADIUS;
+        // 大気散乱の色
+        float3 mieColor = float3(1, 1, 1);
+        float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
             
-            // 大気散乱の色
-            float3 mieColor = float3(1, 1, 1);
-            float3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
-            
-            payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), WorldNormal, float3(1, 1, 1)) * PayloadData.impactAmount_;
-            
-        }
-        
+        payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), NormalMap, float3(1, 1, 1)) * dirLightVisibility * PayloadData.impactAmount_;
         
     }
     
     // AOの計算。 一定以上の距離の場合はAOの計算を行わない。
+    uint instanceID = InstanceID();
     if (1000.0f < RayTCurrent() || payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_RECLECTION)
     {
         payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
     }
+    else if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK_AO || instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_AO)
+    {
+        
+        int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
+        float3 sampleDir = GetUniformHemisphereSample(seed, NormalMap);
+        
+        float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, normalize(mul(Vtx.Normal, (float3x3) ObjectToWorld4x3())), 50, gRtScene);
+        
+        // 各光源の明るさ情報
+        float aoLightVisibility = 0;
+        aoLightVisibility += aoLightVisibilityBuff;
+        aoLightVisibility = clamp(aoLightVisibility, 0.2f, 1.0f);
+    
+        // ライトの総合隠蔽度を求める。
+        float aoVisibility = aoLightVisibility;
+    
+        // 各色を設定。
+        payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.ao_ -= (1.0f - aoVisibility) * 0.2f * payloadBuff.impactAmount_;
+        
+    }
     else
     {
-     
-        //int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
-        //float3 sampleDir = GetUniformHemisphereSample(seed, WorldNormal);
-        
-        //float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, sampleDir, 5, gRtScene);
-        
-        //float NoL = saturate(dot(WorldNormal, sampleDir));
-        //float pdf = 1.0f / (2.0f * PI);
-        //aoLightVisibility += aoLightVisibilityBuff;
-        //aoLightVisibility = clamp(aoLightVisibility, 0.3f, 1.0f);
-    
-        //// ライトの総合隠蔽度を求める。
-        //float aoVisibility = aoLightVisibility;
-    
-        //// 各色を設定。
-        //payloadBuff.ao_ += aoVisibility * payloadBuff.impactAmount_;
+
         payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
         
     }
@@ -670,7 +665,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
 }
 
 // ライティング後処理
-void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 WorldNormal, float4 DefTexColor, inout float4 TexColor, uint InstanceID)
+void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 NormalMap, float4 DefTexColor, inout float4 TexColor, uint InstanceID)
 {
     
     // Payload一時受け取り用変数。
@@ -681,7 +676,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     {
         if (0.0f < payloadBuff.impactAmount_)
         {
-            ShootGIRay(Vtx, 150, payloadBuff, WorldNormal);
+            ShootGIRay(Vtx, 150, payloadBuff, NormalMap);
             payloadBuff.gi_ = (payloadBuff.gi_ * payloadBuff.impactAmount_);
             payloadBuff.gi_ = payloadBuff.gi_;
             payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;
@@ -789,13 +784,13 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         float refractVal = 1.4f;
         float3 rayDir = float3(0, 0, 0);
 
-        float nr = dot(WorldNormal, WorldRayDirection());
+        float nr = dot(NormalMap, WorldRayDirection());
         if (nr < 0)
         {
 
             // 空気中->オブジェクト
             float eta = 1.0f / refractVal;
-            rayDir = refract(WorldRayDirection(), WorldNormal, eta);
+            rayDir = refract(WorldRayDirection(), NormalMap, eta);
 
         }
         else
@@ -803,7 +798,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
             // オブジェクト->空気中
             float eta = refractVal / 1.0f;
-            rayDir = refract(WorldRayDirection(), -WorldNormal, eta);
+            rayDir = refract(WorldRayDirection(), -NormalMap, eta);
       
         }
             
@@ -853,7 +848,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             {
                 
                 // 反射レイを飛ばす。
-                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), WorldNormal), payloadBuff, gRtScene);
+                ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), NormalMap), payloadBuff, gRtScene);
                 
             }
         
@@ -892,11 +887,31 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             return;
             
         }
-           
+        
         payload.impactAmount_ = 0.0f;
+        
+        return;
+    }
+    // AO影用レイだったら。
+    if (payload.rayID_ == CHS_IDENTIFICATION_RAYID_AO_SHADOW)
+    {
+        
+        // AOレイの最大長
+        const float AO_LENGTH = 50.0f;
+        float rayLength = RayTCurrent();
+        
+        if (rayLength <= AO_LENGTH)
+        {
+            payload.impactAmount_ = rayLength / AO_LENGTH;
+        }
+        else
+        {
+            payload.impactAmount_ = 0.0f;
+        }
         
         
         return;
+        
     }
 
     // 呼び出し回数が制限を超えないようにする。
@@ -912,6 +927,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     uint instanceID = InstanceID();
     float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
     float3 worldNormal = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3()));
+    float3 normalMap = worldNormal;
     
     // MipLevel計算処理
     float2 ddxUV;
@@ -1026,7 +1042,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     {
         float3 normalColor = (float4) mapTexture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
         
-        worldNormal = normalColor;
+        normalMap = normalColor;
         
         // 接空間変換用
         float3 tan;
@@ -1041,12 +1057,12 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             float3(vtx.Normal)
         };
         
-        worldNormal = mul(worldNormal, mat);
+        normalMap = mul(normalMap, mat);
         
     }
     
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。
-    if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, texColor, instanceID))
+    if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, normalMap, texColor, instanceID))
     {
         return;
     }
@@ -1055,14 +1071,14 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     // ライティングの処理
     if (instanceID != CHS_IDENTIFICATION_INSTANCE_ALPHA)
     {
-        if (Lighting(payload, worldPos, worldNormal, vtx, texColor))
+        if (Lighting(payload, worldPos, normalMap, vtx, texColor))
         {
             return;
         }
     }
     
     // ライティング後の処理を実行。 ----- ライティングの結果を合成する処理や反射や屈折等の再びレイを飛ばす必要があるオブジェクトの処理。
-    ProccessingAfterLighting(payload, vtx, worldPos, worldNormal, defTexColor, texColor, instanceID);
+    ProccessingAfterLighting(payload, vtx, worldPos, normalMap, defTexColor, texColor, instanceID);
     
 }
 

@@ -1572,7 +1572,7 @@ void Character::InclineCarBody()
 	if (0 < boostSpeed_) {
 
 		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
-		const float MAX_ROT = 0.7f;
+		const float MAX_ROT = 0.1f;
 
 		baseBoostRot_ = MAX_ROT * boostRate;
 
