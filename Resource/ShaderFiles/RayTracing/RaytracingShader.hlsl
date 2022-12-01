@@ -257,8 +257,14 @@ void mainRayGen()
     denoiseMaskoutput[launchIndex.xy] = float4(1, 1, 1, 1);
 
     // Linear -> sRGB
-    payloadData.light_ = 1.055f * pow(payloadData.light_, 1.0f / 2.4f) - 0.055f;
-    payloadData.ao_ = 1.055f * pow(payloadData.ao_, 1.0f / 2.4f) - 0.055f;
+    payloadData.light_ = gSceneParam.light.dirLight.lightColor.y * pow(payloadData.light_, 1.0f / gSceneParam.light.dirLight.lightColor.x) - 0.055f;
+    payloadData.ao_ = gSceneParam.light.dirLight.lightColor.y * pow(payloadData.ao_, 1.0f / gSceneParam.light.dirLight.lightColor.x) - 0.055f;
+    
+    
+    if (2.0f <= length(payloadData.light_))
+    {
+        payloadData.emissive_ += payloadData.light_;
+    }
 
     // Œ‹‰ÊŠi”[
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);

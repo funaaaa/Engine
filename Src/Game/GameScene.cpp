@@ -230,6 +230,9 @@ void GameScene::Init()
 	Camera::Ins()->eye_ = Vec3(0, 0, 0);
 	Camera::Ins()->target_ = Vec3(10, 0, 0);
 
+
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ = 2.4f;
+
 }
 
 #include <ostream>
@@ -337,6 +340,29 @@ void GameScene::Update()
 		characterMgr_->Init();
 
 	}
+
+	static bool inTunnel = false;
+
+	ImGui::Checkbox("InTunnel", &inTunnel);
+
+	const float PARAM_A_MIN = 2.4f;
+	const float PARAM_A_MAX = 10.4f;
+	const float PARAM_B_MIN = 1.055f;
+	const float PARAM_B_MAX = 1.204f;
+
+	float div = 10.0f;
+	if (inTunnel) {
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ += (PARAM_A_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_) / div;
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
+	}
+	else {
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ += (PARAM_A_MIN - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_) / div;
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MIN - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
+	}
+
+
+	ImGui::SliderFloat("LightnessX", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_, PARAM_A_MIN, PARAM_A_MAX);
+	ImGui::SliderFloat("LightnessY", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_, PARAM_B_MIN, PARAM_B_MAX);
 
 }
 
