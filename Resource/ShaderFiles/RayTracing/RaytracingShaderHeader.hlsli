@@ -112,7 +112,6 @@ struct Payload
     float impactAmount_; // 合計影響度
     float ao_; // AOの色
     float3 color_; // 色情報
-    float3 gi_; // GI情報
     float3 light_; // ライティングの色情報
     float3 denoiseMask_; // デノイズのマスクの色情報
     float3 emissive_; // エミッシブ出力用
@@ -217,7 +216,6 @@ bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccel
     payloadData.ao_ = 0;
     payloadData.color_ = float3(0, 0, 0);
     payloadData.denoiseMask_ = float3(0, 0, 0);
-    payloadData.gi_ = float3(0, 0, 0);
     payloadData.light_ = float3(0, 0, 0);
     payloadData.isCullingAlpha_ = false;
     payloadData.alphaCounter_ = 0;
@@ -259,7 +257,6 @@ float ShootShadowRayNoAH(float3 Origin, float3 Direction, float TMax, Raytracing
     payload.ao_ = 0;
     payload.color_ = float3(0, 0, 0);
     payload.denoiseMask_ = float3(0, 0, 0);
-    payload.gi_ = float3(0, 0, 0);
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;
@@ -302,7 +299,6 @@ float ShootAOShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAc
     payload.ao_ = 0;
     payload.color_ = float3(0, 0, 0);
     payload.denoiseMask_ = float3(0, 0, 0);
-    payload.gi_ = float3(0, 0, 0);
     payload.light_ = float3(0, 0, 0);
     payload.isCullingAlpha_ = false;
     payload.alphaCounter_ = 0;

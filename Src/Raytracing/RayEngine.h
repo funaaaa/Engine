@@ -34,10 +34,6 @@ public:
 	std::array<std::shared_ptr<RaytracingOutput>, 2> lightOutput_;
 	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseLightOutput_;
 
-	// GI出力用。
-	std::array<std::shared_ptr<RaytracingOutput>, 2> giOutput_;
-	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseGiOutput_;
-
 	// デノイズマスク用。
 	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseMaskOutput_;
 

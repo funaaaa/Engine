@@ -21,9 +21,8 @@ SamplerState smp : register(s0, space1);
 RWTexture2D<float4> aoOutput : register(u0);
 RWTexture2D<float4> lightingOutput : register(u1);
 RWTexture2D<float4> colorOutput : register(u2);
-RWTexture2D<float4> giOutput : register(u3);
-RWTexture2D<float4> denoiseMaskoutput : register(u4);
-RWTexture2D<float4> emissiveOutput : register(u5);
+RWTexture2D<float4> denoiseMaskoutput : register(u3);
+RWTexture2D<float4> emissiveOutput : register(u4);
 
 // 大気散乱
 float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
@@ -194,47 +193,6 @@ float ShootDirShadow(Vertex vtx, float length)
     
 }
 
-// GI
-void ShootGIRay(Vertex vtx, float length, inout Payload PayloadData, float3 WorldNormal)
-{
-    float3 worldPos = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-    float3 worldRayDir = WorldRayDirection();
-    float3 reflectDir = reflect(worldRayDir, WorldNormal);
-    
-    // レイのフラグを設定。
-    RAY_FLAG flag = RAY_FLAG_NONE;
-    flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
-    //flag |= RAY_FLAG_FORCE_OPAQUE; // AnyHitShaderを無視。
-
-    // レイのマスク
-    uint rayMask = 0xFF;
-
-    // レイのパラメーターを設定。
-    RayDesc rayDesc;
-    rayDesc.Origin = worldPos;
-    rayDesc.Direction = reflectDir;
-    rayDesc.TMin = 0.0;
-    rayDesc.TMax = length;
-
-    // ペイロードを初期化。
-    int rayID = PayloadData.rayID_;
-    PayloadData.rayID_ = CHS_IDENTIFICATION_RAYID_GI;
-    
-    // レイを発射。
-    TraceRay(
-        gRtScene,
-        flag,
-        rayMask,
-        0, // ray index
-        1, // MultiplierForGeometryContrib
-        0, // miss index
-        rayDesc,
-        PayloadData);
-    
-    PayloadData.rayID_ = rayID;
-    
-}
-
 // RayGenerationシェーダー
 [shader("raygeneration")]
 void mainRayGen()
@@ -268,7 +226,6 @@ void mainRayGen()
     payloadData.ao_ = 0;
     payloadData.color_ = float3(0, 0, 0);
     payloadData.denoiseMask_ = float3(0, 0, 0);
-    payloadData.gi_ = float3(0, 0, 0);
     payloadData.light_ = float3(0, 0, 0);
     payloadData.emissive_ = float3(0, 0, 0);
     payloadData.isCullingAlpha_ = false;
@@ -297,7 +254,6 @@ void mainRayGen()
     lightingOutput[launchIndex.xy] = float4(1, 1, 1, 1);
     aoOutput[launchIndex.xy] = float4(0, 0, 0, 1);
     colorOutput[launchIndex.xy] = float4(1, 1, 1, 1);
-    giOutput[launchIndex.xy] = float4(1, 1, 1, 1);
     denoiseMaskoutput[launchIndex.xy] = float4(1, 1, 1, 1);
 
     // Linear -> sRGB
@@ -308,7 +264,6 @@ void mainRayGen()
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);
     aoOutput[launchIndex.xy] = float4((payloadData.ao_), (payloadData.ao_), (payloadData.ao_), 1);
     colorOutput[launchIndex.xy] = float4((payloadData.color_), 1);
-    giOutput[launchIndex.xy] = float4((payloadData.gi_), 1);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
     emissiveOutput[launchIndex.xy] = float4(payloadData.emissive_, 1);
 
@@ -330,7 +285,6 @@ void mainMS(inout Payload PayloadData)
     payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
     payloadBuff.color_ += AtmosphericScattering(WorldRayOrigin() + WorldRayDirection() * RayTCurrent(), mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
     payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
-    payloadBuff.gi_ += float3(0, 0, 0) * payloadBuff.impactAmount_;
     payloadBuff.emissive_ = float3(0, 0, 0);
         
     // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
@@ -374,31 +328,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         TexColor += tiremasktex * tiremasktex.a;
         TexColor = normalize(TexColor);
     }
-
-    
-    // 今発射されているレイのIDがGI用だったら
-    if (payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_GI)
-    {
-        
-        // レイの長さを求める。
-        float rayLength = length(WorldRayOrigin() - WorldPos);
-        
-        // GIを表示するレイの長さの最大値。
-        const float MAX_RAY = 300.0f;
-        
-        // レイの長さの割合。
-        float rate = rayLength / MAX_RAY;
-        rate = 1.0f - saturate(rate);
-        
-        float3 giBuff = (float3) TexColor * rate * (1.0f - material[0].metalness_);
-
-        
-        payloadBuff.gi_ += giBuff;
-        
-        PayloadData = payloadBuff;
-        
-        return true;
-    }
     
     // 当たったオブジェクトInstanceIDがテクスチャの色をそのまま返す or ライト用オブジェクトだったら
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
@@ -406,7 +335,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         payloadBuff.light_ += float3(1.0f, 1.0f, 1.0f) * payloadBuff.impactAmount_;
         payloadBuff.color_ += (float3) TexColor * payloadBuff.impactAmount_;
         payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
-        payloadBuff.gi_ += float3(0.0f, 0.0f, 0.0f);
         payloadBuff.emissive_ += payloadBuff.color_ * payloadBuff.impactAmount_;
         
         // 影響度を0にする。
@@ -428,7 +356,6 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         payloadBuff.light_ = float3(1, 1, 1);
         payloadBuff.color_ += (float3) TexColor * material[0].alpha_;
         payloadBuff.ao_ += 1.0f * material[0].alpha_;
-        payloadBuff.gi_ += float3(0.0f, 0.0f, 0.0f);
         
         
         if (payloadBuff.impactAmount_ < material[0].alpha_)
@@ -670,21 +597,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     
     // Payload一時受け取り用変数。
     Payload payloadBuff = PayloadData;
-    
-    // 当たったオブジェクトがGIを行うオブジェクトで、GIを行うフラグが立っていたら。
-    if ((InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK))
-    {
-        if (0.0f < payloadBuff.impactAmount_)
-        {
-            ShootGIRay(Vtx, 150, payloadBuff, NormalMap);
-            payloadBuff.gi_ = (payloadBuff.gi_ * payloadBuff.impactAmount_);
-            payloadBuff.gi_ = payloadBuff.gi_;
-            payloadBuff.color_.xyz += (float3) TexColor * payloadBuff.impactAmount_;
-        
-            payloadBuff.impactAmount_ = 0.0f;
-        }
-        
-    }
         
     // 金属度
     float metalness = 1.0f - material[0].metalness_;
