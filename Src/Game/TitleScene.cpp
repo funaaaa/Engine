@@ -156,6 +156,11 @@ void TitleScene::Update()
 	// タイトルのステータスごとの更新処理
 	UpdateTitleStat();
 
+	const float PARAM_A_MIN = 2.4f;
+	const float PARAM_B_MIN = 1.055f;
+
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ = PARAM_A_MIN;
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ = PARAM_B_MIN;
 
 }
 

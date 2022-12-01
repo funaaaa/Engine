@@ -360,10 +360,6 @@ void GameScene::Update()
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MIN - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
 	}
 
-
-	ImGui::SliderFloat("LightnessX", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_, PARAM_A_MIN, PARAM_A_MAX);
-	ImGui::SliderFloat("LightnessY", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_, PARAM_B_MIN, PARAM_B_MAX);
-
 }
 
 void GameScene::Draw()
