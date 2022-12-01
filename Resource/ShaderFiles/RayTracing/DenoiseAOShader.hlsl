@@ -274,7 +274,7 @@ void mainRayGen()
 void mainMS(inout Payload PayloadData)
 {
     
-    if (PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_GI || PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW)
+    if (PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW || PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_AO_SHADOW)
         return;
     
     // ペイロード受け取り用変数。
@@ -743,7 +743,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         {
             // metalnessマップの色を取得。
             float3 metalnessMapColor = (float3) mapTexture.SampleLevel(smp, Vtx.uv, 0.0f);
-            //metal = saturate((1.0f - metalnessMapColor.x));
         }
         
         if (payloadBuff.impactAmount_ < metal)
