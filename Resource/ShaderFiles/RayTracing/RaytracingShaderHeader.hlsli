@@ -65,7 +65,7 @@ struct AlphaData
     int instanceIndex_;
     float alpha_;
 };
-#define ALPHA_DATA_COUNT 120
+#define ALPHA_DATA_COUNT 60
 struct AlphaConstBufferData
 {
     AlphaData alphaData_[ALPHA_DATA_COUNT];

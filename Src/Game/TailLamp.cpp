@@ -76,7 +76,7 @@ TailLamp::TailLamp()
 	}
 
 	// INSTANCE‚ğ¶¬
-	ins_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::Ins()->DEF_TAILLAMP);
+	ins_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::Ins()->TEXCOLOR);
 
 	// ‚»‚Ì‘¼•Ï”‚ğ‰Šú‰»
 	isActive_ = false;

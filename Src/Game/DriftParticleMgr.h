@@ -14,7 +14,7 @@ class DriftParticleMgr : public Singleton<DriftParticleMgr> {
 
 private:
 
-	static const int DRIFT_PARTICLE_COUNT = 120;
+	static const int DRIFT_PARTICLE_COUNT = 60;
 	std::array<std::shared_ptr<DriftParticle>, DRIFT_PARTICLE_COUNT> driftParticle_;	// ドリフト時のパーティクル
 
 	std::weak_ptr<BLAS> smokeBlas_;
