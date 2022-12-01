@@ -40,7 +40,6 @@ struct DirLightData
     float3 lightColor;
     int seed;
 };
-static const int POINT_LIGHT_COUNT = 30;
 // ポイントライト用定数バッファ
 struct PointLightData
 {
@@ -56,7 +55,6 @@ struct PointLightData
 struct LightConstBufferData
 {
     DirLightData dirLight;
-    PointLightData pointLight[POINT_LIGHT_COUNT];
 };
 // アルファ値転送用の定数バッファ
 struct AlphaData

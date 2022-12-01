@@ -246,7 +246,6 @@ public:
 
 	// XVˆ—
 	void Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shared_ptr<Character>> CharaData, bool IsBeforeStart, bool IsGameFinish);
-	void UpdateTitle();
 
 	// •`‰æˆ—
 	void Draw();

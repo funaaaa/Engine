@@ -46,7 +46,7 @@ struct RayLightConstBufferData {
 	static const int POINT_LIGHT_COUNT = 30;
 
 	RayDirLightConstBufferData dirLight_;						// •ÀsŒõŒ¹
-	std::array<RayPointLightData, POINT_LIGHT_COUNT> pointLight_;// “_ŒõŒ¹
+	//std::array<RayPointLightData, POINT_LIGHT_COUNT> pointLight_;// “_ŒõŒ¹
 
 	// ‰Šú‰»ˆ—
 	void Init();

@@ -25,7 +25,8 @@
 #include "DriftParticle.h"
 #include "MugenStage.h"
 #include "RadialBlur.h"
-#include <SceneMgr.h>
+#include "SceneMgr.h"
+#include "BaseScene.h"
 
 #pragma warning(push)
 #pragma warning(disable:4324)
@@ -182,8 +183,12 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Param)
 	obb_ = std::make_shared<OBB>();
 	obb_->Setting(playerModel_.carBodyBlas_, playerModel_.carBodyInstance_);
 
-	leftTailLamp_ = std::make_shared<TailLampMgr>();
-	rightTailLamp_ = std::make_shared<TailLampMgr>();
+	if (SceneMgr::Ins()->nowScene_ == BaseScene::SCENE_ID::GAME) {
+
+		leftTailLamp_ = std::make_shared<TailLampMgr>();
+		rightTailLamp_ = std::make_shared<TailLampMgr>();
+
+	}
 
 }
 
@@ -259,8 +264,12 @@ void Character::Init()
 
 	DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
-	leftTailLamp_->Init();
-	rightTailLamp_->Init();
+	if (SceneMgr::Ins()->nowScene_ == BaseScene::SCENE_ID::GAME) {
+
+		leftTailLamp_->Init();
+		rightTailLamp_->Init();
+
+	}
 
 }
 
@@ -499,64 +508,47 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 		}
 	}
 
-	if (8.0f <= jumpBoostSpeed_) {
+	// ゲームシーンでのみこの更新処理を行う。
+	if (SceneMgr::Ins()->nowScene_ == BaseScene::SCENE_ID::GAME) {
 
-		// テールランプを生成。
-		static const int VERTEX_SIZE = 4;
-		{
-			// 右後ろのテールランプ
-			DirectX::XMMATRIX matWorld = playerModel_.carRightLightInstance_.lock()->GetWorldMat();
-			std::array<Vec3, VERTEX_SIZE> vertex;
-			vertex[0] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[10], matWorld);	// ライトの頂点を設定。いずれは各頂点の最小と最大から自動で設定できるようにしたい。
-			vertex[1] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[11], matWorld);
-			vertex[2] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[1], matWorld);
-			vertex[3] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[2], matWorld);
-			// 生成
-			leftTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - 8.0f) / (JUMP_BOOST_SPEED - 8.0f));
+		// 画面内に収まっているか。
+		bool inScreen = FHelper::CheckInScreen(GetPos(), 100.0f, 100.0f, Camera::Ins()->matView_, Camera::Ins()->matPerspective_);
+
+		const float TAILLAMP_OFFSET_SPEED = 8.0f;	// テールランプを出すスピード
+		if (TAILLAMP_OFFSET_SPEED <= jumpBoostSpeed_ && inScreen) {
+
+			// テールランプを生成。
+			static const int VERTEX_SIZE = 4;
+			{
+				// 右後ろのテールランプ
+				DirectX::XMMATRIX matWorld = playerModel_.carRightLightInstance_.lock()->GetWorldMat();
+				std::array<Vec3, VERTEX_SIZE> vertex;
+				vertex[0] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[10], matWorld);	// ライトの頂点を設定。いずれは各頂点の最小と最大から自動で設定できるようにしたい。
+				vertex[1] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[11], matWorld);
+				vertex[2] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[1], matWorld);
+				vertex[3] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[2], matWorld);
+				// 生成
+				leftTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - TAILLAMP_OFFSET_SPEED) / (JUMP_BOOST_SPEED - TAILLAMP_OFFSET_SPEED));
+
+			}
+			{
+				// 左後ろのテールランプ
+				DirectX::XMMATRIX matWorld = playerModel_.carLeftLightInstance_.lock()->GetWorldMat();
+				std::array<Vec3, VERTEX_SIZE> vertex;
+				vertex[3] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[3], matWorld);
+				vertex[2] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[11], matWorld);
+				vertex[1] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[8], matWorld);
+				vertex[0] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[2], matWorld);
+				// 生成
+				rightTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - TAILLAMP_OFFSET_SPEED) / (JUMP_BOOST_SPEED - TAILLAMP_OFFSET_SPEED));
+
+			}
 
 		}
-		{
-			// 左後ろのテールランプ
-			DirectX::XMMATRIX matWorld = playerModel_.carLeftLightInstance_.lock()->GetWorldMat();
-			std::array<Vec3, VERTEX_SIZE> vertex;
-			vertex[3] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[3], matWorld);
-			vertex[2] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[11], matWorld);
-			vertex[1] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[8], matWorld);
-			vertex[0] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[2], matWorld);
-			// 生成
-			rightTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - 8.0f) / (JUMP_BOOST_SPEED - 8.0f));
 
-		}
-
-	}
-
-	// テールランプを更新。
-	leftTailLamp_->Update();
-	rightTailLamp_->Update();
-
-}
-
-void Character::UpdateTitle()
-{
-
-	/*===== タイトルでの更新処理 =====*/
-
-	// 座標を更新。
-	playerModel_.carBodyInstance_.lock()->ChangeTrans(pos_);
-
-	// OBBを更新。
-	obb_->SetMat(playerModel_.carBodyInstance_);
-
-	// Y軸回転させる。
-	//rotY_ += 0.01f;
-
-	// 回転させる。
-	playerModel_.carBodyInstance_.lock()->ChangeRotate(DirectX::XMMatrixRotationY(rotY_));
-
-	// タイヤを更新する。
-	for (auto& index : tires_) {
-
-		index->Update();
+		// テールランプを更新。
+		leftTailLamp_->Update();
+		rightTailLamp_->Update();
 
 	}
 

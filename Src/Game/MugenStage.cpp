@@ -271,11 +271,6 @@ void MugenStage::Update()
 	// 点光源をセット。
 	for (auto& index : pointLightPos) {
 
-		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isActive_ = status_ == STATUS::DEF;
-		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].isShadow_ = false;
-		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPower_ = 1000;
-		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightPos_ = index;
-		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[static_cast<int>(&index - &pointLightPos[0])].lightSize_ = 1;
 
 	}
 

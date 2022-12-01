@@ -974,13 +974,6 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 				}
 
 			}
-			// それ以降は通常テクスチャを書き込んでメモリの隙間を埋める。
-			else {
-
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
-				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
-
-			}
 
 		}
 

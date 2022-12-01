@@ -27,14 +27,14 @@ void RayLightConstBufferData::Init()
 	/*===== ライト用定数バッファを初期化 =====*/
 
 	// 点光源をセッティング
-	for (auto& index_ : pointLight_) {
-		index_.lightColor_ = Vec3(1.0f, 1.0f, 1.0f);
-		index_.lightPos_ = Vec3(0, 300, 0);
-		index_.lightSize_ = 5.0f;
-		index_.lightPower_ = 10.0f;
-		index_.isActive_ = false;
-		index_.isShadow_ = true;
-	}
+	//for (auto& index_ : pointLight_) {
+	//	index_.lightColor_ = Vec3(1.0f, 1.0f, 1.0f);
+	//	index_.lightPos_ = Vec3(0, 300, 0);
+	//	index_.lightSize_ = 5.0f;
+	//	index_.lightPower_ = 10.0f;
+	//	index_.isActive_ = false;
+	//	index_.isShadow_ = true;
+	//}
 
 	// 並行光源をセッティング
 	dirLight_.isActive_ = true;

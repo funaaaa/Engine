@@ -69,6 +69,7 @@ TailLamp::TailLamp()
 
 		// ‚»‚Ì‘¼î•ñ‚ğ‘‚«‚ŞB
 		data.material_.textureHandle_ = TextureManager::Ins()->LoadTexture(L"Resource/Game/Stage/MugenStage/green.png");
+		data.textureHandle_ = data.material_.textureHandle_;
 
 		// BLAS‚ğ¶¬‚·‚éB
 		blas_ = BLASRegister::Ins()->GenerateData(data, true);
@@ -76,7 +77,6 @@ TailLamp::TailLamp()
 
 	// INSTANCE‚ğ¶¬
 	ins_ = PolygonInstanceRegister::Ins()->CreateInstance(blas_, PolygonInstanceRegister::Ins()->DEF_TAILLAMP);
-	//PolygonInstanceRegister::Ins()->NonDisplay(ins_);
 
 	// ‚»‚Ì‘¼•Ï”‚ğ‰Šú‰»
 	isActive_ = false;

@@ -169,39 +169,6 @@ float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
 
 }
 
-// ソフトシャドウ射出関数
-float SoftShadow(Vertex vtx, float lightSize, float length, int lightIndex)
-{
-    float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
-
-    // 光源への中心ベクトル
-    float3 pointLightPosition = gSceneParam.light.pointLight[lightIndex].lightPos;
-    float3 lightDir = normalize(pointLightPosition - worldPosition);
-
-    // ライトベクトルと垂直なベクトルを求める。
-    float3 perpL = cross(lightDir, float3(0, 1, 0));
-    if (all(perpL == 0.0f))
-    {
-        perpL.x = 1.0f;
-    }
-
-    // 光源の端を求める。
-    float3 toLightEdge = (pointLightPosition + perpL * lightSize) - worldPosition;
-    toLightEdge = normalize(toLightEdge);
-
-    // 角度を求める。
-    float coneAngle = acos(dot(lightDir, toLightEdge)) * 2.0f;
-
-    // 乱数の種を求める。
-    uint2 pixldx = DispatchRaysIndex().xy;
-    uint2 numPix = DispatchRaysDimensions().xy;
-    int randSeed = InitRand(DispatchRaysIndex().x + (vtx.Position.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100);
-    
-    float3 shadowRayDir = GetConeSample(randSeed, lightDir, coneAngle);
-    return ShootShadowRay(worldPosition, shadowRayDir, length, gRtScene);
-    
-}
-
 // 太陽光の影チェック用レイの準備関数 戻り値は太陽光の色
 bool ShootDirShadow(Vertex vtx, float length)
 {
@@ -626,52 +593,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     
     // 各光源の明るさ情報
     float aoLightVisibility = 0;
-    
-    // 点光源は一旦使ってないのでコメントアウト。後で戻す。
-    
-    //for (int index = 0; index < POINT_LIGHT_COUNT; ++index)
-    //{
-        
-    //    // ポイントライトが有効化されていなかったら処理を飛ばす。
-    //    if (!gSceneParam.light.pointLight[index].isActive)
-    //    {
-    //        continue;
-    //    }
-        
-    //    // 光源までの長さ
-    //    float lightLength = length(gSceneParam.light.pointLight[index].lightPos - WorldPos);
-    
-    //    // 光源までの長さが点光源の強さより小さかったら処理を飛ばす。
-    //    if (lightLength < gSceneParam.light.pointLight[index].lightPower && gSceneParam.light.pointLight[index].isActive)
-    //    {
-            
-    //        // ライトの隠蔽度
-    //        float pointLightVisibilityBuff = 0;
-    //        if (gSceneParam.light.pointLight[index].isShadow)
-    //        {
-    //            pointLightVisibilityBuff = SoftShadow(Vtx, gSceneParam.light.pointLight[index].lightSize, lightLength, index);
-    //        }
-        
-    //        // ライトの明るさが一定以上だったらスペキュラーなどを計算する。
-    //        if (0 < pointLightVisibilityBuff)
-    //        {
-                
-    //            float3 pointLightDir = WorldPos - gSceneParam.light.pointLight[index].lightPos;
-    //            pointLightDir = normalize(pointLightDir);
-            
-    //            // ライトまでの距離の割合
-    //            float rate = lightLength / gSceneParam.light.pointLight[index].lightPower;
-    //            rate = pow(rate, 5);
-    //            rate = 1.0f - rate;
-                
-
-    //            payloadBuff.light_ += gSceneParam.light.pointLight[index].lightColor * BRDF(-pointLightDir, -WorldRayDirection(), WorldNormal, material[0].baseColor_) * rate * PayloadData.impactAmount_;
-
-    //        }
-        
-    //    }
-    //}
-    
             
     // 太陽の位置とベクトル
     float3 sunPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
