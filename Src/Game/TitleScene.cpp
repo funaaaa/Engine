@@ -226,13 +226,13 @@ void TitleScene::Input()
 		/*-- レベル選択画像が出ている状態 --*/
 
 		// 左が入力されたら。
-		if (Input::Ins()->IsKeyTrigger(DIK_LEFT) || Input::Ins()->IsPadStickTrigger(XINPUT_THUMB_LEFTVERT)) {
+		if (Input::Ins()->IsKeyTrigger(DIK_LEFT) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_DPAD_LEFT)) {
 
 			--nowSelectLevel_;
 
 		}
 		// 右が入力されたら。
-		if (Input::Ins()->IsKeyTrigger(DIK_RIGHT) || Input::Ins()->IsPadStickTrigger(XINPUT_THUMB_RIGHTVERT)) {
+		if (Input::Ins()->IsKeyTrigger(DIK_RIGHT) || Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_DPAD_RIGHT)) {
 
 			++nowSelectLevel_;
 
