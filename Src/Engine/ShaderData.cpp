@@ -105,6 +105,7 @@ void ShaderData::LoadShaderDXC()
 	// コンパイルオプションの指定
 	std::vector<LPCWSTR> arguments;
 
+	arguments.emplace_back(L"/enable-16bit-types");		// 16bit変数を使用可能にする。
 	//arguments.emplace_back(L"/Od");		// 最適化を無効にする。
 	//arguments.emplace_back(L"/Zi");		// デバッグ情報を有効にする。
 	//arguments.emplace_back(L"-Qembed_debug");	// PDBをシェーダーコンテナーに埋め込む。これを指定する場合はZiは必須らしい。

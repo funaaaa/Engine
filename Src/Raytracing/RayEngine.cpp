@@ -60,7 +60,7 @@ void RayEngine::Setting()
 
 	// デノイズAO用のパイプラインを設定。
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/RaytracingShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
+	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(UINT) * 4;
 	pipeline_ = std::make_shared<RaytracingPipeline>();
 	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
 

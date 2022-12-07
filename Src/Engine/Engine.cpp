@@ -65,7 +65,7 @@ void Engine::Init() {
 	}
 
 	// デバイスの生成
-	//device_.levels.push_back(D3D_FEATURE_LEVEL_12_1);
+	device_.levels_.push_back(D3D_FEATURE_LEVEL_12_1);
 	device_.levels_.push_back(D3D_FEATURE_LEVEL_12_0);
 	device_.levels_.push_back(D3D_FEATURE_LEVEL_11_1);
 	device_.levels_.push_back(D3D_FEATURE_LEVEL_11_0);

@@ -153,7 +153,7 @@ void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& Input
 
 	// ¶¬‚·‚éB
 	Engine::Ins()->device_.dev_->CreateStateObject(
-		subobjects, IID_PPV_ARGS(stateObject_.ReleaseAndGetAddressOf())
+		subobjects, IID_PPV_ARGS(&stateObject_)
 	);
 
 	stateObject_->SetName(L"StateObject");

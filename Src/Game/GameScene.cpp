@@ -252,7 +252,7 @@ void GameScene::Update()
 	}
 
 	// FPS‚ð•\Ž¦B
-	//FPS();
+	FPS();
 
 	// “ü—Íˆ—
 	Input();
@@ -350,6 +350,7 @@ void GameScene::Update()
 	const float PARAM_B_MAX = 1.204f;
 
 	float div = 10.0f;
+	// ‰æ–Ê‚Ì–¾‚é‚³‚ð•â³B
 	if (BrightnessParam::Ins()->isBright_) {
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ += (PARAM_A_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_) / div;
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
