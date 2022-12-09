@@ -48,7 +48,7 @@ public:
 	void ApplyDenoiseGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int OutputUAVIndex, int BlurPower);
 
 	// 色情報と明るさ情報をかける。
-	void MixColorAndLuminance(int InputColorIndex, int InputLuminanceIndex, int InputLightLuminanceIndex, int InputEmissiveIndex, int OutputUAVIndex);
+	void MixColorAndLuminance(int InputColorIndex, int InputLightLuminanceIndex, int InputEmissiveIndex, int OutputUAVIndex);
 
 	// デノイズ
 	void Denoise(int InImg, int OutImg, int DenoiseMaskIndex, int DenoisePower, int DenoiseCount);

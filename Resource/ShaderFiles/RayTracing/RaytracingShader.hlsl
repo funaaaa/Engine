@@ -18,11 +18,10 @@ RWTexture2D<float4> tireMaskTexture : register(u0, space1);
 SamplerState smp : register(s0, space1);
 
 // èoóÕêÊUAV
-RWTexture2D<float4> aoOutput : register(u0);
-RWTexture2D<float4> lightingOutput : register(u1);
-RWTexture2D<float4> colorOutput : register(u2);
-RWTexture2D<float4> denoiseMaskoutput : register(u3);
-RWTexture2D<float4> emissiveOutput : register(u4);
+RWTexture2D<float4> lightingOutput : register(u0);
+RWTexture2D<float4> colorOutput : register(u1);
+RWTexture2D<float4> denoiseMaskoutput : register(u2);
+RWTexture2D<float4> emissiveOutput : register(u3);
 
 // ëÂãCéUóê
 float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
@@ -241,12 +240,6 @@ void mainRayGen()
     rayDesc,
     payloadData);
 
-    // åãâ èëÇ´çûÇ›ópUAVÇàÍíUèâä˙âªÅB
-    lightingOutput[launchIndex.xy] = float4(1, 1, 1, 1);
-    aoOutput[launchIndex.xy] = float4(0, 0, 0, 1);
-    colorOutput[launchIndex.xy] = float4(1, 1, 1, 1);
-    denoiseMaskoutput[launchIndex.xy] = float4(1, 1, 1, 1);
-
     // Linear -> sRGB
     payloadData.light_ = gSceneParam.light.dirLight.lightColor.y * pow(payloadData.light_, 1.0f / gSceneParam.light.dirLight.lightColor.x) - 0.055f;
     payloadData.ao_ = gSceneParam.light.dirLight.lightColor.y * pow(payloadData.ao_, 1.0f / gSceneParam.light.dirLight.lightColor.x) - 0.055f;
@@ -256,8 +249,7 @@ void mainRayGen()
 
     // åãâ äiî[
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);
-    aoOutput[launchIndex.xy] = float4((payloadData.ao_), (payloadData.ao_), (payloadData.ao_), 1);
-    colorOutput[launchIndex.xy] = float4((payloadData.color_), 1);
+    colorOutput[launchIndex.xy] = float4((payloadData.color_), payloadData.ao_);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
     emissiveOutput[launchIndex.xy] = float4(payloadData.emissive_, 1);
 
@@ -812,7 +804,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
         float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
         float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-        //float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         float3 rayDir = WorldRayDirection();
         float rotationAmountR = 0.0174533f / 30.0f;
         float3 rayDirX = normalize(mul(rayDir, float3x3(1, 0, 0,
@@ -823,7 +814,6 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         launchIndex -= uint2(1, -1);
         d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
         target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
-        //float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         float3 rayDirY = normalize(mul(rayDir, float3x3(cos(rotationAmountR), 0, sin(rotationAmountR),
                                                0, 1, 0,
                                                -sin(rotationAmountR), 0, cos(rotationAmountR))));
@@ -1031,7 +1021,3 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     }
     
 }
-
-
-// åvéZâﬂíˆÇÕhalf
-// aoÇÕè¡ÇπÇÈ

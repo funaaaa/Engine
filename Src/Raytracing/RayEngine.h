@@ -23,10 +23,6 @@ public:
 	// TLASを生成。
 	std::shared_ptr<TLAS> tlas_;
 
-	// AO出力用。
-	std::array<std::shared_ptr<RaytracingOutput>, 2> aoOutput_;
-	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseAOOutput_;
-
 	// 色出力用クラス。
 	std::array<std::shared_ptr<RaytracingOutput>, 2> colorOutput_;
 

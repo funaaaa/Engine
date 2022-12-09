@@ -8,21 +8,11 @@ void RayEngine::Setting()
 
 	/*===== 生成処理 =====*/
 
-	// AO出力用クラスをセット。
-	aoOutput_[0] = std::make_shared<RaytracingOutput>();
-	aoOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"AOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseAOOutput_[0] = std::make_shared<RaytracingOutput>();
-	denoiseAOOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseAOOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	aoOutput_[1] = std::make_shared<RaytracingOutput>();
-	aoOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"AOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-	denoiseAOOutput_[1] = std::make_shared<RaytracingOutput>();
-	denoiseAOOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseAOOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-
 	// 色出力用クラスをセット。
 	colorOutput_[0] = std::make_shared<RaytracingOutput>();
-	colorOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"ColorOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	colorOutput_[1] = std::make_shared<RaytracingOutput>();
-	colorOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"ColorOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	colorOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"ColorOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// 明るさ情報出力用クラスをセット。
 	lightOutput_[0] = std::make_shared<RaytracingOutput>();
@@ -36,9 +26,9 @@ void RayEngine::Setting()
 
 	// デノイズマスク用クラスをセット。
 	denoiseMaskOutput_[0] = std::make_shared<RaytracingOutput>();
-	denoiseMaskOutput_[0]->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMaskOutput_[0]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseMaskOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	denoiseMaskOutput_[1] = std::make_shared<RaytracingOutput>();
-	denoiseMaskOutput_[1]->Setting(DXGI_FORMAT_R32G32B32A32_FLOAT, L"DenoiseMaskOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	denoiseMaskOutput_[1]->Setting(DXGI_FORMAT_R11G11B10_FLOAT, L"DenoiseMaskOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	// デノイズ最終出力用クラスをセット。
 	denoiseMixTextureOutput_[0] = std::make_shared<RaytracingOutput>();
@@ -62,7 +52,7 @@ void RayEngine::Setting()
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/RaytracingShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(UINT) * 4;
 	pipeline_ = std::make_shared<RaytracingPipeline>();
-	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
+	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 4, payloadSize, sizeof(Vec2), 6);
 
 	// シェーダーテーブルを生成。
 	pipeline_->ConstructionShaderTable();
@@ -133,11 +123,10 @@ void RayEngine::Draw()
 	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootConstantBufferView(1, constBuffer_->GetBuffer(backBufferIndex)->GetGPUVirtualAddress());
 
 	// 出力用UAVを設定。
-	aoOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(2);		// AOの結果出力用
-	lightOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(3);	// ライトの明るさの結果出力用
-	colorOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(4);	// テクスチャの色情報出力用
-	denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);// デノイズをする際のマスク出力用
-	emissiveOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
+	lightOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(2);	// ライトの明るさの結果出力用
+	colorOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(3);	// テクスチャの色情報出力用
+	denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(4);// デノイズをする際のマスク出力用
+	emissiveOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
 	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject().Get());
@@ -167,20 +156,6 @@ void RayEngine::Draw()
 
 		}
 
-		// AO情報にデノイズをかける。
-		{
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-				aoOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-				denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
-			};
-
-			Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
-
-			// AOにデノイズをかける。
-			Denoiser::Ins()->Denoise(aoOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), 100, 1);
-		}
-
 		// ブルームをかける。
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
@@ -193,15 +168,14 @@ void RayEngine::Draw()
 
 		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
 			colorOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-			denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
 			denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
 			denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetRaytracingOutput().Get())
 		};
 
-		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(4, barrierToUAV);
+		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(3, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(),
+		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(),
 			denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(),
 			emissiveOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
 
