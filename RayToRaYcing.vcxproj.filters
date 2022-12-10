@@ -247,7 +247,12 @@
     <ClCompile Include="Src\Game\CharacterInclineBody.cpp">
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\CharacterGameFinish.cpp" />
+    <ClCompile Include="Src\Game\CharacterGameFinish.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterDrift.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -548,6 +553,9 @@
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\CharacterGameFinish.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterDrift.h">
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
   </ItemGroup>

@@ -16,6 +16,7 @@ class PolygonMeshInstance;
 class BaseStage;
 class CharacterInclineBody;
 class CharacterGameFinish;
+class CharacterDrift;
 
 // キャラクタークラス。操作を管理する操作オブジェクトを入れ替えることによってAIとプレイヤーを切り替える。
 class Character {
@@ -32,6 +33,9 @@ public:
 	Vec3 bottomVec;			// 下方向ベクトル
 	Vec3 upVec_;			// 上方向ベクトル
 	Vec3 size_;				// サイズ
+	float boostSpeed_;					// ブーストされているときの移動速度
+	int boostTimer_;					// ブーストするフレーム数
+	const int BOOST_GIMMICK_BOOST_TIMER = 20;
 	float speed_;			// 移動速度
 	float gravity_;			// 重力
 	float rotY_;			// ハンドル操作によって変わるY軸の回転量
@@ -78,10 +82,6 @@ public:
 
 	bool isHitJumpActionGimmick_;
 
-	bool IsTurningIndicatorRed_;// ウインカーの色が赤かどうか。
-	int turningIndicatorTimer_;	// ウインカーがチカチカするタイマー
-	const int TURNING_INDICATOR_TIMER = 30;
-
 	const float MAX_SPEED = 16.0f;		// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 12.0f;// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;		// 移動速度の加算量
@@ -105,24 +105,7 @@ public:
 
 	/*-- ドリフトに関する変数 --*/
 
-	Vec3 driftJumpVec_;
-	float driftJumpSpeed_;
-	const float DRIFT_JUMP_SPEED = 6.0f;
-	const float SUB_DRIFT_JUMP_SPEED = 0.6f;
-	float boostSpeed_;					// ブーストされているときの移動速度
-	int driftTimer_;
-	int boostTimer_;					// ブーストするフレーム数
-	const int BOOST_GIMMICK_BOOST_TIMER = 20;
-	bool isDriftRight_;					// ドリフトが右側かどうか。
-	bool isInputLTPrev_;				// 前フレームにLTが押されたかどうか
-	bool isInputLT_;					// LTが押されたかどうか。
-	bool isDriftJump_;					// ドリフト前のジャンプ中かどうか。
-	bool isDriftJumpPrev_;				// ドリフト前のジャンプ中かどうかの前Fフラグ。
-	bool isDrift_;						// ドリフト状態かどうか。
-	bool isTireMask_;
-
-	const std::array<int, 3> DRIFT_TIMER = { 30,90,160 };
-	const std::array<int, 3> DRIFT_BOOST = { 10,20,30 };
+	std::shared_ptr<CharacterDrift> drift_;		// ドリフトに関する処理をまとめたクラス
 
 
 	/*-- ジャンプのブーストに関する変数 --*/
@@ -142,8 +125,6 @@ public:
 
 	bool isAccel_;
 	bool isBeforeStartPrev_;
-	int beforeStartSmokeTimer_;
-	const int BEFORE_START_SMOKE_TIMER = 5;
 	const float BEFORE_START_WAVE_LENGTH_RUN = 0.05f;
 	const float BEFORE_START_WAVE_LENGTH_DEF = 0.3f;
 	const float BEFORE_START_WAVE_LENGTH_ACCELL = 1.0f;

@@ -29,6 +29,7 @@
 #include "BaseScene.h"
 #include "CharacterInclineBody.h"
 #include "CharacterGameFinish.h"
+#include "CharacterDrift.h"
 
 Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPersonality)
 {
@@ -136,27 +137,21 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	jumpBoostSpeed_ = 0;
 
 	// ドリフト関係
-	isDrift_ = false;
-	isTireMask_ = false;
-	isDriftJumpPrev_ = false;
+	drift_ = std::make_shared<CharacterDrift>();
 
-	beforeStartSmokeTimer_ = 0;
 	engineWaveTimer_ = 0;
 	engineWaveAmount_ = 0;
-	boostSpeed_ = 0;
 	returnDefPosTimer_ = 0;
-	boostTimer_ = 0;
 	onGround_ = true;
 	isBeforeStartPrev_ = false;
 	onGroundPrev_ = false;
 	onGrass_ = false;
 	isGetItem_ = false;
 	isUseItem_ = false;
-	IsTurningIndicatorRed_ = false;
 	isDisplayRocket_ = false;
-	turningIndicatorTimer_ = 0;
+	boostSpeed_ = 0.0f;
+	boostTimer_ = 0;
 	canNotMoveTimer_ = 0;
-	driftTimer_ = 0;
 	defBodyMatRot_ = DirectX::XMMatrixIdentity();
 	cameraForwardVec_ = forwardVec_;
 
@@ -215,27 +210,17 @@ void Character::Init()
 	rotY_ = DEF_ROTY;
 	speed_ = 0;
 	gravity_ = 0;
-	boostSpeed_ = 0;
-	boostTimer_ = 0;
 	jumpBoostSpeed_ = 0;
-	turningIndicatorTimer_ = 0;
+	boostSpeed_ = 0.0f;
+	boostTimer_ = 0;
 	canNotMoveTimer_ = 0;
-	driftJumpVec_ = Vec3();
 	engineWaveTimer_ = 0;
 	engineWaveAmount_ = 0;
-	beforeStartSmokeTimer_ = 0;
-	driftJumpSpeed_ = 0;
-	isDriftJump_ = false;;
-	isDrift_ = false;
 	isUseItem_ = false;
 	onGround_ = true;
 	onGrass_ = false;
 	isGetItem_ = false;
-	isInputLTPrev_ = false;
-	isInputLT_ = false;
 	isBeforeStartPrev_ = false;
-	IsTurningIndicatorRed_ = false;
-	isTireMask_ = false;
 	isConcentrationLine_ = false;
 	isJumpActionTrigger_ = false;
 	playerModel_.carBodyInstance_.lock()->ChangeRotate(Vec3(0, 0, 0));
@@ -251,12 +236,15 @@ void Character::Init()
 	// キャラクターのゲーム終了時に行う処理をまとめたクラスを初期化。
 	gameFinish_->Init();
 
+	// ドリフトに関する変数を初期化。
+	drift_->Init();
+
 	playerModel_.Delete();
 
 	DriftParticleMgr::Ins()->Init();
 	// 臨時のバグ対策です。 最初の一回目のドリフトのときのみオーラが出ないので、ここで一回生成しておく。
-	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= 0);
-	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= 0);
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance_, static_cast<int>(DriftParticle::ID::AURA_BIG), false, 2 <= 0);
+	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance_, static_cast<int>(DriftParticle::ID::AURA_SMALL), false, 2 <= 0);
 
 	DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
 
@@ -384,7 +372,9 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 	}
 
 	// ブースト量が一定以上だったら集中線を出す。
-	isConcentrationLine_ = (MAX_BOOST_SPEED / 2.0f < boostSpeed_) || (JUMP_BOOST_SPEED / 2.0f < jumpBoostSpeed_);
+	if (charaID_ == CHARA_ID::P1) {
+		isConcentrationLine_ = (MAX_BOOST_SPEED / 2.0f < boostSpeed_) || (JUMP_BOOST_SPEED / 2.0f < jumpBoostSpeed_);
+	}
 
 	// ブーストの割合に応じてラジアルブラーをかける。
 	if (charaID_ == CHARA_ID::P1) {
@@ -570,7 +560,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	}
 
 	// 空中にいたら、ドリフトジャンプ中だったら。
-	if (!onGround_ || isDriftJump_) {
+	if (!onGround_ || drift_->GetIsDriftJump()) {
 
 		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
 		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
@@ -716,7 +706,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 
 	}
 
-	if (!isTireMask_) {
+	if (!drift_->GetIsTireMask()) {
 
 		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
 		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
@@ -738,7 +728,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	bool isHit = false;
 
 	// 右ドリフトしていたらこの処理は通さない。
-	if (!(isDrift_ && !isDriftRight_)) {
+	if (!(drift_->GetIsDrift() && !drift_->GetIsDriftRight())) {
 
 		// 左前タイヤ
 		InputRayData.rayPos_ = playerModel_.carLeftTireInstance_.lock()->GetWorldPos();
@@ -769,7 +759,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 
 
 	// 左ドリフトしていたらこの処理は通さない。
-	if (!(isDrift_ && isDriftRight_)) {
+	if (!(drift_->GetIsDrift() && drift_->GetIsDriftRight())) {
 
 		// 右前タイヤ
 		InputRayData.rayPos_ = playerModel_.carRightTireInstance_.lock()->GetWorldPos();
@@ -907,11 +897,8 @@ void Character::Input(bool IsBeforeStart)
 		operationInputData.hasItemID_ = item_->GetItemID();
 	}
 	operationInputData.isHitJumpBoostGimmick_ = isHitJumpActionGimmick_;
-	operationInputData.isPrevFrameDrift_ = isDrift_;
+	operationInputData.isPrevFrameDrift_ = drift_->GetIsDrift();
 	BaseOperationObject::Operation operation = operationObject_->Input(operationInputData);
-
-	// タイヤのマスクのフラグを初期化する。
-	isTireMask_ = false;
 
 	// 動けないタイマーが動いていたら動かさない。
 	if (0 < canNotMoveTimer_) {
@@ -952,163 +939,21 @@ void Character::Input(bool IsBeforeStart)
 	// アイテムを後ろに投げるフラグを更新。
 	isShotBehind_ = operation.isShotBehind_;
 
-	// 現在のフレームの右スティックの傾き具合。
-	float nowFrameInputLeftStickHori = 0;
+	// ドリフトの入力に関する処理
+	{
+		// 入出力用データを詰め込む。
+		CharacterDrift::InputData inData;
+		inData.canNotMoveTimer_ = canNotMoveTimer_;
+		inData.handleNormal_ = HANDLE_NORMAL;
+		inData.isBeforeStart_ = IsBeforeStart;
+		inData.onGround_ = onGround_;
+		inData.upVec_ = upVec_;
 
-	// 右スティックの横の傾き量でキャラを回転させる。
-	if ((operation.handleDriveRate_ != 0 || isDrift_) && !IsBeforeStart) {
-
-		// 回転量の最大値 通常状態とドリフト状態で違う。
-		float handleAmount = HANDLE_NORMAL;
-
-		// [ドリフト状態] [開始前じゃない] だったら回転量を多い方にする。
-		if (isDrift_ && !IsBeforeStart) {
-
-			handleAmount = HANDLE_DRIFT;
-
-			// ドリフトの向きによって回転量を変える。
-			if (isDriftRight_ && operation.handleDriveRate_ < 0.1f) {
-				operation.handleDriveRate_ = 0.1f;
-			}
-			if (!isDriftRight_ && -0.1f < operation.handleDriveRate_) {
-				operation.handleDriveRate_ = -0.1f;
-			}
-
-			// タイヤを回転させる。
-			for (auto& index : tires_) {
-
-				index->Rot(true, static_cast<float>(operation.handleDriveRate_));
-
-			}
-
-			isTireMask_ = true;
-
-
-		}
-		// ドリフト状態じゃなかったら。
-		else {
-
-			// タイヤを回転させる。
-			for (auto& index : tires_) {
-
-				index->Rot(true, static_cast<float>(operation.handleDriveRate_));
-
-			}
-
-		}
-
-		// クォータニオンを求める。
-		DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationAxis(upVec_.ConvertXMVECTOR(), handleAmount * operation.handleDriveRate_);
-
-		// 求めたクォータニオンを行列に治す。
-		DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
-
-		// 回転を加算する。
-		playerModel_.carBodyInstance_.lock()->AddRotate(quaternionMat);
-		nowFrameInputLeftStickHori = handleAmount * operation.handleDriveRate_;
-		rotY_ += handleAmount * operation.handleDriveRate_;
-
-		// 正面ベクトルを車の回転行列分回転させる。
-		forwardVec_ = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), playerModel_.carBodyInstance_.lock()->GetRotate());
-
-
-		// ウインカーの色を変えるタイマーを更新。
-		++turningIndicatorTimer_;
-		if (TURNING_INDICATOR_TIMER < turningIndicatorTimer_) {
-
-			turningIndicatorTimer_ = 0;
-			IsTurningIndicatorRed_ = IsTurningIndicatorRed_ ? false : true;
-
-		}
-
-		// ウインカーの色を変える。
-		if (IsTurningIndicatorRed_) {
-
-			// 曲がっているのが右だったら。
-			if (0 < operation.handleDriveRate_) {
-
-				playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/blackRed.png"));
-				playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
-
-			}
-			else {
-
-				playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/blackRed.png"));
-				playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
-
-			}
-
-		}
-		else {
-
-			playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
-			playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
-
-		}
-
-	}
-	else {
-
-		// 車のライトの色を元に戻す。
-		playerModel_.carRightLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
-		playerModel_.carLeftLightBlas_.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"));
-
-		// 各変数を初期化。
-		IsTurningIndicatorRed_ = false;
-		turningIndicatorTimer_ = 100;	// チカチカするタイマーを初期化。
+		// ドリフトの入力に関する更新処理
+		drift_->Input(inData, operation, tires_, playerModel_, rotY_, boostSpeed_, forwardVec_);
 
 	}
 
-	// ドリフトの入力情報を保存する。
-	isInputLTPrev_ = isInputLT_;
-	isInputLT_ = operation.isDrift_;
-
-	// ドリフトジャンプのフラグを保存しておく。
-	isDriftJumpPrev_ = isDriftJump_;
-
-	// ドリフトボタンの入力がトリガーだったら。
-	bool triggerDriftBottom = !isInputLTPrev_ && isInputLT_;
-	bool notJump = !isDriftJump_ && driftJumpSpeed_ <= 0.1f;
-	bool isOnGround = onGround_ || IsBeforeStart;	// 設置していたら ゲームが始まっていない場合、キャラは空中に浮いているので、接地判定を取る。
-	if (triggerDriftBottom && notJump && isOnGround && canNotMoveTimer_ <= 0) {
-
-		isDriftJump_ = true;
-		driftJumpVec_ = upVec_;
-		driftJumpSpeed_ = DRIFT_JUMP_SPEED;
-
-	}
-
-	// ドリフト状態でタイマーがカウントされていたら。
-	bool releaseDriftBottom = isInputLTPrev_ && !isInputLT_;
-	if (isDrift_ && 0 < driftTimer_ && releaseDriftBottom) {
-
-		isDrift_ = false;
-
-		// タイマーに応じて加速させる。
-		int driftLevel = -1;
-		for (auto& index : DRIFT_TIMER) {
-
-			if (driftTimer_ < index) break;
-
-			driftLevel = static_cast<int>(&index - &DRIFT_TIMER[0]);
-
-		}
-
-		// ドリフトレベルが0以上だったら加速する。
-		if (driftLevel != -1) {
-			boostTimer_ = DRIFT_BOOST[driftLevel];
-		}
-
-	}
-
-	// バグ回避でLTが押されていなかったらドリフトを解除する。 ドリフト解除の正規の処理はこの処理の上にあるので通常は問題ない。
-	// 開始前の状態でもドリフトを解除する。
-	if (!isInputLT_ || IsBeforeStart) {
-
-		isDrift_ = false;
-		driftTimer_ = 0;
-
-	}
 
 	// このキャラがゴーストだった場合、アイテム取得命令が出たらアイテムを取得する。
 	if (charaID_ == CHARA_ID::GHOST && operation.isGetItem_) {
@@ -1263,55 +1108,7 @@ void Character::UpdateDrift()
 
 	/*===== ドリフトに関する更新処理 =====*/
 
-	// ドリフトジャンプしていたら。
-	if (isDriftJump_) {
-
-		// 座標を移動させる。
-		pos_ += driftJumpVec_ * driftJumpSpeed_;
-		prevPos_ += driftJumpVec_ * driftJumpSpeed_;
-
-		// ドリフト量を減らす。
-		driftJumpSpeed_ -= SUB_DRIFT_JUMP_SPEED;
-		if (driftJumpSpeed_ < 0.0f) {
-
-			driftJumpSpeed_ = 0.0f;
-
-		}
-
-		// スティック入力があったら。
-		if (0.1f < std::fabs(inclineBody_->GetHandleAmount())) {
-
-			isDrift_ = true;
-			isDriftRight_ = 0.0f < inclineBody_->GetHandleAmount();
-
-		}
-
-
-
-	}
-
-	// ドリフト中だったら。
-	if (isDrift_) {
-
-		// ドリフトの経過時間のタイマーを更新。
-		++driftTimer_;
-
-	}
-	else {
-
-		driftTimer_ = 0;
-
-	}
-
-	// ジャンプしたFでこの処理が通らないようにするための条件
-	bool isNotTriggerLT = !(!isInputLTPrev_ && isInputLT_);
-	// 設置したらドリフトジャンプを解除する。
-	if (isDriftJump_ && onGround_ && isNotTriggerLT) {
-
-		isDriftJump_ = false;
-		driftJumpSpeed_ = 0.0f;
-
-	}
+	drift_->Update(inclineBody_, pos_, prevPos_, onGround_);
 
 }
 
@@ -1349,9 +1146,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 		boostSpeed_ = MAX_BOOST_SPEED;
 		boostTimer_ = BOOST_GIMMICK_BOOST_TIMER;
 
-	}
-	if (Input::Ins()->IsKeyTrigger(DIK_H)) {
-		++rapCount_;
 	}
 	if (output.isHitGoal_) {
 
@@ -1520,8 +1314,8 @@ void Character::InclineCarBody()
 	// 回転に関する処理に必要なデータを詰め込む。
 	CharacterInclineBody::InputData inlclineInputData;
 	inlclineInputData.boostSpeed_ = boostSpeed_;
-	inlclineInputData.isDriftJump_ = isDriftJump_;
-	inlclineInputData.isDrift_ = isDrift_;
+	inlclineInputData.isDriftJump_ = drift_->GetIsDriftJump();
+	inlclineInputData.isDrift_ = drift_->GetIsDrift();
 	inlclineInputData.isPlayer_ = charaID_ == CHARA_ID::P1;
 	inlclineInputData.maxBoostSpeed_ = MAX_BOOST_SPEED;
 	inlclineInputData.onGround_ = onGround_;
@@ -1596,151 +1390,27 @@ void Character::UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart)
 
 	/*===== ドリフトパーティクルの更新処理 =====*/
 
-	// ブーストするタイマーが一定以上だったら加速し続ける。
-	if (0 < boostTimer_) {
+	// ドリフトパーティクルの更新に必要な入力情報を詰め込む。
+	CharacterDrift::DriftParticleInData inData;
+	inData.forwardVec_ = forwardVec_;
+	inData.charaIndex_ = charaIndex_;
+	inData.isAccel_ = isAccel_;
+	inData.maxBoostSpeed_ = MAX_BOOST_SPEED;
+	inData.isBeforeStart_ = IsBeforeStart;
+	inData.isGameFinish_ = IsGameFinish;
+	inData.IsJumpAction_ = isJumpAction_;
+	inData.onGroundPrev_ = onGroundPrev_;
+	inData.onGround_ = onGround_;
 
-		--boostTimer_;
+	// ドリフトパーティクルの更新処理で帰ってくる値を詰め込む。
+	CharacterDrift::DriftParticleOutData outData(boostTimer_, boostSpeed_, playerModel_, gameFinish_);
 
-		boostSpeed_ = MAX_BOOST_SPEED;
+	// 更新を行う。
+	drift_->UpdateDriftParticle(inData, outData);
 
-		// 加速の割合を求める。
-		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
-
-		// 煙の大きさを決める。
-		bool IsSmokeBig = 0.5f < boostRate;
-
-		// 設置していたら煙を生成。
-		if (onGround_) {
-			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance_.lock()->GetRotate(), IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
-			driftVec = FHelper::MulRotationMatNormal(Vec3(-1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance_.lock()->GetRotate(), IsSmokeBig, DriftParticleMgr::DELAY_ID::DASH);
-		}
-
-		// 設置していて移動速度が一定以上だったら炎を生成。
-		if (15.0f < boostSpeed_) {
-			DriftParticleMgr::Ins()->GenerateFire(playerModel_.carBehindTireInstance_.lock()->GetWorldPos(), playerModel_.carBodyInstance_.lock()->GetRotate());
-		}
-
-	}
-
-	// 開始前でアクセルを踏んでいたら。
-	if (isAccel_ && IsBeforeStart) {
-
-		// 煙を出すタイマーを更新。
-		++beforeStartSmokeTimer_;
-		if (BEFORE_START_SMOKE_TIMER < beforeStartSmokeTimer_) {
-
-			beforeStartSmokeTimer_ = 0;
-
-			Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-			// 左右に散らす。
-			Vec3 generatePos = playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * static_cast<float>(FHelper::GetRand(-2, 2));
-			// 後ろ方向に持ってくる。
-			generatePos += -forwardVec_ * 20.0f;
-			DriftParticleMgr::Ins()->GenerateSmoke(generatePos, playerModel_.carBodyInstance_.lock()->GetRotate(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY, -forwardVec_);
-
-		}
-
-	}
-
-	// 着地した瞬間だったら。
-	bool isJumpDriftRelease = (isDriftJumpPrev_ && !isDriftJump_);
-	bool onGroundTrigger = (!onGroundPrev_ && onGround_);
-	if ((isJumpDriftRelease || onGroundTrigger) && !IsBeforeStart && !gameFinish_->GetIsGameFinish()) {
-
-		// 三回ランダムに位置をずらして生成する。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-		for (int index = 0; index < 3; ++index) {
-
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance_.lock()->GetRotate(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-
-		}
-		// 三回ランダムに位置をずらして生成する。
-		for (int index = 0; index < 3; ++index) {
-			DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() - driftVec * 30.0f, playerModel_.carBodyInstance_.lock()->GetRotate(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-
-		}
-
-	}
-
-	// ドリフト中は煙を出す。
-	if (isDrift_ && onGround_) {
-
-
-		// 現在のレベル。
-		int nowLevel = 0;
-		for (auto& index : DRIFT_TIMER) {
-
-			if (driftTimer_ < index) continue;
-
-			nowLevel = static_cast<int>(&index - &DRIFT_TIMER[0]);
-
-		}
-
-		// 現在のドリフトレベルが1以上だったらパーティクルとオーラを出す。
-		if (1 <= nowLevel) {
-
-			if (!DriftParticleMgr::Ins()->IsAuraGenerated(charaIndex_)) {
-				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance_, static_cast<int>(DriftParticle::ID::AURA_BIG), isDriftRight_, 2 <= nowLevel);
-				DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance_, static_cast<int>(DriftParticle::ID::AURA_SMALL), isDriftRight_, 2 <= nowLevel);
-			}
-
-			// レートを求める。
-			float rate = 0;
-			rate = FHelper::Saturate(static_cast<float>(driftTimer_) / static_cast<float>(DRIFT_TIMER[0]));
-
-			// パーティクルを生成する。
-			DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), rate, false, DriftParticleMgr::DELAY_ID::DELAY1);
-
-			// レベルが上った瞬間だったら一気にパーティクルを生成する。
-			if (driftTimer_ == DRIFT_TIMER[0] || driftTimer_ == DRIFT_TIMER[1] || driftTimer_ == DRIFT_TIMER[2]) {
-
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
-				DriftParticleMgr::Ins()->GenerateDriftParticle(playerModel_.carBehindTireInstance_, isDriftRight_, 2 <= nowLevel, static_cast<int>(DriftParticle::ID::PARTICLE), 1.0f, true, DriftParticleMgr::DELAY_ID::DELAY1);
-
-				// オーラを一旦破棄
-				DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
-
-			}
-
-		}
-
-		// 煙を出す。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isDriftRight_ ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, playerModel_.carBodyInstance_.lock()->GetRotate(), nowLevel < 1, DriftParticleMgr::DELAY_ID::DEF);
-
-
-
-	}
-	else {
-
-		// オーラを破棄 関数内に二重解放対策の条件式がある。
-		DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
-
-	}
-
-	// ゲームが終了していたら イージングが終了していなかったら。
-	if (IsGameFinish && gameFinish_->GetGameFinishEasingTimer() < 0.9f) {
-
-		// 煙を出す。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(gameFinish_->GetIsGameFinishDriftLeft() ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, gameFinish_->GetGameFinishTriggerMatRot(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, gameFinish_->GetGameFinishTriggerMatRot(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(gameFinish_->GetIsGameFinishDriftLeft() ? playerModel_.carLeftTireInstance_.lock()->GetWorldPos() : playerModel_.carRightTireInstance_.lock()->GetWorldPos(), gameFinish_->GetGameFinishTriggerMatRot(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-
-
-	}
-
-	// ジャンプアクションのパーティクルを生成。
-	if (isJumpAction_ || Input::Ins()->IsKeyTrigger(DIK_M)) {
-
-		DriftParticleMgr::Ins()->GenerateJumpEffect(playerModel_.carBodyInstance_);
-
-	}
+	// 出力データを受け取る。
+	boostTimer_ = outData.boostTimer_;
+	boostSpeed_ = outData.boostSpeed_;
 
 }
 
