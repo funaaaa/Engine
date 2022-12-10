@@ -28,6 +28,7 @@
 #include "SceneMgr.h"
 #include "BaseScene.h"
 #include "CharacterInclineBody.h"
+#include "CharacterGameFinish.h"
 
 Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPersonality)
 {
@@ -148,9 +149,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	onGround_ = true;
 	isBeforeStartPrev_ = false;
 	onGroundPrev_ = false;
-	isPrevGameFinish_ = false;
 	onGrass_ = false;
-	isGameFinish_ = false;
 	isGetItem_ = false;
 	isUseItem_ = false;
 	IsTurningIndicatorRed_ = false;
@@ -168,6 +167,9 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	// キャラクターを回転させる処理をまとめたクラスを生成。
 	inclineBody_ = std::make_shared<CharacterInclineBody>();
 	inclineBody_->Init();
+
+	// ゲーム終了時に行う処理をまとめたクラスを生成。
+	gameFinish_ = std::make_shared<CharacterGameFinish>();
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -225,12 +227,10 @@ void Character::Init()
 	driftJumpSpeed_ = 0;
 	isDriftJump_ = false;;
 	isDrift_ = false;
-	isPrevGameFinish_ = false;
 	isUseItem_ = false;
 	onGround_ = true;
 	onGrass_ = false;
 	isGetItem_ = false;
-	isGameFinish_ = false;
 	isInputLTPrev_ = false;
 	isInputLT_ = false;
 	isBeforeStartPrev_ = false;
@@ -247,6 +247,9 @@ void Character::Init()
 
 	// キャラクターの回転に関する処理を初期化。
 	inclineBody_->Init();
+
+	// キャラクターのゲーム終了時に行う処理をまとめたクラスを初期化。
+	gameFinish_->Init();
 
 	playerModel_.Delete();
 
@@ -274,8 +277,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 
 
 	// ゲーム終了フラグを更新。
-	isPrevGameFinish_ = isGameFinish_;
-	isGameFinish_ = IsGameFinish;
+	gameFinish_->UpdateGameFinishFlag(IsGameFinish);
 
 	// エンジンの動きで動いた分を打ち消す。
 	pos_.y_ -= engineWaveAmount_;
@@ -558,7 +560,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	/*===== タイヤ痕を検出 =====*/
 
 	// ゲームが終了したトリガー判定だったら。
-	if (isGameFinish_ && !isPrevGameFinish_) {
+	if (gameFinish_->GetIsGameFinishTrigger()) {
 
 		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
 		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
@@ -580,10 +582,10 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	const float RAY_LENGTH = 80.0f;
 
 	// ゲームが終了していたら。
-	if (isGameFinish_) {
+	if (gameFinish_->GetIsGameFinish()) {
 
 		// 左側にドリフトしていたら。
-		if (!isGameFinishDriftLeft_) {
+		if (!gameFinish_->GetIsGameFinishDriftLeft()) {
 
 			FHelper::RayToModelCollisionData InputRayData;
 			InputRayData.targetPolygonData_ = PolygonInstanceRegister::Ins()->GetMeshCollisionData(BaseStageData.lock()->stageObjectMgr_->GetInstanceIndex(1));
@@ -895,7 +897,7 @@ void Character::Input(bool IsBeforeStart)
 	/*===== 入力処理 =====*/
 
 	// ゲームが終了している場合は入力を無効化する。 ゲームが終了した最初のFでは入力を取る必要があるので、Prevも比較している。
-	if (isGameFinish_ && isPrevGameFinish_) return;
+	if (gameFinish_->CheckGameFinish()) return;
 
 	// 操作オブジェクトからの入力を受け取る。
 	BaseOperationObject::OperationInputData operationInputData;
@@ -1348,6 +1350,9 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 		boostTimer_ = BOOST_GIMMICK_BOOST_TIMER;
 
 	}
+	if (Input::Ins()->IsKeyTrigger(DIK_H)) {
+		++rapCount_;
+	}
 	if (output.isHitGoal_) {
 
 		// ゴール
@@ -1529,73 +1534,7 @@ void Character::InclineCarBody()
 	inclineBody_->Update(inlclineInputData);
 
 	// ゲーム終了時演出用の回転
-	if (isGameFinish_) {
-
-		// イージングが終わったら。
-		if (0.7f <= gameFinishEasingTimer_) {
-
-			// 回転軸を求める。
-			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), playerModel_.carBodyInstance_.lock()->GetRotate());
-
-			// クォータニオンを求める。
-			DirectX::XMVECTOR gameFinishRotQ = DirectX::XMQuaternionRotationAxis(axisOfRevolution.ConvertXMVECTOR(), gameFinishRotStopAmount_);
-
-			// クォータニオンから回転行列を求める。
-			DirectX::XMMATRIX gameFinishRotMat = DirectX::XMMatrixRotationQuaternion(gameFinishRotQ);
-
-			// 回転させる。
-			playerModel_.carBodyInstance_.lock()->AddRotate(gameFinishRotMat);
-
-			// 回転量を減らす。
-			if (isGameFinishDriftLeft_) {
-
-				gameFinishRotStopReturnAmount_ -= -0.02f;
-				gameFinishRotStopAmount_ += gameFinishRotStopReturnAmount_;
-				if (0 <= gameFinishRotStopAmount_) {
-
-					gameFinishRotStopAmount_ = 0.0f;
-
-				}
-
-			}
-			else {
-
-				gameFinishRotStopReturnAmount_ -= 0.02f;
-				gameFinishRotStopAmount_ += gameFinishRotStopReturnAmount_;
-				if (gameFinishRotStopAmount_ <= 0) {
-
-					gameFinishRotStopAmount_ = 0.0f;
-
-				}
-
-			}
-
-		}
-		else {
-
-			// イージング量を求める。
-			float easingAmount = FEasing::EaseInSine(gameFinishEasingTimer_) * (isGameFinishDriftLeft_ ? -1.0f : 1.0f);
-
-			if (GAME_FINISH_STOP_ROT_LIMIT < fabs(easingAmount)) easingAmount = GAME_FINISH_STOP_ROT_LIMIT * (easingAmount < 0 ? -1.0f : 1.0f);
-
-			// 回転軸を求める。
-			Vec3 axisOfRevolution = FHelper::MulRotationMatNormal(Vec3(0, 0, -1), playerModel_.carBodyInstance_.lock()->GetRotate());
-
-			// クォータニオンを求める。
-			DirectX::XMVECTOR gameFinishRotQ = DirectX::XMQuaternionRotationAxis(axisOfRevolution.ConvertXMVECTOR(), easingAmount);
-
-			// クォータニオンから回転行列を求める。
-			DirectX::XMMATRIX gameFinishRotMat = DirectX::XMMatrixRotationQuaternion(gameFinishRotQ);
-
-			// 回転させる。
-			playerModel_.carBodyInstance_.lock()->AddRotate(gameFinishRotMat);
-
-			gameFinishRotStopAmount_ = easingAmount;
-			gameFinishRotStopReturnAmount_ = 0;
-
-		}
-
-	}
+	gameFinish_->AKIRAERotation(playerModel_);
 
 }
 
@@ -1641,52 +1580,14 @@ void Character::UpdateGameFinish()
 
 	/*===== ゲーム終了時の更新処理 =====*/
 
-	// ゲームが終わっていなかったら処理を飛ばす。
-	if (!isGameFinish_) return;
+	// 入力に必要なデータを詰め込む。
+	CharacterGameFinish::UpdateInputData finishInputData;
+	finishInputData.inclineBody_ = inclineBody_;
+	finishInputData.maxSpeed_ = MAX_SPEED;
+	finishInputData.playerModel_ = playerModel_;
 
-	// ゲーム終了トリガーの場合。
-	bool isFinishTrigger = !isPrevGameFinish_ && isGameFinish_;
-	if (isFinishTrigger) {
-
-		// 各変数を設定。
-		boostTimer_ = 0;
-		speed_ = MAX_SPEED;
-		gameFinishTriggerRotY_ = rotY_;
-		gameFinishEasingTimer_ = 0;
-		gameFinishTruggerForardVec_ = forwardVec_;
-		gameFinishTriggerMatRot_ = playerModel_.carBodyInstance_.lock()->GetRotate();
-
-		// 演出でどちらにドリフトさせるかを取得。
-		isGameFinishDriftLeft_ = inclineBody_->GetHandleAmount() < 0;
-		if (inclineBody_->GetHandleAmount() == 0) {
-
-			isGameFinishDriftLeft_ = true;
-
-		}
-
-		return;
-
-	}
-
-
-	/*-- ゲーム終了時の更新処理本編 --*/
-
-	// 正面ベクトルを更新する。
-	forwardVec_ = gameFinishTruggerForardVec_;
-
-	// ゲーム終了時のイージングタイマーを更新してオーバーフローしないようにする。
-	gameFinishEasingTimer_ = FHelper::Saturate(gameFinishEasingTimer_ + GAME_FINISH_EASING_TIMER);
-
-	// イージング量を求める。
-	float easingAmount = FEasing::EaseOutQuint(gameFinishEasingTimer_);
-
-	// 移動量を更新する。
-	speed_ = MAX_SPEED * (1.0f - easingAmount);
-
-	// 回転を更新する。
-	const float ADD_ROT_Y = DirectX::XM_PIDIV2 * (isGameFinishDriftLeft_ ? -1.0f : 1.0f);
-	rotY_ = gameFinishTriggerRotY_;
-	rotY_ += ADD_ROT_Y * easingAmount;
+	// ゲーム終了時の基本的な更新処理
+	gameFinish_->Update(finishInputData, boostTimer_, speed_, rotY_, forwardVec_);
 
 }
 
@@ -1746,7 +1647,7 @@ void Character::UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart)
 	// 着地した瞬間だったら。
 	bool isJumpDriftRelease = (isDriftJumpPrev_ && !isDriftJump_);
 	bool onGroundTrigger = (!onGroundPrev_ && onGround_);
-	if ((isJumpDriftRelease || onGroundTrigger) && !IsBeforeStart && !isGameFinish_) {
+	if ((isJumpDriftRelease || onGroundTrigger) && !IsBeforeStart && !gameFinish_->GetIsGameFinish()) {
 
 		// 三回ランダムに位置をずらして生成する。
 		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
@@ -1823,13 +1724,13 @@ void Character::UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart)
 	}
 
 	// ゲームが終了していたら イージングが終了していなかったら。
-	if (IsGameFinish && gameFinishEasingTimer_ < 0.9f) {
+	if (IsGameFinish && gameFinish_->GetGameFinishEasingTimer() < 0.9f) {
 
 		// 煙を出す。
-		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(isGameFinishDriftLeft_ ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, gameFinishTriggerMatRot_, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
-		DriftParticleMgr::Ins()->GenerateSmoke(isGameFinishDriftLeft_ ? playerModel_.carLeftTireInstance_.lock()->GetWorldPos() : playerModel_.carRightTireInstance_.lock()->GetWorldPos(), gameFinishTriggerMatRot_, false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		Vec3 driftVec = FHelper::MulRotationMatNormal(Vec3(gameFinish_->GetIsGameFinishDriftLeft() ? -1.0f : 1.0f, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, gameFinish_->GetGameFinishTriggerMatRot(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(playerModel_.carBehindTireInstance_.lock()->GetWorldPos() + driftVec * 30.0f, gameFinish_->GetGameFinishTriggerMatRot(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
+		DriftParticleMgr::Ins()->GenerateSmoke(gameFinish_->GetIsGameFinishDriftLeft() ? playerModel_.carLeftTireInstance_.lock()->GetWorldPos() : playerModel_.carRightTireInstance_.lock()->GetWorldPos(), gameFinish_->GetGameFinishTriggerMatRot(), false, DriftParticleMgr::DELAY_ID::NONE_DELAY);
 
 
 	}

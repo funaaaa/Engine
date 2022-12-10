@@ -24,7 +24,7 @@ private:
 	const int FORWARD_TIMER_LOLLING_TIMER = 20;
 	int driftRotTimer_;					// ドリフトの際に車体を回転させるために使用するタイマー。この値が大きくなれば車体の傾きも大きくなる。			
 	const int MAX_DRIFT_ROT_TIMER = 10;
-	bool isRotRightSide_ = false;		// どちら側にドリフトしているか。車体を回転させる方向を決める際に使用する。
+	bool isRotRightSide_;				// どちら側にドリフトしているか。車体を回転させる方向を決める際に使用する。
 
 public:
 

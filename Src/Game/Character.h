@@ -15,6 +15,7 @@ class BaseOperationObject;
 class PolygonMeshInstance;
 class BaseStage;
 class CharacterInclineBody;
+class CharacterGameFinish;
 
 // キャラクタークラス。操作を管理する操作オブジェクトを入れ替えることによってAIとプレイヤーを切り替える。
 class Character {
@@ -150,18 +151,7 @@ public:
 
 	/*-- ゴール演出用変数 --*/
 
-	DirectX::XMMATRIX gameFinishTriggerMatRot_;
-	Vec3 gameFinishTruggerForardVec_;// ゲーム終了時の正面ベクトル
-	float gameFinishTriggerRotY_;	// ゲームが終わった瞬間の回転量
-	float gameFinishEasingTimer_;	// ゲーム終了時演出に使用するイージングタイマー
-	float gameFinishRotStopAmount_;	// 完全に停止した際の回転量。
-	float gameFinishRotStopReturnAmount_;	// 完全に底した際に元の位置に戻すための回転量。
-	const float GAME_FINISH_EASING_TIMER = 0.01f;
-	const float GAME_FINISH_STOP_ROT = 2.0f;
-	const float GAME_FINISH_STOP_ROT_LIMIT = 0.3f;
-	bool isGameFinish_;				// ゲームが終わったフラグ
-	bool isPrevGameFinish_;			// 前フレームのゲームが終わったフラグ
-	bool isGameFinishDriftLeft_;	// ゲーム終了演出でどちらにドリフトするか。 t:左 f:右
+	std::shared_ptr<CharacterGameFinish> gameFinish_;	// キャラクターのゲーム終了時に行う処理をまとめたクラス
 
 
 	/*-- ゴール用 --*/

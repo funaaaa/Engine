@@ -132,6 +132,7 @@
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
     <ClCompile Include="Src\Game\BoostItem.cpp" />
     <ClCompile Include="Src\Game\Character.cpp" />
+    <ClCompile Include="Src\Game\CharacterGameFinish.cpp" />
     <ClCompile Include="Src\Game\CharacterInclineBody.cpp" />
     <ClCompile Include="Src\Game\CharacterMgr.cpp" />
     <ClCompile Include="Src\Game\ConcentrationLine.cpp" />
@@ -231,6 +232,7 @@
     <ClInclude Include="Src\Game\BoostItem.h" />
     <ClInclude Include="Src\Game\BrightnessParam.h" />
     <ClInclude Include="Src\Game\Character.h" />
+    <ClInclude Include="Src\Game\CharacterGameFinish.h" />
     <ClInclude Include="Src\Game\CharacterInclineBody.h" />
     <ClInclude Include="Src\Game\CharacterMgr.h" />
     <ClInclude Include="Src\Game\ConcentrationLine.h" />
