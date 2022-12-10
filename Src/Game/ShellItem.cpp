@@ -29,7 +29,7 @@ void ShellItem::Update()
 
 }
 
-int ShellItem::Use(float CharaRotY, const int ParamID)
+int ShellItem::Use(float CharaRotY, int ParamID)
 {
 
 	/*===== g—pˆ— =====*/

@@ -69,8 +69,10 @@ void TailLampMgr::Update()
 		isContinuity_ = false;
 	}
 
+	// テールランプを生成する際に参照する頂点クラスを更新。
 	tailLampVertex_->Update();
 
+	// テールランプの更新。
 	for (auto& index : tailLamp_) {
 
 		if (!index->GetIsActive()) continue;

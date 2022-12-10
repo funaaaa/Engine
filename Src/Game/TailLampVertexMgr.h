@@ -5,14 +5,14 @@
 
 class TailLampVertex;
 
-// テールランプ頂点管理クラス
+// テールランプ頂点セットの配列を保持するクラス。
 class TailLampVertexMgr {
 
 private:
 
 	/*===== メンバ変数 =====*/
 
-	static const int TAIL_LAMP_VERTEX_SIZE = 10;
+	static const int TAIL_LAMP_VERTEX_SIZE = 10;	// テールランプの頂点セットの保存量(最大10頂点まで保存する。)
 	std::array<std::shared_ptr<TailLampVertex>, TAIL_LAMP_VERTEX_SIZE> tailLampVertex_;
 	int nowGenerateIndex_;		// 今回生成したIndex
 	int prevGenerateIndex_;		// 前回生成したIndex

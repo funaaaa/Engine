@@ -38,13 +38,16 @@ void TailLampVertexMgr::Generate(std::array<Vec3, 4> Vertex, float ScaleOffsetRa
 
 	/*===== 生成処理 =====*/
 
+	// 前回生成したIndexを保存しておく。
 	prevGenerateIndex_ = nowGenerateIndex_;
 	for (auto& index : tailLampVertex_) {
 
+		// 未生成だったら処理を飛ばす。
 		if (index->GetIsActive()) continue;
 
 		index->Generate(Vertex, ScaleOffsetRate);
 
+		// 現在の生成したIndexを保存しておく。
 		nowGenerateIndex_ = static_cast<int>(&index - &tailLampVertex_[0]);
 
 		break;

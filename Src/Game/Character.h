@@ -7,9 +7,6 @@
 #include "FHelper.h"
 #include "TailLampMgr.h"
 
-#pragma warning(push)
-#pragma warning(disable:4324)
-
 class BaseStage;
 class OBB;
 class PlayerTire;
@@ -17,7 +14,9 @@ class BaseItem;
 class BaseOperationObject;
 class PolygonMeshInstance;
 class BaseStage;
+class CharacterInclineBody;
 
+// キャラクタークラス。操作を管理する操作オブジェクトを入れ替えることによってAIとプレイヤーを切り替える。
 class Character {
 
 private:
@@ -59,7 +58,8 @@ public:
 	std::shared_ptr<TailLampMgr> leftTailLamp_;
 	std::shared_ptr<TailLampMgr> rightTailLamp_;
 
-	std::shared_ptr<OBB> obb_;	// 当たり判定用OBB
+	// 当たり判定用OBB
+	std::shared_ptr<OBB> obb_;
 
 	// 別な車との当たり判定用のヒットボックス
 	std::weak_ptr<BLAS> hitBoxBlas_;
@@ -94,22 +94,7 @@ public:
 
 	/*-- ドリフト、加速時の車体の回転に関する変数 --*/
 
-	DirectX::XMVECTOR handleRotQ_;		// ハンドルの回転量
-	DirectX::XMVECTOR nowHandleRotQ_;	// ハンドルの回転量
-	DirectX::XMVECTOR boostRotQ_;		// 加速時の正面方向への回転の行列
-	DirectX::XMVECTOR nowBoostRotQ_;	// 加速時の正面方向への回転の行列
-	float handleAmount_;				// ハンドル量
-	const float  MAX_DRIFT_ROT = 1.6f;
-	float baseDriftRot_;
-	float nowDriftRot_;
-	float baseBoostRot_;
-	float nowBoostRot_;
-	float tireLollingAmount_;
-	int forwardTireLollingTimer_;
-	const int FORWARD_TIMER_LOLLING_TIMER = 20;
-	int driftRotTimer_;
-	const int MAX_DRIFT_ROT_TIMER = 10;
-	bool isRotRightSide_ = false;
+	std::shared_ptr<CharacterInclineBody> inclineBody_;		// キャラクターを回転させる際に使用する処理をまとめたクラス
 
 
 	/*-- モデルのデータに関する変数 --*/
@@ -126,6 +111,7 @@ public:
 	float boostSpeed_;					// ブーストされているときの移動速度
 	int driftTimer_;
 	int boostTimer_;					// ブーストするフレーム数
+	const int BOOST_GIMMICK_BOOST_TIMER = 20;
 	bool isDriftRight_;					// ドリフトが右側かどうか。
 	bool isInputLTPrev_;				// 前フレームにLTが押されたかどうか
 	bool isInputLT_;					// LTが押されたかどうか。

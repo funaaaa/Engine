@@ -10,6 +10,7 @@ class BaseStage;
 class OBB;
 class PolygonMeshInstance;
 
+// 甲羅アイテムによって生成される甲羅オブジェクトの配列を保持しているクラス
 class ShellObjectMgr : public Singleton<ShellObjectMgr> {
 
 private:

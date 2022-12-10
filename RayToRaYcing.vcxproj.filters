@@ -244,6 +244,7 @@
     <ClCompile Include="Src\Game\TailLampMgr.cpp">
       <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\CharacterInclineBody.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -540,6 +541,9 @@
     <ClInclude Include="Src\Game\BrightnessParam.h">
       <Filter>アプリケーション\トンネル</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Game\CharacterInclineBody.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -774,6 +778,9 @@
     </Filter>
     <Filter Include="アプリケーション\トンネル">
       <UniqueIdentifier>{fcbc1d1f-9dc3-450e-9d71-e8ca08baa9c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類">
+      <UniqueIdentifier>{d6adb0e8-fe7c-4100-a17a-44ba1827ba6b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

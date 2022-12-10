@@ -7,6 +7,7 @@ class BaseStage;
 class PolygonMeshInstance;
 class BLAS;
 
+// 甲羅アイテムによって生成される甲羅オブジェクト
 class ShellObject {
 
 public:

@@ -75,32 +75,32 @@ void TailLampVertex::Update()
 	}
 	else {
 
-		float div = 20.0f;
+		const float DIV = 20.0f;
 
 		// 頂点を縮小させる。
 		{
 			// 0番目を2番目の方向へ
 			Vec3 dir = Vec3(vertex_[2] - vertex_[0]).GetNormal();
 			float length = Vec3(vertex_[2] - vertex_[0]).Length() / 2.0f;
-			vertex_[0] += dir * (length / div);
+			vertex_[0] += dir * (length / DIV);
 		}
 		{
 			// 1番目を3番目の方向へ
 			Vec3 dir = Vec3(vertex_[3] - vertex_[1]).GetNormal();
 			float length = Vec3(vertex_[3] - vertex_[1]).Length() / 2.0f;
-			vertex_[1] += dir * (length / div);
+			vertex_[1] += dir * (length / DIV);
 		}
 		{
 			// 2番目を0番目の方向へ
 			Vec3 dir = Vec3(vertex_[0] - vertex_[2]).GetNormal();
 			float length = Vec3(vertex_[0] - vertex_[2]).Length() / 2.0f;
-			vertex_[2] += dir * (length / div);
+			vertex_[2] += dir * (length / DIV);
 		}
 		{
 			// 3番目を1番目の方向へ
 			Vec3 dir = Vec3(vertex_[1] - vertex_[3]).GetNormal();
 			float length = Vec3(vertex_[1] - vertex_[3]).Length() / 2.0f;
-			vertex_[3] += dir * (length / div);
+			vertex_[3] += dir * (length / DIV);
 		}
 
 		// 距離の差が一定以下になったら縮小が終わったフラグを立てる。

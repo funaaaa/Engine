@@ -22,7 +22,7 @@ public:
 protected:
 
 	ItemID itemID_;		// アイテム識別用ID
-	std::weak_ptr<PolygonMeshInstance> charaInstance;	// キャラのインスタンスのインデックス
+	std::weak_ptr<PolygonMeshInstance> charaInstance;	// このアイテムを保持しているキャラのインスタンスのインデックス
 
 
 public:
@@ -31,7 +31,7 @@ public:
 
 	virtual void Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance) = 0;
 	virtual void Update() = 0;
-	virtual int Use(float CharaRotY = 0, const int ParamID = 0) = 0;
+	virtual int Use(float CharaRotY = 0, int ParamID = 0) = 0;
 
 	ItemID GetItemID() { return itemID_; }
 	std::weak_ptr<PolygonMeshInstance> GetCharaInstance() { return charaInstance; }

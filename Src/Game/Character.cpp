@@ -27,9 +27,7 @@
 #include "RadialBlur.h"
 #include "SceneMgr.h"
 #include "BaseScene.h"
-
-#pragma warning(push)
-#pragma warning(disable:4324)
+#include "CharacterInclineBody.h"
 
 Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPersonality)
 {
@@ -156,28 +154,20 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	isGetItem_ = false;
 	isUseItem_ = false;
 	IsTurningIndicatorRed_ = false;
-	isRotRightSide_ = false;
 	isDisplayRocket_ = false;
 	turningIndicatorTimer_ = 0;
-	tireLollingAmount_ = 0;
 	canNotMoveTimer_ = 0;
 	driftTimer_ = 0;
-	boostRotQ_ = DirectX::XMVECTOR();
-	handleAmount_ = 0;
-	handleRotQ_ = DirectX::XMVECTOR();
-	nowBoostRotQ_ = DirectX::XMVECTOR();
-	nowHandleRotQ_ = DirectX::XMVECTOR();
 	defBodyMatRot_ = DirectX::XMMatrixIdentity();
 	cameraForwardVec_ = forwardVec_;
 
-	baseDriftRot_ = 0;
-	nowDriftRot_ = 0;
-	driftRotTimer_ = 0;
-	baseBoostRot_ = 0;
-	nowBoostRot_ = 0;
 	rocketEasingTimer_ = 0.0f;
 	rocketAddRotationY_ = 0.0f;
 	rocketRotationY_ = 0.0f;
+
+	// キャラクターを回転させる処理をまとめたクラスを生成。
+	inclineBody_ = std::make_shared<CharacterInclineBody>();
+	inclineBody_->Init();
 
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
@@ -254,6 +244,9 @@ void Character::Init()
 	rocketAddRotationY_ = 0.0f;
 	rocketRotationY_ = 0.0f;
 	isDisplayRocket_ = false;
+
+	// キャラクターの回転に関する処理を初期化。
+	inclineBody_->Init();
 
 	playerModel_.Delete();
 
@@ -343,10 +336,8 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 			upVec_ = Vec3(0, 1, 0);
 			returnDefPosTimer_ = 0;
 
-			handleRotQ_ = DirectX::XMVECTOR();
-			nowHandleRotQ_ = DirectX::XMVECTOR();
-			boostRotQ_ = DirectX::XMVECTOR();
-			nowBoostRotQ_ = DirectX::XMVECTOR();
+			// キャラクターの回転に関するクォータニオンを初期化。
+			inclineBody_->InitQuaternion();
 
 		}
 
@@ -1173,7 +1164,7 @@ void Character::Input(bool IsBeforeStart)
 	isJumpActionTrigger_ = operation.isDriftTrigger_;
 
 	// 入力を保存する。
-	handleAmount_ = operation.handleDriveRate_;
+	inclineBody_->SetHandleAmount(operation.handleDriveRate_);
 
 }
 
@@ -1249,6 +1240,14 @@ void Character::Move(bool IsBeforeStart)
 
 	}
 
+	// ジャンプ加速量を減速する。
+	jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
+	if (jumpBoostSpeed_ < 0) {
+
+		jumpBoostSpeed_ = 0;
+
+	}
+
 	// 座標に重力を加算する。
 	pos_ += Vec3(0, -1, 0) * gravity_;
 
@@ -1278,10 +1277,10 @@ void Character::UpdateDrift()
 		}
 
 		// スティック入力があったら。
-		if (0.1f < std::fabs(handleAmount_)) {
+		if (0.1f < std::fabs(inclineBody_->GetHandleAmount())) {
 
 			isDrift_ = true;
-			isDriftRight_ = 0.0f < handleAmount_;
+			isDriftRight_ = 0.0f < inclineBody_->GetHandleAmount();
 
 		}
 
@@ -1346,7 +1345,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 
 		// ブーストをマックスにする。
 		boostSpeed_ = MAX_BOOST_SPEED;
-		boostTimer_ = 20;
+		boostTimer_ = BOOST_GIMMICK_BOOST_TIMER;
 
 	}
 	if (output.isHitGoal_) {
@@ -1502,14 +1501,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 		BrightnessParam::Ins()->isBright_ = false;
 	}
 
-
-	jumpBoostSpeed_ -= SUB_JUMP_BOOST_SPEED;
-	if (jumpBoostSpeed_ < 0) {
-
-		jumpBoostSpeed_ = 0;
-
-	}
-
 }
 
 void Character::InclineCarBody()
@@ -1517,180 +1508,25 @@ void Character::InclineCarBody()
 
 	/*===== 車体を傾ける処理 =====*/
 
+
 	// BODYの回転行列を保存。
 	defBodyMatRot_ = playerModel_.carBodyInstance_.lock()->GetRotate();
 
-	// 空中に居たら。
-	if (!onGround_ && !isDriftJump_) {
+	// 回転に関する処理に必要なデータを詰め込む。
+	CharacterInclineBody::InputData inlclineInputData;
+	inlclineInputData.boostSpeed_ = boostSpeed_;
+	inlclineInputData.isDriftJump_ = isDriftJump_;
+	inlclineInputData.isDrift_ = isDrift_;
+	inlclineInputData.isPlayer_ = charaID_ == CHARA_ID::P1;
+	inlclineInputData.maxBoostSpeed_ = MAX_BOOST_SPEED;
+	inlclineInputData.onGround_ = onGround_;
+	inlclineInputData.playerModel_ = playerModel_;
+	inlclineInputData.pos_ = pos_;
+	inlclineInputData.prevPos_ = prevPos_;
+	inlclineInputData.rotY_ = rotY_;
 
-		// 移動した方向ベクトル
-		Vec3 movedVec = (pos_ - prevPos_).GetNormal();
-
-		if (!std::isnan(movedVec.x_) && charaID_ == CHARA_ID::P1) {
-
-			// デフォルトの上ベクトル。
-			Vec3 defUpVec = Vec3(0, -1, 0);
-
-			// 回転軸を求める。
-			Vec3 axisOfRevolution = defUpVec.Cross(movedVec);
-
-			// 回転軸を正規化する。
-			if (axisOfRevolution.Length() != 0) {
-				axisOfRevolution.Normalize();
-			}
-
-			/*-- 内積から回転量を取得 --*/
-
-			// 回転量を求める。
-			float amountOfRotation = defUpVec.Dot(movedVec);
-
-			// 逆余弦を求める関数を使用して求めたcosθをラジアンに変換。
-			amountOfRotation = acosf(amountOfRotation) - DirectX::XM_PIDIV2;
-
-
-			/*-- クォータニオンを使って回転 --*/
-
-			// 回転軸が{0,0,0}だったら処理を飛ばす。
-			if (axisOfRevolution.Length() != 0 && amountOfRotation != 0) {
-
-				// クォータニオンを求める。
-				DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(axisOfRevolution.ConvertXMVECTOR(), amountOfRotation);
-
-				// 求めたクォータニオンを行列に治す。
-				DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
-
-				// プレイヤーを回転させる。
-				playerModel_.carBodyInstance_.lock()->ChangeRotate(quaternionMat);
-
-				// 上ベクトルを基準としたクォータニオンを求める。
-				Vec3 normal_ = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-				DirectX::XMVECTOR upQuaternion = DirectX::XMQuaternionRotationNormal(normal_.ConvertXMVECTOR(), rotY_);
-
-				// クォータニオンを行列に治す。
-				DirectX::XMMATRIX upQuaternionMat = DirectX::XMMatrixRotationQuaternion(upQuaternion);
-
-				// プレイヤーを回転させる。
-				playerModel_.carBodyInstance_.lock()->AddRotate(upQuaternionMat);
-
-			}
-		}
-
-	}
-
-	// ブースト時の回転。
-	if (0 < boostSpeed_) {
-
-		float boostRate = boostSpeed_ / MAX_BOOST_SPEED;
-		const float MAX_ROT = 0.1f;
-
-		baseBoostRot_ = MAX_ROT * boostRate;
-
-		// バランスを取るタイマーを更新。
-		++forwardTireLollingTimer_;
-		if (FORWARD_TIMER_LOLLING_TIMER < forwardTireLollingTimer_) {
-
-			forwardTireLollingTimer_ = 0;
-
-			// バランスを取っている風にするためにランダムで回転量を変更する。
-			const float MAX_RANDOM = 0.4f;
-			baseBoostRot_ += FHelper::GetRand(-MAX_RANDOM * boostRate, MAX_RANDOM * boostRate);
-
-		}
-
-	}
-	else {
-
-		boostRotQ_ = DirectX::XMVECTOR();
-		forwardTireLollingTimer_ = 0;
-		baseBoostRot_ = 0;
-
-	}
-
-	{
-
-		nowBoostRot_ += (baseBoostRot_ - nowBoostRot_) / 5.0f;
-
-		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-
-		// クォータニオンを求める。
-		boostRotQ_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), nowBoostRot_);
-
-		// ブーストの車体のクォータニオンを補間。
-		nowBoostRotQ_ = DirectX::XMQuaternionSlerp(nowBoostRotQ_, boostRotQ_, 0.2f);
-		// 回転行列を求める。
-		DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowBoostRotQ_);
-		playerModel_.carBodyInstance_.lock()->AddRotate(mat);
-
-	}
-
-
-	// ドリフト時の回転。
-	if (isDrift_ && 0 != handleAmount_) {
-
-		// 前フレームと回転方向が違かったら初期化する。
-		if (isRotRightSide_ && handleAmount_ < 0) {
-			handleRotQ_ = DirectX::XMVECTOR();
-			baseDriftRot_ = 0;
-			driftRotTimer_ = 0;
-		}
-
-		++driftRotTimer_;
-		if (MAX_DRIFT_ROT_TIMER < driftRotTimer_) driftRotTimer_ = MAX_DRIFT_ROT_TIMER;
-
-		float timerRate = static_cast<float>(driftRotTimer_) / static_cast<float>(MAX_DRIFT_ROT_TIMER);
-
-		// 回転量にイージングをかける。 マジックナンバーは傾きの微調整用。
-		if (0.35f < fabs(handleAmount_)) {
-			baseDriftRot_ = 0.6f * (0 < handleAmount_ ? 1.0f : -1.0f);
-		}
-		else {
-			baseDriftRot_ = std::fabs(FEasing::EaseOutCubic(timerRate) * MAX_DRIFT_ROT) * handleAmount_;
-		}
-
-		// 回転方向を保存。
-		isRotRightSide_ = 0 < handleAmount_;
-
-		// バランスを取っている風にするためにランダムで回転量を変更する。
-		const float MAX_RANDOM = 0.1f;
-		tireLollingAmount_ = FHelper::GetRand(-MAX_RANDOM * timerRate, MAX_RANDOM * timerRate);
-		baseDriftRot_ += tireLollingAmount_;
-
-	}
-	else {
-
-		handleRotQ_ = DirectX::XMVECTOR();
-
-		baseDriftRot_ = 0;
-		driftRotTimer_ = 0;
-
-	}
-
-	// 回転させる。
-	{
-		nowDriftRot_ += (baseDriftRot_ - nowDriftRot_) / 10.0f;
-
-		Vec3 horiVec = FHelper::MulRotationMatNormal(Vec3(0, 0, 1), playerModel_.carBodyInstance_.lock()->GetRotate());
-		Vec3 forwardVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-		Vec3 upVec = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), playerModel_.carBodyInstance_.lock()->GetRotate());
-
-		// 横クォータニオンを求める。
-		handleRotQ_ = DirectX::XMQuaternionRotationAxis(horiVec.ConvertXMVECTOR(), nowDriftRot_);
-		// 正面クォータニオンを求める。 横だけだと回転がちょっとだけずれているため。
-		DirectX::XMVECTOR forwardQ = DirectX::XMQuaternionRotationAxis(forwardVec.ConvertXMVECTOR(), 0.01f);
-		// 上クォータニオンを求める。
-		DirectX::XMVECTOR upQ = DirectX::XMQuaternionRotationAxis(upVec.ConvertXMVECTOR(), -0.2f * handleAmount_);
-
-		// クォータニオンをかける。
-		handleRotQ_ = DirectX::XMQuaternionMultiply(handleRotQ_, forwardQ);
-		handleRotQ_ = DirectX::XMQuaternionMultiply(handleRotQ_, upQ);
-	}
-
-	// ブーストの車体のクォータニオンを補間。
-	nowHandleRotQ_ = DirectX::XMQuaternionSlerp(nowHandleRotQ_, handleRotQ_, 0.2f);
-	// 回転行列を求める。
-	DirectX::XMMATRIX mat = DirectX::XMMatrixRotationQuaternion(nowHandleRotQ_);
-	playerModel_.carBodyInstance_.lock()->AddRotate(mat);
-
+	// 車体の回転の処理
+	inclineBody_->Update(inlclineInputData);
 
 	// ゲーム終了時演出用の回転
 	if (isGameFinish_) {
@@ -1821,8 +1657,8 @@ void Character::UpdateGameFinish()
 		gameFinishTriggerMatRot_ = playerModel_.carBodyInstance_.lock()->GetRotate();
 
 		// 演出でどちらにドリフトさせるかを取得。
-		isGameFinishDriftLeft_ = handleAmount_ < 0;
-		if (handleAmount_ == 0) {
+		isGameFinishDriftLeft_ = inclineBody_->GetHandleAmount() < 0;
+		if (inclineBody_->GetHandleAmount() == 0) {
 
 			isGameFinishDriftLeft_ = true;
 

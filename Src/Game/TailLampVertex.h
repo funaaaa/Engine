@@ -17,7 +17,7 @@ private:
 
 public:
 
-	// 参照数
+	// この頂点を参照しているテールランプクラスの数。isFinishScaleDown_がtrueでこれが0の場合、isActive_がfalseになる。
 	int referenceCount_;
 
 
