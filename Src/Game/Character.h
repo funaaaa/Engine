@@ -17,6 +17,7 @@ class BaseStage;
 class CharacterInclineBody;
 class CharacterGameFinish;
 class CharacterDrift;
+class CharacterRocket;
 
 // キャラクタークラス。操作を管理する操作オブジェクトを入れ替えることによってAIとプレイヤーを切り替える。
 class Character {
@@ -142,14 +143,9 @@ public:
 
 
 
-	// ロケットアイテム関係
-	std::array<std::weak_ptr<BLAS>, 4> rocketBlas_;
-	std::array<std::weak_ptr<PolygonMeshInstance>, 4 > rocketIns_;
-	float rocketEasingTimer_;
-	float rocketRotationY_;
-	float rocketAddRotationY_;
-	bool isDisplayRocket_;
+	/*-- ロケットアイテム関係 --*/
 
+	std::shared_ptr<CharacterRocket> rocket_;
 
 
 public:
@@ -261,5 +257,8 @@ private:
 
 	// 車との当たり判定
 	void CheckHitCar(const FHelper::RayToModelCollisionData& CollisionData, std::weak_ptr<Character> IndexCharacter, float CheckHitSize);
+
+	// ロケットに関する更新処理
+	void UpdateRocket();
 
 };
