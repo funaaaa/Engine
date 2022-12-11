@@ -120,9 +120,6 @@ private:
 	// アドレスに情報を書き込む処理
 	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize);
 
-	// バッファ全般を生成する処理
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType);
-
 	// メッシュの当たり判定情報を計算する。
 	void CalMeshCollisionData();
 

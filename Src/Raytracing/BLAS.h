@@ -175,9 +175,6 @@ private:
 	// アドレスに情報を書き込む処理
 	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
 
-	// バッファ全般を生成する処理
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
-
 	// BLAS生成時に設定を取得する関数
 	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque);
 

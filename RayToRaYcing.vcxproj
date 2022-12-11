@@ -117,7 +117,6 @@
     <ClCompile Include="Src\Engine\GLTF.cpp" />
     <ClCompile Include="Src\Engine\StageObjectMgr.cpp" />
     <ClCompile Include="Src\Engine\Input.cpp" />
-    <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
     <ClCompile Include="Src\Engine\Pipeline.cpp" />
     <ClCompile Include="Src\Engine\PipelineManager.cpp" />
@@ -169,7 +168,6 @@
     <ClCompile Include="Src\Raytracing\DynamicConstBuffer.cpp" />
     <ClCompile Include="Src\Raytracing\HitGroup.cpp" />
     <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp" />
-    <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp" />
     <ClCompile Include="Src\Raytracing\OBB.cpp" />
     <ClCompile Include="Src\Raytracing\PolygonInstance.cpp" />
     <ClCompile Include="Src\Raytracing\PolygonInstanceRegister.cpp" />
@@ -208,7 +206,6 @@
     <ClInclude Include="Src\Engine\GLTF.h" />
     <ClInclude Include="Src\Engine\StageObjectMgr.h" />
     <ClInclude Include="Src\Engine\Input.h" />
-    <ClInclude Include="Src\Engine\Joycon.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
     <ClInclude Include="Src\Engine\Pipeline.h" />
     <ClInclude Include="Src\Engine\PipelineManager.h" />
@@ -269,7 +266,6 @@
     <ClInclude Include="Src\Raytracing\DynamicConstBuffer.h" />
     <ClInclude Include="Src\Raytracing\HitGroup.h" />
     <ClInclude Include="Src\Raytracing\HitGroupMgr.h" />
-    <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h" />
     <ClInclude Include="Src\Raytracing\OBB.h" />
     <ClInclude Include="Src\Raytracing\PolygonInstance.h" />
     <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />

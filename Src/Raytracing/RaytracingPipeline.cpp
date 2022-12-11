@@ -5,6 +5,7 @@
 #include "RayRootsignature.h"
 #include "Engine.h"
 #include "BLASRegister.h"
+#include "FHelper.h"
 #include <DirectXMath.h>
 
 void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& InputData, int UseHitGroup, int SRVCount, int CBVCount, int UAVCount, int PayloadSize, int AttribSize, int ReflectionCount)
@@ -205,7 +206,7 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 	/*========== シェーダーテーブルの構築 ==========*/
 
 	// シェーダーテーブル確保。
-	shaderTable_ = CreateBuffer(
+	shaderTable_ = FHelper::CreateBuffer(
 		tableSize, D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD,
@@ -229,8 +230,8 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 			const int RG_COUNT = static_cast<int>(shaderData_[index].rayGenEnteryPoint_.size());
 			for (int rgIndex = 0; rgIndex < RG_COUNT; ++rgIndex) {
 
-				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index].rayGenEnteryPoint_[rgIndex]);
-				p += WriteShaderIdentifier(p, id_);
+				void* id = rtsoProps_->GetShaderIdentifier(shaderData_[index].rayGenEnteryPoint_[rgIndex]);
+				p += WriteShaderIdentifier(p, id);
 
 			}
 
@@ -249,8 +250,8 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 			const int MS_COUNT = static_cast<int>(shaderData_[index].missEntryPoint_.size());
 			for (int msIndex = 0; msIndex < MS_COUNT; ++msIndex) {
 
-				void* id_ = rtsoProps_->GetShaderIdentifier(shaderData_[index].missEntryPoint_[msIndex]);
-				p += WriteShaderIdentifier(p, id_);
+				void* id = rtsoProps_->GetShaderIdentifier(shaderData_[index].missEntryPoint_[msIndex]);
+				p += WriteShaderIdentifier(p, id);
 
 			}
 
@@ -353,50 +354,6 @@ UINT RaytracingPipeline::GetLargestDataSizeInHitGroup()
 
 	return largestDataSize;
 
-}
-
-Microsoft::WRL::ComPtr<ID3D12Resource> RaytracingPipeline::CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType, const wchar_t* name_)
-{
-	D3D12_HEAP_PROPERTIES heapProps{};
-	if (heapType == D3D12_HEAP_TYPE_DEFAULT) {
-		heapProps = D3D12_HEAP_PROPERTIES{
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-		};
-	}
-	if (heapType == D3D12_HEAP_TYPE_UPLOAD) {
-		heapProps = D3D12_HEAP_PROPERTIES{
-		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-		};
-	}
-	HRESULT hr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-	D3D12_RESOURCE_DESC resDesc{};
-	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resDesc.Alignment = 0;
-	resDesc.Width = size_;
-	resDesc.Height = 1;
-	resDesc.DepthOrArraySize = 1;
-	resDesc.MipLevels = 1;
-	resDesc.Format = DXGI_FORMAT_UNKNOWN;
-	resDesc.SampleDesc = { 1, 0 };
-	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	resDesc.Flags = flags;
-
-	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
-		&heapProps,
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc,
-		initialState,
-		nullptr,
-		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
-	);
-	if (FAILED(hr)) {
-		OutputDebugStringA("CreateBuffer failed.\n");
-	}
-	if (resource != nullptr && name_ != nullptr) {
-		resource->SetName(name_);
-	}
-	return resource;
 }
 
 UINT RaytracingPipeline::WriteShaderIdentifier(void* dst, const void* shaderId)

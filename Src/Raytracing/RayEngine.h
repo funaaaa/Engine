@@ -65,4 +65,15 @@ public:
 
 	RayConstBufferData& GetConstBufferData() { return constBufferData_; }
 
+private:
+
+	// レイトレーシングを実行。
+	void TraceRay();
+
+	// デノイズコマンドを積む。
+	void DenoiseCommand();
+
+	// コピーコマンドを積む。
+	void CopyCommand();
+
 };

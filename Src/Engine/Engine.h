@@ -2,16 +2,16 @@
 
 #include <DirectXTex/include/d3dx12.h>
 #include <dxgi1_6.h>
-#include <dinput.h>
 #include <xstring>
 #include <vector>
 #include <array>
 #include <wrl.h>
-#include "Singleton.h"
 #include <dxgi.h>
 #include <Xinput.h>
 #include <d3d12.h>
 #include <memory>
+#include "Singleton.h"
+#include "Input.h"
 
 class WindowsAPI;
 

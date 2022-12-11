@@ -306,7 +306,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     // エミッシブだったらエミッシブマップに書き込む。
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_EMISSIVE)
     {
-        payloadBuff.emissive_ += TexColor;
+        payloadBuff.emissive_ += TexColor * payloadBuff.impactAmount_;
     }
     
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
