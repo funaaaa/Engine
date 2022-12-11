@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseSprite.h"
 
+// スプライト描画クラス
 class Sprite : public BaseSprite {
 
 private:

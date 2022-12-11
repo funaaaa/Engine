@@ -140,15 +140,6 @@ int TextureManager::LoadTexture(LPCWSTR FileName) {
 	Texture proTexture{};
 	proTexture.filePath_ = FileName;
 
-	//// ロードしていなかったらロードする
-	//DirectX::TexMetadata metadata;
-	//DirectX::ScratchImage scratchImg;
-	//HRESULT result = LoadFromWICFile(
-	//	FileName,
-	//	DirectX::WIC_FLAGS_NONE,
-	//	&metadata, scratchImg
-	//);
-
 	DirectX::TexMetadata metadata;
 	DirectX::ScratchImage scratchImg;
 	HRESULT result = LoadFromDDSFile(FileName, DirectX::DDS_FLAGS::DDS_FLAGS_NONE, &metadata, scratchImg);

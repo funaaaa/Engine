@@ -8,6 +8,7 @@ class RaytracingOutput;
 class RayComputeShader;
 class DynamicConstBuffer;
 
+// 指定されたUAVにラジアルブラーをかけるクラス。
 class RadialBlur : public Singleton<RadialBlur> {
 
 private:

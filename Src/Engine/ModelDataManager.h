@@ -12,6 +12,7 @@
 #include "Singleton.h"
 #include "GLTF.h"
 
+// モデルのデータを管理、保存するクラス
 class ModelDataManager : public Singleton<ModelDataManager> {
 
 public:

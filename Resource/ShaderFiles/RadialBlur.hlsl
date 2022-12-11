@@ -48,9 +48,6 @@ void main(uint3 DTid : SV_DispatchThreadID)
     // 割合。
     float blurRate = saturate(centerLength / MAX_LENGTH);
     
-    // 割合にイージングをかける。
-    //blurRate = 1.0f - sqrt(1.0f - pow(blurRate, 2.0f));
-    
     // ブラーの回数。
     int blurCount = (32.0f * blurRate) * weight.x + 1.0f;
     

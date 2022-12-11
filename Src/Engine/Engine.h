@@ -15,6 +15,7 @@
 
 class WindowsAPI;
 
+// DirectX12‚ÌŠî”ÕƒNƒ‰ƒX
 class Engine : public Singleton<Engine> {
 
 public:

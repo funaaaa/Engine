@@ -4,7 +4,6 @@
 #include <wrl.h>
 
 //読み取り専用構造化バッファ
-
 class StructuredBuffer{
 
 public:

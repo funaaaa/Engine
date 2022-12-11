@@ -20,6 +20,7 @@ struct Texture {
 	DirectX::XMFLOAT4 colorData_;					// 色を指定してテクスチャを生成する際、このテクスチャがどの色なのかを渡すための変数
 };
 
+// テクスチャデータを保存しておくクラス。
 class TextureManager : public Singleton<TextureManager> {
 
 private:

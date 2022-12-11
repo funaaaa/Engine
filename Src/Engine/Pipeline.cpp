@@ -25,10 +25,8 @@ Pipeline::Pipeline(
 	Microsoft::WRL::ComPtr<ID3DBlob> psBlob = nullptr;		//ピクセルシェーダオブジェクト
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	//頂点シェーダの読み込みとコンパイル
-	//vsBlob = LoadShader(VSname, "main", "vs_5_0", vsBlob.Get(), errorBlob.Get());
 	vsBlob = ShaderStorage::Ins()->LoadShader(VSname, "vs_5_0", "main");
 	//ピクセルシェーダの読み込みとコンパイル
-	//psBlob = LoadShader(PSname, "main", "ps_5_0", psBlob.Get(), errorBlob.Get());
 	psBlob = ShaderStorage::Ins()->LoadShader(PSname, "ps_5_0", "main");
 
 	//グラフィックスパイプライン生成
@@ -65,10 +63,8 @@ Pipeline::Pipeline(
 	Microsoft::WRL::ComPtr<ID3DBlob> vsBlob = nullptr;		//頂点シェーダオブジェクト
 	Microsoft::WRL::ComPtr<ID3DBlob> psBlob = nullptr;		//ピクセルシェーダオブジェクト
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
-	//vsBlob = LoadShader(VSname, "main", "vs_5_0", vsBlob.Get(), errorBlob.Get());
 	vsBlob = ShaderStorage::Ins()->LoadShader(VSname, "vs_5_0", "main");
 	//ピクセルシェーダの読み込みとコンパイル
-	//psBlob = LoadShader(PSname, "main", "ps_5_0", psBlob.Get(), errorBlob.Get());
 	psBlob = ShaderStorage::Ins()->LoadShader(PSname, "ps_5_0", "main");
 
 	//グラフィックスパイプライン生成
@@ -104,13 +100,10 @@ Pipeline::Pipeline(
 	Microsoft::WRL::ComPtr<ID3DBlob> gsBlob = nullptr;		//ジオメトリシェーダオブジェクト
 	Microsoft::WRL::ComPtr<ID3DBlob> errorBlob = nullptr;	//エラーオブジェクト
 	//頂点シェーダの読み込みとコンパイル
-	//vsBlob = LoadShader(VSname, "main", "vs_5_0", vsBlob.Get(), errorBlob.Get());
 	vsBlob = ShaderStorage::Ins()->LoadShader(VSname, "vs_5_0", "main");
 	//ピクセルシェーダの読み込みとコンパイル
-	//psBlob = LoadShader(PSname, "main", "ps_5_0", psBlob.Get(), errorBlob.Get());
 	psBlob = ShaderStorage::Ins()->LoadShader(PSname, "ps_5_0", "main");
 	//ジオメトリシェーダの読み込みとコンパイル
-	//gsBlob = LoadShader(GSname, "main", "gs_5_0", gsBlob.Get(), errorBlob.Get());
 	gsBlob = ShaderStorage::Ins()->LoadShader(GSname, "gs_5_0", "main");
 
 	//グラフィックスパイプライン生成
