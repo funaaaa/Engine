@@ -101,7 +101,7 @@ void CharacterMgr::AddChara(int CharaID, bool IsPlayer, int Level, int CharaPers
 
 }
 
-bool CharacterMgr::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<Character::TireMaskUV>& TireMaskUVData)
+bool CharacterMgr::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<CharacterTireMask::TireMaskUV>& TireMaskUVData)
 {
 
 	/*===== タイヤ痕チェック =====*/
@@ -110,7 +110,7 @@ bool CharacterMgr::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::ve
 
 	for (auto& index : character_) {
 
-		Character::TireMaskUV tireMaskUVBuff;
+		CharacterTireMask::TireMaskUV tireMaskUVBuff;
 
 		isTireMask |= index->CheckTireMask(BaseStageData, tireMaskUVBuff);
 

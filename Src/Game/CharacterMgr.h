@@ -4,6 +4,7 @@
 #include "Character.h"
 #include "ConstBuffers.h"
 #include "FHelper.h"
+#include "CharacterTireMask.h"
 
 class Character;
 class BaseStage;
@@ -30,7 +31,7 @@ public:
 	// 初期地点を設定。
 	void SettingStartPos();
 	void AddChara(int CharaID, bool IsPlayer, int Param = 0, int CharaPersonality = 0);
-	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<Character::TireMaskUV>& TireMaskUVData);
+	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<CharacterTireMask::TireMaskUV>& TireMaskUVData);
 	inline std::weak_ptr<Character> GetPlayerIns() { return character_[playerIndex_]; }
 
 	// いずれかのキャラがゴールしたかをチェックする。

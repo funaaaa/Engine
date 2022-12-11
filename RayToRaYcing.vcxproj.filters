@@ -243,6 +243,7 @@
     </ClCompile>
     <ClCompile Include="Src\Game\CharacterRocket.cpp" />
     <ClCompile Include="Src\Game\CharacterFlags.cpp" />
+    <ClCompile Include="Src\Game\CharacterTireMask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -540,6 +541,9 @@
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\CharacterFlags.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterTireMask.h">
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
   </ItemGroup>

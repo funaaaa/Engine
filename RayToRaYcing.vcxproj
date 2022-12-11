@@ -138,6 +138,7 @@
     <ClCompile Include="Src\Game\CharacterInclineBody.cpp" />
     <ClCompile Include="Src\Game\CharacterMgr.cpp" />
     <ClCompile Include="Src\Game\CharacterRocket.cpp" />
+    <ClCompile Include="Src\Game\CharacterTireMask.cpp" />
     <ClCompile Include="Src\Game\ConcentrationLine.cpp" />
     <ClCompile Include="Src\Game\ConcentrationLineMgr.cpp" />
     <ClCompile Include="Src\Game\ConvertGimmickInfoFromBlender.cpp" />
@@ -237,6 +238,7 @@
     <ClInclude Include="Src\Game\CharacterInclineBody.h" />
     <ClInclude Include="Src\Game\CharacterMgr.h" />
     <ClInclude Include="Src\Game\CharacterRocket.h" />
+    <ClInclude Include="Src\Game\CharacterTireMask.h" />
     <ClInclude Include="Src\Game\ConcentrationLine.h" />
     <ClInclude Include="Src\Game\ConcentrationLineMgr.h" />
     <ClInclude Include="Src\Game\ConvertGimmickInfoFromBlender.h" />

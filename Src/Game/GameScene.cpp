@@ -27,6 +27,7 @@
 #include "PolygonInstance.h"
 #include "BaseItem.h"
 #include "BrightnessParam.h"
+#include "CharacterTireMask.h"
 
 #include "RayEngine.h"
 
@@ -59,7 +60,7 @@ GameScene::GameScene()
 	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
 	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
 	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
-	tireMaskConstBuffer_->Generate(sizeof(Character::TireMaskUV) * 2, L"TireMaskUV");
+	tireMaskConstBuffer_->Generate(sizeof(CharacterTireMask::TireMaskUV) * 2, L"TireMaskUV");
 
 	// 白塗りコンピュートシェーダー
 	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
@@ -382,13 +383,13 @@ void GameScene::Draw()
 	}
 
 	// タイヤ痕を書き込む。
-	std::vector<Character::TireMaskUV> tireMaskUV;
+	std::vector<CharacterTireMask::TireMaskUV> tireMaskUV;
 	bool isWriteTireMask = characterMgr_->CheckTireMask(stages_[STAGE_ID::MUGEN], tireMaskUV);
 
 	if (isWriteTireMask) {
 
 		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
+		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(CharacterTireMask::TireMaskUV) * 2);
 		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(

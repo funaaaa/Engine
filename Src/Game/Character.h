@@ -2,6 +2,7 @@
 #include "Vec.h"
 #include "ConstBuffers.h"
 #include "PlayerModel.h"
+#include "CharacterTireMask.h"
 #include "FHelper.h"
 #include <vector>
 #include <memory>
@@ -17,6 +18,7 @@ class CharacterInclineBody;
 class CharacterGameFinish;
 class CharacterDrift;
 class CharacterRocket;
+class CharacterTireMask;
 struct CharacterFlags;
 
 // キャラクタークラス。操作を管理する操作オブジェクトを入れ替えることによってAIとプレイヤーを切り替える。
@@ -72,6 +74,9 @@ public:
 	const float MAX_SPEED = 16.0f;			// 移動速度の最大値
 	const float MAX_SPEED_ON_GRASS = 12.0f;	// 草の上にいるときの最大速度
 	const float ADD_SPEED = 2.0f;			// 移動速度の加算量
+	const float HANDLE_DRIFT = 0.05f;		// ドリフト時のハンドリングの角度
+	const float MAX_BOOST_SPEED = 15.0f;	// ブーストの移動量の最大値
+	const float SUB_BOOST_SPEED = 0.2f;		// ブーストの移動量の現残量
 	const float HANDLE_NORMAL = 0.03f;		// 通常時のハンドリングの角度
 	const float MAX_GRAV = 8.0f;			// 重力の最大量
 	const float ADD_GRAV = 0.4f;			// 重力の加算量
@@ -81,79 +86,49 @@ public:
 
 
 	/*-- ドリフト、加速時の車体の回転に関する変数 --*/
+	std::shared_ptr<CharacterInclineBody> inclineBody_;	// キャラクターを回転させる際に使用する処理をまとめたクラス
 
-	std::shared_ptr<CharacterInclineBody> inclineBody_;		// キャラクターを回転させる際に使用する処理をまとめたクラス
+
+	/*-- タイヤ痕に関する処理 --*/
+	std::shared_ptr<CharacterTireMask> tireMask_;		// タイヤ痕に関する処理をまとめたクラス
 
 
 	/*-- モデルのデータに関する変数 --*/
-
 	PlayerModel playerModel_;
 
 
 	/*-- ドリフトに関する変数 --*/
-
-	std::shared_ptr<CharacterDrift> drift_;		// ドリフトに関する処理をまとめたクラス
+	std::shared_ptr<CharacterDrift> drift_;				// ドリフトに関する処理をまとめたクラス
 
 
 	/*-- ジャンプのブーストに関する変数 --*/
-
 	float jumpBoostSpeed_;
 	const float JUMP_BOOST_SPEED = 10.0f;
 	const float SUB_JUMP_BOOST_SPEED = 0.2f;
 
 
 	/*-- エンジン用変数 --*/
-
-	float engineWaveTimer_;	// 開始前にサイン波の動きを指せるようのタイマー	
+	float engineWaveTimer_;		// 開始前にサイン波の動きを指せるようのタイマー	
 	float engineWaveAmount_;
 
 
 	/*-- 開始前用変数 --*/
-
 	const float BEFORE_START_WAVE_LENGTH_RUN = 0.05f;
 	const float BEFORE_START_WAVE_LENGTH_DEF = 0.3f;
 	const float BEFORE_START_WAVE_LENGTH_ACCELL = 1.0f;
 
 
 	/*-- ゴール演出用変数 --*/
-
 	std::shared_ptr<CharacterGameFinish> gameFinish_;	// キャラクターのゲーム終了時に行う処理をまとめたクラス
 
 
 	/*-- ゴール用 --*/
-
 	int rapCount_;
 	bool isPassedMiddlePoint_;
 
 
-
 	/*-- ロケットアイテム関係 --*/
-
 	std::shared_ptr<CharacterRocket> rocket_;
-
-
-public:
-
-	struct TireUVSet {
-		Vec2 uv_;
-		Vec2 prevuv_;
-	};
-
-	// タイヤ痕書き込み用
-	struct TireMaskUV {
-		TireUVSet forwardLeftUV_;
-		TireUVSet forwardRightUV_;
-		TireUVSet behindLeftUV_;
-		TireUVSet behindRightUV_;
-	};
-
-private:
-
-	TireMaskUV tireMaskUV_;				// タイヤ痕を出す際に仕様
-
-	const float HANDLE_DRIFT = 0.05f;	// ドリフト時のハンドリングの角度
-	const float MAX_BOOST_SPEED = 15.0f;// ブーストの移動量の最大値
-	const float SUB_BOOST_SPEED = 0.2f;	// ブーストの移動量の現残量
 
 
 public:
@@ -188,7 +163,7 @@ public:
 	void Draw();
 
 	// タイヤ痕検出
-	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV& TireMaskUVData);
+	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, CharacterTireMask::TireMaskUV& TireMaskUVData);
 
 
 	const Vec3& GetPos() { return pos_; }
