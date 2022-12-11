@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-// 無限型ステージ
+// 無限型ステージ 基本はこのステージを使用する。
 class MugenStage : public BaseStage {
 
 private:
@@ -14,21 +14,6 @@ private:
 	int timer_;	// 各オブジェクトで使用するタイマー。セッティングされてからインクリメントし続ける。
 	int goalInsIndex;	// ゴールのインスタンスのインデックス。
 	int tunnelIndex_;
-
-	std::vector<Vec3> pointLightPos;
-
-public:
-
-	enum class STATUS {
-
-		DEF,
-		REFLECTION,
-
-	};
-
-private:
-
-	STATUS status_;
 
 public:
 
@@ -42,16 +27,20 @@ public:
 
 private:
 
+	// ビルをロードする際に使用するパラメーター
 	enum class OBJ_DATA_ID {
-		ID,
-		POSITION,
-		SCALE,
-		ROTATE,
-		X,
-		Y,
-		Z,
+		ID,			// オブジェクトのID
+		POSITION,	// オブジェクトの座標パラメーター
+		SCALE,		// オブジェクトのスケールパラメーター
+		ROTATE,		// オブジェクトの回転パラメーター
+		X,			// 各パラメーターのX成分
+		Y,			// 各パラメーターのY成分
+		Z,			// 各パラメーターのZ成分
 	};
 	void LoadBuilding();
 	void GetBuildingData(std::string FilePath);
+
+	// 加速ギミックをセット。いずれはtxtから読み取れるようにする予定です。
+	void SetBoostGimmick();
 
 };

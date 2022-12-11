@@ -7,6 +7,7 @@ class StageObjectMgr;
 class PolygonMeshInstance;
 class OBB;
 
+// ステージ基底クラス
 class BaseStage {
 
 public:

@@ -12,7 +12,7 @@ private:
 
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc_;					// UAVの設定
 	Microsoft::WRL::ComPtr<ID3D12Resource> rayTracingOutput_;	// UAV
-	int uavDescriptorIndex_;										// ディスクリプタヒープ上のこのUAVのインデックス
+	int uavDescriptorIndex_;									// ディスクリプタヒープ上のこのUAVのインデックス
 
 
 public:
