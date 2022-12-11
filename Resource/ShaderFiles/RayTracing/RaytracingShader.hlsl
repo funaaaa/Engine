@@ -271,7 +271,6 @@ void mainMS(inout Payload PayloadData)
     payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
     payloadBuff.color_ += AtmosphericScattering(WorldRayOrigin() + WorldRayDirection() * RayTCurrent(), mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
     payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
-    payloadBuff.emissive_ = float3(0, 0, 0);
         
     // マスクの色を白くする。(ライトリーク対策で他のマスクの色とかぶらないようにするため。)
     payloadBuff.denoiseMask_ = float3(1, 1, 1);
@@ -305,6 +304,12 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     if (payloadBuff.recursive_ == 1)
     {
         payloadBuff.denoiseMask_ = (NormalMap);
+    }
+    
+    // エミッシブだったらエミッシブマップに書き込む。
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_EMISSIVE)
+    {
+        payloadBuff.emissive_ += TexColor;
     }
     
     // InstanceIDがCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKだったらテクスチャに色を加算。
