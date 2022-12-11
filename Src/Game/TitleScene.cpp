@@ -264,7 +264,7 @@ void TitleScene::CameraUpdate()
 
 	/*===== カメラの更新処理 =====*/
 
-		// カメラの情報。
+	// カメラの情報。
 	Vec3& eye = Camera::Ins()->eye_;
 	Vec3& target = Camera::Ins()->target_;
 	Vec3& up = Camera::Ins()->up_;

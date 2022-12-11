@@ -10,7 +10,6 @@ public:
 
 		TITLE,			// タイトルシーン
 		GAME,			// ゲームシーン
-		RESULT,			// リザルトシーン
 		SCENE_COUNT,	// シーン数
 
 	};

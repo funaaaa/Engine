@@ -27,7 +27,6 @@ class Character {
 private:
 
 	/*===== メンバ変数 =====*/
-public:
 
 	Vec3 pos_;								// 車の座標
 	Vec3 prevPos_;							// 車の前フレームの座標
@@ -143,7 +142,7 @@ public:
 	};
 
 
-public:
+private:
 
 	CHARA_ID charaID_;
 
@@ -165,11 +164,15 @@ public:
 	// タイヤ痕検出
 	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, CharacterTireMask::TireMaskUV& TireMaskUVData);
 
+	// 初期地点を設定。
+	void SettingStartPos(int& Index);
 
+
+	PlayerModel& GetPlayerModel() { return playerModel_; }
 	const Vec3& GetPos() { return pos_; }
 	const Vec3& GetPrevPos() { return prevPos_; }
-	Vec3 GetCameraForwardVec();
 	const Vec3& GetForwardVec() { return forwardVec_; }
+	Vec3 GetCameraForwardVec();
 	Vec3 GetUpVec() { return upVec_; };
 	float GetNowSpeedPer();
 	bool GetIsGetItem();	// アイテムを取得した瞬間

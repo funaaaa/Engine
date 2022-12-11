@@ -51,12 +51,12 @@ void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bo
 		// カリングする。
 		if (inScreen) {
 
-			index->playerModel_.Display();
+			index->GetPlayerModel().Display();
 
 		}
 		else {
 
-			index->playerModel_.NonDisplay();
+			index->GetPlayerModel().NonDisplay();
 
 		}
 
@@ -76,15 +76,7 @@ void CharacterMgr::SettingStartPos()
 	int counter = 0;
 	for (auto& index : character_) {
 
-		// プレイヤーだったら。
-		if (index->charaID_ == Character::CHARA_ID::P1) {
-			index->defPos_ = index->PLAYER_DEF_POS;
-			continue;
-		}
-
-		// それ以外のキャラは順番に場所を設定する。
-		index->defPos_ = index->GHOST_DEF_POS[counter];
-		++counter;
+		index->SettingStartPos(counter);
 
 	}
 
@@ -123,6 +115,8 @@ bool CharacterMgr::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::ve
 
 bool CharacterMgr::CheckGoal()
 {
+
+	/*===== ゴールしたかどうかをチェック =====*/
 
 	bool isGoal = false;
 

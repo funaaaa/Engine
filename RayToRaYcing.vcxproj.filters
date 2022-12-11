@@ -130,9 +130,6 @@
     <ClCompile Include="Src\Game\TitleScene.cpp">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\ResultScene.cpp">
-      <Filter>アプリケーション\シーン管理\シーン</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Engine\Pipeline.cpp">
       <Filter>エンジン\パイプライン</Filter>
     </ClCompile>
@@ -385,9 +382,6 @@
       <Filter>アプリケーション\シーン管理\管理</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\GameScene.h">
-      <Filter>アプリケーション\シーン管理\シーン</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\ResultScene.h">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\TitleScene.h">

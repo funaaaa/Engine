@@ -394,6 +394,24 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, CharacterT
 
 }
 
+void Character::SettingStartPos(int& Index)
+{
+
+	/*===== 初期地点を設定 =====*/
+
+	// プレイヤーだったら。
+	if (charaID_ == Character::CHARA_ID::P1) {
+		defPos_ = PLAYER_DEF_POS;
+		return;
+	}
+
+	// それ以外のキャラは順番に場所を設定する。
+	defPos_ = GHOST_DEF_POS[Index];
+
+	++Index;
+
+}
+
 Vec3 Character::GetCameraForwardVec()
 {
 	/*===== カメラ用正面ベクトル取得関数 =====*/

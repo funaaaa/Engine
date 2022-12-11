@@ -9,6 +9,7 @@
 class Character;
 class BaseStage;
 
+// キャラクターを管理するクラス。AddCharaでキャラのIDやパラメーターを渡すことでプレイヤーやAIを生成する。
 class CharacterMgr {
 
 private:

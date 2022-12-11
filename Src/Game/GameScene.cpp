@@ -80,7 +80,7 @@ GameScene::GameScene()
 
 	isDisplayFPS_ = false;
 
-	nextScene_ = SCENE_ID::RESULT;
+	nextScene_ = SCENE_ID::TITLE;
 	isTransition_ = false;
 
 	countDownStartTimer_ = 0;
