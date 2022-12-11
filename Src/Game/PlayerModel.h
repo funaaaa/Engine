@@ -5,6 +5,7 @@
 class PolygonMeshInstance;
 class BLAS;
 
+// キャラクターのモデル情報をまとめたクラス
 class PlayerModel {
 
 public:
@@ -65,6 +66,7 @@ public:
 
 	/*===== メンバ関数 =====*/
 
+	// 車体の色
 	enum class COLOR {
 
 		RED,
@@ -72,6 +74,7 @@ public:
 
 	};
 
+	// キャラの情報
 	enum class CHARA {
 
 		PLAYER,

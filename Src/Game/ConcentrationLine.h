@@ -11,11 +11,11 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::shared_ptr<Sprite> sprite_;
-	float alpha_;
-	int exitTimer_;
+	std::shared_ptr<Sprite> sprite_;	// 描画する画像データ
+	float alpha_;						// アルファ値 だんだん薄くしていく。
+	int exitTimer_;						// 無効化するまでのタイマー
 	const int EXIT_TIME = 10;
-	bool isActive_;
+	bool isActive_;						// 有効化フラグ
 
 
 public:

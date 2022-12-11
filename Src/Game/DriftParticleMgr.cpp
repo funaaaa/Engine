@@ -153,8 +153,6 @@ void DriftParticleMgr::GenerateFire(const Vec3& Pos, const DirectX::XMMATRIX Mat
 
 	}
 
-	//}
-
 }
 
 void DriftParticleMgr::GenerateAura(int CharaIndex, std::weak_ptr<PolygonMeshInstance> TireInstance, int Id, bool IsBoostRight, bool IsOrange)

@@ -1,6 +1,5 @@
 #include "StageObjectMgr.h"
 #include "BasicStageObject.h"
-#include "FloatingStageObject.h"
 #include "ItemBoxObject.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
@@ -46,14 +45,8 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 	}
 
-	// ふわふわ動く装飾オブジェクトだったら。
-	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
-
-		objects_[addIndex].first = std::make_shared<FloatingStageObject>();
-
-	}
 	// アイテムボックスオブジェクトだったら
-	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+	if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
 
 		objects_[addIndex].first = std::make_shared<ItemBoxObject>();
 
@@ -102,14 +95,8 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 	}
 
-	// ふわふわ動く装飾オブジェクトだったら。
-	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
-
-		objects_[addIndex].first = std::make_shared<FloatingStageObject>();
-
-	}
 	// アイテムボックスオブジェクトだったら
-	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+	if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
 
 		objects_[addIndex].first = std::make_shared<ItemBoxObject>();
 

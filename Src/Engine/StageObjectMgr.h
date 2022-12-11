@@ -7,6 +7,7 @@
 #include "FHelper.h"
 #include "BLAS.h"
 
+// ステージに配置されるオブジェクトを管理するクラス。BaseStageがこのクラスを1つ持つ。
 class StageObjectMgr {
 
 private:

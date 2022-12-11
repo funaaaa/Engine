@@ -9,6 +9,7 @@ class OBB;
 class PolygonMeshInstance;
 class BLAS;
 
+// ステージに配置されるオブジェクトの既定クラス。
 class BaseStageObject {
 
 public:
@@ -32,7 +33,6 @@ public:
 		GOAL,			// ゴール
 		MIDDLE_POINT,	// 中間地点
 		ORNAMENT,		// 装飾オブジェクト
-		FLOATING_ORNAMENT,	// ふわふわ動く装飾オブジェクト
 		BOOST_GIMMICK,	// 加速ギミック
 		ITEM_BOX,		// アイテムボックス
 		STEP_BOOST_GIMMICK,	// 段差加速ギミック

@@ -4,6 +4,7 @@
 
 class PolygonMeshInstance;
 
+// キャラクターのタイヤを保存しておくクラス。
 class PlayerTire{
 
 private:

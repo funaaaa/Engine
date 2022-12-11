@@ -4,6 +4,7 @@
 
 class FirstAIWayPointMgr;
 
+// 最初に作ったAIの操作オブジェクト
 class FirstAIOperationObject : public BaseOperationObject {
 
 private:

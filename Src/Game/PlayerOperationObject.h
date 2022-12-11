@@ -5,6 +5,7 @@
 
 class Character;
 
+// コントローラーからプレイヤーの入力を受け取る操作オブジェクト
 class PlayerOperationObject : public BaseOperationObject {
 
 private:

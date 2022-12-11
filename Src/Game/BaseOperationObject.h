@@ -2,7 +2,7 @@
 #include "Vec.h"
 #include "BaseItem.h"
 
-// 操作オブジェクト基底クラス
+// 操作オブジェクト基底クラス これを継承したクラスをCharacterにセットして車を動かす。
 class BaseOperationObject {
 
 protected:
@@ -36,14 +36,15 @@ public:
 
 	};
 
+	// AIが操作を決定する際に必要な情報。
 	struct OperationInputData
 	{
 
-		Vec3 pos_;
-		Vec3 forwradVec_;
-		bool isHitJumpBoostGimmick_;
-		bool isPrevFrameDrift_;
-		BaseItem::ItemID hasItemID_;
+		Vec3 pos_;					// 現在のキャラクターの座標
+		Vec3 forwradVec_;			// キャラクターの移動方向ベクトル
+		bool isHitJumpBoostGimmick_;// 段差ジャンプギミックにあたっているかどうか
+		bool isPrevFrameDrift_;		// 前フレームにドリフトしていたか。
+		BaseItem::ItemID hasItemID_;// 保持しているアイテムのID
 
 		OperationInputData() :pos_({}), forwradVec_(Vec3(0, 0, 1)), isHitJumpBoostGimmick_(false), isPrevFrameDrift_(false), hasItemID_(BaseItem::ItemID::NONE) {};
 

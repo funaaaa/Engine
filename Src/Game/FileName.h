@@ -7,8 +7,10 @@
 #include <array>
 #include "FString.h"
 
+// ファイル情報を取得する。
 namespace FFILE {
 
+	// ファイル名を取得する。
 	bool GetFileNames(std::string FolderPath, std::vector<std::string>& FileNames)
 	{
 		HANDLE hFind;

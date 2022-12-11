@@ -160,9 +160,6 @@
     <ClCompile Include="Src\Engine\StageObjectMgr.cpp">
       <Filter>アプリケーション\ステージオブジェクト\管理クラス</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\FloatingStageObject.cpp">
-      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Game\PlayerTire.cpp">
       <Filter>アプリケーション\プレイヤー</Filter>
     </ClCompile>
@@ -418,9 +415,6 @@
       <Filter>アプリケーション\ステージオブジェクト\基底クラス</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\BasicStageObject.h">
-      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\FloatingStageObject.h">
       <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\StageObjectMgr.h">
