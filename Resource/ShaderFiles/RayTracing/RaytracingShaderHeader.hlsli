@@ -133,74 +133,6 @@ inline float3 CalcBarycentrics(float2 Barys)
     return float3(1.0 - Barys.x - Barys.y, Barys.x, Barys.y);
 }
 
-// 乱数の種を更新
-float NextRand(inout uint S)
-{
-    S = (1664525u * S + 1013904223u);
-    return float(S & 0x00FFFFFF) / float(0x01000000);
-}
-
-float3x3 AngleAxis3x3(float Angle, float3 Axis)
-{
-    float c, s;
-    sincos(Angle, s, c);
-
-    float t = 1 - c;
-    float x = Axis.x;
-    float y = Axis.y;
-    float z = Axis.z;
-
-    return float3x3(
-        t * x * x + c, t * x * y - s * z, t * x * z + s * y,
-        t * x * y + s * z, t * y * y + c, t * y * z - s * x,
-        t * x * z - s * y, t * y * z + s * x, t * z * z + c
-        );
-}
-
-// 円錐状にベクトルをサンプリング
-float3 GetConeSample(inout uint randSeed, float3 direction, float coneAngle)
-{
-    float cosAngle = cos(coneAngle);
-    const float PI = 3.1415926535;
-    
-    float z = NextRand(randSeed) * (1.0f - cosAngle) + cosAngle;
-    float phi = NextRand(randSeed) * 2.0f * PI;
-
-    float x = sqrt(1.0f - z * z) * cos(phi);
-    float y = sqrt(1.0f - z * z) * sin(phi);
-    float3 north = float3(0.f, 0.f, 1.f);
-    
-    float3 axis = normalize(cross(north, normalize(direction)));
-    float angle = acos(dot(normalize(direction), north));
-    
-    float3x3 R = AngleAxis3x3(angle, axis);
-
-    return mul(R, float3(x, y, z));
-}
-
-float3 GetPerpendicularVector(float3 U)
-{
-    float3 a = abs(U);
-    uint xm = ((a.x - a.y) < 0 && (a.x - a.z) < 0) ? 1 : 0;
-    uint ym = (a.y - a.z) < 0 ? (1 ^ xm) : 0;
-    uint zm = 1 ^ (xm | ym);
-    return cross(U, float3(xm, ym, zm));
-}
-
-float3 GetUniformHemisphereSample(inout uint RandSeed, float3 HitNorm)
-{
-    float2 randVal = float2(NextRand(RandSeed), NextRand(RandSeed));
-    float3 bitangent = GetPerpendicularVector(HitNorm);
-    float3 tangent = cross(bitangent, HitNorm);
-    float cosTheta = randVal.x;
-    float sinTheta = sqrt(1.0f - cosTheta * cosTheta);
-    float phi = 2.0f * 3.14f * randVal.y;
-    float x = sinTheta * cos(phi);
-    float z = sinTheta * sin(phi);
-    float y = cosTheta;
-    return x * tangent + y * HitNorm.xyz + z * bitangent;
-}
-
 // 影のレイを照射
 bool ShootShadowRay(float3 Origin, float3 Direction, float TMax, RaytracingAccelerationStructure GRtScene)
 {
@@ -361,22 +293,6 @@ void ShootRay(uint RayID, float3 Origin, float3 Direction, inout Payload Payload
     
 }
 
-uint InitRand(uint Val0, uint Val1, uint Backoff = 16)
-{
-    uint v0 = Val0, v1 = Val1, s0 = 0;
-
-	[unroll]
-    for (uint n = 0; n < Backoff; n++)
-    {
-        s0 += 0x9e3779b9;
-        v0 += ((v1 << 4) + 0xa341316c) ^ (v1 + s0) ^ ((v1 >> 5) + 0xc8013ea4);
-        v1 += ((v0 << 4) + 0xad90777d) ^ (v0 + s0) ^ ((v0 >> 5) + 0x7e95761e);
-    }
-    return v0;
-}
-
-
-
 // 当たった位置の情報を取得する関数
 Vertex GetHitVertex(MyAttribute attrib, StructuredBuffer<Vertex> vertexBuffer, StructuredBuffer<uint> indexBuffer, inout Vertex meshInfo[3])
 {
@@ -427,16 +343,13 @@ float3 CalcVertexBarys(float3 HitVertex, float3 VertexA, float3 VertexB, float3 
     
 }
 
-
-
-
 // 資料から持ってきた関数。
 float Scale(float FCos)
 {
     float x = 1.0 - FCos;
     return 0.25f * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
 }
-
+// 資料から持ってきた関数。 天球との交点を求める。
 float3 IntersectionPos(float3 Dir, float3 A, float Radius)
 {
     float b = dot(A, Dir);
@@ -449,7 +362,7 @@ float3 IntersectionPos(float3 Dir, float3 A, float Radius)
 // 3頂点とUV値から指定座標でのU軸（Tangent）及びV軸（Binormal）を算出
 void CalcTangentAndBinormal(float3 p0, float3 p1, float3 p2, float2 uv0, float2 uv1, float2 uv2, inout float3 outTangent, inout float3 outBinormal)
 {
-   // 5次元→3次元頂点に
+    // 5次元→3次元頂点に
     float3 CP0[3] =
     {
         float3(p0.x, uv0.x, uv0.y),
@@ -469,7 +382,7 @@ void CalcTangentAndBinormal(float3 p0, float3 p1, float3 p2, float2 uv0, float2 
         float3(p2.z, uv2.x, uv2.y),
     };
 
-   // 平面パラメータからUV軸座標算出
+    // 平面パラメータからUV軸座標算出
     float U[3], V[3];
     for (int i = 0; i < 3; ++i)
     {

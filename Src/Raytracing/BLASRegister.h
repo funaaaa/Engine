@@ -9,6 +9,7 @@
 
 class BLAS;
 
+// オブジェクトの形状データを管理、保存するクラス。
 class BLASRegister : public Singleton<BLASRegister> {
 
 private:

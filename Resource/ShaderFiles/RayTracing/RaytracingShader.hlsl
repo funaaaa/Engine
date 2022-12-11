@@ -1,6 +1,3 @@
-
-//#pragma enable_d3d11_debug_symbols
-
 #include "RaytracingShaderHeader.hlsli"
 
 // TLAS
@@ -511,9 +508,6 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
     }
     else if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK_AO || instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_AO)
     {
-        
-        int seed = InitRand(DispatchRaysIndex().x + (WorldPos.x / 1000.0f) + DispatchRaysIndex().y * numPix.x, 100, 16);
-        float3 sampleDir = GetUniformHemisphereSample(seed, NormalMap);
         
         float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, normalize(mul(Vtx.Normal, (float3x3) ObjectToWorld4x3())), 50, gRtScene);
         

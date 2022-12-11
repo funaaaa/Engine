@@ -35,17 +35,6 @@ void TLAS::GenerateTLAS()
 
 }
 
-//void tlas::updateinstancedata()
-//{
-//
-//	// インスタンスの情報を記録したバッファを準備する。
-//	size_t sizeofinstancedescs = PolygonInstanceRegister::instance()->getregistersize() * sizeof(d3d12_raytracing_instance_desc);
-//
-//	// 生成したバッファにデータを書き込む。
-//	writetomemory(instanceDescBuffer_, PolygonInstanceRegister::instance()->getdata(), sizeofinstancedescs);
-//
-//}
-
 void TLAS::Update()
 {
 

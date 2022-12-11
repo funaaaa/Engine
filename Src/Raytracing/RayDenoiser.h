@@ -8,6 +8,7 @@ class RaytracingOutput;
 class RayComputeShader;
 class DynamicConstBuffer;
 
+// 指定のUAVをデノイズして返すクラス。
 class Denoiser : public Singleton<Denoiser> {
 
 private:

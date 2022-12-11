@@ -14,6 +14,7 @@ class RaytracingOutput;
 class RaytracingPipeline;
 class DynamicConstBuffer;
 
+// レイトレーシング用の処理をまとめたクラス。Engineに付随する形で使用する。
 class RayEngine : public Singleton<RayEngine> {
 
 public:

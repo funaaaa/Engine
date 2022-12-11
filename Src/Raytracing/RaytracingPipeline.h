@@ -13,8 +13,8 @@ struct RayPipelineShaderData {
 
 	std::string shaderPath_;					// シェーダーパス
 	std::vector<LPCWSTR> rayGenEnteryPoint_;	// エントリポイント
-	std::vector<LPCWSTR> missEntryPoint_;	// エントリポイント
-	std::vector<LPCWSTR> hitgroupEntryPoint_;// エントリポイント
+	std::vector<LPCWSTR> missEntryPoint_;		// エントリポイント
+	std::vector<LPCWSTR> hitgroupEntryPoint_;	// エントリポイント
 	RayPipelineShaderData() {};
 	RayPipelineShaderData(std::string ShaderPath, std::vector<LPCWSTR> RGEntry, std::vector<LPCWSTR> MSEntry, std::vector<LPCWSTR> HGEntry)
 		:shaderPath_(ShaderPath), rayGenEnteryPoint_(RGEntry), missEntryPoint_(MSEntry), hitgroupEntryPoint_(HGEntry) {};

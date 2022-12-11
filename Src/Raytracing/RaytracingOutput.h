@@ -3,7 +3,7 @@
 #include <wrl.h>
 #include "Vec.h"
 
-// レイトレ出力UAVクラス
+// レイトレ出力UAVクラス レイトレ関数からの出力結果や、デノイズ後の出力結果の保存用に使用する。
 class RaytracingOutput {
 
 private:

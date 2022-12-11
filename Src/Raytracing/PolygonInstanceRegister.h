@@ -24,10 +24,11 @@ public:
 
 private:
 
-	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance_;
+	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance_;	// 描画オブジェクトの配列
 
-	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc_;
+	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc_;		// 描画オブジェクトの設定
 
+	// 描画する際に使用する行列をまとめたデータ
 	struct MatData {
 		DirectX::XMMATRIX matRot_;
 		DirectX::XMMATRIX matScale_;
