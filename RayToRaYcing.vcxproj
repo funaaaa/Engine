@@ -133,6 +133,7 @@
     <ClCompile Include="Src\Game\BoostItem.cpp" />
     <ClCompile Include="Src\Game\Character.cpp" />
     <ClCompile Include="Src\Game\CharacterDrift.cpp" />
+    <ClCompile Include="Src\Game\CharacterFlags.cpp" />
     <ClCompile Include="Src\Game\CharacterGameFinish.cpp" />
     <ClCompile Include="Src\Game\CharacterInclineBody.cpp" />
     <ClCompile Include="Src\Game\CharacterMgr.cpp" />
@@ -160,10 +161,6 @@
     <ClCompile Include="Src\Game\PlayerTire.cpp" />
     <ClCompile Include="Src\Game\ResultScene.cpp" />
     <ClCompile Include="Src\Game\SceneMgr.cpp" />
-    <ClCompile Include="Src\Game\TailLamp.cpp" />
-    <ClCompile Include="Src\Game\TailLampMgr.cpp" />
-    <ClCompile Include="Src\Game\TailLampVertex.cpp" />
-    <ClCompile Include="Src\Game\TailLampVertexMgr.cpp" />
     <ClCompile Include="Src\Game\TitleScene.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Raytracing\BLAS.cpp" />
@@ -235,6 +232,7 @@
     <ClInclude Include="Src\Game\BrightnessParam.h" />
     <ClInclude Include="Src\Game\Character.h" />
     <ClInclude Include="Src\Game\CharacterDrift.h" />
+    <ClInclude Include="Src\Game\CharacterFlags.h" />
     <ClInclude Include="Src\Game\CharacterGameFinish.h" />
     <ClInclude Include="Src\Game\CharacterInclineBody.h" />
     <ClInclude Include="Src\Game\CharacterMgr.h" />
@@ -263,10 +261,6 @@
     <ClInclude Include="Src\Game\PlayerTire.h" />
     <ClInclude Include="Src\Game\ResultScene.h" />
     <ClInclude Include="Src\Game\SceneMgr.h" />
-    <ClInclude Include="Src\Game\TailLamp.h" />
-    <ClInclude Include="Src\Game\TailLampMgr.h" />
-    <ClInclude Include="Src\Game\TailLampVertex.h" />
-    <ClInclude Include="Src\Game\TailLampVertexMgr.h" />
     <ClInclude Include="Src\Game\TitleScene.h" />
     <ClInclude Include="Src\Game\FirstAIWayPoint.h" />
     <ClInclude Include="Src\Raytracing\BLAS.h" />

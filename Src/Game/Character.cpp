@@ -31,6 +31,7 @@
 #include "CharacterGameFinish.h"
 #include "CharacterDrift.h"
 #include "CharacterRocket.h"
+#include "CharacterFlags.h"
 
 Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPersonality)
 {
@@ -135,17 +136,14 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	engineWaveTimer_ = 0;
 	engineWaveAmount_ = 0;
 	returnDefPosTimer_ = 0;
-	onGround_ = true;
-	isBeforeStartPrev_ = false;
-	onGroundPrev_ = false;
-	onGrass_ = false;
-	isGetItem_ = false;
-	isUseItem_ = false;
 	boostSpeed_ = 0.0f;
 	boostTimer_ = 0;
 	canNotMoveTimer_ = 0;
 	defBodyMatRot_ = DirectX::XMMatrixIdentity();
 	cameraForwardVec_ = forwardVec_;
+
+	// キャラクターで使用するフラグを生成。
+	flags_ = std::make_shared<CharacterFlags>();
 
 	// キャラクターを回転させる処理をまとめたクラスを生成。
 	inclineBody_ = std::make_shared<CharacterInclineBody>();
@@ -157,13 +155,6 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	// OBBを生成。
 	obb_ = std::make_shared<OBB>();
 	obb_->Setting(playerModel_.carBodyBlas_, playerModel_.carBodyInstance_);
-
-	//if (SceneMgr::Ins()->nowScene_ == BaseScene::SCENE_ID::GAME) {
-
-	//	leftTailLamp_ = std::make_shared<TailLampMgr>();
-	//	rightTailLamp_ = std::make_shared<TailLampMgr>();
-
-	//}
 
 }
 
@@ -204,15 +195,11 @@ void Character::Init()
 	canNotMoveTimer_ = 0;
 	engineWaveTimer_ = 0;
 	engineWaveAmount_ = 0;
-	isUseItem_ = false;
-	onGround_ = true;
-	onGrass_ = false;
-	isGetItem_ = false;
-	isBeforeStartPrev_ = false;
-	isConcentrationLine_ = false;
-	isJumpActionTrigger_ = false;
 	playerModel_.carBodyInstance_.lock()->ChangeRotate(Vec3(0, 0, 0));
 	cameraForwardVec_ = forwardVec_;
+
+	// キャラクターで使用するフラグを初期化
+	flags_->Init();
 
 	// ロケットに関する変数を初期化。
 	rocket_->Init();
@@ -234,13 +221,6 @@ void Character::Init()
 	DriftParticleMgr::Ins()->GenerateAura(charaIndex_, playerModel_.carBehindTireInstance_, static_cast<int>(DriftParticle::ID::AURA_SMALL), false, 2 <= 0);
 
 	DriftParticleMgr::Ins()->DestroyAura(charaIndex_);
-
-	//if (SceneMgr::Ins()->nowScene_ == BaseScene::SCENE_ID::GAME) {
-
-	//	leftTailLamp_->Init();
-	//	rightTailLamp_->Init();
-
-	//}
 
 }
 
@@ -294,7 +274,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 	InclineCarBody();
 
 	// 空中にいるときは初期地点まで戻るタイマーを更新。地上に要るときはタイマーを初期化。
-	if (onGround_) {
+	if (flags_->onGround_) {
 
 		returnDefPosTimer_ = 0;
 
@@ -360,7 +340,7 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 
 	// ブースト量が一定以上だったら集中線を出す。
 	if (charaID_ == CHARA_ID::P1) {
-		isConcentrationLine_ = (MAX_BOOST_SPEED / 2.0f < boostSpeed_) || (JUMP_BOOST_SPEED / 2.0f < jumpBoostSpeed_);
+		flags_->isConcentrationLine_ = (MAX_BOOST_SPEED / 2.0f < boostSpeed_) || (JUMP_BOOST_SPEED / 2.0f < jumpBoostSpeed_);
 	}
 
 	// ブーストの割合に応じてラジアルブラーをかける。
@@ -368,62 +348,16 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 
 		RadialBlur::Ins()->SetBlurPower(FHelper::Saturate(boostSpeed_ / MAX_BOOST_SPEED));
 
-		//_RPTFN(_CRT_WARN, "%f\n", boostSpeed_ / MAX_BOOST_SPEED);
-
 	}
 
 	// 接地フラグを保存。
-	onGroundPrev_ = onGround_;
+	flags_->onGroundPrev_ = flags_->onGround_;
 
 	// ゲーム開始前フラグを保存。
-	isBeforeStartPrev_ = IsBeforeStart;
+	flags_->isBeforeStartPrev_ = IsBeforeStart;
 
 	// ロケットの処理
 	UpdateRocket();
-
-	//// ゲームシーンでのみこの更新処理を行う。
-	//if (SceneMgr::Ins()->nowScene_ == BaseScene::SCENE_ID::GAME) {
-
-	//	// 画面内に収まっているか。
-	//	bool inScreen = FHelper::CheckInScreen(GetPos(), 100.0f, 100.0f, Camera::Ins()->matView_, Camera::Ins()->matPerspective_);
-
-	//	const float TAILLAMP_OFFSET_SPEED = 8.0f;	// テールランプを出すスピード
-	//	if (TAILLAMP_OFFSET_SPEED <= jumpBoostSpeed_ && inScreen) {
-
-	//		// テールランプを生成。
-	//		static const int VERTEX_SIZE = 4;
-	//		{
-	//			// 右後ろのテールランプ
-	//			DirectX::XMMATRIX matWorld = playerModel_.carRightLightInstance_.lock()->GetWorldMat();
-	//			std::array<Vec3, VERTEX_SIZE> vertex;
-	//			vertex[0] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[10], matWorld);	// ライトの頂点を設定。いずれは各頂点の最小と最大から自動で設定できるようにしたい。
-	//			vertex[1] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[11], matWorld);
-	//			vertex[2] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[1], matWorld);
-	//			vertex[3] = FHelper::MulMat(playerModel_.carRightLightBlas_.lock()->GetVertexPos()[2], matWorld);
-	//			// 生成
-	//			leftTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - TAILLAMP_OFFSET_SPEED) / (JUMP_BOOST_SPEED - TAILLAMP_OFFSET_SPEED));
-
-	//		}
-	//		{
-	//			// 左後ろのテールランプ
-	//			DirectX::XMMATRIX matWorld = playerModel_.carLeftLightInstance_.lock()->GetWorldMat();
-	//			std::array<Vec3, VERTEX_SIZE> vertex;
-	//			vertex[3] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[3], matWorld);
-	//			vertex[2] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[11], matWorld);
-	//			vertex[1] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[8], matWorld);
-	//			vertex[0] = FHelper::MulMat(playerModel_.carLeftLightBlas_.lock()->GetVertexPos()[2], matWorld);
-	//			// 生成
-	//			rightTailLamp_->Generate(vertex, TextureManager::Ins()->LoadTexture(L"Resource/Game/Car/TurningIndicator/white.png"), (jumpBoostSpeed_ - TAILLAMP_OFFSET_SPEED) / (JUMP_BOOST_SPEED - TAILLAMP_OFFSET_SPEED));
-
-	//		}
-
-	//	}
-
-	//	// テールランプを更新。
-	//	leftTailLamp_->Update();
-	//	rightTailLamp_->Update();
-
-	//}
 
 }
 
@@ -450,7 +384,7 @@ bool Character::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, TireMaskUV
 	}
 
 	// 空中にいたら、ドリフトジャンプ中だったら。
-	if (!onGround_ || drift_->GetIsDriftJump()) {
+	if (!flags_->onGround_ || drift_->GetIsDriftJump()) {
 
 		tireMaskUV_.forwardLeftUV_.prevuv_ = Vec2(0, 0);
 		tireMaskUV_.forwardLeftUV_.uv_ = Vec2(0, 0);
@@ -757,9 +691,24 @@ float Character::GetNowSpeedPer()
 
 }
 
+bool Character::GetIsGetItem()
+{
+	return flags_->isGetItem_;
+}
+
 bool Character::GetIsItem()
 {
 	return item_.operator bool();
+}
+
+bool Character::GetUseItem()
+{
+	return flags_->isUseItem_;
+}
+
+bool Character::GetIdConcentrationLine()
+{
+	return flags_->isConcentrationLine_;
 }
 
 void Character::DeleteInstance()
@@ -786,7 +735,7 @@ void Character::Input(bool IsBeforeStart)
 	if (item_.operator bool()) {
 		operationInputData.hasItemID_ = item_->GetItemID();
 	}
-	operationInputData.isHitJumpBoostGimmick_ = isHitJumpActionGimmick_;
+	operationInputData.isHitJumpBoostGimmick_ = flags_->isHitJumpActionGimmick_;
 	operationInputData.isPrevFrameDrift_ = drift_->GetIsDrift();
 	BaseOperationObject::Operation operation = operationObject_->Input(operationInputData);
 
@@ -799,10 +748,10 @@ void Character::Input(bool IsBeforeStart)
 	}
 
 	// 開始前のアクセルのフラグを更新。
-	isAccel_ = 0 < operation.accelerationRate_;
+	flags_->isAccel_ = 0 < operation.accelerationRate_;
 
 	// RTが引かれていたら加速。
-	if (0 < operation.accelerationRate_ && onGround_ && !IsBeforeStart) {
+	if (0 < operation.accelerationRate_ && flags_->onGround_ && !IsBeforeStart) {
 
 		speed_ += operation.accelerationRate_ * ADD_SPEED;
 
@@ -813,7 +762,7 @@ void Character::Input(bool IsBeforeStart)
 		speed_ -= speed_ / 50.0f;
 
 	}
-	else if (onGround_) {
+	else if (flags_->onGround_) {
 
 		// 移動していなくて地上にいたら移動量を0に近づける。
 		speed_ -= speed_ / 10.0f;
@@ -827,7 +776,7 @@ void Character::Input(bool IsBeforeStart)
 	}
 
 	// アイテムを後ろに投げるフラグを更新。
-	isShotBehind_ = operation.isShotBehind_;
+	flags_->isShotBehind_ = operation.isShotBehind_;
 
 	// ドリフトの入力に関する処理
 	{
@@ -836,7 +785,7 @@ void Character::Input(bool IsBeforeStart)
 		inData.canNotMoveTimer_ = canNotMoveTimer_;
 		inData.handleNormal_ = HANDLE_NORMAL;
 		inData.isBeforeStart_ = IsBeforeStart;
-		inData.onGround_ = onGround_;
+		inData.onGround_ = flags_->onGround_;
 		inData.upVec_ = upVec_;
 
 		// ドリフトの入力に関する更新処理
@@ -850,24 +799,24 @@ void Character::Input(bool IsBeforeStart)
 
 		item_ = std::make_shared<BoostItem>();
 		item_->Generate(playerModel_.carBodyInstance_);
-		isGetItem_ = true;
+		flags_->isGetItem_ = true;
 
 	}
 	else if (charaID_ == CHARA_ID::GHOST) {
 
-		isGetItem_ = false;
+		flags_->isGetItem_ = false;
 
 	}
 
 	// アイテムを操作
-	isUseItem_ = false;
+	flags_->isUseItem_ = false;
 	if (operation.isUseItemTrigger_ && item_.operator bool()) {
 
 		if (item_->GetItemID() == BaseItem::ItemID::BOOST) {
 
 			boostSpeed_ = MAX_BOOST_SPEED;
 			boostTimer_ = 30;
-			isUseItem_ = true;
+			flags_->isUseItem_ = true;
 			item_.reset();
 
 		}
@@ -882,9 +831,9 @@ void Character::Input(bool IsBeforeStart)
 
 	if (operation.isUseItemRelease_ && item_.operator bool()) {
 
-		isUseItem_ = true;
+		flags_->isUseItem_ = true;
 
-		if (isShotBehind_) {
+		if (flags_->isShotBehind_) {
 			item_->Use(rotY_, static_cast<int>(ShellItem::PARAM_ID::BEHIND_THROW));
 			timerToSkipShellCollider_ = TIMER_TO_SKIP_SHELL_COLLIDER;
 		}
@@ -898,7 +847,7 @@ void Character::Input(bool IsBeforeStart)
 	}
 
 	// ジャンプアクションのトリガー判定。
-	isJumpActionTrigger_ = operation.isDriftTrigger_;
+	flags_->isJumpActionTrigger_ = operation.isDriftTrigger_;
 
 	// 入力を保存する。
 	inclineBody_->SetHandleAmount(operation.handleDriveRate_);
@@ -918,7 +867,7 @@ void Character::Move(bool IsBeforeStart)
 	}
 
 	// 草の上にいたら移動速度の限界値を下げる。
-	if (onGrass_ && MAX_SPEED_ON_GRASS < speed_) {
+	if (flags_->onGrass_ && MAX_SPEED_ON_GRASS < speed_) {
 
 		speed_ = MAX_SPEED_ON_GRASS;
 
@@ -949,7 +898,7 @@ void Character::Move(bool IsBeforeStart)
 	}
 
 	// 地上にいたら重力を無効化する。
-	if (onGround_) {
+	if (flags_->onGround_) {
 
 		gravity_ = 0;
 
@@ -969,8 +918,8 @@ void Character::Move(bool IsBeforeStart)
 	}
 
 	// ゲームが開始したトリガーのときにアクセルがふまれていたら加速。
-	bool isGameStartRelease = isBeforeStartPrev_ && !IsBeforeStart;
-	if (isGameStartRelease && isAccel_) {
+	bool isGameStartRelease = flags_->isBeforeStartPrev_ && !IsBeforeStart;
+	if (isGameStartRelease && flags_->isAccel_) {
 
 		boostTimer_ = 20;
 		boostSpeed_ = MAX_BOOST_SPEED;
@@ -998,7 +947,7 @@ void Character::UpdateDrift()
 
 	/*===== ドリフトに関する更新処理 =====*/
 
-	drift_->Update(inclineBody_, pos_, prevPos_, onGround_);
+	drift_->Update(inclineBody_, pos_, prevPos_, flags_->onGround_);
 
 }
 
@@ -1066,12 +1015,12 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 
 	}
 	// 設置判定を初期化。
-	onGround_ = false;
-	onGrass_ = false;
+	flags_->onGround_ = false;
+	flags_->onGrass_ = false;
 	if (output.isHitStage_) {
 
 		// ステージとの当たり判定
-		onGround_ = true;
+		flags_->onGround_ = true;
 
 		forwardVec_ = output.forwardVec_;
 		upVec_ = output.upVec_;
@@ -1084,11 +1033,11 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 	if (output.isHitStageGrass_) {
 
 		// ステージと当たっていなかったら
-		if (!onGround_) {
+		if (!flags_->onGround_) {
 
 			// 草とあたった判定
-			onGround_ = true;
-			onGrass_ = true;
+			flags_->onGround_ = true;
+			flags_->onGrass_ = true;
 
 			forwardVec_ = output.forwardVec_;
 			upVec_ = output.upVec_;
@@ -1103,7 +1052,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 	if (output.isHitItemBox_ && charaID_ != CHARA_ID::GHOST && !item_.operator bool()) {
 
 		// アイテムを取得したフラグ
-		isGetItem_ = true;
+		flags_->isGetItem_ = true;
 
 		if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::WRITE_GHOST || GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::GHOST) {
 
@@ -1137,19 +1086,19 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 	else if (charaID_ != CHARA_ID::GHOST) {
 
 		// アイテムを取得しなかった
-		isGetItem_ = false;
+		flags_->isGetItem_ = false;
 
 	}
 
 	// 段差加速オブジェクトと当たっていて、ジャンプアクションボタンを押していたら。
-	isJumpAction_ = false;
-	isHitJumpActionGimmick_ = output.isHitStepBoostGimmick_;
-	if (output.isHitStepBoostGimmick_ && isJumpActionTrigger_) {
+	flags_->isJumpAction_ = false;
+	flags_->isHitJumpActionGimmick_ = output.isHitStepBoostGimmick_;
+	if (output.isHitStepBoostGimmick_ && flags_->isJumpActionTrigger_) {
 
 		// 加速させる。
 		jumpBoostSpeed_ = JUMP_BOOST_SPEED;
 
-		isJumpAction_ = true;
+		flags_->isJumpAction_ = true;
 
 	}
 
@@ -1208,7 +1157,7 @@ void Character::InclineCarBody()
 	inlclineInputData.isDrift_ = drift_->GetIsDrift();
 	inlclineInputData.isPlayer_ = charaID_ == CHARA_ID::P1;
 	inlclineInputData.maxBoostSpeed_ = MAX_BOOST_SPEED;
-	inlclineInputData.onGround_ = onGround_;
+	inlclineInputData.onGround_ = flags_->onGround_;
 	inlclineInputData.playerModel_ = playerModel_;
 	inlclineInputData.pos_ = pos_;
 	inlclineInputData.prevPos_ = prevPos_;
@@ -1234,25 +1183,22 @@ void Character::EngineSineWave()
 	float waveLength = 0;
 
 	// 開始前でアクセルがふまれていたら激しく動かす。
-	if (isAccel_ && isBeforeStartPrev_) {
+	if (flags_->isAccel_ && flags_->isBeforeStartPrev_) {
 
 		waveLength = BEFORE_START_WAVE_LENGTH_ACCELL;
 
 	}
 	// [地上にいて止まっていたら] or [開始前だったら] エンジンを動かす。
-	else if ((onGround_ && speed_ <= 0.1f && boostSpeed_ <= 0.1f) || isBeforeStartPrev_) {
+	else if ((flags_->onGround_ && speed_ <= 0.1f && boostSpeed_ <= 0.1f) || flags_->isBeforeStartPrev_) {
 
 		waveLength = BEFORE_START_WAVE_LENGTH_DEF;
 
 	}
-	else if (onGround_) {
+	else if (flags_->onGround_) {
 
 		waveLength = BEFORE_START_WAVE_LENGTH_RUN;
 
 	}
-
-	// サイン波を計算する。
-	//engineWaveAmount_ = std::sin(engineWaveTimer_) * waveLength;
 
 	// 動かす。
 	pos_.y_ += engineWaveAmount_;
@@ -1284,13 +1230,13 @@ void Character::UpdateDriftParticle(bool IsGameFinish, bool IsBeforeStart)
 	CharacterDrift::DriftParticleInData inData;
 	inData.forwardVec_ = forwardVec_;
 	inData.charaIndex_ = charaIndex_;
-	inData.isAccel_ = isAccel_;
+	inData.isAccel_ = flags_->isAccel_;
 	inData.maxBoostSpeed_ = MAX_BOOST_SPEED;
 	inData.isBeforeStart_ = IsBeforeStart;
 	inData.isGameFinish_ = IsGameFinish;
-	inData.IsJumpAction_ = isJumpAction_;
-	inData.onGroundPrev_ = onGroundPrev_;
-	inData.onGround_ = onGround_;
+	inData.IsJumpAction_ = flags_->isJumpAction_;
+	inData.onGroundPrev_ = flags_->onGroundPrev_;
+	inData.onGround_ = flags_->onGround_;
 
 	// ドリフトパーティクルの更新処理で帰ってくる値を詰め込む。
 	CharacterDrift::DriftParticleOutData outData(boostTimer_, boostSpeed_, playerModel_, gameFinish_);
@@ -1410,9 +1356,9 @@ void Character::UpdateRocket()
 	inData.upVec_ = upVec_;
 	inData.forwardVec_ = forwardVec_;
 	inData.hasItem_ = GetIsItem();
-	inData.isGetItem_ = isGetItem_;
+	inData.isGetItem_ = flags_->isGetItem_;
 	inData.isPlayer_ = charaID_ == CHARA_ID::P1;
-	inData.isUseItem_ = isUseItem_;
+	inData.isUseItem_ = flags_->isUseItem_;
 
 	// 更新する。
 	rocket_->Update(inData);

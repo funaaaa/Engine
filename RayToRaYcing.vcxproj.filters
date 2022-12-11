@@ -232,18 +232,6 @@
     <ClCompile Include="Src\Raytracing\Bloom.cpp">
       <Filter>レイトレーシング\ポストエフェクト</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\TailLampVertex.cpp">
-      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Game\TailLampVertexMgr.cpp">
-      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Game\TailLamp.cpp">
-      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Game\TailLampMgr.cpp">
-      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Game\CharacterInclineBody.cpp">
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClCompile>
@@ -254,6 +242,7 @@
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\CharacterRocket.cpp" />
+    <ClCompile Include="Src\Game\CharacterFlags.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -535,18 +524,6 @@
     <ClInclude Include="Src\Raytracing\Bloom.h">
       <Filter>レイトレーシング\ポストエフェクト</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Game\TailLampVertex.h">
-      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\TailLampVertexMgr.h">
-      <Filter>アプリケーション\キャラクター\テールランプ\頂点</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\TailLamp.h">
-      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\TailLampMgr.h">
-      <Filter>アプリケーション\キャラクター\テールランプ\形</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Game\BrightnessParam.h">
       <Filter>アプリケーション\トンネル</Filter>
     </ClInclude>
@@ -560,6 +537,9 @@
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\CharacterRocket.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterFlags.h">
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
   </ItemGroup>
@@ -784,15 +764,6 @@
     </Filter>
     <Filter Include="レイトレーシング\ポストエフェクト">
       <UniqueIdentifier>{dfb1cc77-996b-4573-9ca2-f6a263e0f1e3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="アプリケーション\キャラクター\テールランプ">
-      <UniqueIdentifier>{2a910e41-aa1d-4b42-9080-9545a42a104b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="アプリケーション\キャラクター\テールランプ\形">
-      <UniqueIdentifier>{af850c01-8a5c-4403-9c7c-439a80d5b757}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="アプリケーション\キャラクター\テールランプ\頂点">
-      <UniqueIdentifier>{beccf10b-8453-4f89-abfd-efb4ef759503}</UniqueIdentifier>
     </Filter>
     <Filter Include="アプリケーション\トンネル">
       <UniqueIdentifier>{fcbc1d1f-9dc3-450e-9d71-e8ca08baa9c8}</UniqueIdentifier>
