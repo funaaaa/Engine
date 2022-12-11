@@ -66,6 +66,11 @@ void CharacterDrift::Input(const InputData& Input, BaseOperationObject::Operatio
 
 		}
 
+		// タイヤ痕を出す。
+		if (0.95f < fabs(Operation.handleDriveRate_) || Operation.isDrift_) {
+			isTireMask_ = true;
+		}
+
 		// タイヤを回転させる。
 		for (auto& index : Tires) {
 
