@@ -5,6 +5,7 @@
 #include <array>
 
 class Character;
+class CharacterMgr;
 class PolygonMeshInstance;
 class BLAS;
 class BaseStage;
@@ -59,7 +60,15 @@ private:
 	std::shared_ptr<RayComputeShader> whiteOutComputeShader_;
 	std::shared_ptr<DynamicConstBuffer> tireMaskConstBuffer_;
 
-	std::shared_ptr<Character> player_;
+	// タイトルで走らせるプレイヤー
+	std::shared_ptr<CharacterMgr> player_;
+
+	// 太陽の角度
+	float sunAngle_;
+	float sunSpeed_;
+
+
+	// 最初の三秒の間プレイヤーを動かせなくする。
 
 	// カメラの状態
 	enum class CAMERA_MODE {

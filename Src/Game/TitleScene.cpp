@@ -7,6 +7,7 @@
 #include "PolygonInstanceRegister.h"
 #include "RayEngine.h"
 #include "Character.h"
+#include "CharacterMgr.h"
 #include "PolygonInstance.h"
 #include "PolygonInstanceRegister.h"
 #include "BLASRegister.h"
@@ -72,7 +73,8 @@ void TitleScene::Init()
 	PolygonInstanceRegister::Ins()->Setting();
 
 	// プレイヤーを生成。
-	player_ = std::make_shared<Character>(Character::CHARA_ID::GHOST, 0, 0);
+	player_ = std::make_shared<CharacterMgr>();
+	player_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, 0, 0);
 
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
@@ -95,6 +97,11 @@ void TitleScene::Init()
 	redSpriteAlpha_ = 0.0f;
 	redSpriteScaleRate_ = 0.0f;
 	redSpriteExpSpan_ = 0;
+
+	// 太陽に関する変数
+	sunAngle_ = 0.495f;
+	sunSpeed_ = 0.0005f;
+
 	isExp = false;
 	easingTimerUI_ = 0.0f;
 	titleStat_ = TITLE_STAT::TITLE;
@@ -139,16 +146,22 @@ void TitleScene::Update()
 	// 乱数の種を更新。
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
+	// ステージを更新。
+	stages_[STAGE_ID::MUGEN]->Update();
+
 	// 太陽の角度を更新。
-	const float SUN_ANGLE = 0.495f;
+	sunAngle_ += sunSpeed_;
+	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
+
+		sunAngle_ += sunSpeed_ * 50.0f;
+
+	}
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
-	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(SUN_ANGLE), -sin(SUN_ANGLE), 0.5f);
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 
 	// プレイヤーの位置を調整。
-	std::vector<std::shared_ptr<Character>> character;
-	character.emplace_back(player_);
-	player_->Update(stages_[0], character, false, false);
+	player_->Update(stages_[0], false, false);
 
 	// カメラの更新処理
 	CameraUpdate();
@@ -168,6 +181,26 @@ void TitleScene::Draw()
 {
 
 	RayEngine::Ins()->Draw();
+
+	// タイヤ痕を書き込む。
+	std::vector<CharacterTireMask::TireMaskUV> tireMaskUV;
+	bool isWriteTireMask = player_->CheckTireMask(stages_[STAGE_ID::MUGEN], tireMaskUV);
+
+	if (isWriteTireMask) {
+
+		// UAVを書き込む。
+		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(CharacterTireMask::TireMaskUV) * 2);
+		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+		{
+			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+						tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+						tireMaskTextureOutput_->GetRaytracingOutput().Get())
+			};
+
+			Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(2, barrierToUAV);
+		}
+
+	}
 
 	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
 	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
@@ -291,9 +324,9 @@ void TitleScene::CameraUpdate()
 		Vec3 cameraVec = Vec3(cosf(cameraAngle_), 0.0f, sinf(cameraAngle_));
 
 		// カメラの位置を求める。
-		target = player_->GetPos();
+		target = player_->GetPlayerIns().lock()->GetPos();
 		eye = target + cameraVec * cameraDistance_ + Vec3(0, cameraHeight_, 0);
-		up = player_->GetUpVec();
+		up = player_->GetPlayerIns().lock()->GetUpVec();
 
 		break;
 
@@ -309,7 +342,7 @@ void TitleScene::CameraUpdate()
 		}
 
 		eye += (cameraPutBeforePos_ - eye) / divCount;
-		target = player_->GetPos();
+		target = player_->GetPlayerIns().lock()->GetPos();
 
 		break;
 
@@ -323,9 +356,9 @@ void TitleScene::CameraUpdate()
 		const float CAMERA_DISTANCE = 25.0f;
 		const float CAMERA_BEHIND_DISTANCE = 10.0f;
 
-		Vec3 baseEye = player_->GetPos() + Vec3(0, 1, 0) * CAMERA_DISTANCE + player_->GetForwardVec() * CAMERA_BEHIND_DISTANCE;
-		Vec3 baseTarget = player_->GetPos() + player_->GetForwardVec() * CAMERA_FOCUS;
-		up = player_->GetUpVec();
+		Vec3 baseEye = player_->GetPlayerIns().lock()->GetPos() + Vec3(0, 1, 0) * CAMERA_DISTANCE + player_->GetPlayerIns().lock()->GetForwardVec() * CAMERA_BEHIND_DISTANCE;
+		Vec3 baseTarget = player_->GetPlayerIns().lock()->GetPos() + player_->GetPlayerIns().lock()->GetForwardVec() * CAMERA_FOCUS;
+		up = player_->GetPlayerIns().lock()->GetUpVec();
 
 		// 座標を補間する。
 		eye += (baseEye - eye) / 10.0f;
@@ -342,7 +375,7 @@ void TitleScene::CameraUpdate()
 		const Vec3 CAMERA_DIR = Vec3(2.5f, 1.0f, 0).GetNormal();
 
 		// カメラの各ステータスを設定。
-		target = player_->GetPos();
+		target = player_->GetPlayerIns().lock()->GetPos();
 		float nowDistance = UPCLOSE_DISTANCE_MIN + (UPCLOSE_DISTANCE_MAX - UPCLOSE_DISTANCE_MIN) * (static_cast<float>(cameraTimer_) / CAMERA_TIMER[static_cast<int>(cameraMode_)]);
 		Vec3 baseEye = target + CAMERA_DIR * nowDistance;
 		eye += (baseEye - eye) / 10.0f;
@@ -386,7 +419,7 @@ void TitleScene::CameraUpdate()
 		switch (cameraMode_)
 		{
 		case TitleScene::CAMERA_MODE::PUT_BEFORE:
-			cameraPutBeforePos_ = player_->GetPos() + player_->GetForwardVec() * 1000.0f + Vec3(100, 100, 0);
+			cameraPutBeforePos_ = player_->GetPlayerIns().lock()->GetPos() + player_->GetPlayerIns().lock()->GetForwardVec() * 1000.0f + Vec3(100, 100, 0);
 			break;
 		case TitleScene::CAMERA_MODE::UP_CLOSE:
 			cameraDistance_ = UPCLOSE_DISTANCE_MIN;
