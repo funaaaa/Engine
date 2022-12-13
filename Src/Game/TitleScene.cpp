@@ -77,7 +77,7 @@ void TitleScene::Init()
 	player_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, 0, 0);
 
 	// 一旦サーキットステージを有効化する。
-	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
+	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex(), false);
 
 	// 設定
 	DriftParticleMgr::Ins()->Init();

@@ -11,7 +11,7 @@
 
 using namespace std;
 
-void MugenStage::Setting(int TireMaskIndex)
+void MugenStage::Setting(int TireMaskIndex, bool IsBoostGimmick)
 {
 
 	/*===== セッティング処理 =====*/
@@ -107,7 +107,9 @@ void MugenStage::Setting(int TireMaskIndex)
 	stageObjectMgr_->NonDisplay(indexBuff);
 
 	// 加速ギミックをセット
-	SetBoostGimmick();
+	if (IsBoostGimmick) {
+		SetBoostGimmick();
+	}
 
 	// アイテムボックス
 	ConvertGimmickInfoFromBlender itemBoxData;

@@ -107,7 +107,7 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	rocket_ = std::make_shared<CharacterRocket>();
 
 	// 車との当たり判定用のチェックボックスをロード
-	hitBoxBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Car/collision/", "carHitBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
+	hitBoxBlas_ = BLASRegister::Ins()->GenerateObj("Resource/Game/Car/Collision/", "carHitBox.obj", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
 	hitBox_ = PolygonInstanceRegister::Ins()->CreateInstance(hitBoxBlas_, PolygonInstanceRegister::DEF, true);
 	PolygonInstanceRegister::Ins()->NonDisplay(hitBox_);
 

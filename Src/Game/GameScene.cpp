@@ -252,9 +252,6 @@ void GameScene::Update()
 		isFinishTransition_ = true;
 	}
 
-	// FPS‚ğ•\¦B
-	FPS();
-
 	// “ü—Íˆ—
 	Input();
 

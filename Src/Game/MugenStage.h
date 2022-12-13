@@ -19,7 +19,7 @@ public:
 
 	/*===== ƒƒ“ƒoŠÖ” =====*/
 
-	void Setting(int TireMaskIndex)override;
+	void Setting(int TireMaskIndex, bool IsBoostGimmick = true)override;
 	void Destroy()override;
 	void Update()override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
