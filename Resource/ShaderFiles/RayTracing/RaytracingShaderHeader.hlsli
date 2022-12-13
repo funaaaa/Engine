@@ -7,6 +7,7 @@ static const int CHS_IDENTIFICATION_INSTANCE_DEF = 0; // InstanceID 通常のオブジ
 static const int CHS_IDENTIFICATION_INSTNACE_AS = 1; // InstanceID 大気散乱用のオブジェクト
 static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR = 2; // InstanceID テクスチャの色をそのまま返すオブジェクト
 static const int CHS_IDENTIFICATION_INSTANCE_DEF_EMISSIVE = 3; // InstanceID 通常反射とエミッシブ
+static const int CHS_IDENTIFICATION_INSTANCE_TEXCOLOR_REFLECTION_EMISSIVE = 4; // InstanceID 通常反射とテクスチャの色そのままとエミッシブ
 static const int CHS_IDENTIFICATION_INSTANCE_LIGHT = 5; // instanceID ライト用オブジェクト テクスチャの色をそのまま返す。MissShaderで当たり判定を棄却する為にも使用する。
 static const int CHS_IDENTIFICATION_INSTANCE_REFRACTION = 6; // instanceID 屈折の処理
 static const int CHS_IDENTIFICATION_INSTANCE_INVISIBILITY = 7; // instanceID ライティングも描画も行わないオブジェクト

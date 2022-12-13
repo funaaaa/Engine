@@ -544,6 +544,14 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     
     // Payload一時受け取り用変数。
     Payload payloadBuff = PayloadData;
+    
+    
+    // エミッシブだったらエミッシブマップに書き込む。
+    if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR_REFLECTION_EMISSIVE)
+    {
+        payloadBuff.emissive_ += TexColor * payloadBuff.impactAmount_;
+        payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
+    }
         
     // 金属度
     float metalness = 1.0f - material[0].metalness_;

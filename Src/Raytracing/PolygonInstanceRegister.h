@@ -81,6 +81,7 @@ public:
 		AS = 1,				// 大気散乱用
 		TEXCOLOR = 2,		// テクスチャの色をそのまま返す
 		DEF_EMISSIVE = 3,	// 通常反射とエミッシブ
+		DEF_TEXCOLOR_EMISSIVE = 4,	// 通常反射とテクスチャの色そのままエミッシブ
 		LIGHT = 5,			// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
 		REFRACTION = 6,		// 屈折用のレイ
 		INVISIBILITY = 7,	// 不可視のオブジェクト
