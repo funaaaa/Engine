@@ -71,10 +71,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		SceneMgr::Ins()->Update();
 		SceneMgr::Ins()->Draw();
 
-
 		// 描画後処理
 		Engine::Ins()->ProcessAfterDrawing();
-
 
 		// メッセージ確認
 		if (PeekMessage(&Engine::Ins()->windowsAPI_->msg_, nullptr, 0, 0, PM_REMOVE)) {
@@ -93,6 +91,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 
 	}
 
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
 	return 0;

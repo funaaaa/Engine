@@ -406,20 +406,6 @@ void Engine::ProcessBeforeDrawing() {
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	//ImGui::CreateContext();
-	//auto& io = ImGui::GetIO();
-
-	//// Enable docking(available in imgui `docking` branch at the moment)
-	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-	//// Update and Render additional Platform Windows
-	//if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	//{
-	//	ImGui::UpdatePlatformWindows();
-	//	ImGui::RenderPlatformWindowsDefault();
-	//}
-
 	// ウィンドウ設定
 	ImGui::Begin("Menu");
 	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
