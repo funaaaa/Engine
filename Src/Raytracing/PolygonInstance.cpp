@@ -3,6 +3,7 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 #include <assert.h>
+#include "FHelper.h"
 
 D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr<BLAS> Blas, UINT ShaderID, bool HaveMeshCollisionData, int InstanceIndex)
 {
@@ -41,6 +42,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr
 	blas_ = Blas;
 
 	isActive_ = true;
+	isDisplay_ = true;
 	childCount_ = 0;
 	haveMeshCollisionData_ = HaveMeshCollisionData;
 	if (haveMeshCollisionData_) {
@@ -407,58 +409,6 @@ void PolygonMeshInstance::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& 
 		Resource->Unmap(0, nullptr);
 
 	}
-
-}
-
-Microsoft::WRL::ComPtr<ID3D12Resource> PolygonMeshInstance::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
-{
-
-	/*===== バッファ全般を生成する処理 =====*/
-
-	// 引数から設定用構造体を設定する。
-	D3D12_HEAP_PROPERTIES heapProps{};
-	if (HeapType == D3D12_HEAP_TYPE_DEFAULT) {
-		heapProps = D3D12_HEAP_PROPERTIES{
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-		};
-	}
-	if (HeapType == D3D12_HEAP_TYPE_UPLOAD) {
-		heapProps = D3D12_HEAP_PROPERTIES{
-		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-		};
-	}
-
-	// 実際にバッファを生成する。
-	HRESULT hr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-	D3D12_RESOURCE_DESC resDesc{};
-	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resDesc.Alignment = 0;
-	resDesc.Width = Size;
-	resDesc.Height = 1;
-	resDesc.DepthOrArraySize = 1;
-	resDesc.MipLevels = 1;
-	resDesc.Format = DXGI_FORMAT_UNKNOWN;
-	resDesc.SampleDesc = { 1, 0 };
-	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	resDesc.Flags = Flags;
-
-	// バッファ生成命令を出す。
-	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
-		&heapProps,
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc,
-		InitialState,
-		nullptr,
-		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
-	);
-
-	// 生成に失敗したら。
-	if (FAILED(hr)) {
-		OutputDebugStringA("CreateBuffer failed.\n");
-	}
-
-	return resource;
 
 }
 

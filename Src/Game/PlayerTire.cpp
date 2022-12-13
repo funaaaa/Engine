@@ -8,7 +8,7 @@ PlayerTire::PlayerTire(std::weak_ptr<PolygonMeshInstance> TireInstance, bool IsB
 
 	/*===== コンストラクタ =====*/
 
-	tireInstance = TireInstance;
+	tireInstance_ = TireInstance;
 	isBehindTire_ = IsBehindTire;
 	pos_ = Vec3();
 	prevPos_ = Vec3();
@@ -25,7 +25,7 @@ void PlayerTire::Update()
 	rot_.y_ -= rot_.y_ / 10.0f;
 
 	// 今フレームの座標を求める。
-	pos_ = tireInstance.lock()->GetWorldPos();
+	pos_ = tireInstance_.lock()->GetWorldPos();
 
 	// 前フレームとの距離を求める。
 	float distance = (pos_ - prevPos_).Length();
@@ -34,23 +34,23 @@ void PlayerTire::Update()
 	rot_.x_ -= distance / 10.0f;
 
 	// 回転を一旦初期化。
-	tireInstance.lock()->ChangeRotate(Vec3(0, 0, 0));
+	tireInstance_.lock()->ChangeRotate(Vec3(0, 0, 0));
 
 	// 前輪だったら。
 	if (!isBehindTire_) {
 
-		tireInstance.lock()->ChangeRotate(Vec3(0, rot_.y_, 0));
+		tireInstance_.lock()->ChangeRotate(Vec3(0, rot_.y_, 0));
 
 	}
 
 	// 移動に伴う回転をさせる。
-	Vec3 rotVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), tireInstance.lock()->GetRotate());
+	Vec3 rotVec = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), tireInstance_.lock()->GetRotate());
 
 	DirectX::XMVECTOR quaternion = DirectX::XMQuaternionRotationNormal(rotVec.ConvertXMVECTOR(), rot_.x_);
 
 	// クォータニオンを行列に治す。
 	DirectX::XMMATRIX quaternionMat = DirectX::XMMatrixRotationQuaternion(quaternion);
-	tireInstance.lock()->AddRotate(quaternionMat);
+	tireInstance_.lock()->AddRotate(quaternionMat);
 
 	// 座標を保存。
 	prevPos_ = pos_;

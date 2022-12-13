@@ -105,9 +105,7 @@ void ShaderData::LoadShaderDXC()
 	// コンパイルオプションの指定
 	std::vector<LPCWSTR> arguments;
 
-	//arguments.emplace_back(L"/Od");		// 最適化を無効にする。
-	//arguments.emplace_back(L"/Zi");		// デバッグ情報を有効にする。
-	//arguments.emplace_back(L"-Qembed_debug");	// PDBをシェーダーコンテナーに埋め込む。これを指定する場合はZiは必須らしい。
+	arguments.emplace_back(L"/enable-16bit-types");		// 16bit変数を使用可能にする。
 
 	// シェーダーモデルは一旦これで固定する。
 	const auto target_ = L"lib_6_4";
@@ -140,26 +138,3 @@ void ShaderData::LoadShaderDXC()
 	shaderBin_ = result;
 
 }
-
-//std::wstring ShaderData::StringToWString(std::string OString)
-//{
-//	// SJIS → wstring
-//	int iBufferSize = MultiByteToWideChar(CP_ACP, 0, OString.c_str()
-//		, -1, (wchar_t*)NULL, 0);
-//
-//	// バッファの取得
-//	wchar_t* cpUCS2 = new wchar_t[iBufferSize];
-//
-//	// SJIS → wstring
-//	MultiByteToWideChar(CP_ACP, 0, OString.c_str(), -1, cpUCS2
-//		, iBufferSize);
-//
-//	// stringの生成
-//	std::wstring oRet(cpUCS2, cpUCS2 + iBufferSize - 1);
-//
-//	// バッファの破棄
-//	delete[] cpUCS2;
-//
-//	// 変換結果を返す
-//	return(oRet);
-//}

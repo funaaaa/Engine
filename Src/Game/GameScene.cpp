@@ -26,6 +26,8 @@
 #include "ConcentrationLineMgr.h"
 #include "PolygonInstance.h"
 #include "BaseItem.h"
+#include "BrightnessParam.h"
+#include "CharacterTireMask.h"
 
 #include "RayEngine.h"
 
@@ -58,7 +60,7 @@ GameScene::GameScene()
 	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
 	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
 	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
-	tireMaskConstBuffer_->Generate(sizeof(Character::TireMaskUV) * 2, L"TireMaskUV");
+	tireMaskConstBuffer_->Generate(sizeof(CharacterTireMask::TireMaskUV) * 2, L"TireMaskUV");
 
 	// 白塗りコンピュートシェーダー
 	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
@@ -73,12 +75,12 @@ GameScene::GameScene()
 	DriftParticleMgr::Ins()->Setting();
 
 	// 太陽に関する変数
-	sunAngle_ = 0.25f;
-	sunSpeed_ = 0.01f;
+	sunAngle_ = 0.495f;
+	sunSpeed_ = 0.0005f;
 
 	isDisplayFPS_ = false;
 
-	nextScene_ = SCENE_ID::RESULT;
+	nextScene_ = SCENE_ID::TITLE;
 	isTransition_ = false;
 
 	countDownStartTimer_ = 0;
@@ -89,7 +91,7 @@ GameScene::GameScene()
 	countDownEasingTimer_ = 0;
 	isCountDownExit_ = false;
 	isGameFinish_ = false;
-
+	BrightnessParam::Ins()->isBright_ = false;
 
 
 	// フォントをロード
@@ -173,7 +175,9 @@ void GameScene::Init()
 		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::P1), true);
 
 		// AIを生成。
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_, 0);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_, 1);
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_, 2);
 
 	}
 	else if (GameSceneMode::Ins()->mode_ == GameSceneMode::MODE::DEF) {
@@ -198,6 +202,9 @@ void GameScene::Init()
 
 	}
 
+	// キャラの初期位置を設定。
+	characterMgr_->SettingStartPos();
+
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
 
@@ -210,6 +217,7 @@ void GameScene::Init()
 
 	DriftParticleMgr::Ins()->Init();
 
+	BrightnessParam::Ins()->isBright_ = false;
 	isBeforeStart_ = true;
 	isCountDown_ = false;
 	countDownEasingTimer_ = 0;
@@ -219,11 +227,14 @@ void GameScene::Init()
 	countDownStartTimer_ = 0;
 	transitionTimer = 0;
 	countDownNumber_ = 2;
-	sunAngle_ = 0.8f;
+	sunAngle_ = 0.495f;
 	isFinishTransition_ = false;
 
 	Camera::Ins()->eye_ = Vec3(0, 0, 0);
 	Camera::Ins()->target_ = Vec3(10, 0, 0);
+
+
+	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ = 2.4f;
 
 }
 
@@ -243,6 +254,13 @@ void GameScene::Update()
 
 	// 入力処理
 	Input();
+
+	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
+
+		// AIを生成。
+		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
+
+	}
 
 	// キャラを更新。
 	characterMgr_->Update(stages_[STAGE_ID::MUGEN], isBeforeStart_, isGameFinish_);
@@ -291,14 +309,12 @@ void GameScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
-	//sunAngle_ = 0.8f;
-	//if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
+	sunAngle_ += sunSpeed_;
+	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
-	//	sunAngle_ += sunSpeed_;
-	//	sunAngle_ += sunSpeed_;
-	//	sunAngle_ += sunSpeed_;
+		sunAngle_ += sunSpeed_ * 50.0f;
 
-	//}
+	}
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
@@ -326,6 +342,22 @@ void GameScene::Update()
 	}
 
 
+	const float PARAM_A_MIN = 2.4f;
+	const float PARAM_A_MAX = 10.4f;
+	const float PARAM_B_MIN = 1.055f;
+	const float PARAM_B_MAX = 1.204f;
+
+	float div = 10.0f;
+	// 画面の明るさを補正。
+	if (BrightnessParam::Ins()->isBright_) {
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ += (PARAM_A_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_) / div;
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MAX - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
+	}
+	else {
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ += (PARAM_A_MIN - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_) / div;
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MIN - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
+	}
+
 }
 
 void GameScene::Draw()
@@ -348,13 +380,13 @@ void GameScene::Draw()
 	}
 
 	// タイヤ痕を書き込む。
-	std::vector<Character::TireMaskUV> tireMaskUV;
+	std::vector<CharacterTireMask::TireMaskUV> tireMaskUV;
 	bool isWriteTireMask = characterMgr_->CheckTireMask(stages_[STAGE_ID::MUGEN], tireMaskUV);
 
 	if (isWriteTireMask) {
 
 		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(Character::TireMaskUV) * 2);
+		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(CharacterTireMask::TireMaskUV) * 2);
 		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
 		{
 			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(

@@ -1,7 +1,6 @@
 #include "SceneMgr.h"
 #include "TitleScene.h"
 #include "GameScene.h"
-#include "ResultScene.h"
 #include "SceneTransition.h"
 
 SceneMgr::SceneMgr()
@@ -21,8 +20,7 @@ void SceneMgr::Init()
 	// シーンを生成。
 	scenes_.emplace_back(std::make_shared<TitleScene>());
 	scenes_.emplace_back(std::make_shared<GameScene>());
-	scenes_.emplace_back(std::make_shared<ResultScene>());
-
+	
 	// シーン番号を設定。
 	nowScene_ = BaseScene::SCENE_ID::TITLE;
 	nextScene_ = BaseScene::SCENE_ID::GAME;

@@ -11,7 +11,6 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT Shade
 
 		descRange_[rootparamCount_] = CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, ShaderRegister, RegisterSpace);
 		rootparam_[rootparamCount_].InitAsDescriptorTable(1, &descRange_[rootparamCount_]);
-		//rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 		rootparam_[rootparamCount_].Descriptor.ShaderRegister = ShaderRegister;
 		rootparam_[rootparamCount_].Descriptor.RegisterSpace = RegisterSpace;
 		rootparam_[rootparamCount_].DescriptorTable.NumDescriptorRanges = 1;
@@ -27,7 +26,6 @@ void RayRootsignature::AddRootparam(D3D12_DESCRIPTOR_RANGE_TYPE Type, UINT Shade
 
 		descRange_[rootparamCount_] = CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, 1, ShaderRegister, RegisterSpace);
 		rootparam_[rootparamCount_].InitAsDescriptorTable(1, &descRange_[rootparamCount_]);
-		//rootparam[rootparamCount].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
 		rootparam_[rootparamCount_].Descriptor.ShaderRegister = ShaderRegister;
 		rootparam_[rootparamCount_].Descriptor.RegisterSpace = RegisterSpace;
 		rootparam_[rootparamCount_].DescriptorTable.NumDescriptorRanges = 1;

@@ -4,6 +4,8 @@
 #include <DirectXMath.h>
 #include "Vec.h"
 #include <vector>
+#include <wrl.h>
+#include <d3d12.h>
 
 //DirectXに関する便利機能をまとめたもの
 namespace FHelper {
@@ -153,6 +155,12 @@ namespace FHelper {
 
 		Vec3 tmp;
 		tmp = worldPos;
+
+		// Zが-だと視錐台に収まっていない。
+		if (tmp.z_ < -1000) {
+			return false;
+		}
+
 		// zで割って-1~1の範囲に収める
 		// スクリーン変換
 		Vec3 viewVec = DirectX::XMVectorSet(tmp.x_ / tmp.z_, tmp.y_ / tmp.z_, 1.0f, 1.0f);
@@ -170,6 +178,9 @@ namespace FHelper {
 
 		}
 	}
+
+	// バッファを生成。
+	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType, const wchar_t* Name = nullptr);
 
 	// 三角形の重心座標を求める。
 	Vec3 CalBary(const Vec3& PosA, const Vec3& PosB, const Vec3& PosC, const Vec3& TargetPos);

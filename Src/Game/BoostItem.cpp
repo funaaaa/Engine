@@ -20,9 +20,11 @@ void BoostItem::Update()
 
 	/*===== 更新処理 =====*/
 
+	// 更新処理は何も行わない。
+
 }
 
-int BoostItem::Use(float CharaRotY, const int ParamID)
+int BoostItem::Use(float CharaRotY, int ParamID)
 {
 
 	/*===== 使用処理 =====*/

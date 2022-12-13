@@ -43,7 +43,6 @@ void OBB::SetMat(std::weak_ptr<PolygonMeshInstance> Instance)
 
 	pos_ = Instance.lock()->GetPos();
 	length_ = FHelper::MulMat(defLength_, Instance.lock()->GetScale());
-	length_ *= 1.5f;
 	DirectX::XMMATRIX matRot_ = Instance.lock()->GetRotate();
 	dir_[0] = FHelper::MulRotationMatNormal(Vec3(1, 0, 0), matRot_);
 	dir_[1] = FHelper::MulRotationMatNormal(Vec3(0, 1, 0), matRot_);

@@ -35,17 +35,6 @@ void TLAS::GenerateTLAS()
 
 }
 
-//void tlas::updateinstancedata()
-//{
-//
-//	// インスタンスの情報を記録したバッファを準備する。
-//	size_t sizeofinstancedescs = PolygonInstanceRegister::instance()->getregistersize() * sizeof(d3d12_raytracing_instance_desc);
-//
-//	// 生成したバッファにデータを書き込む。
-//	writetomemory(instanceDescBuffer_, PolygonInstanceRegister::instance()->getdata(), sizeofinstancedescs);
-//
-//}
-
 void TLAS::Update()
 {
 
@@ -113,58 +102,6 @@ void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const
 
 }
 
-Microsoft::WRL::ComPtr<ID3D12Resource> TLAS::CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType)
-{
-
-	/*===== バッファ全般を生成する処理 =====*/
-
-	// 引数から設定用構造体を設定する。
-	D3D12_HEAP_PROPERTIES heapProps{};
-	if (HeapType == D3D12_HEAP_TYPE_DEFAULT) {
-		heapProps = D3D12_HEAP_PROPERTIES{
-		D3D12_HEAP_TYPE_DEFAULT, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-		};
-	}
-	if (HeapType == D3D12_HEAP_TYPE_UPLOAD) {
-		heapProps = D3D12_HEAP_PROPERTIES{
-		D3D12_HEAP_TYPE_UPLOAD, D3D12_CPU_PAGE_PROPERTY_UNKNOWN, D3D12_MEMORY_POOL_UNKNOWN, 1, 1
-		};
-	}
-
-	// 実際にバッファを生成する。
-	HRESULT hr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-	D3D12_RESOURCE_DESC resDesc{};
-	resDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resDesc.Alignment = 0;
-	resDesc.Width = Size;
-	resDesc.Height = 1;
-	resDesc.DepthOrArraySize = 1;
-	resDesc.MipLevels = 1;
-	resDesc.Format = DXGI_FORMAT_UNKNOWN;
-	resDesc.SampleDesc = { 1, 0 };
-	resDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	resDesc.Flags = Flags;
-
-	// バッファ生成命令を出す。
-	hr = Engine::Ins()->device_.dev_->CreateCommittedResource(
-		&heapProps,
-		D3D12_HEAP_FLAG_NONE,
-		&resDesc,
-		InitialState,
-		nullptr,
-		IID_PPV_ARGS(resource.ReleaseAndGetAddressOf())
-	);
-
-	// 生成に失敗したら。
-	if (FAILED(hr)) {
-		OutputDebugStringA("CreateBuffer failed.\n");
-	}
-
-	return resource;
-
-}
-
 void TLAS::SettingAccelerationStructure()
 {
 
@@ -175,7 +112,7 @@ void TLAS::SettingAccelerationStructure()
 
 	// インスタンスの情報を記録したバッファを準備する。
 	size_t sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
-	instanceDescBuffer_ = CreateBuffer(
+	instanceDescBuffer_ = FHelper::CreateBuffer(
 		sizeOfInstanceDescs,
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
@@ -203,7 +140,7 @@ void TLAS::SettingAccelerationStructure()
 	/*-- TLASバッファとスクラッチバッファを生成する --*/
 
 	// スクラッチメモリ(バッファ)を確保。
-	scratchBuffer_ = CreateBuffer(
+	scratchBuffer_ = FHelper::CreateBuffer(
 		tlasPrebuild.ScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
@@ -212,7 +149,7 @@ void TLAS::SettingAccelerationStructure()
 	scratchBuffer_->SetName(L"TLASScratchBuffer");
 
 	// TLAS用メモリ(バッファ)を確保。
-	tlasBuffer_ = CreateBuffer(
+	tlasBuffer_ = FHelper::CreateBuffer(
 		tlasPrebuild.ResultDataMaxSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
@@ -221,7 +158,7 @@ void TLAS::SettingAccelerationStructure()
 	tlasBuffer_->SetName(L"tlasBuffer_");
 
 	// TLAS更新用メモリ(バッファ)を確保。
-	tlasUpdateBuffer_ = CreateBuffer(
+	tlasUpdateBuffer_ = FHelper::CreateBuffer(
 		tlasPrebuild.UpdateScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,

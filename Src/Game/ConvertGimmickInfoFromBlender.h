@@ -4,6 +4,7 @@
 #include <DirectXMath.h>
 #include "Vec.h"
 
+// Blenderで設定した頂点からオブジェクトを生成するクラス。現在はアイテムボックスで使用。
 class ConvertGimmickInfoFromBlender {
 
 private:

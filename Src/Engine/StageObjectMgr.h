@@ -5,7 +5,9 @@
 #include "Singleton.h"
 #include "BaseStage.h"
 #include "FHelper.h"
+#include "BLAS.h"
 
+// ステージに配置されるオブジェクトを管理するクラス。BaseStageがこのクラスを1つ持つ。
 class StageObjectMgr {
 
 private:
@@ -24,15 +26,14 @@ public:
 	void Setting();
 
 	// 追加する。
-	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = true, bool IsNewGenerate = false);
-	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = true);
+	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = false, bool IsNewGenerate = false);
+	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = false);
 
 	// 更新処理
 	void Update(int Timer);
 
-	// 指定のインデックスの法線ベクトルを変更。
-	void ChangeNormalTexture(int Index, int NormalTexture);
-	void ChangeMetalnessTexture(int Index, int MetalnessTexture);
+	// 指定のインデックスのマップ用テクスチャを変更。
+	void ChangeMapTexture(int Index, int TextureIndex, BLAS::MAP_PARAM MapParam);
 
 	// 当たり判定
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input);
@@ -74,7 +75,7 @@ private:
 	BaseStage::ColliderOutput StageMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID);
 
 	// 装飾オブジェクトとの当たり判定
-	BaseStage::ColliderOutput OrnamentMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output);
+	BaseStage::ColliderOutput OrnamentMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID);
 
 	// 4方向に当たり判定
 	BaseStage::ColliderOutput Decision4Way(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID);

@@ -65,7 +65,7 @@ void Engine::Init() {
 	}
 
 	// デバイスの生成
-	//device_.levels.push_back(D3D_FEATURE_LEVEL_12_1);
+	device_.levels_.push_back(D3D_FEATURE_LEVEL_12_1);
 	device_.levels_.push_back(D3D_FEATURE_LEVEL_12_0);
 	device_.levels_.push_back(D3D_FEATURE_LEVEL_11_1);
 	device_.levels_.push_back(D3D_FEATURE_LEVEL_11_0);
@@ -405,20 +405,6 @@ void Engine::ProcessBeforeDrawing() {
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
-	//ImGui::CreateContext();
-	//auto& io = ImGui::GetIO();
-
-	//// Enable docking(available in imgui `docking` branch at the moment)
-	//io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-	//// Update and Render additional Platform Windows
-	//if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	//{
-	//	ImGui::UpdatePlatformWindows();
-	//	ImGui::RenderPlatformWindowsDefault();
-	//}
 
 	// ウィンドウ設定
 	ImGui::Begin("Menu");

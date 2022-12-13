@@ -7,6 +7,7 @@ class StageObjectMgr;
 class PolygonMeshInstance;
 class OBB;
 
+// ステージ基底クラス
 class BaseStage {
 
 public:
@@ -44,6 +45,8 @@ public:
 		bool isHitOrnament_;		// 装飾オブジェクトと当たった判定
 		bool isHitItemBox_;			// アイテムボックスと当たった判定
 		bool isHitStepBoostGimmick_;// 段差加速ギミックと当たった判定
+		bool isHitBrightnessWall_;
+		bool isHitDarknessWall_;
 	};
 
 
@@ -51,7 +54,7 @@ public:
 
 	/*===== メンバ関数 =====*/
 
-	virtual void Setting(int TireMaskIndex) = 0;
+	virtual void Setting(int TireMaskIndex, bool IsBoostGimmick = true) = 0;
 	virtual void Destroy() = 0;
 	virtual void Update() = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;

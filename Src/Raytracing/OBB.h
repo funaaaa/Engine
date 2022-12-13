@@ -6,6 +6,7 @@
 class PolygonMeshInstance;
 class BLAS;
 
+// “–‚½‚è”»’è—pOBBƒNƒ‰ƒX
 class OBB
 {
 

@@ -3,10 +3,13 @@
 #include <vector>
 #include "Character.h"
 #include "ConstBuffers.h"
+#include "FHelper.h"
+#include "CharacterTireMask.h"
 
 class Character;
 class BaseStage;
 
+// キャラクターを管理するクラス。AddCharaでキャラのIDやパラメーターを渡すことでプレイヤーやAIを生成する。
 class CharacterMgr {
 
 private:
@@ -26,8 +29,10 @@ public:
 	void Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bool IsGameFinish);
 	void Draw();
 
-	void AddChara(int CharaID, bool IsPlayer, int Param = 0);
-	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<Character::TireMaskUV>& TireMaskUVData);
+	// 初期地点を設定。
+	void SettingStartPos();
+	void AddChara(int CharaID, bool IsPlayer, int Param = 0, int CharaPersonality = 0);
+	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<CharacterTireMask::TireMaskUV>& TireMaskUVData);
 	inline std::weak_ptr<Character> GetPlayerIns() { return character_[playerIndex_]; }
 
 	// いずれかのキャラがゴールしたかをチェックする。

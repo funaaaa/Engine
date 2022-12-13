@@ -1,6 +1,5 @@
 #include "StageObjectMgr.h"
 #include "BasicStageObject.h"
-#include "FloatingStageObject.h"
 #include "ItemBoxObject.h"
 #include "BLASRegister.h"
 #include "PolygonInstanceRegister.h"
@@ -46,14 +45,8 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 	}
 
-	// ふわふわ動く装飾オブジェクトだったら。
-	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
-
-		objects_[addIndex].first = std::make_shared<FloatingStageObject>();
-
-	}
 	// アイテムボックスオブジェクトだったら
-	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+	if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
 
 		objects_[addIndex].first = std::make_shared<ItemBoxObject>();
 
@@ -102,14 +95,8 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 	}
 
-	// ふわふわ動く装飾オブジェクトだったら。
-	if (ObjectID == BaseStageObject::OBJECT_ID::FLOATING_ORNAMENT) {
-
-		objects_[addIndex].first = std::make_shared<FloatingStageObject>();
-
-	}
 	// アイテムボックスオブジェクトだったら
-	else if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
+	if (ObjectID == BaseStageObject::OBJECT_ID::ITEM_BOX) {
 
 		objects_[addIndex].first = std::make_shared<ItemBoxObject>();
 
@@ -134,6 +121,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 
 }
 
+#include "Camera.h"
 void StageObjectMgr::Update(int Timer)
 {
 
@@ -145,25 +133,33 @@ void StageObjectMgr::Update(int Timer)
 
 		index.first->Update(Timer);
 
+		if (index.first->GetObjectID() != BaseStageObject::OBJECT_ID::ORNAMENT) continue;
+
+		//// 視錐台カリング
+		//bool inScreen = FHelper::CheckInScreen(index.first->GetInstance().lock()->GetPos(), 500.0f, 500.0f, Camera::Ins()->matView_, Camera::Ins()->matPerspective_);
+
+		//// カリングする。
+		//if (true) {
+
+		//	index.first->Display();
+
+		//}
+		//else {
+
+		//	index.first->NonDisplay();
+
+		//}
+
 	}
 
 }
 
-void StageObjectMgr::ChangeNormalTexture(int Index, int NormalTexture)
+void StageObjectMgr::ChangeMapTexture(int Index, int TextureIndex, BLAS::MAP_PARAM MapParam)
 {
 
 	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
 
-	objects_[Index].first->ChangeNormalTexture(NormalTexture);
-
-}
-
-void StageObjectMgr::ChangeMetalnessTexture(int Index, int MetalnessTexture)
-{
-
-	/*===== 指定のインデックスの法線ベクトルを変更 =====*/
-
-	objects_[Index].first->ChangeMetalnessTexture(MetalnessTexture);
+	objects_[Index].first->ChangeMapTexture(TextureIndex, static_cast<int>(MapParam));
 
 }
 
@@ -183,6 +179,8 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 	output.isHitStage_ = false;
 	output.isHitItemBox_ = false;
 	output.isHitStepBoostGimmick_ = false;
+	output.isHitBrightnessWall_ = false;
+	output.isHitDarknessWall_ = false;
 	output.ornamentHitNormal_ = Vec3(-100, -100, -100);
 	output.resultPos_ = Input.targetPos_;
 
@@ -264,6 +262,9 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			if (indexObjID == BaseStageObject::OBJECT_ID::STAGE || indexObjID == BaseStageObject::OBJECT_ID::STAGE_GRASS || indexObjID == BaseStageObject::OBJECT_ID::WALL) {
 				output = StageMeshCollider(Input, InputRayData, output, indexObjID);
 			}
+			else if (Input.isPlayer_ && (indexObjID == BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL || indexObjID == BaseStageObject::OBJECT_ID::DARKNESS_WALL)) {
+				output = OrnamentMeshCollider(Input, InputRayData, output, indexObjID);
+			}
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ORNAMENT) {
 
 				// 一定以上離れていたら。 オブジェクトの配置をBlender基準でやっているため距離を頂点から持ってきているが、いずれは手動で配置して座標から距離を持ってこれるようにする
@@ -271,7 +272,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 				float size = Vec3(Input.targetSize_ + index.first->GetOBB()->length_).Length();
 				if (size < distance) continue;
 
-				output = OrnamentMeshCollider(Input, InputRayData, output);
+				output = OrnamentMeshCollider(Input, InputRayData, output, indexObjID);
 			}
 
 		}
@@ -445,7 +446,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	// 前後左右の四方向にレイを飛ばして当たり判定を行う。
 	Output = Decision4Way(Input, InputRayData, Output, ObjectID);
 
-	if (ObjectID != BaseStageObject::OBJECT_ID::WALL) {
+	if (ObjectID != BaseStageObject::OBJECT_ID::WALL && ObjectID != BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL && ObjectID != BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL) {
 
 		// レイ用の設定を追加。
 		InputRayData.rayPos_ = Input.targetPos_;
@@ -508,7 +509,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 
 }
 
-BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output)
+BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::ColliderInput& Input, FHelper::RayToModelCollisionData InputRayData, BaseStage::ColliderOutput Output, BaseStageObject::OBJECT_ID ObjectID)
 {
 
 	/*===== ステージ装飾オブジェクトとの当たり判定 =====*/
@@ -530,10 +531,18 @@ BaseStage::ColliderOutput StageObjectMgr::OrnamentMeshCollider(BaseStage::Collid
 	// 当たっていたら押し戻す。
 	if (isHit) {
 
-		// 法線方向に当たった分押し戻す。
-		Input.targetPos_ = impactPos + hitNormal * hitDistance;
-		Output.isHitOrnament_ = true;
-		Output.ornamentHitNormal_ = hitNormal;
+		if (ObjectID == BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL) {
+			Output.isHitDarknessWall_ = true;
+		}
+		else if (ObjectID == BaseStageObject::OBJECT_ID::DARKNESS_WALL) {
+			Output.isHitBrightnessWall_ = true;
+		}
+		else {
+			// 法線方向に当たった分押し戻す。
+			Input.targetPos_ = impactPos + hitNormal * hitDistance;
+			Output.isHitOrnament_ = true;
+			Output.ornamentHitNormal_ = hitNormal;
+		}
 
 	}
 

@@ -3,7 +3,7 @@
 #include <wrl.h>
 #include "Vec.h"
 
-// レイトレ出力UAVクラス
+// レイトレ出力UAVクラス レイトレ関数からの出力結果や、デノイズ後の出力結果の保存用に使用する。
 class RaytracingOutput {
 
 private:
@@ -12,7 +12,7 @@ private:
 
 	D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc_;					// UAVの設定
 	Microsoft::WRL::ComPtr<ID3D12Resource> rayTracingOutput_;	// UAV
-	int uavDescriptorIndex_;										// ディスクリプタヒープ上のこのUAVのインデックス
+	int uavDescriptorIndex_;									// ディスクリプタヒープ上のこのUAVのインデックス
 
 
 public:

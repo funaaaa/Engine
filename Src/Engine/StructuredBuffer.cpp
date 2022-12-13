@@ -1,5 +1,5 @@
 #include "StructuredBuffer.h"
-#include <DirectXTex/d3dx12.h>
+#include <DirectXTex/include/d3dx12.h>
 #include "Engine.h"
 
 

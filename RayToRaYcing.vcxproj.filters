@@ -58,9 +58,6 @@
     <ClCompile Include="Src\Engine\Engine.cpp">
       <Filter>エンジン\基盤関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\Joycon.cpp">
-      <Filter>エンジン\入力関係</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Raytracing\PolygonInstance.cpp">
       <Filter>レイトレーシング\加速構造体\Instance</Filter>
     </ClCompile>
@@ -97,9 +94,6 @@
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp">
       <Filter>レイトレーシング\基礎\出力</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp">
-      <Filter>レイトレーシング\基礎\OBJ複数メッシュ読み込み</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Raytracing\RayComputeShader.cpp">
       <Filter>レイトレーシング\デノイズ\レイトレーシングコンピュートシェーダー</Filter>
     </ClCompile>
@@ -110,7 +104,7 @@
       <Filter>レイトレーシング\基礎\動的定数バッファ</Filter>
     </ClCompile>
     <ClCompile Include="Src\main.cpp">
-      <Filter>アプリケーション\基本的クラス</Filter>
+      <Filter>アプリケーション\main</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\FHelper.cpp">
       <Filter>エンジン\便利系</Filter>
@@ -128,9 +122,6 @@
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\TitleScene.cpp">
-      <Filter>アプリケーション\シーン管理\シーン</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Game\ResultScene.cpp">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClCompile>
     <ClCompile Include="Src\Engine\Pipeline.cpp">
@@ -162,9 +153,6 @@
     </ClCompile>
     <ClCompile Include="Src\Engine\StageObjectMgr.cpp">
       <Filter>アプリケーション\ステージオブジェクト\管理クラス</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Game\FloatingStageObject.cpp">
-      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\PlayerTire.cpp">
       <Filter>アプリケーション\プレイヤー</Filter>
@@ -226,7 +214,30 @@
     <ClCompile Include="Src\Game\RadialBlur.cpp">
       <Filter>エンジン\エフェクト\ラジアルブラー\コード</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Game\SceneTransition.cpp" />
+    <ClCompile Include="Src\Game\SceneTransition.cpp">
+      <Filter>アプリケーション\シーン管理\遷移</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Raytracing\Bloom.cpp">
+      <Filter>レイトレーシング\ポストエフェクト</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterInclineBody.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterGameFinish.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterDrift.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterFlags.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterRocket.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Game\CharacterTireMask.cpp">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -295,9 +306,6 @@
     <ClInclude Include="Src\Engine\Input.h">
       <Filter>エンジン\入力関係</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Engine\Joycon.h">
-      <Filter>エンジン\入力関係</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Engine\FHelper.h">
       <Filter>エンジン\便利系</Filter>
     </ClInclude>
@@ -343,9 +351,6 @@
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h">
       <Filter>レイトレーシング\基礎\出力</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h">
-      <Filter>レイトレーシング\基礎\OBJ複数メッシュ読み込み</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Raytracing\RayComputeShader.h">
       <Filter>レイトレーシング\デノイズ\レイトレーシングコンピュートシェーダー</Filter>
     </ClInclude>
@@ -368,9 +373,6 @@
       <Filter>アプリケーション\シーン管理\管理</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\GameScene.h">
-      <Filter>アプリケーション\シーン管理\シーン</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\ResultScene.h">
       <Filter>アプリケーション\シーン管理\シーン</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\TitleScene.h">
@@ -407,9 +409,6 @@
       <Filter>アプリケーション\ステージオブジェクト\基底クラス</Filter>
     </ClInclude>
     <ClInclude Include="Src\Game\BasicStageObject.h">
-      <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Game\FloatingStageObject.h">
       <Filter>アプリケーション\ステージオブジェクト\オブジェクトクラス</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\StageObjectMgr.h">
@@ -504,6 +503,30 @@
     </ClInclude>
     <ClInclude Include="Src\Game\SceneTransition.h">
       <Filter>アプリケーション\シーン管理\遷移</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Raytracing\Bloom.h">
+      <Filter>レイトレーシング\ポストエフェクト</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\BrightnessParam.h">
+      <Filter>アプリケーション\トンネル</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterInclineBody.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterGameFinish.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterDrift.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterRocket.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterFlags.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Game\CharacterTireMask.h">
+      <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -608,9 +631,6 @@
     <Filter Include="レイトレーシング\基礎\動的定数バッファ">
       <UniqueIdentifier>{4ef98c17-6994-4e1a-81d4-6fe47737563d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="レイトレーシング\基礎\OBJ複数メッシュ読み込み">
-      <UniqueIdentifier>{1f30ad24-57be-4298-b3fc-fd489f00d687}</UniqueIdentifier>
-    </Filter>
     <Filter Include="レイトレーシング\デノイズ\デノイザー">
       <UniqueIdentifier>{7c053e35-ebff-4a0f-ab97-3b62b69316a1}</UniqueIdentifier>
     </Filter>
@@ -622,9 +642,6 @@
     </Filter>
     <Filter Include="レイトレーシング\基礎\ディスクリプタ">
       <UniqueIdentifier>{33b90ca8-cb92-4665-8159-fa0b92fce967}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="アプリケーション\基本的クラス">
-      <UniqueIdentifier>{b0feb384-4a79-42b0-9897-08a45c86c9d1}</UniqueIdentifier>
     </Filter>
     <Filter Include="エンジン\アイコン">
       <UniqueIdentifier>{299f50b9-6625-41dc-91f3-85547e1e9efd}</UniqueIdentifier>
@@ -725,6 +742,18 @@
     <Filter Include="アプリケーション\シーン管理\遷移">
       <UniqueIdentifier>{cfb2932d-8d70-41cd-961b-4d9672ed5344}</UniqueIdentifier>
     </Filter>
+    <Filter Include="レイトレーシング\ポストエフェクト">
+      <UniqueIdentifier>{dfb1cc77-996b-4573-9ca2-f6a263e0f1e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\トンネル">
+      <UniqueIdentifier>{fcbc1d1f-9dc3-450e-9d71-e8ca08baa9c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類">
+      <UniqueIdentifier>{d6adb0e8-fe7c-4100-a17a-44ba1827ba6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="アプリケーション\main">
+      <UniqueIdentifier>{b0feb384-4a79-42b0-9897-08a45c86c9d1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Library Include="SetupAPI.Lib">
@@ -753,7 +782,7 @@
     <FxCompile Include="Resource\ShaderFiles\RayTracing\TireMaskComputeShader.hlsl">
       <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
     </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\RaytracingShader.hlsl">
       <Filter>レイトレーシング\シェーダー</Filter>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
@@ -770,6 +799,18 @@
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RadialBlur.hlsl">
       <Filter>エンジン\エフェクト\ラジアルブラー\シェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurX.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurY.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurFinal.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomMix.hlsl">
+      <Filter>レイトレーシング\シェーダー\コンピュートシェーダー</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

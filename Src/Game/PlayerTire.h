@@ -4,13 +4,14 @@
 
 class PolygonMeshInstance;
 
+// キャラクターのタイヤを保存しておくクラス。
 class PlayerTire{
 
 private:
 
 	/*===== メンバ変数 =====*/
 
-	std::weak_ptr<PolygonMeshInstance> tireInstance;	// タイヤのインスタンスのインデックス
+	std::weak_ptr<PolygonMeshInstance> tireInstance_;	// タイヤのインスタンスのインデックス
 	Vec3 pos_;			// 座標
 	Vec3 prevPos_;		// 前フレームの座標
 	Vec3 rot_;			// 回転量

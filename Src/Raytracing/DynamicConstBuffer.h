@@ -11,6 +11,7 @@ private:
 	/*===== ƒƒ“ƒo•Ï” =====*/
 
 	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> buffer_;
+	std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> uploadBuffer_;
 	int descHeapIndex_;
 
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseItem.h"
 
+// 真っ直ぐ飛ばす甲羅アイテム
 class ShellItem : public BaseItem {
 
 private:
@@ -27,6 +28,6 @@ public:
 	ShellItem();
 	void Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)override;
 	void Update()override;
-	int Use(float CharaRotY = 0, const int ParamID = 0)override;
+	int Use(float CharaRotY = 0, int ParamID = 0)override;
 
 };

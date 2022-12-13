@@ -9,6 +9,7 @@ class OBB;
 class PolygonMeshInstance;
 class BLAS;
 
+// ステージに配置されるオブジェクトの既定クラス。
 class BaseStageObject {
 
 public:
@@ -32,11 +33,12 @@ public:
 		GOAL,			// ゴール
 		MIDDLE_POINT,	// 中間地点
 		ORNAMENT,		// 装飾オブジェクト
-		FLOATING_ORNAMENT,	// ふわふわ動く装飾オブジェクト
 		BOOST_GIMMICK,	// 加速ギミック
 		ITEM_BOX,		// アイテムボックス
 		STEP_BOOST_GIMMICK,	// 段差加速ギミック
 		INV_WALL,		// 見えない壁
+		BRIGHTNESS_WALL,// 明るさの壁
+		DARKNESS_WALL,	// 暗さの壁
 	};
 
 
@@ -77,9 +79,8 @@ public:
 	inline const COLLISION_ID GetCollisionID() { return collisionID_; }
 	inline const OBJECT_ID GetObjectID() { return objID_; }
 
-	// 法線マップを変更。
-	void ChangeNormalTexture(int Index);
-	void ChangeMetalnessTexture(int Index);
+	// マップを変更。
+	void ChangeMapTexture(int Index, int MapParam);
 
 	// 移動関係
 	void AddTrans(const Vec3& Trans);

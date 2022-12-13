@@ -1,0 +1,24 @@
+diff a/Resource/ShaderFiles/RayTracing/RaytracingShaderHeader.hlsli b/Resource/ShaderFiles/RayTracing/RaytracingShaderHeader.hlsli	(rejected hunks)
+@@ -107,17 +107,17 @@
+ // �y�C���[�h
+ struct Payload
+ {
+-    uint recursive_; // ������
+-    uint rayID_; // ���C��ID
++    int recursive_; // ������
++    int rayID_; // ���C��ID
++    int alphaCounter_; // �����A���t�@�̃I�u�W�F�N�g�ɓ���������
++    int isCullingAlpha_; // �����A���t�@�̃I�u�W�F�N�g�Ɉ��ȏ㓖�������玟����A���t�@�𖳌�������t���O�B
+     float impactAmount_; // ���v�e���x
++    float roughnessOffset_;
+     float ao_; // AO�̐F
+     float3 color_; // �F���
+     float3 light_; // ���C�e�B���O�̐F���
+     float3 denoiseMask_; // �f�m�C�Y�̃}�X�N�̐F���
+     float3 emissive_; // �G�~�b�V�u�o�͗p
+-    uint alphaCounter_; // �����A���t�@�̃I�u�W�F�N�g�ɓ���������
+-    uint isCullingAlpha_; // �����A���t�@�̃I�u�W�F�N�g�Ɉ��ȏ㓖�������玟����A���t�@�𖳌�������t���O�B
+-    float roughnessOffset_;
+     float pad_;
+ };
+ 

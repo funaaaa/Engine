@@ -13,10 +13,10 @@ struct RayPipelineShaderData {
 
 	std::string shaderPath_;					// シェーダーパス
 	std::vector<LPCWSTR> rayGenEnteryPoint_;	// エントリポイント
-	std::vector<LPCWSTR> missEntryPoint_;	// エントリポイント
-	std::vector<LPCWSTR> hitgroupEntryPoint_;// エントリポイント
+	std::vector<LPCWSTR> missEntryPoint_;		// エントリポイント
+	std::vector<LPCWSTR> hitgroupEntryPoint_;	// エントリポイント
 	RayPipelineShaderData() {};
-	RayPipelineShaderData(std::string ShaderPath, std::vector<LPCWSTR> RGEntry, std::vector<LPCWSTR> MSEntry, std::vector<LPCWSTR> HGEntry)
+	RayPipelineShaderData(const std::string& ShaderPath, const std::vector<LPCWSTR>& RGEntry, const std::vector<LPCWSTR>& MSEntry, const std::vector<LPCWSTR>& HGEntry)
 		:shaderPath_(ShaderPath), rayGenEnteryPoint_(RGEntry), missEntryPoint_(MSEntry), hitgroupEntryPoint_(HGEntry) {};
 
 };
@@ -44,7 +44,7 @@ protected:
 
 public:
 
-	/*===== メンバ変数 =====*/
+	/*===== メンバ関数 =====*/
 
 	// セッティング処理
 	void Setting(const std::vector<RayPipelineShaderData>& InputData, int UseHitGroup, int SRVCount, int CBVCount, int UAVCount, int PayloadSize, int AttribSize, int ReflectionCount = 4);
@@ -69,9 +69,6 @@ protected:
 	UINT RoundUp(size_t Size, UINT Align) {
 		return UINT(Size + Align - 1) & ~(Align - 1);
 	}
-
-	// バッファを生成。
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType, const wchar_t* Name = nullptr);
 
 	// シェーダー識別子を書き込む。
 	UINT WriteShaderIdentifier(void* Dst, const void* ShaderId);

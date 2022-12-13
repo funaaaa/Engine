@@ -14,6 +14,7 @@ class RaytracingOutput;
 class RaytracingPipeline;
 class DynamicConstBuffer;
 
+// レイトレーシング用の処理をまとめたクラス。Engineに付随する形で使用する。
 class RayEngine : public Singleton<RayEngine> {
 
 public:
@@ -23,20 +24,12 @@ public:
 	// TLASを生成。
 	std::shared_ptr<TLAS> tlas_;
 
-	// AO出力用。
-	std::array<std::shared_ptr<RaytracingOutput>, 2> aoOutput_;
-	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseAOOutput_;
-
 	// 色出力用クラス。
 	std::array<std::shared_ptr<RaytracingOutput>, 2> colorOutput_;
 
 	// ライト出力用。
 	std::array<std::shared_ptr<RaytracingOutput>, 2> lightOutput_;
 	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseLightOutput_;
-
-	// GI出力用。
-	std::array<std::shared_ptr<RaytracingOutput>, 2> giOutput_;
-	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseGiOutput_;
 
 	// デノイズマスク用。
 	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseMaskOutput_;
@@ -45,7 +38,10 @@ public:
 	std::array<std::shared_ptr<RaytracingOutput>, 2> denoiseMixTextureOutput_;
 
 	// デノイズをかけてエフェクトもつけた最終出力用クラス。
-	std::array<std::shared_ptr<RaytracingOutput>, 2> finalOutputTexture_;;
+	std::array<std::shared_ptr<RaytracingOutput>, 2> finalOutputTexture_;
+
+	// ブルーム用エミッシブ出力
+	std::array<std::shared_ptr<RaytracingOutput>, 2> emissiveOutput_;
 
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPipelineShaderData> pipelineShaders_;
@@ -66,8 +62,18 @@ public:
 	void Update();
 
 	void Draw();
-	void NoiseDraw();
 
 	RayConstBufferData& GetConstBufferData() { return constBufferData_; }
+
+private:
+
+	// レイトレーシングを実行。
+	void TraceRay();
+
+	// デノイズコマンドを積む。
+	void DenoiseCommand();
+
+	// コピーコマンドを積む。
+	void CopyCommand();
 
 };

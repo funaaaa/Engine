@@ -4,6 +4,7 @@
 
 class PolygonMeshInstance;
 
+// ‰Á‘¬ƒAƒCƒeƒ€
 class BoostItem : public BaseItem {
 
 private:
@@ -18,6 +19,6 @@ public:
 	BoostItem();
 	void Generate(std::weak_ptr<PolygonMeshInstance> CharaInstance)override;
 	void Update()override;
-	int Use(float CharaRotY = 0, const int ParamID = 0)override;
+	int Use(float CharaRotY = 0, int ParamID = 0)override;
 
 };

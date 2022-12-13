@@ -26,16 +26,6 @@ void RayLightConstBufferData::Init()
 
 	/*===== ライト用定数バッファを初期化 =====*/
 
-	// 点光源をセッティング
-	for (auto& index_ : pointLight_) {
-		index_.lightColor_ = Vec3(1.0f, 1.0f, 1.0f);
-		index_.lightPos_ = Vec3(0, 300, 0);
-		index_.lightSize_ = 5.0f;
-		index_.lightPower_ = 10.0f;
-		index_.isActive_ = false;
-		index_.isShadow_ = true;
-	}
-
 	// 並行光源をセッティング
 	dirLight_.isActive_ = true;
 	dirLight_.lightColor_ = Vec3{ 1.0f,1.0f,1.0f };
@@ -45,38 +35,6 @@ void RayLightConstBufferData::Init()
 
 }
 
-//void AtmosphericScatteringConstBufferData::Init()
-//{
-//
-//	/*===== 大気散乱用定数バッファを初期化 =====*/
-//
-//	eSun_ = 20.0f;
-//	g_ = -0.999f;
-//	innerRadius_ = 10000.0f;
-//	outerRadius_ = 10250.0f;
-//	km_ = 0.005f;
-//	kr_ = 0.0025f;
-//	samples_ = 2.0f;
-//	aveHeight_ = 0.35f;
-//
-//}
-
-//void DebugConstBufferData::Init()
-//{
-//
-//	/*===== デバッグ用定数バッファを初期化 =====*/
-//
-//	seed_ = FHelper::GetRand(0, 1000);
-//	isLightHitScene_ = false;
-//	isNormalScene_ = false;
-//	isMeshScene_ = false;
-//	isNoAO_ = false;
-//	isNoGI_ = false;
-//	isGIOnlyScene_ = false;
-//	isNoiseScene_ = false;
-//
-//}
-
 void RayConstBufferData::Init()
 {
 
@@ -84,8 +42,6 @@ void RayConstBufferData::Init()
 
 	camera_.Init();
 	light_.Init();
-	//as_.Init();
-	//debug_.Init();
 	alphaData_.Init();
 
 }

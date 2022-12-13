@@ -46,13 +46,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\Dxcompiler;$(ProjectDir)lib\fbx_sdk\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(ProjectDir)Lib\DirectXTex\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\Dxcompiler;$(ProjectDir)lib\fbx_sdk\lib;$(LibraryPath);$(ProjectDir)Lib\DirectXTex\lib\$(Configuration)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)lib\fbx_sdk\lib;$(ProjectDir)lib\Dxcompiler;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)lib\fbx_sdk\include;$(ProjectDir)Lib\DirectXTex\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)lib\fbx_sdk\lib;$(ProjectDir)lib\Dxcompiler;$(LibraryPath);$(ProjectDir)Lib\DirectXTex\lib\$(Configuration)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -69,7 +69,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;hid.lib;SetupAPI.Lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4099 /ignore:4820 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(ProjectDir)lib\Dxcompiler\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -93,10 +93,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libfbxsdk-mt.lib;libxml2-mt.lib;zlib-mt.lib;hid.lib;SetupAPI.Lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4099 /ignore:4820 /ignore:4324 %(AdditionalOptions)</AdditionalOptions>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <AdditionalLibraryDirectories>$(ProjectDir)lib\Dxcompiler\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libfbxsdk-mt.lib;libxml2-mt.lib;zlib-mt.lib;hid.lib;SetupAPI.Lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -117,7 +117,6 @@
     <ClCompile Include="Src\Engine\GLTF.cpp" />
     <ClCompile Include="Src\Engine\StageObjectMgr.cpp" />
     <ClCompile Include="Src\Engine\Input.cpp" />
-    <ClCompile Include="Src\Engine\Joycon.cpp" />
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
     <ClCompile Include="Src\Engine\Pipeline.cpp" />
     <ClCompile Include="Src\Engine\PipelineManager.cpp" />
@@ -132,7 +131,13 @@
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
     <ClCompile Include="Src\Game\BoostItem.cpp" />
     <ClCompile Include="Src\Game\Character.cpp" />
+    <ClCompile Include="Src\Game\CharacterDrift.cpp" />
+    <ClCompile Include="Src\Game\CharacterFlags.cpp" />
+    <ClCompile Include="Src\Game\CharacterGameFinish.cpp" />
+    <ClCompile Include="Src\Game\CharacterInclineBody.cpp" />
     <ClCompile Include="Src\Game\CharacterMgr.cpp" />
+    <ClCompile Include="Src\Game\CharacterRocket.cpp" />
+    <ClCompile Include="Src\Game\CharacterTireMask.cpp" />
     <ClCompile Include="Src\Game\ConcentrationLine.cpp" />
     <ClCompile Include="Src\Game\ConcentrationLineMgr.cpp" />
     <ClCompile Include="Src\Game\ConvertGimmickInfoFromBlender.cpp" />
@@ -150,21 +155,19 @@
     <ClCompile Include="Src\Game\ShellObjectMgr.cpp" />
     <ClCompile Include="Src\Game\DriftParticle.cpp" />
     <ClCompile Include="Src\Game\DriftParticleMgr.cpp" />
-    <ClCompile Include="Src\Game\FloatingStageObject.cpp" />
     <ClCompile Include="Src\Game\GameScene.cpp" />
     <ClCompile Include="Src\Game\PlayerModel.cpp" />
     <ClCompile Include="Src\Game\PlayerTire.cpp" />
-    <ClCompile Include="Src\Game\ResultScene.cpp" />
     <ClCompile Include="Src\Game\SceneMgr.cpp" />
     <ClCompile Include="Src\Game\TitleScene.cpp" />
     <ClCompile Include="Src\main.cpp" />
     <ClCompile Include="Src\Raytracing\BLAS.cpp" />
     <ClCompile Include="Src\Raytracing\BLASRegister.cpp" />
+    <ClCompile Include="Src\Raytracing\Bloom.cpp" />
     <ClCompile Include="Src\Raytracing\ConstBuffers.cpp" />
     <ClCompile Include="Src\Raytracing\DynamicConstBuffer.cpp" />
     <ClCompile Include="Src\Raytracing\HitGroup.cpp" />
     <ClCompile Include="Src\Raytracing\HitGroupMgr.cpp" />
-    <ClCompile Include="Src\Raytracing\MultiMeshLoadOBJ.cpp" />
     <ClCompile Include="Src\Raytracing\OBB.cpp" />
     <ClCompile Include="Src\Raytracing\PolygonInstance.cpp" />
     <ClCompile Include="Src\Raytracing\PolygonInstanceRegister.cpp" />
@@ -203,7 +206,6 @@
     <ClInclude Include="Src\Engine\GLTF.h" />
     <ClInclude Include="Src\Engine\StageObjectMgr.h" />
     <ClInclude Include="Src\Engine\Input.h" />
-    <ClInclude Include="Src\Engine\Joycon.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
     <ClInclude Include="Src\Engine\Pipeline.h" />
     <ClInclude Include="Src\Engine\PipelineManager.h" />
@@ -223,8 +225,15 @@
     <ClInclude Include="Src\Game\BaseStage.h" />
     <ClInclude Include="Src\Game\BasicStageObject.h" />
     <ClInclude Include="Src\Game\BoostItem.h" />
+    <ClInclude Include="Src\Game\BrightnessParam.h" />
     <ClInclude Include="Src\Game\Character.h" />
+    <ClInclude Include="Src\Game\CharacterDrift.h" />
+    <ClInclude Include="Src\Game\CharacterFlags.h" />
+    <ClInclude Include="Src\Game\CharacterGameFinish.h" />
+    <ClInclude Include="Src\Game\CharacterInclineBody.h" />
     <ClInclude Include="Src\Game\CharacterMgr.h" />
+    <ClInclude Include="Src\Game\CharacterRocket.h" />
+    <ClInclude Include="Src\Game\CharacterTireMask.h" />
     <ClInclude Include="Src\Game\ConcentrationLine.h" />
     <ClInclude Include="Src\Game\ConcentrationLineMgr.h" />
     <ClInclude Include="Src\Game\ConvertGimmickInfoFromBlender.h" />
@@ -243,22 +252,20 @@
     <ClInclude Include="Src\Game\ShellObjectMgr.h" />
     <ClInclude Include="Src\Game\DriftParticle.h" />
     <ClInclude Include="Src\Game\DriftParticleMgr.h" />
-    <ClInclude Include="Src\Game\FloatingStageObject.h" />
     <ClInclude Include="Src\Game\GameScene.h" />
     <ClInclude Include="Src\Game\PlayerModel.h" />
     <ClInclude Include="Src\Game\PlayerTire.h" />
-    <ClInclude Include="Src\Game\ResultScene.h" />
     <ClInclude Include="Src\Game\SceneMgr.h" />
     <ClInclude Include="Src\Game\TitleScene.h" />
     <ClInclude Include="Src\Game\FirstAIWayPoint.h" />
     <ClInclude Include="Src\Raytracing\BLAS.h" />
     <ClInclude Include="Src\Raytracing\BLASRegister.h" />
+    <ClInclude Include="Src\Raytracing\Bloom.h" />
     <ClInclude Include="Src\Raytracing\ConstBuffers.h" />
     <ClInclude Include="Src\Raytracing\DescriptorHeapMgr.h" />
     <ClInclude Include="Src\Raytracing\DynamicConstBuffer.h" />
     <ClInclude Include="Src\Raytracing\HitGroup.h" />
     <ClInclude Include="Src\Raytracing\HitGroupMgr.h" />
-    <ClInclude Include="Src\Raytracing\MultiMeshLoadOBJ.h" />
     <ClInclude Include="Src\Raytracing\OBB.h" />
     <ClInclude Include="Src\Raytracing\PolygonInstance.h" />
     <ClInclude Include="Src\Raytracing\PolygonInstanceRegister.h" />
@@ -296,7 +303,39 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
     </FxCompile>
-    <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseAOShader.hlsl">
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurFinal.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurX.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomBlurY.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\BloomMix.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Resource\ShaderFiles\RayTracing\RaytracingShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Library</ShaderType>
@@ -305,48 +344,57 @@
       </EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Library</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">6.4</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurX.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseBlurY.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\DenoiseFinal.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\MixColorAndLuminance.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\RayTracing\TireMaskComputeShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Resource\ShaderFiles\WhiteMakeUpShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Lib\DirectXTex\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">
-      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

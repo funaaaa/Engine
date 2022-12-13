@@ -2,6 +2,7 @@
 #include "Engine.h"
 #include "Singleton.h"
 
+// ディスクリプタヒープクラス。
 class DescriptorHeapMgr : public Singleton<DescriptorHeapMgr> {
 
 private:
@@ -9,14 +10,14 @@ private:
 	/*===== メンバ変数 =====*/
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap_;	// CBV,SRV,UAV用ディスクリプタヒープ
-	int head_;										// 先頭のインデックス
+	int head_;														// 先頭のインデックス
 
 
 private:
 
 	/*===== 定数 =====*/
 
-	const int CBV_SRV_UAV_COUNT = 4096;	// CBV,SRV,UAV用ディスクリプタの数
+	const int CBV_SRV_UAV_COUNT = 4096 * 2;	// CBV,SRV,UAV用ディスクリプタの数
 
 public:
 

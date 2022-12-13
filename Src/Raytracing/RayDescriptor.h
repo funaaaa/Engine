@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine.h"
 
-
+// レイトレーシング用に生成したディスクリプタクラス。レイトレーシング用のデータはすべてこのクラスを使用している。
 class RayDescriptor {
 
 private:

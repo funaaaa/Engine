@@ -14,35 +14,37 @@ class DriftParticleMgr : public Singleton<DriftParticleMgr> {
 
 private:
 
-	static const int DRIFT_PARTICLE_COUNT = 120;
+	static const int DRIFT_PARTICLE_COUNT = 60;
 	std::array<std::shared_ptr<DriftParticle>, DRIFT_PARTICLE_COUNT> driftParticle_;	// ドリフト時のパーティクル
 
-	std::weak_ptr<BLAS> smokeBlas_;
-	std::weak_ptr<BLAS> fireBlas_;
-	std::weak_ptr<BLAS> smallAuraBlas_;
-	std::weak_ptr<BLAS> bigAuraBlas_;
-	std::weak_ptr<BLAS> driftParticleBlas_;
-	std::weak_ptr<BLAS> smallAuraOrangeBlas_;
-	std::weak_ptr<BLAS> bigAuraOrangeBlas_;
-	std::weak_ptr<BLAS> driftParticleOrangeBlas_;
-	std::weak_ptr<BLAS> jumpEffectBlas_;
+	std::weak_ptr<BLAS> smokeBlas_;					// 煙のパーティクルのモデル情報
+	std::weak_ptr<BLAS> fireBlas_;					// 炎のパーティクルのモデル情報
+	std::weak_ptr<BLAS> smallAuraBlas_;				// ドリフト時に出る小さいオーラのモデル情報
+	std::weak_ptr<BLAS> bigAuraBlas_;				// ドリフト時に出る大きいオーラのモデル情報
+	std::weak_ptr<BLAS> driftParticleBlas_;			// ドリフトのパーティクルのモデル情報
+	std::weak_ptr<BLAS> smallAuraOrangeBlas_;		// ドリフト二段階目に出る小さいオーラのモデル情報
+	std::weak_ptr<BLAS> bigAuraOrangeBlas_;			// ドリフト二段階目に出る大きいオーラのモデル情報
+	std::weak_ptr<BLAS> driftParticleOrangeBlas_;	// ドリフト二段階目に出るパーティクルのモデル情報
+	std::weak_ptr<BLAS> jumpEffectBlas_;			// ジャンプ時に出るエフェクトのモデル情報
 
+	// オーラがどのキャラに出るかを保存する構造体
 	struct AuraData {
-		int insIndex_;
-		int charaIndex_;
-		bool isActive_;
+		int insIndex_;		// オーラを出すキャラの描画情報
+		int charaIndex_;	// オーラを出すキャラのCharacterMgrでの番号
+		bool isActive_;		// オーラが有効化されているかどうか。
 	};
 	std::array<AuraData, 10> bigAuraIndex_;		// ドリフト二段階目以降に発生するドリフト演出の大きい方
 	std::array<AuraData, 10> smallAuraIndex_;	// ドリフト二段階目以降二発生するドリフト演出の小さい方
 
-	const int GENERATE_COUNT_FIRE = 2;
+	const int GENERATE_COUNT_FIRE = 2;			// 炎のパーティクルを生成する数
 
-	int smokeGenerateDelay_;		// パーティクルを生成するときの遅延
-	int fireGenerateDelay_;
-	int particleGenerateDelay_;
+	int smokeGenerateDelay_;					// パーティクルを生成するときの遅延
+	int fireGenerateDelay_;						// 炎のパーティクルを生成する遅延
+	int particleGenerateDelay_;					// ドリフトのパーティクルを生成する遅延
 
 public:
 
+	// パーティクルを生成する際の遅延
 	enum DELAY_ID {
 
 		NONE_DELAY = 0,

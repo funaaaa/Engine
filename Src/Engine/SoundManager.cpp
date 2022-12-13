@@ -4,9 +4,6 @@
 
 #pragma comment(lib,"xaudio2.lib")
 
-//XAudio2VoiceCallbackのインスタンスをグローバル変数としてインスタンスを作る
-//XAudio2VoiceCallback voiceCallback{};
-
 void SoundManager::SettingSoundManager()
 {
 	// xaudio2のエンジンを生成
@@ -80,28 +77,6 @@ SoundManager::SoundData SoundManager::SoundLoadWave(char* FileName)
 	soundData.volume_ = 1.0f;
 
 	return soundData;
-
-	////③サウンド再生 読み込んだ.wavファイルの情報から音声を再生する
-	//WAVEFORMATEX wfex{};
-	////波形フォーマットの設定
-	//memcpy(&wfex, &format.fmt, sizeof(format.fmt));
-	//wfex.wBitsPerSample = format.fmt.nBlockAlign * 8 / format.fmt.nChannels;
-	////波形フォーマットをもとにSourceVoiceの生成
-	//IXAudio2SourceVoice* pSourceVoice = nullptr;
-	//result = xAudio2->CreateSourceVoice(&pSourceVoice, &wfex, 0, 2.0f, &voiceCallback);
-	//if FAILED(result) {
-	//	delete[] pBuffer;
-	//	return;
-	//}
-	////再生する波形データの設定
-	//XAUDIO2_BUFFER buf{};
-	//buf.pAudioData = (BYTE*)pBuffer;
-	//buf.pContext = pBuffer;
-	//buf.Flags = XAUDIO2_END_OF_STREAM;
-	//buf.AudioBytes = data.size;
-	////波形データの再生
-	//result = pSourceVoice->SubmitSourceBuffer(&buf);
-	//result = pSourceVoice->Start();
 }
 
 void SoundManager::SoundUnload(SoundData* SoundData)

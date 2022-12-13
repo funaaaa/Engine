@@ -36,7 +36,7 @@ private:
 	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
 
 	// マテリアル情報用定数バッファ
-	ModelDataManager::Material material_;
+	ModelDataManager::GPUMaterial material_;
 
 	// BLASのインデックス。
 	int blasIndex_;
@@ -66,9 +66,10 @@ private:
 
 	bool isGenerate_;
 
+	bool isUseVertexUploadBuffer_;	// Upload用のバッファを使うか。
+
 	int baseTextureHandle_;				// 使用するテクスチャのハンドル
-	int normalMapHandle_;
-	int metalnessMapHandle_;
+	int mapTextureHandle_;
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
 	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
@@ -86,6 +87,15 @@ private:
 
 	std::vector<FbxLoader::SkinComputeInput> skinComputeInput_;
 
+public:
+
+	enum class MAP_PARAM {
+		NONE,
+		NORMAL,
+		SPECULAR,
+		AO
+	};
+
 
 public:
 
@@ -97,9 +107,10 @@ public:
 	void Init();
 
 	// BLASの生成
-	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
-	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
-	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = true);
+	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
+	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
+	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
+	void GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int BlasIndex, bool IsOpaque = false);
 
 	// BLASの更新
 	void Update();
@@ -113,21 +124,14 @@ public:
 	void StopAnimation();	// 停止
 
 	// マテリアルの参照を取得。
-	ModelDataManager::Material& GetMaterial() { return material_; }
+	ModelDataManager::GPUMaterial& GetMaterial() { return material_; }
 
 	// マテリアルを書き換えた判定。
 	void IsChangeMaterial();
 
 	// テクスチャを追加。
 	void ChangeBaseTexture(int Index);
-	void ChangeNormalTexture(int Index) {
-		normalMapHandle_ = Index;
-		isChangeTexture_ = true;
-	}
-	void ChangeMetalnessTexture(int Index) {
-		metalnessMapHandle_ = Index;
-		isChangeTexture_ = true;
-	}
+	void ChangeMapTexture(int Index, MAP_PARAM MapParam);
 	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
@@ -142,6 +146,9 @@ public:
 	// 指定のUVをSUBUVに代入する。
 	void AssignUV(const std::vector<RayVertex>& UV);
 
+	// 頂点情報の座標成分のみを変更。
+	void ChangeVertexPosition(int Index, const Vec3& Pos);
+
 	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer_; }
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer_; }
@@ -155,6 +162,7 @@ public:
 	const Vec3& GetVertexMax() { return vertexMax_; }
 	bool GetIsGenerate() { return isGenerate_; }
 	int GetBlasIndex() { return blasIndex_; }
+	int GetBaseTexture() { return baseTextureHandle_; }
 
 	std::vector<RayVertex> GetVertex() { return vertex_; }
 	const std::vector<Vec3>& GetVertexPos() { return vertexPos_; }
@@ -166,9 +174,6 @@ private:
 
 	// アドレスに情報を書き込む処理
 	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
-
-	// バッファ全般を生成する処理
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t size_, D3D12_RESOURCE_FLAGS flags, D3D12_RESOURCE_STATES initialState, D3D12_HEAP_TYPE heapType);
 
 	// BLAS生成時に設定を取得する関数
 	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque);

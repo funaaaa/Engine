@@ -9,6 +9,7 @@
 class HitGroup;
 class RayRootsignature;
 
+// HitGroupを管理、保存するクラス。現在は1つのHitGroupしか無いが、増やす予定です。
 class HitGroupMgr : public Singleton<HitGroupMgr> {
 
 private:

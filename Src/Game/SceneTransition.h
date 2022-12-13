@@ -3,6 +3,7 @@
 #include "Sprite.h"
 #include "Singleton.h"
 
+// シーン遷移を行うクラス。 現在は黒いテクスチャをアルファをかけて出している。
 class SceneTransition : public Singleton<SceneTransition> {
 
 private:

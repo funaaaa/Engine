@@ -19,15 +19,16 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	static const int MAX_INSTANCE = 512;	// インスタンスの最大数。
+	static const int MAX_INSTANCE = 1024 / 2;	// インスタンスの最大数。
 
 
 private:
 
-	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance_;
+	std::array<std::shared_ptr<PolygonMeshInstance>, MAX_INSTANCE> instance_;	// 描画オブジェクトの配列
 
-	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc_;
+	std::array<D3D12_RAYTRACING_INSTANCE_DESC, MAX_INSTANCE> instanceDesc_;		// 描画オブジェクトの設定
 
+	// 描画する際に使用する行列をまとめたデータ
 	struct MatData {
 		DirectX::XMMATRIX matRot_;
 		DirectX::XMMATRIX matScale_;
@@ -79,6 +80,8 @@ public:
 		DEF = 0,			// 通常のレイ
 		AS = 1,				// 大気散乱用
 		TEXCOLOR = 2,		// テクスチャの色をそのまま返す
+		DEF_EMISSIVE = 3,	// 通常反射とエミッシブ
+		DEF_TEXCOLOR_EMISSIVE = 4,	// 通常反射とテクスチャの色そのままエミッシブ
 		LIGHT = 5,			// ライト用のレイ テクスチャの色をそのまま返し、シャドウとの当たり判定を行わない。
 		REFRACTION = 6,		// 屈折用のレイ
 		INVISIBILITY = 7,	// 不可視のオブジェクト
@@ -87,6 +90,9 @@ public:
 		ALPHA = 10,			// 半透明 定数バッファを登録する必要有り。
 		ADD = 11,			// 加算合成 定数バッファを登録する必要有り。
 		DEF_TIREMASK = 12,	// 通常ライティングとタイヤ痕
+		DEF_TAILLAMP = 13,	// 通常ライティングとエミッシブとマテリアルアルファ
+		DEF_AO = 14,		// 通常ライティングとAO
+		DEF_TIREMASK_AO = 15,	// 通常ライティングとタイヤ痕とAO
 
 	};
 

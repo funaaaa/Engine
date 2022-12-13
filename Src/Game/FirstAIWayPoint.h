@@ -8,14 +8,14 @@ public:
 
 	/*===== メンバ変数 =====*/
 
-	Vec3 pos_;
-	int insIndex_;
-	int blasIndex_;
-	bool isActive_;
+	Vec3 pos_;			// 配置する座標
+	int insIndex_;		// デバッグでウェイポイントを描画する際の描画データ
+	int blasIndex_;		// デバッグでウェイポイントを描画する際のモデルデータ
+	bool isActive_;		// このウェイポイントが有効化されているか。
 
 public:
 
-	static const int RADIUS = 500;
+	static const int RADIUS = 500;	// ウェイポイントと車の当たり判定を行う際のサイズ
 
 
 public:

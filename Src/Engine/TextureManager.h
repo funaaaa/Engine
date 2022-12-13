@@ -6,9 +6,9 @@
 #include <DirectXMath.h>
 #include <vector>
 #include <array>
-#include <DirectXTex/DirectXTex.h>
+#include <DirectXTex/include/DirectXTex.h>
 #include <string>
-#include <DirectXTex/d3dx12.h>
+#include <DirectXTex/include/d3dx12.h>
 
 struct Texture {
 	LPCWSTR filePath_;								// ファイル名
@@ -20,6 +20,7 @@ struct Texture {
 	DirectX::XMFLOAT4 colorData_;					// 色を指定してテクスチャを生成する際、このテクスチャがどの色なのかを渡すための変数
 };
 
+// テクスチャデータを保存しておくクラス。
 class TextureManager : public Singleton<TextureManager> {
 
 private:

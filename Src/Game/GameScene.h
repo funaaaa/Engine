@@ -103,8 +103,6 @@ private:
 	Vec3 WINDOW_CENTER = Vec3(1280.0f / 2.0f, 720.0f / 2.0f, 0.1f);
 	Vec3 COUNT_DOWN_START_POS = Vec3(1280.0f / 2.0f, 720.0f / 2.0f - 300.0f, 0.1f);
 
-
-
 public:
 
 	/*===== ÉÅÉìÉoä÷êî =====*/
