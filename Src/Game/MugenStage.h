@@ -21,7 +21,7 @@ public:
 
 	void Setting(int TireMaskIndex, bool IsBoostGimmick = true)override;
 	void Destroy()override;
-	void Update()override;
+	void Update(std::weak_ptr<CharacterMgr> Character)override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
 
 

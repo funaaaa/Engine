@@ -15,7 +15,7 @@ public:
 
 	void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance)override;
 	void Destroy()override;
-	void Update(int Timer)override;
-	void Disable(int TimerToActivation)override;
+	void Update(int Timer, std::weak_ptr<CharacterMgr> Character)override;
+	void Disable(int TimerToActivation, int CharaIndex)override;
 
 };

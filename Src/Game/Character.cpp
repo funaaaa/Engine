@@ -705,6 +705,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 	input.targetInstance_ = playerModel_.carBodyInstance_;
 	input.targetOBB_ = obb_;
 	input.targetPos_ = pos_;
+	input.characterIndex_ = charaIndex_;
 	input.targetUpVec_ = upVec_;
 	input.targetPrevPos_ = prevPos_;
 	input.targetRotY_ = rotY_;

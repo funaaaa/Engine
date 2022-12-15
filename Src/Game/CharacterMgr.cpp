@@ -113,6 +113,15 @@ bool CharacterMgr::CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::ve
 	return isTireMask;
 }
 
+Vec3 CharacterMgr::GetPos(int Index)
+{
+
+	/*===== À•W‚ðŽæ“¾ =====*/
+
+	return character_.at(Index)->GetPos();;
+
+}
+
 bool CharacterMgr::CheckGoal()
 {
 

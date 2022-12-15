@@ -8,6 +8,7 @@
 class OBB;
 class PolygonMeshInstance;
 class BLAS;
+class CharacterMgr;
 
 // ステージに配置されるオブジェクトの既定クラス。
 class BaseStageObject {
@@ -46,6 +47,8 @@ protected:
 
 	std::weak_ptr<BLAS> blas_;			// BLASのインデックス
 	std::weak_ptr<PolygonMeshInstance> instance_;		// Instanceのインデックス
+	Vec3 defPos_;		// デフォルトの座標
+	Vec3 pos_;			// 現在座標
 	bool isActive_;		// 有効化フラグ
 	COLLISION_ID collisionID_;	// 当たり判定のID
 	OBJECT_ID objID_;			// オブジェクトのID
@@ -58,8 +61,8 @@ public:
 
 	virtual void Setting(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, std::weak_ptr<PolygonMeshInstance> Instance) = 0;
 	virtual void Destroy() = 0;
-	virtual void Update(int Timer) = 0;
-	virtual void Disable(int TimerToActivation) = 0;
+	virtual void Update(int Timer, std::weak_ptr<CharacterMgr> Character) = 0;
+	virtual void Disable(int TimerToActivation, int CharaIndex) = 0;
 
 	// 有効化。
 	inline void Activate() { isActive_ = true; }

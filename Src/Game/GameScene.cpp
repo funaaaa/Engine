@@ -303,7 +303,7 @@ void GameScene::Update()
 	nowRapCountUI_->ChangeTextureID(numFontHandle_[rapCount + 1], 0);
 
 	// ステージを更新。
-	stages_[STAGE_ID::MUGEN]->Update();
+	stages_[STAGE_ID::MUGEN]->Update(characterMgr_);
 
 	// TLASやパイプラインを更新。
 	RayEngine::Ins()->Update();

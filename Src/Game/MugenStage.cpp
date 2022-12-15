@@ -171,14 +171,14 @@ void MugenStage::Destroy()
 }
 
 #include "RayEngine.h"
-void MugenStage::Update()
+void MugenStage::Update(std::weak_ptr<CharacterMgr> Character)
 {
 
 	/*===== XVˆ— =====*/
 
 	++timer_;
 
-	stageObjectMgr_->Update(timer_);
+	stageObjectMgr_->Update(timer_, Character);
 
 }
 

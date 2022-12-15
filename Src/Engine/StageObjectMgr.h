@@ -7,6 +7,8 @@
 #include "FHelper.h"
 #include "BLAS.h"
 
+class CharacterMgr;
+
 // ステージに配置されるオブジェクトを管理するクラス。BaseStageがこのクラスを1つ持つ。
 class StageObjectMgr {
 
@@ -14,7 +16,7 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 512> objects_;
+	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 512> objects_;	// オブジェクト配列 fist->オブジェクト second->有効化フラグ
 
 
 
@@ -30,7 +32,7 @@ public:
 	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = false);
 
 	// 更新処理
-	void Update(int Timer);
+	void Update(int Timer, std::weak_ptr<CharacterMgr> Character);
 
 	// 指定のインデックスのマップ用テクスチャを変更。
 	void ChangeMapTexture(int Index, int TextureIndex, BLAS::MAP_PARAM MapParam);

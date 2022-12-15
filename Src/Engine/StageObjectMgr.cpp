@@ -122,7 +122,7 @@ int StageObjectMgr::AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const 
 }
 
 #include "Camera.h"
-void StageObjectMgr::Update(int Timer)
+void StageObjectMgr::Update(int Timer, std::weak_ptr<CharacterMgr> Character)
 {
 
 	/*===== 更新処理 =====*/
@@ -131,24 +131,7 @@ void StageObjectMgr::Update(int Timer)
 
 		if (!index.second) continue;
 
-		index.first->Update(Timer);
-
-		if (index.first->GetObjectID() != BaseStageObject::OBJECT_ID::ORNAMENT) continue;
-
-		//// 視錐台カリング
-		//bool inScreen = FHelper::CheckInScreen(index.first->GetInstance().lock()->GetPos(), 500.0f, 500.0f, Camera::Ins()->matView_, Camera::Ins()->matPerspective_);
-
-		//// カリングする。
-		//if (true) {
-
-		//	index.first->Display();
-
-		//}
-		//else {
-
-		//	index.first->NonDisplay();
-
-		//}
+		index.first->Update(Timer, Character);
 
 	}
 
@@ -227,7 +210,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			else if (indexObjID == BaseStageObject::OBJECT_ID::ITEM_BOX && Input.isPlayer_) {
 
 				// アイテムボックスを一時的に無効化。
-				index.first->Disable(180);
+				index.first->Disable(180, Input.characterIndex_);
 
 				output.isHitItemBox_ = true;
 
@@ -243,7 +226,7 @@ BaseStage::ColliderOutput StageObjectMgr::Collider(BaseStage::ColliderInput Inpu
 			if (!isHit) continue;
 
 			// アイテムボックスを一時的に無効化。
-			index.first->Disable(180);
+			index.first->Disable(180, Input.characterIndex_);
 
 			output.isHitItemBox_ = true;
 

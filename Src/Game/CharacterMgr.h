@@ -35,6 +35,9 @@ public:
 	bool CheckTireMask(std::weak_ptr<BaseStage> BaseStageData, std::vector<CharacterTireMask::TireMaskUV>& TireMaskUVData);
 	inline std::weak_ptr<Character> GetPlayerIns() { return character_[playerIndex_]; }
 
+	// ゲッタ
+	Vec3 GetPos(int Index);
+
 	// いずれかのキャラがゴールしたかをチェックする。
 	bool CheckGoal();
 

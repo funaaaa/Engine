@@ -147,7 +147,7 @@ void TitleScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
 	// ステージを更新。
-	stages_[STAGE_ID::MUGEN]->Update();
+	stages_[STAGE_ID::MUGEN]->Update(player_);
 
 	// 太陽の角度を更新。
 	sunAngle_ += sunSpeed_;
