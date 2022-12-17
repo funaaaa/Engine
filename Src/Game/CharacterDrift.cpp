@@ -57,11 +57,16 @@ void CharacterDrift::Input(const InputData& Input, BaseOperationObject::Operatio
 			handleAmount = Input.handleNormal_;
 
 			// ドリフトの向きによって回転量を変える。
-			if (isDriftRight_ && Operation.handleDriveRate_ < 0.1f) {
-				Operation.handleDriveRate_ = 0.1f;
+			float driftAmount = 0.8f;
+			if (0 < Operation.handleDriveRate_ && Operation.handleDriveRate_ < driftAmount) {
+				Operation.handleDriveRate_ = driftAmount;
+				isDriftRight_ = true;
+			}else if (-driftAmount < Operation.handleDriveRate_ && Operation.handleDriveRate_ < 0) {
+				Operation.handleDriveRate_ = -driftAmount;
+				isDriftRight_ = false;
 			}
-			if (!isDriftRight_ && -0.1f < Operation.handleDriveRate_) {
-				Operation.handleDriveRate_ = -0.1f;
+			else if(Operation.handleDriveRate_ == 0) {
+				Operation.handleDriveRate_ = driftAmount * (isDriftRight_ ? 1.0f : -1.0f);
 			}
 
 		}
@@ -197,7 +202,7 @@ void CharacterDrift::Update(std::weak_ptr<CharacterInclineBody> InclineBody, Vec
 
 	/*===== 更新処理 =====*/
 
-		// ドリフトジャンプしていたら。
+	// ドリフトジャンプしていたら。
 	if (isDriftJump_) {
 
 		// 座標を移動させる。
@@ -216,10 +221,9 @@ void CharacterDrift::Update(std::weak_ptr<CharacterInclineBody> InclineBody, Vec
 		if (0.1f < std::fabs(InclineBody.lock()->GetHandleAmount())) {
 
 			isDrift_ = true;
-			isDriftRight_ = 0.0f < InclineBody.lock()->GetHandleAmount();
+			isDriftRight_ = 0.0f < InclineBody.lock()->GetNowFrameHaneleAmount();
 
 		}
-
 
 
 	}

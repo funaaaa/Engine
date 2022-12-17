@@ -26,17 +26,17 @@ BaseOperationObject::Operation FirstAIOperationObject::Input(const BaseOperation
 	// 移動速度をレベルによって変更。
 	if (level_ == 0) {
 
-		operation.accelerationRate_ = 0.5f;
+		operation.accelerationRate_ = 0.3f;
 
 	}
 	else if (level_ == 1) {
 
-		operation.accelerationRate_ = 0.9f;
+		operation.accelerationRate_ = 0.5f;
 
 	}
 	else if (level_ == 2) {
 
-		operation.accelerationRate_ = 1.3f;
+		operation.accelerationRate_ = 0.8f;
 
 	}
 
