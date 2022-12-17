@@ -15,6 +15,9 @@ private:
 	int level_;
 	int charaPersonality_;
 
+	// レベルが上った際のオフセット移動量
+	const float LEVEL_OFFSET_SPEED = 0.3f;
+
 
 public:
 
