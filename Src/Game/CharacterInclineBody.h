@@ -14,8 +14,6 @@ private:
 	DirectX::XMVECTOR boostRotQ_;		// 加速時の正面方向への回転の行列
 	DirectX::XMVECTOR nowBoostRotQ_;	// 加速時の正面方向への回転の行列
 	float handleAmount_;				// ハンドル量
-	float baseHandleAmount_;			// ハンドル量 補間先
-	float nowFrameHandleAmount_;		// 現在のフレームのハンドル量
 	const float  MAX_DRIFT_ROT = 1.6f;	// ドリフト時の車体の回転の最大量
 	float baseDriftRot_;				// ドリフト時に車体を回転させる際の補間先
 	float nowDriftRot_;					// ドリフト時に車体を回転させる際の現在量
@@ -56,11 +54,8 @@ public:
 
 	// ハンドル量を取得
 	float GetHandleAmount() { return handleAmount_; }
-	float GetNowFrameHaneleAmount() { return nowFrameHandleAmount_; }
 	// ハンドル量を更新
-	inline void SetBaseHandleAmount(float HandleAmount) { baseHandleAmount_ = HandleAmount; }
 	inline void SetHandleAmount(float HandleAmount) { handleAmount_ = HandleAmount; }
-	inline void SetNowFrameHandleMount(float HandleAmount) { nowFrameHandleAmount_ = HandleAmount; }
 
 
 };

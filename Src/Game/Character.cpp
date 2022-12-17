@@ -590,8 +590,7 @@ void Character::Input(bool IsBeforeStart)
 	flags_->isJumpActionTrigger_ = operation.isDriftTrigger_;
 
 	// “ü—Í‚ð•Û‘¶‚·‚éB
-	inclineBody_->SetBaseHandleAmount(operation.handleDriveRate_);
-	inclineBody_->SetNowFrameHandleMount(operation.handleDriveRate_);
+	inclineBody_->SetHandleAmount(operation.handleDriveRate_);
 
 }
 
@@ -1106,3 +1105,4 @@ void Character::UpdateRocket()
 	rocket_->Update(inData);
 
 }
+

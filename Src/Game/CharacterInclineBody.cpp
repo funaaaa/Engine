@@ -13,7 +13,6 @@ CharacterInclineBody::CharacterInclineBody()
 	nowBoostRotQ_ = DirectX::XMVECTOR();
 	nowHandleRotQ_ = DirectX::XMVECTOR();
 	handleAmount_ = 0;
-	baseHandleAmount_ = 0;
 	tireLollingAmount_ = 0;
 	isRotRightSide_ = false;
 	nowDriftRot_ = 0;
@@ -21,7 +20,6 @@ CharacterInclineBody::CharacterInclineBody()
 	driftRotTimer_ = 0;
 	baseBoostRot_ = 0;
 	nowBoostRot_ = 0;
-	nowFrameHandleAmount_ = 0;
 
 }
 
@@ -35,7 +33,6 @@ void CharacterInclineBody::Init()
 	nowBoostRotQ_ = DirectX::XMVECTOR();
 	nowHandleRotQ_ = DirectX::XMVECTOR();
 	handleAmount_ = 0;
-	baseHandleAmount_ = 0;
 	tireLollingAmount_ = 0;
 	isRotRightSide_ = false;
 	nowDriftRot_ = 0;
@@ -43,7 +40,6 @@ void CharacterInclineBody::Init()
 	driftRotTimer_ = 0;
 	baseBoostRot_ = 0;
 	nowBoostRot_ = 0;
-	nowFrameHandleAmount_ = 0;
 
 }
 
@@ -51,9 +47,6 @@ void CharacterInclineBody::Update(const InputData& Input)
 {
 
 	/*===== 更新処理 =====*/
-
-	// ハンドルの量を補間する。
-	handleAmount_ += (baseHandleAmount_ - handleAmount_) / 30.0f;
 
 	// 空中に居たら。
 	if (!Input.onGround_ && !Input.isDriftJump_) {
