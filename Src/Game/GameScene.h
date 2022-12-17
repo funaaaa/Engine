@@ -40,9 +40,7 @@ private:
 	STAGE_ID nowStageID;
 
 	// UIŠÖŒW
-	std::shared_ptr<Sprite> coinUI_;
 	std::shared_ptr<Sprite> rapUI_;
-	std::array<std::shared_ptr<Sprite>, 2> coinCountUI_;
 	std::shared_ptr<Sprite> nowRapCountUI_;
 	std::shared_ptr<Sprite> slashUI_;
 	std::shared_ptr<Sprite> maxRapCountUI_;
