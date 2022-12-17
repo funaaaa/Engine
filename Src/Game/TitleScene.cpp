@@ -241,7 +241,7 @@ void TitleScene::Input()
 
 		/*-- タイトル画像が出ている状態 --*/
 
-		if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+		if (!isStatTransition_ && (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_RETURN))) {
 
 			isStatTransition_ = true;
 			isAppear_ = false;
@@ -272,7 +272,7 @@ void TitleScene::Input()
 		}
 
 		// 決定されたら。
-		if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+		if (!isStatTransition_ && (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_RETURN))) {
 
 			isStatTransition_ = true;
 			isReservationTransition_ = true;

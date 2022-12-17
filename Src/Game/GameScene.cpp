@@ -255,13 +255,6 @@ void GameScene::Update()
 	// 入力処理
 	Input();
 
-	if (Input::Ins()->IsKeyTrigger(DIK_O)) {
-
-		// AIを生成。
-		characterMgr_->AddChara(static_cast<int>(Character::CHARA_ID::AI1), false, GameSceneMode::Ins()->level_);
-
-	}
-
 	// キャラを更新。
 	characterMgr_->Update(stages_[STAGE_ID::MUGEN], isBeforeStart_, isGameFinish_);
 
@@ -372,7 +365,7 @@ void GameScene::Draw()
 
 	// 床を白塗り
 	static int firstTimeClean = 0;
-	if (Input::Ins()->IsKeyTrigger(DIK_R) || firstTimeClean == 0) {
+	if (firstTimeClean == 0) {
 
 		whiteOutComputeShader_->Dispatch(4096 / 32, 4096 / 32, 1, tireMaskTexture_->GetUAVIndex()); \
 			++firstTimeClean;
@@ -469,7 +462,7 @@ void GameScene::Input()
 
 	/*===== 入力処理 =====*/
 
-	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+	if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_START) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
 
 		if (!isStartTransition_) {
 			isStartTransition_ = true;
