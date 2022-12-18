@@ -75,6 +75,7 @@ void TitleScene::Init()
 	// プレイヤーを生成。
 	player_ = std::make_shared<CharacterMgr>();
 	player_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, 0, 0);
+	player_->Setting();
 
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex(), false);

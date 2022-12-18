@@ -121,6 +121,16 @@ GameScene::GameScene()
 	maxRapCountUI_ = std::make_shared<Sprite>();
 	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(194, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
 
+	// ランキングに使用するフォントをロード
+	rankingFont_[0] = TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/rank1.png");
+	rankingFont_[1] = TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/rank2.png");
+	rankingFont_[2] = TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/rank3.png");
+	rankingFont_[3] = TextureManager::Ins()->LoadTexture(L"Resource/Game/UI/rank4.png");
+	rankingUI_ = std::make_shared<Sprite>();
+	rankingUI_->GenerateSpecifyTextureID(RANK_UI_POS, Vec2(64, 64), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, rankingFont_[0]);
+	rankUIEasingTimer_ = 1;
+	isRankUIExp_ = true;
+
 	// 勝敗のUIを生成
 	Vec3 WIN_GAMEOVER_POS = Vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT * 0.25f, 0.1f);
 	winUI_ = std::make_shared<Sprite>();
@@ -128,7 +138,7 @@ GameScene::GameScene()
 	gameoverUI_ = std::make_shared<Sprite>();
 	gameoverUI_->GenerateForTexture(WIN_GAMEOVER_POS, Vec2(0, 0), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/gameover.png");
 	gameFinishUISizeRate_ = 0.0f;
-	gameFinishUIEasingTimer_ = 0;
+	gameFinishUIEasingTimer_ = 1;
 
 	// 集中線
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
@@ -199,7 +209,7 @@ void GameScene::Init()
 	}
 
 	// キャラの初期位置を設定。
-	characterMgr_->SettingStartPos();
+	characterMgr_->Setting();
 
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex());
@@ -225,6 +235,8 @@ void GameScene::Init()
 	countDownNumber_ = 2;
 	sunAngle_ = 0.495f;
 	isFinishTransition_ = false;
+	rankUIEasingTimer_ = 1;
+	isRankUIExp_ = true;
 
 	gameFinishUISizeRate_ = 0.0f;
 	gameFinishUIEasingTimer_ = 0;
@@ -318,8 +330,6 @@ void GameScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(sunAngle_), -sin(sunAngle_), 0.5f);
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
-	// 天球自体も回転させる。
-	//skyDomeIns_.lock()->AddRotate(Vec3(0.001f, 0, 0));
 
 	// 甲羅を更新。
 	ShellObjectMgr::Ins()->Update(stages_[STAGE_ID::MUGEN]);
@@ -376,6 +386,39 @@ void GameScene::Update()
 	else {
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ += (PARAM_A_MIN - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_) / div;
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ += (PARAM_B_MIN - RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_) / div;
+	}
+
+	// ランキングのUIを更新する。
+	rankUIEasingTimer_ += RANK_UI_EASING_TIMER;
+	if (1.0f < rankUIEasingTimer_) {
+
+		// 拡張中だったら。
+		if (isRankUIExp_) {
+			rankUIEasingTimer_ = 1.0f;
+		}
+		else {
+			rankUIEasingTimer_ = 0.0f;
+			isRankUIExp_ = true;
+			rankingUI_->ChangeTextureID(rankingFont_[characterMgr_->GetPlayerRanking()], 0);
+		}
+
+	}
+
+	// スケールを更新する。
+	float rankingEasingAmount = 0.0f;
+	if (isRankUIExp_) {
+		rankingEasingAmount = FEasing::EaseInCubic(rankUIEasingTimer_);
+	}
+	else {
+		rankingEasingAmount = 1.0f - FEasing::EaseOutCubic(rankUIEasingTimer_);
+	}
+	rankingUI_->ChangeScale(Vec3(RANK_UI_SIZE.x_, RANK_UI_SIZE.y_ * rankingEasingAmount, 1.0f));
+	rankingUI_->SetColor(DirectX::XMFLOAT4(1, 1, 1, rankingEasingAmount));
+
+	// ランキングのUIが変わった瞬間だったらイージングを初期化してテクスチャを変える。
+	if (characterMgr_->GetIsChangePlayerRanking()) {
+		rankUIEasingTimer_ = 0;
+		isRankUIExp_ = false;
 	}
 
 }
@@ -452,6 +495,9 @@ void GameScene::Draw()
 		}
 
 	}
+
+	// ランキングのUIを表示
+	rankingUI_->Draw();
 
 	// シーン遷移の画像を描画。
 	SceneTransition::Ins()->Draw();

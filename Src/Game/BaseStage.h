@@ -39,6 +39,8 @@ public:
 		Vec3 forwardVec_;			// 正面ベクトル
 		Vec3 upVec_;				// 上ベクトル
 		Vec3 ornamentHitNormal_;	// 装飾オブジェクトの当たった面の法線
+		int rankingWallIndex_;		// ランキング計測用壁に当たった際の壁番号
+		bool isHitRankigWall_;		// ランキング計測用壁にあたったかどうか
 		bool isHitStage_;			// ステージと当たった判定
 		bool isHitStageGrass_;		// ステージの草と当たった判定
 		bool isHitGoal_;			// ゴールと当たった判定
@@ -60,5 +62,8 @@ public:
 	virtual void Destroy() = 0;
 	virtual void Update(std::weak_ptr<CharacterMgr> Character) = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;
+
+	// ランキング計測用壁の数を返す。
+	virtual int GetRankingWallCount() = 0;
 
 };

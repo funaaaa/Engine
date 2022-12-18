@@ -40,6 +40,7 @@ public:
 		INV_WALL,		// 見えない壁
 		BRIGHTNESS_WALL,// 明るさの壁
 		DARKNESS_WALL,	// 暗さの壁
+		RANKING_WALL,	// ランキング計測用のかべ
 	};
 
 

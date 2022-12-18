@@ -115,6 +115,10 @@ Character::Character(CHARA_ID CharaID, int CharaIndex, int Level, int CharaPerso
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
 
+	// ランキング関係
+	hitRankingWallCount_ = 0;
+	hitRankingelapsedTime_ = 0;
+
 	// 座標関係
 	pos_ = defPos_;
 	prevPos_ = pos_;
@@ -181,6 +185,9 @@ void Character::Init()
 		defPos_ = GHOST_DEF_POS[0];
 	}
 
+	// ランキング関係
+	hitRankingWallCount_ = 0;
+
 	rapCount_ = 0;
 	isPassedMiddlePoint_ = 0;
 	pos_ = defPos_;
@@ -199,6 +206,7 @@ void Character::Init()
 	canNotMoveTimer_ = 0;
 	engineWaveTimer_ = 0;
 	engineWaveAmount_ = 0;
+	hitRankingelapsedTime_ = 0;
 	playerModel_.carBodyInstance_.lock()->ChangeRotate(Vec3(0, 0, 0));
 	cameraForwardVec_ = forwardVec_;
 
@@ -696,6 +704,14 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 
 	/*===== 当たり判定 =====*/
 
+	// ランキング計測用壁配列のサイズが0だったら最初のFということなので、拡張する。
+	if (static_cast<int>(isHitRankingWall_.size()) <= 0) {
+		isHitRankingWall_.resize(static_cast<int>(StageData.lock()->GetRankingWallCount()));
+		for (auto& index : isHitRankingWall_) {
+			index = false;
+		}
+	}
+
 	// 他の車との当たり判定。
 	CheckHitOtherCar(CharaData);
 
@@ -806,20 +822,6 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 			item_ = std::make_shared<BoostItem>();
 			item_->Generate(playerModel_.carBodyInstance_);
 
-			//// AI戦だったらランダムでアイテムを生成する。
-			//int random = FHelper::GetRand(0, 1);
-
-			//if (random == 0) {
-			//	item_ = std::make_shared<BoostItem>();
-			//	item_->Generate(playerModel_.carBodyInstance);
-			//}
-			//else {
-			//	item_ = std::make_shared<ShellItem>();
-			//	item_->Generate(playerModel_.carBodyInstance);
-			//}
-			//item_ = std::make_shared<ShellItem>();
-			//item_->Generate(playerModel_.carBodyInstance);
-
 		}
 
 	}
@@ -877,6 +879,38 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 	}
 	if (charaID_ == CHARA_ID::P1 && output.isHitDarknessWall_) {
 		BrightnessParam::Ins()->isBright_ = false;
+	}
+
+	// ランキング計測用壁にあたっていたら。
+	++hitRankingelapsedTime_;
+	if (output.isHitRankigWall_) {
+
+		// [当たったランキング壁が最初][保存されているランキングフラグの最後がtrue]だったら
+		if (output.rankingWallIndex_ == 0) {
+
+			// ランキングフラグを初期化して最初からにする。
+			for (auto& index : isHitRankingWall_) {
+				index = false;
+			}
+
+			// 進んでいるランキング壁を更新。
+			++hitRankingWallCount_;
+			hitRankingelapsedTime_ = 0;
+
+		}
+		else {
+
+			// 当たったランキング壁に対応するフラグがfalseだったらカウントする。
+			if (!isHitRankingWall_[output.rankingWallIndex_]) {
+
+				isHitRankingWall_[output.rankingWallIndex_] = true;
+				++hitRankingWallCount_;
+				hitRankingelapsedTime_ = 0;
+
+			}
+
+		}
+
 	}
 
 }

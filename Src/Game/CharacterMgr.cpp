@@ -10,6 +10,7 @@ CharacterMgr::CharacterMgr()
 	/*===== コンストラクタ =====*/
 
 	playerIndex_ = 0;
+	playerRaking_ = 0;
 
 }
 
@@ -27,6 +28,7 @@ void CharacterMgr::Init()
 	}
 
 	character_.resize(0);
+	playerRaking_ = 0;
 
 }
 
@@ -36,6 +38,8 @@ void CharacterMgr::Init()
 #include "PolygonInstance.h"
 #include "PolygonInstanceRegister.h"
 #include "Camera.h"
+#include <algorithm>
+#include <string>
 void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bool IsGameFinish)
 {
 
@@ -60,7 +64,26 @@ void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bo
 
 		}
 
+		rankingCount_[static_cast<int>(&index - &character_[0])] = std::pair<int,int>(index->GetHitRankingCount(), index->GetHitRankingelapsedTime_());
+
 	}
+
+	// ランキングを降順でソート
+	std::sort(rankingCount_.rbegin(), rankingCount_.rend());
+
+	// プレイヤーキャラのランキングを調べる。
+	prevPlayerRanking_ = playerRaking_;
+	for (auto& index : rankingCount_) {
+
+		// プレイヤーキャラと同じだったら
+		if (!(character_[playerIndex_]->GetHitRankingCount() == index.first && character_[playerIndex_]->GetHitRankingelapsedTime_() == index.second)) continue;
+
+		playerRaking_ = static_cast<int>(&index - &rankingCount_[0]);
+		break;
+
+	}
+
+	ImGui::DragInt("Character", &playerRaking_);
 
 }
 
@@ -68,10 +91,10 @@ void CharacterMgr::Draw()
 {
 }
 
-void CharacterMgr::SettingStartPos()
+void CharacterMgr::Setting()
 {
 
-	/*===== 初期地点を設定する =====*/
+	/*===== 諸々の設定処理 =====*/
 
 	int counter = 0;
 	for (auto& index : character_) {
@@ -79,6 +102,8 @@ void CharacterMgr::SettingStartPos()
 		index->SettingStartPos(counter);
 
 	}
+
+	rankingCount_.resize(static_cast<int>(character_.size()));
 
 }
 

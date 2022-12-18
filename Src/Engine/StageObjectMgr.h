@@ -2,6 +2,7 @@
 #include <array>
 #include <memory>
 #include "BaseStageObject.h"
+#include "BaseStage.h"
 #include "Singleton.h"
 #include "BaseStage.h"
 #include "FHelper.h"
@@ -17,6 +18,7 @@ private:
 	/*===== メンバ変数 =====*/
 
 	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 512> objects_;	// オブジェクト配列 fist->オブジェクト second->有効化フラグ
+	std::array<std::pair<std::shared_ptr<BaseStageObject>, bool>, 12> forRankingWalls;	// ランキング決定用オブジェクト配列 fist->オブジェクト second->有効化フラグ
 
 
 
@@ -30,6 +32,9 @@ public:
 	// 追加する。
 	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = false, bool IsNewGenerate = false);
 	int AddObject(const BaseStageObject::OBJECT_ID& ObjectID, const BaseStageObject::COLLISION_ID& CollisionID, const std::wstring& ModelPath, const std::wstring& HitGroupName, UINT ShaderID, bool IsOpaque = false);
+
+	// ランキング決定用オブジェクトを追加。
+	int AddRankingWall(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName);
 
 	// 更新処理
 	void Update(int Timer, std::weak_ptr<CharacterMgr> Character);
@@ -49,6 +54,7 @@ public:
 
 	// サイズ関係
 	void AddScale(int Index, const Vec3& Scale);
+	void AddScaleRankingWall(int Index, const Vec3& Scale);
 	void ChangeScale(int Index, const Vec3& Scale);
 
 	// 回転関係
@@ -57,6 +63,7 @@ public:
 
 	// Instanseを非表示、表示関数
 	void NonDisplay(int Index);
+	void NonDisplayRankingWall(int Index);
 	void Display(int Index);
 
 	// ゲッタ
@@ -71,6 +78,9 @@ public:
 	// 指定のBLASのUVを指定のBLASのSUBUVに代入する。
 	void AssignmentUVToSubUV(int AssigningBLASIndex, int AssignedBLASIndex);
 
+	// ランキング計測用壁の要素数
+	int GetRankingWallCount() { return static_cast<int>(forRankingWalls.size()); }
+
 private:
 
 	// ステージ、草との当たり判定
@@ -84,5 +94,9 @@ private:
 
 	// 斜め床の回転
 	void RotObliqueFloor(BaseStage::ColliderInput Input, const Vec3& HitNormal, BaseStage::ColliderOutput& Output);
+
+	// 通常オブジェクトとの当たり判定
+	void CheckHitBasicObject(BaseStage::ColliderInput& Input, BaseStage::ColliderOutput& Output);
+	void CheckHitRankingWallObject(BaseStage::ColliderInput& Input, BaseStage::ColliderOutput& Output);
 
 };

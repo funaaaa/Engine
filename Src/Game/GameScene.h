@@ -53,6 +53,15 @@ private:
 	float gameFinishUIEasingTimer_;
 	const float GAME_FINISH_UI_EASING_TIMER = 0.05f;
 
+	// ƒ‰ƒ“ƒLƒ“ƒO‚ÌUI
+	std::array<int, 4> rankingFont_;
+	std::shared_ptr<Sprite> rankingUI_;
+	const Vec3 RANK_UI_POS = Vec3(1174.0f, 629.5f, 0.1f);
+	const Vec3 RANK_UI_SIZE = Vec3(64, 64, 1);
+	bool isRankUIExp_;
+	float rankUIEasingTimer_;
+	const float RANK_UI_EASING_TIMER = 0.2f;
+
 
 	// W’†ü
 	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
