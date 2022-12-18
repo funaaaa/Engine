@@ -237,7 +237,6 @@ void Character::Update(std::weak_ptr<BaseStage> StageData, std::vector<std::shar
 
 	/*===== 更新処理 =====*/
 
-
 	// ゲーム終了フラグを更新。
 	gameFinish_->UpdateGameFinishFlag(IsGameFinish);
 

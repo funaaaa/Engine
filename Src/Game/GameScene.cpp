@@ -115,11 +115,20 @@ GameScene::GameScene()
 	rapUI_->GenerateForTexture(Vec3(140, 647, 0.1f), Vec2(224 / 2.0f, 64 / 2.0f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/rapUI.dds");
 
 	nowRapCountUI_ = std::make_shared<Sprite>();
-	nowRapCountUI_->GenerateSpecifyTextureID(Vec3(321 - 187, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[1]);
+	nowRapCountUI_->GenerateSpecifyTextureID(Vec3(134, 647, 0.1f), Vec2(16.0f * 0.8f, 32.0f * 0.8f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[1]);
 	slashUI_ = std::make_shared<Sprite>();
-	slashUI_->GenerateSpecifyTextureID(Vec3(356 - 187, 651, 0.1f), Vec2(16.0f * 0.6f, 32.0f * 0.6f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[10]);
+	slashUI_->GenerateSpecifyTextureID(Vec3(169, 651, 0.1f), Vec2(16.0f * 0.6f, 32.0f * 0.6f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[10]);
 	maxRapCountUI_ = std::make_shared<Sprite>();
-	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(381 - 187, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
+	maxRapCountUI_->GenerateSpecifyTextureID(Vec3(194, 651, 0.1f), Vec2(16.0f * 0.5f, 32.0f * 0.5f), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, numFontHandle_[3]);
+
+	// 勝敗のUIを生成
+	Vec3 WIN_GAMEOVER_POS = Vec3(WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT * 0.25f, 0.1f);
+	winUI_ = std::make_shared<Sprite>();
+	winUI_->GenerateForTexture(WIN_GAMEOVER_POS, Vec2(0, 0), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/win.png");
+	gameoverUI_ = std::make_shared<Sprite>();
+	gameoverUI_->GenerateForTexture(WIN_GAMEOVER_POS, Vec2(0, 0), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/gameover.png");
+	gameFinishUISizeRate_ = 0.0f;
+	gameFinishUIEasingTimer_ = 0;
 
 	// 集中線
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
@@ -217,6 +226,9 @@ void GameScene::Init()
 	sunAngle_ = 0.495f;
 	isFinishTransition_ = false;
 
+	gameFinishUISizeRate_ = 0.0f;
+	gameFinishUIEasingTimer_ = 0;
+
 	Camera::Ins()->eye_ = Vec3(0, 0, 0);
 	Camera::Ins()->target_ = Vec3(10, 0, 0);
 
@@ -252,10 +264,18 @@ void GameScene::Update()
 	Camera::Ins()->Update(characterMgr_->GetPlayerIns().lock()->GetPos(), characterMgr_->GetPlayerIns().lock()->GetCameraForwardVec(), characterMgr_->GetPlayerIns().lock()->GetUpVec(), characterMgr_->GetPlayerIns().lock()->GetNowSpeedPer(), isBeforeStart_, isGameFinish_);
 
 	// いずれかのキャラがゴールしていたらリザルトシーンに移動する。
-	if (characterMgr_->CheckGoal()) {
+	bool isGoalPlayer = false;
+	if (characterMgr_->CheckGoal(isGoalPlayer)) {
 
+		// ゴールしたトリガーだったら
+		if (!isGameFinish_) {
+			// スケールを変える。
+			winUI_->ChangeScale(0, 0, 1.0f);
+			gameoverUI_->ChangeScale(0, 0, 1.0f);
+		}
 
 		isGameFinish_ = true;
+		isWin_ = isGoalPlayer;
 
 		++transitionTimer;
 		if (TRANSION_TIME < transitionTimer) {
@@ -318,6 +338,26 @@ void GameScene::Update()
 		isTransition_ = true;
 
 		characterMgr_->Init();
+
+	}
+
+	// ゲームが終わっていたら
+	if (isGameFinish_) {
+
+		// UIの更新処理を行う。
+		gameFinishUIEasingTimer_ += GAME_FINISH_UI_EASING_TIMER;
+
+		// イージングの処理を行う。
+		float easingAmount = FEasing::EaseInOutExpo(gameFinishUIEasingTimer_);
+		if (1.0f < gameFinishUIEasingTimer_) {
+
+			gameFinishUIEasingTimer_ = 1.0f;
+
+		}
+
+		// スケールを変える。
+		winUI_->ChangeScale(WIN_UI_SIZE.x_, WIN_UI_SIZE.y_ * easingAmount, 1.0f);
+		gameoverUI_->ChangeScale(GAMEOVER_UI_SIZE.x_, GAMEOVER_UI_SIZE.y_ * easingAmount, 1.0f);
 
 	}
 
@@ -400,6 +440,18 @@ void GameScene::Draw()
 
 	// カウントダウン終了時のgoのui。
 	goSprite_->Draw();
+
+	// 勝敗を描画
+	if (isGameFinish_) {
+
+		if (isWin_) {
+			winUI_->Draw();
+		}
+		else {
+			gameoverUI_->Draw();
+		}
+
+	}
 
 	// シーン遷移の画像を描画。
 	SceneTransition::Ins()->Draw();

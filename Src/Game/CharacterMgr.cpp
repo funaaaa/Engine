@@ -122,7 +122,7 @@ Vec3 CharacterMgr::GetPos(int Index)
 
 }
 
-bool CharacterMgr::CheckGoal()
+bool CharacterMgr::CheckGoal(bool& IsPlayer)
 {
 
 	/*===== ゴールしたかどうかをチェック =====*/
@@ -134,6 +134,7 @@ bool CharacterMgr::CheckGoal()
 		if (index->GetRapCount() < 3) continue;
 
 		isGoal = true;
+		IsPlayer = index->GetIsPlayer();
 
 		break;
 

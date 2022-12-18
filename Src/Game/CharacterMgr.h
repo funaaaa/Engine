@@ -39,6 +39,6 @@ public:
 	Vec3 GetPos(int Index);
 
 	// いずれかのキャラがゴールしたかをチェックする。
-	bool CheckGoal();
+	bool CheckGoal(bool& IsPlayer);
 
 };

@@ -283,6 +283,15 @@ namespace FEasing {
 		return 1.0f + c3 * std::powf(Time - 1.0f, 3.0f) + c1 * std::powf(Time - 1.0f, 2.0f);
 	}
 
+	inline float EaseInOutExpo(float Time) {
+		return Time == 0
+			? 0
+			: Time == 1
+			? 1
+			: Time < 0.5 ? powf(2, 20 * Time - 10) / 2
+			: (2 - powf(2, -20 * Time + 10)) / 2;
+	}
+
 	//inline float EaseOutExpo(float Time) {
 	//	return Time == 1.0f ? 1.0f : 1.0f - powf(2.0f, -10.0f * Time);
 	//}

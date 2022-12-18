@@ -178,6 +178,7 @@ public:
 	bool GetIsGetItem();	// アイテムを取得した瞬間
 	bool GetIsItem();	// アイテムを持っているか。
 	bool GetUseItem();	// アイテムを使った瞬間。
+	bool GetIsPlayer() { return charaID_ == CHARA_ID::P1; }
 	bool GetIdConcentrationLine();
 	int GetRapCount() { return rapCount_; }
 	bool GetIsPassedMiddlePoint() { return isPassedMiddlePoint_; }
