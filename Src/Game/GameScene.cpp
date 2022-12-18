@@ -139,6 +139,7 @@ GameScene::GameScene()
 	gameoverUI_->GenerateForTexture(WIN_GAMEOVER_POS, Vec2(0, 0), Pipeline::PROJECTIONID::UI, Pipeline::PIPLINE_ID::PIPLINE_SPRITE_ALPHA, L"Resource/Game/UI/gameover.png");
 	gameFinishUISizeRate_ = 0.0f;
 	gameFinishUIEasingTimer_ = 1;
+	rankUISineWaveTimer_ = 0.0f;
 
 	// èWíÜê¸
 	concentrationLine_ = std::make_shared<ConcentrationLineMgr>();
@@ -240,6 +241,7 @@ void GameScene::Init()
 
 	gameFinishUISizeRate_ = 0.0f;
 	gameFinishUIEasingTimer_ = 0;
+	rankUISineWaveTimer_ = 0.0f;
 
 	Camera::Ins()->eye_ = Vec3(0, 0, 0);
 	Camera::Ins()->target_ = Vec3(10, 0, 0);
@@ -420,6 +422,18 @@ void GameScene::Update()
 		rankUIEasingTimer_ = 0;
 		isRankUIExp_ = false;
 	}
+
+	// ÉâÉìÉNÇÃUIÇècÇ…Ç‰ÇÁÇ‰ÇÁìÆÇ©Ç∑ÅB
+	if (!isBeforeStart_) {
+		rankUISineWaveTimer_ += RANK_UI_SINE_WAVE_TIMER * (5.0f - characterMgr_->GetPlayerRanking());
+		float sineWaveAmount = sinf(rankUISineWaveTimer_) * RANK_UI_SINE_WAVE_LENGTH;
+		rankingUI_->ChangePosition(RANK_UI_POS + Vec3(0, sineWaveAmount, 0));
+	}else{
+		rankUISineWaveTimer_ += RANK_UI_SINE_WAVE_TIMER;
+		float sineWaveAmount = sinf(rankUISineWaveTimer_) * RANK_UI_SINE_WAVE_LENGTH;
+		rankingUI_->ChangePosition(RANK_UI_POS + Vec3(0, sineWaveAmount, 0));
+	}
+
 
 }
 

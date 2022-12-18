@@ -154,7 +154,7 @@ int StageObjectMgr::AddRankingWall(const std::string& DirectryPath, const std::s
 	forRankingWalls[addIndex].first = std::make_shared<BasicStageObject>();
 
 	// Blas‚ğƒ[ƒh
-	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, false, false);
+	std::weak_ptr<BLAS> blasIndex = BLASRegister::Ins()->GenerateObj(DirectryPath, ModelName, HitGroupName, false, true);
 	// Instance‚ğ¶¬B
 	std::weak_ptr<PolygonMeshInstance> instance = PolygonInstanceRegister::Ins()->CreateInstance(blasIndex, PolygonInstanceRegister::DEF, true);
 

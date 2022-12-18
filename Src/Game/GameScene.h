@@ -60,7 +60,10 @@ private:
 	const Vec3 RANK_UI_SIZE = Vec3(64, 64, 1);
 	bool isRankUIExp_;
 	float rankUIEasingTimer_;
-	const float RANK_UI_EASING_TIMER = 0.2f;
+	const float RANK_UI_EASING_TIMER = 0.1f;
+	float rankUISineWaveTimer_;						// ランクのUIを縦にゆらゆら動かす用の変数
+	const float RANK_UI_SINE_WAVE_TIMER = 0.05f;
+	const float RANK_UI_SINE_WAVE_LENGTH = 10.0f;	// ランクのUIを縦にゆらゆら動かす量
 
 
 	// 集中線
