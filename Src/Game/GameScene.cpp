@@ -577,7 +577,6 @@ void GameScene::InputImGUI()
 
 	/*===== IMGUIçXêV =====*/
 
-	ImGui::DragFloat("SunAngle", &sunAngle_, 0.005f);
 
 }
 

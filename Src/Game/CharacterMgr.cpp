@@ -83,8 +83,6 @@ void CharacterMgr::Update(std::weak_ptr<BaseStage> Stage, bool IsBeforeStart, bo
 
 	}
 
-	ImGui::DragInt("Character", &playerRaking_);
-
 }
 
 void CharacterMgr::Draw()
