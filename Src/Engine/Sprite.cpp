@@ -35,7 +35,7 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	// 頂点バッファビューの生成
 	CD3DX12_HEAP_PROPERTIES vtxHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC vtxResDesc = CD3DX12_RESOURCE_DESC::Buffer(vertex_.size() * sizeof(Vertex));
-	HRESULT result = Engine::Ins()->device_.dev_->CreateCommittedResource(
+	Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&vtxHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&vtxResDesc,
@@ -52,13 +52,21 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	/*-----定数バッファの生成-----*/
 	CD3DX12_HEAP_PROPERTIES constHeapProp = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
 	CD3DX12_RESOURCE_DESC constResDesc = CD3DX12_RESOURCE_DESC::Buffer((sizeof(ConstBufferDataB0) + 0xff) & ~0xff);
-	result = Engine::Ins()->device_.dev_->CreateCommittedResource(
+	Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&constHeapProp,
 		D3D12_HEAP_FLAG_NONE,
 		&constResDesc,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		nullptr,
-		IID_PPV_ARGS(&constBuffB0_)
+		IID_PPV_ARGS(&constBuffB0_[0])
+	);
+	Engine::Ins()->device_.dev_->CreateCommittedResource(
+		&constHeapProp,
+		D3D12_HEAP_FLAG_NONE,
+		&constResDesc,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&constBuffB0_[1])
 	);
 
 	// 行列を初期化
@@ -84,8 +92,13 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 0, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-	cbvDesc.BufferLocation = constBuffB0_->GetGPUVirtualAddress();
-	cbvDesc.SizeInBytes = (UINT)constBuffB0_->GetDesc().Width;
+	cbvDesc.BufferLocation = constBuffB0_[0]->GetGPUVirtualAddress();
+	cbvDesc.SizeInBytes = (UINT)constBuffB0_[0]->GetDesc().Width;
+	Engine::Ins()->device_.dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 1, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+	cbvDesc.BufferLocation = constBuffB0_[1]->GetGPUVirtualAddress();
+	cbvDesc.SizeInBytes = (UINT)constBuffB0_[1]->GetDesc().Width;
 	Engine::Ins()->device_.dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
 }
 
@@ -128,17 +141,20 @@ void Sprite::Draw()
 	// 非表示状態だったら描画処理を行わない
 	if (isDisplay_ == false) return;
 
+	// 現在のQueueのインデックスを取得
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+
 	// パイプラインとルートシグネチャの設定
 	PipelineManager::Ins()->SetPipline(piplineID_);
 
 	// 定数バッファB0構造体をマップ処理
-	MapConstDataB0(constBuffB0_, constBufferDataB0_);
+	MapConstDataB0(constBuffB0_[currentQueueIndex], constBufferDataB0_);
 
 	// 座標を保存しておく
 	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);
 
 	// 定数バッファビュー設定コマンド
-	Engine::Ins()->copyResourceCmdList_->SetGraphicsRootConstantBufferView(0, constBuffB0_->GetGPUVirtualAddress());
+	Engine::Ins()->copyResourceCmdList_->SetGraphicsRootConstantBufferView(0, constBuffB0_[currentQueueIndex]->GetGPUVirtualAddress());
 
 	// ディスクリプタヒープ設定コマンド
 	ID3D12DescriptorHeap* ppHeaps2[] = { DescriptorHeapMgr::Ins()->GetDescriptorHeap().Get() };

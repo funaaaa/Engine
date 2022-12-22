@@ -63,31 +63,6 @@ std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, c
 
 }
 
-std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque, bool IsNewGenerate)
-{
-
-	/*===== BLASを生成 =====*/
-
-	IsNewGenerate;
-	for (auto& index : blas_) {
-
-		if (index->GetIsGenerate()) continue;
-
-		index->GenerateBLASFbx(DirectryPath, ModelName, HitGroupName, static_cast<int>(&index - &blas_[0]), IsOpaque);
-
-		return index;
-
-	}
-
-	// 要素数をオーバーしました！
-	assert(0);
-
-	return std::weak_ptr<BLAS>();
-
-	//}
-
-}
-
 #include "FString.h"
 std::weak_ptr<BLAS> BLASRegister::GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, bool IsOpaque, bool IsNewGenerate) {
 

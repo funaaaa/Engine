@@ -7,6 +7,7 @@
 #include "Vec.h"
 #include "DynamicConstBuffer.h"
 #include <DirectXMath.h>
+#include <array>
 
 // レイトレ用頂点構造体
 struct RayVertex {
@@ -26,12 +27,12 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer_;	// 頂点バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexUploadBuffer_;	// 頂点バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer_;	// 頂点インデックスバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> indexUploadBuffer_;	// 頂点インデックスバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer_;	// 頂点インデックスバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> materialUploadBuffer_;	// 頂点インデックスバッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexBuffer_;	// 頂点バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexUploadBuffer_;	// 頂点バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexBuffer_;	// 頂点インデックスバッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexUploadBuffer_;	// 頂点インデックスバッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialBuffer_;	// 頂点インデックスバッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialUploadBuffer_;	// 頂点インデックスバッファ
 	RayDescriptor vertexDescriptor_;		// 頂点ディスクリプタ
 	RayDescriptor indexDescriptor_;			// 頂点インデックスディスクリプタ
 	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
@@ -42,9 +43,9 @@ private:
 	// BLASのインデックス。
 	int blasIndex_;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer_;		// BLAS用バッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;	// スクラッチバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> updateBuffer_;	// 更新用バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> blasBuffer_;		// BLAS用バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> scratchBuffer_;	// スクラッチバッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> updateBuffer_;	// 更新用バッファ
 
 	UINT vertexCount_;						// 頂点の数
 	UINT indexCount_;						// 頂点インデックスの数
@@ -109,7 +110,6 @@ public:
 
 	// BLASの生成
 	void GenerateBLASObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
-	void GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
 	void GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque = false);
 	void GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int BlasIndex, bool IsOpaque = false);
 
@@ -151,9 +151,9 @@ public:
 	void ChangeVertexPosition(int Index, const Vec3& Pos);
 
 	// アクセッサ
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer_; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer_; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer_; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(int Index) { return blasBuffer_[Index]; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer(int Index) { return vertexBuffer_[Index]; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer(int Index) { return indexBuffer_[Index]; }
 	std::wstring& GetHitGroupName() { return hitGroupName_; }
 	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor_; }
 	RayDescriptor& GetIndexDescriptor() { return indexDescriptor_; }
@@ -177,13 +177,19 @@ private:
 	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
 
 	// BLAS生成時に設定を取得する関数
-	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque);
+	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque, int Index);
 
 	// 加速構造体の設定用関数
-	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc);
+	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc, int Index);
 
 	// 加速構造体の構築用関数
-	void CreateAccelerationStructure();
+	void CreateAccelerationStructure(int Index);
+
+	// マテリアルを設定
+	void CreateMaterialBuffer();
+
+	// 頂点バッファを設定
+	void CreateVertexBuffer(const ModelDataManager::ObjectData& DataBuff);
 
 	// GPUディスクリプタを書き込む。
 	inline UINT WriteGPUDescriptor(void* Dst, const D3D12_GPU_DESCRIPTOR_HANDLE* Descriptor)

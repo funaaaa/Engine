@@ -44,123 +44,28 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	// テクスチャを保存。
 	baseTextureHandle_ = dataBuff.textureHandle_;
 
+	// 現在のQueueのIndex
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+
 	// マテリアルバッファを生成する。
-	materialBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	materialBuffer_->SetName(L"MaterialBuffer");
+	CreateMaterialBuffer();
 
-	// アップロード用マテリアルバッファを生成する。
-	materialUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	materialUploadBuffer_->SetName(L"MaterialUploadBuffer");
-
-	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-	// マテリアルデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点数を求める。
-	vertexCount_ = static_cast<UINT>(dataBuff.vertex_.size());
-
-	// 頂点インデックス数を求める。
-	indexCount_ = static_cast<UINT>(dataBuff.index_.size());
-
-	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
-
-		RayVertex buff{};
-		buff.normal_ = dataBuff.vertex_[index].normal_;
-		buff.position_ = dataBuff.vertex_[index].pos_;
-		buff.uv_ = dataBuff.vertex_[index].uv_;
-		buff.subUV_ = dataBuff.vertex_[index].uv_;
-
-		// データを保存。
-		vertex_.push_back(buff);
-
-	}
-
-	// 頂点インデックスデータを保存。
-	vertIndex_ = dataBuff.index_;
-
-	// 頂点サイズを求める。
-	vertexStride_ = sizeof(RayVertex);
-
-	// 頂点インデックスサイズを求める。
-	indexStride_ = sizeof(UINT);
-
-	// 頂点バッファを生成する。
-	vertexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	vertexBuffer_->SetName(L"VertexBuffer");
-
-	// アップロード用頂点バッファを生成する。
-	vertexUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	vertexUploadBuffer_->SetName(L"VertexUploadBuffer");
-
-	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-
-	// 頂点インデックスバッファを生成する。
-	indexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	indexBuffer_->SetName(L"IndexBuffer");
-
-	// アップロード用頂点インデックスバッファを生成する。
-	indexUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	indexUploadBuffer_->SetName(L"IndexUploadBuffer");
-
-	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexUploadBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_.Get(), indexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-	// 頂点インデックスデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点データでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
+	// 頂点バッファとインデックスバッファを生成。
+	CreateVertexBuffer(dataBuff);
 
 
 	/*-- BLASバッファを生成する --*/
 
-	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
-	isOpaque_ = IsOpaque;
+	for (int index = 0; index < 2; ++index) {
 
-	// BLASバッファを設定、構築する。
-	SettingAccelerationStructure(geomDesc);
+		// 形状を設定する用の構造体を設定。
+		D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque, index);
+		isOpaque_ = IsOpaque;
+
+		// BLASバッファを設定、構築する。
+		SettingAccelerationStructure(geomDesc, index);
+
+	}
 
 
 	// ヒットグループ名を保存する。
@@ -187,160 +92,6 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 	isGenerate_ = true;
 	isUseVertexUploadBuffer_ = true;
-
-}
-
-void BLAS::GenerateBLASFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, int BlasIndex, bool IsOpaque)
-{
-
-	/*===== BLASを生成する処理 =====*/
-
-	// BlasのIndexを保存。
-	blasIndex_ = BlasIndex;
-
-	/*-- 形状データを読み込む --*/
-
-	// 読み込んだデータを一時保存する用のバッファ。
-	std::vector<FbxLoader::Vertex> modelVertexData;
-	std::vector<UINT> modelIndexData;
-
-	// モデルをロード。
-	modelIndex_ = FbxLoader::Ins()->LoadModelFromFile(DirectryPath, ModelName);
-
-	FbxLoader::Ins()->GetFbxData(modelIndex_, modelVertexData, modelIndexData);
-
-	// テクスチャを取得。
-	baseTextureHandle_ = FbxLoader::Ins()->GetTextureIndex(modelIndex_);
-
-	// マテリアル用定数バッファを生成。
-	materialBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-
-	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
-
-	// マテリアルデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点数を求める。
-	vertexCount_ = static_cast<UINT>(modelVertexData.size());
-
-	// 頂点インデックス数を求める。
-	indexCount_ = static_cast<UINT>(modelIndexData.size());
-
-	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
-
-		RayVertex buff{};
-		buff.normal_ = modelVertexData[index].normal_;
-		buff.position_ = modelVertexData[index].pos_;
-		buff.uv_ = modelVertexData[index].uv_;
-
-		// データを保存。
-		vertex_.push_back(buff);
-
-	}
-
-	// 頂点インデックスデータを保存。
-	vertIndex_ = modelIndexData;
-
-	// 頂点サイズを求める。
-	vertexStride_ = sizeof(RayVertex);
-
-	// 頂点インデックスサイズを求める。
-	indexStride_ = sizeof(UINT);
-
-	// 頂点バッファを生成する。
-	vertexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-
-	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
-
-	// 頂点インデックスバッファを生成する。
-	indexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	indexBuffer_->SetName(L"IndexBuffer");
-
-	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
-
-	// 頂点インデックスデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点データでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-
-	/*-- BLASバッファを生成する --*/
-
-	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
-	isOpaque_ = IsOpaque;
-
-	// BLASバッファを設定、構築する。
-	SettingAccelerationStructure(geomDesc);
-
-	// ヒットグループ名を保存する。
-	this->hitGroupName_ = HitGroupName;
-
-	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
-
-		// 入力用構造体をリサイズ。
-		skinComputeInput_.resize(vertex_.size());
-
-		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-		FbxLoader::Ins()->GetSkinComputeInput(modelIndex_, skinComputeInput_);
-
-		// スキニングアニメーションで使用するコンピュートシェーダーをロードしておく。
-		skinComput_.Init(L"resource/ShaderFiles/RayTracing/ComputeSkin.hlsl", sizeof(FbxLoader::SkinComputeInput), static_cast<int>(skinComputeInput_.size()), skinComputeInput_.data(), sizeof(RayVertex), static_cast<int>(vertex_.size()), vertex_.data());
-
-	}
-
-	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	int counter = 0;
-	for (auto& index_ : vertex_) {
-		vertexPos_[counter] = index_.position_;
-		vertexNormal_[counter] = index_.normal_;
-		vertexUV_[counter] = index_.uv_;
-		++counter;
-	}
-
-	// 頂点を保存。
-	defVertex_ = vertex_;
-
-	// ダーティフラグ
-	isChangeVertex_ = true;
-	isChangeTexture_ = true;
-
-	isGenerate_ = true;
-	isUseVertexUploadBuffer_ = true;
-
-	// 最小と最大の頂点を保存。
-	ModelDataManager::ObjectData dataBuff;
-	for (auto& index : vertexPos_) {
-
-		ModelDataManager::Ins()->SaveVertexMinMaxInfo(dataBuff, index);
-
-	}
-	vertexMin_ = dataBuff.vertexMin_;
-	vertexMax_ = dataBuff.vertexMax_;
 
 }
 
@@ -380,30 +131,7 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 	baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// マテリアルバッファを生成する。
-	materialBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	materialBuffer_->SetName(L"MaterialBuffer");
-
-	// アップロード用マテリアルバッファを生成する。
-	materialUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	materialUploadBuffer_->SetName(L"MaterialUploadBuffer");
-
-	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-	// マテリアルデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
+	CreateMaterialBuffer();
 
 	// 頂点数を求める。
 	vertexCount_ = static_cast<UINT>(dataBuff.vertex_.size());
@@ -424,77 +152,22 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 
 	}
 
-	// 頂点インデックスデータを保存。
-	vertIndex_ = dataBuff.index_;
-
-	// 頂点サイズを求める。
-	vertexStride_ = sizeof(RayVertex);
-
-	// 頂点インデックスサイズを求める。
-	indexStride_ = sizeof(UINT);
-
-	// 頂点バッファを生成する。
-	vertexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	vertexBuffer_->SetName(L"VertexBuffer");
-
-	// アップロード用頂点バッファを生成する。
-	vertexUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	vertexUploadBuffer_->SetName(L"VertexUploadBuffer");
-
-	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-
-	// 頂点インデックスバッファを生成する。
-	indexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	indexBuffer_->SetName(L"IndexBuffer");
-
-	// アップロード用頂点インデックスバッファを生成する。
-	indexUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	indexUploadBuffer_->SetName(L"IndexUploadBuffer");
-
-	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexUploadBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_.Get(), indexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-	// 頂点インデックスデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点データでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
+	// 頂点バッファを生成。
+	CreateVertexBuffer(dataBuff);
 
 
 	/*-- BLASバッファを生成する --*/
 
-	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
-	isOpaque_ = IsOpaque;
+	for (int index = 0; index < 2; ++index) {
 
-	// BLASバッファを設定、構築する。
-	SettingAccelerationStructure(geomDesc);
+		// 形状を設定する用の構造体を設定。
+		D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque, index);
+		isOpaque_ = IsOpaque;
+
+		// BLASバッファを設定、構築する。
+		SettingAccelerationStructure(geomDesc, index);
+
+	}
 
 
 	// ヒットグループ名を保存する。
@@ -553,111 +226,24 @@ void BLAS::GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int B
 	baseTextureHandle_ = ModelData.textureHandle_;
 
 	// マテリアルバッファを生成する。
-	materialBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	materialBuffer_->SetName(L"MaterialBuffer");
+	CreateMaterialBuffer();
 
-	// アップロード用マテリアルバッファを生成する。
-	materialUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	materialUploadBuffer_->SetName(L"MaterialUploadBuffer");
-
-	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-	// マテリアルデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点数を求める。
-	vertexCount_ = static_cast<UINT>(ModelData.vertex_.size());
-
-	// 頂点インデックス数を求める。
-	indexCount_ = static_cast<UINT>(ModelData.index_.size());
-
-	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
-
-		RayVertex buff{};
-		buff.normal_ = ModelData.vertex_[index].normal_;
-		buff.position_ = ModelData.vertex_[index].pos_;
-		buff.uv_ = ModelData.vertex_[index].uv_;
-		buff.subUV_ = ModelData.vertex_[index].uv_;
-
-		// データを保存。
-		vertex_.push_back(buff);
-
-	}
-
-	// 頂点インデックスデータを保存。
-	vertIndex_ = ModelData.index_;
-
-	// 頂点サイズを求める。
-	vertexStride_ = sizeof(RayVertex);
-
-	// 頂点インデックスサイズを求める。
-	indexStride_ = sizeof(UINT);
-
-	// 頂点バッファを生成する。
-	vertexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(vertexStride_ * vertexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	vertexBuffer_->SetName(L"VertexBuffer");
-
-	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
-
-
-	// 頂点インデックスバッファを生成する。
-	indexBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
-	indexBuffer_->SetName(L"IndexBuffer");
-
-	// アップロード用頂点インデックスバッファを生成する。
-	indexUploadBuffer_ = FHelper::CreateBuffer(
-		static_cast<size_t>(indexStride_ * indexCount_),
-		D3D12_RESOURCE_FLAG_NONE,
-		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
-	indexUploadBuffer_->SetName(L"IndexUploadBuffer");
-
-	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
-	WriteToMemory(indexUploadBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
-
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_.Get(), indexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-
-	// 頂点インデックスデータでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
-
-	// 頂点データでディスクリプタを生成。
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
-	DescriptorHeapMgr::Ins()->IncrementHead();
+	// 頂点バッファを生成。
+	CreateVertexBuffer(ModelData);
 
 
 	/*-- BLASバッファを生成する --*/
 
-	// 形状を設定する用の構造体を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque);
-	isOpaque_ = IsOpaque;
+	for (int index = 0; index < 2; ++index) {
 
-	// BLASバッファを設定、構築する。
-	SettingAccelerationStructure(geomDesc);
+		// 形状を設定する用の構造体を設定。
+		D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque, index);
+		isOpaque_ = IsOpaque;
+
+		// BLASバッファを設定、構築する。
+		SettingAccelerationStructure(geomDesc, index);
+
+	}
 
 
 	// ヒットグループ名を保存する。
@@ -692,54 +278,31 @@ void BLAS::Update()
 
 	/*===== BLASの更新 =====*/
 
+	// 現在のQueueのインデックス
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+
 	// 生成していなかったら処理を飛ばす。
 	if (!isGenerate_) return;
-
-	// この処理はFBXのアニメーションが必要になった際に戻す。
-	{
-		//// モデルがアニメーションを持っていたら。
-		//if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation) {
-
-		//	// アニメーションの更新処理
-		//	auto& model = FbxLoader::Ins()->GetFbxModel(modelIndex_);
-		//	if (model.isPlay) {
-
-		//		model.currentTime += model.frameTime;
-
-		//		// 最後まで再生したら先頭に戻す。
-		//		if (model.endTime < model.currentTime) {
-
-		//			model.currentTime = model.startTime;
-
-		//		}
-
-		//		// スキニングアニメーションコンピュートシェーダーで使用する入力用構造体をセット。
-		//		FbxLoader::Ins()->GetSkinComputeInput(modelIndex_, skinComputeInput_);
-
-		//	}
-
-		//};
-	}
 
 	if (isUseVertexUploadBuffer_) {
 
 		// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
-		WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+		WriteToMemory(vertexUploadBuffer_[currentQueueIndex], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
-		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
-		Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-		barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+		CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+		Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_[currentQueueIndex].Get(), vertexUploadBuffer_[currentQueueIndex].Get());
+		barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 		Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 	}
 	else {
 
-		WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+		WriteToMemory(vertexBuffer_[currentQueueIndex], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 	}
 
 	// 更新のための値を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_);
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_, currentQueueIndex);
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
@@ -751,19 +314,18 @@ void BLAS::Update()
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE |
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
 
-
 	// インプレース更新を実行する。
-	asDesc.SourceAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
-	asDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
+	asDesc.SourceAccelerationStructureData = blasBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
+	asDesc.DestAccelerationStructureData = blasBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
 	// 更新用の作業バッファを設定する。
-	asDesc.ScratchAccelerationStructureData = updateBuffer_->GetGPUVirtualAddress();
+	asDesc.ScratchAccelerationStructureData = updateBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
 	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
 
-	CreateAccelerationStructure();
+	CreateAccelerationStructure(currentQueueIndex);
 
 }
 
@@ -830,13 +392,16 @@ void BLAS::IsChangeMaterial()
 
 	/*===== マテリアルを書き換えた際の処理 =====*/
 
-	// 確保したバッファにマテリアルデータを書き込む。
-	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
+	// 現在のQueueのインデックス
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
 
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialUploadBuffer_[currentQueueIndex], &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
+
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_[currentQueueIndex].Get(), materialUploadBuffer_[currentQueueIndex].Get());
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 	isChangeVertex_ = true;
@@ -1064,6 +629,9 @@ void BLAS::MulVec3Vertex(Vec3 Vec)
 
 	/*===== すべての頂点に行列情報をかける ====*/
 
+	// 現在のQueueのインデックス
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+
 	for (auto& index_ : vertex_) {
 
 		index_.position_ = defVertex_[&index_ - &vertex_[0]].position_ * Vec;
@@ -1071,7 +639,7 @@ void BLAS::MulVec3Vertex(Vec3 Vec)
 	}
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+	WriteToMemory(vertexBuffer_[currentQueueIndex], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 }
 
@@ -1080,6 +648,9 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 
 	/*===== 指定のUVを代入する =====*/
 
+	// 現在のQueueのインデックス
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+
 	for (auto& index : vertex_) {
 
 		index.subUV_ = UV[static_cast<int>(&index - &vertex_[0])].uv_;
@@ -1087,12 +658,12 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 	}
 
 	// 確保したバッファに頂点データを書き込む。
-	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+	WriteToMemory(vertexUploadBuffer_[currentQueueIndex], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_[currentQueueIndex].Get(), vertexUploadBuffer_[currentQueueIndex].Get());
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 
 	// 頂点を書き換えたフラグを立てる。
@@ -1133,7 +704,7 @@ void BLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const
 
 }
 
-D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(bool IsOpaque)
+D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(bool IsOpaque, int Index)
 {
 
 	/*===== BLAS生成時に設定を取得する用関数 =====*/
@@ -1151,10 +722,10 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(bool IsOpaque)
 
 	// 形状データの細かい項目を設定。
 	auto& triangles = geometryDesc.Triangles;
-	triangles.VertexBuffer.StartAddress = vertexBuffer_->GetGPUVirtualAddress();
+	triangles.VertexBuffer.StartAddress = vertexBuffer_[Index]->GetGPUVirtualAddress();
 	triangles.VertexBuffer.StrideInBytes = vertexStride_;
 	triangles.VertexCount = vertexCount_;
-	triangles.IndexBuffer = indexBuffer_->GetGPUVirtualAddress();
+	triangles.IndexBuffer = indexBuffer_[Index]->GetGPUVirtualAddress();
 	triangles.IndexCount = indexCount_;
 	triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 	triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
@@ -1163,7 +734,225 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(bool IsOpaque)
 
 }
 
-void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& GeomDesc)
+//void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& GeomDesc, int Index)
+//{
+//
+//	/*===== 加速構造体の設定用関数 =====*/
+//
+//	// AS(レイとの判定を迅速に行うために必要なポリゴンデータ構造体)の設定に必要な各項目を設定。
+//	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc{};
+//	auto& inputs = buildASDesc.Inputs;	// D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_INPUTS
+//	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
+//	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
+//	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
+//	inputs.NumDescs = 1;
+//	inputs.pGeometryDescs = &GeomDesc;
+//
+//	// 関数を使って必要なメモリ量を求める.
+//	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO blasPrebuild{};
+//	Engine::Ins()->device_.dev_->GetRaytracingAccelerationStructurePrebuildInfo(
+//		&inputs, &blasPrebuild
+//	);
+//
+//	// スクラッチバッファを生成する。
+//	scratchBuffer_[Index] = FHelper::CreateBuffer(
+//		blasPrebuild.ScratchDataSizeInBytes,
+//		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
+//		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+//		D3D12_HEAP_TYPE_DEFAULT
+//	);
+//	scratchBuffer_[Index]->SetName(L"BLASScratchBuffer");
+//
+//	// BLASのバッファを生成する。
+//	blasBuffer_[Index] = FHelper::CreateBuffer(
+//		blasPrebuild.ResultDataMaxSizeInBytes,
+//		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
+//		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
+//		D3D12_HEAP_TYPE_DEFAULT
+//	);
+//	blasBuffer_[Index]->SetName(L"BLASBuffer");
+//
+//	// 更新用バッファを生成する。
+//	updateBuffer_[Index] = FHelper::CreateBuffer(
+//		blasPrebuild.UpdateScratchDataSizeInBytes,
+//		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
+//		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+//		D3D12_HEAP_TYPE_DEFAULT
+//	);
+//	updateBuffer_[Index]->SetName(L"BLASUpdateBuffer");
+//
+//	// AccelerationStructureの構築。
+//	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_[Index]->GetGPUVirtualAddress();
+//	buildASDesc.DestAccelerationStructureData = blasBuffer_[Index]->GetGPUVirtualAddress();
+//	// コマンドリストに積んで実行する。
+//	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
+//		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
+//	);
+//
+//	// BLASを構築する。
+//	CreateAccelerationStructure(Index);
+//
+//}
+//
+//void BLAS::CreateAccelerationStructure(int Index)
+//{
+//
+//	/*===== BLAS構築処理 =====*/
+//
+//	// リソースバリアの設定。
+//	D3D12_RESOURCE_BARRIER uavBarrier{};
+//	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+//	uavBarrier.UAV.pResource = blasBuffer_[Index].Get();
+//	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
+//	Engine::Ins()->mainGraphicsCmdList_->Close();
+//
+//	// 構築用関数を呼ぶ。
+//	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
+//	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
+//	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->asFence_.Get(), ++Engine::Ins()->asfenceValue_);
+//
+//
+//	// グラフィックコマンドリストの完了待ち
+//	UINT64 gpuFence = Engine::Ins()->asFence_->GetCompletedValue();
+//	if (gpuFence != Engine::Ins()->asfenceValue_) {
+//		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+//		Engine::Ins()->asFence_->SetEventOnCompletion(Engine::Ins()->asfenceValue_, event);
+//		WaitForSingleObject(event, INFINITE);
+//		CloseHandle(event);
+//	}
+//
+//	// コマンドアロケータのリセット
+//	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();	//キューをクリア
+//
+//	// コマンドリストのリセット
+//	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+//
+//}
+
+//void BLAS::CreateMaterialBuffer()
+//{
+//
+//	/*===== マテリアルを設定 =====*/
+//
+//	// マテリアルバッファを生成する。
+//	materialBuffer_ = FHelper::CreateBuffer(
+//		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
+//		D3D12_RESOURCE_FLAG_NONE,
+//		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+//	materialBuffer_->SetName(L"MaterialBuffer");
+//
+//	// アップロード用マテリアルバッファを生成する。
+//	materialUploadBuffer_ = FHelper::CreateBuffer(
+//		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
+//		D3D12_RESOURCE_FLAG_NONE,
+//		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+//	materialUploadBuffer_->SetName(L"MaterialUploadBuffer");
+//
+//	// 確保したバッファにマテリアルデータを書き込む。
+//	WriteToMemory(materialUploadBuffer_, &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
+//
+//	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_.Get(), materialUploadBuffer_.Get());
+//	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+//	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+//
+//	// マテリアルデータでディスクリプタを生成。
+//	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+//	materialDescriptor_.CreateStructuredSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+//	DescriptorHeapMgr::Ins()->IncrementHead();
+//
+//}
+//
+//void BLAS::CreateVertexBuffer(const ModelDataManager::ObjectData& DataBuff)
+//{
+//
+//	/*===== 頂点とインデックスバッファを生成 =====*/
+//
+//	// 頂点数を求める。
+//	vertexCount_ = static_cast<UINT>(DataBuff.vertex_.size());
+//
+//	// 頂点インデックス数を求める。
+//	indexCount_ = static_cast<UINT>(DataBuff.index_.size());
+//
+//	// 頂点データを変換。
+//	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
+//
+//		RayVertex buff{};
+//		buff.normal_ = DataBuff.vertex_[index].normal_;
+//		buff.position_ = DataBuff.vertex_[index].pos_;
+//		buff.uv_ = DataBuff.vertex_[index].uv_;
+//		buff.subUV_ = DataBuff.vertex_[index].uv_;
+//
+//		// データを保存。
+//		vertex_.push_back(buff);
+//
+//	}
+//
+//	// 頂点インデックスデータを保存。
+//	vertIndex_ = DataBuff.index_;
+//
+//	// 頂点サイズを求める。
+//	vertexStride_ = sizeof(RayVertex);
+//
+//	// 頂点インデックスサイズを求める。
+//	indexStride_ = sizeof(UINT);
+//
+//	// 頂点バッファを生成する。
+//	vertexBuffer_ = FHelper::CreateBuffer(
+//		static_cast<size_t>(vertexStride_ * vertexCount_),
+//		D3D12_RESOURCE_FLAG_NONE,
+//		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+//	vertexBuffer_->SetName(L"VertexBuffer");
+//
+//	// アップロード用頂点バッファを生成する。
+//	vertexUploadBuffer_ = FHelper::CreateBuffer(
+//		static_cast<size_t>(vertexStride_ * vertexCount_),
+//		D3D12_RESOURCE_FLAG_NONE,
+//		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+//	vertexUploadBuffer_->SetName(L"VertexUploadBuffer");
+//
+//	// 確保したバッファに頂点データを書き込む。
+//	WriteToMemory(vertexUploadBuffer_, vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+//
+//	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_.Get(), vertexUploadBuffer_.Get());
+//	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+//	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+//
+//
+//	// 頂点インデックスバッファを生成する。
+//	indexBuffer_ = FHelper::CreateBuffer(
+//		static_cast<size_t>(indexStride_ * indexCount_),
+//		D3D12_RESOURCE_FLAG_NONE,
+//		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+//	indexBuffer_->SetName(L"IndexBuffer");
+//
+//	// アップロード用頂点インデックスバッファを生成する。
+//	indexUploadBuffer_ = FHelper::CreateBuffer(
+//		static_cast<size_t>(indexStride_ * indexCount_),
+//		D3D12_RESOURCE_FLAG_NONE,
+//		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+//	indexUploadBuffer_->SetName(L"IndexUploadBuffer");
+//
+//	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
+//	WriteToMemory(indexUploadBuffer_, vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
+//
+//	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_.Get(), indexUploadBuffer_.Get());
+//	barrier = CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+//	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+//
+//	// 頂点インデックスデータでディスクリプタを生成。
+//	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+//	indexDescriptor_.CreateStructuredSRV(indexBuffer_, indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+//	DescriptorHeapMgr::Ins()->IncrementHead();
+//
+//	// 頂点データでディスクリプタを生成。
+//	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+//	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_, vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+//	DescriptorHeapMgr::Ins()->IncrementHead();
+//
+//}
+
+
+void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& GeomDesc, int Index)
 {
 
 	/*===== 加速構造体の設定用関数 =====*/
@@ -1184,46 +973,46 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	);
 
 	// スクラッチバッファを生成する。
-	scratchBuffer_ = FHelper::CreateBuffer(
+	scratchBuffer_[Index] = FHelper::CreateBuffer(
 		blasPrebuild.ScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	scratchBuffer_->SetName(L"BLASScratchBuffer");
+	scratchBuffer_[Index]->SetName(L"BLASScratchBuffer");
 
 	// BLASのバッファを生成する。
-	blasBuffer_ = FHelper::CreateBuffer(
+	blasBuffer_[Index] = FHelper::CreateBuffer(
 		blasPrebuild.ResultDataMaxSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	blasBuffer_->SetName(L"BLASBuffer");
+	blasBuffer_[Index]->SetName(L"BLASBuffer");
 
 	// 更新用バッファを生成する。
-	updateBuffer_ = FHelper::CreateBuffer(
+	updateBuffer_[Index] = FHelper::CreateBuffer(
 		blasPrebuild.UpdateScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	updateBuffer_->SetName(L"BLASUpdateBuffer");
+	updateBuffer_[Index]->SetName(L"BLASUpdateBuffer");
 
 	// AccelerationStructureの構築。
-	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
-	buildASDesc.DestAccelerationStructureData = blasBuffer_->GetGPUVirtualAddress();
+	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_[Index]->GetGPUVirtualAddress();
+	buildASDesc.DestAccelerationStructureData = blasBuffer_[Index]->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
 	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
 	);
 
 	// BLASを構築する。
-	CreateAccelerationStructure();
+	CreateAccelerationStructure(Index);
 
 }
 
-void BLAS::CreateAccelerationStructure()
+void BLAS::CreateAccelerationStructure(int Index)
 {
 
 	/*===== BLAS構築処理 =====*/
@@ -1231,7 +1020,7 @@ void BLAS::CreateAccelerationStructure()
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-	uavBarrier.UAV.pResource = blasBuffer_.Get();
+	uavBarrier.UAV.pResource = blasBuffer_[Index].Get();
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
 	Engine::Ins()->mainGraphicsCmdList_->Close();
 
@@ -1257,5 +1046,178 @@ void BLAS::CreateAccelerationStructure()
 
 	// コマンドリストのリセット
 	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);//再びコマンドリストを貯める準備
+
+}
+
+void BLAS::CreateMaterialBuffer()
+{
+
+	/*===== マテリアルを設定 =====*/
+
+	// マテリアルバッファを生成する。
+	materialBuffer_[0] = FHelper::CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+	materialBuffer_[0]->SetName(L"MaterialBuffer0");
+	materialBuffer_[1] = FHelper::CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+	materialBuffer_[1]->SetName(L"MaterialBuffer1");
+
+	// アップロード用マテリアルバッファを生成する。
+	materialUploadBuffer_[0] = FHelper::CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	materialUploadBuffer_[0]->SetName(L"MaterialUploadBuffer0");
+	materialUploadBuffer_[1] = FHelper::CreateBuffer(
+		static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	materialUploadBuffer_[1]->SetName(L"MaterialUploadBuffer1");
+
+	// 確保したバッファにマテリアルデータを書き込む。
+	WriteToMemory(materialUploadBuffer_[0], &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
+	WriteToMemory(materialUploadBuffer_[1], &material_, static_cast<size_t>(sizeof(ModelDataManager::GPUMaterial)));
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_[0].Get(), materialUploadBuffer_[0].Get());
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_[0].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(materialBuffer_[1].Get(), materialUploadBuffer_[1].Get());
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(materialBuffer_[1].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+
+	// マテリアルデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_[0], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_.CreateStructuredSRV(materialBuffer_[1], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
+}
+
+void BLAS::CreateVertexBuffer(const ModelDataManager::ObjectData& DataBuff)
+{
+
+	/*===== 頂点とインデックスバッファを生成 =====*/
+
+	// 頂点数を求める。
+	vertexCount_ = static_cast<UINT>(DataBuff.vertex_.size());
+
+	// 頂点インデックス数を求める。
+	indexCount_ = static_cast<UINT>(DataBuff.index_.size());
+
+	// 頂点データを変換。
+	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
+
+		RayVertex buff{};
+		buff.normal_ = DataBuff.vertex_[index].normal_;
+		buff.position_ = DataBuff.vertex_[index].pos_;
+		buff.uv_ = DataBuff.vertex_[index].uv_;
+		buff.subUV_ = DataBuff.vertex_[index].uv_;
+
+		// データを保存。
+		vertex_.push_back(buff);
+
+	}
+
+	// 頂点インデックスデータを保存。
+	vertIndex_ = DataBuff.index_;
+
+	// 頂点サイズを求める。
+	vertexStride_ = sizeof(RayVertex);
+
+	// 頂点インデックスサイズを求める。
+	indexStride_ = sizeof(UINT);
+
+	// 頂点バッファを生成する。
+	vertexBuffer_[0] = FHelper::CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+	vertexBuffer_[0]->SetName(L"VertexBuffer0");
+	vertexBuffer_[1] = FHelper::CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+	vertexBuffer_[1]->SetName(L"VertexBuffer1");
+
+	// アップロード用頂点バッファを生成する。
+	vertexUploadBuffer_[0] = FHelper::CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	vertexUploadBuffer_[0]->SetName(L"VertexUploadBuffer0");
+	vertexUploadBuffer_[1] = FHelper::CreateBuffer(
+		static_cast<size_t>(vertexStride_ * vertexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	vertexUploadBuffer_[1]->SetName(L"VertexUploadBuffer1");
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexUploadBuffer_[0], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+	WriteToMemory(vertexUploadBuffer_[1], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_[0].Get(), vertexUploadBuffer_[0].Get());
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[0].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_[1].Get(), vertexUploadBuffer_[1].Get());
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[1].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+
+
+	// 頂点インデックスバッファを生成する。
+	indexBuffer_[0] = FHelper::CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+	indexBuffer_[0]->SetName(L"IndexBuffer0");
+	indexBuffer_[1] = FHelper::CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_COPY_DEST, D3D12_HEAP_TYPE_DEFAULT);
+	indexBuffer_[1]->SetName(L"IndexBuffer1");
+
+	// アップロード用頂点インデックスバッファを生成する。
+	indexUploadBuffer_[0] = FHelper::CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	indexUploadBuffer_[0]->SetName(L"IndexUploadBuffer0");
+	indexUploadBuffer_[1] = FHelper::CreateBuffer(
+		static_cast<size_t>(indexStride_ * indexCount_),
+		D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_HEAP_TYPE_UPLOAD);
+	indexUploadBuffer_[1]->SetName(L"IndexUploadBuffer1");
+
+	// 確保したインデックスバッファに頂点インデックスデータを書き込む。
+	WriteToMemory(indexUploadBuffer_[0], vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
+	WriteToMemory(indexUploadBuffer_[1], vertIndex_.data(), static_cast<size_t>(indexStride_ * indexCount_));
+
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_[0].Get(), indexUploadBuffer_[0].Get());
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_[0].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(indexBuffer_[1].Get(), indexUploadBuffer_[1].Get());
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer_[1].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+
+	// 頂点インデックスデータでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor_.CreateStructuredSRV(indexBuffer_[0], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor_.CreateStructuredSRV(indexBuffer_[1], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
+	// 頂点データでディスクリプタを生成。
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_[0], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_[1], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
 
 }

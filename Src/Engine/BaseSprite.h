@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseDrawData.h"
+#include <array>
 
 // スプライト基盤クラス
 class BaseSprite : public BaseDrawData {
@@ -15,7 +16,7 @@ protected:
 
 	// 定数データ関係
 	ConstBufferDataB0 constBufferDataB0_;						// 定数 行列や視点座標、カラーなど
-	Microsoft::WRL::ComPtr<ID3D12Resource> constBuffB0_;		// 定数バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> constBuffB0_;		// 定数バッファ
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> constDescHeap_;// CBV用ディスクリプタヒープ
 
 	// デバッグor当たり判定用

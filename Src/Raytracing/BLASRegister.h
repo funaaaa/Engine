@@ -29,7 +29,6 @@ public:
 
 	// ê∂ê¨èàóù
 	std::weak_ptr<BLAS> GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque = false, bool IsNewGenerate = false);
-	std::weak_ptr<BLAS> GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque = false, bool IsNewGenerate = false);
 	std::weak_ptr<BLAS> GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, bool IsOpaque = false, bool IsNewGenerate = false);
 	std::weak_ptr<BLAS> GenerateData(const ModelDataManager::ObjectData& ModelData, bool IsOpaque = false);
 
