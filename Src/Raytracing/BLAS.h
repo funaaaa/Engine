@@ -15,6 +15,7 @@ struct RayVertex {
 	Vec3 normal_;
 	Vec2 uv_;
 	Vec2 subUV_;
+	Vec2 pad_;
 
 };
 
