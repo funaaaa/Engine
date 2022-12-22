@@ -9,14 +9,6 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	// パイプランの名前の保存
 	this->piplineID_ = PiplineID;
 
-	// 設定構造体
-	D3D12_DESCRIPTOR_HEAP_DESC descHeapDesc{};
-	descHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-	descHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;			// シェーダーから見える
-	descHeapDesc.NumDescriptors = 2;										// CBV2つ
-	// ディスクリプタヒープの生成
-	Engine::Ins()->device_.dev_->CreateDescriptorHeap(&descHeapDesc, IID_PPV_ARGS(&constDescHeap_));
-
 	// 頂点バッファの生成
 	Vertex vertexBuff;
 	vertexBuff.pos_ = Vec3(-1.0f, 1.0f, 10);		// 左下
@@ -90,16 +82,21 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 	// CBVディスクリプタヒープの先頭アドレスを取得
 	CD3DX12_CPU_DESCRIPTOR_HANDLE basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 0, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
 	cbvDesc.BufferLocation = constBuffB0_[0]->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = (UINT)constBuffB0_[0]->GetDesc().Width;
 	Engine::Ins()->device_.dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+
+	DescriptorHeapMgr::Ins()->IncrementHead();
+
 	basicHeapHandle = CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		constDescHeap_->GetCPUDescriptorHandleForHeapStart(), 1, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+		DescriptorHeapMgr::Ins()->GetDescriptorHeap()->GetCPUDescriptorHandleForHeapStart(), DescriptorHeapMgr::Ins()->GetHead(), Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
 	cbvDesc.BufferLocation = constBuffB0_[1]->GetGPUVirtualAddress();
 	cbvDesc.SizeInBytes = (UINT)constBuffB0_[1]->GetDesc().Width;
 	Engine::Ins()->device_.dev_->CreateConstantBufferView(&cbvDesc, basicHeapHandle);
+
+	DescriptorHeapMgr::Ins()->IncrementHead();
 }
 
 void Sprite::GenerateForTexture(Vec3 CenterPos, Vec2 Size, int ProjectionID, int PiplineID, LPCWSTR FileName)

@@ -17,7 +17,6 @@ protected:
 	// 定数データ関係
 	ConstBufferDataB0 constBufferDataB0_;						// 定数 行列や視点座標、カラーなど
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> constBuffB0_;		// 定数バッファ
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> constDescHeap_;// CBV用ディスクリプタヒープ
 
 	// デバッグor当たり判定用
 	Vec3 pos_;													// 座標
