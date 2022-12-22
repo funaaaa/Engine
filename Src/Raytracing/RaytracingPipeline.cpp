@@ -206,17 +206,25 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 	/*========== シェーダーテーブルの構築 ==========*/
 
 	// シェーダーテーブル確保。
-	shaderTable_ = FHelper::CreateBuffer(
+	shaderTable_[0] = FHelper::CreateBuffer(
 		tableSize, D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD,
-		L"ShaderTable");
+		L"ShaderTable0");
+	shaderTable_[1] = FHelper::CreateBuffer(
+		tableSize, D3D12_RESOURCE_FLAG_NONE,
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		D3D12_HEAP_TYPE_UPLOAD,
+		L"ShaderTable1");
 
 	stateObject_.As(&rtsoProps_);
 
+	// 現在のQueueのインデックス
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+
 	// 各シェーダーレコードを書き込んでいく。
 	void* mapped = nullptr;
-	shaderTable_->Map(0, nullptr, &mapped);
+	shaderTable_[currentQueueIndex]->Map(0, nullptr, &mapped);
 	uint8_t* pStart = static_cast<uint8_t*>(mapped);
 
 	// RayGeneration 用のシェーダーレコードを書き込み。
@@ -269,12 +277,11 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_);
 
 	}
-	shaderTable_->Unmap(0, nullptr);
 
 	// レイ発射時の設定を設定。
 
 	// DispatchRays のために情報をセットしておく.
-	auto startAddress = shaderTable_->GetGPUVirtualAddress();
+	auto startAddress = shaderTable_[currentQueueIndex]->GetGPUVirtualAddress();
 	// RayGenerationシェーダーの情報
 	auto& shaderRecordRG = dispatchRayDesc_.RayGenerationShaderRecord;
 	shaderRecordRG.StartAddress = startAddress;
@@ -304,13 +311,13 @@ void RaytracingPipeline::MapHitGroupInfo()
 
 	/*===== HitGroupの情報を転送 =====*/
 
+	// 現在のQueueのインデックス
+	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+
 	void* mapped = nullptr;
-	HRESULT result = shaderTable_->Map(0, nullptr, &mapped);
+	HRESULT result = shaderTable_[currentQueueIndex]->Map(0, nullptr, &mapped);
 	if (result != S_OK) {
-
-		int a = 0;
-		++a;
-
+		assert(0);
 	}
 	uint8_t* pStart = static_cast<uint8_t*>(mapped);
 
@@ -324,7 +331,6 @@ void RaytracingPipeline::MapHitGroupInfo()
 		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_);
 
 	}
-	shaderTable_->Unmap(0, nullptr);
 
 }
 

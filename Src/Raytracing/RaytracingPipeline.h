@@ -2,6 +2,7 @@
 #include <string>
 #include <wtypes.h>
 #include <vector>
+#include <array>
 #include <d3d12.h>
 #include <wrl.h>
 #include <memory>
@@ -33,7 +34,7 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12StateObject> stateObject_;	// ステートオブジェクト
 	std::shared_ptr<RayRootsignature> globalRootSig_;		// グローバルルートシグネチャ
 	D3D12_DISPATCH_RAYS_DESC dispatchRayDesc_;				// レイ発射時の設定
-	Microsoft::WRL::ComPtr<ID3D12Resource> shaderTable_;		// シェーダーテーブル
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> shaderTable_;		// シェーダーテーブル
 	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps_;
 	LPCWSTR hitGroupName_;
 
