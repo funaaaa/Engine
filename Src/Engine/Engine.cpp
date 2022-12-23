@@ -291,23 +291,37 @@ void Engine::Init() {
 		&depthResDesc,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,
 		&resrouceClearValue,
-		IID_PPV_ARGS(&swapchain_.depthBuffer_)
+		IID_PPV_ARGS(&swapchain_.depthBuffer_[0])
 	);
-	swapchain_.depthBuffer_->SetName(L"DepthBuffer");
+	swapchain_.depthBuffer_[0]->SetName(L"DepthBuffer0");
+	result = device_.dev_->CreateCommittedResource(
+		&resourceProp,
+		D3D12_HEAP_FLAG_NONE,
+		&depthResDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&resrouceClearValue,
+		IID_PPV_ARGS(&swapchain_.depthBuffer_[1])
+	);
+	swapchain_.depthBuffer_[1]->SetName(L"DepthBuffer1");
 
 	// 深度バッファビュー生成
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.NumDescriptors = 2;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	result = device_.dev_->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&swapchain_.dsvHeap_));
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	device_.dev_->CreateDepthStencilView(
-		swapchain_.depthBuffer_.Get(),
+		swapchain_.depthBuffer_[0].Get(),
 		&dsvDesc,
 		swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart()
 	);
+	device_.dev_->CreateDepthStencilView(
+		swapchain_.depthBuffer_[0].Get(),
+		&dsvDesc,
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart(), 1, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV)));
 	swapchain_.dsvHeap_->SetName(L"DsvHeap");
 
 	// DirectInputオブジェクトの生成
@@ -360,7 +374,8 @@ void Engine::ProcessBeforeDrawing() {
 			swapchain_.rtvHeaps_->GetCPUDescriptorHandleForHeapStart(), bbIndex, device_.dev_->GetDescriptorHandleIncrementSize(swapchain_.heapDesc_.Type));
 
 		// 深度バッファ用のディスクリプタヒープの先頭アドレスを取得
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart(), currentQueueIndex_, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
 		copyResourceCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
 
 		// 画面クリア

@@ -41,7 +41,7 @@ public:
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> rtvHeaps_;
 		std::vector<Microsoft::WRL::ComPtr<ID3D12Resource>> backBuffers_;
 		D3D12_DESCRIPTOR_HEAP_DESC heapDesc_;
-		Microsoft::WRL::ComPtr<ID3D12Resource> depthBuffer_;
+		std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> depthBuffer_;
 		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> dsvHeap_;
 		Microsoft::WRL::ComPtr<IDXGISwapChain4> swapchain_;
 	};
