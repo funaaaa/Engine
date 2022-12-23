@@ -39,6 +39,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, c
 	// ロードされていたら
 	if (isLoaded && !IsNewGenerate) {
 
+		blas_[blasIndex_]->ChangeTextureFlag();
 		return blas_[blasIndex_];
 
 	}
@@ -90,6 +91,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateGLTF(const std::wstring& Path, const s
 	// ロードされていたら
 	if (isLoaded && !IsNewGenerate) {
 
+		blas_[blasIndex_]->ChangeTextureFlag();
 		return blas_[blasIndex_];
 
 	}

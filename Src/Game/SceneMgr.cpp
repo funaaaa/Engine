@@ -8,6 +8,8 @@ SceneMgr::SceneMgr()
 
 	/*===== コンストラクタ =====*/
 
+	nowScene_ = BaseScene::SCENE_ID::TITLE;;
+	nextScene_ = BaseScene::SCENE_ID::TITLE;
 	SceneTransition::Ins()->Setting();
 
 }

@@ -405,10 +405,10 @@ BLAS::BLAS()
 	indexCount_ = 0;
 	indexDescriptor_ = {};
 	indexStride_ = {};
-	isChangeVertex_[0] = false;
-	isChangeVertex_[1] = false;
-	isChangeTexture_[0] = false;
-	isChangeTexture_[1] = false;
+	isChangeVertex_[0] = true;
+	isChangeVertex_[1] = true;
+	isChangeTexture_[0] = true;
+	isChangeTexture_[1] = true;
 	isOpaque_ = false;
 	materialDescriptor_ = {};
 	modelIndex_ = 0;

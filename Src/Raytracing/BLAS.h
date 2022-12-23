@@ -126,6 +126,12 @@ public:
 	// マテリアルを書き換えた判定。
 	void IsChangeMaterial();
 
+	// テクスチャを変えたフラグ。
+	void ChangeTextureFlag() {
+		isChangeTexture_[0] = true;
+		isChangeTexture_[1] = true;
+	}
+
 	// テクスチャを追加。
 	void ChangeBaseTexture(int Index);
 	void ChangeMapTexture(int Index, MAP_PARAM MapParam);
