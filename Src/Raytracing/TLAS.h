@@ -14,7 +14,7 @@ private:
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> instanceDescBuffer_;	// インスタンスバッファ
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> tlasUpdateBuffer_;	// TLAS更新用バッファ
 
-	int descriptorHeapIndex_;
+	std::array<int, 2> descriptorHeapIndex_;
 
 
 public:
@@ -24,11 +24,8 @@ public:
 	// TLASの生成
 	void GenerateTLAS();
 
-	// アクセッサ
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetTLASBuffer(int Index) { return tlasBuffer_[Index]; }
-
 	// ディスクリプタヒープのインデックスのアクセッサ
-	inline int GetDescriptorHeapIndex() { return descriptorHeapIndex_; }
+	inline int GetDescriptorHeapIndex(int Index) { return descriptorHeapIndex_[Index]; }
 
 	// インスタンスを更新
 	void Update();

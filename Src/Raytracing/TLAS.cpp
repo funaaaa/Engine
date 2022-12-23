@@ -18,7 +18,7 @@ void TLAS::GenerateTLAS()
 	/*-- TLAS用のディスクリプタを生成する --*/
 
 	// ディスクリプタヒープのインデックスを取得
-	descriptorHeapIndex_ = DescriptorHeapMgr::Ins()->GetHead();
+	descriptorHeapIndex_[0] = DescriptorHeapMgr::Ins()->GetHead();
 
 	// ディスクリプタヒープにSRVを確保
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -37,6 +37,8 @@ void TLAS::GenerateTLAS()
 	/*-- 加速構造体を設定 --*/
 	SettingAccelerationStructure(1);
 
+	// ディスクリプタヒープのインデックスを取得
+	descriptorHeapIndex_[1] = DescriptorHeapMgr::Ins()->GetHead();
 
 	// ディスクリプタヒープにSRVを確保
 	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
@@ -93,9 +95,6 @@ void TLAS::Update()
 		&asDesc, 0, nullptr
 	);
 
-	// 実行する。
-	/*CreateAccelerationStructure();*/
-
 }
 
 void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize)
@@ -136,7 +135,7 @@ void TLAS::SettingAccelerationStructure(int Index)
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD);
-	instanceDescBuffer_[Index]->SetName(L"instanceDescBuffer_");
+	instanceDescBuffer_[Index]->SetName(L"InstanceDescBuffer");
 
 	// 生成したバッファにデータを書き込む。
 	WriteToMemory(instanceDescBuffer_[Index], PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
@@ -165,7 +164,7 @@ void TLAS::SettingAccelerationStructure(int Index)
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	scratchBuffer_[Index]->SetName(L"TLASScratchBuffer");
+	scratchBuffer_[Index]->SetName(L"TlasScratchBuffer");
 
 	// TLAS用メモリ(バッファ)を確保。
 	tlasBuffer_[Index] = FHelper::CreateBuffer(
@@ -174,7 +173,7 @@ void TLAS::SettingAccelerationStructure(int Index)
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	tlasBuffer_[Index]->SetName(L"tlasBuffer_");
+	tlasBuffer_[Index]->SetName(L"TlasBuffer");
 
 	// TLAS更新用メモリ(バッファ)を確保。
 	tlasUpdateBuffer_[Index] = FHelper::CreateBuffer(
@@ -183,7 +182,7 @@ void TLAS::SettingAccelerationStructure(int Index)
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	tlasUpdateBuffer_[Index]->SetName(L"tlasUpdateBuffer_");
+	tlasUpdateBuffer_[Index]->SetName(L"TlasUpdateBuffer");
 
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 

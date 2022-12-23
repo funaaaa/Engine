@@ -28,15 +28,6 @@
     <ClCompile Include="Src\Engine\Camera.cpp">
       <Filter>エンジン\カメラ関係</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Engine\ComputeShader.cpp">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Engine\StructuredBuffer.cpp">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Engine\ShaderData.cpp">
       <Filter>エンジン\シェーダー管理クラス</Filter>
     </ClCompile>
@@ -269,15 +260,6 @@
     </ClInclude>
     <ClInclude Include="Src\Engine\Camera.h">
       <Filter>エンジン\カメラ関係</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Engine\ComputeShader.h">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Engine\RWStructuredBuffer.h">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Engine\StructuredBuffer.h">
-      <Filter>エンジン\コンピュートシェーダー</Filter>
     </ClInclude>
     <ClInclude Include="Src\Engine\ShaderData.h">
       <Filter>エンジン\シェーダー管理クラス</Filter>
@@ -579,9 +561,6 @@
     </Filter>
     <Filter Include="エンジン\便利系">
       <UniqueIdentifier>{25a638f1-bce9-4f0e-8bf2-aa854281a892}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="エンジン\コンピュートシェーダー">
-      <UniqueIdentifier>{99c38a50-9035-4ce5-bfc1-93064ffc4e12}</UniqueIdentifier>
     </Filter>
     <Filter Include="レイトレーシング">
       <UniqueIdentifier>{53aa4391-833f-4167-8cec-2d49f0fe089e}</UniqueIdentifier>

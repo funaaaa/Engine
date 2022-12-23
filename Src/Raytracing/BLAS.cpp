@@ -3,8 +3,6 @@
 #include "DescriptorHeapMgr.h"
 #include <DirectXMath.h>
 #include "FbxLoader.h"
-#include "RWStructuredBuffer.h"
-#include "StructuredBuffer.h"
 #include "TextureManager.h"
 #include "FHelper.h"
 #include "HitGroupMgr.h"
@@ -326,27 +324,6 @@ void BLAS::Update()
 	);
 
 	CreateAccelerationStructure(currentQueueIndex);
-
-}
-
-void BLAS::ComputeSkin()
-{
-
-	/*===== 頂点データをスキニング行列を元に書き換える処理 =====*/
-
-	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
-
-		// 入力構造体を更新。
-		skinComput_.UpdateInputSB(skinComputeInput_.data());
-
-		// 計算開始。
-		skinComput_.Dispatch(1, 1, 1);
-
-		// 結果を代入。
-		memcpy(vertex_.data(), skinComput_.outputSB_->buffersOnCPU_, sizeof(RayVertex) * vertex_.size());
-
-	}
 
 }
 

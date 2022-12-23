@@ -1,7 +1,6 @@
 #pragma once
 #include "Engine.h"
 #include "RayDescriptor.h"
-#include "ComputeShader.h"
 #include "ModelDataManager.h"
 #include "FbxLoader.h"
 #include "Vec.h"
@@ -74,8 +73,6 @@ private:
 	int mapTextureHandle_;
 	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
 
-	ComputeShader skinComput_;				// スキニング行列を元に頂点を書き換えるコンピュートシェーダー
-
 	// デバッグ用
 	std::vector<RayVertex> defVertex_;	// 生成した時点の頂点
 	std::vector<RayVertex> vertex_;		// 現在の頂点 頂点を書き換える場合があるのでその時用
@@ -115,9 +112,6 @@ public:
 
 	// BLASの更新
 	void Update();
-
-	// スキニングを計算
-	void ComputeSkin();
 
 	// アニメーションの有効化
 	void InitAnimation();	// 初期化
