@@ -33,14 +33,26 @@ protected:
 	std::vector<D3D12_SHADER_BYTECODE> shaderCode_;			// 使用するシェーダーのバイトコード
 	Microsoft::WRL::ComPtr<ID3D12StateObject> stateObject_;	// ステートオブジェクト
 	std::shared_ptr<RayRootsignature> globalRootSig_;		// グローバルルートシグネチャ
-	D3D12_DISPATCH_RAYS_DESC dispatchRayDesc_;				// レイ発射時の設定
+	std::array<D3D12_DISPATCH_RAYS_DESC, 2> dispatchRayDesc_;				// レイ発射時の設定
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> shaderTable_;		// シェーダーテーブル
+	std::array<void*, 2> shaderTalbeMapAddress_;							// シェーダーテーブルのデータ転送用Mapアドレス
 	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps_;
 	LPCWSTR hitGroupName_;
 
+
+	// シェーダーテーブルの構築に必要な変数群
+	UINT raygenRecordSize_;
+	UINT missRecordSize_;
+	UINT hitgroupRecordSize_;
+	UINT hitgroupCount;
+	UINT raygenSize_;
+	UINT missSize_;
+	UINT hitGroupSize_;
+	UINT tableAlign_;
+	UINT hitgroupRegion_;
+	UINT tableSize_;
 	UINT raygenRegion_;
 	UINT missRegion_;
-	UINT hitgroupRecordSize_;
 
 
 public:
@@ -58,7 +70,7 @@ public:
 
 	// ゲッタ
 	Microsoft::WRL::ComPtr<ID3D12StateObject> GetStateObject() { return stateObject_; }
-	D3D12_DISPATCH_RAYS_DESC GetDispatchRayDesc() { return dispatchRayDesc_; }
+	D3D12_DISPATCH_RAYS_DESC GetDispatchRayDesc(int Index) { return dispatchRayDesc_[Index]; }
 	std::shared_ptr<RayRootsignature> GetGlobalRootSig() { return globalRootSig_; }
 
 protected:
@@ -70,6 +82,9 @@ protected:
 	UINT RoundUp(size_t Size, UINT Align) {
 		return UINT(Size + Align - 1) & ~(Align - 1);
 	}
+
+	// シェーダーテーブルを書き込み、レイを設定する。
+	void WriteShadetTalbeAndSettingRay(int Index, int DispatchX, int DispatchY);
 
 	// シェーダー識別子を書き込む。
 	UINT WriteShaderIdentifier(void* Dst, const void* ShaderId);

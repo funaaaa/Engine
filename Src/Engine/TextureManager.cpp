@@ -58,8 +58,6 @@ void TextureManager::WriteTextureData(CD3DX12_RESOURCE_DESC& TexresDesc, DirectX
 
 	}
 
-	iUploadBuffer->Unmap(0, nullptr);
-
 	// コピーする。
 	for (uint32_t mip = 0; mip < MetaData.mipLevels; ++mip) {
 

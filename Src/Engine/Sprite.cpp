@@ -52,6 +52,8 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 		nullptr,
 		IID_PPV_ARGS(&constBuffB0_[0])
 	);
+	constBuffB0MapAddress_[0] = nullptr;
+	constBuffB0_[0]->Map(0, nullptr, (void**)&constBuffB0MapAddress_[0]);
 	Engine::Ins()->device_.dev_->CreateCommittedResource(
 		&constHeapProp,
 		D3D12_HEAP_FLAG_NONE,
@@ -60,6 +62,8 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 		nullptr,
 		IID_PPV_ARGS(&constBuffB0_[1])
 	);
+	constBuffB0MapAddress_[1] = nullptr;
+	constBuffB0_[1]->Map(0, nullptr, (void**)&constBuffB0MapAddress_[1]);
 
 	// 行列を初期化
 	projectionID_ = ProjectionID;
@@ -76,8 +80,6 @@ void Sprite::CommonGenerate(Vec3 CenterPos, Vec2 Size, int ProjectionID, int Pip
 	{
 		vertMap[i] = vertex_.at(i);   // 座標をコピー
 	}
-	// マップを解除
-	vertBuff_->Unmap(0, nullptr);
 
 	/*-----CBVディスクリプタヒープの生成 定数バッファの情報をGPUに伝えるための定数バッファビュー用-----*/
 	// CBVディスクリプタヒープの先頭アドレスを取得
@@ -145,7 +147,7 @@ void Sprite::Draw()
 	PipelineManager::Ins()->SetPipline(piplineID_);
 
 	// 定数バッファB0構造体をマップ処理
-	MapConstDataB0(constBuffB0_[currentQueueIndex], constBufferDataB0_);
+	MapConstDataB0(constBuffB0MapAddress_[currentQueueIndex], constBufferDataB0_);
 
 	// 座標を保存しておく
 	pos_ = Vec3(positionMat_.r[3].m128_f32[0], positionMat_.r[3].m128_f32[1], positionMat_.r[3].m128_f32[2]);

@@ -148,7 +148,7 @@ void RayEngine::TraceRay()
 	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject().Get());
 
 	// レイトレーシングを実行。
-	D3D12_DISPATCH_RAYS_DESC rayDesc = pipeline_->GetDispatchRayDesc();
+	D3D12_DISPATCH_RAYS_DESC rayDesc = pipeline_->GetDispatchRayDesc(Engine::Ins()->currentQueueIndex_);
 	Engine::Ins()->mainGraphicsCmdList_->DispatchRays(&rayDesc);
 
 }

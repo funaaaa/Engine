@@ -19,6 +19,10 @@ void DynamicConstBuffer::Generate(UINT BufferSize, const wchar_t* Name)
 	BufferSize = RoundUp(BufferSize, 256);
 	UINT count = 2;
 	buffer_.resize(count);
+	bufferMapAddress_.resize(count);
+
+	// バッファのサイズを保存
+	bufferSize_ = BufferSize;
 
 	// バッファを生成する。
 	for (UINT i = 0; i < count; ++i) {
@@ -32,6 +36,9 @@ void DynamicConstBuffer::Generate(UINT BufferSize, const wchar_t* Name)
 		if (buffer_[i]) {
 			buffer_[i]->SetName(Name);
 		}
+
+		// Mapする。
+		buffer_[i]->Map(0, nullptr, &bufferMapAddress_[i]);
 	}
 
 }
@@ -41,13 +48,13 @@ void DynamicConstBuffer::Write(UINT BufferIndex, const void* Data, UINT Size)
 
 	/*===== データ書き込み処理 =====*/
 
-	auto& buff = buffer_[BufferIndex];
-	void* dst = nullptr;
-	buff->Map(0, nullptr, &dst);
-	if (dst) {
-		memcpy(dst, Data, Size);
-		buff->Unmap(0, nullptr);
+	// 引数で渡されたバッファのサイズが生成された値と違います。
+	Size = RoundUp(Size, 256);
+	if (Size != bufferSize_) {
+		assert(0);
 	}
+
+	memcpy(bufferMapAddress_[BufferIndex], Data, bufferSize_);
 
 }
 

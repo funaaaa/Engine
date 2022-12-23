@@ -26,12 +26,15 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexBuffer_;	// 頂点バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexBuffer_;		// 頂点バッファ
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexUploadBuffer_;	// 頂点バッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexBuffer_;	// 頂点インデックスバッファ
+	std::array<void*, 2> vertexMapAddress_;		// 頂点バッファMap用アドレス
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexBuffer_;			// 頂点インデックスバッファ
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexUploadBuffer_;	// 頂点インデックスバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialBuffer_;	// 頂点インデックスバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialUploadBuffer_;	// 頂点インデックスバッファ
+	std::array<void*, 2> indexMapAddress_;		// 頂点インデックスバッファMap用アドレス
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialBuffer_;			// マテリアルバッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialUploadBuffer_;	// マテリアルバッファ
+	std::array<void*, 2> materialMapAddress_;	// マテリアルバッファMap用アドレス
 	RayDescriptor vertexDescriptor_;		// 頂点ディスクリプタ
 	RayDescriptor indexDescriptor_;			// 頂点インデックスディスクリプタ
 	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
@@ -62,12 +65,11 @@ private:
 
 	bool isOpaque_;							// 不透明フラグ
 
-	bool isChangeTexture_;
-	bool isChangeVertex_;
+	// 書き込むシェーダーテーブルが表と裏で2つあるので、こちらも2つ用意する。
+	std::array<bool, 2> isChangeTexture_;	// テクスチャを書き換えたかフラグ
+	std::array<bool, 2> isChangeVertex_;	// 頂点を書き換えたかフラグ
 
 	bool isGenerate_;
-
-	bool isUseVertexUploadBuffer_;	// Upload用のバッファを使うか。
 
 	int baseTextureHandle_;				// 使用するテクスチャのハンドル
 	int mapTextureHandle_;
@@ -130,7 +132,7 @@ public:
 	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
-	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
+	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, int Index);
 
 	// 各成分の長さの最大を返す。
 	Vec3 GetVertexLengthMax();
@@ -168,7 +170,7 @@ public:
 private:
 
 	// アドレスに情報を書き込む処理
-	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& resource, const void* pData, size_t dataSize);
+	void WriteToMemory(void* MapAddress, const void* PData, size_t DataSize);
 
 	// BLAS生成時に設定を取得する関数
 	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque, int Index);

@@ -170,62 +170,120 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 	const auto ShaderRecordAlignment = D3D12_RAYTRACING_SHADER_RECORD_BYTE_ALIGNMENT;
 
 	// RayGenerationシェーダーではローカルルートシグネチャ未使用。
-	UINT raygenRecordSize = 0;
-	raygenRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	raygenRecordSize = RoundUp(raygenRecordSize, ShaderRecordAlignment);
+	raygenRecordSize_ += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	raygenRecordSize_ = RoundUp(raygenRecordSize_, ShaderRecordAlignment);
 
 	// Missシェーダーではローカルルートシグネチャ未使用。
-	UINT missRecordSize = 0;
-	missRecordSize += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-	missRecordSize = RoundUp(missRecordSize, ShaderRecordAlignment);
+	missRecordSize_ += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+	missRecordSize_ = RoundUp(missRecordSize_, ShaderRecordAlignment);
 
-	// ヒットグループでは、保存されているヒットグループの中から最大のサイズのものでデータを確保する。。
-	hitgroupRecordSize_ = 0;
+	// ヒットグループでは、保存されているヒットグループの中から最大のサイズのものでデータを確保する。
 	hitgroupRecordSize_ += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 	hitgroupRecordSize_ += GetLargestDataSizeInHitGroup();
 	hitgroupRecordSize_ = RoundUp(hitgroupRecordSize_, ShaderRecordAlignment);
 
 	// 使用する各シェーダーの個数より、シェーダーテーブルのサイズを求める。
-	UINT hitgroupCount = HitGroupMgr::Ins()->GetHitGroupCount();
-	UINT raygenSize = GetRayGenerationCount() * raygenRecordSize;
-	UINT missSize = GetMissCount() * missRecordSize;
-	UINT hitGroupSize = hitgroupCount * hitgroupRecordSize_;
+	hitgroupCount = HitGroupMgr::Ins()->GetHitGroupCount();
+	raygenSize_ = GetRayGenerationCount() * raygenRecordSize_;
+	missSize_ = GetMissCount() * missRecordSize_;
+	hitGroupSize_ = hitgroupCount * hitgroupRecordSize_;
 
 	// 各テーブルの開始位置にアライメント制約があるので調整する。
-	UINT tableAlign = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
-	raygenRegion_ = RoundUp(raygenRecordSize, tableAlign);
-	missRegion_ = RoundUp(missSize, tableAlign);
-	UINT hitgroupRegion = RoundUp(hitGroupSize, tableAlign);
+	tableAlign_ = D3D12_RAYTRACING_SHADER_TABLE_BYTE_ALIGNMENT;
+	raygenRegion_ = RoundUp(raygenRecordSize_, tableAlign_);
+	missRegion_ = RoundUp(missSize_, tableAlign_);
+	hitgroupRegion_ = RoundUp(hitGroupSize_, tableAlign_);
 
 	// 生成されたBLASの数。
 	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount() - 1;
 
 	// シェーダーテーブルのサイズ。
-	UINT tableSize = raygenRegion_ + missRegion_ + hitgroupRegion * BLAS_COUNT;
+	tableSize_ = raygenRegion_ + missRegion_ + hitgroupRegion_ * BLAS_COUNT;
 
 	/*========== シェーダーテーブルの構築 ==========*/
 
 	// シェーダーテーブル確保。
 	shaderTable_[0] = FHelper::CreateBuffer(
-		tableSize, D3D12_RESOURCE_FLAG_NONE,
+		tableSize_, D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD,
 		L"ShaderTable0");
+	shaderTalbeMapAddress_[0] = nullptr;
+	shaderTable_[0]->Map(0, nullptr, &shaderTalbeMapAddress_[0]);
 	shaderTable_[1] = FHelper::CreateBuffer(
-		tableSize, D3D12_RESOURCE_FLAG_NONE,
+		tableSize_, D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD,
 		L"ShaderTable1");
+	shaderTalbeMapAddress_[1] = nullptr;
+	shaderTable_[1]->Map(0, nullptr, &shaderTalbeMapAddress_[1]);
 
 	stateObject_.As(&rtsoProps_);
+
+	// シェーダーテーブルを書き込み、レイを設定する。
+	WriteShadetTalbeAndSettingRay(0, DispatchX, DispatchY);
+	WriteShadetTalbeAndSettingRay(1, DispatchX, DispatchY);
+
+}
+
+void RaytracingPipeline::MapHitGroupInfo()
+{
+
+	/*===== HitGroupの情報を転送 =====*/
 
 	// 現在のQueueのインデックス
 	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
 
+	uint8_t* pStart = static_cast<uint8_t*>(shaderTalbeMapAddress_[currentQueueIndex]);
+
+	// Hit Group 用のシェーダーレコードを書き込み。
+	uint8_t* hitgroupStart = pStart + raygenRegion_ + missRegion_;
+	{
+
+		uint8_t* pRecord = hitgroupStart;
+
+		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
+		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_, Engine::Ins()->currentQueueIndex_);
+
+	}
+
+}
+
+UINT RaytracingPipeline::GetLargestDataSizeInHitGroup()
+{
+
+	/*===== 全てのヒットグループの中で最もデータサイズが大きいものを取得する =====*/
+
+	UINT largestDataSize = 0;
+
+	const int HIT_GROUP_COUNT = HitGroupMgr::Ins()->GetHitGroupCount();
+	for (int index = 0; index < HIT_GROUP_COUNT; ++index) {
+
+		// データサイズを取得。
+		UINT dataSize = 0;
+		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetSRVCount(index);
+		dataSize += sizeof(D3D12_GPU_VIRTUAL_ADDRESS) * HitGroupMgr::Ins()->GetCBVCount(index);
+		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetUAVCount(index);
+
+		// 取得したデータサイズが保存されているデータサイズより小さかったら処理を飛ばす。
+		if (dataSize < largestDataSize) continue;
+
+		// 取得したデータサイズを保存する。
+		largestDataSize = dataSize;
+
+	}
+
+	return largestDataSize;
+
+}
+
+void RaytracingPipeline::WriteShadetTalbeAndSettingRay(int Index, int DispatchX, int DispatchY)
+{
+
+	/*===== シェーダーテーブルを書き込み、レイを設定する =====*/
+
 	// 各シェーダーレコードを書き込んでいく。
-	void* mapped = nullptr;
-	shaderTable_[currentQueueIndex]->Map(0, nullptr, &mapped);
-	uint8_t* pStart = static_cast<uint8_t*>(mapped);
+	uint8_t* pStart = static_cast<uint8_t*>(shaderTalbeMapAddress_[Index]);
 
 	// RayGeneration 用のシェーダーレコードを書き込み。
 	uint8_t* rgsStart = pStart;
@@ -274,91 +332,35 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 		uint8_t* pRecord = hitgroupStart;
 
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_);
+		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_, Index);
 
 	}
 
 	// レイ発射時の設定を設定。
 
 	// DispatchRays のために情報をセットしておく.
-	auto startAddress = shaderTable_[currentQueueIndex]->GetGPUVirtualAddress();
+	auto startAddress = shaderTable_[Index]->GetGPUVirtualAddress();
 	// RayGenerationシェーダーの情報
-	auto& shaderRecordRG = dispatchRayDesc_.RayGenerationShaderRecord;
+	auto& shaderRecordRG = dispatchRayDesc_[Index].RayGenerationShaderRecord;
 	shaderRecordRG.StartAddress = startAddress;
-	shaderRecordRG.SizeInBytes = raygenSize;
+	shaderRecordRG.SizeInBytes = raygenSize_;
 	startAddress += raygenRegion_;
 	// Missシェーダーの情報
-	auto& shaderRecordMS = dispatchRayDesc_.MissShaderTable;
+	auto& shaderRecordMS = dispatchRayDesc_[Index].MissShaderTable;
 	shaderRecordMS.StartAddress = startAddress;
-	shaderRecordMS.SizeInBytes = missSize;
-	shaderRecordMS.StrideInBytes = missRecordSize;
+	shaderRecordMS.SizeInBytes = missSize_;
+	shaderRecordMS.StrideInBytes = missRecordSize_;
 	startAddress += missRegion_;
 	// HitGroupの情報
-	auto& shaderRecordHG = dispatchRayDesc_.HitGroupTable;
+	auto& shaderRecordHG = dispatchRayDesc_[Index].HitGroupTable;
 	shaderRecordHG.StartAddress = startAddress;
-	shaderRecordHG.SizeInBytes = hitGroupSize;
+	shaderRecordHG.SizeInBytes = hitGroupSize_;
 	shaderRecordHG.StrideInBytes = hitgroupRecordSize_;
-	startAddress += hitgroupRegion;
+	startAddress += hitgroupRegion_;
 	// レイの情報
-	dispatchRayDesc_.Width = DispatchX;
-	dispatchRayDesc_.Height = DispatchY;
-	dispatchRayDesc_.Depth = 1;
-
-}
-
-void RaytracingPipeline::MapHitGroupInfo()
-{
-
-	/*===== HitGroupの情報を転送 =====*/
-
-	// 現在のQueueのインデックス
-	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
-
-	void* mapped = nullptr;
-	HRESULT result = shaderTable_[currentQueueIndex]->Map(0, nullptr, &mapped);
-	if (result != S_OK) {
-		assert(0);
-	}
-	uint8_t* pStart = static_cast<uint8_t*>(mapped);
-
-	// Hit Group 用のシェーダーレコードを書き込み。
-	uint8_t* hitgroupStart = pStart + raygenRegion_ + missRegion_;
-	{
-
-		uint8_t* pRecord = hitgroupStart;
-
-		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_);
-
-	}
-
-}
-
-UINT RaytracingPipeline::GetLargestDataSizeInHitGroup()
-{
-
-	/*===== 全てのヒットグループの中で最もデータサイズが大きいものを取得する =====*/
-
-	UINT largestDataSize = 0;
-
-	const int HIT_GROUP_COUNT = HitGroupMgr::Ins()->GetHitGroupCount();
-	for (int index = 0; index < HIT_GROUP_COUNT; ++index) {
-
-		// データサイズを取得。
-		UINT dataSize = 0;
-		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetSRVCount(index);
-		dataSize += sizeof(D3D12_GPU_VIRTUAL_ADDRESS) * HitGroupMgr::Ins()->GetCBVCount(index);
-		dataSize += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE) * HitGroupMgr::Ins()->GetUAVCount(index);
-
-		// 取得したデータサイズが保存されているデータサイズより小さかったら処理を飛ばす。
-		if (dataSize < largestDataSize) continue;
-
-		// 取得したデータサイズを保存する。
-		largestDataSize = dataSize;
-
-	}
-
-	return largestDataSize;
+	dispatchRayDesc_[Index].Width = DispatchX;
+	dispatchRayDesc_[Index].Height = DispatchY;
+	dispatchRayDesc_[Index].Depth = 1;
 
 }
 

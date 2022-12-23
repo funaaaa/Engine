@@ -137,13 +137,13 @@ std::weak_ptr<BLAS> BLASRegister::GenerateData(const ModelDataManager::ObjectDat
 
 }
 
-uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
+uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, int Index)
 {
 
 	/*===== シェーダーレコードを書き込む =====*/
 
 	for (auto& index : blas_) {
-		Dst = index->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName);
+		Dst = index->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName, Index);
 	}
 
 	return Dst;

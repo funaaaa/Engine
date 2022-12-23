@@ -69,7 +69,7 @@ void TLAS::Update()
 	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
 	// CPU から書き込み可能なバッファに書き込む。
-	WriteToMemory(instanceDescBuffer_[currentQueueIndex], PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescMapAddress_[currentQueueIndex], PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// 更新のための値を設定。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
@@ -97,27 +97,16 @@ void TLAS::Update()
 
 }
 
-void TLAS::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize)
+void TLAS::WriteToMemory(void* MapAddress, const void* PData, size_t DataSize)
 {
 
 	/*===== メモリに値を書き込む処理 =====*/
 
 	// nullチェック。
-	if (Resource == nullptr) return;
+	if (MapAddress == nullptr) assert(0);
 
 	// マップ処理を行う。
-	void* mapped = nullptr;
-	D3D12_RANGE range{ 0, DataSize };
-	HRESULT hr = Resource->Map(0, nullptr, (void**)&mapped);
-
-	// マップが成功したら値を書き込む。
-	if (SUCCEEDED(hr)) {
-
-		memcpy(mapped, PData, DataSize);
-		Resource->Unmap(0, nullptr);
-
-	}
-
+	memcpy(MapAddress, PData, DataSize);
 }
 
 void TLAS::SettingAccelerationStructure(int Index)
@@ -136,9 +125,10 @@ void TLAS::SettingAccelerationStructure(int Index)
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD);
 	instanceDescBuffer_[Index]->SetName(L"InstanceDescBuffer");
+	instanceDescBuffer_[Index]->Map(0, nullptr, &instanceDescMapAddress_[Index]);
 
 	// 生成したバッファにデータを書き込む。
-	WriteToMemory(instanceDescBuffer_[Index], PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescMapAddress_[Index], PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
 	// メモリ量を求めるための設定を行う。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};

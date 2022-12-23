@@ -11,8 +11,9 @@ private:
 
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> tlasBuffer_;			// TLAS用バッファ
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> scratchBuffer_;		// スクラッチバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> instanceDescBuffer_;	// インスタンスバッファ
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> tlasUpdateBuffer_;	// TLAS更新用バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> instanceDescBuffer_;	// インスタンスバッファ
+	std::array<void*, 2> instanceDescMapAddress_;
 
 	std::array<int, 2> descriptorHeapIndex_;
 
@@ -34,7 +35,7 @@ public:
 private:
 
 	// アドレスに情報を書き込む処理
-	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize);
+	void WriteToMemory(void* MapAddress, const void* PData, size_t DataSize);
 
 	// 加速構造体の設定用関数
 	void SettingAccelerationStructure(int Index);
