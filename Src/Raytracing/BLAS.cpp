@@ -444,13 +444,13 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		throw std::logic_error("Not found ShaderIdentifier");
 	}
 
+	// シェーダー識別子を書き込む。
+	memcpy(Dst, mode_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
+	Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
+
+
 	// 頂点関係のデータが変更されていたら。
 	if (isChangeVertex_[Index]) {
-
-		// シェーダー識別子を書き込む。
-		memcpy(Dst, mode_, D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES);
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-
 		// 今回のプログラムでは以下の順序でディスクリプタを記録。
 		// [0] : インデックスバッファ
 		// [1] : 頂点バッファ
@@ -466,7 +466,6 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	}
 	else {
 
-		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
 		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)));
 		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)));
 		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)));
@@ -483,7 +482,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
 	// テクスチャ関係が変更されていたら。
-	if (isChangeTexture_[Index]) {
+	if (true) {
 
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
@@ -646,12 +645,6 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 
 	// 現在のQueueのインデックス
 	currentQueueIndex = 1;
-
-	for (auto& index : vertex_) {
-
-		index.subUV_ = UV[static_cast<int>(&index - &vertex_[0])].uv_;
-
-	}
 
 	// 確保したバッファに頂点データを書き込む。
 	WriteToMemory(vertexMapAddress_[currentQueueIndex], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));

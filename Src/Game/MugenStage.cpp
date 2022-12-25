@@ -9,8 +9,6 @@
 #include "TextureManager.h"
 #include <algorithm>
 
-using namespace std;
-
 void MugenStage::Setting(int TireMaskIndex, bool IsBoostGimmick)
 {
 

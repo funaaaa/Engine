@@ -145,7 +145,7 @@ void RayEngine::TraceRay()
 	emissiveOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
-	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject().Get());
+	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject(Engine::Ins()->currentQueueIndex_).Get());
 
 	// レイトレーシングを実行。
 	D3D12_DISPATCH_RAYS_DESC rayDesc = pipeline_->GetDispatchRayDesc(Engine::Ins()->currentQueueIndex_);

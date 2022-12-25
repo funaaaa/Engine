@@ -163,7 +163,7 @@ void GameScene::Init()
 	/*===== 初期化処理 =====*/
 
 	// インスタンスを初期化。
-	BLASRegister::Ins()->Setting();
+	//BLASRegister::Ins()->Setting();
 	PolygonInstanceRegister::Ins()->Setting();
 
 	nextScene_ = SCENE_ID::TITLE;

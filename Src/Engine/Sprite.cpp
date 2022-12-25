@@ -168,6 +168,6 @@ void Sprite::Draw()
 	Engine::Ins()->copyResourceCmdList_->IASetVertexBuffers(0, 1, &vbView_);
 
 	// •`‰æƒRƒ}ƒ“ƒh
-	Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);		//‚±‚±‚Ìˆø”‚ð•Ï‚¦‚é‚±‚Æ‚Å’¸“_‚ð—˜—p‚µ‚Ä‚Ç‚ñ‚È}Œ`‚ð•`‚­‚©‚ðÝ’è‚Å‚«‚é Ž‘—¿3_3
+	Engine::Ins()->copyResourceCmdList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	Engine::Ins()->copyResourceCmdList_->DrawInstanced(static_cast<UINT>(vertex_.size()), 1, 0, 0);
 }

@@ -154,10 +154,14 @@ void RaytracingPipeline::Setting(const std::vector<RayPipelineShaderData>& Input
 
 	// 生成する。
 	Engine::Ins()->device_.dev_->CreateStateObject(
-		subobjects, IID_PPV_ARGS(&stateObject_)
+		subobjects, IID_PPV_ARGS(&stateObject_[0])
 	);
+	stateObject_[0]->SetName(L"StateObject0");
 
-	stateObject_->SetName(L"StateObject");
+	Engine::Ins()->device_.dev_->CreateStateObject(
+		subobjects, IID_PPV_ARGS(&stateObject_[1])
+	);
+	stateObject_[1]->SetName(L"StateObject1");
 
 }
 
@@ -195,7 +199,7 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 	hitgroupRegion_ = RoundUp(hitGroupSize_, tableAlign_);
 
 	// 生成されたBLASの数。
-	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount() - 1;
+	const int BLAS_COUNT = BLASRegister::Ins()->GetBLASCount();
 
 	// シェーダーテーブルのサイズ。
 	tableSize_ = raygenRegion_ + missRegion_ + hitgroupRegion_ * BLAS_COUNT;
@@ -218,8 +222,8 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 	shaderTalbeMapAddress_[1] = nullptr;
 	shaderTable_[1]->Map(0, nullptr, &shaderTalbeMapAddress_[1]);
 
-	stateObject_.As(&rtsoProps_[0]);
-	stateObject_.As(&rtsoProps_[1]);
+	stateObject_[0].As(&rtsoProps_[0]);
+	stateObject_[1].As(&rtsoProps_[1]);
 
 	// シェーダーテーブルを書き込み、レイを設定する。
 	WriteShadetTalbeAndSettingRay(0, DispatchX, DispatchY);
@@ -244,7 +248,7 @@ void RaytracingPipeline::MapHitGroupInfo()
 		uint8_t* pRecord = hitgroupStart;
 
 		// 送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_, Engine::Ins()->currentQueueIndex_);
+		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_[currentQueueIndex], hitGroupName_, currentQueueIndex);
 
 	}
 
@@ -333,7 +337,7 @@ void RaytracingPipeline::WriteShadetTalbeAndSettingRay(int Index, int DispatchX,
 		uint8_t* pRecord = hitgroupStart;
 
 		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
-		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_, Index);
+		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_[Index], hitGroupName_, Index);
 
 	}
 

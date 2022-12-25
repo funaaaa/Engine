@@ -31,7 +31,7 @@ protected:
 
 	std::vector<RayPipelineShaderData> shaderData_;			// 使用するシェーダーを纏めた構造体
 	std::vector<D3D12_SHADER_BYTECODE> shaderCode_;			// 使用するシェーダーのバイトコード
-	Microsoft::WRL::ComPtr<ID3D12StateObject> stateObject_;	// ステートオブジェクト
+	std::array<Microsoft::WRL::ComPtr<ID3D12StateObject>, 2> stateObject_;	// ステートオブジェクト
 	std::shared_ptr<RayRootsignature> globalRootSig_;		// グローバルルートシグネチャ
 	std::array<D3D12_DISPATCH_RAYS_DESC, 2> dispatchRayDesc_;				// レイ発射時の設定
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> shaderTable_;		// シェーダーテーブル
@@ -69,7 +69,7 @@ public:
 	void MapHitGroupInfo();
 
 	// ゲッタ
-	Microsoft::WRL::ComPtr<ID3D12StateObject> GetStateObject() { return stateObject_; }
+	Microsoft::WRL::ComPtr<ID3D12StateObject> GetStateObject(int Index) { return stateObject_[Index]; }
 	D3D12_DISPATCH_RAYS_DESC GetDispatchRayDesc(int Index) { return dispatchRayDesc_[Index]; }
 	std::shared_ptr<RayRootsignature> GetGlobalRootSig() { return globalRootSig_; }
 
