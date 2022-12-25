@@ -35,9 +35,9 @@ private:
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialBuffer_;			// マテリアルバッファ
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialUploadBuffer_;	// マテリアルバッファ
 	std::array<void*, 2> materialMapAddress_;	// マテリアルバッファMap用アドレス
-	RayDescriptor vertexDescriptor_;		// 頂点ディスクリプタ
-	RayDescriptor indexDescriptor_;			// 頂点インデックスディスクリプタ
-	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
+	std::array<RayDescriptor, 2> vertexDescriptor_;		// 頂点ディスクリプタ
+	std::array<RayDescriptor, 2> indexDescriptor_;			// 頂点インデックスディスクリプタ
+	std::array<RayDescriptor, 2> materialDescriptor_;		// マテリアル情報用ディスクリプタ
 
 	// マテリアル情報用定数バッファ
 	ModelDataManager::GPUMaterial material_;
@@ -157,8 +157,6 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer(int Index) { return vertexBuffer_[Index]; }
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer(int Index) { return indexBuffer_[Index]; }
 	std::wstring& GetHitGroupName() { return hitGroupName_; }
-	RayDescriptor& GetVertexDescriptor() { return vertexDescriptor_; }
-	RayDescriptor& GetIndexDescriptor() { return indexDescriptor_; }
 	const std::string& GetModelPath() { return modelPath_; }
 	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath_; }
 	const Vec3& GetVertexMin() { return vertexMin_; }

@@ -121,7 +121,7 @@ void RayEngine::TraceRay()
 	constBufferData_.camera_.mtxProjInv_ = DirectX::XMMatrixInverse(nullptr, constBufferData_.camera_.mtxProj_);
 
 	// 定数バッファをセット。
-	constBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(constBufferData_));
+	constBuffer_->Write(Engine::Ins()->currentQueueIndex_, &constBufferData_, sizeof(constBufferData_));
 
 
 	// グローバルルートシグネチャで使うと宣言しているリソースらをセット。

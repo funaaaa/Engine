@@ -425,6 +425,8 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	// 生成されていなかったら飛ばす。
 	if (!isGenerate_) {
 
+
+		Dst = Dst + recordSize;
 		return Dst;
 
 	}
@@ -453,11 +455,11 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		// [0] : インデックスバッファ
 		// [1] : 頂点バッファ
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor_.GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor_.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &indexDescriptor_[Index].GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor_[Index].GetGPUHandle());
 
 		// マテリアル用のバッファをセット。
-		Dst += WriteGPUDescriptor(Dst, &materialDescriptor_.GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &materialDescriptor_[Index].GetGPUHandle());
 
 		isChangeVertex_[Index] = false;
 
@@ -465,9 +467,9 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	else {
 
 		Dst += D3D12_SHADER_IDENTIFIER_SIZE_IN_BYTES;
-		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE)));
-		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE)));
-		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE)));
+		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)));
+		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)));
+		Dst += static_cast<UINT>((sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*)));
 
 	}
 
@@ -540,7 +542,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 		}
 		else {
 
-			Dst += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE);
+			Dst += sizeof(D3D12_GPU_DESCRIPTOR_HANDLE*);
 
 		}
 
@@ -625,7 +627,7 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 	/*===== 指定のUVを代入する =====*/
 
 	// 現在のQueueのインデックス
-	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
+	int currentQueueIndex = 0;
 
 	for (auto& index : vertex_) {
 
@@ -637,6 +639,24 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 	WriteToMemory(vertexMapAddress_[currentQueueIndex], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
 
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_[currentQueueIndex].Get(), vertexUploadBuffer_[currentQueueIndex].Get());
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+
+	// 現在のQueueのインデックス
+	currentQueueIndex = 1;
+
+	for (auto& index : vertex_) {
+
+		index.subUV_ = UV[static_cast<int>(&index - &vertex_[0])].uv_;
+
+	}
+
+	// 確保したバッファに頂点データを書き込む。
+	WriteToMemory(vertexMapAddress_[currentQueueIndex], vertex_.data(), static_cast<size_t>(vertexStride_ * vertexCount_));
+
+	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 	Engine::Ins()->mainGraphicsCmdList_->CopyResource(vertexBuffer_[currentQueueIndex].Get(), vertexUploadBuffer_[currentQueueIndex].Get());
 	barrier = CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer_[currentQueueIndex].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -843,10 +863,16 @@ void BLAS::CreateMaterialBuffer()
 
 	// マテリアルデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_[0], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	materialDescriptor_[0].CreateStructuredSRV(materialBuffer_[0], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 	materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	materialDescriptor_.CreateStructuredSRV(materialBuffer_[1], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	materialDescriptor_[0].CreateStructuredSRV(materialBuffer_[1], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_[1].CreateStructuredSRV(materialBuffer_[0], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	materialDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	materialDescriptor_[1].CreateStructuredSRV(materialBuffer_[1], 1, 0, sizeof(ModelDataManager::GPUMaterial), materialDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 }
@@ -967,18 +993,30 @@ void BLAS::CreateVertexBuffer(const ModelDataManager::ObjectData& DataBuff)
 
 	// 頂点インデックスデータでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor_.CreateStructuredSRV(indexBuffer_[0], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	indexDescriptor_[0].CreateStructuredSRV(indexBuffer_[0], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 	indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	indexDescriptor_.CreateStructuredSRV(indexBuffer_[1], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	indexDescriptor_[0].CreateStructuredSRV(indexBuffer_[1], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor_[1].CreateStructuredSRV(indexBuffer_[0], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	indexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	indexDescriptor_[1].CreateStructuredSRV(indexBuffer_[1], indexCount_, 0, indexStride_, indexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 	// 頂点データでディスクリプタを生成。
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_[0], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	vertexDescriptor_[0].CreateStructuredSRV(vertexBuffer_[0], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 	vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
-	vertexDescriptor_.CreateStructuredSRV(vertexBuffer_[1], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	vertexDescriptor_[0].CreateStructuredSRV(vertexBuffer_[1], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor_[1].CreateStructuredSRV(vertexBuffer_[0], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
+	DescriptorHeapMgr::Ins()->IncrementHead();
+	vertexDescHeap = DescriptorHeapMgr::Ins()->GetDescriptorHeap();
+	vertexDescriptor_[1].CreateStructuredSRV(vertexBuffer_[1], vertexCount_, 0, vertexStride_, vertexDescHeap, DescriptorHeapMgr::Ins()->GetHead());
 	DescriptorHeapMgr::Ins()->IncrementHead();
 
 }

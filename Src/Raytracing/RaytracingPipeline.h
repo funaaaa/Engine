@@ -36,7 +36,7 @@ protected:
 	std::array<D3D12_DISPATCH_RAYS_DESC, 2> dispatchRayDesc_;				// レイ発射時の設定
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> shaderTable_;		// シェーダーテーブル
 	std::array<void*, 2> shaderTalbeMapAddress_;							// シェーダーテーブルのデータ転送用Mapアドレス
-	Microsoft::WRL::ComPtr<ID3D12StateObjectProperties> rtsoProps_;
+	std::array<Microsoft::WRL::ComPtr<ID3D12StateObjectProperties>, 2> rtsoProps_;
 	LPCWSTR hitGroupName_;
 
 

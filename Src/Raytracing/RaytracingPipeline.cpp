@@ -218,7 +218,8 @@ void RaytracingPipeline::ConstructionShaderTable(int DispatchX, int DispatchY)
 	shaderTalbeMapAddress_[1] = nullptr;
 	shaderTable_[1]->Map(0, nullptr, &shaderTalbeMapAddress_[1]);
 
-	stateObject_.As(&rtsoProps_);
+	stateObject_.As(&rtsoProps_[0]);
+	stateObject_.As(&rtsoProps_[1]);
 
 	// シェーダーテーブルを書き込み、レイを設定する。
 	WriteShadetTalbeAndSettingRay(0, DispatchX, DispatchY);
@@ -242,7 +243,7 @@ void RaytracingPipeline::MapHitGroupInfo()
 
 		uint8_t* pRecord = hitgroupStart;
 
-		// この処理は仮の実装。送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
+		// 送るBLASのデータが増えた際はBLASごとに書き込む処理を変える。今考えているのは、HITGROUP_IDごとに関数を用意する実装。
 		pRecord = BLASRegister::Ins()->WriteShaderRecord(pRecord, hitgroupRecordSize_, stateObject_, hitGroupName_, Engine::Ins()->currentQueueIndex_);
 
 	}
@@ -296,7 +297,7 @@ void RaytracingPipeline::WriteShadetTalbeAndSettingRay(int Index, int DispatchX,
 			const int RG_COUNT = static_cast<int>(shaderData_[index].rayGenEnteryPoint_.size());
 			for (int rgIndex = 0; rgIndex < RG_COUNT; ++rgIndex) {
 
-				void* id = rtsoProps_->GetShaderIdentifier(shaderData_[index].rayGenEnteryPoint_[rgIndex]);
+				void* id = rtsoProps_[Index]->GetShaderIdentifier(shaderData_[index].rayGenEnteryPoint_[rgIndex]);
 				p += WriteShaderIdentifier(p, id);
 
 			}
@@ -316,7 +317,7 @@ void RaytracingPipeline::WriteShadetTalbeAndSettingRay(int Index, int DispatchX,
 			const int MS_COUNT = static_cast<int>(shaderData_[index].missEntryPoint_.size());
 			for (int msIndex = 0; msIndex < MS_COUNT; ++msIndex) {
 
-				void* id = rtsoProps_->GetShaderIdentifier(shaderData_[index].missEntryPoint_[msIndex]);
+				void* id = rtsoProps_[Index]->GetShaderIdentifier(shaderData_[index].missEntryPoint_[msIndex]);
 				p += WriteShaderIdentifier(p, id);
 
 			}
