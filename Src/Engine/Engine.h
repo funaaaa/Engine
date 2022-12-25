@@ -70,17 +70,12 @@ public:
 
 	// コマンドアロケーター
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> mainGraphicsCmdAllocator_;
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> copyResourceCmdAllocator_;
-	std::array<Microsoft::WRL::ComPtr<ID3D12CommandAllocator>, 2> denoiseCmdAllocator_;
 
 	// コマンドリスト
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainGraphicsCmdList_;			// メインで使用するグラフィックスコマンドリスト
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> copyResourceCmdList_;			// CopyResourceで使用するグラフィックスコマンドリスト
-	std::array<Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4>, 2> denoiseCmdList_;	// デノイズで使用するコマンドリスト SwapChainのように裏と表を切り替えて使用する。
 
 	// キュー
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> graphicsCmdQueue_;				// グラフィックスキュー レイトレ関数やUIの描画等を行う。
-	Microsoft::WRL::ComPtr<ID3D12CommandQueue> computeCmdQueue_;				// コンピュートキュー 主にデノイズを行う。
 
 	// フェンス
 	std::array<Microsoft::WRL::ComPtr<ID3D12Fence>, 2> GPUtoCPUFence_;			// mainGraphicsとCPUの同期をとるためのフェンス

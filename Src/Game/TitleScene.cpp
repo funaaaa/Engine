@@ -206,27 +206,27 @@ void TitleScene::Draw()
 	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
 	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &resourceBarrier);
 
-	// タイトル画像を描画
-	title_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
-	title_.Draw();
-	titleOperation_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
-	titleOperation_.Draw();
+	//// タイトル画像を描画
+	//title_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
+	//title_.Draw();
+	//titleOperation_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
+	//titleOperation_.Draw();
 
 
-	// レベル選択のUIを描画
-	for (int index = 0; index < 3; ++index) {
-		levelSprite_[index].ChangePosition(levelPos_[index]);
-		levelSprite_[index].Draw();
-	}
-	redSprite_.Draw();
+	//// レベル選択のUIを描画
+	//for (int index = 0; index < 3; ++index) {
+	//	levelSprite_[index].ChangePosition(levelPos_[index]);
+	//	levelSprite_[index].Draw();
+	//}
+	//redSprite_.Draw();
 
-	SceneTransition::Ins()->Draw();
+	//SceneTransition::Ins()->Draw();
 
 	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 }
 

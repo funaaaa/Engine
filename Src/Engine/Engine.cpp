@@ -101,24 +101,6 @@ void Engine::Init() {
 			IID_PPV_ARGS(&mainGraphicsCmdAllocator_));
 		mainGraphicsCmdAllocator_->SetName(L"MainGraphicsCmdAllocator");
 
-		// デノイズ結果をバックバッファにコピーする際に使用するコマンドリスト用のAllocatorを生成。
-		result = device_.dev_->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_DIRECT,
-			IID_PPV_ARGS(&copyResourceCmdAllocator_));
-		copyResourceCmdAllocator_->SetName(L"CopyResourceCmdAllocator");
-
-		// デノイズに使用するコマンドリスト表用のAllocatorを生成。
-		result = Engine::Ins()->device_.dev_->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			IID_PPV_ARGS(&denoiseCmdAllocator_[0]));
-		denoiseCmdAllocator_[0]->SetName(L"DenoiseAllocator0");
-
-		// デノイズに使用するコマンドリスト裏用のAllocatorを生成。
-		result = Engine::Ins()->device_.dev_->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			IID_PPV_ARGS(&denoiseCmdAllocator_[1]));
-		denoiseCmdAllocator_[1]->SetName(L"DenoiseAllocator1");
-
 	}
 
 	// コマンドリストの生成
@@ -130,27 +112,6 @@ void Engine::Init() {
 			mainGraphicsCmdAllocator_.Get(), nullptr,
 			IID_PPV_ARGS(&mainGraphicsCmdList_));
 		mainGraphicsCmdList_->SetName(L"GraphicsCmdList");
-
-		// デノイズ結果をバックバッファにコピーする際に使用するコマンドリスト
-		result = device_.dev_->CreateCommandList(0,
-			D3D12_COMMAND_LIST_TYPE_DIRECT,
-			copyResourceCmdAllocator_.Get(), nullptr,
-			IID_PPV_ARGS(&copyResourceCmdList_));
-		copyResourceCmdList_->SetName(L"CopyResourceCmdList");
-
-		// デノイズに使用するコマンドリスト表
-		result = Engine::Ins()->device_.dev_->CreateCommandList(0,
-			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			denoiseCmdAllocator_[0].Get(), nullptr,
-			IID_PPV_ARGS(&denoiseCmdList_[0]));
-		denoiseCmdList_[0]->SetName(L"DenoiseComputeCmdList0");
-
-		// デノイズに使用するコマンドリスト裏
-		result = Engine::Ins()->device_.dev_->CreateCommandList(0,
-			D3D12_COMMAND_LIST_TYPE_COMPUTE,
-			denoiseCmdAllocator_[1].Get(), nullptr,
-			IID_PPV_ARGS(&denoiseCmdList_[1]));
-		denoiseCmdList_[1]->SetName(L"DenoiseComputeCmdList1");
 
 	}
 
@@ -164,13 +125,6 @@ void Engine::Init() {
 		cmdQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 		result = device_.dev_->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&graphicsCmdQueue_));
 		graphicsCmdQueue_->SetName(L"GraphicsCmdQueue");
-
-		// デノイズに使用するコンピュートキューの表を生成。
-		cmdQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-		cmdQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-		cmdQueueDesc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
-		result = Engine::Ins()->device_.dev_->CreateCommandQueue(&cmdQueueDesc, IID_PPV_ARGS(&computeCmdQueue_));
-		computeCmdQueue_->SetName(L"ComputeQueue");
 
 	}
 
@@ -367,7 +321,7 @@ void Engine::ProcessBeforeDrawing() {
 		UINT bbIndex = swapchain_.swapchain_->GetCurrentBackBufferIndex();
 		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(swapchain_.backBuffers_[bbIndex].Get(),
 			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+		mainGraphicsCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 		// レンダーターゲットの設定
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
@@ -376,7 +330,7 @@ void Engine::ProcessBeforeDrawing() {
 		// 深度バッファ用のディスクリプタヒープの先頭アドレスを取得
 		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
 			swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart(), currentQueueIndex_, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
-		copyResourceCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
+		mainGraphicsCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
 
 		// 画面クリア
 		// 初期化色
@@ -384,18 +338,18 @@ void Engine::ProcessBeforeDrawing() {
 		for (int i = 0; i < 4; ++i) {
 			clearColor[i] = clearColor[i] / 255.0f;
 		}
-		//copyResourceCmdList_->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
+		//mainGraphicsCmdList_->ClearRenderTargetView(rtvH, clearColor, 0, nullptr);
 
 		// 深度バッファのクリアコマンド
-		copyResourceCmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+		mainGraphicsCmdList_->ClearDepthStencilView(dsvH, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 		// ビューポート設定
 		CD3DX12_VIEWPORT viewportData = CD3DX12_VIEWPORT(0.0f, 0.0f, WINDOW_WIDTH, WINDOW_HEIGHT);
-		copyResourceCmdList_->RSSetViewports(1, &viewportData);
+		mainGraphicsCmdList_->RSSetViewports(1, &viewportData);
 
 		// シザリング矩形設定
 		CD3DX12_RECT rectData = CD3DX12_RECT(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-		copyResourceCmdList_->RSSetScissorRects(1, &rectData);
+		mainGraphicsCmdList_->RSSetScissorRects(1, &rectData);
 
 	}
 
@@ -423,43 +377,9 @@ void Engine::ProcessAfterDrawing() {
 		graphicsCmdQueue_->ExecuteCommandLists(1, cmdLists);
 
 		// MainGraphicsの実行完了を通知。
-		graphicsCmdQueue_->Signal(graphicsToDenoiseFence_[currentQueueIndex_].Get(), fenceValue);
-
-		// 前フレームのデノイズを待つ。
-		if (frameIndex_ != 0) {
-			graphicsCmdQueue_->Wait(denoiseToCopyFence_[pastQueueIndex_].Get(), fenceValue - 1);
-		}
-
-		// コピーコマンドリストのクローズ
-		copyResourceCmdList_->Close();
-
-		// コピーを実行。
-		ID3D12CommandList* copyCmdLists[] = { copyResourceCmdList_.Get() };
-		graphicsCmdQueue_->ExecuteCommandLists(1, copyCmdLists);
-
-		// Copyの実行完了を通知。
 		graphicsCmdQueue_->Signal(GPUtoCPUFence_[currentQueueIndex_].Get(), fenceValue);
 
 	}
-
-	// ComputeQueueの処理
-	if (!isGameEndReservation_) {
-
-		// コマンドリストを閉じる
-		denoiseCmdList_[currentQueueIndex_]->Close();
-
-		// レイトレの処理を待つ。
-		computeCmdQueue_->Wait(graphicsToDenoiseFence_[currentQueueIndex_].Get(), fenceValue - 0);
-
-		// デノイズを実行
-		ID3D12CommandList* cmdLists[] = { denoiseCmdList_[currentQueueIndex_].Get() };
-		computeCmdQueue_->ExecuteCommandLists(1, cmdLists);
-
-		// 実行完了を通知。
-		computeCmdQueue_->Signal(denoiseToCopyFence_[currentQueueIndex_].Get(), fenceValue);
-
-	}
-
 
 	// SwapChainを反転させて、GPUの処理完了を待つ。
 	if (!isGameEndReservation_) {
@@ -481,16 +401,6 @@ void Engine::ProcessAfterDrawing() {
 		mainGraphicsCmdAllocator_->Reset();
 		mainGraphicsCmdList_->Reset(mainGraphicsCmdAllocator_.Get(), nullptr);
 
-		// 今フレームのコピーのコマンドを初期化。
-		copyResourceCmdAllocator_->Reset();
-		copyResourceCmdList_->Reset(copyResourceCmdAllocator_.Get(), nullptr);
-
-		// 前フレームのデノイズのコマンドを初期化。
-		if (frameIndex_ != 0) {
-			denoiseCmdAllocator_[pastQueueIndex_]->Reset();
-			denoiseCmdList_[pastQueueIndex_]->Reset(denoiseCmdAllocator_[pastQueueIndex_].Get(), nullptr);
-		}
-
 	}
 	// ゲームの終了が予約されていたら、前フレームのデノイズが終わるのを待ってからゲーム画面を閉じる。
 	else {
@@ -503,9 +413,6 @@ void Engine::ProcessAfterDrawing() {
 			WaitForSingleObject(event, INFINITE);
 			CloseHandle(event);
 		}
-
-		denoiseCmdAllocator_[pastQueueIndex_]->Reset();
-		denoiseCmdList_[pastQueueIndex_]->Reset(denoiseCmdAllocator_[pastQueueIndex_].Get(), nullptr);
 
 		isGameEnd_ = true;
 

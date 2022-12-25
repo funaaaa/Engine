@@ -71,7 +71,7 @@ void Bloom::ApplyBloom(int InOutImg)
 	std::vector<int> inputUAV;
 	for (auto& index : emissiveIntermediateTexture_) inputUAV.emplace_back(index->GetUAVIndex());
 	mixEmissive_->ChangeInputUAVIndex(inputUAV);
-	mixEmissive_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), InOutImg, { }, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
+	mixEmissive_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), InOutImg, { }, Engine::Ins()->mainGraphicsCmdList_);
 
 }
 
@@ -91,9 +91,9 @@ void Bloom::ApplyBloomGaussianBlur(int InputUAVIndex, int SourceUAVIndex, int Ou
 	blurX_->ChangeInputUAVIndex({ InputUAVIndex });
 	blurY_->ChangeInputUAVIndex({ blurXOutput_->GetUAVIndex() });
 	blurFinal_->ChangeInputUAVIndex({ blurYOutput_->GetUAVIndex() });
-	blurX_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 2.0f) / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), blurXOutput_->GetUAVIndex(), { bloomWeightTableCBX_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
-	blurY_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 2.0f) / 32) + 1, static_cast<UINT>((WINDOW_HEIGHT / 2.0f) / 32) + 1, static_cast<UINT>(1), blurYOutput_->GetUAVIndex(), { bloomWeightTableCBY_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
-	blurFinal_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, {}, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
+	blurX_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 2.0f) / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), blurXOutput_->GetUAVIndex(), { bloomWeightTableCBX_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->mainGraphicsCmdList_);
+	blurY_->Dispatch(static_cast<UINT>((WINDOW_WIDTH / 2.0f) / 32) + 1, static_cast<UINT>((WINDOW_HEIGHT / 2.0f) / 32) + 1, static_cast<UINT>(1), blurYOutput_->GetUAVIndex(), { bloomWeightTableCBY_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() }, Engine::Ins()->mainGraphicsCmdList_);
+	blurFinal_->Dispatch(static_cast<UINT>(WINDOW_WIDTH / 32) + 1, static_cast<UINT>(WINDOW_HEIGHT / 32) + 1, static_cast<UINT>(1), OutputUAVIndex, {}, Engine::Ins()->mainGraphicsCmdList_);
 
 }
 

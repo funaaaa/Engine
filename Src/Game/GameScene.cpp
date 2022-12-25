@@ -480,45 +480,45 @@ void GameScene::Draw()
 	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
 	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &resourceBarrier);
 
-	concentrationLine_->Draw();
+	//concentrationLine_->Draw();
 
-	// 現在のラップ数のui。
-	nowRapCountUI_->Draw();
-	slashUI_->Draw();
-	maxRapCountUI_->Draw();
+	//// 現在のラップ数のui。
+	//nowRapCountUI_->Draw();
+	//slashUI_->Draw();
+	//maxRapCountUI_->Draw();
 
-	// 左下のuiのフレーム。
-	rapUI_->Draw();
+	//// 左下のuiのフレーム。
+	//rapUI_->Draw();
 
-	// カウントダウン用のui。
-	countDownSprite_->Draw();
+	//// カウントダウン用のui。
+	//countDownSprite_->Draw();
 
-	// カウントダウン終了時のgoのui。
-	goSprite_->Draw();
+	//// カウントダウン終了時のgoのui。
+	//goSprite_->Draw();
 
-	// 勝敗を描画
-	if (isGameFinish_) {
+	//// 勝敗を描画
+	//if (isGameFinish_) {
 
-		if (isWin_) {
-			winUI_->Draw();
-		}
-		else {
-			gameoverUI_->Draw();
-		}
+	//	if (isWin_) {
+	//		winUI_->Draw();
+	//	}
+	//	else {
+	//		gameoverUI_->Draw();
+	//	}
 
-	}
+	//}
 
-	// ランキングのUIを表示
-	rankingUI_->Draw();
+	//// ランキングのUIを表示
+	//rankingUI_->Draw();
 
-	// シーン遷移の画像を描画。
-	SceneTransition::Ins()->Draw();
+	//// シーン遷移の画像を描画。
+	//SceneTransition::Ins()->Draw();
 
 	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
 		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 }
 
