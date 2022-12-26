@@ -34,7 +34,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr
 	instanceDesc.InstanceMask = 0xFF;
 	instanceDesc.InstanceContributionToHitGroupIndex = Blas.lock()->GetBlasIndex();
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer(Engine::Ins()->currentQueueIndex_)->GetGPUVirtualAddress();
+	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer()->GetGPUVirtualAddress();
 
 
 	// BLAS‚ÌIndex‚ğ•Û‘¶B
@@ -74,7 +74,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::ReCreateInstance(std::weak_p
 	instanceDesc.InstanceMask = 0xFF;
 	instanceDesc.InstanceContributionToHitGroupIndex = Blas.lock()->GetBlasIndex();
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer(Engine::Ins()->currentQueueIndex_)->GetGPUVirtualAddress();
+	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer()->GetGPUVirtualAddress();
 
 
 	// BLAS‚ÌIndex‚ğ•Û‘¶B

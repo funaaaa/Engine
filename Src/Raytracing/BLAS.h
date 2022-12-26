@@ -26,18 +26,18 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexBuffer_;		// 頂点バッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexUploadBuffer_;	// 頂点バッファ
-	std::array<void*, 2> vertexMapAddress_;		// 頂点バッファMap用アドレス
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexBuffer_;			// 頂点インデックスバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexUploadBuffer_;	// 頂点インデックスバッファ
-	std::array<void*, 2> indexMapAddress_;		// 頂点インデックスバッファMap用アドレス
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialBuffer_;			// マテリアルバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialUploadBuffer_;	// マテリアルバッファ
-	std::array<void*, 2> materialMapAddress_;	// マテリアルバッファMap用アドレス
-	std::array<RayDescriptor, 2> vertexDescriptor_;		// 頂点ディスクリプタ
-	std::array<RayDescriptor, 2> indexDescriptor_;			// 頂点インデックスディスクリプタ
-	std::array<RayDescriptor, 2> materialDescriptor_;		// マテリアル情報用ディスクリプタ
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexBuffer_;		// 頂点バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> vertexUploadBuffer_;	// 頂点バッファ
+	void* vertexMapAddress_;		// 頂点バッファMap用アドレス
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexBuffer_;			// 頂点インデックスバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexUploadBuffer_;	// 頂点インデックスバッファ
+	void* indexMapAddress_;		// 頂点インデックスバッファMap用アドレス
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialBuffer_;			// マテリアルバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialUploadBuffer_;	// マテリアルバッファ
+	void* materialMapAddress_;	// マテリアルバッファMap用アドレス
+	RayDescriptor vertexDescriptor_;		// 頂点ディスクリプタ
+	RayDescriptor indexDescriptor_;			// 頂点インデックスディスクリプタ
+	RayDescriptor materialDescriptor_;		// マテリアル情報用ディスクリプタ
 
 	// マテリアル情報用定数バッファ
 	ModelDataManager::GPUMaterial material_;
@@ -45,9 +45,9 @@ private:
 	// BLASのインデックス。
 	int blasIndex_;
 
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> blasBuffer_;		// BLAS用バッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> scratchBuffer_;	// スクラッチバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> updateBuffer_;	// 更新用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> blasBuffer_;		// BLAS用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;	// スクラッチバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> updateBuffer_;	// 更新用バッファ
 
 	UINT vertexCount_;						// 頂点の数
 	UINT indexCount_;						// 頂点インデックスの数
@@ -66,8 +66,8 @@ private:
 	bool isOpaque_;							// 不透明フラグ
 
 	// 書き込むシェーダーテーブルが表と裏で2つあるので、こちらも2つ用意する。
-	std::array<bool, 2> isChangeTexture_;	// テクスチャを書き換えたかフラグ
-	std::array<bool, 2> isChangeVertex_;	// 頂点を書き換えたかフラグ
+	bool isChangeTexture_;	// テクスチャを書き換えたかフラグ
+	bool isChangeVertex_;	// 頂点を書き換えたかフラグ
 
 	bool isGenerate_;
 
@@ -128,8 +128,7 @@ public:
 
 	// テクスチャを変えたフラグ。
 	void ChangeTextureFlag() {
-		isChangeTexture_[0] = true;
-		isChangeTexture_[1] = true;
+		isChangeTexture_ = true;
 	}
 
 	// テクスチャを追加。
@@ -138,7 +137,7 @@ public:
 	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
-	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, int Index);
+	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
 
 	// 各成分の長さの最大を返す。
 	Vec3 GetVertexLengthMax();
@@ -153,9 +152,9 @@ public:
 	void ChangeVertexPosition(int Index, const Vec3& Pos);
 
 	// アクセッサ
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(int Index) { return blasBuffer_[Index]; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer(int Index) { return vertexBuffer_[Index]; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer(int Index) { return indexBuffer_[Index]; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer() { return blasBuffer_; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer() { return vertexBuffer_; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer() { return indexBuffer_; }
 	std::wstring& GetHitGroupName() { return hitGroupName_; }
 	const std::string& GetModelPath() { return modelPath_; }
 	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath_; }
@@ -177,13 +176,13 @@ private:
 	void WriteToMemory(void* MapAddress, const void* PData, size_t DataSize);
 
 	// BLAS生成時に設定を取得する関数
-	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque, int Index);
+	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque);
 
 	// 加速構造体の設定用関数
-	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc, int Index);
+	void SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& geomDesc);
 
 	// 加速構造体の構築用関数
-	void CreateAccelerationStructure(int Index);
+	void CreateAccelerationStructure();
 
 	// マテリアルを設定
 	void CreateMaterialBuffer();
