@@ -931,6 +931,7 @@ void BLAS::CreateVertexBuffer(const ModelDataManager::ObjectData& DataBuff)
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 	vertexBuffer_[1]->SetName(L"VertexBuffer1");
 
+
 	// アップロード用頂点バッファを生成する。
 	vertexUploadBuffer_[0] = FHelper::CreateBuffer(
 		static_cast<size_t>(vertexStride_ * vertexCount_),

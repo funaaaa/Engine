@@ -64,12 +64,8 @@ void TLAS::Update()
 	// インスタンスの行列を計算。
 	PolygonInstanceRegister::Ins()->CalWorldMat();
 
-	// Instanceのサイズを取得。
-	auto sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE;
-	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
-
 	// CPU から書き込み可能なバッファに書き込む。
-	WriteToMemory(instanceDescMapAddress_[currentQueueIndex], PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescMapAddress_[currentQueueIndex], PolygonInstanceRegister::Ins()->GetData(), instanceDescSize_);
 
 	// 更新のための値を設定。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
@@ -94,6 +90,8 @@ void TLAS::Update()
 	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&asDesc, 0, nullptr
 	);
+	D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer_[currentQueueIndex].Get());
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1,&barrier);
 
 }
 
@@ -118,9 +116,9 @@ void TLAS::SettingAccelerationStructure(int Index)
 	/*-- TLASの生成に必要なメモリ量を求める --*/
 
 	// インスタンスの情報を記録したバッファを準備する。
-	size_t sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	instanceDescSize_ = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 	instanceDescBuffer_[Index] = FHelper::CreateBuffer(
-		sizeOfInstanceDescs,
+		instanceDescSize_,
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD);
@@ -128,7 +126,7 @@ void TLAS::SettingAccelerationStructure(int Index)
 	instanceDescBuffer_[Index]->Map(0, nullptr, &instanceDescMapAddress_[Index]);
 
 	// 生成したバッファにデータを書き込む。
-	WriteToMemory(instanceDescMapAddress_[Index], PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescMapAddress_[Index], PolygonInstanceRegister::Ins()->GetData(), instanceDescSize_);
 
 	// メモリ量を求めるための設定を行う。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};

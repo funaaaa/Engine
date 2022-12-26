@@ -15,6 +15,8 @@ private:
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> instanceDescBuffer_;	// インスタンスバッファ
 	std::array<void*, 2> instanceDescMapAddress_;
 
+	size_t instanceDescSize_;		// InstanceDescのサイズ memcpyで使用する。
+
 	std::array<int, 2> descriptorHeapIndex_;
 
 
