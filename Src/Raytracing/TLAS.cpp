@@ -151,9 +151,10 @@ void TLAS::SettingAccelerationStructure(int Index)
 	scratchBuffer_[Index] = FHelper::CreateBuffer(
 		tlasPrebuild.ScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		D3D12_RESOURCE_STATE_COMMON,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	D3D12_RESOURCE_BARRIER barrier = { CD3DX12_RESOURCE_BARRIER::Transition(scratchBuffer_[Index].Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
 	scratchBuffer_[Index]->SetName(L"TlasScratchBuffer");
 
 	// TLAS用メモリ(バッファ)を確保。
@@ -169,9 +170,10 @@ void TLAS::SettingAccelerationStructure(int Index)
 	tlasUpdateBuffer_[Index] = FHelper::CreateBuffer(
 		tlasPrebuild.UpdateScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		D3D12_RESOURCE_STATE_COMMON,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
+	barrier = { CD3DX12_RESOURCE_BARRIER::Transition(tlasUpdateBuffer_[Index].Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
 	tlasUpdateBuffer_[Index]->SetName(L"TlasUpdateBuffer");
 
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/

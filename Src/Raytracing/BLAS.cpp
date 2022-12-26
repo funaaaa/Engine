@@ -750,7 +750,6 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-
 	blasBuffer_[Index]->SetName(L"BLASBuffer");
 
 	// 更新用バッファを生成する。
