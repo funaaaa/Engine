@@ -417,10 +417,10 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 
 	// 頂点関係のデータが変更されていたら。
-		// 今回のプログラムでは以下の順序でディスクリプタを記録。
-		// [0] : インデックスバッファ
-		// [1] : 頂点バッファ
-		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
+	// 今回のプログラムでは以下の順序でディスクリプタを記録。
+	// [0] : インデックスバッファ
+	// [1] : 頂点バッファ
+	// ※ ローカルルートシグネチャの順序に合わせる必要がある。
 	Dst += WriteGPUDescriptor(Dst, &indexDescriptor_.GetGPUHandle());
 	Dst += WriteGPUDescriptor(Dst, &vertexDescriptor_.GetGPUHandle());
 
