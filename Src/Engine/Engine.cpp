@@ -405,15 +405,6 @@ void Engine::ProcessAfterDrawing() {
 	// ゲームの終了が予約されていたら、前フレームのデノイズが終わるのを待ってからゲーム画面を閉じる。
 	else {
 
-
-		UINT64 gpuFence = denoiseToCopyFence_[pastQueueIndex_]->GetCompletedValue();
-		if (gpuFence != fenceValue - 1) {
-			HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-			denoiseToCopyFence_[pastQueueIndex_]->SetEventOnCompletion(fenceValue - 1, event);
-			WaitForSingleObject(event, INFINITE);
-			CloseHandle(event);
-		}
-
 		isGameEnd_ = true;
 
 	}
