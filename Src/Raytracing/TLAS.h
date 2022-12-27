@@ -14,6 +14,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> instanceDescBuffer_;	// インスタンスバッファ
 	void* instanceDescMapAddress_;
 
+	size_t instanceDescSize_;
+
 	int descriptorHeapIndex_;
 
 

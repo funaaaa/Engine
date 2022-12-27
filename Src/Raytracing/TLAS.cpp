@@ -32,7 +32,6 @@ void TLAS::GenerateTLAS()
 
 	// ディスクリプタヒープをインクリメント
 	DescriptorHeapMgr::Ins()->IncrementHead();
-
 }
 
 void TLAS::Update()
@@ -40,13 +39,11 @@ void TLAS::Update()
 
 	/*===== TLASの更新処理 =====*/
 
-	/*-- TLASの生成に必要なメモリ量を求める --*/
-
-	// インスタンスの情報を記録したバッファを準備する。
-	size_t sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	// インスタンスの行列を計算。
+	PolygonInstanceRegister::Ins()->CalWorldMat();
 
 	// 生成したバッファにデータを書き込む。
-	WriteToMemory(instanceDescMapAddress_, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescMapAddress_, PolygonInstanceRegister::Ins()->GetData(), instanceDescSize_);
 
 	// メモリ量を求めるための設定を行う。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};
@@ -71,7 +68,6 @@ void TLAS::Update()
 
 	/*-- 実際にバッファを生成する --*/
 
-	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer_.Get());
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
 
@@ -98,9 +94,9 @@ void TLAS::SettingAccelerationStructure()
 	/*-- TLASの生成に必要なメモリ量を求める --*/
 
 	// インスタンスの情報を記録したバッファを準備する。
-	size_t sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	instanceDescSize_ = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 	instanceDescBuffer_ = FHelper::CreateBuffer(
-		sizeOfInstanceDescs,
+		instanceDescSize_,
 		D3D12_RESOURCE_FLAG_NONE,
 		D3D12_RESOURCE_STATE_GENERIC_READ,
 		D3D12_HEAP_TYPE_UPLOAD);
@@ -108,7 +104,7 @@ void TLAS::SettingAccelerationStructure()
 	instanceDescBuffer_->Map(0, nullptr, &instanceDescMapAddress_);
 
 	// 生成したバッファにデータを書き込む。
-	WriteToMemory(instanceDescMapAddress_, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
+	WriteToMemory(instanceDescMapAddress_, PolygonInstanceRegister::Ins()->GetData(), instanceDescSize_);
 
 	// メモリ量を求めるための設定を行う。
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};
@@ -135,7 +131,6 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_HEAP_TYPE_DEFAULT
 	);
 	D3D12_RESOURCE_BARRIER barrier = { CD3DX12_RESOURCE_BARRIER::Transition(scratchBuffer_.Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
 	scratchBuffer_->SetName(L"TlasScratchBuffer");
 
 	// TLAS用メモリ(バッファ)を確保。
