@@ -11,7 +11,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> tlasBuffer_;			// TLAS用バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;		// スクラッチバッファ
-	Microsoft::WRL::ComPtr<ID3D12Resource> tlasUpdateBuffer_;	// TLAS更新用バッファ
 	Microsoft::WRL::ComPtr<ID3D12Resource> instanceDescBuffer_;	// インスタンスバッファ
 	void* instanceDescMapAddress_;
 

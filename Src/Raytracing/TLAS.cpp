@@ -40,39 +40,40 @@ void TLAS::Update()
 
 	/*===== TLASの更新処理 =====*/
 
-	// インスタンスの行列を計算。
-	PolygonInstanceRegister::Ins()->CalWorldMat();
+	/*-- TLASの生成に必要なメモリ量を求める --*/
 
-	// Instanceのサイズを取得。
-	auto sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE;
-	sizeOfInstanceDescs *= sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
+	// インスタンスの情報を記録したバッファを準備する。
+	size_t sizeOfInstanceDescs = PolygonInstanceRegister::MAX_INSTANCE * sizeof(D3D12_RAYTRACING_INSTANCE_DESC);
 
-	// CPU から書き込み可能なバッファに書き込む。
+	// 生成したバッファにデータを書き込む。
 	WriteToMemory(instanceDescMapAddress_, PolygonInstanceRegister::Ins()->GetData(), sizeOfInstanceDescs);
 
-	// 更新のための値を設定。
-	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
-	auto& inputs = asDesc.Inputs;
+	// メモリ量を求めるための設定を行う。
+	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC buildASDesc = {};
+	auto& inputs = buildASDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL;
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
 	inputs.NumDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	inputs.InstanceDescs = instanceDescBuffer_->GetGPUVirtualAddress();
-	// TLAS の更新処理を行うためのフラグを設定する。
-	inputs.Flags =
-		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE |
-		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
+	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_NONE;
 
+	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 
-	// インプレース更新を実行する。
-	asDesc.SourceAccelerationStructureData = tlasBuffer_->GetGPUVirtualAddress();
-	asDesc.DestAccelerationStructureData = tlasBuffer_->GetGPUVirtualAddress();
-	// 更新用の作業バッファを設定する。
-	asDesc.ScratchAccelerationStructureData = tlasUpdateBuffer_->GetGPUVirtualAddress();
+	// AccelerationStructure構築。
+	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_->GetGPUVirtualAddress();
+	buildASDesc.DestAccelerationStructureData = tlasBuffer_->GetGPUVirtualAddress();
 
-	// コマンドリストに積む。
+	// コマンドリストに積んで実行する。
 	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
-		&asDesc, 0, nullptr
+		&buildASDesc, 0, nullptr
 	);
+
+
+	/*-- 実際にバッファを生成する --*/
+
+	// リソースバリアの設定。
+	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer_.Get());
+	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
 
 }
 
@@ -116,7 +117,7 @@ void TLAS::SettingAccelerationStructure()
 	inputs.DescsLayout = D3D12_ELEMENTS_LAYOUT_ARRAY;
 	inputs.NumDescs = PolygonInstanceRegister::MAX_INSTANCE;
 	inputs.InstanceDescs = instanceDescBuffer_->GetGPUVirtualAddress();
-	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_ALLOW_UPDATE;
+	inputs.Flags = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_NONE;
 
 	// メモリ量を求める関数を実行する。
 	D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO tlasPrebuild{};
@@ -145,17 +146,6 @@ void TLAS::SettingAccelerationStructure()
 		D3D12_HEAP_TYPE_DEFAULT
 	);
 	tlasBuffer_->SetName(L"TlasBuffer");
-
-	// TLAS更新用メモリ(バッファ)を確保。
-	tlasUpdateBuffer_ = FHelper::CreateBuffer(
-		tlasPrebuild.UpdateScratchDataSizeInBytes,
-		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
-		D3D12_RESOURCE_STATE_COMMON,
-		D3D12_HEAP_TYPE_DEFAULT
-	);
-	barrier = { CD3DX12_RESOURCE_BARRIER::Transition(tlasUpdateBuffer_.Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-	tlasUpdateBuffer_->SetName(L"TlasUpdateBuffer");
 
 	/*-- BLASのアドレスとスクラッチバッファアドレスとTLASのアドレスを指定して確保処理をコマンドリストに積む --*/
 
