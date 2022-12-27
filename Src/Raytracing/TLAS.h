@@ -9,13 +9,13 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> tlasBuffer_;			// TLAS用バッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> scratchBuffer_;		// スクラッチバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> tlasUpdateBuffer_;	// TLAS更新用バッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> instanceDescBuffer_;	// インスタンスバッファ
-	std::array<void*, 2> instanceDescMapAddress_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> tlasBuffer_;			// TLAS用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> scratchBuffer_;		// スクラッチバッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> tlasUpdateBuffer_;	// TLAS更新用バッファ
+	Microsoft::WRL::ComPtr<ID3D12Resource> instanceDescBuffer_;	// インスタンスバッファ
+	void* instanceDescMapAddress_;
 
-	std::array<int, 2> descriptorHeapIndex_;
+	int descriptorHeapIndex_;
 
 
 public:
@@ -26,7 +26,7 @@ public:
 	void GenerateTLAS();
 
 	// ディスクリプタヒープのインデックスのアクセッサ
-	inline int GetDescriptorHeapIndex(int Index) { return descriptorHeapIndex_[Index]; }
+	inline int GetDescriptorHeapIndex() { return descriptorHeapIndex_; }
 
 	// インスタンスを更新
 	void Update();
@@ -38,9 +38,9 @@ private:
 	void WriteToMemory(void* MapAddress, const void* PData, size_t DataSize);
 
 	// 加速構造体の設定用関数
-	void SettingAccelerationStructure(int Index);
+	void SettingAccelerationStructure();
 
 	// 加速構造体の構築用関数
-	void CreateAccelerationStructure(int Index);
+	void CreateAccelerationStructure();
 
 };
