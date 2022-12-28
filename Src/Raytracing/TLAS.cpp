@@ -168,32 +168,5 @@ void TLAS::CreateAccelerationStructure()
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(tlasBuffer_.Get());
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
-	Engine::Ins()->mainGraphicsCmdList_->Close();
-
-	// TLASを構築。
-	//ID3D12CommandList* pCmdList[] = { Engine::Ins()->cmdList.Get() };
-
-	// 構築用関数を呼ぶ。
-	ID3D12CommandList* commandLists[] = { Engine::Ins()->mainGraphicsCmdList_.Get() };
-	Engine::Ins()->graphicsCmdQueue_->ExecuteCommandLists(1, commandLists);
-	Engine::Ins()->graphicsCmdQueue_->Signal(Engine::Ins()->asFence_.Get(), ++Engine::Ins()->asfenceValue_);
-
-
-	/*-- リソースバリアを設定して書き込めないようにする --*/
-
-	// グラフィックコマンドリストの完了待ち
-	UINT64 gpuFence = Engine::Ins()->asFence_->GetCompletedValue();
-	if (gpuFence != Engine::Ins()->asfenceValue_) {
-		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		Engine::Ins()->asFence_->SetEventOnCompletion(Engine::Ins()->asfenceValue_, event);
-		WaitForSingleObject(event, INFINITE);
-		CloseHandle(event);
-	}
-
-	//コマンドアロケータのリセット
-	Engine::Ins()->mainGraphicsCmdAllocator_->Reset();						//キューをクリア
-
-	//コマンドリストのリセット
-	Engine::Ins()->mainGraphicsCmdList_->Reset(Engine::Ins()->mainGraphicsCmdAllocator_.Get(), nullptr);		//再びコマンドリストを貯める準備
 
 }
