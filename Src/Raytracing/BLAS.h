@@ -25,6 +25,56 @@ struct RayVertex {
 
 };
 
+// モデルの基本情報をまとめた構造体
+struct ModelInfo {
+	UINT vertexCount_;	// 頂点の数
+	UINT indexCount_;	// 頂点インデックスの数
+	UINT vertexStride_;	// 1頂点のデータサイズ
+	UINT indexStride_;	// 1頂点インデックスのデータサイズ
+	Vec3 vertexMax_;	// 頂点の各成分の最大値
+	Vec3 vertexMin_;	// 頂点の各成分の最小値
+	int modelIndex_;	// モデルのインデックス
+	bool isOpaque_;		// 不透明フラグ
+};
+
+// 頂点情報
+struct VertexInfo {
+	std::vector<RayVertex> defVertex_;	// 生成した時点の頂点
+	std::vector<RayVertex> vertex_;		// 現在の頂点 頂点を書き換える場合があるのでその時用
+	std::vector<Vec3> vertexPos_;
+	std::vector<Vec3> vertexNormal_;
+	std::vector<Vec2> vertexUV_;
+	std::vector<UINT> vertIndex_;
+};
+
+// BLASの情報
+struct BLASInfo {
+	std::shared_ptr<DoubleResourceWrapper> vertexBuffer_;			// 頂点バッファ
+	std::shared_ptr<DoubleResourceWrapper> indexBuffer_;			// 頂点インデックスバッファ
+	std::shared_ptr<DoubleResourceWrapper> materialBuffer_;			// 頂点インデックスバッファ
+	std::shared_ptr<DoubleRayDescriptor> vertexDescriptor_;			// 頂点ディスクリプタ
+	std::shared_ptr<DoubleRayDescriptor> indexDescriptor_;			// 頂点インデックスディスクリプタ
+	std::shared_ptr<DoubleRayDescriptor> materialDescriptor_;		// マテリアル情報用ディスクリプタ
+	ModelDataManager::GPUMaterial material_;						// マテリアル情報用定数バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> blasBuffer_;		// BLAS用バッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> scratchBuffer_;	// スクラッチバッファ
+	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> updateBuffer_;	// 更新用バッファ
+	int blasIndex_;			// BLASのインデックス。
+	bool isGenerate_;
+};
+
+// HitGroupの情報
+struct HitGroupInfo {
+	std::wstring hitGroupName_;				// 使用するヒットグループの名前
+	std::string modelPath_;					// 使用するモデルのパス
+	std::vector<LPCWSTR> texturePath_;		// 使用するテクスチャのパス
+	std::array<bool, 2> isChangeTexture_;	// テクスチャを書き換えたかフラグ
+	std::array<bool, 2> isChangeVertex_;	// 頂点を書き換えたかフラグ
+	int baseTextureHandle_;					// 使用するテクスチャのハンドル
+	int mapTextureHandle_;
+	std::vector<int> uavHandle_;			// 使用するUAVのハンドル
+};
+
 // ポリゴン形状を保存してあるBLASクラス
 class BLAS {
 
@@ -32,56 +82,17 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::shared_ptr<DoubleResourceWrapper> vertexBuffer_;			// 頂点バッファ
-	std::shared_ptr<DoubleResourceWrapper> indexBuffer_;			// 頂点インデックスバッファ
-	std::shared_ptr<DoubleResourceWrapper> materialBuffer_;			// 頂点インデックスバッファ
-	std::shared_ptr<DoubleRayDescriptor> vertexDescriptor_;			// 頂点ディスクリプタ
-	std::shared_ptr<DoubleRayDescriptor> indexDescriptor_;			// 頂点インデックスディスクリプタ
-	std::shared_ptr<DoubleRayDescriptor> materialDescriptor_;		// マテリアル情報用ディスクリプタ
+	// モデルの基本情報
+	ModelInfo modelInfo_;
 
-	// マテリアル情報用定数バッファ
-	ModelDataManager::GPUMaterial material_;
+	// 頂点情報用
+	VertexInfo vertexInfo_;
 
-	// BLASのインデックス。
-	int blasIndex_;
+	// BLASの基本的な情報
+	BLASInfo blasInfo_;
 
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> blasBuffer_;		// BLAS用バッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> scratchBuffer_;	// スクラッチバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> updateBuffer_;	// 更新用バッファ
-
-	UINT vertexCount_;						// 頂点の数
-	UINT indexCount_;						// 頂点インデックスの数
-	UINT vertexStride_;						// 1頂点のデータサイズ
-	UINT indexStride_;						// 1頂点インデックスのデータサイズ
-
-	Vec3 vertexMax_;							// 頂点の各成分の最大値
-	Vec3 vertexMin_;							// 頂点の各成分の最小値
-
-	std::wstring hitGroupName_;				// 使用するヒットグループの名前
-	std::string modelPath_;					// 使用するモデルのパス
-	std::vector<LPCWSTR> texturePath_;		// 使用するテクスチャのパス
-
-	int modelIndex_;							// モデルのインデックス
-
-	bool isOpaque_;							// 不透明フラグ
-
-	// 書き込むシェーダーテーブルが表と裏で2つあるので、こちらも2つ用意する。
-	std::array<bool, 2> isChangeTexture_;	// テクスチャを書き換えたかフラグ
-	std::array<bool, 2> isChangeVertex_;	// 頂点を書き換えたかフラグ
-
-	bool isGenerate_;
-
-	int baseTextureHandle_;				// 使用するテクスチャのハンドル
-	int mapTextureHandle_;
-	std::vector<int> uavHandle_;				// 使用するUAVのハンドル
-
-	// デバッグ用
-	std::vector<RayVertex> defVertex_;	// 生成した時点の頂点
-	std::vector<RayVertex> vertex_;		// 現在の頂点 頂点を書き換える場合があるのでその時用
-	std::vector<Vec3> vertexPos_;
-	std::vector<Vec3> vertexNormal_;
-	std::vector<Vec2> vertexUV_;
-	std::vector<UINT> vertIndex_;
+	// HitGroupの情報
+	HitGroupInfo hitGroupInfo_;
 
 
 private:
@@ -121,21 +132,21 @@ public:
 	void StopAnimation();	// 停止
 
 	// マテリアルの参照を取得。
-	ModelDataManager::GPUMaterial& GetMaterial() { return material_; }
+	ModelDataManager::GPUMaterial& GetMaterial() { return blasInfo_.material_; }
 
 	// マテリアルを書き換えた判定。
 	void IsChangeMaterial();
 
 	// テクスチャを変えたフラグ。
 	void ChangeTextureFlag() {
-		isChangeTexture_[0] = true;
-		isChangeTexture_[1] = true;
+		hitGroupInfo_.isChangeTexture_[0] = true;
+		hitGroupInfo_.isChangeTexture_[1] = true;
 	}
 
 	// テクスチャを追加。
 	void ChangeBaseTexture(int Index);
 	void ChangeMapTexture(int Index, MAP_PARAM MapParam);
-	void AddUAVTex(int Index) { uavHandle_.emplace_back(Index); }
+	void AddUAVTex(int Index) { hitGroupInfo_.uavHandle_.emplace_back(Index); }
 
 	// シェーダーレコードを書き込む。
 	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, int Index);
@@ -153,23 +164,23 @@ public:
 	void ChangeVertexPosition(int Index, const Vec3& Pos);
 
 	// アクセッサ
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(int Index) { return blasBuffer_[Index]; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer(int Index) { return vertexBuffer_->GetBuffer(Index); }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer(int Index) { return indexBuffer_->GetBuffer(Index); }
-	std::wstring& GetHitGroupName() { return hitGroupName_; }
-	const std::string& GetModelPath() { return modelPath_; }
-	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath_; }
-	const Vec3& GetVertexMin() { return vertexMin_; }
-	const Vec3& GetVertexMax() { return vertexMax_; }
-	bool GetIsGenerate() { return isGenerate_; }
-	int GetBlasIndex() { return blasIndex_; }
-	int GetBaseTexture() { return baseTextureHandle_; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(int Index) { return blasInfo_.blasBuffer_[Index]; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer(int Index) { return blasInfo_.vertexBuffer_->GetBuffer(Index); }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer(int Index) { return blasInfo_.indexBuffer_->GetBuffer(Index); }
+	std::wstring& GetHitGroupName() { return hitGroupInfo_.hitGroupName_; }
+	const std::string& GetModelPath() { return hitGroupInfo_.modelPath_; }
+	const std::vector<LPCWSTR>& GetTexturePath() { return hitGroupInfo_.texturePath_; }
+	const Vec3& GetVertexMin() { return modelInfo_.vertexMin_; }
+	const Vec3& GetVertexMax() { return modelInfo_.vertexMax_; }
+	bool GetIsGenerate() { return blasInfo_.isGenerate_; }
+	int GetBlasIndex() { return blasInfo_.blasIndex_; }
+	int GetBaseTexture() { return hitGroupInfo_.baseTextureHandle_; }
 
-	std::vector<RayVertex> GetVertex() { return vertex_; }
-	const std::vector<Vec3>& GetVertexPos() { return vertexPos_; }
-	const std::vector<Vec3>& GetVertexNormal() { return vertexNormal_; }
-	const std::vector<Vec2>& GetVertexUV() { return vertexUV_; };
-	const std::vector<UINT>& GetVertexIndex() { return vertIndex_; }
+	std::vector<RayVertex> GetVertex() { return vertexInfo_.vertex_; }
+	const std::vector<Vec3>& GetVertexPos() { return vertexInfo_.vertexPos_; }
+	const std::vector<Vec3>& GetVertexNormal() { return vertexInfo_.vertexNormal_; }
+	const std::vector<Vec2>& GetVertexUV() { return vertexInfo_.vertexUV_; };
+	const std::vector<UINT>& GetVertexIndex() { return vertexInfo_.vertIndex_; }
 
 private:
 

@@ -15,10 +15,10 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	/*===== BLASを生成する処理 =====*/
 
 	// パスを保存。
-	modelPath_ = DirectryPath + ModelName;
+	hitGroupInfo_.modelPath_ = DirectryPath + ModelName;
 
 	// BlasのIndexを保存。
-	blasIndex_ = BlasIndex;
+	blasInfo_.blasIndex_ = BlasIndex;
 
 
 	/*-- 形状データを読み込む --*/
@@ -30,18 +30,18 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 	ModelDataManager::Ins()->LoadObj(DirectryPath, ModelName, dataBuff, false);
 
 	// 各成分の値を保存。
-	vertexMax_ = dataBuff.vertexMax_;
-	vertexMin_ = dataBuff.vertexMin_;
+	modelInfo_.vertexMax_ = dataBuff.vertexMax_;
+	modelInfo_.vertexMin_ = dataBuff.vertexMin_;
 
 	// マテリアル情報を保存。
-	material_.baseColor_ = dataBuff.material_.baseColor_;
-	material_.mapParam_ = dataBuff.material_.mapParam_;
-	material_.roughness_ = dataBuff.material_.roughness_;
-	material_.metalness_ = dataBuff.material_.metalness_;
-	material_.specular_ = dataBuff.material_.specular_;
+	blasInfo_.material_.baseColor_ = dataBuff.material_.baseColor_;
+	blasInfo_.material_.mapParam_ = dataBuff.material_.mapParam_;
+	blasInfo_.material_.roughness_ = dataBuff.material_.roughness_;
+	blasInfo_.material_.metalness_ = dataBuff.material_.metalness_;
+	blasInfo_.material_.specular_ = dataBuff.material_.specular_;
 
 	// テクスチャを保存。
-	baseTextureHandle_ = dataBuff.textureHandle_;
+	hitGroupInfo_.baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// 現在のQueueのIndex
 	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
@@ -59,7 +59,7 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 		// 形状を設定する用の構造体を設定。
 		D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque, index);
-		isOpaque_ = IsOpaque;
+		modelInfo_.isOpaque_ = IsOpaque;
 
 		// BLASバッファを設定、構築する。
 		SettingAccelerationStructure(geomDesc, index);
@@ -68,30 +68,30 @@ void BLAS::GenerateBLASObj(const std::string& DirectryPath, const std::string& M
 
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName_ = HitGroupName;
+	this->hitGroupInfo_.hitGroupName_ = HitGroupName;
 
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexInfo_.vertexPos_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
+	vertexInfo_.vertexNormal_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
+	vertexInfo_.vertexUV_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
 	int counter = 0;
-	for (auto& index_ : vertex_) {
-		vertexPos_[counter] = index_.position_;
-		vertexNormal_[counter] = index_.normal_;
-		vertexUV_[counter] = index_.uv_;
+	for (auto& index_ : vertexInfo_.vertex_) {
+		vertexInfo_.vertexPos_[counter] = index_.position_;
+		vertexInfo_.vertexNormal_[counter] = index_.normal_;
+		vertexInfo_.vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
 
 	// 頂点を保存。
-	defVertex_ = vertex_;
+	vertexInfo_.defVertex_ = vertexInfo_.vertex_;
 
 	// ダーティフラグ
-	isChangeVertex_[0] = true;
-	isChangeVertex_[1] = true;
-	isChangeTexture_[0] = true;
-	isChangeTexture_[1] = true;
+	hitGroupInfo_.isChangeVertex_[0] = true;
+	hitGroupInfo_.isChangeVertex_[1] = true;
+	hitGroupInfo_.isChangeTexture_[0] = true;
+	hitGroupInfo_.isChangeTexture_[1] = true;
 
-	isGenerate_ = true;
+	blasInfo_.isGenerate_ = true;
 
 }
 
@@ -102,10 +102,10 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 	/*===== BLASを生成する処理 =====*/
 
 	// パスを保存。
-	modelPath_ = FString::WStringToString(Path);
+	hitGroupInfo_.modelPath_ = FString::WStringToString(Path);
 
 	// BlasのIndexを保存。
-	blasIndex_ = BlasIndex;
+	blasInfo_.blasIndex_ = BlasIndex;
 
 
 	/*-- 形状データを読み込む --*/
@@ -117,30 +117,30 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 	ModelDataManager::Ins()->LoadGLTF(Path, dataBuff);
 
 	// 各成分の値を保存。
-	vertexMax_ = dataBuff.vertexMax_;
-	vertexMin_ = dataBuff.vertexMin_;
+	modelInfo_.vertexMax_ = dataBuff.vertexMax_;
+	modelInfo_.vertexMin_ = dataBuff.vertexMin_;
 
 	// マテリアル情報を保存。
-	material_.baseColor_ = dataBuff.material_.baseColor_;
-	material_.mapParam_ = dataBuff.material_.mapParam_;
-	material_.roughness_ = dataBuff.material_.roughness_;
-	material_.metalness_ = dataBuff.material_.metalness_;
-	material_.specular_ = dataBuff.material_.specular_;
+	blasInfo_.material_.baseColor_ = dataBuff.material_.baseColor_;
+	blasInfo_.material_.mapParam_ = dataBuff.material_.mapParam_;
+	blasInfo_.material_.roughness_ = dataBuff.material_.roughness_;
+	blasInfo_.material_.metalness_ = dataBuff.material_.metalness_;
+	blasInfo_.material_.specular_ = dataBuff.material_.specular_;
 
 	// テクスチャを保存。
-	baseTextureHandle_ = dataBuff.textureHandle_;
+	hitGroupInfo_.baseTextureHandle_ = dataBuff.textureHandle_;
 
 	// マテリアルバッファを生成する。
 	CreateMaterialBuffer();
 
 	// 頂点数を求める。
-	vertexCount_ = static_cast<UINT>(dataBuff.vertex_.size());
+	modelInfo_.vertexCount_ = static_cast<UINT>(dataBuff.vertex_.size());
 
 	// 頂点インデックス数を求める。
-	indexCount_ = static_cast<UINT>(dataBuff.index_.size());
+	modelInfo_.indexCount_ = static_cast<UINT>(dataBuff.index_.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
+	for (int index = 0; index < static_cast<int>(modelInfo_.vertexCount_); ++index) {
 
 		RayVertex buff{};
 		buff.normal_ = dataBuff.vertex_[index].normal_;
@@ -148,7 +148,7 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 		buff.uv_ = dataBuff.vertex_[index].uv_;
 
 		// データを保存。
-		vertex_.push_back(buff);
+		vertexInfo_.vertex_.push_back(buff);
 
 	}
 
@@ -162,7 +162,7 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 
 		// 形状を設定する用の構造体を設定。
 		D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque, index);
-		isOpaque_ = IsOpaque;
+		modelInfo_.isOpaque_ = IsOpaque;
 
 		// BLASバッファを設定、構築する。
 		SettingAccelerationStructure(geomDesc, index);
@@ -171,30 +171,30 @@ void BLAS::GenerateBLASGLTF(const std::wstring& Path, const std::wstring& HitGro
 
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName_ = HitGroupName;
+	this->hitGroupInfo_.hitGroupName_ = HitGroupName;
 
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexInfo_.vertexPos_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
+	vertexInfo_.vertexNormal_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
+	vertexInfo_.vertexUV_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
 	int counter = 0;
-	for (auto& index_ : vertex_) {
-		vertexPos_[counter] = index_.position_;
-		vertexNormal_[counter] = index_.normal_;
-		vertexUV_[counter] = index_.uv_;
+	for (auto& index_ : vertexInfo_.vertex_) {
+		vertexInfo_.vertexPos_[counter] = index_.position_;
+		vertexInfo_.vertexNormal_[counter] = index_.normal_;
+		vertexInfo_.vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
 
 	// 頂点を保存。
-	defVertex_ = vertex_;
+	vertexInfo_.defVertex_ = vertexInfo_.vertex_;
 
 	// ダーティフラグ
-	isChangeVertex_[0] = true;
-	isChangeVertex_[1] = true;
-	isChangeTexture_[0] = true;
-	isChangeTexture_[1] = true;
+	hitGroupInfo_.isChangeVertex_[0] = true;
+	hitGroupInfo_.isChangeVertex_[1] = true;
+	hitGroupInfo_.isChangeTexture_[0] = true;
+	hitGroupInfo_.isChangeTexture_[1] = true;
 
-	isGenerate_ = true;
+	blasInfo_.isGenerate_ = true;
 
 }
 
@@ -204,27 +204,27 @@ void BLAS::GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int B
 	/*===== BLASを生成する処理 =====*/
 
 	// パスを保存。
-	modelPath_ = "SelfModel";
+	hitGroupInfo_.modelPath_ = "SelfModel";
 
 	// BlasのIndexを保存。
-	blasIndex_ = BlasIndex;
+	blasInfo_.blasIndex_ = BlasIndex;
 
 
 	/*-- 形状データを読み込む --*/
 
 	// 各成分の値を保存。
-	vertexMax_ = ModelData.vertexMax_;
-	vertexMin_ = ModelData.vertexMin_;
+	modelInfo_.vertexMax_ = ModelData.vertexMax_;
+	modelInfo_.vertexMin_ = ModelData.vertexMin_;
 
 	// マテリアル情報を保存。
-	material_.baseColor_ = ModelData.material_.baseColor_;
-	material_.mapParam_ = ModelData.material_.mapParam_;
-	material_.roughness_ = ModelData.material_.roughness_;
-	material_.metalness_ = ModelData.material_.metalness_;
-	material_.specular_ = ModelData.material_.specular_;
+	blasInfo_.material_.baseColor_ = ModelData.material_.baseColor_;
+	blasInfo_.material_.mapParam_ = ModelData.material_.mapParam_;
+	blasInfo_.material_.roughness_ = ModelData.material_.roughness_;
+	blasInfo_.material_.metalness_ = ModelData.material_.metalness_;
+	blasInfo_.material_.specular_ = ModelData.material_.specular_;
 
 	// テクスチャを保存。
-	baseTextureHandle_ = ModelData.textureHandle_;
+	hitGroupInfo_.baseTextureHandle_ = ModelData.textureHandle_;
 
 	// マテリアルバッファを生成する。
 	CreateMaterialBuffer();
@@ -239,7 +239,7 @@ void BLAS::GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int B
 
 		// 形状を設定する用の構造体を設定。
 		D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(IsOpaque, index);
-		isOpaque_ = IsOpaque;
+		modelInfo_.isOpaque_ = IsOpaque;
 
 		// BLASバッファを設定、構築する。
 		SettingAccelerationStructure(geomDesc, index);
@@ -248,30 +248,30 @@ void BLAS::GenerateBLASData(const ModelDataManager::ObjectData& ModelData, int B
 
 
 	// ヒットグループ名を保存する。
-	this->hitGroupName_ = HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::Ins()->DEF];
+	this->hitGroupInfo_.hitGroupName_ = HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::Ins()->DEF];
 
 	// デバッグで使用する頂点のみのデータと法線のみのデータを生成する。
-	vertexPos_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexNormal_.resize(static_cast<unsigned __int64>(vertex_.size()));
-	vertexUV_.resize(static_cast<unsigned __int64>(vertex_.size()));
+	vertexInfo_.vertexPos_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
+	vertexInfo_.vertexNormal_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
+	vertexInfo_.vertexUV_.resize(static_cast<unsigned __int64>(vertexInfo_.vertex_.size()));
 	int counter = 0;
-	for (auto& index_ : vertex_) {
-		vertexPos_[counter] = index_.position_;
-		vertexNormal_[counter] = index_.normal_;
-		vertexUV_[counter] = index_.uv_;
+	for (auto& index_ : vertexInfo_.vertex_) {
+		vertexInfo_.vertexPos_[counter] = index_.position_;
+		vertexInfo_.vertexNormal_[counter] = index_.normal_;
+		vertexInfo_.vertexUV_[counter] = index_.uv_;
 		++counter;
 	}
 
 	// 頂点を保存。
-	defVertex_ = vertex_;
+	vertexInfo_.defVertex_ = vertexInfo_.vertex_;
 
 	// ダーティフラグ
-	isChangeVertex_[0] = true;
-	isChangeVertex_[1] = true;
-	isChangeTexture_[0] = true;
-	isChangeTexture_[1] = true;
+	hitGroupInfo_.isChangeVertex_[0] = true;
+	hitGroupInfo_.isChangeVertex_[1] = true;
+	hitGroupInfo_.isChangeTexture_[0] = true;
+	hitGroupInfo_.isChangeTexture_[1] = true;
 
-	isGenerate_ = true;
+	blasInfo_.isGenerate_ = true;
 
 }
 
@@ -284,13 +284,13 @@ void BLAS::Update()
 	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
 
 	// 生成していなかったら処理を飛ばす。
-	if (!isGenerate_) return;
+	if (!blasInfo_.isGenerate_) return;
 
 	// 頂点を書き込む。 今のところは頂点しか書き換える予定はないが、後々他のやつも書き込む。ダーティフラグみたいなのを用意したい。
-	vertexBuffer_->WriteData(currentQueueIndex, sizeof(vertexStride_ * vertexCount_), vertex_.data());
+	blasInfo_.vertexBuffer_->WriteData(currentQueueIndex, sizeof(modelInfo_.vertexStride_ * modelInfo_.vertexCount_), vertexInfo_.vertex_.data());
 
 	// 更新のための値を設定。
-	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(isOpaque_, currentQueueIndex);
+	D3D12_RAYTRACING_GEOMETRY_DESC geomDesc = GetGeometryDesc(modelInfo_.isOpaque_, currentQueueIndex);
 	D3D12_BUILD_RAYTRACING_ACCELERATION_STRUCTURE_DESC asDesc{};
 	auto& inputs = asDesc.Inputs;
 	inputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
@@ -303,10 +303,10 @@ void BLAS::Update()
 		D3D12_RAYTRACING_ACCELERATION_STRUCTURE_BUILD_FLAG_PERFORM_UPDATE;
 
 	// インプレース更新を実行する。
-	asDesc.SourceAccelerationStructureData = blasBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
-	asDesc.DestAccelerationStructureData = blasBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
+	asDesc.SourceAccelerationStructureData = blasInfo_.blasBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
+	asDesc.DestAccelerationStructureData = blasInfo_.blasBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
 	// 更新用の作業バッファを設定する。
-	asDesc.ScratchAccelerationStructureData = updateBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
+	asDesc.ScratchAccelerationStructureData = blasInfo_.updateBuffer_[currentQueueIndex]->GetGPUVirtualAddress();
 
 	// コマンドリストに積む。
 	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
@@ -320,9 +320,9 @@ void BLAS::Update()
 void BLAS::InitAnimation()
 {
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
+	if (FbxLoader::Ins()->GetFbxModel(modelInfo_.modelIndex_).hasAnimation_) {
 
-		FbxLoader::Ins()->GetFbxModel(modelIndex_).InitAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelInfo_.modelIndex_).InitAnimation();
 
 	}
 }
@@ -333,9 +333,9 @@ void BLAS::PlayAnimation()
 	/*===== アニメーションさせる =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
+	if (FbxLoader::Ins()->GetFbxModel(modelInfo_.modelIndex_).hasAnimation_) {
 
-		FbxLoader::Ins()->GetFbxModel(modelIndex_).PlayAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelInfo_.modelIndex_).PlayAnimation();
 
 	}
 
@@ -347,9 +347,9 @@ void BLAS::StopAnimation()
 	/*===== アニメーションを停止させる =====*/
 
 	// モデルがアニメーションを持っていたら。
-	if (FbxLoader::Ins()->GetFbxModel(modelIndex_).hasAnimation_) {
+	if (FbxLoader::Ins()->GetFbxModel(modelInfo_.modelIndex_).hasAnimation_) {
 
-		FbxLoader::Ins()->GetFbxModel(modelIndex_).StopAnimation();
+		FbxLoader::Ins()->GetFbxModel(modelInfo_.modelIndex_).StopAnimation();
 
 	}
 
@@ -363,24 +363,24 @@ void BLAS::IsChangeMaterial()
 	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
 
 	// 確保したバッファにマテリアルデータを書き込む。
-	materialBuffer_->WriteData(currentQueueIndex, sizeof(ModelDataManager::GPUMaterial), &material_);
+	blasInfo_.materialBuffer_->WriteData(currentQueueIndex, sizeof(ModelDataManager::GPUMaterial), &blasInfo_.material_);
 
-	isChangeVertex_[0] = true;
-	isChangeVertex_[1] = true;
+	hitGroupInfo_.isChangeVertex_[0] = true;
+	hitGroupInfo_.isChangeVertex_[1] = true;
 
 }
 void BLAS::ChangeBaseTexture(int Index)
 {
-	baseTextureHandle_ = Index;
-	isChangeTexture_[0] = true;
-	isChangeTexture_[1] = true;
+	hitGroupInfo_.baseTextureHandle_ = Index;
+	hitGroupInfo_.isChangeTexture_[0] = true;
+	hitGroupInfo_.isChangeTexture_[1] = true;
 }
 void BLAS::ChangeMapTexture(int Index, MAP_PARAM MapParam)
 {
-	mapTextureHandle_ = Index;
-	material_.mapParam_ = static_cast<int>(MapParam);
-	isChangeTexture_[0] = true;
-	isChangeTexture_[1] = true;
+	hitGroupInfo_.mapTextureHandle_ = Index;
+	blasInfo_.material_.mapParam_ = static_cast<int>(MapParam);
+	hitGroupInfo_.isChangeTexture_[0] = true;
+	hitGroupInfo_.isChangeTexture_[1] = true;
 	IsChangeMaterial();
 }
 #include "HitGroupMgr.h"
@@ -388,23 +388,23 @@ void BLAS::ChangeMapTexture(int Index, MAP_PARAM MapParam)
 BLAS::BLAS()
 {
 
-	isGenerate_ = false;
-	baseTextureHandle_ = -1;
-	mapTextureHandle_ = -1;
-	blasIndex_ = -1;
-	indexCount_ = 0;
-	indexDescriptor_ = {};
-	indexStride_ = {};
-	isChangeVertex_[0] = true;
-	isChangeVertex_[1] = true;
-	isChangeTexture_[0] = true;
-	isChangeTexture_[1] = true;
-	isOpaque_ = false;
-	materialDescriptor_ = {};
-	modelIndex_ = 0;
-	vertexCount_ = 0;
-	vertexDescriptor_ = {};
-	vertexStride_ = 0;
+	blasInfo_.isGenerate_ = false;
+	hitGroupInfo_.baseTextureHandle_ = -1;
+	hitGroupInfo_.mapTextureHandle_ = -1;
+	blasInfo_.blasIndex_ = -1;
+	modelInfo_.indexCount_ = 0;
+	blasInfo_.indexDescriptor_ = {};
+	modelInfo_.indexStride_ = {};
+	hitGroupInfo_.isChangeVertex_[0] = true;
+	hitGroupInfo_.isChangeVertex_[1] = true;
+	hitGroupInfo_.isChangeTexture_[0] = true;
+	hitGroupInfo_.isChangeTexture_[1] = true;
+	modelInfo_.isOpaque_ = false;
+	blasInfo_.materialDescriptor_ = {};
+	modelInfo_.modelIndex_ = 0;
+	modelInfo_.vertexCount_ = 0;
+	blasInfo_.vertexDescriptor_ = {};
+	modelInfo_.vertexStride_ = 0;
 }
 
 uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, int Index)
@@ -413,7 +413,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	/*===== シェーダーレコードを書き込む =====*/
 
 	// 生成されていなかったら飛ばす。
-	if (!isGenerate_) {
+	if (!blasInfo_.isGenerate_) {
 
 
 		Dst = Dst + recordSize;
@@ -440,18 +440,18 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 
 	// 頂点関係のデータが変更されていたら。
-	if (isChangeVertex_[Index]) {
+	if (hitGroupInfo_.isChangeVertex_[Index]) {
 		// 今回のプログラムでは以下の順序でディスクリプタを記録。
 		// [0] : インデックスバッファ
 		// [1] : 頂点バッファ
 		// ※ ローカルルートシグネチャの順序に合わせる必要がある。
-		Dst += WriteGPUDescriptor(Dst, &indexDescriptor_->GetDescriptor(Index).lock()->GetGPUHandle());
-		Dst += WriteGPUDescriptor(Dst, &vertexDescriptor_->GetDescriptor(Index).lock()->GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &blasInfo_.indexDescriptor_->GetDescriptor(Index).lock()->GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &blasInfo_.vertexDescriptor_->GetDescriptor(Index).lock()->GetGPUHandle());
 
 		// マテリアル用のバッファをセット。
-		Dst += WriteGPUDescriptor(Dst, &materialDescriptor_->GetDescriptor(Index).lock()->GetGPUHandle());
+		Dst += WriteGPUDescriptor(Dst, &blasInfo_.materialDescriptor_->GetDescriptor(Index).lock()->GetGPUHandle());
 
-		isChangeVertex_[Index] = false;
+		hitGroupInfo_.isChangeVertex_[Index] = false;
 
 	}
 	else {
@@ -472,7 +472,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	int srvCount = HitGroupMgr::Ins()->GetHitGroupSRVCount(hitGroupID) - OFFSET_VERTEX_INDEX_MATERIAL;
 
 	// テクスチャ関係が変更されていたら。
-	if (isChangeTexture_[Index]) {
+	if (hitGroupInfo_.isChangeTexture_[Index]) {
 
 		// ここはテクスチャのサイズではなく、パイプラインにセットされたSRVの数を持ってきてそれを使う。
 		// この時点でSRVの数とテクスチャの数が合っていなかったらassertを出す。
@@ -482,25 +482,25 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 			if (index == 0) {
 
 				// 基本のテクスチャが設定されていない。
-				if (baseTextureHandle_ == -1) assert(0);
+				if (hitGroupInfo_.baseTextureHandle_ == -1) assert(0);
 
-				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
+				CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(hitGroupInfo_.baseTextureHandle_);
 				Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 			}
 			// 1番目は法線マップテクスチャ。
 			else if (index == 1) {
 
-				if (mapTextureHandle_ != -1) {
+				if (hitGroupInfo_.mapTextureHandle_ != -1) {
 
-					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(mapTextureHandle_);
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(hitGroupInfo_.mapTextureHandle_);
 					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 				}
 				else {
 
 					// 法線マップが設定されていなかったら、メモリの隙間を埋めるため通常のテクスチャを書き込む。
-					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(baseTextureHandle_);
+					CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(hitGroupInfo_.baseTextureHandle_);
 					Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 				}
@@ -509,7 +509,7 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 
 		}
 
-		isChangeTexture_[Index] = false;
+		hitGroupInfo_.isChangeTexture_[Index] = false;
 
 	}
 	else {
@@ -523,9 +523,9 @@ uint8_t* BLAS::WriteShaderRecord(uint8_t* Dst, UINT recordSize, Microsoft::WRL::
 	for (int index = 0; index < uavCount; ++index) {
 
 		// テクスチャが存在していたら。
-		if (0 < uavHandle_.size()) {
+		if (0 < hitGroupInfo_.uavHandle_.size()) {
 
-			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(uavHandle_[index]);
+			CD3DX12_GPU_DESCRIPTOR_HANDLE texDescHandle = DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(hitGroupInfo_.uavHandle_[index]);
 			Dst += WriteGPUDescriptor(Dst, &texDescHandle);
 
 		}
@@ -547,16 +547,16 @@ void BLAS::Init()
 
 	/*===== 初期化処理 =====*/
 
-	texturePath_.clear();
-	defVertex_.clear();
-	vertex_.clear();
-	vertexPos_.clear();
-	vertexNormal_.clear();
-	vertexUV_.clear();
-	vertIndex_.clear();
-	isGenerate_ = false;
-	baseTextureHandle_ = -1;
-	mapTextureHandle_ = -1;
+	hitGroupInfo_.texturePath_.clear();
+	vertexInfo_.defVertex_.clear();
+	vertexInfo_.vertex_.clear();
+	vertexInfo_.vertexPos_.clear();
+	vertexInfo_.vertexNormal_.clear();
+	vertexInfo_.vertexUV_.clear();
+	vertexInfo_.vertIndex_.clear();
+	blasInfo_.isGenerate_ = false;
+	hitGroupInfo_.baseTextureHandle_ = -1;
+	hitGroupInfo_.mapTextureHandle_ = -1;
 
 }
 
@@ -567,25 +567,25 @@ Vec3 BLAS::GetVertexLengthMax()
 
 	Vec3 vertexLength;
 
-	if (fabs(vertexMin_.x_) < fabs(vertexMax_.x_)) {
-		vertexLength.x_ = fabs(vertexMax_.x_);
+	if (fabs(modelInfo_.vertexMin_.x_) < fabs(modelInfo_.vertexMax_.x_)) {
+		vertexLength.x_ = fabs(modelInfo_.vertexMax_.x_);
 	}
 	else {
-		vertexLength.x_ = fabs(vertexMin_.x_);
+		vertexLength.x_ = fabs(modelInfo_.vertexMin_.x_);
 	}
 
-	if (fabs(vertexMin_.y_) < fabs(vertexMax_.y_)) {
-		vertexLength.y_ = fabs(vertexMax_.y_);
+	if (fabs(modelInfo_.vertexMin_.y_) < fabs(modelInfo_.vertexMax_.y_)) {
+		vertexLength.y_ = fabs(modelInfo_.vertexMax_.y_);
 	}
 	else {
-		vertexLength.y_ = fabs(vertexMin_.y_);
+		vertexLength.y_ = fabs(modelInfo_.vertexMin_.y_);
 	}
 
-	if (fabs(vertexMin_.z_) < fabs(vertexMax_.z_)) {
-		vertexLength.z_ = fabs(vertexMax_.z_);
+	if (fabs(modelInfo_.vertexMin_.z_) < fabs(modelInfo_.vertexMax_.z_)) {
+		vertexLength.z_ = fabs(modelInfo_.vertexMax_.z_);
 	}
 	else {
-		vertexLength.z_ = fabs(vertexMin_.z_);
+		vertexLength.z_ = fabs(modelInfo_.vertexMin_.z_);
 	}
 
 	return vertexLength;
@@ -599,14 +599,14 @@ void BLAS::MulVec3Vertex(Vec3 Vec)
 	// 現在のQueueのインデックス
 	int currentQueueIndex = Engine::Ins()->currentQueueIndex_;
 
-	for (auto& index_ : vertex_) {
+	for (auto& index_ : vertexInfo_.vertex_) {
 
-		index_.position_ = defVertex_[&index_ - &vertex_[0]].position_ * Vec;
+		index_.position_ = vertexInfo_.defVertex_[&index_ - &vertexInfo_.vertex_[0]].position_ * Vec;
 
 	}
 
 	// 確保したバッファに頂点データを書き込む。
-	vertexBuffer_->WriteData(currentQueueIndex, static_cast<size_t>(vertexStride_ * vertexCount_), vertex_.data());
+	blasInfo_.vertexBuffer_->WriteData(currentQueueIndex, static_cast<size_t>(modelInfo_.vertexStride_ * modelInfo_.vertexCount_), vertexInfo_.vertex_.data());
 
 }
 
@@ -618,24 +618,24 @@ void BLAS::AssignUV(const std::vector<RayVertex>& UV)
 	// 現在のQueueのインデックス
 	int currentQueueIndex = 0;
 
-	for (auto& index : vertex_) {
+	for (auto& index : vertexInfo_.vertex_) {
 
-		index.subUV_ = UV[static_cast<int>(&index - &vertex_[0])].uv_;
+		index.subUV_ = UV[static_cast<int>(&index - &vertexInfo_.vertex_[0])].uv_;
 
 	}
 
 	// 確保したバッファに頂点データを書き込む。
-	vertexBuffer_->WriteData(currentQueueIndex, static_cast<size_t>(vertexStride_ * vertexCount_), vertex_.data());
+	blasInfo_.vertexBuffer_->WriteData(currentQueueIndex, static_cast<size_t>(modelInfo_.vertexStride_ * modelInfo_.vertexCount_), vertexInfo_.vertex_.data());
 
 	// 現在のQueueのインデックス
 	currentQueueIndex = 1;
 
 	// 確保したバッファに頂点データを書き込む。
-	vertexBuffer_->WriteData(currentQueueIndex, static_cast<size_t>(vertexStride_ * vertexCount_), vertex_.data());
+	blasInfo_.vertexBuffer_->WriteData(currentQueueIndex, static_cast<size_t>(modelInfo_.vertexStride_ * modelInfo_.vertexCount_), vertexInfo_.vertex_.data());
 
 	// 頂点を書き換えたフラグを立てる。
-	isChangeVertex_[0] = true;
-	isChangeVertex_[1] = true;
+	hitGroupInfo_.isChangeVertex_[0] = true;
+	hitGroupInfo_.isChangeVertex_[1] = true;
 
 }
 
@@ -644,9 +644,9 @@ void BLAS::ChangeVertexPosition(int Index, const Vec3& Pos)
 
 	/*===== 頂点情報の座標成分のみを変更 =====*/
 
-	vertex_[Index].position_ = Pos;
-	isChangeVertex_[0] = true;
-	isChangeVertex_[1] = true;
+	vertexInfo_.vertex_[Index].position_ = Pos;
+	hitGroupInfo_.isChangeVertex_[0] = true;
+	hitGroupInfo_.isChangeVertex_[1] = true;
 
 }
 
@@ -668,11 +668,11 @@ D3D12_RAYTRACING_GEOMETRY_DESC BLAS::GetGeometryDesc(bool IsOpaque, int Index)
 
 	// 形状データの細かい項目を設定。
 	auto& triangles = geometryDesc.Triangles;
-	triangles.VertexBuffer.StartAddress = vertexBuffer_->GetBuffer(Index)->GetGPUVirtualAddress();
-	triangles.VertexBuffer.StrideInBytes = vertexStride_;
-	triangles.VertexCount = vertexCount_;
-	triangles.IndexBuffer = indexBuffer_->GetBuffer(Index)->GetGPUVirtualAddress();
-	triangles.IndexCount = indexCount_;
+	triangles.VertexBuffer.StartAddress = blasInfo_.vertexBuffer_->GetBuffer(Index)->GetGPUVirtualAddress();
+	triangles.VertexBuffer.StrideInBytes = modelInfo_.vertexStride_;
+	triangles.VertexCount = modelInfo_.vertexCount_;
+	triangles.IndexBuffer = blasInfo_.indexBuffer_->GetBuffer(Index)->GetGPUVirtualAddress();
+	triangles.IndexCount = modelInfo_.indexCount_;
 	triangles.VertexFormat = DXGI_FORMAT_R32G32B32_FLOAT;
 	triangles.IndexFormat = DXGI_FORMAT_R32_UINT;
 
@@ -701,40 +701,39 @@ void BLAS::SettingAccelerationStructure(const D3D12_RAYTRACING_GEOMETRY_DESC& Ge
 	);
 
 	// スクラッチバッファを生成する。
-	scratchBuffer_[Index] = FHelper::CreateBuffer(
+	blasInfo_.scratchBuffer_[Index] = FHelper::CreateBuffer(
 		blasPrebuild.ScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_COMMON,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::Transition(scratchBuffer_[Index].Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
+	D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::Transition(blasInfo_.scratchBuffer_[Index].Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, barrierToUAV);
-	scratchBuffer_[Index]->SetName(L"BLASScratchBuffer");
+	blasInfo_.scratchBuffer_[Index]->SetName(L"BLASScratchBuffer");
 
 	// BLASのバッファを生成する。
-	blasBuffer_[Index] = FHelper::CreateBuffer(
+	blasInfo_.blasBuffer_[Index] = FHelper::CreateBuffer(
 		blasPrebuild.ResultDataMaxSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_RAYTRACING_ACCELERATION_STRUCTURE,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-
-	blasBuffer_[Index]->SetName(L"BLASBuffer");
+	blasInfo_.blasBuffer_[Index]->SetName(L"BLASBuffer");
 
 	// 更新用バッファを生成する。
-	updateBuffer_[Index] = FHelper::CreateBuffer(
+	blasInfo_.updateBuffer_[Index] = FHelper::CreateBuffer(
 		blasPrebuild.UpdateScratchDataSizeInBytes,
 		D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
 		D3D12_RESOURCE_STATE_COMMON,
 		D3D12_HEAP_TYPE_DEFAULT
 	);
-	barrierToUAV[0] = { CD3DX12_RESOURCE_BARRIER::Transition(updateBuffer_[Index].Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
+	barrierToUAV[0] = { CD3DX12_RESOURCE_BARRIER::Transition(blasInfo_.updateBuffer_[Index].Get(),D3D12_RESOURCE_STATE_COMMON,D3D12_RESOURCE_STATE_UNORDERED_ACCESS) };
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, barrierToUAV);
-	updateBuffer_[Index]->SetName(L"BLASUpdateBuffer");
+	blasInfo_.updateBuffer_[Index]->SetName(L"BLASUpdateBuffer");
 
 	// AccelerationStructureの構築。
-	buildASDesc.ScratchAccelerationStructureData = scratchBuffer_[Index]->GetGPUVirtualAddress();
-	buildASDesc.DestAccelerationStructureData = blasBuffer_[Index]->GetGPUVirtualAddress();
+	buildASDesc.ScratchAccelerationStructureData = blasInfo_.scratchBuffer_[Index]->GetGPUVirtualAddress();
+	buildASDesc.DestAccelerationStructureData = blasInfo_.blasBuffer_[Index]->GetGPUVirtualAddress();
 	// コマンドリストに積んで実行する。
 	Engine::Ins()->mainGraphicsCmdList_->BuildRaytracingAccelerationStructure(
 		&buildASDesc, 0, nullptr /* pPostBuildInfoDescs */
@@ -753,7 +752,7 @@ void BLAS::CreateAccelerationStructure(int Index)
 	// リソースバリアの設定。
 	D3D12_RESOURCE_BARRIER uavBarrier{};
 	uavBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
-	uavBarrier.UAV.pResource = blasBuffer_[Index].Get();
+	uavBarrier.UAV.pResource = blasInfo_.blasBuffer_[Index].Get();
 	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &uavBarrier);
 
 }
@@ -764,12 +763,12 @@ void BLAS::CreateMaterialBuffer()
 	/*===== マテリアルを設定 =====*/
 
 	// マテリアル用バッファを生成
-	materialBuffer_ = std::make_shared<DoubleResourceWrapper>();
-	materialBuffer_->CreateBuffer(sizeof(ModelDataManager::GPUMaterial), &material_, L"MaterialBuffer");
+	blasInfo_.materialBuffer_ = std::make_shared<DoubleResourceWrapper>();
+	blasInfo_.materialBuffer_->CreateBuffer(sizeof(ModelDataManager::GPUMaterial), &blasInfo_.material_, L"MaterialBuffer");
 
 	// マテリアルデータでディスクリプタを生成。
-	materialDescriptor_ = std::make_shared<DoubleRayDescriptor>();
-	materialDescriptor_->CreateSRV(materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial));
+	blasInfo_.materialDescriptor_ = std::make_shared<DoubleRayDescriptor>();
+	blasInfo_.materialDescriptor_->CreateSRV(blasInfo_.materialBuffer_, 1, 0, sizeof(ModelDataManager::GPUMaterial));
 
 }
 
@@ -779,13 +778,13 @@ void BLAS::CreateVertexBuffer(const ModelDataManager::ObjectData& DataBuff)
 	/*===== 頂点とインデックスバッファを生成 =====*/
 
 	// 頂点数を求める。
-	vertexCount_ = static_cast<UINT>(DataBuff.vertex_.size());
+	modelInfo_.vertexCount_ = static_cast<UINT>(DataBuff.vertex_.size());
 
 	// 頂点インデックス数を求める。
-	indexCount_ = static_cast<UINT>(DataBuff.index_.size());
+	modelInfo_.indexCount_ = static_cast<UINT>(DataBuff.index_.size());
 
 	// 頂点データを変換。
-	for (int index = 0; index < static_cast<int>(vertexCount_); ++index) {
+	for (int index = 0; index < static_cast<int>(modelInfo_.vertexCount_); ++index) {
 
 		RayVertex buff{};
 		buff.normal_ = DataBuff.vertex_[index].normal_;
@@ -794,33 +793,33 @@ void BLAS::CreateVertexBuffer(const ModelDataManager::ObjectData& DataBuff)
 		buff.subUV_ = DataBuff.vertex_[index].uv_;
 
 		// データを保存。
-		vertex_.push_back(buff);
+		vertexInfo_.vertex_.push_back(buff);
 
 	}
 
 	// 頂点インデックスデータを保存。
-	vertIndex_ = DataBuff.index_;
+	vertexInfo_.vertIndex_ = DataBuff.index_;
 
 	// 頂点サイズを求める。
-	vertexStride_ = sizeof(RayVertex);
+	modelInfo_.vertexStride_ = sizeof(RayVertex);
 
 	// 頂点インデックスサイズを求める。
-	indexStride_ = sizeof(UINT);
+	modelInfo_.indexStride_ = sizeof(UINT);
 
 	// 頂点バッファを生成。
-	vertexBuffer_ = std::make_shared<DoubleResourceWrapper>();
-	vertexBuffer_->CreateBuffer(static_cast<size_t>(vertexStride_ * vertexCount_), vertex_.data(), L"VertexBuffer");
+	blasInfo_.vertexBuffer_ = std::make_shared<DoubleResourceWrapper>();
+	blasInfo_.vertexBuffer_->CreateBuffer(static_cast<size_t>(modelInfo_.vertexStride_ * modelInfo_.vertexCount_), vertexInfo_.vertex_.data(), L"VertexBuffer");
 
 	// 頂点インデックスバッファを生成。
-	indexBuffer_ = std::make_shared<DoubleResourceWrapper>();
-	indexBuffer_->CreateBuffer(static_cast<size_t>(indexStride_ * indexCount_), vertIndex_.data(), L"VertexIndexBuffer");
+	blasInfo_.indexBuffer_ = std::make_shared<DoubleResourceWrapper>();
+	blasInfo_.indexBuffer_->CreateBuffer(static_cast<size_t>(modelInfo_.indexStride_ * modelInfo_.indexCount_), vertexInfo_.vertIndex_.data(), L"VertexIndexBuffer");
 
 	// 頂点インデックスデータでディスクリプタを生成。
-	indexDescriptor_ = std::make_shared<DoubleRayDescriptor>();
-	indexDescriptor_->CreateSRV(indexBuffer_, indexCount_, 0, indexStride_);
+	blasInfo_.indexDescriptor_ = std::make_shared<DoubleRayDescriptor>();
+	blasInfo_.indexDescriptor_->CreateSRV(blasInfo_.indexBuffer_, modelInfo_.indexCount_, 0, modelInfo_.indexStride_);
 
 	// 頂点データでディスクリプタを生成。
-	vertexDescriptor_ = std::make_shared<DoubleRayDescriptor>();
-	vertexDescriptor_->CreateSRV(vertexBuffer_, vertexCount_, 0, vertexStride_);
+	blasInfo_.vertexDescriptor_ = std::make_shared<DoubleRayDescriptor>();
+	blasInfo_.vertexDescriptor_->CreateSRV(blasInfo_.vertexBuffer_, modelInfo_.vertexCount_, 0, modelInfo_.vertexStride_);
 
 }
