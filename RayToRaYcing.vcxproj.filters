@@ -229,6 +229,12 @@
     <ClCompile Include="Src\Game\CharacterTireMask.cpp">
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Engine\DoubleResourceWrapper.cpp">
+      <Filter>エンジン\リソース</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Engine\DoubleRayDescriptor.cpp">
+      <Filter>エンジン\リソース</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -510,6 +516,12 @@
     <ClInclude Include="Src\Game\CharacterTireMask.h">
       <Filter>アプリケーション\キャラクター\キャラクターの機能をまとめたクラス類</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Engine\DoubleResourceWrapper.h">
+      <Filter>エンジン\リソース</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Engine\DoubleRayDescriptor.h">
+      <Filter>エンジン\リソース</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">
@@ -732,6 +744,9 @@
     </Filter>
     <Filter Include="アプリケーション\main">
       <UniqueIdentifier>{b0feb384-4a79-42b0-9897-08a45c86c9d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="エンジン\リソース">
+      <UniqueIdentifier>{a803c2e4-d1ed-4f77-a473-09aaee920582}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

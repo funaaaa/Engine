@@ -5,8 +5,14 @@
 #include "FbxLoader.h"
 #include "Vec.h"
 #include "DynamicConstBuffer.h"
+#include "DoubleResourceWrapper.h"
 #include <DirectXMath.h>
 #include <array>
+#include <memory>
+
+// 二重バッファ用クラス
+class DoubleResourceWrapper;
+class DoubleRayDescriptor;
 
 // レイトレ用頂点構造体
 struct RayVertex {
@@ -26,18 +32,12 @@ private:
 
 	/*===== メンバ変数 =====*/
 
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexBuffer_;		// 頂点バッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> vertexUploadBuffer_;	// 頂点バッファ
-	std::array<void*, 2> vertexMapAddress_;		// 頂点バッファMap用アドレス
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexBuffer_;			// 頂点インデックスバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> indexUploadBuffer_;	// 頂点インデックスバッファ
-	std::array<void*, 2> indexMapAddress_;		// 頂点インデックスバッファMap用アドレス
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialBuffer_;			// マテリアルバッファ
-	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> materialUploadBuffer_;	// マテリアルバッファ
-	std::array<void*, 2> materialMapAddress_;	// マテリアルバッファMap用アドレス
-	std::array<RayDescriptor, 2> vertexDescriptor_;		// 頂点ディスクリプタ
-	std::array<RayDescriptor, 2> indexDescriptor_;			// 頂点インデックスディスクリプタ
-	std::array<RayDescriptor, 2> materialDescriptor_;		// マテリアル情報用ディスクリプタ
+	std::shared_ptr<DoubleResourceWrapper> vertexBuffer_;			// 頂点バッファ
+	std::shared_ptr<DoubleResourceWrapper> indexBuffer_;			// 頂点インデックスバッファ
+	std::shared_ptr<DoubleResourceWrapper> materialBuffer_;			// 頂点インデックスバッファ
+	std::shared_ptr<DoubleRayDescriptor> vertexDescriptor_;			// 頂点ディスクリプタ
+	std::shared_ptr<DoubleRayDescriptor> indexDescriptor_;			// 頂点インデックスディスクリプタ
+	std::shared_ptr<DoubleRayDescriptor> materialDescriptor_;		// マテリアル情報用ディスクリプタ
 
 	// マテリアル情報用定数バッファ
 	ModelDataManager::GPUMaterial material_;
@@ -154,8 +154,8 @@ public:
 
 	// アクセッサ
 	Microsoft::WRL::ComPtr<ID3D12Resource>& GetBLASBuffer(int Index) { return blasBuffer_[Index]; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer(int Index) { return vertexBuffer_[Index]; }
-	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer(int Index) { return indexBuffer_[Index]; }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetVertexBuffer(int Index) { return vertexBuffer_->GetBuffer(Index); }
+	Microsoft::WRL::ComPtr<ID3D12Resource>& GetIndexBuffer(int Index) { return indexBuffer_->GetBuffer(Index); }
 	std::wstring& GetHitGroupName() { return hitGroupName_; }
 	const std::string& GetModelPath() { return modelPath_; }
 	const std::vector<LPCWSTR>& GetTexturePath() { return texturePath_; }
@@ -168,13 +168,10 @@ public:
 	std::vector<RayVertex> GetVertex() { return vertex_; }
 	const std::vector<Vec3>& GetVertexPos() { return vertexPos_; }
 	const std::vector<Vec3>& GetVertexNormal() { return vertexNormal_; }
+	const std::vector<Vec2>& GetVertexUV() { return vertexUV_; };
 	const std::vector<UINT>& GetVertexIndex() { return vertIndex_; }
-	const std::vector<Vec2>& GetVertexUV() { return vertexUV_; }
 
 private:
-
-	// アドレスに情報を書き込む処理
-	void WriteToMemory(void* MapAddress, const void* PData, size_t DataSize);
 
 	// BLAS生成時に設定を取得する関数
 	D3D12_RAYTRACING_GEOMETRY_DESC GetGeometryDesc(bool IsOpaque, int Index);
