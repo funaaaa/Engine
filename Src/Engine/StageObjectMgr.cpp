@@ -416,14 +416,14 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 	if (ObjectID != BaseStageObject::OBJECT_ID::WALL && ObjectID != BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL && ObjectID != BaseStageObject::OBJECT_ID::BRIGHTNESS_WALL) {
 
 		// レイ用の設定を追加。
-		InputRayData.rayPos_ = Input.targetPos_;
 		InputRayData.rayDir_ = FHelper::MulRotationMatNormal(Vec3(0, -1, 0), Input.targetInstance_.lock()->GetRotate());
+		InputRayData.rayPos_ = Input.targetPos_ - (InputRayData.rayDir_ * Input.targetSize_.y_);
 
 		// 当たり判定を行う。
 		isHit = FHelper::RayToModelCollision(InputRayData, impactPos, hitDistance, hitNormal, hitUV);
 
 		// 当たった距離がY軸のサイズよりも小さかったら。
-		isHit &= (hitDistance - Input.targetSize_.y_) <= 0;
+		isHit &= (hitDistance - Input.targetSize_.y_ * 2.0f) <= 0;
 		isHit &= 0 < hitDistance;
 
 		// 当たっていたら押し戻す。
@@ -433,7 +433,7 @@ BaseStage::ColliderOutput StageObjectMgr::StageMeshCollider(BaseStage::ColliderI
 			const float PUSH_BACK_OFFSET = 1.0f;
 
 			// 法線方向に当たった分押し戻す。
-			Input.targetPos_ += hitNormal * (Input.targetSize_.y_ - (hitDistance + PUSH_BACK_OFFSET));
+			Input.targetPos_ += hitNormal * (Input.targetSize_.y_ * 2.0f - (hitDistance + PUSH_BACK_OFFSET));
 
 			// 斜め床の回転処理。
 			RotObliqueFloor(Input, hitNormal, Output);
