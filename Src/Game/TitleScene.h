@@ -26,8 +26,8 @@ private:
 	std::weak_ptr<BLAS> envMap3Blas_;
 
 	// PBRテスト用球2種類
-	std::array < std::array < std::weak_ptr<PolygonMeshInstance>, 5>, 5> pbrTest_;
-	std::array<std::array<std::weak_ptr<BLAS>, 5>, 5> pbrTestBlas_;
+	std::array < std::array < std::weak_ptr<PolygonMeshInstance>, 10>, 10> pbrTest_;
+	std::array<std::array<std::weak_ptr<BLAS>, 10>, 10> pbrTestBlas_;
 
 	// コーネルボックス用
 	std::weak_ptr<BLAS> cornellBoxWhiteBlas_;

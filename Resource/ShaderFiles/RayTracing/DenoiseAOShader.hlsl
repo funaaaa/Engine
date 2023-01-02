@@ -977,7 +977,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         float3 metalnessMapColor = (float3) metalnessTexture.SampleLevel(smp, Vtx.uv, 0.0f);
         float metal = metalness;
         float rougness = material[0].roughness_;
-        payloadBuff.roughnessOffset_ = rougness * 1500.0f;
+        payloadBuff.roughnessOffset_ = rougness * 1000.0f;
         
         // metalnessマップの色とテクスチャの色が同じじゃなかったらmetallnessマップの色を再取得。(metalnessマップがないテクスチャにはメモリの隙間を埋めるために一応テクスチャをいれているから。)
         if (!(TexColor.x == metalnessMapColor.x && TexColor.y == metalnessMapColor.y && TexColor.z == metalnessMapColor.z))
@@ -1064,7 +1064,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     float2 ddyUV;
     float4 texColor;
 
-    if (gSceneParam.light.pointLight[0].pad.x)
+    if (gSceneParam.light.pointLight[0].pad.x || (instanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR && payload.rayID_ == CHS_IDENTIFICATION_RAYID_DEF))
     {
 
         // テクスチャの色を取得。

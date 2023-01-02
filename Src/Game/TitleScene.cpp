@@ -63,11 +63,11 @@ void TitleScene::Init()
 
 		}
 	}
-	for (int height = 0; height < 5; ++height) {
-		for (int width = 0; width < 5; ++width) {
+	for (int height = 0; height < 10; ++height) {
+		for (int width = 0; width < 10; ++width) {
 
 			pbrTest_[height][width] = PolygonInstanceRegister::Ins()->CreateInstance(pbrTestBlas_[height][width], static_cast<int>(PolygonInstanceRegister::PBR_TEST));
-			pbrTest_[height][width].lock()->AddScale(Vec3(10, 10, 10));
+			pbrTest_[height][width].lock()->ChangeScale(Vec3(5, 5, 5));
 			pbrTest_[height][width].lock()->ChangeTrans(Vec3(0, 10000, 0));
 
 		}
@@ -227,8 +227,8 @@ void TitleScene::Update()
 		// コーネルボックスだったら
 		if (invMapIndex_ == 3) {
 
-			for (int height = 0; height < 5; ++height) {
-				for (int width = 0; width < 5; ++width) {
+			for (int height = 0; height < 10; ++height) {
+				for (int width = 0; width < 10; ++width) {
 
 					pbrTest_[height][width].lock()->ChangeTrans(Vec3(0, 10000, 0));
 
@@ -236,7 +236,7 @@ void TitleScene::Update()
 			}
 
 			pbrTest_[0][0].lock()->ChangeTrans(Vec3(0, 0, 0));
-			pbrTest_[0][0].lock()->ChangeScale(Vec3(30, 30, 30));
+			pbrTest_[0][0].lock()->ChangeScale(Vec3(5, 5, 5));
 			pbrTestBlas_[0][0].lock()->GetMaterial().metalness_ = 0.021f;
 			pbrTestBlas_[0][0].lock()->GetMaterial().roughness_ = 0.390f;
 			pbrTestBlas_[0][0].lock()->GetMaterial().specular_ = 0.999f;
@@ -245,18 +245,19 @@ void TitleScene::Update()
 		}
 		else {
 
-			float interval = 20.0f;
-			Vec3 offsetPos = Vec3(-interval * 2.5f, -interval * 2.5f + 10.0f, 0.0f);
-			for (int height = 0; height < 5; ++height) {
-				for (int width = 0; width < 5; ++width) {
+			float interval = 10.0f;
+			Vec3 offsetPos = Vec3(-interval * 5.0f, -interval * 5.0f + 10.0f, 0.0f);
+			for (int height = 0; height < 10; ++height) {
+				for (int width = 0; width < 10; ++width) {
 
 					pbrTest_[height][width].lock()->ChangeTrans(offsetPos + Vec3(width * interval, height * interval, 0));
+					pbrTest_[height][width].lock()->ChangeScale(Vec3(5, 5, 5));
 
-					float roughness = (1.0f / 5.0f) * height;
+					float roughness = (1.0f / 10.0f) * height;
 					if (roughness <= 0.0f) roughness = 0.001f;
 					if (1.0f <= roughness) roughness = 0.999f;
 					pbrTestBlas_[height][width].lock()->GetMaterial().roughness_ = roughness;
-					float metalness = (1.0f / 5.0f) * (5 - width);
+					float metalness = (1.0f / 10.0f) * (10.0f - width);
 					if (metalness <= 0.0f) metalness = 0.001f;
 					if (1.0f <= metalness) metalness = 0.999f;
 					pbrTestBlas_[height][width].lock()->GetMaterial().metalness_ = metalness;
