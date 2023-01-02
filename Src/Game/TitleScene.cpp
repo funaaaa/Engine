@@ -59,7 +59,7 @@ void TitleScene::Init()
 		for (auto& width : height) {
 
 			width = BLASRegister::Ins()->GenerateGLTF(L"Resource/Game/Gimmick/gltfTest.glb", HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF], false, true);
-			width.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/red.png"));
+			width.lock()->ChangeBaseTexture(TextureManager::Ins()->LoadTexture(L"Resource/Title/white.png"));
 
 		}
 	}
@@ -95,8 +95,6 @@ void TitleScene::Init()
 	cameraAngle = 0;
 	invMapIndex_ = 0;
 	objectIndex_ = 3;
-
-	isStopRotate_ = false;
 
 }
 
@@ -139,8 +137,8 @@ void TitleScene::Update()
 	ImGui::SameLine();
 	ImGui::RadioButton("Car", &objectIndex_, 3);
 
-	ImGui::Checkbox("StopRotation", &isStopRotate_);
-	ImGui::SameLine();
+	ImGui::DragFloat("CameraAngle", &cameraAngle, 0.03f);
+
 	bool isMipmap = !RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x;
 	ImGui::Checkbox("MipmapFlag", &isMipmap);
 	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x = !isMipmap;
@@ -298,13 +296,6 @@ void TitleScene::Update()
 
 	// 乱数の種を更新。
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
-
-	if (!isStopRotate_) {
-
-		// カメラの位置を調整。
-		cameraAngle += 0.01f;
-
-	}
 
 	// カメラの角度から位置を求める。
 	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));

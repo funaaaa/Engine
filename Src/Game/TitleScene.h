@@ -44,8 +44,6 @@ private:
 	int invMapIndex_;
 	int objectIndex_;
 
-	bool isStopRotate_;
-
 	std::shared_ptr<Character> player_;
 
 public:
