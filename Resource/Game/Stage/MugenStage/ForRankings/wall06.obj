@@ -1,3 +1,17 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:2ba368d9c52175763bb8250ebaea9dcf4b2dac7ca8d9605f6fc7b36004d34dbb
-size 377
+# Blender v2.90.1 OBJ File: ''
+# www.blender.org
+mtllib wall06.mtl
+o 平面.006
+v 52.866356 -6.928576 -28.185549
+v 34.901741 -6.928576 -40.647614
+v 52.866356 2.066872 -28.185547
+v 34.901741 2.066873 -40.647614
+vt 1.000000 0.000000
+vt 0.000000 1.000000
+vt 0.000000 0.000000
+vt 1.000000 1.000000
+vn 0.5700 0.0000 -0.8217
+usemtl None
+s off
+f 2/1/1 3/2/1 1/3/1
+f 2/1/1 4/4/1 3/2/1

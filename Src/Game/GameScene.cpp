@@ -76,7 +76,7 @@ GameScene::GameScene()
 
 	// ‘¾—z‚ÉŠÖ‚·‚é•Ï”
 	sunAngle_ = 0.495f;
-	sunSpeed_ = 0.0005f;
+	sunSpeed_ = 0.005f;
 
 	isDisplayFPS_ = false;
 
