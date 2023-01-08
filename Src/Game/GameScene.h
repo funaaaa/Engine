@@ -40,13 +40,31 @@ private:
 	STAGE_ID nowStageID;
 
 	// UI関係
-	std::shared_ptr<Sprite> coinUI_;
 	std::shared_ptr<Sprite> rapUI_;
-	std::array<std::shared_ptr<Sprite>, 2> coinCountUI_;
 	std::shared_ptr<Sprite> nowRapCountUI_;
 	std::shared_ptr<Sprite> slashUI_;
 	std::shared_ptr<Sprite> maxRapCountUI_;
 	std::array<int, 11> numFontHandle_;
+	std::shared_ptr<Sprite> winUI_;
+	std::shared_ptr<Sprite> gameoverUI_;
+	const Vec2 WIN_UI_SIZE = Vec2(256.0f * 0.75f, 64.0f * 0.75f);
+	const Vec2 GAMEOVER_UI_SIZE = Vec2(512.0f * 0.75f, 64.0f * 0.75f);
+	float gameFinishUISizeRate_;		// ゲーム終了時に出る「WIN」「GAMEOVER」のスケールのレート
+	float gameFinishUIEasingTimer_;
+	const float GAME_FINISH_UI_EASING_TIMER = 0.05f;
+
+	// ランキングのUI
+	std::array<int, 4> rankingFont_;
+	std::shared_ptr<Sprite> rankingUI_;
+	const Vec3 RANK_UI_POS = Vec3(1174.0f, 629.5f, 0.1f);
+	const Vec3 RANK_UI_SIZE = Vec3(64, 64, 1);
+	bool isRankUIExp_;
+	float rankUIEasingTimer_;
+	const float RANK_UI_EASING_TIMER = 0.1f;
+	float rankUISineWaveTimer_;						// ランクのUIを縦にゆらゆら動かす用の変数
+	const float RANK_UI_SINE_WAVE_TIMER = 0.05f;
+	const float RANK_UI_SINE_WAVE_LENGTH = 10.0f;	// ランクのUIを縦にゆらゆら動かす量
+
 
 	// 集中線
 	std::shared_ptr<ConcentrationLineMgr> concentrationLine_;
@@ -58,6 +76,7 @@ private:
 
 	// ゴール関係
 	bool isGameFinish_;
+	bool isWin_;
 	int transitionTimer;
 	const int TRANSION_TIME = 180;
 

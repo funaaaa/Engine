@@ -34,7 +34,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::CreateInstance(std::weak_ptr
 	instanceDesc.InstanceMask = 0xFF;
 	instanceDesc.InstanceContributionToHitGroupIndex = Blas.lock()->GetBlasIndex();
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer()->GetGPUVirtualAddress();
+	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer(Engine::Ins()->currentQueueIndex_)->GetGPUVirtualAddress();
 
 
 	// BLASのIndexを保存。
@@ -74,7 +74,7 @@ D3D12_RAYTRACING_INSTANCE_DESC PolygonMeshInstance::ReCreateInstance(std::weak_p
 	instanceDesc.InstanceMask = 0xFF;
 	instanceDesc.InstanceContributionToHitGroupIndex = Blas.lock()->GetBlasIndex();
 	instanceDesc.Flags = D3D12_RAYTRACING_INSTANCE_FLAG_NONE;
-	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer()->GetGPUVirtualAddress();
+	instanceDesc.AccelerationStructure = Blas.lock()->GetBLASBuffer(Engine::Ins()->currentQueueIndex_)->GetGPUVirtualAddress();
 
 
 	// BLASのIndexを保存。
@@ -385,29 +385,6 @@ void PolygonMeshInstance::Disable()
 	isActive_ = false;
 	if (!parentInstance_.expired()) {
 		--parentInstance_.lock()->childCount_;
-	}
-
-}
-
-void PolygonMeshInstance::WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize)
-{
-
-	/*===== メモリに値を書き込む処理 =====*/
-
-	// nullチェック。
-	if (Resource == nullptr) return;
-
-	// マップ処理を行う。
-	void* mapped = nullptr;
-	D3D12_RANGE range{ 0, DataSize };
-	HRESULT hr = Resource->Map(0, nullptr, (void**)&mapped);
-
-	// マップが成功したら値を書き込む。
-	if (SUCCEEDED(hr)) {
-
-		memcpy(mapped, PData, DataSize);
-		Resource->Unmap(0, nullptr);
-
 	}
 
 }

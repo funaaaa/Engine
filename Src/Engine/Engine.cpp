@@ -291,23 +291,37 @@ void Engine::Init() {
 		&depthResDesc,
 		D3D12_RESOURCE_STATE_DEPTH_WRITE,
 		&resrouceClearValue,
-		IID_PPV_ARGS(&swapchain_.depthBuffer_)
+		IID_PPV_ARGS(&swapchain_.depthBuffer_[0])
 	);
-	swapchain_.depthBuffer_->SetName(L"DepthBuffer");
+	swapchain_.depthBuffer_[0]->SetName(L"DepthBuffer0");
+	result = device_.dev_->CreateCommittedResource(
+		&resourceProp,
+		D3D12_HEAP_FLAG_NONE,
+		&depthResDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&resrouceClearValue,
+		IID_PPV_ARGS(&swapchain_.depthBuffer_[1])
+	);
+	swapchain_.depthBuffer_[1]->SetName(L"DepthBuffer1");
 
 	// 深度バッファビュー生成
 	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc{};
-	dsvHeapDesc.NumDescriptors = 1;
+	dsvHeapDesc.NumDescriptors = 2;
 	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 	result = device_.dev_->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&swapchain_.dsvHeap_));
 	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
 	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 	device_.dev_->CreateDepthStencilView(
-		swapchain_.depthBuffer_.Get(),
+		swapchain_.depthBuffer_[0].Get(),
 		&dsvDesc,
 		swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart()
 	);
+	device_.dev_->CreateDepthStencilView(
+		swapchain_.depthBuffer_[0].Get(),
+		&dsvDesc,
+		CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart(), 1, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV)));
 	swapchain_.dsvHeap_->SetName(L"DsvHeap");
 
 	// DirectInputオブジェクトの生成
@@ -333,23 +347,6 @@ void Engine::Init() {
 	// 排他制御レベルのセット
 	result = input_.devmouse_->SetCooperativeLevel(
 		windowsAPI_->hwnd_, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-
-
-	// imguiの生成
-	heapForImgui_ = CreateDescriptorHeaoForImgui();
-	// imguiの初期化
-	if (ImGui::CreateContext() == nullptr) {
-		assert(0);
-	}
-	// windows用の初期化
-	bool blnResult = ImGui_ImplWin32_Init(windowsAPI_->hwnd_);
-	if (!blnResult) {
-		assert(0);
-	}
-
-	// directX12用の初期化
-	blnResult = ImGui_ImplDX12_Init(device_.dev_.Get(), 3, DXGI_FORMAT_R8G8B8A8_UNORM, heapForImgui_.Get(),
-		heapForImgui_.Get()->GetCPUDescriptorHandleForHeapStart(), heapForImgui_.Get()->GetGPUDescriptorHandleForHeapStart());
 
 }
 
@@ -377,7 +374,8 @@ void Engine::ProcessBeforeDrawing() {
 			swapchain_.rtvHeaps_->GetCPUDescriptorHandleForHeapStart(), bbIndex, device_.dev_->GetDescriptorHandleIncrementSize(swapchain_.heapDesc_.Type));
 
 		// 深度バッファ用のディスクリプタヒープの先頭アドレスを取得
-		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart();
+		D3D12_CPU_DESCRIPTOR_HANDLE dsvH = CD3DX12_CPU_DESCRIPTOR_HANDLE(
+			swapchain_.dsvHeap_->GetCPUDescriptorHandleForHeapStart(), currentQueueIndex_, Engine::Ins()->device_.dev_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV));
 		copyResourceCmdList_->OMSetRenderTargets(1, &rtvH, false, &dsvH);
 
 		// 画面クリア
@@ -401,22 +399,10 @@ void Engine::ProcessBeforeDrawing() {
 
 	}
 
-	// imgui描画前処理
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-
-	// ウィンドウ設定
-	ImGui::Begin("Menu");
-	ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-
 }
 
 #include "RayDenoiser.h"
 void Engine::ProcessAfterDrawing() {
-
-	ImGui::End();
-	ImGui::Render();
 
 	// 各フェンスの値を加算する。
 	{
@@ -443,21 +429,6 @@ void Engine::ProcessAfterDrawing() {
 		if (frameIndex_ != 0) {
 			graphicsCmdQueue_->Wait(denoiseToCopyFence_[pastQueueIndex_].Get(), fenceValue - 1);
 		}
-
-
-
-		UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
-		CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-			D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
-
-		// コマンドリストに追加
-		copyResourceCmdList_->SetDescriptorHeaps(1, heapForImgui_.GetAddressOf());
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), copyResourceCmdList_.Get());
-
-		resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 		// コピーコマンドリストのクローズ
 		copyResourceCmdList_->Close();

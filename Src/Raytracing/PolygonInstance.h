@@ -117,9 +117,6 @@ public:
 
 private:
 
-	// アドレスに情報を書き込む処理
-	void WriteToMemory(Microsoft::WRL::ComPtr<ID3D12Resource>& Resource, const void* PData, size_t DataSize);
-
 	// メッシュの当たり判定情報を計算する。
 	void CalMeshCollisionData();
 

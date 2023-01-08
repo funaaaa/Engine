@@ -39,6 +39,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, c
 	// ロードされていたら
 	if (isLoaded && !IsNewGenerate) {
 
+		blas_[blasIndex_]->ChangeTextureFlag();
 		return blas_[blasIndex_];
 
 	}
@@ -60,31 +61,6 @@ std::weak_ptr<BLAS> BLASRegister::GenerateObj(const std::string& DirectryPath, c
 		return std::weak_ptr<BLAS>();
 
 	}
-
-}
-
-std::weak_ptr<BLAS> BLASRegister::GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque, bool IsNewGenerate)
-{
-
-	/*===== BLASを生成 =====*/
-
-	IsNewGenerate;
-	for (auto& index : blas_) {
-
-		if (index->GetIsGenerate()) continue;
-
-		index->GenerateBLASFbx(DirectryPath, ModelName, HitGroupName, static_cast<int>(&index - &blas_[0]), IsOpaque);
-
-		return index;
-
-	}
-
-	// 要素数をオーバーしました！
-	assert(0);
-
-	return std::weak_ptr<BLAS>();
-
-	//}
 
 }
 
@@ -115,6 +91,7 @@ std::weak_ptr<BLAS> BLASRegister::GenerateGLTF(const std::wstring& Path, const s
 	// ロードされていたら
 	if (isLoaded && !IsNewGenerate) {
 
+		blas_[blasIndex_]->ChangeTextureFlag();
 		return blas_[blasIndex_];
 
 	}
@@ -162,13 +139,13 @@ std::weak_ptr<BLAS> BLASRegister::GenerateData(const ModelDataManager::ObjectDat
 
 }
 
-uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName)
+uint8_t* BLASRegister::WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, int Index)
 {
 
 	/*===== シェーダーレコードを書き込む =====*/
 
 	for (auto& index : blas_) {
-		Dst = index->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName);
+		Dst = index->WriteShaderRecord(Dst, RecordSize, StateObject, HitGroupName, Index);
 	}
 
 	return Dst;

@@ -29,12 +29,11 @@ public:
 
 	// 生成処理
 	std::weak_ptr<BLAS> GenerateObj(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque = false, bool IsNewGenerate = false);
-	std::weak_ptr<BLAS> GenerateFbx(const std::string& DirectryPath, const std::string& ModelName, const std::wstring& HitGroupName, bool IsOpaque = false, bool IsNewGenerate = false);
 	std::weak_ptr<BLAS> GenerateGLTF(const std::wstring& Path, const std::wstring& HitGroupName, bool IsOpaque = false, bool IsNewGenerate = false);
 	std::weak_ptr<BLAS> GenerateData(const ModelDataManager::ObjectData& ModelData, bool IsOpaque = false);
 
 	// シェーダーレコードを書き込む。
-	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName);
+	uint8_t* WriteShaderRecord(uint8_t* Dst, UINT RecordSize, Microsoft::WRL::ComPtr<ID3D12StateObject>& StateObject, LPCWSTR HitGroupName, int Index);
 
 	// BLASの数を取得。
 	int GetBLASCount() { return static_cast<int>(blas_.size()); }

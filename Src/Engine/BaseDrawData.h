@@ -111,7 +111,7 @@ protected:
 	/*-- メンバ関数 --*/
 
 	// 定数バッファ構造体b0のマップ処理
-	void MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBuffB0, const ConstBufferDataB0& ConstBufferDataB0);
+	void MapConstDataB0(ConstBufferDataB0* ConstMap, const ConstBufferDataB0& ConstBufferDataB0);
 
 
 public:

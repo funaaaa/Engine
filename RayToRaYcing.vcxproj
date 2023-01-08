@@ -72,6 +72,7 @@
       <AdditionalDependencies>libfbxsdk-md.lib;libxml2-md.lib;zlib-md.lib;hid.lib;SetupAPI.Lib;DirectXTex.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/ignore:4049 /ignore:4099 /ignore:4820 %(AdditionalOptions)</AdditionalOptions>
       <AdditionalLibraryDirectories>$(ProjectDir)lib\Dxcompiler\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -110,7 +111,8 @@
     <ClCompile Include="Src\Engine\BaseDrawData.cpp" />
     <ClCompile Include="Src\Engine\BaseStageObject.cpp" />
     <ClCompile Include="Src\Engine\Camera.cpp" />
-    <ClCompile Include="Src\Engine\ComputeShader.cpp" />
+    <ClCompile Include="Src\Engine\DoubleRayDescriptor.cpp" />
+    <ClCompile Include="Src\Engine\DoubleResourceWrapper.cpp" />
     <ClCompile Include="Src\Engine\Engine.cpp" />
     <ClCompile Include="Src\Engine\FbxLoader.cpp" />
     <ClCompile Include="Src\Engine\FHelper.cpp" />
@@ -120,12 +122,10 @@
     <ClCompile Include="Src\Engine\ModelDataManager.cpp" />
     <ClCompile Include="Src\Engine\Pipeline.cpp" />
     <ClCompile Include="Src\Engine\PipelineManager.cpp" />
-    <ClCompile Include="Src\Engine\RWStructuredBuffer.cpp" />
     <ClCompile Include="Src\Engine\ShaderData.cpp" />
     <ClCompile Include="Src\Engine\ShaderStorage.cpp" />
     <ClCompile Include="Src\Engine\SoundManager.cpp" />
     <ClCompile Include="Src\Engine\Sprite.cpp" />
-    <ClCompile Include="Src\Engine\StructuredBuffer.cpp" />
     <ClCompile Include="Src\Engine\TextureManager.cpp" />
     <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
@@ -197,25 +197,24 @@
     <ClInclude Include="Src\Engine\BaseStageObject.h" />
     <ClInclude Include="Src\Engine\BaseSprite.h" />
     <ClInclude Include="Src\Engine\Camera.h" />
-    <ClInclude Include="Src\Engine\ComputeShader.h" />
+    <ClInclude Include="Src\Engine\DoubleRayDescriptor.h" />
     <ClInclude Include="Src\Engine\Engine.h" />
     <ClInclude Include="Src\Engine\dxcapi.h" />
     <ClInclude Include="Src\Engine\FbxLoader.h" />
     <ClInclude Include="Src\Engine\FHelper.h" />
     <ClInclude Include="Src\Engine\FString.h" />
     <ClInclude Include="Src\Engine\GLTF.h" />
+    <ClInclude Include="Src\Engine\DoubleResourceWrapper.h" />
     <ClInclude Include="Src\Engine\StageObjectMgr.h" />
     <ClInclude Include="Src\Engine\Input.h" />
     <ClInclude Include="Src\Engine\ModelDataManager.h" />
     <ClInclude Include="Src\Engine\Pipeline.h" />
     <ClInclude Include="Src\Engine\PipelineManager.h" />
-    <ClInclude Include="Src\Engine\RWStructuredBuffer.h" />
     <ClInclude Include="Src\Engine\ShaderData.h" />
     <ClInclude Include="Src\Engine\ShaderStorage.h" />
     <ClInclude Include="Src\Engine\Singleton.h" />
     <ClInclude Include="Src\Engine\SoundManager.h" />
     <ClInclude Include="Src\Engine\Sprite.h" />
-    <ClInclude Include="Src\Engine\StructuredBuffer.h" />
     <ClInclude Include="Src\Engine\TextureManager.h" />
     <ClInclude Include="Src\Engine\Vec.h" />
     <ClInclude Include="Src\Engine\WindowsAPI.h" />

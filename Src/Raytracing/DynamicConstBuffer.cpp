@@ -7,7 +7,6 @@ DynamicConstBuffer::DynamicConstBuffer()
 	/*===== コンストラクタ =====*/
 
 	buffer_.clear();
-	uploadBuffer_.clear();
 
 }
 
@@ -20,31 +19,26 @@ void DynamicConstBuffer::Generate(UINT BufferSize, const wchar_t* Name)
 	BufferSize = RoundUp(BufferSize, 256);
 	UINT count = 2;
 	buffer_.resize(count);
-	uploadBuffer_.resize(count);
+	bufferMapAddress_.resize(count);
+
+	// バッファのサイズを保存
+	bufferSize_ = BufferSize;
 
 	// バッファを生成する。
 	for (UINT i = 0; i < count; ++i) {
 		buffer_[i] = CreateBuffer(
 			BufferSize,
 			D3D12_RESOURCE_FLAG_NONE,
-			D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-			D3D12_HEAP_TYPE_DEFAULT);
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			D3D12_HEAP_TYPE_UPLOAD);
 
 		// 名前をセットする。
 		if (buffer_[i]) {
 			buffer_[i]->SetName(Name);
 		}
 
-		uploadBuffer_[i] = CreateBuffer(
-			BufferSize,
-			D3D12_RESOURCE_FLAG_NONE,
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			D3D12_HEAP_TYPE_UPLOAD);
-
-		// 名前をセットする。
-		if (uploadBuffer_[i]) {
-			uploadBuffer_[i]->SetName(Name);
-		}
+		// Mapする。
+		buffer_[i]->Map(0, nullptr, &bufferMapAddress_[i]);
 	}
 
 }
@@ -54,19 +48,13 @@ void DynamicConstBuffer::Write(UINT BufferIndex, const void* Data, UINT Size)
 
 	/*===== データ書き込み処理 =====*/
 
-	auto& buff = uploadBuffer_[BufferIndex];
-	void* dst = nullptr;
-	buff->Map(0, nullptr, &dst);
-	if (dst) {
-		memcpy(dst, Data, Size);
-		buff->Unmap(0, nullptr);
+	// 引数で渡されたバッファのサイズが生成された値と違います。
+	Size = RoundUp(Size, 256);
+	if (Size != bufferSize_) {
+		assert(0);
 	}
 
-	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(buffer_[BufferIndex].Get(), D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_COPY_DEST);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
-	Engine::Ins()->mainGraphicsCmdList_->CopyResource(buffer_[BufferIndex].Get(), uploadBuffer_[BufferIndex].Get());
-	barrier = CD3DX12_RESOURCE_BARRIER::Transition(buffer_[BufferIndex].Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-	Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(1, &barrier);
+	memcpy(bufferMapAddress_[BufferIndex], Data, bufferSize_);
 
 }
 

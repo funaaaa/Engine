@@ -54,6 +54,11 @@ private:
 	const int CAN_NOT_MOVE_TIMER_SHELL_HIT = 60;
 	const int RETURN_DEFPOS_TIMER = 600;
 
+	// ランキング計測用
+	std::vector<bool> isHitRankingWall_;
+	int hitRankingWallCount_;
+	int hitRankingelapsedTime_;	// ランキング壁にあたってからの経過時間
+
 	// 当たり判定用OBB
 	std::shared_ptr<OBB> obb_;
 
@@ -178,9 +183,12 @@ public:
 	bool GetIsGetItem();	// アイテムを取得した瞬間
 	bool GetIsItem();	// アイテムを持っているか。
 	bool GetUseItem();	// アイテムを使った瞬間。
+	bool GetIsPlayer() { return charaID_ == CHARA_ID::P1; }
 	bool GetIdConcentrationLine();
 	int GetRapCount() { return rapCount_; }
 	bool GetIsPassedMiddlePoint() { return isPassedMiddlePoint_; }
+	int GetHitRankingCount() { return hitRankingWallCount_; }
+	int GetHitRankingelapsedTime_() { return hitRankingelapsedTime_; }
 
 	// モデルを削除。
 	void DeleteInstance();

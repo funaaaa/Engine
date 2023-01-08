@@ -50,11 +50,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	// カメラを初期化。
 	Camera::Ins()->Init();
 
-	// シーンクラス。
-	SceneMgr::Ins()->Init();
-
 	// レイトレエンジンを設定。
 	RayEngine::Ins()->Setting();
+
+	// シーンクラス。
+	SceneMgr::Ins()->Init();
 
 	// ブラー用クラスを設定。
 	RadialBlur::Ins()->Setting();
@@ -90,10 +90,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		}
 
 	}
-
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
 
 	return 0;
 

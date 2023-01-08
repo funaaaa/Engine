@@ -9,8 +9,6 @@
 #include "TextureManager.h"
 #include <algorithm>
 
-using namespace std;
-
 void MugenStage::Setting(int TireMaskIndex, bool IsBoostGimmick)
 {
 
@@ -126,6 +124,9 @@ void MugenStage::Setting(int TireMaskIndex, bool IsBoostGimmick)
 
 	}
 
+	// ランキングカウント用の壁をロード
+	LoadRankingWall();
+
 	// ビルをロード
 	LoadBuilding();
 
@@ -171,14 +172,14 @@ void MugenStage::Destroy()
 }
 
 #include "RayEngine.h"
-void MugenStage::Update()
+void MugenStage::Update(std::weak_ptr<CharacterMgr> Character)
 {
 
 	/*===== 更新処理 =====*/
 
 	++timer_;
 
-	stageObjectMgr_->Update(timer_);
+	stageObjectMgr_->Update(timer_, Character);
 
 }
 
@@ -195,6 +196,11 @@ BaseStage::ColliderOutput MugenStage::Collider(BaseStage::ColliderInput Input)
 
 }
 
+int MugenStage::GetRankingWallCount()
+{
+	return stageObjectMgr_->GetRankingWallCount();
+}
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -205,6 +211,25 @@ void MugenStage::LoadBuilding()
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData2.txt");		// 大きい方のカーブ周り
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData3.txt");		// 小さい方のカーブ周り
 	GetBuildingData("Resource/Game/Stage/MugenStage/Building/MugenStageBuildingData4.txt");		// 小道を作ろうとしていたところ
+
+}
+
+void MugenStage::LoadRankingWall()
+{
+
+	/*===== ランキング用の壁をロード =====*/
+
+	// オブジェクトの名前の配列
+	std::array<std::string, 12> modelName = { "wall01.obj","wall02.obj" ,"wall03.obj" ,"wall04.obj" ,"wall05.obj" ,"wall06.obj" ,"wall07.obj" ,"wall08.obj","wall09.obj","wall10.obj","wall11.obj","wall12.obj" };
+
+	for (int index = 0; index < 12; ++index) {
+
+		// ステージの坂セット。
+		int indexBuff = stageObjectMgr_->AddRankingWall("Resource/Game/Stage/MugenStage/ForRankings/", modelName[index], HitGroupMgr::Ins()->hitGroupNames[HitGroupMgr::DEF]);
+		stageObjectMgr_->AddScaleRankingWall(indexBuff, Vec3(120.0f, 120.0f, 120.0f));
+		stageObjectMgr_->NonDisplayRankingWall(indexBuff);
+
+	}
 
 }
 

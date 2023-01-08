@@ -125,7 +125,7 @@ void BaseDrawData::ClearTextureID()
 	textureID_.clear();
 }
 
-void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBuffB0, const ConstBufferDataB0& ConstBufferB0)
+void BaseDrawData::MapConstDataB0(ConstBufferDataB0* ConstMap, const ConstBufferDataB0& ConstBufferB0)
 {
 
 	// 転送する行列をLightCameraの引数次第で変える。
@@ -147,8 +147,6 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 
 
 	// 定数バッファへのデータ転送
-	ConstBufferDataB0* constMap = nullptr;
-	ConstBuffB0->Map(0, nullptr, (void**)&constMap);
 	// 投影IDがbackGourndの場合は平行投影変換を行う
 	if (projectionID_ == Pipeline::PROJECTIONID::UI) {
 		// ワールド行列の更新
@@ -156,10 +154,10 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 		matWorld *= scaleMat_;
 		matWorld *= rotationMat_;
 		matWorld *= positionMat_;
-		constMap->mat.world_ = matWorld;
-		constMap->mat.viewproj = Camera::Ins()->matProjection_;		// 平行投影変換
-		constMap->eye_ = Camera::Ins()->eye_;
-		constMap->color = ConstBufferB0.color;
+		ConstMap->mat.world_ = matWorld;
+		ConstMap->mat.viewproj = Camera::Ins()->matProjection_;		// 平行投影変換
+		ConstMap->eye_ = Camera::Ins()->eye_;
+		ConstMap->color = ConstBufferB0.color;
 	}
 	// 投影IDがobjectの場合はいろいろな変換を行う
 	else if (projectionID_ == Pipeline::PROJECTIONID::OBJECT) {
@@ -168,10 +166,10 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 		matWorld *= scaleMat_;
 		matWorld *= rotationMat_;
 		matWorld *= positionMat_;
-		constMap->mat.world_ = matWorld;								// ワールド変換 * ビュー変換 * 透視投影変換
-		constMap->mat.viewproj = matView_ * matPerspective_;
-		constMap->eye_ = eye_;
-		constMap->color = ConstBufferB0.color;
+		ConstMap->mat.world_ = matWorld;								// ワールド変換 * ビュー変換 * 透視投影変換
+		ConstMap->mat.viewproj = matView_ * matPerspective_;
+		ConstMap->eye_ = eye_;
+		ConstMap->color = ConstBufferB0.color;
 	}
 	// ビルボードの場合
 	else if (projectionID_ == Pipeline::PROJECTIONID::BILLBOARD) {
@@ -234,10 +232,9 @@ void BaseDrawData::MapConstDataB0(Microsoft::WRL::ComPtr<ID3D12Resource> ConstBu
 		matWorld *= scaleMat_;
 		matWorld *= rotationMat_;
 		matWorld *= positionMat_;
-		constMap->mat.world_ = matWorld;												// ワールド変換 * ビュー変換 * 透視投影変換
-		constMap->mat.viewproj = invMatView * matPerspective_;
-		constMap->eye_ = eye_;
-		constMap->color = ConstBufferB0.color;
+		ConstMap->mat.world_ = matWorld;												// ワールド変換 * ビュー変換 * 透視投影変換
+		ConstMap->mat.viewproj = invMatView * matPerspective_;
+		ConstMap->eye_ = eye_;
+		ConstMap->color = ConstBufferB0.color;
 	}
-	ConstBuffB0->Unmap(0, nullptr);
 }

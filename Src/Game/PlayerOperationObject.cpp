@@ -42,7 +42,7 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 	InputData;
 
 	// 前進についての入力処理
-	operation.accelerationRate_ = Input::Ins()->PadTrigger(XINPUT_TRIGGER_RIGHT);
+	operation.accelerationRate_ = static_cast<float>(Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_B));
 	if (Input::Ins()->IsKey(DIK_W)) {
 		operation.accelerationRate_ = 1.0f;
 	}
@@ -72,7 +72,7 @@ BaseOperationObject::Operation PlayerOperationObject::Input(const BaseOperationO
 	}
 
 	// ドリフトについての入力処理を行う。
-	operation.isDrift_ = 0.9f < Input::Ins()->PadTrigger(XINPUT_TRIGGER_LEFT);
+	operation.isDrift_ = Input::Ins()->IsPadBottom(XINPUT_GAMEPAD_RIGHT_SHOULDER);
 	if (Input::Ins()->IsKey(DIK_LSHIFT)) {
 		operation.isDrift_ = true;
 	}
@@ -130,9 +130,6 @@ void PlayerOperationObject::DecideFileName()
 			std::istringstream commaIss(cutString);
 			std::string commaCutString;
 			while (std::getline(commaIss, commaCutString, '.')) {
-
-				// 文字列が"Dev"だったら開発者ゴースト。
-				//if (cutString == "Dev");
 
 				// 文字列が数字かどうかを判定する。
 				if (std::all_of(commaCutString.cbegin(), commaCutString.cend(), isdigit)) {

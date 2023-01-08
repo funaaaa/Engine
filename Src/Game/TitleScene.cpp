@@ -75,6 +75,7 @@ void TitleScene::Init()
 	// プレイヤーを生成。
 	player_ = std::make_shared<CharacterMgr>();
 	player_->AddChara(static_cast<int>(Character::CHARA_ID::GHOST), false, 0, 0);
+	player_->Setting();
 
 	// 一旦サーキットステージを有効化する。
 	stages_[STAGE_ID::MUGEN]->Setting(tireMaskTexture_->GetUAVIndex(), false);
@@ -147,7 +148,7 @@ void TitleScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
 
 	// ステージを更新。
-	stages_[STAGE_ID::MUGEN]->Update();
+	stages_[STAGE_ID::MUGEN]->Update(player_);
 
 	// 太陽の角度を更新。
 	sunAngle_ += sunSpeed_;
@@ -241,7 +242,7 @@ void TitleScene::Input()
 
 		/*-- タイトル画像が出ている状態 --*/
 
-		if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+		if (!isStatTransition_ && (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_RETURN))) {
 
 			isStatTransition_ = true;
 			isAppear_ = false;
@@ -272,7 +273,7 @@ void TitleScene::Input()
 		}
 
 		// 決定されたら。
-		if (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_A) || Input::Ins()->IsKeyTrigger(DIK_RETURN)) {
+		if (!isStatTransition_ && (Input::Ins()->IsPadBottomTrigger(XINPUT_GAMEPAD_B) || Input::Ins()->IsKeyTrigger(DIK_RETURN))) {
 
 			isStatTransition_ = true;
 			isReservationTransition_ = true;

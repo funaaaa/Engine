@@ -21,8 +21,9 @@ public:
 
 	void Setting(int TireMaskIndex, bool IsBoostGimmick = true)override;
 	void Destroy()override;
-	void Update()override;
+	void Update(std::weak_ptr<CharacterMgr> Character)override;
 	BaseStage::ColliderOutput Collider(BaseStage::ColliderInput Input)override;
+	int GetRankingWallCount()override;
 
 
 private:
@@ -38,6 +39,7 @@ private:
 		Z,			// 各パラメーターのZ成分
 	};
 	void LoadBuilding();
+	void LoadRankingWall();
 	void GetBuildingData(std::string FilePath);
 
 	// 加速ギミックをセット。いずれはtxtから読み取れるようにする予定です。

@@ -21,20 +21,22 @@ void BasicStageObject::Destroy()
 
 }
 
-void BasicStageObject::Update(int Timer)
+void BasicStageObject::Update(int Timer, std::weak_ptr<CharacterMgr> Character)
 {
 
 	/*===== 更新処理 =====*/
 
 	Timer;
+	Character;
 
 }
 
-void BasicStageObject::Disable(int TimerToActivation)
+void BasicStageObject::Disable(int TimerToActivation, int CharaIndex)
 {
 
 	/*===== 無効化して再設定までの時間をセット =====*/
 
 	TimerToActivation;
+	CharaIndex;
 
 }

@@ -6,6 +6,7 @@
 class StageObjectMgr;
 class PolygonMeshInstance;
 class OBB;
+class CharacterMgr;
 
 // ステージ基底クラス
 class BaseStage {
@@ -25,8 +26,9 @@ public:
 		Vec3 targetSize_;				// 当たり判定を行うオブジェクトのサイズ
 		Vec3 targetUpVec_;				// 上ベクトル
 		std::weak_ptr<OBB> targetOBB_;	// 当たり判定を行うオブジェクトのOBB
-		float targetRotY_;				// 当たり判定を行うオブジェクトのY軸の回転量
 		std::weak_ptr<PolygonMeshInstance> targetInstance_;			// 当たり判定を行うオブジェクトのインスタンスのインデックス
+		float targetRotY_;				// 当たり判定を行うオブジェクトのY軸の回転量
+		int characterIndex_;			// CharacterMgr上でのキャラのIndex
 		bool isInvalidateRotY_;			// 回転行列を求める際にY軸回転を無効化するフラグ
 		bool isPlayer_;					// プレイヤーかどうか アイテムボックスとの判定の有無を識別するために使用する。
 	};
@@ -37,6 +39,8 @@ public:
 		Vec3 forwardVec_;			// 正面ベクトル
 		Vec3 upVec_;				// 上ベクトル
 		Vec3 ornamentHitNormal_;	// 装飾オブジェクトの当たった面の法線
+		int rankingWallIndex_;		// ランキング計測用壁に当たった際の壁番号
+		bool isHitRankigWall_;		// ランキング計測用壁にあたったかどうか
 		bool isHitStage_;			// ステージと当たった判定
 		bool isHitStageGrass_;		// ステージの草と当たった判定
 		bool isHitGoal_;			// ゴールと当たった判定
@@ -56,7 +60,10 @@ public:
 
 	virtual void Setting(int TireMaskIndex, bool IsBoostGimmick = true) = 0;
 	virtual void Destroy() = 0;
-	virtual void Update() = 0;
+	virtual void Update(std::weak_ptr<CharacterMgr> Character) = 0;
 	virtual ColliderOutput Collider(ColliderInput Input) = 0;
+
+	// ランキング計測用壁の数を返す。
+	virtual int GetRankingWallCount() = 0;
 
 };

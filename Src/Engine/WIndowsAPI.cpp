@@ -27,7 +27,7 @@ void WindowsAPI::Init()
 	// ウィンドウクラスを設定
 	windowClass_.cbSize = sizeof(WNDCLASSEX);
 	windowClass_.lpfnWndProc = (WNDPROC)WindowProc;			// ウィンドウプロシージャを設定
-	windowClass_.lpszClassName = L"LE3A_20_フナクラベ_タクミ";	// ウィンドウクラス名
+	windowClass_.lpszClassName = L"RayToRaYcing";			// ウィンドウクラス名
 	windowClass_.hInstance = GetModuleHandle(nullptr);		// ウィンドウハンドル
 	windowClass_.hIcon = LoadIcon(windowClass_.hInstance, TEXT("icon"));
 
@@ -39,7 +39,7 @@ void WindowsAPI::Init()
 
 	// ウィンドウオブジェクトの生成
 	hwnd_ = CreateWindow(windowClass_.lpszClassName,		// クラス名
-		L"LE3A_20_フナクラベ_タクミ",						// タイトルバーの文字
+		L"RayToRaYcing",								// タイトルバーの文字
 		WS_OVERLAPPEDWINDOW,							// 標準的なウィンドウスタイル
 		CW_USEDEFAULT,									// 表示X座標（OSに任せる）
 		CW_USEDEFAULT,									// 表示Y座標（OSに任せる）

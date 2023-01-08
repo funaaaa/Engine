@@ -104,10 +104,11 @@ struct Vertex
     float3 Normal;
     float2 uv;
     float2 subUV;
+    float2 pad_;
 };
 
 // ペイロード
-struct [raypayload] Payload
+struct Payload
 {
     uint recursive_; // 反復回数
     uint rayID_; // レイのID

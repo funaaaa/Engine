@@ -2,6 +2,7 @@
 #include "FirstAIWaypointMgr.h"
 #include "FirstAIWayPoint.h"
 #include "FHelper.h"
+#include "GameSceneMode.h"
 
 FirstAIOperationObject::FirstAIOperationObject(int WayPointOffset, int Level, int CharaPersonality)
 {
@@ -22,21 +23,24 @@ BaseOperationObject::Operation FirstAIOperationObject::Input(const BaseOperation
 	/*===== キャラ操作 =====*/
 
 	BaseOperationObject::Operation operation;
+	
+	// セレクトシーンで選択したゲーム難易度によって移動量にオフセットを足す。
+	float moveSpeedOffset = LEVEL_OFFSET_SPEED * GameSceneMode::Ins()->level_;
 
 	// 移動速度をレベルによって変更。
 	if (level_ == 0) {
 
-		operation.accelerationRate_ = 0.5f;
+		operation.accelerationRate_ = 0.3f + moveSpeedOffset;
 
 	}
 	else if (level_ == 1) {
 
-		operation.accelerationRate_ = 0.9f;
+		operation.accelerationRate_ = 0.5f + moveSpeedOffset;
 
 	}
 	else if (level_ == 2) {
 
-		operation.accelerationRate_ = 1.3f;
+		operation.accelerationRate_ = 1.0f + moveSpeedOffset;
 
 	}
 

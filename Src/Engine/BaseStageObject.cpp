@@ -52,6 +52,7 @@ void BaseStageObject::AddTrans(const Vec3& Trans)
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
 		instance_.lock()->AddTrans(Trans);
+		defPos_ += Trans;
 
 	}
 
@@ -74,6 +75,7 @@ void BaseStageObject::ChangeTrans(const Vec3& Trans)
 	if (objID_ != BaseStageObject::OBJECT_ID::MIDDLE_POINT) {
 
 		instance_.lock()->ChangeTrans(Trans);
+		defPos_ = Trans;
 
 	}
 

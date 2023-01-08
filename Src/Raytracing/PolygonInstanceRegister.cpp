@@ -42,7 +42,7 @@ std::weak_ptr<PolygonMeshInstance> PolygonInstanceRegister::CreateInstance(std::
 
 		for (auto& index : instanceDesc_) {
 
-			index.AccelerationStructure = Blas_.lock()->GetBLASBuffer()->GetGPUVirtualAddress();
+			index.AccelerationStructure = Blas_.lock()->GetBLASBuffer(Engine::Ins()->currentQueueIndex_)->GetGPUVirtualAddress();
 
 		}
 

@@ -469,42 +469,49 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
     float3 sunPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
     float3 sunDir = normalize(sunPos - WorldPos);
     
-    // ディレクショナルライトの色
-    if (gSceneParam.light.dirLight.isActive && gSceneParam.light.dirLight.lightDir.y < 0.2f)
+    // ディレクショナルライトの方向にレイを飛ばす。
+    float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
+    
+    // 大気散乱の色
+    float16_t3 skydomeColor;
+    float16_t3 mieColor = float3(1, 1, 1);
+    
+    // ディレクショナルライトの明るさが一定以上だったら
+    if (0.0f < dirLightVisibility)
     {
-        
-        // ディレクショナルライトの方向にレイを飛ばす。
-        float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
-        
-        // ディレクショナルライトの明るさが一定以上だったら
-        const float16_t SKYDOME_RADIUS = 15000.0f;
+    
+        const float SKYDOME_RADIUS = 15000.0f;
         const float16_t SAMPLING_POS_Y = 0.0f;
-            
+        
         // 天球の色をサンプリング
-        float16_t3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir * float16_t3(1.0f, 0.0f, 1.0f)) * SKYDOME_RADIUS;
-        samplingVec.y = 0.1f;
-            
+        float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir) * SKYDOME_RADIUS;
+        
         // サンプリングするベクトル
         samplingVec.y = SAMPLING_POS_Y;
         samplingVec = normalize(samplingVec);
-            
+        
         // サンプリングする座標
         float3 samplingPos;
         samplingPos = samplingVec * SKYDOME_RADIUS;
-            
-        // 大気散乱の色
-        float16_t3 mieColor = float3(1, 1, 1);
-        float16_t3 skydomeColor = AtmosphericScattering(samplingPos, mieColor);
-            
-        payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), NormalMap, float16_t3(1, 1, 1)) * dirLightVisibility * PayloadData.impactAmount_;
+        
+        // 大気散乱を計算。
+        skydomeColor = AtmosphericScattering(samplingPos, mieColor);
+        payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), NormalMap, float3(1, 1, 1)) * dirLightVisibility * PayloadData.impactAmount_;
+        //payloadBuff.color_ = float3(1, 1, 1);
+        
         
     }
+    else
+    {
+        //payloadBuff.light_ += float3(1, 0, 0);
+    }
+        
     
     // AOの計算。 一定以上の距離の場合はAOの計算を行わない。
     uint instanceID = InstanceID();
     if (500.0f < RayTCurrent() || payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_RECLECTION)
     {
-        payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.light_ += mieColor * 0.2f * payloadBuff.impactAmount_;
     }
     else if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK_AO || instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_AO)
     {
@@ -520,14 +527,14 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
         float aoVisibility = aoLightVisibility;
     
         // 各色を設定。
-        payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
-        payloadBuff.ao_ -= (1.0f - aoVisibility) * 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.light_ += mieColor * 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.light_ -= (1.0f - aoVisibility) * 0.2f * payloadBuff.impactAmount_;
         
     }
     else
     {
 
-        payloadBuff.ao_ += 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.light_ += mieColor * 0.2f * payloadBuff.impactAmount_;
         
     }
     
