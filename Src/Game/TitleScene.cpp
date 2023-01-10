@@ -95,6 +95,7 @@ void TitleScene::Init()
 	cameraAngle = 0;
 	invMapIndex_ = 0;
 	objectIndex_ = 3;
+	isCameraAngleChange_ = true;
 
 }
 
@@ -116,38 +117,72 @@ void TitleScene::Update()
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(0.5f, 0.5f, 0.5f).GetNormal();
 	}
 
-	ImGui::Text("SceneSelect");
+	if (ImGui::TreeNode("SceneInfo")) {
 
-	ImGui::RadioButton("Street", &invMapIndex_, 0);
-	ImGui::SameLine();
-	ImGui::RadioButton("Building", &invMapIndex_, 1);
-	ImGui::SameLine();
-	ImGui::RadioButton("Grasslands", &invMapIndex_, 2);
-	ImGui::SameLine();
-	ImGui::RadioButton("CornellBox", &invMapIndex_, 3);
+		ImGui::RadioButton("Street", &invMapIndex_, 0);
+		ImGui::SameLine();
+		ImGui::RadioButton("Building", &invMapIndex_, 1);
+		ImGui::SameLine();
+		ImGui::RadioButton("Grasslands", &invMapIndex_, 2);
+		ImGui::SameLine();
+		ImGui::RadioButton("CornellBox", &invMapIndex_, 3);
 
-	ImGui::Text("SelectObject");
+		if (invMapIndex_ == 3) {
+			ImGui::RadioButton("SoftShadow", &objectIndex_, 2);
+		}
+		else {
+			ImGui::RadioButton("Sphere", &objectIndex_, 2);
+		}
+		ImGui::SameLine();
+		ImGui::RadioButton("Car", &objectIndex_, 3);
 
-	if (invMapIndex_ == 3) {
-		ImGui::RadioButton("SoftShadow", &objectIndex_, 2);
+		ImGui::TreePop();
+
 	}
-	else {
-		ImGui::RadioButton("ReflectionObject", &objectIndex_, 2);
+
+	if (ImGui::TreeNode("CameraInfo")) {
+
+		ImGui::Checkbox("CameraMoveFlag", &isCameraAngleChange_);
+		ImGui::SameLine();
+		ImGui::DragFloat("CameraAngle", &cameraAngle, 0.03f);
+
+		bool isMipmap = !RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x;
+		ImGui::Checkbox("MipmapFlag", &isMipmap);
+		RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x = !isMipmap;
+
+		ImGui::TreePop();
+
 	}
-	ImGui::SameLine();
-	ImGui::RadioButton("Car", &objectIndex_, 3);
-
-	ImGui::DragFloat("CameraAngle", &cameraAngle, 0.03f);
-
-	bool isMipmap = !RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x;
-	ImGui::Checkbox("MipmapFlag", &isMipmap);
-	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].pad_.x = !isMipmap;
 
 
-	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
-	ImGui::SliderFloat("DirLightX", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.x_, -0.999f, 0.999f);
-	ImGui::SliderFloat("DirLightY", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_, -0.899f, 0.999f);
-	ImGui::SliderFloat("DirLightZ", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.z_, -0.999f, 0.999f);
+	if (ImGui::TreeNode("LightInfo")) {
+
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = true;
+		ImGui::SliderFloat("DirLightX", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.x_, -0.999f, 0.999f);
+		ImGui::SliderFloat("DirLightY", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_, -0.899f, 0.999f);
+		ImGui::SliderFloat("DirLightZ", &RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.z_, -0.999f, 0.999f);
+
+		ImGui::TreePop();
+
+	}
+
+	if (ImGui::TreeNode("DebugInfo")) {
+
+		bool buff = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isNoiseScene_);
+		ImGui::Checkbox("Noise", &buff);
+		RayEngine::Ins()->GetConstBufferData().debug_.isNoiseScene_ = static_cast<int>(buff);
+
+		buff = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isNormalScene_);
+		ImGui::Checkbox("Normal", &buff);
+		RayEngine::Ins()->GetConstBufferData().debug_.isNormalScene_ = static_cast<int>(buff);
+
+		buff = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isMeshScene_);
+		ImGui::Checkbox("Mesh", &buff);
+		RayEngine::Ins()->GetConstBufferData().debug_.isMeshScene_ = static_cast<int>(buff);
+
+		ImGui::TreePop();
+
+	}
 
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 
@@ -161,7 +196,10 @@ void TitleScene::Update()
 
 	// 環境マップを更新。
 	RayEngine::Ins()->GetConstBufferData().light_.pointLight_[0].lightColor_ = Vec3(1.0f, 1.0f, 1.0f);
-	if (invMapIndex_ == 0) {
+	switch (invMapIndex_)
+	{
+
+	case 0:
 
 		envMap1_.lock()->ChangeTrans(Vec3(0, 0, 0));
 		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
@@ -171,8 +209,9 @@ void TitleScene::Update()
 		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		invMapIndex_ = 0;
 
-	}
-	else if (invMapIndex_ == 1) {
+		break;
+
+	case 1:
 
 		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
 		envMap2_.lock()->ChangeTrans(Vec3(0, 0, 0));
@@ -182,8 +221,9 @@ void TitleScene::Update()
 		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		invMapIndex_ = 1;
 
-	}
-	else if (invMapIndex_ == 2) {
+		break;
+
+	case 2:
 
 		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
 		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
@@ -193,9 +233,9 @@ void TitleScene::Update()
 		cornellBoxWhite_.lock()->ChangeTrans(Vec3(0, 10000, 0));
 		invMapIndex_ = 2;
 
+		break;
 
-	}
-	else if (invMapIndex_ == 3) {
+	case 3:
 
 		envMap1_.lock()->ChangeTrans(Vec3(0, 1000, 0));
 		envMap2_.lock()->ChangeTrans(Vec3(0, 1000, 0));
@@ -212,7 +252,10 @@ void TitleScene::Update()
 
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.isActive_ = false;
 
+		break;
 
+	default:
+		break;
 	}
 
 	if (objectIndex_ == 2) {
@@ -296,6 +339,11 @@ void TitleScene::Update()
 
 	// 乱数の種を更新。
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.seed_ = FHelper::GetRand(0, 1000);
+
+	// カメラを更新。
+	if (isCameraAngleChange_) {
+		cameraAngle += 0.005f;
+	}
 
 	// カメラの角度から位置を求める。
 	Vec3 cameraDir = Vec3(cosf(cameraAngle), 0.0f, sinf(cameraAngle));

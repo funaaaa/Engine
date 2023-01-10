@@ -69,11 +69,21 @@ struct AlphaConstBufferData
     AlphaData alphaData_[ALPHA_DATA_COUNT];
 };
 
+// デバッグ用定数バッファデータ
+struct DebugConstBufferData
+{
+    int seed_; // 乱数の種
+    int isNoiseScene_; // ノイズのみの画面を描画するか
+    int isNormalScene_; // 法線情報のみを描画するか
+    int isMeshScene_; // メッシュ情報のみを描画するか
+};
+
 // 定数バッファ
 struct ConstBufferData
 {
     CameraConstBufferData camera;
     LightConstBufferData light;
+    DebugConstBufferData debug_;
     AlphaConstBufferData alphaData_;
 };
 

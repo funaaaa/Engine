@@ -61,21 +61,17 @@ void RayLightConstBufferData::Init()
 //
 //}
 
-//void DebugConstBufferData::Init()
-//{
-//
-//	/*===== デバッグ用定数バッファを初期化 =====*/
-//
-//	seed_ = FHelper::GetRand(0, 1000);
-//	isLightHitScene_ = false;
-//	isNormalScene_ = false;
-//	isMeshScene_ = false;
-//	isNoAO_ = false;
-//	isNoGI_ = false;
-//	isGIOnlyScene_ = false;
-//	isNoiseScene_ = false;
-//
-//}
+void DebugConstBufferData::init()
+{
+
+	/*===== デバッグ用定数バッファを初期化 =====*/
+
+	seed_ = FHelper::GetRand(0, 1000);
+	isNormalScene_ = false;
+	isMeshScene_ = false;
+	isNoiseScene_ = false;
+
+}
 
 void RayConstBufferData::Init()
 {
@@ -85,7 +81,7 @@ void RayConstBufferData::Init()
 	camera_.Init();
 	light_.Init();
 	//as_.Init();
-	//debug_.Init();
+	debug_.init();
 	alphaData_.Init();
 
 }

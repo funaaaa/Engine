@@ -41,6 +41,7 @@ private:
 	std::weak_ptr<PolygonMeshInstance> skydome_;
 
 	float cameraAngle;
+	bool isCameraAngleChange_;
 	int invMapIndex_;
 	int objectIndex_;
 

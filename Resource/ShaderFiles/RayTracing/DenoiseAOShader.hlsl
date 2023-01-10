@@ -1053,6 +1053,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         return;
     }
     
+    
     Vertex meshInfo[3];
     Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer, meshInfo);
     uint instanceID = InstanceID();
@@ -1157,6 +1158,20 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
         worldNormal = mul(worldNormal, mat);
 
+    }
+    
+    // デバッグ用
+    if (gSceneParam.debug_.isNormalScene_)
+    {
+        payload.color_ = worldNormal;
+        payload.light_ = float3(1, 1, 1);
+        return;
+    }
+    if (gSceneParam.debug_.isMeshScene_)
+    {
+        payload.color_ = float3(attrib.barys, 1.0f);
+        payload.light_ = float3(1, 1, 1);
+        return;
     }
     
 

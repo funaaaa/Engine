@@ -149,7 +149,6 @@ void RayEngine::Draw()
 	D3D12_DISPATCH_RAYS_DESC rayDesc = pipeline_->GetDispatchRayDesc();
 	Engine::Ins()->mainGraphicsCmdList_->DispatchRays(&rayDesc);
 
-
 	// DenoiseQueueが実行可能状態だったら。
 	{
 
@@ -211,8 +210,12 @@ void RayEngine::Draw()
 		Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]->ResourceBarrier(5, barrierToUAV);
 
 		// デノイズをかけたライティング情報と色情報を混ぜる。
-		Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
-
+		if (constBufferData_.debug_.isNoiseScene_) {
+			Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), aoOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), lightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
+		}
+		else {
+			Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseAOOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseGiOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
+		}
 
 		// ラジアルブラーをかける。
 		{

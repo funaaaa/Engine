@@ -71,21 +71,17 @@ struct RayLightConstBufferData {
 //};
 
 // デバッグ用定数バッファ
-//struct DebugConstBufferData {
-//
-//	int seed_;			// 乱数の種
-//	int isNoiseScene_;	// ノイズのみの画面を描画するか
-//	int isLightHitScene_;// ライトに当たった場所のみを描画するか
-//	int isNormalScene_;	// 法線情報のみを描画するか
-//	int isMeshScene_;	// メッシュ情報のみを描画するか
-//	int isNoAO_;			// AOを行わないか
-//	int isNoGI_;			// GIを行わないか
-//	int isGIOnlyScene_;	// GIのみを行うか
-//
-//	// 初期化処理
-//	void Init();
-//
-//};
+struct DebugConstBufferData {
+
+	int seed_;			// 乱数の種
+	int isNoiseScene_;	// ノイズのみの画面を描画するか
+	int isNormalScene_;	// 法線情報のみを描画するか
+	int isMeshScene_;	// メッシュ情報のみを描画するか
+
+	// 初期化処理
+	void init();
+
+};
 
 // アルファ用データ
 struct AlphaData {
@@ -113,7 +109,7 @@ struct RayConstBufferData {
 	// AS用
 	//AtmosphericScatteringConstBufferData as_;
 	// デバッグ用
-	//DebugConstBufferData debug_;
+	DebugConstBufferData debug_;
 	// アルファ用
 	AlphaConstBufferData alphaData_;
 
