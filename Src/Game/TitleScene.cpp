@@ -117,6 +117,27 @@ void TitleScene::Update()
 		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(0.5f, 0.5f, 0.5f).GetNormal();
 	}
 
+	// FPSを計測して表示
+	{
+		static DWORD prev_time = timeGetTime();	// 前回の時間
+		static int frame_count = 0;		// フレームカウント
+		static int fps = 60;
+		DWORD now_time = timeGetTime();		// 今回のフレームの時間
+
+		++frame_count;	// フレーム数をカウントする
+
+		// 経過時間が１秒を超えたらカウントと時間をリセット
+		if (now_time - prev_time >= 1000)
+		{
+			fps = frame_count;
+			prev_time = now_time;
+			frame_count = 0;
+		}
+		std::string fpsstr = "FPS" + std::to_string(fps);
+		ImGui::Text(fpsstr.c_str(), &invMapIndex_, 0);
+		ImGui::Text("", &invMapIndex_, 0);
+	}
+
 	if (ImGui::TreeNode("SceneInfo")) {
 
 		ImGui::RadioButton("Street", &invMapIndex_, 0);
@@ -277,7 +298,7 @@ void TitleScene::Update()
 			}
 
 			pbrTest_[0][0].lock()->ChangeTrans(Vec3(0, 0, 0));
-			pbrTest_[0][0].lock()->ChangeScale(Vec3(5, 5, 5));
+			pbrTest_[0][0].lock()->ChangeScale(Vec3(20, 20, 20));
 			pbrTestBlas_[0][0].lock()->GetMaterial().metalness_ = 0.021f;
 			pbrTestBlas_[0][0].lock()->GetMaterial().roughness_ = 0.390f;
 			pbrTestBlas_[0][0].lock()->GetMaterial().specular_ = 0.999f;
