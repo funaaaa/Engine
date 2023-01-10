@@ -508,10 +508,11 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
         
     
     // AOの計算。 一定以上の距離の場合はAOの計算を行わない。
+    float offsetAO = 0.2f;
     uint instanceID = InstanceID();
     if (500.0f < RayTCurrent() || payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_RECLECTION)
     {
-        payloadBuff.light_ += mieColor * 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.light_ += mieColor * offsetAO * payloadBuff.impactAmount_;
     }
     else if (instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK_AO || instanceID == CHS_IDENTIFICATION_INSTANCE_DEF_AO)
     {
@@ -521,20 +522,20 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
         // 各光源の明るさ情報
         float aoLightVisibility = 0;
         aoLightVisibility += aoLightVisibilityBuff;
-        aoLightVisibility = clamp(aoLightVisibility, 0.2f, 1.0f);
+        aoLightVisibility = clamp(aoLightVisibility, offsetAO, 1.0f);
     
         // ライトの総合隠蔽度を求める。
         float aoVisibility = aoLightVisibility;
     
         // 各色を設定。
-        payloadBuff.light_ += mieColor * 0.2f * payloadBuff.impactAmount_;
-        payloadBuff.light_ -= (1.0f - aoVisibility) * 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.light_ += mieColor * offsetAO * payloadBuff.impactAmount_;
+        payloadBuff.light_ -= (1.0f - aoVisibility) * offsetAO * payloadBuff.impactAmount_;
         
     }
     else
     {
 
-        payloadBuff.light_ += mieColor * 0.2f * payloadBuff.impactAmount_;
+        payloadBuff.light_ += mieColor * offsetAO * payloadBuff.impactAmount_;
         
     }
     
