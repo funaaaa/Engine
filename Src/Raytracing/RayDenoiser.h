@@ -1,6 +1,7 @@
 #pragma once
 #include "Singleton.h"
 #include "Engine.h"
+#include "Vec.h"
 #include <memory>
 #include <array>
 
@@ -21,7 +22,6 @@ private:
 	// ブラーをかけるコンピュートシェーダー
 	std::shared_ptr<RayComputeShader> blurX_;
 	std::shared_ptr<RayComputeShader> blurY_;
-	std::shared_ptr<RayComputeShader> blurFinal_;
 
 	// デノイズ時に使用する一時保蔵要テクスチャ
 	std::shared_ptr<RaytracingOutput> denoiseOutput_;
@@ -31,7 +31,13 @@ private:
 
 	// 重みテーブル
 	static const int GAUSSIAN_WEIGHTS_COUNT = 8;
-	std::array<float, GAUSSIAN_WEIGHTS_COUNT> gaussianWeights_;
+	struct GaussianParam
+	{
+		std::array<float, GAUSSIAN_WEIGHTS_COUNT> gaussianWeights_;
+		float denoiseDebugParam_;
+		Vec3 pad_;
+	};
+	GaussianParam gaussianParam_;
 
 	// 重み定数バッファ
 	std::shared_ptr<DynamicConstBuffer> weightTableCBX_;
@@ -61,6 +67,8 @@ public:
 
 	// コマンドリストをクローズ。
 	void CloseCommandList();
+
+	float& GetDenoiseDebugParam() { return gaussianParam_.denoiseDebugParam_; }
 
 private:
 

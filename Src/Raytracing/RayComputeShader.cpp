@@ -5,7 +5,7 @@
 #include "RayRootsignature.h"
 #include <assert.h>
 
-void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int UAVCount, std::vector<int> UAVIndex)
+void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int UAVCount, std::vector<int> SRVIndex, std::vector<int> UAVIndex)
 {
 
 	/*===== セッティング処理 =====*/
@@ -21,6 +21,7 @@ void RayComputeShader::Setting(LPCWSTR CsPath, int SRVCount, int CBVCount, int U
 	inputCBVCount_ = CBVCount;
 	inputUAVCount_ = UAVCount;
 	inputUAVIndex_ = UAVIndex;
+	inputSRVIndex_ = SRVIndex;
 
 	// ルートシグネチャを生成。
 	rootSignature_ = std::make_shared<RayRootsignature>();
@@ -75,25 +76,29 @@ void RayComputeShader::Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, 
 	// パイプラインをセット。
 	cmdList->SetPipelineState(pipeline_.Get());
 
-	// 一応UAVをセット。
-	for (auto& index_ : inputUAVIndex_) {
+	// SRVをセット。
+	for (auto& index : inputSRVIndex_) {
 
-		cmdList->SetComputeRootDescriptorTable(static_cast<int>(&index_ - &inputUAVIndex_[0]) + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
+		cmdList->SetComputeRootDescriptorTable(static_cast<int>(&index - &inputSRVIndex_[0]), DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index));
 
 	}
 
-	// バックバッファのフレームを取得。
-	//auto frameIndex = Engine::Ins()->swapchain->GetCurrentBackBufferIndex();
+	// UAVをセット。
+	for (auto& index_ : inputUAVIndex_) {
+
+		cmdList->SetComputeRootDescriptorTable(static_cast<int>(&index_ - &inputUAVIndex_[0]) + inputCBVCount_ + inputSRVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(index_));
+
+	}
 
 	// CBVをセット。
 	for (auto& index_ : InputCBV) {
 
-		cmdList->SetComputeRootConstantBufferView(static_cast<int>(&index_ - &InputCBV[0]), index_);
+		cmdList->SetComputeRootConstantBufferView(static_cast<int>(&index_ - &InputCBV[0]) + inputSRVCount_, index_);
 
 	}
 
 	// 出力用UAVをセット。
-	cmdList->SetComputeRootDescriptorTable(inputUAVCount_ + inputCBVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
+	cmdList->SetComputeRootDescriptorTable(inputUAVCount_ + inputCBVCount_ + inputSRVCount_, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(OutputIndex));
 
 	// ディスパッチ。
 	cmdList->Dispatch(ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ);

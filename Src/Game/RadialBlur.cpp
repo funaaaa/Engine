@@ -14,7 +14,7 @@ void RadialBlur::Setting()
 	blur_ = std::make_shared<RayComputeShader>();
 
 	// ガウシアンブラーに使用するコンピュートシェーダーをセット。
-	blur_->Setting(L"Resource/ShaderFiles/RadialBlur.hlsl", 0, 1, 1, { 0 });
+	blur_->Setting(L"Resource/ShaderFiles/RadialBlur.hlsl", 0, 1, 1, {}, { 0 });
 
 	// 定数バッファを生成。
 	weight_ = std::make_shared<DynamicConstBuffer>();

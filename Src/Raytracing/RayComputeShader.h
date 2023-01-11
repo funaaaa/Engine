@@ -23,6 +23,7 @@ private:
 	int inputSRVCount_;					// 入力するSRVの数
 	int inputUAVCount_;					// 入力するUAVの数
 	std::vector<int> inputUAVIndex_;	// 入力UAVデータのディスクリプタヒープ上でのインデックス
+	std::vector<int> inputSRVIndex_;	// 入力SRVデータのディスクリプタヒープ上でのインデックス
 	int outputIndex_;					// 出力データのディスクリプタヒープ上でのインデックス
 
 
@@ -31,7 +32,7 @@ public:
 	/*===== メンバ関数 =====*/
 
 	// セッティング処理
-	void Setting(LPCWSTR CsPath, int SRVCount, int CVBCount, int UAVCount, std::vector<int> UAVIndex);
+	void Setting(LPCWSTR CsPath, int SRVCount, int CVBCount, int UAVCount, std::vector<int> SRVIndex, std::vector<int> UAVIndex);
 
 	// 実行！
 	void Dispatch(UINT ThreadGroupCountX, UINT ThreadGroupCountY, UINT ThreadGroupCountZ, int OutputIndex, std::vector<D3D12_GPU_VIRTUAL_ADDRESS> InputCBV = {}, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> CmdList = nullptr);

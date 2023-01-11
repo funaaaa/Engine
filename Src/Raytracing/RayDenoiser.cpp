@@ -4,6 +4,7 @@
 #include "DynamicConstBuffer.h"
 #include "WindowsAPI.h"
 #include "Engine.h"
+#include "TextureManager.h"
 
 void Denoiser::Setting()
 {
@@ -25,23 +26,21 @@ void Denoiser::Setting()
 	// 使用するコンピュートシェーダーを生成。
 	blurX_ = std::make_shared<RayComputeShader>();
 	blurY_ = std::make_shared<RayComputeShader>();
-	blurFinal_ = std::make_shared<RayComputeShader>();
 	mixColorAndLuminance_ = std::make_shared<RayComputeShader>();
 
 	// ガウシアンブラーに使用するコンピュートシェーダーをセット。
-	blurX_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurX.hlsl", 0, 1, 2, { 0 });
-	blurY_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurY.hlsl", 0, 1, 2, { blurXOutput_->GetUAVIndex() });
-	blurFinal_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseFinal.hlsl", 0, 0, 1, { blurYOutput_->GetUAVIndex() });
-	mixColorAndLuminance_->Setting(L"Resource/ShaderFiles/RayTracing/MixColorAndLuminance.hlsl", 0, 0, 4, { 0,0 });
+	blurX_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurX.hlsl", 0, 1, 2, { }, { 0 });
+	blurY_->Setting(L"Resource/ShaderFiles/RayTracing/DenoiseBlurY.hlsl", 0, 1, 2, { }, { blurXOutput_->GetUAVIndex() });
+	mixColorAndLuminance_->Setting(L"Resource/ShaderFiles/RayTracing/MixColorAndLuminance.hlsl", 0, 0, 4, {}, { 0, 0 });
 
 	// ガウシアンブラーの重みテーブルを計算。
 	CalcWeightsTableFromGaussian(10);
 
 	// 定数バッファを生成。
 	weightTableCBX_ = std::make_shared<DynamicConstBuffer>();
-	weightTableCBX_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBX");
+	weightTableCBX_->Generate(sizeof(GaussianParam), L"GaussianWeightCBX");
 	weightTableCBY_ = std::make_shared<DynamicConstBuffer>();
-	weightTableCBY_->Generate(sizeof(float) * GAUSSIAN_WEIGHTS_COUNT, L"GaussianWeightCBY");
+	weightTableCBY_->Generate(sizeof(GaussianParam), L"GaussianWeightCBY");
 
 }
 
@@ -54,8 +53,8 @@ void Denoiser::ApplyGaussianBlur(int InputUAVIndex, int DenoiseMaskIndex, int Ou
 	CalcWeightsTableFromGaussian(static_cast<float>(BlurPower));
 
 	// 重みテーブルを書き込む。
-	weightTableCBX_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
-	weightTableCBY_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), gaussianWeights_.data(), sizeof(float) * GAUSSIAN_WEIGHTS_COUNT);
+	weightTableCBX_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), &gaussianParam_, sizeof(GaussianParam));
+	weightTableCBY_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), &gaussianParam_, sizeof(GaussianParam));
 
 	// コンピュートシェーダーを実行。
 	blurX_->ChangeInputUAVIndex({ InputUAVIndex, DenoiseMaskIndex });
@@ -185,14 +184,14 @@ void Denoiser::CalcWeightsTableFromGaussian(float Power)
 	// ループ変数のxが基準テクセルからの距離。
 	for (int x_ = 0; x_ < GAUSSIAN_WEIGHTS_COUNT; x_++)
 	{
-		gaussianWeights_[x_] = expf(-0.5f * static_cast<float>(x_ * x_) / Power);
-		total += 2.0f * gaussianWeights_.at(x_);
+		gaussianParam_.gaussianWeights_[x_] = expf(-0.5f * static_cast<float>(x_ * x_) / Power);
+		total += 2.0f * gaussianParam_.gaussianWeights_.at(x_);
 	}
 
 	// 重みの合計で除算することで、重みの合計を1にしている。
 	for (int i = 0; i < GAUSSIAN_WEIGHTS_COUNT; i++)
 	{
-		gaussianWeights_[i] /= total;
+		gaussianParam_.gaussianWeights_[i] /= total;
 	}
 
 }

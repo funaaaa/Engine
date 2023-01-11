@@ -56,13 +56,13 @@ GameScene::GameScene()
 	tireMaskTextureOutput_ = std::make_shared<RaytracingOutput>();
 	tireMaskTextureOutput_->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"TireMaskTexture", Vec2(4096, 4096), D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 	tireMaskComputeShader_ = std::make_shared<RayComputeShader>();
-	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, { tireMaskTextureOutput_->GetUAVIndex() });
+	tireMaskComputeShader_->Setting(L"Resource/ShaderFiles/RayTracing/TireMaskComputeShader.hlsl", 0, 1, 1, {}, { tireMaskTextureOutput_->GetUAVIndex() });
 	tireMaskConstBuffer_ = std::make_shared<DynamicConstBuffer>();
 	tireMaskConstBuffer_->Generate(sizeof(Character::TireMaskUV) * 2, L"TireMaskUV");
 
 	// 白塗りコンピュートシェーダー
 	whiteOutComputeShader_ = std::make_shared<RayComputeShader>();
-	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {});
+	whiteOutComputeShader_->Setting(L"Resource/ShaderFiles/WhiteMakeUpShader.hlsl", 0, 0, 0, {}, {});
 
 	characterMgr_ = std::make_shared<CharacterMgr>();
 

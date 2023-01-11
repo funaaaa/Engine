@@ -12,6 +12,7 @@
 #include "BLASRegister.h"
 #include "BLAS.h"
 #include "HitGroupMgr.h"
+#include "RayDenoiser.h"
 
 TitleScene::TitleScene()
 {
@@ -96,6 +97,7 @@ void TitleScene::Init()
 	invMapIndex_ = 0;
 	objectIndex_ = 3;
 	isCameraAngleChange_ = true;
+	Denoiser::Ins()->GetDenoiseDebugParam() = 1280.0f;
 
 }
 
@@ -192,6 +194,19 @@ void TitleScene::Update()
 		bool buff = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isNoiseScene_);
 		ImGui::Checkbox("Noise", &buff);
 		RayEngine::Ins()->GetConstBufferData().debug_.isNoiseScene_ = static_cast<int>(buff);
+
+		// ノイズにチェックが入っていたら。
+		if (buff) {
+
+			// Sliderを用意。
+			ImGui::SliderFloat("DenoiseLine", &Denoiser::Ins()->GetDenoiseDebugParam(), 0.0f, 1280.0f);
+
+		}
+		else {
+			
+			Denoiser::Ins()->GetDenoiseDebugParam() = 1280.0f;
+
+		}
 
 		buff = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isNormalScene_);
 		ImGui::Checkbox("Normal", &buff);
