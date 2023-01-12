@@ -2,6 +2,7 @@
 #include "RaytracingOutput.h"
 #include "TLAS.h"
 #include "HitGroupMgr.h"
+#include "TextureManager.h"
 
 void RayEngine::Setting()
 {
@@ -66,7 +67,7 @@ void RayEngine::Setting()
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/DenoiseAOShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(int) * 2 + sizeof(Vec2);
 	pipeline_ = std::make_shared<RaytracingPipeline>();
-	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 1, 1, 5, payloadSize, sizeof(Vec2), 6);
+	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 2, 1, 5, payloadSize, sizeof(Vec2), 6);
 
 	// シェーダーテーブルを生成。
 	pipeline_->ConstructionShaderTable();
@@ -76,6 +77,9 @@ void RayEngine::Setting()
 	constBuffer_ = std::make_shared<DynamicConstBuffer>();
 	constBuffer_->Generate(sizeof(RayConstBufferData), L"CameraConstBuffer");
 	constBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), &constBufferData_, sizeof(RayConstBufferData));
+
+	// デバッグ用のマスク画像をセット。
+	debugMaskHandle_ = TextureManager::Ins()->LoadTexture(L"Resource/Title/MeshInfoMask.png");
 
 }
 
@@ -131,16 +135,17 @@ void RayEngine::Draw()
 
 	// TLASを設定。
 	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootDescriptorTable(0, DescriptorHeapMgr::Ins()->GetGPUHandleIncrement(RayEngine::Ins()->tlas_->GetDescriptorHeapIndex()));
+	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootDescriptorTable(1, TextureManager::Ins()->GetSRV(debugMaskHandle_));
 
 	// 定数バッファをセット
-	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootConstantBufferView(1, constBuffer_->GetBuffer(backBufferIndex)->GetGPUVirtualAddress());
+	Engine::Ins()->mainGraphicsCmdList_->SetComputeRootConstantBufferView(2, constBuffer_->GetBuffer(backBufferIndex)->GetGPUVirtualAddress());
 
 	// 出力用UAVを設定。
-	aoOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(2);		// AOの結果出力用
-	lightOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(3);	// ライトの明るさの結果出力用
-	colorOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(4);	// テクスチャの色情報出力用
-	giOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);		// giの結果出力用
-	denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
+	aoOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(3);		// AOの結果出力用
+	lightOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(4);	// ライトの明るさの結果出力用
+	colorOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);	// テクスチャの色情報出力用
+	giOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(6);		// giの結果出力用
+	denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(7);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
 	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject().Get());

@@ -54,6 +54,9 @@ public:
 	RayConstBufferData constBufferData_;
 	std::shared_ptr<DynamicConstBuffer> constBuffer_;
 
+	// デバッグ用のマスク画像
+	int debugMaskHandle_;
+
 
 public:
 

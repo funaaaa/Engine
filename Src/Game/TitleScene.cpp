@@ -208,13 +208,17 @@ void TitleScene::Update()
 
 		}
 
-		buff = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isNormalScene_);
-		ImGui::Checkbox("Normal", &buff);
-		RayEngine::Ins()->GetConstBufferData().debug_.isNormalScene_ = static_cast<int>(buff);
-
 		buff = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isMeshScene_);
 		ImGui::Checkbox("Mesh", &buff);
 		RayEngine::Ins()->GetConstBufferData().debug_.isMeshScene_ = static_cast<int>(buff);
+
+		// Meeshにチェックが入っていたら。
+		if (buff) {
+
+			// Sliderを用意。
+			ImGui::DragInt("MeshParamLine", &RayEngine::Ins()->GetConstBufferData().debug_.isNormalScene_, 1);
+
+		}
 
 		ImGui::TreePop();
 
