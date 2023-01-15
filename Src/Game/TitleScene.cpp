@@ -128,75 +128,9 @@ void TitleScene::Update()
 
 	/*===== 更新処理 =====*/
 
-
-	// ImGuiの表示非表示を切り替える。
-	if (Input::Ins()->IsKey(DIK_O) && Input::Ins()->IsKeyTrigger(DIK_P)) {
-		Engine::Ins()->isReservActivateImGui_ = !Engine::Ins()->isReservActivateImGui_;
-	}
-
-	// ImGuiが有効化されていたら。
+	// 基本的なデバッグ機能
 	bool isMoveOnly1F = false;
-	if (Engine::Ins()->isActivateImGui_) {
-
-		// タイトルとウィンドウを設定
-		ImGui::Begin("Menu");
-		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-
-		// FPSを表示
-		ImGui::Text(std::to_string(FHelper::FPS()).c_str());
-
-		// 空白
-		ImGui::Text("");
-
-		// ゲーム一時停止フラグ
-		ImGui::Checkbox("StopGame", &Engine::Ins()->isStopGame_);
-		ImGui::SameLine();
-		ImGui::Checkbox("MoveOnly1F", &isMoveOnly1F);
-
-		// ゲームが一時停止していたらフリーカメラのチェックボックスを出す。
-		if (Engine::Ins()->isStopGame_) {
-
-			bool prevFreeCamera = Engine::Ins()->isFreeCamera_;
-			ImGui::Checkbox("FreeCamera", &Engine::Ins()->isFreeCamera_);
-
-			// フリーカメラになったトリガーだったら。
-			if (!prevFreeCamera && Engine::Ins()->isFreeCamera_) {
-
-				// フリーカメラ用の初期化処理
-				Camera::Ins()->InitFreeCamera();
-
-			}
-
-		}
-		else {
-
-			Engine::Ins()->isFreeCamera_ = false;
-
-		}
-
-		// メッシュのデバッグを行うか。
-		bool isDebugMesh = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isDebugMesnInfo_);
-		ImGui::Checkbox("IsDebugMeshInfo", &isDebugMesh);
-		RayEngine::Ins()->GetConstBufferData().debug_.isDebugMesnInfo_ = static_cast<int>(isDebugMesh);
-
-		// ImGuiの書き込みを終了
-		ImGui::End();
-
-		// メッシュのデバッグメニューを別ウィンドウへ
-		if (isDebugMesh) {
-
-			ImGui::Begin("DebugMeshInfo");
-			ImGui::SetWindowSize(ImVec2(400, 100), ImGuiCond_::ImGuiCond_FirstUseEver);
-			ImGui::DragInt("MaskX", &RayEngine::Ins()->GetConstBufferData().debug_.debugMeshMoveX_, 1);
-			ImGui::End();
-		}
-
-	}
-
-	// フリーカメラ状態だったら
-	if (Engine::Ins()->isFreeCamera_) {
-		Camera::Ins()->FreeCamera();
-	}
+	ImGuiDebug(isMoveOnly1F);
 
 	// ゲームの一時停止フラグが立っていたら処理をとばす。
 	if (Engine::Ins()->isStopGame_ && !isMoveOnly1F) return;
@@ -372,6 +306,8 @@ void TitleScene::CameraUpdate()
 {
 
 	/*===== カメラの更新処理 =====*/
+
+	if (Engine::Ins()->isStopGame_) return;
 
 	// カメラの情報。
 	Vec3& eye = Camera::Ins()->eye_;

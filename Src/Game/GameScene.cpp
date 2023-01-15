@@ -259,6 +259,16 @@ void GameScene::Update()
 
 	/*===== 更新処理 =====*/
 
+	// 基本的なデバッグ機能
+	bool isMoveOnly1F = false;
+	ImGuiDebug(isMoveOnly1F);
+
+	// ゲームの一時停止フラグが立っていたら処理をとばす。
+	if (Engine::Ins()->isStopGame_ && !isMoveOnly1F) return;
+
+
+
+
 	// シーン遷移を終わらせていなかったら終わらせる。
 	if (!isFinishTransition_) {
 		SceneTransition::Ins()->Exit();

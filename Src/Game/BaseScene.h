@@ -30,5 +30,6 @@ public:
 	virtual void Draw() = 0;
 	bool GetIsTransition() { return isTransition_; }
 	const SCENE_ID& GetNextScene() { return nextScene_; }
+	void ImGuiDebug(bool& IsMoveOnly1F);
 
 };

@@ -57,6 +57,8 @@ void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec
 
 	/*===== 更新処理 =====*/
 
+	if (Engine::Ins()->isStopGame_) return;
+
 	// 経過時間タイマーを更新。
 	++convTimer_;
 
@@ -189,8 +191,8 @@ void Camera::FreeCamera()
 	// 透視投影変換行列
 	matPerspective_ = DirectX::XMMatrixPerspectiveFovLH(
 		DirectX::XMConvertToRadians(DEF_ANGLEOFVIEW),	// 画角(60度)
-		(float)WINDOW_WIDTH / WINDOW_HEIGHT,			//アスペクト比
-		0.1f, 1000000.0f								//前端、奥端
+		(float)WINDOW_WIDTH / WINDOW_HEIGHT,			// アスペクト比
+		0.1f, 1000000.0f								// 前端、奥端
 	);
 	// 射影変換行列
 	matProjection_ = DirectX::XMMatrixOrthographicOffCenterLH(0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0.01f, 100000.0f);

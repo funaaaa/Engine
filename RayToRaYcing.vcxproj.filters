@@ -235,6 +235,7 @@
     <ClCompile Include="Src\Engine\DoubleRayDescriptor.cpp">
       <Filter>エンジン\リソース</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Game\BaseScene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">

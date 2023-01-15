@@ -128,6 +128,7 @@
     <ClCompile Include="Src\Engine\Sprite.cpp" />
     <ClCompile Include="Src\Engine\TextureManager.cpp" />
     <ClCompile Include="Src\Engine\WIndowsAPI.cpp" />
+    <ClCompile Include="Src\Game\BaseScene.cpp" />
     <ClCompile Include="Src\Game\BasicStageObject.cpp" />
     <ClCompile Include="Src\Game\BoostItem.cpp" />
     <ClCompile Include="Src\Game\Character.cpp" />
