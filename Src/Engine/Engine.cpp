@@ -363,6 +363,7 @@ void Engine::Init() {
 	isActivateImGui_ = false;
 	isReservActivateImGui_ = false;
 	isStopGame_ = false;
+	isFreeCamera_ = false;
 
 }
 

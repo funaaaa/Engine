@@ -22,6 +22,10 @@ public:
 	float angleOfView_;		// 画角
 	float baseAngleOfView_;	// 基準となる画角の値 angleOfViewをこの値に向かって補間する。
 
+	// フリーカメラ用変数
+	float angleOfXYPlane_;	// XY平面
+	float angleOfXZPlane_;	// XZ平面
+
 	int convTimer_;		// ゲームが始まってからのフレームを計算する。
 
 private:
@@ -46,5 +50,11 @@ public:
 
 	// 更新処理
 	void Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec3& CharaUpVec, float CharaSpeedPer, bool IsBeforeStart, bool IsGameFinish);
+
+	// フリーカメラの操作
+	void FreeCamera();
+
+	// フリーカメラ用の初期設定(フリーカメラを使い始めに使用する。)
+	void InitFreeCamera();
 
 };

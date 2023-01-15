@@ -144,13 +144,69 @@ void Camera::Update(const Vec3& CharaPos, const Vec3& CharaForwardVec, const Vec
 
 	// ビュー行列を生成。	
 	matView_ = DirectX::XMMatrixLookAtLH(eye_.ConvertXMVECTOR(), target_.ConvertXMVECTOR(), up_.ConvertXMVECTOR());
-	//透視投影変換行列
+	// 透視投影変換行列
 	matPerspective_ = DirectX::XMMatrixPerspectiveFovLH(
-		DirectX::XMConvertToRadians(angleOfView_),				//画角(60度)
-		(float)WINDOW_WIDTH / WINDOW_HEIGHT,	//アスペクト比
-		0.1f, 1000000.0f							//前端、奥端
+		DirectX::XMConvertToRadians(angleOfView_),	// 画角
+		(float)WINDOW_WIDTH / WINDOW_HEIGHT,		// アスペクト比
+		0.1f, 1000000.0f							// 前端、奥端
 	);
-	//射影変換行列
+	// 射影変換行列
 	matProjection_ = DirectX::XMMatrixOrthographicOffCenterLH(0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0.01f, 100000.0f);
+
+}
+
+void Camera::FreeCamera()
+{
+
+	/*===== フリーカメラの操作 =====*/
+
+	// カメラ移動用定数
+	const float CAMERA_MOVE_SPEED = 5.0f;
+	const float CAMERA_ANGLE_SPEED = 0.02f;
+
+	// 上下に動かす。
+	eye_.y_ += (Input::Ins()->IsKey(DIK_SPACE) * CAMERA_MOVE_SPEED) - (Input::Ins()->IsKey(DIK_LSHIFT) * CAMERA_MOVE_SPEED);
+
+	// XZ平面を動かす。
+	angleOfXZPlane_ += (Input::Ins()->IsKey(DIK_LEFT) * CAMERA_ANGLE_SPEED) - (Input::Ins()->IsKey(DIK_RIGHT) * CAMERA_ANGLE_SPEED);
+
+	// XY平面を動かす。
+	angleOfXYPlane_ += (Input::Ins()->IsKey(DIK_UP) * CAMERA_ANGLE_SPEED) - (Input::Ins()->IsKey(DIK_DOWN) * CAMERA_ANGLE_SPEED);
+
+	// 移動させる。
+	Vec3 dir = Vec3(cosf(angleOfXZPlane_ + DirectX::XM_PIDIV2), 0.0f, sinf(angleOfXZPlane_ + DirectX::XM_PIDIV2));
+	eye_ += dir * static_cast<float>(Input::Ins()->IsKey(DIK_A)) * CAMERA_MOVE_SPEED;
+	eye_ -= dir * static_cast<float>(Input::Ins()->IsKey(DIK_D)) * CAMERA_MOVE_SPEED;
+	dir = Vec3(cosf(angleOfXZPlane_), 0.0f, sinf(angleOfXZPlane_));
+	eye_ -= dir * static_cast<float>(Input::Ins()->IsKey(DIK_S)) * CAMERA_MOVE_SPEED;
+	eye_ += dir * static_cast<float>(Input::Ins()->IsKey(DIK_W)) * CAMERA_MOVE_SPEED;
+
+	// TARGETの位置を更新する。
+	target_ = eye_ + (dir + Vec3(0, angleOfXYPlane_, 0)) * TARGET_PLAYER_DISTNACE;
+
+	// ビュー行列を生成。	
+	matView_ = DirectX::XMMatrixLookAtLH(eye_.ConvertXMVECTOR(), target_.ConvertXMVECTOR(), up_.ConvertXMVECTOR());
+	// 透視投影変換行列
+	matPerspective_ = DirectX::XMMatrixPerspectiveFovLH(
+		DirectX::XMConvertToRadians(DEF_ANGLEOFVIEW),	// 画角(60度)
+		(float)WINDOW_WIDTH / WINDOW_HEIGHT,			//アスペクト比
+		0.1f, 1000000.0f								//前端、奥端
+	);
+	// 射影変換行列
+	matProjection_ = DirectX::XMMatrixOrthographicOffCenterLH(0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, 0.01f, 100000.0f);
+
+}
+
+void Camera::InitFreeCamera()
+{
+
+	/*===== フリーカメラ用の初期化処理 =====*/
+
+	// カメラの角度を求める。
+	Vec3 cameraVec = Vec3(target_ - eye_).GetNormal();
+
+	// 行列を求める。
+	angleOfXZPlane_ = atan2f(cameraVec.z_, cameraVec.x_);
+	angleOfXYPlane_ = cameraVec.y_;
 
 }

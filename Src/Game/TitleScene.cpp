@@ -153,6 +153,27 @@ void TitleScene::Update()
 		ImGui::SameLine();
 		ImGui::Checkbox("MoveOnly1F", &isMoveOnly1F);
 
+		// ゲームが一時停止していたらフリーカメラのチェックボックスを出す。
+		if (Engine::Ins()->isStopGame_) {
+
+			bool prevFreeCamera = Engine::Ins()->isFreeCamera_;
+			ImGui::Checkbox("FreeCamera", &Engine::Ins()->isFreeCamera_);
+
+			// フリーカメラになったトリガーだったら。
+			if (!prevFreeCamera && Engine::Ins()->isFreeCamera_) {
+
+				// フリーカメラ用の初期化処理
+				Camera::Ins()->InitFreeCamera();
+
+			}
+
+		}
+		else {
+
+			Engine::Ins()->isFreeCamera_ = false;
+
+		}
+
 		// メッシュのデバッグを行うか。
 		bool isDebugMesh = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isDebugMesnInfo_);
 		ImGui::Checkbox("IsDebugMeshInfo", &isDebugMesh);
@@ -161,6 +182,7 @@ void TitleScene::Update()
 		// ImGuiの書き込みを終了
 		ImGui::End();
 
+		// メッシュのデバッグメニューを別ウィンドウへ
 		if (isDebugMesh) {
 
 			ImGui::Begin("DebugMeshInfo");
@@ -171,6 +193,10 @@ void TitleScene::Update()
 
 	}
 
+	// フリーカメラ状態だったら
+	if (Engine::Ins()->isFreeCamera_) {
+		Camera::Ins()->FreeCamera();
+	}
 
 	// ゲームの一時停止フラグが立っていたら処理をとばす。
 	if (Engine::Ins()->isStopGame_ && !isMoveOnly1F) return;

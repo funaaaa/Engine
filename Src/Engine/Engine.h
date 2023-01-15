@@ -67,6 +67,7 @@ public:
 	bool isActivateImGui_;						// ImGuiが有効化されているかどうか
 	bool isReservActivateImGui_;				// ImGuiの有効化フラグの切り替え予約
 	bool isStopGame_;							// ゲームを一時停止するタイマー
+	bool isFreeCamera_;							// フリーカメラ状態か
 
 
 	/*-- GPUの非同期処理にあたって新たに作った変数たち --*/
