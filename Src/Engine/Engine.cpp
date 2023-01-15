@@ -362,6 +362,7 @@ void Engine::Init() {
 		heapForImgui_.Get()->GetCPUDescriptorHandleForHeapStart(), heapForImgui_.Get()->GetGPUDescriptorHandleForHeapStart());
 	isActivateImGui_ = false;
 	isReservActivateImGui_ = false;
+	isStopGame_ = false;
 
 }
 
@@ -423,10 +424,6 @@ void Engine::ProcessBeforeDrawing() {
 		ImGui_ImplWin32_NewFrame();
 		ImGui::NewFrame();
 
-		// タイトルとウィンドウを設定
-		ImGui::Begin("Menu");
-		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
-
 	}
 
 }
@@ -439,7 +436,6 @@ void Engine::ProcessAfterDrawing() {
 	if (isActivateImGui_) {
 
 		// ImGuiを終了
-		ImGui::End();
 		ImGui::Render();
 
 	}

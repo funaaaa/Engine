@@ -179,6 +179,28 @@ namespace FHelper {
 		}
 	}
 
+	// FPSを計測
+	inline int FPS() {
+
+		static DWORD prevTime = timeGetTime();	// 前回の時間
+		static int frameCount = 0;			// フレームカウント
+		static int fps = 0;
+		DWORD nowTime = timeGetTime();		// 今回のフレームの時間
+
+		frameCount++;	// フレーム数をカウントする
+
+		// 経過時間が１秒を超えたらカウントと時間をリセット
+		if (1000 <= nowTime - prevTime)
+		{
+			prevTime = nowTime;
+			fps = frameCount;
+			frameCount = 0;
+		}
+
+		return fps;
+
+	}
+
 	// バッファを生成。
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBuffer(size_t Size, D3D12_RESOURCE_FLAGS Flags, D3D12_RESOURCE_STATES InitialState, D3D12_HEAP_TYPE HeapType, const wchar_t* Name = nullptr);
 

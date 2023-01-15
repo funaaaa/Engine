@@ -128,6 +128,49 @@ void TitleScene::Update()
 
 	/*===== 更新処理 =====*/
 
+
+	// ImGuiの表示非表示を切り替える。
+	if (Input::Ins()->IsKey(DIK_O) && Input::Ins()->IsKeyTrigger(DIK_P)) {
+		Engine::Ins()->isReservActivateImGui_ = !Engine::Ins()->isReservActivateImGui_;
+	}
+
+	// ImGuiが有効化されていたら。
+	bool isMoveOnly1F = false;
+	if (Engine::Ins()->isActivateImGui_) {
+
+		// タイトルとウィンドウを設定
+		ImGui::Begin("Menu");
+		ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+
+		// FPSを表示
+		ImGui::Text(std::to_string(FHelper::FPS()).c_str());
+
+		// 空白
+		ImGui::Text("");
+
+		// ゲーム一時停止フラグ
+		ImGui::Checkbox("StopGame", &Engine::Ins()->isStopGame_);
+		ImGui::SameLine();
+		ImGui::Checkbox("MoveOnly1F", &isMoveOnly1F);
+
+		// ImGuiの書き込みを終了
+		ImGui::End();
+
+		if (Engine::Ins()->isStopGame_) {
+
+			ImGui::Begin("SecondMenu");
+			ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+			ImGui::End();
+		}
+
+	}
+
+
+	// ゲームの一時停止フラグが立っていたら処理をとばす。
+	if (Engine::Ins()->isStopGame_ && !isMoveOnly1F) return;
+
+
+
 	if (!isFinishSceneTransition_) {
 		SceneTransition::Ins()->Exit();
 
@@ -176,17 +219,6 @@ void TitleScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ = PARAM_A_MIN;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ = PARAM_B_MIN;
 
-	// ImGuiの表示非表示を切り替える。
-	if (Input::Ins()->IsKey(DIK_O) && Input::Ins()->IsKeyTrigger(DIK_P)) {
-		Engine::Ins()->isReservActivateImGui_ = !Engine::Ins()->isReservActivateImGui_;
-	}
-
-	// ImGuiが有効化されていたら。
-	if (Engine::Ins()->isActivateImGui_) {
-
-		ImGui::Text("Debug");
-
-	}
 }
 
 void TitleScene::Draw()
