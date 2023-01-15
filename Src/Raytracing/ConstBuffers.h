@@ -18,6 +18,18 @@ struct CameraConstBufferData {
 
 };
 
+// デバッグ用情報
+struct DebugData {
+
+	int isDebugMesnInfo_;
+	int debugMeshMoveX_;
+	Vec2 pad_;
+
+	// 初期化処理
+	void Init();
+
+};
+
 struct RayLightConstBufferData {
 
 	// ディレクショナルライト用定数バッファ
@@ -78,6 +90,8 @@ struct RayConstBufferData {
 	RayLightConstBufferData light_;
 	// アルファ用
 	AlphaConstBufferData alphaData_;
+	// デバッグ用情報
+	DebugData debug_;
 
 	// 初期化処理
 	void Init();

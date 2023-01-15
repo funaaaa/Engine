@@ -49,6 +49,7 @@ public:
 
 	RayConstBufferData constBufferData_;
 	std::shared_ptr<DynamicConstBuffer> constBuffer_;
+	int debugMesnInfoHandle_;
 
 
 public:

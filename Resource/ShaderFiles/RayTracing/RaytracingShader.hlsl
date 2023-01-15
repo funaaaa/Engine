@@ -1,176 +1,177 @@
-#include "RaytracingShaderHeader.hlsli"
+ï»¿#include "RaytracingShaderHeader.hlsli"
 
 // TLAS
 RaytracingAccelerationStructure gRtScene : register(t0);
+Texture2D<float4> debugMaskTexture : register(t1);
 ConstantBuffer<ConstBufferData> gSceneParam : register(b0);
 
-// ŠeƒŠƒ\[ƒX“™
+// å„ãƒªã‚½ãƒ¼ã‚¹ç­‰
 StructuredBuffer<uint> indexBuffer : register(t0, space1);
 StructuredBuffer<Vertex> vertexBuffer : register(t1, space1);
 StructuredBuffer<Material> material : register(t2, space1);
 Texture2D<float4> texture : register(t3, space1);
 Texture2D<float4> mapTexture : register(t4, space1);
 RWTexture2D<float4> tireMaskTexture : register(u0, space1);
-// ƒTƒ“ƒvƒ‰[
+// ã‚µãƒ³ãƒ—ãƒ©ãƒ¼
 SamplerState smp : register(s0, space1);
 
-// o—ÍæUAV
+// å‡ºåŠ›å…ˆUAV
 RWTexture2D<float4> lightingOutput : register(u0);
 RWTexture2D<float4> colorOutput : register(u1);
 RWTexture2D<float4> denoiseMaskoutput : register(u2);
 RWTexture2D<float4> emissiveOutput : register(u3);
 
-// ‘å‹CU—
+// å¤§æ°—æ•£ä¹±
 float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
 {
 
-    // ƒŒƒCƒŠ[U—’è”
+    // ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±å®šæ•°
     float16_t kr = 0.0025f;
-    // ƒ~[U—’è”
+    // ãƒŸãƒ¼æ•£ä¹±å®šæ•°
     float16_t km = 0.005f;
 
-    // ‘å‹C’†‚Ìü•ª‚ğƒTƒ“ƒvƒŠƒ“ƒO‚·‚é”B
+    // å¤§æ°—ä¸­ã®ç·šåˆ†ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹æ•°ã€‚
     float16_t fSamples = 2.0f;
 
-    // “ä‚ÌF F“I‚É‚Í”–‚ß‚Ì’ƒF
+    // è¬ã®è‰² è‰²çš„ã«ã¯è–„ã‚ã®èŒ¶è‰²
     float16_t3 three_primary_colors = float3(0.68f, 0.55f, 0.44f);
-    // Œõ‚Ì”g’·H
+    // å…‰ã®æ³¢é•·ï¼Ÿ
     float16_t3 v3InvWaveLength = 1.0f / pow(three_primary_colors, 4.0f);
 
-    // ‘å‹CŒ—‚Ìˆê”Ôã‚Ì‚‚³B
+    // å¤§æ°—åœã®ä¸€ç•ªä¸Šã®é«˜ã•ã€‚
     float16_t fOuterRadius = 10250.0f;
-    // ’n‹…‘S‘Ì‚Ì’nã‚Ì‚‚³B
+    // åœ°çƒå…¨ä½“ã®åœ°ä¸Šã®é«˜ã•ã€‚
     float16_t fInnerRadius = 10200.0f;
 
-    // ‘¾—zŒõ‚Ì‹­‚³H
+    // å¤ªé™½å…‰ã®å¼·ã•ï¼Ÿ
     float16_t fESun = 10.0f;
-    // ‘¾—zŒõ‚Ì‹­‚³‚ÉƒŒƒCƒŠ[U—’è”‚ğ‚©‚¯‚ÄƒŒƒCƒŠ[U—‚Ì‹­‚³‚ğ‹‚ß‚Ä‚¢‚éB
+    // å¤ªé™½å…‰ã®å¼·ã•ã«ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±å®šæ•°ã‚’ã‹ã‘ã¦ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±ã®å¼·ã•ã‚’æ±‚ã‚ã¦ã„ã‚‹ã€‚
     float16_t fKrESun = kr * fESun;
-    // ‘¾—zŒõ‚Ì‹­‚³‚Éƒ~[U—’è”‚ğ‚©‚¯‚ÄƒŒƒCƒŠ[U—‚Ì‹­‚³‚ğ‹‚ß‚Ä‚¢‚éB
+    // å¤ªé™½å…‰ã®å¼·ã•ã«ãƒŸãƒ¼æ•£ä¹±å®šæ•°ã‚’ã‹ã‘ã¦ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±ã®å¼·ã•ã‚’æ±‚ã‚ã¦ã„ã‚‹ã€‚
     float16_t fKmESun = km * fESun;
 
-    // ƒŒƒCƒŠ[U—’è”‚É‰~ü—¦‚ğ‚©‚¯‚Ä‚¢‚é‚Ì‚¾‚ªAŒÀ‚è‚È‚­0‚É‹ß‚¢’lB
+    // ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±å®šæ•°ã«å††å‘¨ç‡ã‚’ã‹ã‘ã¦ã„ã‚‹ã®ã ãŒã€é™ã‚Šãªã0ã«è¿‘ã„å€¤ã€‚
     float16_t fKr4PI = kr * 4.0f * PI;
-    // ƒ~[U—’è”‚É‰~ü—¦‚ğ‚©‚¯‚Ä‚¢‚é‚Ì‚¾‚ªAƒ~[U—’è”‚Í0‚È‚Ì‚Å‚±‚ê‚Ì’l‚Í0B
+    // ãƒŸãƒ¼æ•£ä¹±å®šæ•°ã«å††å‘¨ç‡ã‚’ã‹ã‘ã¦ã„ã‚‹ã®ã ãŒã€ãƒŸãƒ¼æ•£ä¹±å®šæ•°ã¯0ãªã®ã§ã“ã‚Œã®å€¤ã¯0ã€‚
     float16_t fKm4PI = km * 4.0f * PI;
 
-    // ’n‹…‘S‘Ì‚Å‚Ì‘å‹C‚ÌŠ„‡B
+    // åœ°çƒå…¨ä½“ã§ã®å¤§æ°—ã®å‰²åˆã€‚
     float16_t fScale = 1.0f / (fOuterRadius - fInnerRadius);
-    // •½‹Ï‘å‹C–§“x‚ğ‹‚ß‚é‚‚³B
+    // å¹³å‡å¤§æ°—å¯†åº¦ã‚’æ±‚ã‚ã‚‹é«˜ã•ã€‚
     float16_t fScaleDepth = 0.35f;
-    // ’n‹…‘S‘Ì‚Å‚Ì‘å‹C‚ÌŠ„‡‚ğ•½‹Ï‘å‹C–§“x‚ÅŠ„‚Á‚½’lB
+    // åœ°çƒå…¨ä½“ã§ã®å¤§æ°—ã®å‰²åˆã‚’å¹³å‡å¤§æ°—å¯†åº¦ã§å‰²ã£ãŸå€¤ã€‚
     float16_t fScaleOverScaleDepth = fScale / fScaleDepth;
 
-    // U—’è”‚ğ‹‚ß‚éÛ‚Ég—p‚·‚é’lB
+    // æ•£ä¹±å®šæ•°ã‚’æ±‚ã‚ã‚‹éš›ã«ä½¿ç”¨ã™ã‚‹å€¤ã€‚
     float16_t g = -0.999f;
-    // U—’è”‚ğ‹‚ß‚éÛ‚Ég—p‚·‚é’l‚ğ“ñæ‚µ‚½‚à‚ÌB‚È‚ºB
+    // æ•£ä¹±å®šæ•°ã‚’æ±‚ã‚ã‚‹éš›ã«ä½¿ç”¨ã™ã‚‹å€¤ã‚’äºŒä¹—ã—ãŸã‚‚ã®ã€‚ãªãœã€‚
     float16_t g2 = g * g;
 
-    // “–‚½‚Á‚½“V‹…‚Ìƒ[ƒ‹ƒhÀ•W
+    // å½“ãŸã£ãŸå¤©çƒã®ãƒ¯ãƒ¼ãƒ«ãƒ‰åº§æ¨™
     float3 worldPos = normalize(pos) * fOuterRadius;
     worldPos = IntersectionPos(normalize(worldPos), float3(0.0, fInnerRadius, 0.0), fOuterRadius);
 
-    // ƒJƒƒ‰À•W Œ³ŒvZ®‚¾‚Æ’†SŒÅ’è‚É‚È‚Á‚Ä‚µ‚Ü‚Á‚Ä‚¢‚»‚¤B
+    // ã‚«ãƒ¡ãƒ©åº§æ¨™ å…ƒè¨ˆç®—å¼ã ã¨ä¸­å¿ƒå›ºå®šã«ãªã£ã¦ã—ã¾ã£ã¦ã„ãã†ã€‚
     float3 v3CameraPos = float3(0.0, fInnerRadius + 1.0f, 0.0f);
 
-    // ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒg‚ÌêŠ‚ğ‹‚ß‚éB
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆã®å ´æ‰€ã‚’æ±‚ã‚ã‚‹ã€‚
     float3 dirLightPos = -gSceneParam.light.dirLight.lightDir * 1000000.0f;
 
-    // ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒg‚Ö‚Ì•ûŒü‚ğ‹‚ß‚éB
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆã¸ã®æ–¹å‘ã‚’æ±‚ã‚ã‚‹ã€‚
     float16_t3 v3LightDir = normalize(dirLightPos - worldPos);
 
-    // “V‹…ã’¸“_‚©‚çƒJƒƒ‰‚Ü‚Å‚ÌƒxƒNƒgƒ‹(Œõ‚ª‘å‹CŒ—‚É“Ë“ü‚µ‚½“_‚©‚çƒJƒƒ‰‚Ü‚Å‚ÌŒõ‚ÌƒxƒNƒgƒ‹)
+    // å¤©çƒä¸Šé ‚ç‚¹ã‹ã‚‰ã‚«ãƒ¡ãƒ©ã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«(å…‰ãŒå¤§æ°—åœã«çªå…¥ã—ãŸç‚¹ã‹ã‚‰ã‚«ãƒ¡ãƒ©ã¾ã§ã®å…‰ã®ãƒ™ã‚¯ãƒˆãƒ«)
     float3 v3Ray = worldPos - v3CameraPos;
 
-    // ‘å‹C‚É“Ë“ü‚µ‚Ä‚©‚ç‚Ì“_‚ÆƒJƒƒ‰‚Ü‚Å‚Ì‹——£B
+    // å¤§æ°—ã«çªå…¥ã—ã¦ã‹ã‚‰ã®ç‚¹ã¨ã‚«ãƒ¡ãƒ©ã¾ã§ã®è·é›¢ã€‚
     float16_t fFar = length(v3Ray);
 
-    // ³‹K‰»‚³‚ê‚½ŠgUŒõ‚ª—ˆ‚½•ûŒüB
+    // æ­£è¦åŒ–ã•ã‚ŒãŸæ‹¡æ•£å…‰ãŒæ¥ãŸæ–¹å‘ã€‚
     v3Ray /= fFar;
 
-    // ƒTƒ“ƒvƒŠƒ“ƒO‚·‚én“_À•W ‘—¿‚¾‚ÆA‚Ì’¸“_
+    // ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹å§‹ç‚¹åº§æ¨™ è³‡æ–™ã ã¨Aã®é ‚ç‚¹
     float3 v3Start = v3CameraPos;
-    // ƒTƒ“ƒvƒ‹‚Å‚ÍƒJƒƒ‰‚ÌˆÊ’u‚ª(0,Radius,0)‚È‚Ì‚ÅƒJƒƒ‰‚Ì‚‚³B‚Ç‚ÌˆÊ’u‚ÉˆÚ“®‚µ‚Ä‚à’n‹…‹“_‚ÅŒ©‚ê‚ÎŒ´“_(’n‹…‚Ì’†S)‚©‚ç‚Ì‚‚³B
+    // ã‚µãƒ³ãƒ—ãƒ«ã§ã¯ã‚«ãƒ¡ãƒ©ã®ä½ç½®ãŒ(0,Radius,0)ãªã®ã§ã‚«ãƒ¡ãƒ©ã®é«˜ã•ã€‚ã©ã®ä½ç½®ã«ç§»å‹•ã—ã¦ã‚‚åœ°çƒè¦–ç‚¹ã§è¦‹ã‚Œã°åŸç‚¹(åœ°çƒã®ä¸­å¿ƒ)ã‹ã‚‰ã®é«˜ã•ã€‚
     float16_t fCameraHeight = length(v3CameraPos);
-    // ’nã‚©‚ç‚Ì–@ü(?)‚ÆŠgUŒõ‚ª‚â‚Á‚Ä‚«‚½Šp“x‚Ì“àÏ‚É‚æ‚Á‚Ä‹‚ß‚ç‚ê‚½Šp“x‚ğƒJƒƒ‰‚Ì‚‚³‚ÅŠ„‚éB
+    // åœ°ä¸Šã‹ã‚‰ã®æ³•ç·š(?)ã¨æ‹¡æ•£å…‰ãŒã‚„ã£ã¦ããŸè§’åº¦ã®å†…ç©ã«ã‚ˆã£ã¦æ±‚ã‚ã‚‰ã‚ŒãŸè§’åº¦ã‚’ã‚«ãƒ¡ãƒ©ã®é«˜ã•ã§å‰²ã‚‹ã€‚
     float16_t fStartAngle = dot(v3Ray, v3Start) / fCameraHeight;
-    // ŠJn’n“_‚Ì‚‚³‚É•½‹Ï‘å‹C–§“x‚ğ‚©‚¯‚½’l‚Ìw”‚ğ‹‚ß‚éH
+    // é–‹å§‹åœ°ç‚¹ã®é«˜ã•ã«å¹³å‡å¤§æ°—å¯†åº¦ã‚’ã‹ã‘ãŸå€¤ã®æŒ‡æ•°ã‚’æ±‚ã‚ã‚‹ï¼Ÿ
     float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
-    // ŠJn’n“_‚Ì‚È‚É‚©‚ÌŠp“x‚ÌƒIƒtƒZƒbƒgB
+    // é–‹å§‹åœ°ç‚¹ã®ãªã«ã‹ã®è§’åº¦ã®ã‚ªãƒ•ã‚»ãƒƒãƒˆã€‚
     float fStartOffset = fStartDepth * Scale(fStartAngle);
 
-    // ƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒgŠÔ‚Ì’·‚³B
+    // ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆé–“ã®é•·ã•ã€‚
     float fSampleLength = fFar / fSamples;
-    // ƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒgŠÔ‚Ì’·‚³‚É’n‹…‚Ì‘å‹C‚ÌŠ„‡‚ğ‚©‚¯‚éB
+    // ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆé–“ã®é•·ã•ã«åœ°çƒã®å¤§æ°—ã®å‰²åˆã‚’ã‹ã‘ã‚‹ã€‚
     float fScaledLength = fSampleLength * fScale;
-    // ŠgUŒõ‚ª—ˆ‚½•ûŒü‚ÉƒTƒ“ƒvƒ‹‚Ì’·‚³‚ğ‚©‚¯‚é‚±‚Æ‚ÅƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒgŠÔ‚ÌƒŒƒC‚ğƒxƒNƒgƒ‹‚ğ‹‚ß‚éB
+    // æ‹¡æ•£å…‰ãŒæ¥ãŸæ–¹å‘ã«ã‚µãƒ³ãƒ—ãƒ«ã®é•·ã•ã‚’ã‹ã‘ã‚‹ã“ã¨ã§ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆé–“ã®ãƒ¬ã‚¤ã‚’ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ±‚ã‚ã‚‹ã€‚
     float16_t3 v3SampleRay = v3Ray * fSampleLength;
-    // Å‰‚ÌƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚ğ‹‚ß‚éB0.5‚ğ‚©‚¯‚Ä‚é‚Ì‚Í­‚µ“®‚©‚·‚½‚ßH
+    // æœ€åˆã®ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã‚’æ±‚ã‚ã‚‹ã€‚0.5ã‚’ã‹ã‘ã¦ã‚‹ã®ã¯å°‘ã—å‹•ã‹ã™ãŸã‚ï¼Ÿ
     float3 v3SamplePoint = v3Start + v3SampleRay * 0.5f;
 
-    // Fî•ñ
+    // è‰²æƒ…å ±
     float16_t3 v3FrontColor = 0.0f;
     for (int n = 0; n < int(fSamples); ++n)
     {
-        // ƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚Ì‚‚³B‚Ç‚¿‚ç‚É‚¹‚æŒ´“_‚Í’n‹…‚Ì’†S‚È‚Ì‚ÅA‚±‚Ì’l‚ªŒ»İˆÊ’u‚Ì‚‚³‚É‚È‚éB
+        // ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã®é«˜ã•ã€‚ã©ã¡ã‚‰ã«ã›ã‚ˆåŸç‚¹ã¯åœ°çƒã®ä¸­å¿ƒãªã®ã§ã€ã“ã®å€¤ãŒç¾åœ¨ä½ç½®ã®é«˜ã•ã«ãªã‚‹ã€‚
         float fHeight = length(v3SamplePoint);
-        // ’nã‚©‚çƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚Ì‚‚³‚Ì·‚É•½‹Ï‘å‹C–§“x‚ğ‚©‚¯‚½‚à‚ÌB  ‚“x‚É‰‚¶‚Ä‘å‹C–§“x‚ªw”“I‚É¬‚³‚­‚È‚Á‚Ä‚¢‚­‚Ì‚ğ•\Œ»‚µ‚Ä‚¢‚éH
+        // åœ°ä¸Šã‹ã‚‰ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã®é«˜ã•ã®å·®ã«å¹³å‡å¤§æ°—å¯†åº¦ã‚’ã‹ã‘ãŸã‚‚ã®ã€‚  é«˜åº¦ã«å¿œã˜ã¦å¤§æ°—å¯†åº¦ãŒæŒ‡æ•°çš„ã«å°ã•ããªã£ã¦ã„ãã®ã‚’è¡¨ç¾ã—ã¦ã„ã‚‹ï¼Ÿ
         float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));
-        // ’nã‚©‚çŒ©‚½ƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚Ì–@ü‚ÆƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒg‚Ì•ûŒü‚ÌŠp“x‚ğ‹‚ß‚ÄAƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚Ì‚‚³‚ÅŠ„‚éB
-        float fLightAngle = dot(v3LightDir, v3SamplePoint) / fHeight; // ‚±‚¢‚Â‚Ì’l‚ª-1‚É‚È‚é¨Scale“à‚ÌŒvZ‚Åexp‚Ìˆø”‚ª43‚É‚È‚èA‚Æ‚Ä‚Â‚à‚È‚­‚Å‚©‚¢’l‚ª“ü‚éB ¨ -‚É‚È‚ç‚È‚¢‚æ‚¤‚É‚·‚éH
-        // ’nã‚©‚çŒ©‚½ƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚Ì–@ü‚ÆU—Œõ‚ª”ò‚ñ‚Å‚«‚Ä‚¢‚é•û‹æ‚ÌŠp“x‚ğ‹‚ß‚ÄAƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚Ì‚‚³‚ÅŠ„‚éB
+        // åœ°ä¸Šã‹ã‚‰è¦‹ãŸã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã®æ³•ç·šã¨ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆã®æ–¹å‘ã®è§’åº¦ã‚’æ±‚ã‚ã¦ã€ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã®é«˜ã•ã§å‰²ã‚‹ã€‚
+        float fLightAngle = dot(v3LightDir, v3SamplePoint) / fHeight; // ã“ã„ã¤ã®å€¤ãŒ-1ã«ãªã‚‹â†’Scaleå†…ã®è¨ˆç®—ã§expã®å¼•æ•°ãŒ43ã«ãªã‚Šã€ã¨ã¦ã¤ã‚‚ãªãã§ã‹ã„å€¤ãŒå…¥ã‚‹ã€‚ â†’ -ã«ãªã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹ï¼Ÿ
+        // åœ°ä¸Šã‹ã‚‰è¦‹ãŸã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã®æ³•ç·šã¨æ•£ä¹±å…‰ãŒé£›ã‚“ã§ãã¦ã„ã‚‹æ–¹åŒºã®è§’åº¦ã‚’æ±‚ã‚ã¦ã€ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã®é«˜ã•ã§å‰²ã‚‹ã€‚
         float fCameraAngle = dot(v3Ray, v3SamplePoint) / fHeight;
-        // U—ŒõH
+        // æ•£ä¹±å…‰ï¼Ÿ
         float fScatter = (fStartOffset + fDepth * (Scale(fLightAngle * 1) - Scale(fCameraAngle * 1)));
 
-        // F‚²‚Æ‚ÌŒ¸Š—¦H
+        // è‰²ã”ã¨ã®æ¸›è¡°ç‡ï¼Ÿ
         float16_t3 v3Attenuate = exp(-fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
-        // ƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚ÌˆÊ’u‚ğl—¶‚µ‚ÄU—‚µ‚½F‚ğ‹‚ß‚éB
+        // ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã®ä½ç½®ã‚’è€ƒæ…®ã—ã¦æ•£ä¹±ã—ãŸè‰²ã‚’æ±‚ã‚ã‚‹ã€‚
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
-        // ƒTƒ“ƒvƒ‹ƒ|ƒCƒ“ƒg‚ğˆÚ“®‚³‚¹‚éB
+        // ã‚µãƒ³ãƒ—ãƒ«ãƒã‚¤ãƒ³ãƒˆã‚’ç§»å‹•ã•ã›ã‚‹ã€‚
         v3SamplePoint += v3SampleRay;
 
     }
 
-    // ƒŒƒCƒŠ[U—‚Ég—p‚·‚éFî•ñ
+    // ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±ã«ä½¿ç”¨ã™ã‚‹è‰²æƒ…å ±
     float16_t3 c0 = v3FrontColor * (v3InvWaveLength * fKrESun);
-    // ƒ~[U—‚Ég—p‚·‚éFî•ñ
+    // ãƒŸãƒ¼æ•£ä¹±ã«ä½¿ç”¨ã™ã‚‹è‰²æƒ…å ±
     float16_t3 c1 = v3FrontColor * fKmESun;
-    // ƒJƒƒ‰À•W‚©‚ç“V‹…‚ÌÀ•W‚Ö‚ÌƒxƒNƒgƒ‹B
+    // ã‚«ãƒ¡ãƒ©åº§æ¨™ã‹ã‚‰å¤©çƒã®åº§æ¨™ã¸ã®ãƒ™ã‚¯ãƒˆãƒ«ã€‚
     float3 v3Direction = v3CameraPos - worldPos;
 
     //float fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
     float16_t fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
     float16_t fcos2 = fcos * fcos;
 
-    // ƒŒƒCƒŠ[U—‚Ì–¾‚é‚³B
+    // ãƒ¬ã‚¤ãƒªãƒ¼æ•£ä¹±ã®æ˜ã‚‹ã•ã€‚
     float16_t rayleighPhase = 0.75f * (1.0f + fcos2);
-    // ƒ~[U—‚Ì–¾‚é‚³B
+    // ãƒŸãƒ¼æ•£ä¹±ã®æ˜ã‚‹ã•ã€‚
     float16_t miePhase = 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fcos2) / pow(1.0f + g2 - 2.0f * g * fcos, 1.5f);
 
-    // ƒ~[U—‚ÌF‚ğ•Û‘¶B
+    // ãƒŸãƒ¼æ•£ä¹±ã®è‰²ã‚’ä¿å­˜ã€‚
     mieColor = c0 * rayleighPhase;
 
-    // ÅIŒ‹‰Ê‚ÌF
+    // æœ€çµ‚çµæœã®è‰²
     float16_t3 col = 1.0f;
     col.rgb = rayleighPhase * c0 + miePhase * c1;
 
-    // Œğ“_‚Ü‚Å‚ÌƒxƒNƒgƒ‹‚Æ‘¾—z‚Ü‚Å‚ÌƒxƒNƒgƒ‹‚ª‹ß‚©‚Á‚½‚ç”’F‚É•`‰æ‚·‚éB
+    // äº¤ç‚¹ã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«ã¨å¤ªé™½ã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«ãŒè¿‘ã‹ã£ãŸã‚‰ç™½è‰²ã«æç”»ã™ã‚‹ã€‚
     int sunWhite = step(0.999f, dot(normalize(dirLightPos - v3CameraPos), normalize(worldPos - v3CameraPos)));
     
     return col + float16_t3(sunWhite, sunWhite, sunWhite);
 
 }
 
-// ‘¾—zŒõ‚Ì‰eƒ`ƒFƒbƒN—pƒŒƒC‚Ì€”õŠÖ” –ß‚è’l‚Í‘¾—zŒõ‚ÌF
+// å¤ªé™½å…‰ã®å½±ãƒã‚§ãƒƒã‚¯ç”¨ãƒ¬ã‚¤ã®æº–å‚™é–¢æ•° æˆ»ã‚Šå€¤ã¯å¤ªé™½å…‰ã®è‰²
 float ShootDirShadow(Vertex vtx, float length)
 {
     float3 worldPosition = mul(float4(vtx.Position, 1), ObjectToWorld4x3());
 
-    // •ÀsŒõŒ¹‚ÌÀ•W‚ğ‰¼‚Å‹‚ß‚éB
+    // ä¸¦è¡Œå…‰æºã®åº§æ¨™ã‚’ä»®ã§æ±‚ã‚ã‚‹ã€‚
     float3 dirLightPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
 
-    // •ÀsŒõŒ¹‚Ü‚Å‚ÌƒxƒNƒgƒ‹B
+    // ä¸¦è¡Œå…‰æºã¾ã§ã®ãƒ™ã‚¯ãƒˆãƒ«ã€‚
     float3 dirLightVec = dirLightPos - worldPosition;
     dirLightVec = normalize(dirLightVec);
 
@@ -180,7 +181,7 @@ float ShootDirShadow(Vertex vtx, float length)
     
 }
 
-// RayGenerationƒVƒF[ƒ_[
+// RayGenerationã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 [shader("raygeneration")]
 void mainRayGen()
 {
@@ -194,7 +195,7 @@ void mainRayGen()
     matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
     matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
 
-    // ƒŒƒC‚Ìİ’è
+    // ãƒ¬ã‚¤ã®è¨­å®š
     RayDesc rayDesc;
     rayDesc.Origin = mul(mtxViewInv, float4(0, 0, 0, 1)).xyz;
 
@@ -205,7 +206,7 @@ void mainRayGen()
     rayDesc.TMin = 0;
     rayDesc.TMax = 300000;
 
-    // ƒyƒCƒ[ƒh‚Ìİ’è
+    // ãƒšã‚¤ãƒ­ãƒ¼ãƒ‰ã®è¨­å®š
     Payload payloadData;
     payloadData.impactAmount_ = 1.0f;
     payloadData.rayID_ = CHS_IDENTIFICATION_RAYID_DEF;
@@ -220,17 +221,17 @@ void mainRayGen()
     payloadData.roughnessOffset_ = 1.0f;
     payloadData.pad_ = 1.0f;
 
-    // TransRay‚É•K—v‚Èİ’è‚ğì¬
+    // TransRayã«å¿…è¦ãªè¨­å®šã‚’ä½œæˆ
     uint rayMask = 0xFF;
     
     RAY_FLAG flag = RAY_FLAG_NONE;
     flag |= RAY_FLAG_CULL_BACK_FACING_TRIANGLES;
     
-    // ƒŒƒC‚ğ”­Ë
+    // ãƒ¬ã‚¤ã‚’ç™ºå°„
     TraceRay(
     gRtScene, // TLAS
-    flag, // Õ“Ë”»’è§Œä‚ğ‚·‚éƒtƒ‰ƒO
-    rayMask, // Õ“Ë”»’è‘ÎÛ‚Ìƒ}ƒXƒN’l
+    flag, // è¡çªåˆ¤å®šåˆ¶å¾¡ã‚’ã™ã‚‹ãƒ•ãƒ©ã‚°
+    rayMask, // è¡çªåˆ¤å®šå¯¾è±¡ã®ãƒã‚¹ã‚¯å€¤
     0, // ray index
     1, // MultiplierForGeometryContrib
     0, // miss index
@@ -244,7 +245,7 @@ void mainRayGen()
     
     payloadData.emissive_ += payloadData.light_ * step(2.0f, length(payloadData.light_));
 
-    // Œ‹‰ÊŠi”[
+    // çµæœæ ¼ç´
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);
     colorOutput[launchIndex.xy] = float4((payloadData.color_), payloadData.ao_);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
@@ -252,7 +253,7 @@ void mainRayGen()
 
 }
 
-// missƒVƒF[ƒ_[ ƒŒƒC‚ªƒqƒbƒg‚µ‚È‚©‚Á‚½‚ÉŒÄ‚Î‚ê‚éƒVƒF[ƒ_[
+// missã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ ãƒ¬ã‚¤ãŒãƒ’ãƒƒãƒˆã—ãªã‹ã£ãŸæ™‚ã«å‘¼ã°ã‚Œã‚‹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 [shader("miss")]
 void mainMS(inout Payload PayloadData)
 {
@@ -260,56 +261,56 @@ void mainMS(inout Payload PayloadData)
     if (PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW || PayloadData.rayID_ == CHS_IDENTIFICATION_RAYID_AO_SHADOW)
         return;
     
-    // ƒyƒCƒ[ƒhó‚¯æ‚è—p•Ï”B
+    // ãƒšã‚¤ãƒ­ãƒ¼ãƒ‰å—ã‘å–ã‚Šç”¨å¤‰æ•°ã€‚
     Payload payloadBuff = PayloadData;
     
-    // ‰e‹¿“x‚ğ‚©‚¯‚Â‚ÂF‚ğ•Û‘¶B
+    // å½±éŸ¿åº¦ã‚’ã‹ã‘ã¤ã¤è‰²ã‚’ä¿å­˜ã€‚
     float3 mieColor = float3(1, 1, 1);
     payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
     payloadBuff.color_ += AtmosphericScattering(WorldRayOrigin() + WorldRayDirection() * RayTCurrent(), mieColor) * payloadBuff.impactAmount_ * payloadBuff.impactAmount_;
     payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
         
-    // ƒ}ƒXƒN‚ÌF‚ğ”’‚­‚·‚éB(ƒ‰ƒCƒgƒŠ[ƒN‘Îô‚Å‘¼‚Ìƒ}ƒXƒN‚ÌF‚Æ‚©‚Ô‚ç‚È‚¢‚æ‚¤‚É‚·‚é‚½‚ßB)
+    // ãƒã‚¹ã‚¯ã®è‰²ã‚’ç™½ãã™ã‚‹ã€‚(ãƒ©ã‚¤ãƒˆãƒªãƒ¼ã‚¯å¯¾ç­–ã§ä»–ã®ãƒã‚¹ã‚¯ã®è‰²ã¨ã‹ã¶ã‚‰ãªã„ã‚ˆã†ã«ã™ã‚‹ãŸã‚ã€‚)
     payloadBuff.denoiseMask_ = float3(1, 1, 1);
         
-    // ƒTƒ“ƒvƒŠƒ“ƒO‚µ‚½“_‚Ì‹P“x‚ğæ“¾‚·‚éB
+    // ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã—ãŸç‚¹ã®è¼åº¦ã‚’å–å¾—ã™ã‚‹ã€‚
     float t = dot(payloadBuff.color_.xyz, float3(0.2125f, 0.7154f, 0.0721f));
         
-    // ‰e‹¿“x‚ğ0‚É‚·‚éB
+    // å½±éŸ¿åº¦ã‚’0ã«ã™ã‚‹ã€‚
     payloadBuff.impactAmount_ = 0.0f;
         
     PayloadData = payloadBuff;
 
 }
 
-// ƒVƒƒƒhƒE—pmissƒVƒF[ƒ_[
+// ã‚·ãƒ£ãƒ‰ã‚¦ç”¨missã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 [shader("miss")]
 void shadowMS(inout Payload payload)
 {
-    // ‰½‚É‚à“–‚½‚Á‚Ä‚¢‚È‚¢‚Æ‚¢‚¤‚±‚Æ‚È‚Ì‚ÅA‰e‚Í¶¬‚µ‚È‚¢B
+    // ä½•ã«ã‚‚å½“ãŸã£ã¦ã„ãªã„ã¨ã„ã†ã“ã¨ãªã®ã§ã€å½±ã¯ç”Ÿæˆã—ãªã„ã€‚
     payload.impactAmount_ = 1.0f;
 }
 
-// ƒ‰ƒCƒeƒBƒ“ƒO‘Oˆ—
+// ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°å‰å‡¦ç†
 bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute Attrib, float3 WorldPos, float3 WorldNormal, float3 NormalMap, inout float4 TexColor, uint InstanceID)
 {
     
-    // ƒyƒCƒ[ƒhó‚¯æ‚è—p•Ï”B
+    // ãƒšã‚¤ãƒ­ãƒ¼ãƒ‰å—ã‘å–ã‚Šç”¨å¤‰æ•°ã€‚
     Payload payloadBuff = PayloadData;
     
-    // ƒfƒmƒCƒY—p‚Ìƒ}ƒXƒN‚Ég—p‚·‚éƒeƒNƒXƒ`ƒƒ‚É–@ü‚ÌF‚ÆInstanceIndex‚ğ‚©‚¯‚½‚à‚Ì‚ğ‘‚«‚ŞB
+    // ãƒ‡ãƒã‚¤ã‚ºç”¨ã®ãƒã‚¹ã‚¯ã«ä½¿ç”¨ã™ã‚‹ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«æ³•ç·šã®è‰²ã¨InstanceIndexã‚’ã‹ã‘ãŸã‚‚ã®ã‚’æ›¸ãè¾¼ã‚€ã€‚
     if (payloadBuff.recursive_ == 1)
     {
         payloadBuff.denoiseMask_ = (NormalMap);
     }
     
-    // ƒGƒ~ƒbƒVƒu‚¾‚Á‚½‚çƒGƒ~ƒbƒVƒuƒ}ƒbƒv‚É‘‚«‚ŞB
+    // ã‚¨ãƒŸãƒƒã‚·ãƒ–ã ã£ãŸã‚‰ã‚¨ãƒŸãƒƒã‚·ãƒ–ãƒãƒƒãƒ—ã«æ›¸ãè¾¼ã‚€ã€‚
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_EMISSIVE)
     {
         payloadBuff.emissive_ += TexColor * payloadBuff.impactAmount_;
     }
     
-    // InstanceID‚ªCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK‚¾‚Á‚½‚çƒeƒNƒXƒ`ƒƒ‚ÉF‚ğ‰ÁZB
+    // InstanceIDãŒCHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASKã ã£ãŸã‚‰ãƒ†ã‚¯ã‚¹ãƒãƒ£ã«è‰²ã‚’åŠ ç®—ã€‚
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_GI_TIREMASK || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK || InstanceID == CHS_IDENTIFICATION_INSTANCE_DEF_TIREMASK_AO)
     {
         float4 tiremasktex = (float4) tireMaskTexture[uint2((uint) (Vtx.subUV.x * 4096.0f), (uint) (Vtx.subUV.y * 4096.0f))];
@@ -317,7 +318,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         TexColor = normalize(TexColor);
     }
     
-    // “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒgInstanceID‚ªƒeƒNƒXƒ`ƒƒ‚ÌF‚ğ‚»‚Ì‚Ü‚Ü•Ô‚· or ƒ‰ƒCƒg—pƒIƒuƒWƒFƒNƒg‚¾‚Á‚½‚ç
+    // å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆInstanceIDãŒãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’ãã®ã¾ã¾è¿”ã™ or ãƒ©ã‚¤ãƒˆç”¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã ã£ãŸã‚‰
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR || InstanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT)
     {
         payloadBuff.light_ += float3(1.0f, 1.0f, 1.0f) * payloadBuff.impactAmount_;
@@ -325,7 +326,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
         payloadBuff.ao_ += 1.0f * payloadBuff.impactAmount_;
         payloadBuff.emissive_ += payloadBuff.color_ * payloadBuff.impactAmount_;
         
-        // ‰e‹¿“x‚ğ0‚É‚·‚éB
+        // å½±éŸ¿åº¦ã‚’0ã«ã™ã‚‹ã€‚
         payloadBuff.impactAmount_ = 0.0f;
         
         PayloadData = payloadBuff;
@@ -339,7 +340,7 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
     
 }
 
-// UE4‚ÌGGX•ª•z
+// UE4ã®GGXåˆ†å¸ƒ
 float DistributionGGX(float16_t Alpha, float16_t NdotH)
 {
     float16_t alpha2 = Alpha * Alpha;
@@ -347,7 +348,7 @@ float DistributionGGX(float16_t Alpha, float16_t NdotH)
     return alpha2 / (PI * t * t);
 }
 
-// Schlick‚É‚æ‚éƒtƒŒƒlƒ‹‚Ì‹ß— 
+// Schlickã«ã‚ˆã‚‹ãƒ•ãƒ¬ãƒãƒ«ã®è¿‘ä¼¼ 
 float16_t SchlickFresnel(float16_t F0, float16_t F90, float16_t Cosine)
 {
     float16_t m = saturate(1.0f - Cosine);
@@ -363,24 +364,24 @@ float16_t3 SchlickFresnel3(float16_t3 F0, float16_t3 F90, float16_t Cosine)
     return lerp(F0, F90, m5);
 }
 
-// ƒfƒBƒYƒj[‚ÌƒtƒŒƒlƒ‹ŒvZ
+// ãƒ‡ã‚£ã‚ºãƒ‹ãƒ¼ã®ãƒ•ãƒ¬ãƒãƒ«è¨ˆç®—
 float16_t3 DisneyFresnel(float16_t LdotH, float16_t3 BaseColor)
 {
     
-    // ‹P“x
+    // è¼åº¦
     float16_t luminance = 0.3f * BaseColor.r + 0.6f * BaseColor.g + 0.1f * BaseColor.b;
-    // F‡‚¢
+    // è‰²åˆã„
     float16_t3 tintColor = BaseColor / luminance;
-    // ”ñ‹à‘®‚Ì‹¾–Ê”½ËF‚ğŒvZ
+    // éé‡‘å±ã®é¡é¢åå°„è‰²ã‚’è¨ˆç®—
     float16_t3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
-    // metalness‚É‚æ‚éF•âŠ® ‹à‘®‚Ìê‡‚Íƒx[ƒXƒJƒ‰[
+    // metalnessã«ã‚ˆã‚‹è‰²è£œå®Œ é‡‘å±ã®å ´åˆã¯ãƒ™ãƒ¼ã‚¹ã‚«ãƒ©ãƒ¼
     float16_t3 specularColor = lerp(nonMetalColor, BaseColor, material[0].metalness_);
-    // NdotH‚ÌŠ„‡‚ÅSchlickFresnel•âŠÔ
+    // NdotHã®å‰²åˆã§SchlickFresnelè£œé–“
     return SchlickFresnel3(specularColor, float16_t3(1.0f, 1.0f, 1.0f), LdotH);
     
 }
 
-// UE4‚ÌSmithƒ‚ƒfƒ‹
+// UE4ã®Smithãƒ¢ãƒ‡ãƒ«
 float16_t GeometricSmith(float16_t Cosine)
 {
     float16_t k = (material[0].roughness_ + 1.0f);
@@ -388,113 +389,113 @@ float16_t GeometricSmith(float16_t Cosine)
     return Cosine / (Cosine * (1.0f - k) + k);
 }
 
-// ‹¾–Ê”½Ë‚ÌŒvZ
+// é¡é¢åå°„ã®è¨ˆç®—
 float16_t3 CookTorranceSpecular(float16_t NdotL, float16_t NdotV, float16_t NdotH, float16_t LdotH, float16_t3 BaseColor)
 {
     
-    // D€(•ª•z:Distribution)
+    // Dé …(åˆ†å¸ƒ:Distribution)
     float16_t Ds = DistributionGGX(material[0].roughness_ * material[0].roughness_, NdotH);
     
-    // F€(ƒtƒŒƒlƒ‹:Fresnel)
+    // Fé …(ãƒ•ãƒ¬ãƒãƒ«:Fresnel)
     float16_t3 Fs = DisneyFresnel(LdotH, BaseColor);
     
-    // G€(Šô‰½Œ¸Š:Geometry attenuation)
+    // Gé …(å¹¾ä½•æ¸›è¡°:Geometry attenuation)
     float16_t Gs = GeometricSmith(NdotL) * GeometricSmith(NdotV);
     
-    // M€(•ª•ê)
+    // Mé …(åˆ†æ¯)
     float16_t m = 4.0f * NdotL * NdotV;
     
-    // ‡¬‚µ‚Ä‹¾–Ê”½Ë‚ÌF‚ğ“¾‚éB
+    // åˆæˆã—ã¦é¡é¢åå°„ã®è‰²ã‚’å¾—ã‚‹ã€‚
     return Ds * Fs * Gs / m;
     
 }
 
-// ‘o•ûŒü”½Ë•ª•zŠÖ”
+// åŒæ–¹å‘åå°„åˆ†å¸ƒé–¢æ•°
 float16_t3 BRDF(float16_t3 LightVec, float16_t3 ViewVec, float16_t3 Normal, float16_t3 BaseColor)
 {
-    // –@ü‚Æƒ‰ƒCƒg•ûŒü‚Ì“àÏ
+    // æ³•ç·šã¨ãƒ©ã‚¤ãƒˆæ–¹å‘ã®å†…ç©
     float16_t NdotL = dot(Normal, LightVec);
     
-    // –@ü‚ÆƒJƒƒ‰•ûŒü‚Ì“àÏ
+    // æ³•ç·šã¨ã‚«ãƒ¡ãƒ©æ–¹å‘ã®å†…ç©
     float16_t NdotV = dot(Normal, ViewVec);
     
-    // ƒ‰ƒCƒg•ûŒü‚ÆƒJƒƒ‰•ûŒü‚Ì’†ŠÔ‚Å‚ ‚éƒn[ƒtƒxƒNƒgƒ‹
+    // ãƒ©ã‚¤ãƒˆæ–¹å‘ã¨ã‚«ãƒ¡ãƒ©æ–¹å‘ã®ä¸­é–“ã§ã‚ã‚‹ãƒãƒ¼ãƒ•ãƒ™ã‚¯ãƒˆãƒ«
     float16_t3 floatVec = normalize(LightVec + ViewVec);
     
-    // –@ü‚Æƒn[ƒtƒxƒNƒgƒ‹‚Ì“àÏ
+    // æ³•ç·šã¨ãƒãƒ¼ãƒ•ãƒ™ã‚¯ãƒˆãƒ«ã®å†…ç©
     float16_t NdotH = dot(Normal, floatVec);
     
-    // ƒ‰ƒCƒg‚Æƒn[ƒtƒxƒNƒgƒ‹‚Ì“àÏ
+    // ãƒ©ã‚¤ãƒˆã¨ãƒãƒ¼ãƒ•ãƒ™ã‚¯ãƒˆãƒ«ã®å†…ç©
     float16_t LdotH = dot(LightVec, floatVec);
     
-    // ŠgU”½Ë—¦
+    // æ‹¡æ•£åå°„ç‡
     float16_t diffuseReflectance = 1.0f / PI;
     
-    // “üËŠp‚ª90“x‚Ìê‡‚ÌŠgU”½Ë—¦
+    // å…¥å°„è§’ãŒ90åº¦ã®å ´åˆã®æ‹¡æ•£åå°„ç‡
     float16_t energyBias = 0.5f * material[0].roughness_;
     float16_t FD90 = energyBias + 2.0f * LdotH * LdotH * material[0].roughness_;
     
-    // “ü‚Á‚Ä‚¢‚­‚Æ‚«‚ÌŠgU”½Ë—¦
+    // å…¥ã£ã¦ã„ãã¨ãã®æ‹¡æ•£åå°„ç‡
     float16_t FL = SchlickFresnel(1.0f, FD90, NdotL);
     
-    // o‚Ä‚¢‚­‚Æ‚«‚ÌŠgU”½Ë—¦
+    // å‡ºã¦ã„ãã¨ãã®æ‹¡æ•£åå°„ç‡
     float16_t FV = SchlickFresnel(1.0f, FD90, NdotV);
     
-    // “ü‚Á‚Äo‚Ä‚¢‚­‚Ü‚Å‚ÌŠgU”½Ë—¦
+    // å…¥ã£ã¦å‡ºã¦ã„ãã¾ã§ã®æ‹¡æ•£åå°„ç‡
     float16_t energyFactor = lerp(1.0f, 1.0f / 1.51f, material[0].roughness_);
     float16_t FD = FL * FV * energyFactor;
     
-    // ŠgU”½Ë€
+    // æ‹¡æ•£åå°„é …
     float16_t3 diffuseColor = diffuseReflectance * FD * BaseColor * (1.0f - material[0].metalness_);
     
-    // ‹¾–Ê”½Ë€
+    // é¡é¢åå°„é …
     float16_t3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH, BaseColor);
     
     return diffuseColor + specularColor;
     
 }
 
-// ƒ‰ƒCƒeƒBƒ“ƒOˆ—
+// ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°å‡¦ç†
 bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vertex Vtx, float4 TexColor)
 {
     
-    // Payloadˆêó‚¯æ‚è—p•Ï”B
+    // Payloadä¸€æ™‚å—ã‘å–ã‚Šç”¨å¤‰æ•°ã€‚
     Payload payloadBuff = PayloadData;
     
-    // —”‚Ìí‚Æ‚È‚é’l‚ğæ“¾B
+    // ä¹±æ•°ã®ç¨®ã¨ãªã‚‹å€¤ã‚’å–å¾—ã€‚
     uint2 pixldx = DispatchRaysIndex().xy;
     uint2 numPix = DispatchRaysDimensions().xy;
             
-    // ‘¾—z‚ÌˆÊ’u‚ÆƒxƒNƒgƒ‹
+    // å¤ªé™½ã®ä½ç½®ã¨ãƒ™ã‚¯ãƒˆãƒ«
     float3 sunPos = -gSceneParam.light.dirLight.lightDir * 300000.0f;
     float3 sunDir = normalize(sunPos - WorldPos);
     
-    // ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒg‚Ì•ûŒü‚ÉƒŒƒC‚ğ”ò‚Î‚·B
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆã®æ–¹å‘ã«ãƒ¬ã‚¤ã‚’é£›ã°ã™ã€‚
     float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
     
-    // ‘å‹CU—‚ÌF
+    // å¤§æ°—æ•£ä¹±ã®è‰²
     float16_t3 skydomeColor;
     float16_t3 mieColor = float3(1, 1, 1);
     
-    // ƒfƒBƒŒƒNƒVƒ‡ƒiƒ‹ƒ‰ƒCƒg‚Ì–¾‚é‚³‚ªˆê’èˆÈã‚¾‚Á‚½‚ç
+    // ãƒ‡ã‚£ãƒ¬ã‚¯ã‚·ãƒ§ãƒŠãƒ«ãƒ©ã‚¤ãƒˆã®æ˜ã‚‹ã•ãŒä¸€å®šä»¥ä¸Šã ã£ãŸã‚‰
     if (0.0f < dirLightVisibility)
     {
     
         const float SKYDOME_RADIUS = 15000.0f;
         const float16_t SAMPLING_POS_Y = 0.0f;
         
-        // “V‹…‚ÌF‚ğƒTƒ“ƒvƒŠƒ“ƒO
+        // å¤©çƒã®è‰²ã‚’ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°
         float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir) * SKYDOME_RADIUS;
         
-        // ƒTƒ“ƒvƒŠƒ“ƒO‚·‚éƒxƒNƒgƒ‹
+        // ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹ãƒ™ã‚¯ãƒˆãƒ«
         samplingVec.y = SAMPLING_POS_Y;
         samplingVec = normalize(samplingVec);
         
-        // ƒTƒ“ƒvƒŠƒ“ƒO‚·‚éÀ•W
+        // ã‚µãƒ³ãƒ—ãƒªãƒ³ã‚°ã™ã‚‹åº§æ¨™
         float3 samplingPos;
         samplingPos = samplingVec * SKYDOME_RADIUS;
         
-        // ‘å‹CU—‚ğŒvZB
+        // å¤§æ°—æ•£ä¹±ã‚’è¨ˆç®—ã€‚
         skydomeColor = AtmosphericScattering(samplingPos, mieColor);
         payloadBuff.light_ += BRDF(-gSceneParam.light.dirLight.lightDir, -WorldRayDirection(), NormalMap, float3(1, 1, 1)) * dirLightVisibility * PayloadData.impactAmount_;
         //payloadBuff.color_ = float3(1, 1, 1);
@@ -507,7 +508,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
     }
         
     
-    // AO‚ÌŒvZB ˆê’èˆÈã‚Ì‹——£‚Ìê‡‚ÍAO‚ÌŒvZ‚ğs‚í‚È‚¢B
+    // AOã®è¨ˆç®—ã€‚ ä¸€å®šä»¥ä¸Šã®è·é›¢ã®å ´åˆã¯AOã®è¨ˆç®—ã‚’è¡Œã‚ãªã„ã€‚
     float offsetAO = 0.2f;
     uint instanceID = InstanceID();
     if (500.0f < RayTCurrent() || payloadBuff.rayID_ == CHS_IDENTIFICATION_RAYID_RECLECTION)
@@ -519,15 +520,15 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
         
         float aoLightVisibilityBuff = ShootAOShadowRay(WorldPos, normalize(mul(Vtx.Normal, (float3x3) ObjectToWorld4x3())), 50, gRtScene);
         
-        // ŠeŒõŒ¹‚Ì–¾‚é‚³î•ñ
+        // å„å…‰æºã®æ˜ã‚‹ã•æƒ…å ±
         float aoLightVisibility = 0;
         aoLightVisibility += aoLightVisibilityBuff;
         aoLightVisibility = clamp(aoLightVisibility, offsetAO, 1.0f);
     
-        // ƒ‰ƒCƒg‚Ì‘‡‰B•Á“x‚ğ‹‚ß‚éB
+        // ãƒ©ã‚¤ãƒˆã®ç·åˆéš è”½åº¦ã‚’æ±‚ã‚ã‚‹ã€‚
         float aoVisibility = aoLightVisibility;
     
-        // ŠeF‚ğİ’èB
+        // å„è‰²ã‚’è¨­å®šã€‚
         payloadBuff.light_ += mieColor * offsetAO * payloadBuff.impactAmount_;
         payloadBuff.light_ -= (1.0f - aoVisibility) * offsetAO * payloadBuff.impactAmount_;
         
@@ -546,29 +547,29 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
     
 }
 
-// ƒ‰ƒCƒeƒBƒ“ƒOŒãˆ—
+// ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°å¾Œå‡¦ç†
 void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 WorldPos, float3 NormalMap, float4 DefTexColor, inout float4 TexColor, uint InstanceID)
 {
     
-    // Payloadˆêó‚¯æ‚è—p•Ï”B
+    // Payloadä¸€æ™‚å—ã‘å–ã‚Šç”¨å¤‰æ•°ã€‚
     Payload payloadBuff = PayloadData;
     
     
-    // ƒGƒ~ƒbƒVƒu‚¾‚Á‚½‚çƒGƒ~ƒbƒVƒuƒ}ƒbƒv‚É‘‚«‚ŞB
+    // ã‚¨ãƒŸãƒƒã‚·ãƒ–ã ã£ãŸã‚‰ã‚¨ãƒŸãƒƒã‚·ãƒ–ãƒãƒƒãƒ—ã«æ›¸ãè¾¼ã‚€ã€‚
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_TEXCOLOR_REFLECTION_EMISSIVE)
     {
         payloadBuff.emissive_ += TexColor * payloadBuff.impactAmount_;
         payloadBuff.light_ += float3(1, 1, 1) * payloadBuff.impactAmount_;
     }
         
-    // ‹à‘®“x
+    // é‡‘å±åº¦
     float metalness = 1.0f - material[0].metalness_;
     
-    // “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚ÌInstanceID‚ªƒAƒ‹ƒtƒ@‚¾‚Á‚½‚ç
+    // å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®InstanceIDãŒã‚¢ãƒ«ãƒ•ã‚¡ã ã£ãŸã‚‰
     if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA || InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
     {
         
-        // ƒAƒ‹ƒtƒ@’l‚ğ‹‚ß‚éB
+        // ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã‚’æ±‚ã‚ã‚‹ã€‚
         int instanceIndex = InstanceIndex();
         float alpha = 0;
         for (int alphaIndex = 0; alphaIndex < ALPHA_DATA_COUNT; ++alphaIndex)
@@ -581,7 +582,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             break;
         }
         
-        // ƒAƒ‹ƒtƒ@ƒuƒŒƒ“ƒh‚¾‚Á‚½‚ç
+        // ã‚¢ãƒ«ãƒ•ã‚¡ãƒ–ãƒ¬ãƒ³ãƒ‰ã ã£ãŸã‚‰
         if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA)
         {
         
@@ -600,7 +601,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             }
             
         }
-        // ‰ÁZ‡¬‚¾‚Á‚½‚ç
+        // åŠ ç®—åˆæˆã ã£ãŸã‚‰
         else if (InstanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
         {
             
@@ -621,7 +622,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             }
         }
         
-        // ƒAƒ‹ƒtƒ@‚ªˆê’èˆÈ‰º‚¾‚Á‚½‚çB
+        // ã‚¢ãƒ«ãƒ•ã‚¡ãŒä¸€å®šä»¥ä¸‹ã ã£ãŸã‚‰ã€‚
         if (alpha < 0.5f)
         {
             ++payloadBuff.alphaCounter_;
@@ -634,13 +635,13 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         if (0.0f < payloadBuff.impactAmount_)
         {
                 
-            // ”½ËƒŒƒC‚ğ”ò‚Î‚·B
+            // åå°„ãƒ¬ã‚¤ã‚’é£›ã°ã™ã€‚
             ShootRay(CHS_IDENTIFICATION_RAYID_DEF, WorldPos, WorldRayDirection(), payloadBuff, gRtScene);
             
         }
         
     }
-    // “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚ÌInstanceID‚ª‹üÜ‚¾‚Á‚½‚ç
+    // å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®InstanceIDãŒå±ˆæŠ˜ã ã£ãŸã‚‰
     else if (InstanceID == CHS_IDENTIFICATION_INSTANCE_REFRACTION)
     {
         
@@ -663,7 +664,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         if (nr < 0)
         {
 
-            // ‹ó‹C’†->ƒIƒuƒWƒFƒNƒg
+            // ç©ºæ°—ä¸­->ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
             float eta = 1.0f / refractVal;
             rayDir = refract(WorldRayDirection(), NormalMap, eta);
 
@@ -671,7 +672,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         else
         {
 
-            // ƒIƒuƒWƒFƒNƒg->‹ó‹C’†
+            // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ->ç©ºæ°—ä¸­
             float eta = refractVal / 1.0f;
             rayDir = refract(WorldRayDirection(), -NormalMap, eta);
       
@@ -685,7 +686,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
 
     }
-    // ˆê’èˆÈã—£‚ê‚Ä‚¢‚é‚Æ”½Ë‚ğs‚í‚È‚¢B
+    // ä¸€å®šä»¥ä¸Šé›¢ã‚Œã¦ã„ã‚‹ã¨åå°„ã‚’è¡Œã‚ãªã„ã€‚
     else if (5000.0f < RayTCurrent())
     {
         
@@ -693,7 +694,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         payloadBuff.impactAmount_ = 0.0f;
         
     }
-    // ”½Ë‚Ìˆ—
+    // åå°„ã®å‡¦ç†
     else
     {
         
@@ -701,10 +702,10 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         float rougness = material[0].roughness_;
         payloadBuff.roughnessOffset_ = rougness * 100.0f;
         
-        // metalnessƒ}ƒbƒv‚Ìæ“¾B
+        // metalnessãƒãƒƒãƒ—ã®å–å¾—ã€‚
         if (material[0].mapParam_ == MAP_SPECULAR)
         {
-            // metalnessƒ}ƒbƒv‚ÌF‚ğæ“¾B
+            // metalnessãƒãƒƒãƒ—ã®è‰²ã‚’å–å¾—ã€‚
             float3 metalnessMapColor = (float3) mapTexture.SampleLevel(smp, Vtx.uv, 0.0f);
         }
         
@@ -721,7 +722,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             if (0.0f < payloadBuff.impactAmount_)
             {
                 
-                // ”½ËƒŒƒC‚ğ”ò‚Î‚·B
+                // åå°„ãƒ¬ã‚¤ã‚’é£›ã°ã™ã€‚
                 ShootRay(CHS_IDENTIFICATION_RAYID_RECLECTION, WorldPos, reflect(WorldRayDirection(), NormalMap), payloadBuff, gRtScene);
                 
             }
@@ -734,7 +735,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     
 }
 
-// closesthitƒVƒF[ƒ_[ ƒŒƒC‚ªƒqƒbƒg‚µ‚½‚ÉŒÄ‚Î‚ê‚éƒVƒF[ƒ_[
+// closesthitã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ ãƒ¬ã‚¤ãŒãƒ’ãƒƒãƒˆã—ãŸæ™‚ã«å‘¼ã°ã‚Œã‚‹ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼
 [shader("closesthit")]
 
     void mainCHS
@@ -743,15 +744,15 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     attrib)
 {
     
-    // ‰e—pƒŒƒC‚¾‚Á‚½‚çB
+    // å½±ç”¨ãƒ¬ã‚¤ã ã£ãŸã‚‰ã€‚
     if (payload.rayID_ == CHS_IDENTIFICATION_RAYID_SHADOW)
     {
         
-        // ƒAƒ‹ƒtƒ@‚ÌƒIƒuƒWƒFƒNƒg‚¾‚Á‚½‚ç
+        // ã‚¢ãƒ«ãƒ•ã‚¡ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã ã£ãŸã‚‰
         if (InstanceID() == CHS_IDENTIFICATION_INSTANCE_ALPHA)
         {
             
-            // ƒeƒNƒXƒ`ƒƒ‚ÌF‚ğæ“¾B
+            // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’å–å¾—ã€‚
             Vertex meshInfo[3];
             Vertex vtx = GetHitVertex(attrib, vertexBuffer, indexBuffer, meshInfo);
             float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
@@ -766,11 +767,11 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
         return;
     }
-    // AO‰e—pƒŒƒC‚¾‚Á‚½‚çB
+    // AOå½±ç”¨ãƒ¬ã‚¤ã ã£ãŸã‚‰ã€‚
     if (payload.rayID_ == CHS_IDENTIFICATION_RAYID_AO_SHADOW)
     {
         
-        // AOƒŒƒC‚ÌÅ‘å’·
+        // AOãƒ¬ã‚¤ã®æœ€å¤§é•·
         const float AO_LENGTH = 50.0f;
         float rayLength = RayTCurrent();
         
@@ -788,7 +789,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
     }
 
-    // ŒÄ‚Ño‚µ‰ñ”‚ª§ŒÀ‚ğ’´‚¦‚È‚¢‚æ‚¤‚É‚·‚éB
+    // å‘¼ã³å‡ºã—å›æ•°ãŒåˆ¶é™ã‚’è¶…ãˆãªã„ã‚ˆã†ã«ã™ã‚‹ã€‚
     ++payload.recursive_;
     if (5 < payload.recursive_ || payload.impactAmount_ <= 0 || payload.isCullingAlpha_)
     {
@@ -803,19 +804,19 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     float3 worldNormal = normalize(mul(vtx.Normal, (float3x3) ObjectToWorld4x3()));
     float3 normalMap = worldNormal;
     
-    // MipLevelŒvZˆ—
+    // MipLevelè¨ˆç®—å‡¦ç†
     float2 ddxUV;
     float2 ddyUV;
     if (payload.rayID_ != CHS_IDENTIFICATION_RAYID_DEF)
     {
         
-        // ƒŒƒC‚Ì”­ËƒxƒNƒgƒ‹‚ğ‹‚ß‚é‚Ì‚É•K—v‚È•Ï”‚½‚¿
+        // ãƒ¬ã‚¤ã®ç™ºå°„ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ±‚ã‚ã‚‹ã®ã«å¿…è¦ãªå¤‰æ•°ãŸã¡
         matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
         matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
         float2 dims = float2(DispatchRaysDimensions().xy);
         float aspect = dims.x / dims.y;
         
-        // Œ»İ‚ÌƒŒƒC‚©‚çX+•ûŒü‚Ì”­ËƒxƒNƒgƒ‹
+        // ç¾åœ¨ã®ãƒ¬ã‚¤ã‹ã‚‰X+æ–¹å‘ã®ç™ºå°„ãƒ™ã‚¯ãƒˆãƒ«
         uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
         float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
         float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
@@ -825,7 +826,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
                                                0, cos(rotationAmountR), -sin(rotationAmountR),
                                                0, sin(rotationAmountR), cos(rotationAmountR))));
         
-        // Œ»İ‚ÌƒŒƒC‚©‚çY+•ûŒü‚Ì”­ËƒxƒNƒgƒ‹
+        // ç¾åœ¨ã®ãƒ¬ã‚¤ã‹ã‚‰Y+æ–¹å‘ã®ç™ºå°„ãƒ™ã‚¯ãƒˆãƒ«
         launchIndex -= uint2(1, -1);
         d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
         target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
@@ -833,22 +834,22 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
                                                0, 1, 0,
                                                -sin(rotationAmountR), 0, cos(rotationAmountR))));
         
-        // ƒŒƒC‚ÌËo’n“_B
+        // ãƒ¬ã‚¤ã®å°„å‡ºåœ°ç‚¹ã€‚
         float3 worldRayOrigin = WorldRayOrigin() + (RayTMin() * rayDir);
         
-        // ƒxƒNƒgƒ‹X‚ª•½–Ê‚É“–‚½‚é‚Ü‚Å‚Ì’·‚³‚ÆÕ“Ë’n“_‚ğ‹‚ß‚éB
+        // ãƒ™ã‚¯ãƒˆãƒ«XãŒå¹³é¢ã«å½“ãŸã‚‹ã¾ã§ã®é•·ã•ã¨è¡çªåœ°ç‚¹ã‚’æ±‚ã‚ã‚‹ã€‚
         float lengthX = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirX);
         float3 impPosX = rayDirX * lengthX + worldRayOrigin;
         
-        // ƒxƒNƒgƒ‹Y‚ª•½–Ê‚É“–‚½‚é‚Ü‚Å‚Ì’·‚³‚ÆÕ“Ë’n“_‚ğ‹‚ß‚éB
+        // ãƒ™ã‚¯ãƒˆãƒ«YãŒå¹³é¢ã«å½“ãŸã‚‹ã¾ã§ã®é•·ã•ã¨è¡çªåœ°ç‚¹ã‚’æ±‚ã‚ã‚‹ã€‚
         float lengthY = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirY);
         float3 impPosY = rayDirY * lengthY + worldRayOrigin;
         
-        // XY‚ÌdSÀ•W‚ğ‹‚ß‚éB
+        // XYã®é‡å¿ƒåº§æ¨™ã‚’æ±‚ã‚ã‚‹ã€‚
         float3 baryX = CalcVertexBarys(impPosX, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
         float3 baryY = CalcVertexBarys(impPosY, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
         
-        // uv‚ğ‹‚ß‚ÄA‚»‚Ì·•ª‚ğæ“¾‚·‚éB
+        // uvã‚’æ±‚ã‚ã¦ã€ãã®å·®åˆ†ã‚’å–å¾—ã™ã‚‹ã€‚
         float2 uvX = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
         float2 uvY = baryY.x * meshInfo[0].uv + baryY.y * meshInfo[1].uv + baryY.z * meshInfo[2].uv;
         ddxUV = abs(uvX - vtx.uv);
@@ -858,40 +859,40 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     }
     else
     {
-        // ƒŒƒC‚Ì”­ËƒxƒNƒgƒ‹‚ğ‹‚ß‚é‚Ì‚É•K—v‚È•Ï”‚½‚¿
+        // ãƒ¬ã‚¤ã®ç™ºå°„ãƒ™ã‚¯ãƒˆãƒ«ã‚’æ±‚ã‚ã‚‹ã®ã«å¿…è¦ãªå¤‰æ•°ãŸã¡
         matrix mtxViewInv = gSceneParam.camera.mtxViewInv;
         matrix mtxProjInv = gSceneParam.camera.mtxProjInv;
         float2 dims = float2(DispatchRaysDimensions().xy);
         float aspect = dims.x / dims.y;
         
-        // Œ»İ‚ÌƒŒƒC‚©‚çX+•ûŒü‚Ì”­ËƒxƒNƒgƒ‹
+        // ç¾åœ¨ã®ãƒ¬ã‚¤ã‹ã‚‰X+æ–¹å‘ã®ç™ºå°„ãƒ™ã‚¯ãƒˆãƒ«
         uint2 launchIndex = DispatchRaysIndex().xy + uint2(1, 0);
         float2 d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
         float4 target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
         float3 rayDirX = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         
-        // Œ»İ‚ÌƒŒƒC‚©‚çY+•ûŒü‚Ì”­ËƒxƒNƒgƒ‹
+        // ç¾åœ¨ã®ãƒ¬ã‚¤ã‹ã‚‰Y+æ–¹å‘ã®ç™ºå°„ãƒ™ã‚¯ãƒˆãƒ«
         launchIndex -= uint2(1, -1);
         d = (launchIndex.xy + 0.5) / dims.xy * 2.0 - 1.0;
         target = mul(mtxProjInv, float4(d.x, -d.y, 1, 1));
         float3 rayDirY = normalize(mul(mtxViewInv, float4(target.xyz, 0)).xyz);
         
-        // ƒŒƒC‚ÌËo’n“_B
+        // ãƒ¬ã‚¤ã®å°„å‡ºåœ°ç‚¹ã€‚
         float3 worldRayOrigin = WorldRayOrigin() + (RayTMin() * WorldRayDirection());
         
-        // ƒxƒNƒgƒ‹X‚ª•½–Ê‚É“–‚½‚é‚Ü‚Å‚Ì’·‚³‚ÆÕ“Ë’n“_‚ğ‹‚ß‚éB
+        // ãƒ™ã‚¯ãƒˆãƒ«XãŒå¹³é¢ã«å½“ãŸã‚‹ã¾ã§ã®é•·ã•ã¨è¡çªåœ°ç‚¹ã‚’æ±‚ã‚ã‚‹ã€‚
         float lengthX = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirX);
         float3 impPosX = rayDirX * lengthX + worldRayOrigin;
         
-        // ƒxƒNƒgƒ‹Y‚ª•½–Ê‚É“–‚½‚é‚Ü‚Å‚Ì’·‚³‚ÆÕ“Ë’n“_‚ğ‹‚ß‚éB
+        // ãƒ™ã‚¯ãƒˆãƒ«YãŒå¹³é¢ã«å½“ãŸã‚‹ã¾ã§ã®é•·ã•ã¨è¡çªåœ°ç‚¹ã‚’æ±‚ã‚ã‚‹ã€‚
         float lengthY = dot(-worldNormal, worldRayOrigin - worldPos) / dot(worldNormal, rayDirY);
         float3 impPosY = rayDirY * lengthY + worldRayOrigin;
         
-        // XY‚ÌdSÀ•W‚ğ‹‚ß‚éB
+        // XYã®é‡å¿ƒåº§æ¨™ã‚’æ±‚ã‚ã‚‹ã€‚
         float3 baryX = CalcVertexBarys(impPosX, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
         float3 baryY = CalcVertexBarys(impPosY, meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position);
         
-        // uv‚ğ‹‚ß‚ÄA‚»‚Ì·•ª‚ğæ“¾‚·‚éB
+        // uvã‚’æ±‚ã‚ã¦ã€ãã®å·®åˆ†ã‚’å–å¾—ã™ã‚‹ã€‚
         float2 uvX = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
         float2 uvY = baryX.x * meshInfo[0].uv + baryX.y * meshInfo[1].uv + baryX.z * meshInfo[2].uv;
         ddxUV = abs(uvX - vtx.uv);
@@ -899,29 +900,29 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         
     }
 
-    // ƒeƒNƒXƒ`ƒƒ‚ÌF‚ğæ“¾B
+    // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’å–å¾—ã€‚
     float4 texColor = (float4) texture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
     float4 defTexColor = texColor;
     
-    // ’Ç‰Á‚Ìƒ}ƒbƒv‚ªAO—p‚¾‚Á‚½‚ç
+    // è¿½åŠ ã®ãƒãƒƒãƒ—ãŒAOç”¨ã ã£ãŸã‚‰
     if (material[0].mapParam_ == MAP_AO)
     {
         float mapColor = (float4) mapTexture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
         texColor *= mapColor;
     }
-    // ’Ç‰Á‚Ìƒ}ƒbƒv‚ª–@ü—p‚¾‚Á‚½‚ç
+    // è¿½åŠ ã®ãƒãƒƒãƒ—ãŒæ³•ç·šç”¨ã ã£ãŸã‚‰
     if (material[0].mapParam_ == MAP_NORMAL)
     {
         float3 normalColor = (float4) mapTexture.SampleGrad(smp, vtx.uv, ddxUV * payload.roughnessOffset_, ddyUV * payload.roughnessOffset_);
         
         normalMap = normalColor;
         
-        // Ú‹óŠÔ•ÏŠ·—p
+        // æ¥ç©ºé–“å¤‰æ›ç”¨
         float3 tan;
         float3 bnorm;
         CalcTangentAndBinormal(meshInfo[0].Position, meshInfo[1].Position, meshInfo[2].Position, meshInfo[0].uv, meshInfo[1].uv, meshInfo[2].uv, tan, bnorm);
         
-        // à‹óŠÔs—ñ‚ğ‹‚ß‚éB
+        // èª¬ç©ºé–“è¡Œåˆ—ã‚’æ±‚ã‚ã‚‹ã€‚
         float3x3 mat =
         {
             float3(tan),
@@ -932,15 +933,70 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         normalMap = mul(normalMap, mat);
         
     }
+
+    // ãƒ¡ãƒƒã‚·ãƒ¥ã®ãƒ‡ãƒãƒƒã‚°
+    float2 uv = DispatchRaysIndex().xy / float2(1280.0f, 720.0f);
+    uv.x += gSceneParam.debug_.debugMesnInfoX_ / 1280.0f;
+    float3 debugColor = (float3) debugMaskTexture.SampleLevel(smp, uv, 1);
+    if (gSceneParam.debug_.isDebugMeshInfo_ == 1)
+    {
+
+        // ç™½â€¦UI
+        if (debugColor.x == 1 && debugColor.y == 1 && debugColor.z == 1)
+        {
+            payload.color_ = debugColor;
+            payload.light_ = float3(1, 1, 1);
+        }
+        // é»ƒâ€¦ãƒ¡ãƒƒã‚·ãƒ¥
+        else if (debugColor.x == 1 && debugColor.y == 1)
+        {
+            payload.color_ = float3(attrib.barys, 1);
+            payload.light_ = float3(1, 1, 1);
+            return;
+        }
+        // ç´«â€¦æ³•ç·š
+        else if (debugColor.x == 1 && debugColor.z == 1)
+        {
+            payload.color_ = normalMap;
+            payload.light_ = float3(1, 1, 1);
+            return;
+        }
+        // èµ¤â€¦é€šå¸¸
+        else if (debugColor.x == 1)
+        {
+        }
+        // ç·‘â€¦ã‚¢ãƒ«ãƒ™ãƒ‰
+        else if (debugColor.y == 1)
+        {
+            payload.color_ = texColor;
+            payload.light_ = float3(1, 1, 1);
+            return;
+        }
+        // é’â€¦ãƒ¡ã‚¿ãƒ«ãƒã‚¹
+        else if (debugColor.z == 1)
+        {
+            payload.color_ = float3(material[0].metalness_, material[0].metalness_, material[0].metalness_);
+            payload.light_ = float3(1, 1, 1);
+            return;
+        }
+        // é»’â€¦ãƒ©ãƒ•ãƒã‚¹
+        else
+        {
+            payload.color_ = float3(material[0].roughness_, material[0].roughness_, material[0].roughness_);
+            payload.light_ = float3(1, 1, 1);
+            return;
+        }
+
+    }
     
-    // ƒ‰ƒCƒeƒBƒ“ƒO‘O‚Ìˆ—‚ğÀsB----- ‘S”½ËƒIƒuƒWƒFƒNƒg‚âƒeƒNƒXƒ`ƒƒ‚ÌF‚ğ‚»‚Ì‚Ü‚Üg‚¤ƒIƒuƒWƒFƒNƒg‚ÌFæ“¾ˆ—B
+    // ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°å‰ã®å‡¦ç†ã‚’å®Ÿè¡Œã€‚----- å…¨åå°„ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚„ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’ãã®ã¾ã¾ä½¿ã†ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è‰²å–å¾—å‡¦ç†ã€‚
     if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, normalMap, texColor, instanceID))
     {
         return;
     }
     
 
-    // ƒ‰ƒCƒeƒBƒ“ƒO‚Ìˆ—
+    // ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã®å‡¦ç†
     if (instanceID != CHS_IDENTIFICATION_INSTANCE_ALPHA)
     {
         if (Lighting(payload, worldPos, normalMap, vtx, texColor))
@@ -949,12 +1005,12 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
         }
     }
     
-    // ƒ‰ƒCƒeƒBƒ“ƒOŒã‚Ìˆ—‚ğÀsB ----- ƒ‰ƒCƒeƒBƒ“ƒO‚ÌŒ‹‰Ê‚ğ‡¬‚·‚éˆ—‚â”½Ë‚â‹üÜ“™‚ÌÄ‚ÑƒŒƒC‚ğ”ò‚Î‚·•K—v‚ª‚ ‚éƒIƒuƒWƒFƒNƒg‚Ìˆ—B
+    // ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°å¾Œã®å‡¦ç†ã‚’å®Ÿè¡Œã€‚ ----- ãƒ©ã‚¤ãƒ†ã‚£ãƒ³ã‚°ã®çµæœã‚’åˆæˆã™ã‚‹å‡¦ç†ã‚„åå°„ã‚„å±ˆæŠ˜ç­‰ã®å†ã³ãƒ¬ã‚¤ã‚’é£›ã°ã™å¿…è¦ãŒã‚ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®å‡¦ç†ã€‚
     ProccessingAfterLighting(payload, vtx, worldPos, normalMap, defTexColor, texColor, instanceID);
     
 }
 
-// ‰e—pCHS g—p‚µ‚Ä‚¢‚È‚¢B
+// å½±ç”¨CHS ä½¿ç”¨ã—ã¦ã„ãªã„ã€‚
 [shader("closesthit")]
 
     void shadowCHS
@@ -984,18 +1040,18 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     
     int instanceID = InstanceID();
     
-    // “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚ÌInstanceID‚ªƒ‰ƒCƒg—por•s‰Â‹‚ÌƒIƒuƒWƒFƒNƒg‚¾‚Á‚½‚ç“–‚½‚è”»’è‚ğŠü‹p
+    // å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®InstanceIDãŒãƒ©ã‚¤ãƒˆç”¨orä¸å¯è¦–ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã ã£ãŸã‚‰å½“ãŸã‚Šåˆ¤å®šã‚’æ£„å´
     if (instanceID == CHS_IDENTIFICATION_INSTANCE_LIGHT || instanceID == CHS_IDENTIFICATION_INSTANCE_INVISIBILITY)
     {
         IgnoreHit();
 
     }
     
-    // “–‚½‚Á‚½ƒIƒuƒWƒFƒNƒg‚ÌInstanceID‚ªƒAƒ‹ƒtƒ@‚¾‚Á‚½‚ç
+    // å½“ãŸã£ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®InstanceIDãŒã‚¢ãƒ«ãƒ•ã‚¡ã ã£ãŸã‚‰
     if (instanceID == CHS_IDENTIFICATION_INSTANCE_ALPHA || instanceID == CHS_IDENTIFICATION_INSTANCE_ADD)
     {
         
-        // ˆê’èˆÈã”–‚¢ƒAƒ‹ƒtƒ@’l‚ÌƒIƒuƒWƒFƒNƒg‚Æ‚ ‚½‚Á‚Ä‚¢‚½‚çB
+        // ä¸€å®šä»¥ä¸Šè–„ã„ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¨ã‚ãŸã£ã¦ã„ãŸã‚‰ã€‚
         if (payload.isCullingAlpha_)
         {
             IgnoreHit();
@@ -1008,7 +1064,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
         }
         
-        // ƒAƒ‹ƒtƒ@’l‚ğ‹‚ß‚éB
+        // ã‚¢ãƒ«ãƒ•ã‚¡å€¤ã‚’æ±‚ã‚ã‚‹ã€‚
         int instanceIndex = InstanceIndex();
         float alpha = 0;
         for (int alphaIndex = 0; alphaIndex < ALPHA_DATA_COUNT; ++alphaIndex)
@@ -1021,7 +1077,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
             break;
         }
         
-        // ƒeƒNƒXƒ`ƒƒ‚ÌF‚ğæ“¾B
+        // ãƒ†ã‚¯ã‚¹ãƒãƒ£ã®è‰²ã‚’å–å¾—ã€‚
         float4 texColor = (float4) texture.SampleLevel(smp, vtx.uv, 0.0f);
         texColor.xyz *= texColor.w;
         

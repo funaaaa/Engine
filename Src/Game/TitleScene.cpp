@@ -153,13 +153,19 @@ void TitleScene::Update()
 		ImGui::SameLine();
 		ImGui::Checkbox("MoveOnly1F", &isMoveOnly1F);
 
+		// メッシュのデバッグを行うか。
+		bool isDebugMesh = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isDebugMesnInfo_);
+		ImGui::Checkbox("IsDebugMeshInfo", &isDebugMesh);
+		RayEngine::Ins()->GetConstBufferData().debug_.isDebugMesnInfo_ = static_cast<int>(isDebugMesh);
+
 		// ImGuiの書き込みを終了
 		ImGui::End();
 
-		if (Engine::Ins()->isStopGame_) {
+		if (isDebugMesh) {
 
-			ImGui::Begin("SecondMenu");
-			ImGui::SetWindowSize(ImVec2(400, 500), ImGuiCond_::ImGuiCond_FirstUseEver);
+			ImGui::Begin("DebugMeshInfo");
+			ImGui::SetWindowSize(ImVec2(400, 100), ImGuiCond_::ImGuiCond_FirstUseEver);
+			ImGui::DragInt("MaskX", &RayEngine::Ins()->GetConstBufferData().debug_.debugMeshMoveX_, 1);
 			ImGui::End();
 		}
 

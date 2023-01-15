@@ -65,12 +65,20 @@ struct LightConstBufferData
 struct AlphaData
 {
     int instanceIndex_;
-    float alpha_;
+    int alpha_;
 };
 #define ALPHA_DATA_COUNT 60
 struct AlphaConstBufferData
 {
     AlphaData alphaData_[ALPHA_DATA_COUNT];
+};
+
+// デバッグ用情報
+struct DebugData
+{
+    int isDebugMeshInfo_;
+    int debugMesnInfoX_;
+    float2 pad_;
 };
 
 // 定数バッファ
@@ -79,6 +87,7 @@ struct ConstBufferData
     CameraConstBufferData camera;
     LightConstBufferData light;
     AlphaConstBufferData alphaData_;
+    DebugData debug_;
 };
 
 static int MAP_NONE = 0;
