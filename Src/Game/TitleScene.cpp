@@ -176,6 +176,17 @@ void TitleScene::Update()
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.x_ = PARAM_A_MIN;
 	RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lightColor_.y_ = PARAM_B_MIN;
 
+	// ImGuiの表示非表示を切り替える。
+	if (Input::Ins()->IsKey(DIK_O) && Input::Ins()->IsKeyTrigger(DIK_P)) {
+		Engine::Ins()->isReservActivateImGui_ = !Engine::Ins()->isReservActivateImGui_;
+	}
+
+	// ImGuiが有効化されていたら。
+	if (Engine::Ins()->isActivateImGui_) {
+
+		ImGui::Text("Debug");
+
+	}
 }
 
 void TitleScene::Draw()

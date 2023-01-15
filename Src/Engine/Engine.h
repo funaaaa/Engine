@@ -64,6 +64,8 @@ public:
 	SwapChain swapchain_;						// SwapChain関連
 	DevInput input_;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> heapForImgui_;	//imgui用ディスクリプタヒープ
+	bool isActivateImGui_;						// ImGuiが有効化されているかどうか
+	bool isReservActivateImGui_;				// ImGuiの有効化フラグの切り替え予約
 
 
 	/*-- GPUの非同期処理にあたって新たに作った変数たち --*/
