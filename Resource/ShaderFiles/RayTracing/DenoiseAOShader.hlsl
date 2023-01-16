@@ -776,7 +776,7 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 WorldNormal, Ve
     {
         
         // ディレクショナルライトの方向にレイを飛ばす。
-        float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
+        float dirLightVisibility = ShootDirShadow(Vtx, 200.0f);
         
         // ディレクショナルライトの明るさが一定以上だったら
         if (0.0f < dirLightVisibility)
