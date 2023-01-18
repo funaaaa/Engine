@@ -863,7 +863,7 @@ void Character::CheckHit(std::weak_ptr<BaseStage> StageData, std::vector<std::sh
 		// b—…‚Æ‚Ì“–‚½‚è”»’è
 		bool isHitShell = ShellObjectMgr::Ins()->Collider(obb_, shellIndex);
 
-		if (isHitShell || Input::Ins()->IsKeyTrigger(DIK_P)) {
+		if (isHitShell) {
 
 			canNotMoveTimer_ = CAN_NOT_MOVE_TIMER_SHELL_HIT;
 			shellHitRot_ = rotY_;

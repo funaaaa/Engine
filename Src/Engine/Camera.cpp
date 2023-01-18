@@ -163,7 +163,7 @@ void Camera::FreeCamera()
 	/*===== フリーカメラの操作 =====*/
 
 	// カメラ移動用定数
-	const float CAMERA_MOVE_SPEED = 5.0f;
+	const float CAMERA_MOVE_SPEED = 10.0f;
 	const float CAMERA_ANGLE_SPEED = 0.02f;
 
 	// 上下に動かす。

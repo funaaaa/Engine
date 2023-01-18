@@ -261,7 +261,7 @@ void GameScene::Update()
 
 	// 基本的なデバッグ機能
 	bool isMoveOnly1F = false;
-	ImGuiDebug(isMoveOnly1F);
+	ImGuiDebug(isMoveOnly1F, sunAngle_);
 
 	// ゲームの一時停止フラグが立っていたら処理をとばす。
 	if (Engine::Ins()->isStopGame_ && !isMoveOnly1F) return;

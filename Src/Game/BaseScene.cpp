@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "FHelper.h"
 
-void BaseScene::ImGuiDebug(bool& IsMoveOnly1F)
+void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 {
 
 	/*===== 基礎的なデバッグ機能 =====*/
@@ -56,6 +56,11 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F)
 			Engine::Ins()->isStopGame_ = true;
 
 		}
+
+		// 太陽の角度を設定。
+		ImGui::DragFloat("SunAngle", &SunAngle, 0.01f);
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_ = Vec3(-cos(SunAngle), -sin(SunAngle), 0.5f);
+		RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.Normalize();
 
 		// メッシュのデバッグを行うか。
 		bool isDebugMesh = static_cast<bool>(RayEngine::Ins()->GetConstBufferData().debug_.isDebugMesnInfo_);
