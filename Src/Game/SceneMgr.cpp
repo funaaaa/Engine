@@ -24,7 +24,7 @@ void SceneMgr::Init()
 	scenes_.emplace_back(std::make_shared<GameScene>());
 	
 	// シーン番号を設定。
-	nowScene_ = BaseScene::SCENE_ID::TITLE;
+	nowScene_ = BaseScene::SCENE_ID::GAME;
 	nextScene_ = BaseScene::SCENE_ID::GAME;
 
 	// シーンを初期化。
