@@ -1,3 +1,7 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:b3c58cc91835946b960ee437d3d438ee1aaaab82d59875bc8d48b576497b66e1
-size 208
+# Blender v2.90.1 OBJ File: ''
+# www.blender.org
+mtllib MugenStagePointLight.mtl
+o MugenStagePointLight
+v 8.103783 -6.118624 -18.087481
+v 15.921865 -6.118623 -20.175743
+v 1.366430 -6.169827 -15.388458
