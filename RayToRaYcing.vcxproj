@@ -65,6 +65,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -180,6 +181,7 @@
     <ClCompile Include="Src\Raytracing\RaytracingOutput.cpp" />
     <ClCompile Include="Src\Raytracing\RaytracingPipeline.cpp" />
     <ClCompile Include="Src\Raytracing\TLAS.cpp" />
+    <ClCompile Include="Src\Raytracing\VolumeTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lib\glTF\json.hpp" />
@@ -277,6 +279,7 @@
     <ClInclude Include="Src\Raytracing\RaytracingOutput.h" />
     <ClInclude Include="Src\Raytracing\RaytracingPipeline.h" />
     <ClInclude Include="Src\Raytracing\TLAS.h" />
+    <ClInclude Include="Src\Raytracing\VolumeTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="hid.dll" />

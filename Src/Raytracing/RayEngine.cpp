@@ -81,6 +81,9 @@ void RayEngine::Setting()
 	// メッシュデバッグ用のマスクをロード
 	debugMesnInfoHandle_ = TextureManager::Ins()->LoadTexture(L"Resource/Debug/MeshInfoMask.png");
 
+	// フォグ用テクスチャを用意。
+	volumeTexture_.Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FogTexture", Vec3(256, 256, 256), D3D12_RESOURCE_STATE_COMMON);
+
 }
 
 void RayEngine::SettingTLAS()

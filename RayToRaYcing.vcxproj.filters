@@ -236,6 +236,7 @@
       <Filter>エンジン\リソース</Filter>
     </ClCompile>
     <ClCompile Include="Src\Game\BaseScene.cpp" />
+    <ClCompile Include="Src\Raytracing\VolumeTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="lib\imgui\imconfig.h">
@@ -523,6 +524,7 @@
     <ClInclude Include="Src\Engine\DoubleRayDescriptor.h">
       <Filter>エンジン\リソース</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Raytracing\VolumeTexture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="setupapi.dll">

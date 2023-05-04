@@ -9,6 +9,8 @@
 #include "RaytracingPipeline.h"
 #include "RayRootsignature.h"
 
+#include "VolumeTexture.h"
+
 class TLAS;
 class RaytracingOutput;
 class RaytracingPipeline;
@@ -50,6 +52,9 @@ public:
 	RayConstBufferData constBufferData_;
 	std::shared_ptr<DynamicConstBuffer> constBuffer_;
 	int debugMesnInfoHandle_;
+
+	// フォグ用ボリュームテクスチャ
+	VolumeTextureUAV volumeTexture_;
 
 
 public:
