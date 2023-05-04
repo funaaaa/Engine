@@ -3,6 +3,7 @@
 #include "TLAS.h"
 #include "HitGroupMgr.h"
 #include "TextureManager.h"
+#include "RayComputeShader.h"
 
 void RayEngine::Setting()
 {
@@ -82,7 +83,11 @@ void RayEngine::Setting()
 	debugMesnInfoHandle_ = TextureManager::Ins()->LoadTexture(L"Resource/Debug/MeshInfoMask.png");
 
 	// フォグ用テクスチャを用意。
-	volumeTexture_.Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FogTexture", Vec3(256, 256, 256), D3D12_RESOURCE_STATE_COMMON);
+	volumeTexture_.Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FogTexture", Vec3(256, 256, 256), D3D12_RESOURCE_STATE_COMMON);	
+	
+	// フォグノイズ書き込み用CSを用意。
+	write3DNoiseCS_ = std::make_shared<RayComputeShader>();
+	write3DNoiseCS_->Setting(L"Resource/ShaderFiles/Write3DNoise.hlsl", 0, 0, 0, {});
 
 }
 
@@ -120,6 +125,9 @@ void RayEngine::Draw()
 
 	// レイトレーシングを実行。
 	TraceRay();
+
+	// ノイズを書き込み。
+	write3DNoiseCS_->Dispatch(static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 4), volumeTexture_.GetUAVIndex(), {}, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
 
 	// デノイズコマンドを積む。
 	DenoiseCommand();

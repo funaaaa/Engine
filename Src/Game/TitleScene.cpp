@@ -190,52 +190,52 @@ void TitleScene::Update()
 void TitleScene::Draw()
 {
 
-	RayEngine::Ins()->Draw();
+	//RayEngine::Ins()->Draw();
 
-	// タイヤ痕を書き込む。
-	std::vector<CharacterTireMask::TireMaskUV> tireMaskUV;
-	bool isWriteTireMask = player_->CheckTireMask(stages_[STAGE_ID::MUGEN], tireMaskUV);
+	//// タイヤ痕を書き込む。
+	//std::vector<CharacterTireMask::TireMaskUV> tireMaskUV;
+	//bool isWriteTireMask = player_->CheckTireMask(stages_[STAGE_ID::MUGEN], tireMaskUV);
 
-	if (isWriteTireMask) {
+	//if (isWriteTireMask) {
 
-		// UAVを書き込む。
-		tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(CharacterTireMask::TireMaskUV) * 2);
-		tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
-		{
-			D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
-						tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
-						tireMaskTextureOutput_->GetRaytracingOutput().Get())
-			};
+	//	// UAVを書き込む。
+	//	tireMaskConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), tireMaskUV.data(), sizeof(CharacterTireMask::TireMaskUV) * 2);
+	//	tireMaskComputeShader_->Dispatch(1, 1, 1, tireMaskTexture_->GetUAVIndex(), { tireMaskConstBuffer_->GetBuffer(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex())->GetGPUVirtualAddress() });
+	//	{
+	//		D3D12_RESOURCE_BARRIER barrierToUAV[] = { CD3DX12_RESOURCE_BARRIER::UAV(
+	//					tireMaskTexture_->GetRaytracingOutput().Get()),CD3DX12_RESOURCE_BARRIER::UAV(
+	//					tireMaskTextureOutput_->GetRaytracingOutput().Get())
+	//		};
 
-			Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(2, barrierToUAV);
-		}
+	//		Engine::Ins()->mainGraphicsCmdList_->ResourceBarrier(2, barrierToUAV);
+	//	}
 
-	}
+	//}
 
-	UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
-	CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-		D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	//UINT bbIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	//CD3DX12_RESOURCE_BARRIER resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+	//	D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	//Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
-	// タイトル画像を描画
-	title_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
-	title_.Draw();
-	titleOperation_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
-	titleOperation_.Draw();
+	//// タイトル画像を描画
+	//title_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
+	//title_.Draw();
+	//titleOperation_.ChangePosition(Vec3(titleSpritePos_.x_, titleSpritePos_.y_, 0.1f));
+	//titleOperation_.Draw();
 
 
-	// レベル選択のUIを描画
-	for (int index = 0; index < 3; ++index) {
-		levelSprite_[index].ChangePosition(levelPos_[index]);
-		levelSprite_[index].Draw();
-	}
-	redSprite_.Draw();
+	//// レベル選択のUIを描画
+	//for (int index = 0; index < 3; ++index) {
+	//	levelSprite_[index].ChangePosition(levelPos_[index]);
+	//	levelSprite_[index].Draw();
+	//}
+	//redSprite_.Draw();
 
-	SceneTransition::Ins()->Draw();
+	//SceneTransition::Ins()->Draw();
 
-	resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
-		D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
+	//resourceBarrier = CD3DX12_RESOURCE_BARRIER::Transition(Engine::Ins()->swapchain_.backBuffers_[bbIndex].Get(),
+	//	D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	//Engine::Ins()->copyResourceCmdList_->ResourceBarrier(1, &resourceBarrier);
 
 }
 

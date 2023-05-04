@@ -14,6 +14,7 @@
 class TLAS;
 class RaytracingOutput;
 class RaytracingPipeline;
+class RayComputeShader;
 class DynamicConstBuffer;
 
 // レイトレーシング用の処理をまとめたクラス。Engineに付随する形で使用する。
@@ -55,6 +56,9 @@ public:
 
 	// フォグ用ボリュームテクスチャ
 	VolumeTextureUAV volumeTexture_;
+
+	// 3Dノイズ書き込み用コンピュートシェーダー
+	std::shared_ptr<RayComputeShader> write3DNoiseCS_;
 
 
 public:
