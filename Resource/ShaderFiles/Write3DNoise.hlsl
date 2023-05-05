@@ -3,34 +3,45 @@
 RWTexture3D<float4> OutputImg : register(u0);
 
 
-// 2Dのランダムハッシュ関数
-float2 random2(float2 st)
+// 3Dのランダムハッシュ関数
+float3 random3(float3 st)
 {
-    float2 seed = float2(dot(st, float2(127.1, 311.7)), dot(st, float2(269.5, 183.3)));
+    float3 seed = float3(dot(st, float3(127.1, 311.7, 523.3)), dot(st, float3(269.5, 183.3, 497.5)), dot(st, float3(419.2, 371.9, 251.6)));
     return -1.0 + 2.0 * frac(sin(seed) * 43758.5453123);
 }
 
-
-// 2Dグラディエントノイズ関数
-float noise(float2 st)
+// 3Dグラディエントノイズ関数
+float noise(float3 st)
 {
-    float2 i = floor(st);
-    float2 f = frac(st);
+    float3 i = floor(st);
+    float3 f = frac(st);
 
-    // 四つの隣接点の座標を求める
-    float2 u = f * f * (3.0 - 2.0 * f);
+    // 八つの隣接点の座標を求める
+    float3 u = f * f * (3.0 - 2.0 * f);
 
-    float a = dot(random2(i), f - float2(0, 0));
-    float b = dot(random2(i + float2(1, 0)), f - float2(1, 0));
-    float c = dot(random2(i + float2(0, 1)), f - float2(0, 1));
-    float d = dot(random2(i + float2(1, 1)), f - float2(1, 1));
+    float a = dot(random3(i), f - float3(0, 0, 0));
+    float b = dot(random3(i + float3(1, 0, 0)), f - float3(1, 0, 0));
+    float c = dot(random3(i + float3(0, 1, 0)), f - float3(0, 1, 0));
+    float d = dot(random3(i + float3(1, 1, 0)), f - float3(1, 1, 0));
+    float e = dot(random3(i + float3(0, 0, 1)), f - float3(0, 0, 1));
+    float f1 = dot(random3(i + float3(1, 0, 1)), f - float3(1, 0, 1));
+    float g = dot(random3(i + float3(0, 1, 1)), f - float3(0, 1, 1));
+    float h = dot(random3(i + float3(1, 1, 1)), f - float3(1, 1, 1));
 
     // ノイズ値を補間する
-    return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
+    float x1 = lerp(a, b, u.x);
+    float x2 = lerp(c, d, u.x);
+    float y1 = lerp(e, f1, u.x);
+    float y2 = lerp(g, h, u.x);
+
+    float xy1 = lerp(x1, x2, u.y);
+    float xy2 = lerp(y1, y2, u.y);
+
+    return lerp(xy1, xy2, u.z);
 }
 
-// 2Dパーリンノイズ関数
-float PerlinNoise(float2 st, int octaves, float persistence, float lacunarity)
+// 3Dパーリンノイズ関数
+float PerlinNoise(float3 st, int octaves, float persistence, float lacunarity)
 {
     float amplitude = 1.0;
     float frequency = 1.0;
@@ -53,7 +64,7 @@ float PerlinNoise(float2 st, int octaves, float persistence, float lacunarity)
 void main(uint3 threadIdx : SV_DispatchThreadID)
 {
     
-    float2 st = threadIdx.xy / 256.0f * 40.0; // スケール調整
+    float3 st = threadIdx.xyz / 256.0f * 20.0; // スケール調整
     int octaves = 8; // オクターブ数
     float persistence = 0.5; // 持続度
     float lacunarity = 2.0; // ラクナリティ
@@ -61,9 +72,9 @@ void main(uint3 threadIdx : SV_DispatchThreadID)
     
 
     // パーリンノイズを適用
-    float perlinValue = PerlinNoise(st, octaves, persistence, lacunarity) * 100.0f;
+    float perlinValue = PerlinNoise(st, octaves, persistence, lacunarity);
     
     // 色を保存。
-    OutputImg[threadIdx] = float4(perlinValue, threadIdx.z / 256.0f, 0, 1);
+    OutputImg[threadIdx] = float4(perlinValue, perlinValue, perlinValue, 1);
     
 }

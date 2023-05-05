@@ -68,7 +68,7 @@ void RayEngine::Setting()
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/RaytracingShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
 	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(UINT) * 4;
 	pipeline_ = std::make_shared<RaytracingPipeline>();
-	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 2, 1, 4, payloadSize, sizeof(Vec2), 6);
+	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 2, 1, 5, payloadSize, sizeof(Vec2), 6);
 
 	// シェーダーテーブルを生成。
 	pipeline_->ConstructionShaderTable();
@@ -126,14 +126,16 @@ void RayEngine::Draw()
 	// レイトレーシングを実行。
 	TraceRay();
 
-	// ノイズを書き込み。
-	write3DNoiseCS_->Dispatch(static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 4), volumeTexture_.GetUAVIndex(), {}, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
-
 	// デノイズコマンドを積む。
 	DenoiseCommand();
 
 	// コピーコマンドに命令を積む。
 	CopyCommand();
+
+	// ノイズを書き込み。
+	constBufferData_.debug_.timer_ += 0.1f;
+	constBuffer_->Write(0, &constBufferData_, sizeof(constBufferData_));
+	write3DNoiseCS_->Dispatch(static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 4), volumeTexture_.GetUAVIndex(), {}, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
 
 }
 
@@ -175,6 +177,7 @@ void RayEngine::TraceRay()
 	colorOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(4);	// テクスチャの色情報出力用
 	denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);// デノイズをする際のマスク出力用
 	emissiveOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
+	volumeTexture_.SetComputeRootDescriptorTalbe(7);
 
 	// パイプラインを設定。
 	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject(Engine::Ins()->currentQueueIndex_).Get());

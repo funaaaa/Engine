@@ -78,7 +78,8 @@ struct DebugData
 {
     int isDebugMeshInfo_;
     int debugMesnInfoX_;
-    float2 pad_;
+    float timer_;
+    float pad_;
 };
 
 // 定数バッファ

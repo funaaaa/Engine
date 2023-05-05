@@ -23,7 +23,8 @@ struct DebugData {
 
 	int isDebugMesnInfo_;
 	int debugMeshMoveX_;
-	Vec2 pad_;
+	float timer_;
+	int pad_;
 
 	// ‰Šú‰»ˆ—
 	void Init();

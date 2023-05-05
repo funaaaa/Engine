@@ -68,5 +68,6 @@ void DebugData::Init()
 
 	isDebugMesnInfo_ = false;
 	debugMeshMoveX_ = 0;
+	timer_ = 0;
 
 }

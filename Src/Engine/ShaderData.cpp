@@ -123,6 +123,21 @@ void ShaderData::LoadShaderDXC()
 	if (FAILED(hr)) {
 		Microsoft::WRL::ComPtr<IDxcBlobEncoding> errBlob;
 		dxcResult->GetErrorBuffer(&errBlob);
+
+		// IDxcBlobEncodingオブジェクトからエラーデータとそのサイズを取得
+		const char* errorData = static_cast<const char*>(errBlob->GetBufferPointer());
+		size_t errorDataSize = errBlob->GetBufferSize();
+
+		// エラーデータをstd::stringに変換
+		std::string errorString(errorData, errorData + errorDataSize);
+
+		// エラーメッセージを整形
+		std::ostringstream outputMessage;
+		outputMessage << "Error: " << errorString << std::endl;
+
+		// エラーメッセージをVisual Studioの出力ウィンドウに出力
+		OutputDebugStringA(outputMessage.str().c_str());
+
 		throw std::runtime_error("failed shader compile");
 	}
 

@@ -20,52 +20,53 @@ RWTexture2D<float4> lightingOutput : register(u0);
 RWTexture2D<float4> colorOutput : register(u1);
 RWTexture2D<float4> denoiseMaskoutput : register(u2);
 RWTexture2D<float4> emissiveOutput : register(u3);
+RWTexture3D<float4> fogVolumeTexture : register(u4);
 
 // 大気散乱
-float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
+float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
 {
 
     // レイリー散乱定数
-    float16_t kr = 0.0025f;
+    float kr = 0.0025f;
     // ミー散乱定数
-    float16_t km = 0.005f;
+    float km = 0.005f;
 
     // 大気中の線分をサンプリングする数。
-    float16_t fSamples = 2.0f;
+    float fSamples = 2.0f;
 
     // 謎の色 色的には薄めの茶色
-    float16_t3 three_primary_colors = float3(0.68f, 0.55f, 0.44f);
+    float3 three_primary_colors = float3(0.68f, 0.55f, 0.44f);
     // 光の波長？
-    float16_t3 v3InvWaveLength = 1.0f / pow(three_primary_colors, 4.0f);
+    float3 v3InvWaveLength = 1.0f / pow(three_primary_colors, 4.0f);
 
     // 大気圏の一番上の高さ。
-    float16_t fOuterRadius = 10250.0f;
+    float fOuterRadius = 10250.0f;
     // 地球全体の地上の高さ。
-    float16_t fInnerRadius = 10200.0f;
+    float fInnerRadius = 10200.0f;
 
     // 太陽光の強さ？
-    float16_t fESun = 10.0f;
+    float fESun = 10.0f;
     // 太陽光の強さにレイリー散乱定数をかけてレイリー散乱の強さを求めている。
-    float16_t fKrESun = kr * fESun;
+    float fKrESun = kr * fESun;
     // 太陽光の強さにミー散乱定数をかけてレイリー散乱の強さを求めている。
-    float16_t fKmESun = km * fESun;
+    float fKmESun = km * fESun;
 
     // レイリー散乱定数に円周率をかけているのだが、限りなく0に近い値。
-    float16_t fKr4PI = kr * 4.0f * PI;
+    float fKr4PI = kr * 4.0f * PI;
     // ミー散乱定数に円周率をかけているのだが、ミー散乱定数は0なのでこれの値は0。
-    float16_t fKm4PI = km * 4.0f * PI;
+    float fKm4PI = km * 4.0f * PI;
 
     // 地球全体での大気の割合。
-    float16_t fScale = 1.0f / (fOuterRadius - fInnerRadius);
+    float fScale = 1.0f / (fOuterRadius - fInnerRadius);
     // 平均大気密度を求める高さ。
-    float16_t fScaleDepth = 0.35f;
+    float fScaleDepth = 0.35f;
     // 地球全体での大気の割合を平均大気密度で割った値。
-    float16_t fScaleOverScaleDepth = fScale / fScaleDepth;
+    float fScaleOverScaleDepth = fScale / fScaleDepth;
 
     // 散乱定数を求める際に使用する値。
-    float16_t g = -0.999f;
+    float g = -0.999f;
     // 散乱定数を求める際に使用する値を二乗したもの。なぜ。
-    float16_t g2 = g * g;
+    float g2 = g * g;
 
     // 当たった天球のワールド座標
     float3 worldPos = normalize(pos) * fOuterRadius;
@@ -78,13 +79,13 @@ float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
     float3 dirLightPos = -gSceneParam.light.dirLight.lightDir * 1000000.0f;
 
     // ディレクショナルライトへの方向を求める。
-    float16_t3 v3LightDir = normalize(dirLightPos - worldPos);
+    float3 v3LightDir = normalize(dirLightPos - worldPos);
 
     // 天球上頂点からカメラまでのベクトル(光が大気圏に突入した点からカメラまでの光のベクトル)
     float3 v3Ray = worldPos - v3CameraPos;
 
     // 大気に突入してからの点とカメラまでの距離。
-    float16_t fFar = length(v3Ray);
+    float fFar = length(v3Ray);
 
     // 正規化された拡散光が来た方向。
     v3Ray /= fFar;
@@ -92,9 +93,9 @@ float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
     // サンプリングする始点座標 資料だとAの頂点
     float3 v3Start = v3CameraPos;
     // サンプルではカメラの位置が(0,Radius,0)なのでカメラの高さ。どの位置に移動しても地球視点で見れば原点(地球の中心)からの高さ。
-    float16_t fCameraHeight = length(v3CameraPos);
+    float fCameraHeight = length(v3CameraPos);
     // 地上からの法線(?)と拡散光がやってきた角度の内積によって求められた角度をカメラの高さで割る。
-    float16_t fStartAngle = dot(v3Ray, v3Start) / fCameraHeight;
+    float fStartAngle = dot(v3Ray, v3Start) / fCameraHeight;
     // 開始地点の高さに平均大気密度をかけた値の指数を求める？
     float fStartDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
     // 開始地点のなにかの角度のオフセット。
@@ -105,12 +106,12 @@ float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
     // サンプルポイント間の長さに地球の大気の割合をかける。
     float fScaledLength = fSampleLength * fScale;
     // 拡散光が来た方向にサンプルの長さをかけることでサンプルポイント間のレイをベクトルを求める。
-    float16_t3 v3SampleRay = v3Ray * fSampleLength;
+    float3 v3SampleRay = v3Ray * fSampleLength;
     // 最初のサンプルポイントを求める。0.5をかけてるのは少し動かすため？
     float3 v3SamplePoint = v3Start + v3SampleRay * 0.5f;
 
     // 色情報
-    float16_t3 v3FrontColor = 0.0f;
+    float3 v3FrontColor = 0.0f;
     for (int n = 0; n < int(fSamples); ++n)
     {
         // サンプルポイントの高さ。どちらにせよ原点は地球の中心なので、この値が現在位置の高さになる。
@@ -125,7 +126,7 @@ float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
         float fScatter = (fStartOffset + fDepth * (Scale(fLightAngle * 1) - Scale(fCameraAngle * 1)));
 
         // 色ごとの減衰率？
-        float16_t3 v3Attenuate = exp(-fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
+        float3 v3Attenuate = exp(-fScatter * (v3InvWaveLength * fKr4PI + fKm4PI));
         // サンプルポイントの位置を考慮して散乱した色を求める。
         v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
         // サンプルポイントを移動させる。
@@ -134,32 +135,32 @@ float16_t3 AtmosphericScattering(float3 pos, inout float16_t3 mieColor)
     }
 
     // レイリー散乱に使用する色情報
-    float16_t3 c0 = v3FrontColor * (v3InvWaveLength * fKrESun);
+    float3 c0 = v3FrontColor * (v3InvWaveLength * fKrESun);
     // ミー散乱に使用する色情報
-    float16_t3 c1 = v3FrontColor * fKmESun;
+    float3 c1 = v3FrontColor * fKmESun;
     // カメラ座標から天球の座標へのベクトル。
     float3 v3Direction = v3CameraPos - worldPos;
 
     //float fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
-    float16_t fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
-    float16_t fcos2 = fcos * fcos;
+    float fcos = dot(v3LightDir, v3Direction) / length(v3Direction);
+    float fcos2 = fcos * fcos;
 
     // レイリー散乱の明るさ。
-    float16_t rayleighPhase = 0.75f * (1.0f + fcos2);
+    float rayleighPhase = 0.75f * (1.0f + fcos2);
     // ミー散乱の明るさ。
-    float16_t miePhase = 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fcos2) / pow(1.0f + g2 - 2.0f * g * fcos, 1.5f);
+    float miePhase = 1.5f * ((1.0f - g2) / (2.0f + g2)) * (1.0f + fcos2) / pow(1.0f + g2 - 2.0f * g * fcos, 1.5f);
 
     // ミー散乱の色を保存。
     mieColor = c0 * rayleighPhase;
 
     // 最終結果の色
-    float16_t3 col = 1.0f;
+    float3 col = 1.0f;
     col.rgb = rayleighPhase * c0 + miePhase * c1;
 
     // 交点までのベクトルと太陽までのベクトルが近かったら白色に描画する。
     int sunWhite = step(0.999f, dot(normalize(dirLightPos - v3CameraPos), normalize(worldPos - v3CameraPos)));
     
-    return col + float16_t3(sunWhite, sunWhite, sunWhite);
+    return col + float3(sunWhite, sunWhite, sunWhite);
 
 }
 
@@ -250,6 +251,11 @@ void mainRayGen()
     colorOutput[launchIndex.xy] = float4((payloadData.color_), payloadData.ao_);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
     emissiveOutput[launchIndex.xy] = float4(payloadData.emissive_, 1);
+    
+    if (launchIndex.x < 256 && launchIndex.y < 256)
+    {
+        colorOutput[launchIndex.xy] = fogVolumeTexture[uint3(launchIndex.xy, gSceneParam.debug_.timer_ % 256)];
+    }
 
 }
 
@@ -341,69 +347,69 @@ bool ProcessingBeforeLighting(inout Payload PayloadData, Vertex Vtx, MyAttribute
 }
 
 // UE4のGGX分布
-float DistributionGGX(float16_t Alpha, float16_t NdotH)
+float DistributionGGX(float Alpha, float NdotH)
 {
-    float16_t alpha2 = Alpha * Alpha;
-    float16_t t = NdotH * NdotH * (alpha2 - 1.0f) + 1.0f;
+    float alpha2 = Alpha * Alpha;
+    float t = NdotH * NdotH * (alpha2 - 1.0f) + 1.0f;
     return alpha2 / (PI * t * t);
 }
 
 // Schlickによるフレネルの近似 
-float16_t SchlickFresnel(float16_t F0, float16_t F90, float16_t Cosine)
+float SchlickFresnel(float F0, float F90, float Cosine)
 {
-    float16_t m = saturate(1.0f - Cosine);
-    float16_t m2 = m * m;
-    float16_t m5 = m2 * m2 * m;
+    float m = saturate(1.0f - Cosine);
+    float m2 = m * m;
+    float m5 = m2 * m2 * m;
     return lerp(F0, F90, m5);
 }
-float16_t3 SchlickFresnel3(float16_t3 F0, float16_t3 F90, float16_t Cosine)
+float3 SchlickFresnel3(float3 F0, float3 F90, float Cosine)
 {
-    float16_t m = saturate(1.0f - Cosine);
-    float16_t m2 = m * m;
-    float16_t m5 = m2 * m2 * m;
+    float m = saturate(1.0f - Cosine);
+    float m2 = m * m;
+    float m5 = m2 * m2 * m;
     return lerp(F0, F90, m5);
 }
 
 // ディズニーのフレネル計算
-float16_t3 DisneyFresnel(float16_t LdotH, float16_t3 BaseColor)
+float3 DisneyFresnel(float LdotH, float3 BaseColor)
 {
     
     // 輝度
-    float16_t luminance = 0.3f * BaseColor.r + 0.6f * BaseColor.g + 0.1f * BaseColor.b;
+    float luminance = 0.3f * BaseColor.r + 0.6f * BaseColor.g + 0.1f * BaseColor.b;
     // 色合い
-    float16_t3 tintColor = BaseColor / luminance;
+    float3 tintColor = BaseColor / luminance;
     // 非金属の鏡面反射色を計算
-    float16_t3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
+    float3 nonMetalColor = material[0].specular_ * 0.08f * tintColor;
     // metalnessによる色補完 金属の場合はベースカラー
-    float16_t3 specularColor = lerp(nonMetalColor, BaseColor, material[0].metalness_);
+    float3 specularColor = lerp(nonMetalColor, BaseColor, material[0].metalness_);
     // NdotHの割合でSchlickFresnel補間
-    return SchlickFresnel3(specularColor, float16_t3(1.0f, 1.0f, 1.0f), LdotH);
+    return SchlickFresnel3(specularColor, float3(1.0f, 1.0f, 1.0f), LdotH);
     
 }
 
 // UE4のSmithモデル
-float16_t GeometricSmith(float16_t Cosine)
+float GeometricSmith(float Cosine)
 {
-    float16_t k = (material[0].roughness_ + 1.0f);
+    float k = (material[0].roughness_ + 1.0f);
     k = k * k / 8.0f;
     return Cosine / (Cosine * (1.0f - k) + k);
 }
 
 // 鏡面反射の計算
-float16_t3 CookTorranceSpecular(float16_t NdotL, float16_t NdotV, float16_t NdotH, float16_t LdotH, float16_t3 BaseColor)
+float3 CookTorranceSpecular(float NdotL, float NdotV, float NdotH, float LdotH, float3 BaseColor)
 {
     
     // D項(分布:Distribution)
-    float16_t Ds = DistributionGGX(material[0].roughness_ * material[0].roughness_, NdotH);
+    float Ds = DistributionGGX(material[0].roughness_ * material[0].roughness_, NdotH);
     
     // F項(フレネル:Fresnel)
-    float16_t3 Fs = DisneyFresnel(LdotH, BaseColor);
+    float3 Fs = DisneyFresnel(LdotH, BaseColor);
     
     // G項(幾何減衰:Geometry attenuation)
-    float16_t Gs = GeometricSmith(NdotL) * GeometricSmith(NdotV);
+    float Gs = GeometricSmith(NdotL) * GeometricSmith(NdotV);
     
     // M項(分母)
-    float16_t m = 4.0f * NdotL * NdotV;
+    float m = 4.0f * NdotL * NdotV;
     
     // 合成して鏡面反射の色を得る。
     return Ds * Fs * Gs / m;
@@ -411,45 +417,45 @@ float16_t3 CookTorranceSpecular(float16_t NdotL, float16_t NdotV, float16_t Ndot
 }
 
 // 双方向反射分布関数
-float16_t3 BRDF(float16_t3 LightVec, float16_t3 ViewVec, float16_t3 Normal, float16_t3 BaseColor)
+float3 BRDF(float3 LightVec, float3 ViewVec, float3 Normal, float3 BaseColor)
 {
     // 法線とライト方向の内積
-    float16_t NdotL = dot(Normal, LightVec);
+    float NdotL = dot(Normal, LightVec);
     
     // 法線とカメラ方向の内積
-    float16_t NdotV = dot(Normal, ViewVec);
+    float NdotV = dot(Normal, ViewVec);
     
     // ライト方向とカメラ方向の中間であるハーフベクトル
-    float16_t3 floatVec = normalize(LightVec + ViewVec);
+    float3 floatVec = normalize(LightVec + ViewVec);
     
     // 法線とハーフベクトルの内積
-    float16_t NdotH = dot(Normal, floatVec);
+    float NdotH = dot(Normal, floatVec);
     
     // ライトとハーフベクトルの内積
-    float16_t LdotH = dot(LightVec, floatVec);
+    float LdotH = dot(LightVec, floatVec);
     
     // 拡散反射率
-    float16_t diffuseReflectance = 1.0f / PI;
+    float diffuseReflectance = 1.0f / PI;
     
     // 入射角が90度の場合の拡散反射率
-    float16_t energyBias = 0.5f * material[0].roughness_;
-    float16_t FD90 = energyBias + 2.0f * LdotH * LdotH * material[0].roughness_;
+    float energyBias = 0.5f * material[0].roughness_;
+    float FD90 = energyBias + 2.0f * LdotH * LdotH * material[0].roughness_;
     
     // 入っていくときの拡散反射率
-    float16_t FL = SchlickFresnel(1.0f, FD90, NdotL);
+    float FL = SchlickFresnel(1.0f, FD90, NdotL);
     
     // 出ていくときの拡散反射率
-    float16_t FV = SchlickFresnel(1.0f, FD90, NdotV);
+    float FV = SchlickFresnel(1.0f, FD90, NdotV);
     
     // 入って出ていくまでの拡散反射率
-    float16_t energyFactor = lerp(1.0f, 1.0f / 1.51f, material[0].roughness_);
-    float16_t FD = FL * FV * energyFactor;
+    float energyFactor = lerp(1.0f, 1.0f / 1.51f, material[0].roughness_);
+    float FD = FL * FV * energyFactor;
     
     // 拡散反射項
-    float16_t3 diffuseColor = diffuseReflectance * FD * BaseColor * (1.0f - material[0].metalness_);
+    float3 diffuseColor = diffuseReflectance * FD * BaseColor * (1.0f - material[0].metalness_);
     
     // 鏡面反射項
-    float16_t3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH, BaseColor);
+    float3 specularColor = CookTorranceSpecular(NdotL, NdotV, NdotH, LdotH, BaseColor);
     
     return diffuseColor + specularColor;
     
@@ -474,15 +480,15 @@ bool Lighting(inout Payload PayloadData, float3 WorldPos, float3 NormalMap, Vert
     float dirLightVisibility = ShootDirShadow(Vtx, 10000.0f);
     
     // 大気散乱の色
-    float16_t3 skydomeColor;
-    float16_t3 mieColor = float3(1, 1, 1);
+    float3 skydomeColor;
+    float3 mieColor = float3(1, 1, 1);
     
     // ディレクショナルライトの明るさが一定以上だったら
     if (0.0f < dirLightVisibility)
     {
     
         const float SKYDOME_RADIUS = 15000.0f;
-        const float16_t SAMPLING_POS_Y = 0.0f;
+        const float SAMPLING_POS_Y = 0.0f;
         
         // 天球の色をサンプリング
         float3 samplingVec = normalize(-gSceneParam.light.dirLight.lightDir) * SKYDOME_RADIUS;
