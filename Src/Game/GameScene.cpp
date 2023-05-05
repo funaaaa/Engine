@@ -333,7 +333,7 @@ void GameScene::Update()
 	RayEngine::Ins()->Update();
 
 	// 太陽の角度を更新。
-	sunAngle_ += sunSpeed_;
+	//sunAngle_ += sunSpeed_;
 	if (0.0f < RayEngine::Ins()->GetConstBufferData().light_.dirLight_.lihgtDir_.y_) {
 
 		sunAngle_ += sunSpeed_ * 50.0f;
@@ -446,6 +446,9 @@ void GameScene::Update()
 
 	//プレイヤーの座標をノイズ生成関数に渡す。
 	RayEngine::Ins()->noiseConstData_.playerPos = characterMgr_->GetPlayerIns().lock()->GetPos();
+	RayEngine::Ins()->constBufferData_.debug_.playerPos_ = characterMgr_->GetPlayerIns().lock()->GetPos();
+
+	RayEngine::Ins()->constBufferData_.light_.dirLight_.isActive_ = false;
 
 }
 
@@ -496,34 +499,34 @@ void GameScene::Draw()
 
 	concentrationLine_->Draw();
 
-	// 現在のラップ数のui。
-	nowRapCountUI_->Draw();
-	slashUI_->Draw();
-	maxRapCountUI_->Draw();
+	//// 現在のラップ数のui。
+	//nowRapCountUI_->Draw();
+	//slashUI_->Draw();
+	//maxRapCountUI_->Draw();
 
-	// 左下のuiのフレーム。
-	rapUI_->Draw();
+	//// 左下のuiのフレーム。
+	//rapUI_->Draw();
 
-	// カウントダウン用のui。
-	countDownSprite_->Draw();
+	//// カウントダウン用のui。
+	//countDownSprite_->Draw();
 
-	// カウントダウン終了時のgoのui。
-	goSprite_->Draw();
+	//// カウントダウン終了時のgoのui。
+	//goSprite_->Draw();
 
-	// 勝敗を描画
-	if (isGameFinish_) {
+	//// 勝敗を描画
+	//if (isGameFinish_) {
 
-		if (isWin_) {
-			winUI_->Draw();
-		}
-		else {
-			gameoverUI_->Draw();
-		}
+	//	if (isWin_) {
+	//		winUI_->Draw();
+	//	}
+	//	else {
+	//		gameoverUI_->Draw();
+	//	}
 
-	}
+	//}
 
-	// ランキングのUIを表示
-	rankingUI_->Draw();
+	//// ランキングのUIを表示
+	//rankingUI_->Draw();
 
 	// シーン遷移の画像を描画。
 	SceneTransition::Ins()->Draw();

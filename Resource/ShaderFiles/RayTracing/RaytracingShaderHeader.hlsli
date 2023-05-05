@@ -28,6 +28,12 @@ static const int CHS_IDENTIFICATION_RAYID_REFRACTION = 104; // 屈折のレイ
 static const int CHS_IDENTIFICATION_RAYID_SHADOW = 105; // 影用のレイ
 static const int CHS_IDENTIFICATION_RAYID_AO_SHADOW = 106; // AO影用のレイ
 
+//レイマーチングで使用する用
+static const float FOG_GRID_SIZE = 10.0f;
+static const float FOG_MARCHING_LENGTH = 10.0f;
+static const int FOG_MAX_MARCHING_COUNT = 256;
+
+
 // カメラ用の定数バッファ
 struct CameraConstBufferData
 {
@@ -76,10 +82,11 @@ struct AlphaConstBufferData
 // デバッグ用情報
 struct DebugData
 {
+    float3 playerPos;
     int isDebugMeshInfo_;
     int debugMesnInfoX_;
     float timer_;
-    float pad_;
+    float2 pad_;
 };
 
 // 定数バッファ
@@ -132,6 +139,8 @@ struct Payload
     float roughnessOffset_;
     float3 emissive_; // エミッシブ出力用
     float pad_;
+    float3 fogColor_;
+    float pad2_;
 };
 
 struct MyAttribute

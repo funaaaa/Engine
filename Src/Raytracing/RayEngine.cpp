@@ -56,6 +56,14 @@ void RayEngine::Setting()
 	emissiveOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"EmissiveOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_COMMON);
 	emissiveOutput_[1]->SetResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
+	// フォグ
+	fogOutput_[0] = std::make_shared<RaytracingOutput>();
+	fogOutput_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FogOutput0", Vec2(1280, 720), D3D12_RESOURCE_STATE_COMMON);
+	fogOutput_[0]->SetResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	fogOutput_[1] = std::make_shared<RaytracingOutput>();
+	fogOutput_[1]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FogOutput1", Vec2(1280, 720), D3D12_RESOURCE_STATE_COMMON);
+	fogOutput_[1]->SetResourceBarrier(D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
 	// 最終出力用クラスをセット。
 	finalOutputTexture_[0] = std::make_shared<RaytracingOutput>();
 	finalOutputTexture_[0]->Setting(DXGI_FORMAT_R8G8B8A8_UNORM, L"FinalOutputTexture0", Vec2(1280, 720), D3D12_RESOURCE_STATE_COMMON);
@@ -66,9 +74,9 @@ void RayEngine::Setting()
 
 	// デノイズAO用のパイプラインを設定。
 	pipelineShaders_.push_back({ "Resource/ShaderFiles/RayTracing/RaytracingShader.hlsl", {L"mainRayGen"}, {L"mainMS", L"shadowMS"}, {L"mainCHS", L"mainAnyHit"} });
-	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 4 + sizeof(UINT) * 4;
+	int payloadSize = sizeof(float) * 4 + sizeof(Vec3) * 5 + sizeof(UINT) * 5;
 	pipeline_ = std::make_shared<RaytracingPipeline>();
-	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 2, 1, 5, payloadSize, sizeof(Vec2), 6);
+	pipeline_->Setting(pipelineShaders_, HitGroupMgr::DEF, 2, 1, 6, payloadSize, sizeof(Vec2), 6);
 
 	// シェーダーテーブルを生成。
 	pipeline_->ConstructionShaderTable();
@@ -207,6 +215,7 @@ void RayEngine::TraceRay()
 	denoiseMaskOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(5);// デノイズをする際のマスク出力用
 	emissiveOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(6);// デノイズをする際のマスク出力用
 	volumeTexture_.SetComputeRootDescriptorTalbe(7);
+	fogOutput_[Engine::Ins()->currentQueueIndex_]->SetComputeRootDescriptorTalbe(8);// デノイズをする際のマスク出力用
 
 	// パイプラインを設定。
 	Engine::Ins()->mainGraphicsCmdList_->SetPipelineState1(pipeline_->GetStateObject(Engine::Ins()->currentQueueIndex_).Get());
@@ -259,7 +268,7 @@ void RayEngine::DenoiseCommand()
 	// デノイズをかけたライティング情報と色情報を混ぜる。
 	Denoiser::Ins()->MixColorAndLuminance(colorOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(),
 		denoiseLightOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(),
-		emissiveOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
+		emissiveOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), fogOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex(), denoiseMixTextureOutput_[Engine::Ins()->currentQueueIndex_]->GetUAVIndex());
 
 
 	// ラジアルブラーをかける。

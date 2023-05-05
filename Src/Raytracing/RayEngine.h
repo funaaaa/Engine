@@ -46,6 +46,9 @@ public:
 	// ブルーム用エミッシブ出力
 	std::array<std::shared_ptr<RaytracingOutput>, 2> emissiveOutput_;
 
+	// フォグ出力
+	std::array<std::shared_ptr<RaytracingOutput>, 2> fogOutput_;
+
 	// デノイズAO用のパイプラインを設定。
 	std::vector<RayPipelineShaderData> pipelineShaders_;
 	std::shared_ptr<RaytracingPipeline> pipeline_;

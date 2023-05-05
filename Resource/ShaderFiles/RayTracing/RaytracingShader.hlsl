@@ -21,10 +21,47 @@ RWTexture2D<float4> colorOutput : register(u1);
 RWTexture2D<float4> denoiseMaskoutput : register(u2);
 RWTexture2D<float4> emissiveOutput : register(u3);
 RWTexture3D<float4> fogVolumeTexture : register(u4);
+RWTexture2D<float4> fogOutput : register(u5);
+
+// ボリュームフォグ
+void VolumeFog(inout float3 fog)
+{
+        
+    // レイマーチングの回数を計算。
+    float rayLength = RayTCurrent();
+    int marchingCount = clamp(int(length(rayLength) / FOG_MARCHING_LENGTH), 0, FOG_MAX_MARCHING_COUNT);
+    float3 fogColor = float3(0, 0, 0);
+    float3 marchingPos = WorldRayOrigin();
+    float3 marchingDir = WorldRayDirection();
+    for (int index = 0; index < marchingCount; ++index)
+    {
+        
+        //レイマーチングの座標をボクセル座標空間に直す。
+        uint3 boxPos = marchingPos - gSceneParam.debug_.playerPos; // プレイヤーの移動量を引くことにより原点基準にする。
+        boxPos += uint3(128 * FOG_GRID_SIZE, 128 * FOG_GRID_SIZE, 128 * FOG_GRID_SIZE); // 全体の半分を足すことによって-を無くす。
+        boxPos /= FOG_GRID_SIZE; // 256の範囲に収める。
+        boxPos = clamp(boxPos, 0, 256);
+        
+        //その部分の色を抜き取る。
+        fogColor += fogVolumeTexture[boxPos].xyz;
+        
+        //マーチングを進める。
+        marchingPos += marchingDir * FOG_MARCHING_LENGTH;
+        
+    }
+    
+    //色を加算する。
+    fog.xyz = saturate(fog.xyz + fogColor);
+    
+}
 
 // 大気散乱
 float3 AtmosphericScattering(float3 pos, inout float3 mieColor)
 {
+    
+    mieColor = float3(0, 0, 0);
+    return float3(0, 0, 0);
+    
 
     // レイリー散乱定数
     float kr = 0.0025f;
@@ -221,6 +258,8 @@ void mainRayGen()
     payloadData.alphaCounter_ = 0;
     payloadData.roughnessOffset_ = 1.0f;
     payloadData.pad_ = 1.0f;
+    payloadData.pad2_ = 1.0f;
+    payloadData.fogColor_ = float3(0, 0, 0);
 
     // TransRayに必要な設定を作成
     uint rayMask = 0xFF;
@@ -249,6 +288,7 @@ void mainRayGen()
     // 結果格納
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);
     colorOutput[launchIndex.xy] = float4((payloadData.color_), payloadData.ao_);
+    fogOutput[launchIndex.xy] = float4(payloadData.fogColor_,1);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
     emissiveOutput[launchIndex.xy] = float4(payloadData.emissive_, 1);
     
@@ -284,6 +324,8 @@ void mainMS(inout Payload PayloadData)
         
     // 影響度を0にする。
     payloadBuff.impactAmount_ = 0.0f;
+    
+    VolumeFog(payloadBuff.fogColor_);
         
     PayloadData = payloadBuff;
 
@@ -995,11 +1037,19 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
 
     }
     
+    // ボリュームフォグの計算
+    VolumeFog(payload.fogColor_);
+    
+    
+    //texColor = float4(0, 0, 0, 1);
+    //texColor.x = float(marchingCount) / float(10.0f);
+    
+    
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。
-    if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, normalMap, texColor, instanceID))
-    {
-        return;
-    }
+        if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, normalMap, texColor, instanceID))
+        {
+            return;
+        }
     
 
     // ライティングの処理

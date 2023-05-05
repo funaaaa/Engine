@@ -21,10 +21,11 @@ struct CameraConstBufferData {
 // デバッグ用情報
 struct DebugData {
 
+	Vec3 playerPos_;
 	int isDebugMesnInfo_;
 	int debugMeshMoveX_;
 	float timer_;
-	int pad_;
+	Vec2 pad_;
 
 	// 初期化処理
 	void Init();

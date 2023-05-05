@@ -65,7 +65,7 @@ float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacun
     float smoothTime = t * 0.1; // 任意の係数（この場合は0.1）で時間変数をスケーリング
 
     // プレイヤーのワールド座標に基づくノイズ生成
-    float3 worldSpaceCoords = st + playerPosition / 100.0f;
+    float3 worldSpaceCoords = st + playerPosition;
 
     for (int i = 0; i < octaves; ++i)
     {
@@ -91,7 +91,7 @@ void main(uint3 threadIdx : SV_DispatchThreadID)
     
 
     // パーリンノイズを適用
-    float perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, playerPosition_);
+    float perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, playerPosition_) / 10.0f;
     
     // 色を保存。
     OutputImg[threadIdx] = float4(perlinValue, perlinValue, perlinValue, 1);
