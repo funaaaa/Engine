@@ -4,10 +4,11 @@ RWTexture3D<float4> OutputImg : register(u0);
 
 cbuffer param : register(b0)
 {
-    float3 playerPosition_;
+    float3 worldPos_;
     float timer_;
     float windSpeed_;
     float windStrength_;
+    float threshold_;
 };
 
 
@@ -50,10 +51,10 @@ float noise(float3 st)
 }
 
 // 3Dパーリンノイズ関数（風の表現付き）
-float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacunarity, float windStrength, float windSpeed, float t, float3 playerPosition)
+float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacunarity, float windStrength, float windSpeed, float t, float3 worldPos, float threshold)
 {
     float amplitude = 1.0;
-    float frequency = 1.0;
+    float frequency = 0.5; // 周波数を下げて、より大きな霧のパターンを作成
     float sum = 0.0;
     float maxValue = 0.0;
 
@@ -65,7 +66,7 @@ float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacun
     float smoothTime = t * 0.1; // 任意の係数（この場合は0.1）で時間変数をスケーリング
 
     // プレイヤーのワールド座標に基づくノイズ生成
-    float3 worldSpaceCoords = st + playerPosition;
+    float3 worldSpaceCoords = st + worldPos / 100.0f;
 
     for (int i = 0; i < octaves; ++i)
     {
@@ -76,7 +77,21 @@ float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacun
         frequency *= lacunarity;
     }
 
-    return sum / maxValue;
+    float noiseValue = sum / maxValue;
+
+    // しきい値を適用して霧の塊を作成
+    noiseValue = (noiseValue + 1.0) * 0.5; // ノイズ値を0.0から1.0の範囲に再マッピング
+
+    if (noiseValue > threshold)
+    {
+        return noiseValue;
+    }
+    else
+    {
+        return 0.0;
+    }
+    
+
 }
 
 [numthreads(8, 8, 4)]
@@ -84,16 +99,16 @@ void main(uint3 threadIdx : SV_DispatchThreadID)
 {
     
     float3 st = threadIdx.xyz / 256.0f * 20.0; // スケール調整
-    int octaves = 8; // オクターブ数
+    int octaves = 3; // オクターブ数
     float persistence = 0.5; // 持続度
     float lacunarity = 2.0; // ラクナリティ
     float speed = 0.05; // 流れる速さ
     
 
     // パーリンノイズを適用
-    float perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, playerPosition_) / 10.0f;
+    float perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, worldPos_, threshold_);
     
     // 色を保存。
-    OutputImg[threadIdx] = float4(perlinValue, perlinValue, perlinValue, 1);
+    OutputImg[threadIdx] = float4(perlinValue, perlinValue, perlinValue, 0.1f);
     
 }

@@ -63,11 +63,12 @@ public:
 	// 3Dノイズ書き込み用コンピュートシェーダー
 	std::shared_ptr<RayComputeShader> write3DNoiseCS_;
 	struct NoiseConstData {
-		Vec3 playerPos;
+		Vec3 worldPos_;
 		float timer_;
 		float windSpeed_;
 		float windStrength_;
-		Vec2 pad_;
+		float threshold_;
+		float pad_;
 	}noiseConstData_;
 	std::shared_ptr<DynamicConstBuffer> noiseConstBuffer_;
 

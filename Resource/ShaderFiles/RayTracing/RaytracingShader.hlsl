@@ -29,24 +29,27 @@ void VolumeFog(inout float3 fog)
         
     // レイマーチングの回数を計算。
     float rayLength = RayTCurrent();
-    int marchingCount = clamp(int(length(rayLength) / FOG_MARCHING_LENGTH), 0, FOG_MAX_MARCHING_COUNT);
+    int marchingCount = rayLength / FOG_MARCHING_LENGTH;
     float3 fogColor = float3(0, 0, 0);
     float3 marchingPos = WorldRayOrigin();
     float3 marchingDir = WorldRayDirection();
     for (int index = 0; index < marchingCount; ++index)
     {
         
-        //レイマーチングの座標をボクセル座標空間に直す。
-        uint3 boxPos = marchingPos - gSceneParam.debug_.playerPos; // プレイヤーの移動量を引くことにより原点基準にする。
-        boxPos += uint3(128 * FOG_GRID_SIZE, 128 * FOG_GRID_SIZE, 128 * FOG_GRID_SIZE); // 全体の半分を足すことによって-を無くす。
-        boxPos /= FOG_GRID_SIZE; // 256の範囲に収める。
-        boxPos = clamp(boxPos, 0, 256);
-        
-        //その部分の色を抜き取る。
-        fogColor += fogVolumeTexture[boxPos].xyz;
-        
         //マーチングを進める。
         marchingPos += marchingDir * FOG_MARCHING_LENGTH;
+        
+        //レイマーチングの座標をボクセル座標空間に直す。
+        int3 boxPos = marchingPos - WorldRayOrigin(); // プレイヤーの移動量を引くことにより原点基準にする。
+        boxPos += FOG_GRID_SIZE * 10000.0f;
+        boxPos /= FOG_GRID_SIZE; // 256の範囲に収める。
+        boxPos.x = boxPos.x % 256;
+        boxPos.y = boxPos.y % 256;
+        boxPos.z = boxPos.z % 256;
+        boxPos = clamp(boxPos, 0, 255);
+        
+        //その部分の色を抜き取る。
+        fogColor += fogVolumeTexture[boxPos].xyz / 100.0f;
         
     }
     
@@ -325,7 +328,8 @@ void mainMS(inout Payload PayloadData)
     // 影響度を0にする。
     payloadBuff.impactAmount_ = 0.0f;
     
-    VolumeFog(payloadBuff.fogColor_);
+    //VolumeFog(payloadBuff.fogColor_);
+    payloadBuff.fogColor_ = float3(1, 1, 1);
         
     PayloadData = payloadBuff;
 
@@ -1041,7 +1045,7 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     VolumeFog(payload.fogColor_);
     
     
-    //texColor = float4(0, 0, 0, 1);
+    texColor.xyz -= payload.fogColor_;
     //texColor.x = float(marchingCount) / float(10.0f);
     
     

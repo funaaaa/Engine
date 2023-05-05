@@ -259,6 +259,12 @@ void GameScene::Update()
 
 	/*===== 更新処理 =====*/
 
+
+	//プレイヤーの座標をノイズ生成関数に渡す。
+	RayEngine::Ins()->constBufferData_.debug_.playerPos_ = characterMgr_->GetPlayerIns().lock()->GetPos();
+	RayEngine::Ins()->noiseConstData_.worldPos_ = Camera::Ins()->eye_;
+	RayEngine::Ins()->constBufferData_.light_.dirLight_.isActive_ = false;
+
 	// 基本的なデバッグ機能
 	bool isMoveOnly1F = false;
 	ImGuiDebug(isMoveOnly1F, sunAngle_);
@@ -444,11 +450,6 @@ void GameScene::Update()
 		rankingUI_->ChangePosition(RANK_UI_POS + Vec3(0, sineWaveAmount, 0));
 	}
 
-	//プレイヤーの座標をノイズ生成関数に渡す。
-	RayEngine::Ins()->noiseConstData_.playerPos = characterMgr_->GetPlayerIns().lock()->GetPos();
-	RayEngine::Ins()->constBufferData_.debug_.playerPos_ = characterMgr_->GetPlayerIns().lock()->GetPos();
-
-	RayEngine::Ins()->constBufferData_.light_.dirLight_.isActive_ = false;
 
 }
 
