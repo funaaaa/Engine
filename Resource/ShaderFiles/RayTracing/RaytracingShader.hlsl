@@ -48,8 +48,14 @@ void VolumeFog(inout float3 fog)
         boxPos.z = boxPos.z % 256;
         boxPos = clamp(boxPos, 0, 255);
         
+        //ノイズを抜き取る。
+        float3 noise = fogVolumeTexture[boxPos].xyz / 100.0f;
+        
+        float3 weights = float3(0.5, 0.3, 0.2); // 各ノイズの重み
+        float fogDensity = dot(noise, weights);
+        
         //その部分の色を抜き取る。
-        fogColor += fogVolumeTexture[boxPos].xyz / 100.0f;
+        fogColor += float3(fogDensity, fogDensity, fogDensity);
         
     }
     

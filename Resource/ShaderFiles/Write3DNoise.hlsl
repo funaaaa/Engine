@@ -51,12 +51,9 @@ float noise(float3 st)
 }
 
 // 3Dパーリンノイズ関数（風の表現付き）
-float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacunarity, float windStrength, float windSpeed, float t, float3 worldPos, float threshold)
+float3 PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacunarity, float windStrength, float windSpeed, float t, float3 worldPos, float threshold)
 {
     float amplitude = 1.0;
-    float frequency = 0.5; // 周波数を下げて、より大きな霧のパターンを作成
-    float sum = 0.0;
-    float maxValue = 0.0;
 
     // 風の影響を計算
     float3 windDirection = normalize(float3(1, 0, 0)); // 風の方向を設定（この場合は (1, 0, 0) の方向）
@@ -68,47 +65,50 @@ float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacun
     // プレイヤーのワールド座標に基づくノイズ生成
     float3 worldSpaceCoords = st + worldPos / 100.0f;
 
-    for (int i = 0; i < octaves; ++i)
-    {
-        sum += amplitude * noise((worldSpaceCoords + windEffect) * frequency + (smoothTime + windEffect.x)); // スムーズな時間変数と風の影響をノイズ関数に適用
-        maxValue += amplitude;
+    float3 noiseValue = float3(0, 0, 0);
 
-        amplitude *= persistence;
-        frequency *= lacunarity;
+    for (int j = 0; j < 3; ++j)
+    {
+        float frequency = pow(2.0, float(j));
+        float localAmplitude = amplitude;
+        float sum = 0.0;
+        float maxValue = 0.0;
+        
+        for (int i = 0; i < octaves; ++i)
+        {
+            sum += localAmplitude * noise((worldSpaceCoords + windEffect) * frequency + (smoothTime + windEffect.x)); // スムーズな時間変数と風の影響をノイズ関数に適用
+            maxValue += localAmplitude;
+
+            localAmplitude *= persistence;
+            frequency *= lacunarity;
+        }
+
+        noiseValue[j] = (sum / maxValue + 1.0) * 0.5; // ノイズ値を0.0から1.0の範囲に再マッピング
+
+        if (noiseValue[j] <= threshold)
+        {
+            noiseValue[j] = 0.0;
+        }
     }
 
-    float noiseValue = sum / maxValue;
-
-    // しきい値を適用して霧の塊を作成
-    noiseValue = (noiseValue + 1.0) * 0.5; // ノイズ値を0.0から1.0の範囲に再マッピング
-
-    if (noiseValue > threshold)
-    {
-        return noiseValue;
-    }
-    else
-    {
-        return 0.0;
-    }
-    
-
+    return noiseValue;
 }
 
 [numthreads(8, 8, 4)]
 void main(uint3 threadIdx : SV_DispatchThreadID)
 {
     
-    float3 st = threadIdx.xyz / 256.0f * 20.0; // スケール調整
-    int octaves = 3; // オクターブ数
+    float3 st = threadIdx.xyz / 256.0f * 10.0; // スケール調整
+    int octaves = 4; // オクターブ数
     float persistence = 0.5; // 持続度
     float lacunarity = 2.0; // ラクナリティ
     float speed = 0.05; // 流れる速さ
     
 
     // パーリンノイズを適用
-    float perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, worldPos_, threshold_);
+    float3 perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, worldPos_, threshold_);
     
     // 色を保存。
-    OutputImg[threadIdx] = float4(perlinValue, perlinValue, perlinValue, 0.1f);
+    OutputImg[threadIdx] = float4(perlinValue.x, perlinValue.y, perlinValue.z, 0.1f);
     
 }
