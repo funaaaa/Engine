@@ -87,7 +87,15 @@ void RayEngine::Setting()
 	
 	// フォグノイズ書き込み用CSを用意。
 	write3DNoiseCS_ = std::make_shared<RayComputeShader>();
-	write3DNoiseCS_->Setting(L"Resource/ShaderFiles/Write3DNoise.hlsl", 0, 0, 0, {});
+	write3DNoiseCS_->Setting(L"Resource/ShaderFiles/Write3DNoise.hlsl", 0, 1, 0, {});
+
+	// ノイズ用の定数バッファを用意。
+	noiseConstData_.timer_ = 0.0f;
+	noiseConstData_.windSpeed_ = 1.0f;
+	noiseConstData_.windStrength_ = 1.0f;
+	noiseConstBuffer_ = std::make_shared<DynamicConstBuffer>();
+	noiseConstBuffer_->Generate(sizeof(NoiseConstData), L"NoiseConstBuffer");
+	noiseConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), &noiseConstData_, sizeof(NoiseConstData));
 
 }
 
@@ -118,6 +126,7 @@ void RayEngine::Update()
 #include "Bloom.h"
 #include "Camera.h"
 #include "RadialBlur.h"
+#include <algorithm>
 void RayEngine::Draw()
 {
 
@@ -132,10 +141,27 @@ void RayEngine::Draw()
 	// コピーコマンドに命令を積む。
 	CopyCommand();
 
+	// ノイズ用のデバッグ機能
+	if (Input::Ins()->IsKey(DIK_F)) {
+		noiseConstData_.windSpeed_ = std::clamp(noiseConstData_.windSpeed_ + 0.1f, 0.1f, 10.0f);
+	}
+	if (Input::Ins()->IsKey(DIK_G)) {
+		noiseConstData_.windSpeed_ = std::clamp(noiseConstData_.windSpeed_ - 0.1f, 0.1f, 10.0f);
+	}
+	if (Input::Ins()->IsKey(DIK_H)) {
+		noiseConstData_.windStrength_ = std::clamp(noiseConstData_.windStrength_ + 0.01f, 0.01f, 1.0f);
+	}
+	if (Input::Ins()->IsKey(DIK_J)) {
+		noiseConstData_.windStrength_ = std::clamp(noiseConstData_.windStrength_ - 0.01f, 0.01f, 1.0f);
+	}
+
+	// ノイズ用のタイマーを更新。
+	noiseConstData_.timer_ += 0.01f;
+	noiseConstBuffer_->Write(Engine::Ins()->currentQueueIndex_, &noiseConstData_, sizeof(noiseConstData_));
+
 	// ノイズを書き込み。
-	constBufferData_.debug_.timer_ += 0.1f;
-	constBuffer_->Write(0, &constBufferData_, sizeof(constBufferData_));
-	write3DNoiseCS_->Dispatch(static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 4), volumeTexture_.GetUAVIndex(), {}, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
+	auto backBufferIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();
+	write3DNoiseCS_->Dispatch(static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 8), static_cast<UINT>(256 / 4), volumeTexture_.GetUAVIndex(), {noiseConstBuffer_->GetBuffer(backBufferIndex)->GetGPUVirtualAddress()}, Engine::Ins()->denoiseCmdList_[Engine::Ins()->currentQueueIndex_]);
 
 }
 
@@ -143,6 +169,9 @@ void RayEngine::TraceRay()
 {
 
 	/*===== レイトレーシングを実行 =====*/
+
+	// タイマーを更新。
+	constBufferData_.debug_.timer_ += 0.1f;
 
 	// カメラ行列を更新。
 	auto backBufferIndex = Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex();

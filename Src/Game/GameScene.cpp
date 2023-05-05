@@ -444,6 +444,8 @@ void GameScene::Update()
 		rankingUI_->ChangePosition(RANK_UI_POS + Vec3(0, sineWaveAmount, 0));
 	}
 
+	//プレイヤーの座標をノイズ生成関数に渡す。
+	RayEngine::Ins()->noiseConstData_.playerPos = characterMgr_->GetPlayerIns().lock()->GetPos();
 
 }
 

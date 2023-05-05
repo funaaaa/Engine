@@ -254,7 +254,7 @@ void mainRayGen()
     
     if (launchIndex.x < 256 && launchIndex.y < 256)
     {
-        colorOutput[launchIndex.xy] = fogVolumeTexture[uint3(launchIndex.xy, gSceneParam.debug_.timer_ % 256)];
+        colorOutput[launchIndex.xy] = fogVolumeTexture[uint3(launchIndex.xy, 0)];
     }
 
 }

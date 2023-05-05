@@ -2,6 +2,15 @@
 // 出力先UAV
 RWTexture3D<float4> OutputImg : register(u0);
 
+cbuffer param : register(b0)
+{
+    float3 playerPosition_;
+    float timer_;
+    float windSpeed_;
+    float windStrength_;
+};
+
+
 
 // 3Dのランダムハッシュ関数
 float3 random3(float3 st)
@@ -40,17 +49,27 @@ float noise(float3 st)
     return lerp(xy1, xy2, u.z);
 }
 
-// 3Dパーリンノイズ関数
-float PerlinNoise(float3 st, int octaves, float persistence, float lacunarity)
+// 3Dパーリンノイズ関数（風の表現付き）
+float PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacunarity, float windStrength, float windSpeed, float t, float3 playerPosition)
 {
     float amplitude = 1.0;
     float frequency = 1.0;
     float sum = 0.0;
     float maxValue = 0.0;
 
+    // 風の影響を計算
+    float3 windDirection = normalize(float3(1, 0, 0)); // 風の方向を設定（この場合は (1, 0, 0) の方向）
+    float3 windEffect = windDirection * windStrength * (t * windSpeed);
+
+    // よりスムーズな時間変数
+    float smoothTime = t * 0.1; // 任意の係数（この場合は0.1）で時間変数をスケーリング
+
+    // プレイヤーのワールド座標に基づくノイズ生成
+    float3 worldSpaceCoords = st + playerPosition / 100.0f;
+
     for (int i = 0; i < octaves; ++i)
     {
-        sum += amplitude * noise(st * frequency);
+        sum += amplitude * noise((worldSpaceCoords + windEffect) * frequency + (smoothTime + windEffect.x)); // スムーズな時間変数と風の影響をノイズ関数に適用
         maxValue += amplitude;
 
         amplitude *= persistence;
@@ -72,7 +91,7 @@ void main(uint3 threadIdx : SV_DispatchThreadID)
     
 
     // パーリンノイズを適用
-    float perlinValue = PerlinNoise(st, octaves, persistence, lacunarity);
+    float perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, playerPosition_);
     
     // 色を保存。
     OutputImg[threadIdx] = float4(perlinValue, perlinValue, perlinValue, 1);
