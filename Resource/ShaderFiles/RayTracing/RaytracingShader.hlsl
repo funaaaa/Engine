@@ -303,7 +303,13 @@ void mainRayGen()
     
     if (launchIndex.x < 256 && launchIndex.y < 256)
     {
-        colorOutput[launchIndex.xy] = fogVolumeTexture[uint3(launchIndex.xy, 0)];
+        //ノイズを抜き取る。
+        float3 noise = fogVolumeTexture[uint3(launchIndex.xy, 0)].xyz;
+        
+        float3 weights = float3(0.5, 0.3, 0.2); // 各ノイズの重み
+        float fogDensity = dot(noise, weights);
+        
+        colorOutput[launchIndex.xy] = float4(fogDensity, fogDensity, fogDensity,1.0f);
     }
 
 }

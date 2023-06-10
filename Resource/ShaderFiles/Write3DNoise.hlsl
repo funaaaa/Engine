@@ -9,6 +9,11 @@ cbuffer param : register(b0)
     float windSpeed_;
     float windStrength_;
     float threshold_;
+    float scale_;
+    int octaves_;
+    float persistence_;
+    float lacunarity_;
+    float pad_;
 };
 
 
@@ -98,15 +103,12 @@ float3 PerlinNoiseWithWind(float3 st, int octaves, float persistence, float lacu
 void main(uint3 threadIdx : SV_DispatchThreadID)
 {
     
-    float3 st = threadIdx.xyz / 256.0f * 10.0; // スケール調整
-    int octaves = 4; // オクターブ数
-    float persistence = 0.5; // 持続度
-    float lacunarity = 2.0; // ラクナリティ
-    float speed = 0.05; // 流れる速さ
+    //float3 st = threadIdx.xyz / 256.0f * 10.0; // スケール調整
+    float3 st = threadIdx.xyz / scale_ * 10.0f; // スケール調整
     
 
     // パーリンノイズを適用
-    float3 perlinValue = PerlinNoiseWithWind(st, octaves, persistence, lacunarity, windStrength_, windSpeed_, timer_, worldPos_, threshold_);
+    float3 perlinValue = PerlinNoiseWithWind(st, octaves_, persistence_, lacunarity_, windStrength_, windSpeed_, timer_, worldPos_, threshold_);
     
     // 色を保存。
     OutputImg[threadIdx] = float4(perlinValue.x, perlinValue.y, perlinValue.z, 0.1f);

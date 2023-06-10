@@ -80,6 +80,38 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 
 		}
 
+
+		// ボリュームフォグ用デバッグ情報
+		ImGui::Begin("VolumeFog");
+		ImGui::SetWindowSize(ImVec2(400, 100), ImGuiCond_::ImGuiCond_FirstUseEver);
+
+		//風の速度
+		ImGui::DragFloat("WindSpeed", &RayEngine::Ins()->noiseConstData_.windSpeed_, 0.1f, 0.1f, 10.0f);
+
+		//風の強度
+		ImGui::DragFloat("WindStrength", &RayEngine::Ins()->noiseConstData_.windStrength_, 0.1f, 0.1f, 1.0f);
+
+		//風のしきい値 ノイズを風として判断するためのもの
+		ImGui::DragFloat("WindThreshold", &RayEngine::Ins()->noiseConstData_.windStrength_, 0.01f, 0.01f, 1.0f);
+
+		//ノイズのスケール
+		ImGui::DragFloat("NoiseScale", &RayEngine::Ins()->noiseConstData_.scale_, 1.0f, 1.0f, 1000.0f);
+
+		//ノイズのオクターブ数
+		ImGui::DragInt("NoiseOctaves", &RayEngine::Ins()->noiseConstData_.octaves_, 1, 1, 10);
+
+		//ノイズの持続度 違う周波数のノイズを計算する際にどのくらいノイズを持続させるか。 粒度になる。
+		ImGui::DragFloat("NoisePersistance", &RayEngine::Ins()->noiseConstData_.persistence_, 0.01f, 0.01f, 1.0f);
+
+		//ノイズの黒っぽさ
+		ImGui::DragFloat("NoiseLacunarity", &RayEngine::Ins()->noiseConstData_.lacunarity_, 0.01f, 0.01f, 10.0f);
+
+
+		ImGui::End();
+
+
+
+
 	}
 
 	// フリーカメラ状態だったら

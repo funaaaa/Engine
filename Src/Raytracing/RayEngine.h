@@ -68,6 +68,10 @@ public:
 		float windSpeed_;
 		float windStrength_;
 		float threshold_;
+		float scale_;
+		int octaves_;
+		float persistence_;
+		float lacunarity_;
 		float pad_;
 	}noiseConstData_;
 	std::shared_ptr<DynamicConstBuffer> noiseConstBuffer_;

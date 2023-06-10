@@ -102,6 +102,10 @@ void RayEngine::Setting()
 	noiseConstData_.windSpeed_ = 0.05f;
 	noiseConstData_.windStrength_ = 0.1f;
 	noiseConstData_.threshold_ = 0.5f;
+	noiseConstData_.scale_ = 256.0f;
+	noiseConstData_.octaves_ = 4;
+	noiseConstData_.persistence_ = 0.5f;
+	noiseConstData_.lacunarity_ = 2.0f;
 	noiseConstBuffer_ = std::make_shared<DynamicConstBuffer>();
 	noiseConstBuffer_->Generate(sizeof(NoiseConstData), L"NoiseConstBuffer");
 	noiseConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), &noiseConstData_, sizeof(NoiseConstData));
@@ -150,25 +154,25 @@ void RayEngine::Draw()
 	// コピーコマンドに命令を積む。
 	CopyCommand();
 
-	// ノイズ用のデバッグ機能
-	if (Input::Ins()->IsKey(DIK_F)) {
-		noiseConstData_.windSpeed_ = std::clamp(noiseConstData_.windSpeed_ + 0.1f, 0.1f, 10.0f);
-	}
-	if (Input::Ins()->IsKey(DIK_G)) {
-		noiseConstData_.windSpeed_ = std::clamp(noiseConstData_.windSpeed_ - 0.1f, 0.1f, 10.0f);
-	}
-	if (Input::Ins()->IsKey(DIK_H)) {
-		noiseConstData_.windStrength_ = std::clamp(noiseConstData_.windStrength_ + 0.01f, 0.01f, 1.0f);
-	}
-	if (Input::Ins()->IsKey(DIK_J)) {
-		noiseConstData_.windStrength_ = std::clamp(noiseConstData_.windStrength_ - 0.01f, 0.01f, 1.0f);
-	}
-	if (Input::Ins()->IsKey(DIK_K)) {
-		noiseConstData_.threshold_ = std::clamp(noiseConstData_.threshold_ + 0.01f, 0.01f, 1.0f);
-	}
-	if (Input::Ins()->IsKey(DIK_K)) {
-		noiseConstData_.threshold_ = std::clamp(noiseConstData_.threshold_ - 0.01f, 0.01f, 1.0f);
-	}
+	//// ノイズ用のデバッグ機能
+	//if (Input::Ins()->IsKey(DIK_F)) {
+	//	noiseConstData_.windSpeed_ = std::clamp(noiseConstData_.windSpeed_ + 0.1f, 0.1f, 10.0f);
+	//}
+	//if (Input::Ins()->IsKey(DIK_G)) {
+	//	noiseConstData_.windSpeed_ = std::clamp(noiseConstData_.windSpeed_ - 0.1f, 0.1f, 10.0f);
+	//}
+	//if (Input::Ins()->IsKey(DIK_H)) {
+	//	noiseConstData_.windStrength_ = std::clamp(noiseConstData_.windStrength_ + 0.01f, 0.01f, 1.0f);
+	//}
+	//if (Input::Ins()->IsKey(DIK_J)) {
+	//	noiseConstData_.windStrength_ = std::clamp(noiseConstData_.windStrength_ - 0.01f, 0.01f, 1.0f);
+	//}
+	//if (Input::Ins()->IsKey(DIK_K)) {
+	//	noiseConstData_.threshold_ = std::clamp(noiseConstData_.threshold_ + 0.01f, 0.01f, 1.0f);
+	//}
+	//if (Input::Ins()->IsKey(DIK_K)) {
+	//	noiseConstData_.threshold_ = std::clamp(noiseConstData_.threshold_ - 0.01f, 0.01f, 1.0f);
+	//}
 
 	// ノイズ用のタイマーを更新。
 	noiseConstData_.timer_ += 0.01f;
