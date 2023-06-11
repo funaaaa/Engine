@@ -93,8 +93,8 @@ struct DebugData
 struct RaymarchingData
 {
     float3 pos_;                //ボリュームテクスチャのサイズ
-    float3 color_;              //フォグの色
     float gridSize_;            //サンプリングするグリッドのサイズ
+    float3 color_;              //フォグの色
     float wrapCount_;           //サンプリング座標がはみ出した際に何回までWrapするか
     float samplingLength_;      //サンプリング距離
     float sanplingMaxCount_;    //最大サンプリング数
@@ -109,6 +109,7 @@ struct ConstBufferData
     LightConstBufferData light;
     AlphaConstBufferData alphaData_;
     DebugData debug_;
+    RaymarchingData raymarchingData_;
 };
 
 static int MAP_NONE = 0;

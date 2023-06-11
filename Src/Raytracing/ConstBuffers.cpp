@@ -44,6 +44,7 @@ void RayConstBufferData::Init()
 	light_.Init();
 	alphaData_.Init();
 	debug_.Init();
+	volumeTextureData_.Init();
 
 }
 
@@ -69,5 +70,17 @@ void DebugData::Init()
 	isDebugMesnInfo_ = false;
 	debugMeshMoveX_ = 0;
 	timer_ = 0;
+
+}
+
+void VolumeTextureData::Init()
+{
+
+	color_ = Vec3(1.0f, 1.0f, 1.0f);
+	gridSize_ = 10.0f;
+	wrapCount_ = 100.0f;
+	samplingLength_ = 10.0f;
+	sanplingMaxCount_ = 100.0f;
+	density_ = 1.0f;
 
 }

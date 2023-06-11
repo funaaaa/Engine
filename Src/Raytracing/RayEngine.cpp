@@ -99,10 +99,10 @@ void RayEngine::Setting()
 
 	// ノイズ用の定数バッファを用意。
 	noiseConstData_.timer_ = 0.0f;
-	noiseConstData_.windSpeed_ = 0.05f;
+	noiseConstData_.windSpeed_ = 7.00f;
 	noiseConstData_.windStrength_ = 0.1f;
 	noiseConstData_.threshold_ = 0.5f;
-	noiseConstData_.scale_ = 256.0f;
+	noiseConstData_.scale_ = 650.0f;
 	noiseConstData_.octaves_ = 4;
 	noiseConstData_.persistence_ = 0.5f;
 	noiseConstData_.lacunarity_ = 2.0f;

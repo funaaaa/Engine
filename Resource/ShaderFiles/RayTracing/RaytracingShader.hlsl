@@ -23,13 +23,22 @@ RWTexture2D<float4> emissiveOutput : register(u3);
 RWTexture3D<float4> fogVolumeTexture : register(u4);
 RWTexture2D<float4> fogOutput : register(u5);
 
+//全部の要素が既定の値以内に収まっているか。
+bool IsInRange(float3 value, float range)
+{
+    float3 absValue = abs(value);
+    bool isInRange = absValue.x < range && absValue.y < range && absValue.z < range;
+    return isInRange;
+}
+
 // ボリュームフォグ
 void VolumeFog(inout float3 fog)
 {
         
     // レイマーチングの回数を計算。
     float rayLength = RayTCurrent();
-    int marchingCount = rayLength / FOG_MARCHING_LENGTH;
+    int marchingCount = rayLength / gSceneParam.raymarchingData_.samplingLength_;
+    marchingCount = clamp(marchingCount, 0.0f, gSceneParam.raymarchingData_.sanplingMaxCount_);
     float3 fogColor = float3(0, 0, 0);
     float3 marchingPos = WorldRayOrigin();
     float3 marchingDir = WorldRayDirection();
@@ -37,29 +46,42 @@ void VolumeFog(inout float3 fog)
     {
         
         //マーチングを進める。
-        marchingPos += marchingDir * FOG_MARCHING_LENGTH;
+        marchingPos += marchingDir * gSceneParam.raymarchingData_.samplingLength_;
         
         //レイマーチングの座標をボクセル座標空間に直す。
-        int3 boxPos = marchingPos - WorldRayOrigin(); // プレイヤーの移動量を引くことにより原点基準にする。
-        boxPos += FOG_GRID_SIZE * 10000.0f;
-        boxPos /= FOG_GRID_SIZE; // 256の範囲に収める。
+        int3 boxPos = marchingPos - gSceneParam.raymarchingData_.pos_; // プレイヤーの移動量を引くことにより原点基準にする。
+        boxPos /= gSceneParam.raymarchingData_.gridSize_;
+        
+        if (!IsInRange(boxPos, 256.0f))
+        {
+            continue;
+        }
+        
         boxPos.x = boxPos.x % 256;
         boxPos.y = boxPos.y % 256;
         boxPos.z = boxPos.z % 256;
         boxPos = clamp(boxPos, 0, 255);
         
+        //boxPos += FOG_GRID_SIZE * 10000.0f;
+        //boxPos /= FOG_GRID_SIZE;
+        //boxPos.x = boxPos.x % 256;
+        //boxPos.y = boxPos.y % 256;
+        //boxPos.z = boxPos.z % 256;
+        //boxPos = clamp(boxPos, 0, 255);
+        
         //ノイズを抜き取る。
         float3 noise = fogVolumeTexture[boxPos].xyz / 100.0f;
         
         float3 weights = float3(0.5, 0.3, 0.2); // 各ノイズの重み
-        float fogDensity = dot(noise, weights);
+        float fogDensity = dot(noise, weights) * gSceneParam.raymarchingData_.density_;
         
         //その部分の色を抜き取る。
-        fogColor += float3(fogDensity, fogDensity, fogDensity);
+        fogColor += float3(fogDensity, fogDensity, fogDensity) * gSceneParam.raymarchingData_.color_;
         
     }
     
     //色を加算する。
+    //fogColor = clamp(fogColor, 0.0f, gSceneParam.raymarchingData_.density_);
     fog.xyz = saturate(fog.xyz + fogColor);
     
 }
@@ -297,7 +319,7 @@ void mainRayGen()
     // 結果格納
     lightingOutput[launchIndex.xy] = float4((payloadData.light_), 1);
     colorOutput[launchIndex.xy] = float4((payloadData.color_), payloadData.ao_);
-    fogOutput[launchIndex.xy] = float4(payloadData.fogColor_,1);
+    fogOutput[launchIndex.xy] = float4(payloadData.fogColor_, 1);
     denoiseMaskoutput[launchIndex.xy] = float4(payloadData.denoiseMask_, 1);
     emissiveOutput[launchIndex.xy] = float4(payloadData.emissive_, 1);
     
@@ -309,7 +331,7 @@ void mainRayGen()
         float3 weights = float3(0.5, 0.3, 0.2); // 各ノイズの重み
         float fogDensity = dot(noise, weights);
         
-        colorOutput[launchIndex.xy] = float4(fogDensity, fogDensity, fogDensity,1.0f);
+        colorOutput[launchIndex.xy] = float4(fogDensity, fogDensity, fogDensity, 1.0f);
     }
 
 }
@@ -1062,10 +1084,10 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     
     
     // ライティング前の処理を実行。----- 全反射オブジェクトやテクスチャの色をそのまま使うオブジェクトの色取得処理。
-        if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, normalMap, texColor, instanceID))
-        {
-            return;
-        }
+    if (ProcessingBeforeLighting(payload, vtx, attrib, worldPos, worldNormal, normalMap, texColor, instanceID))
+    {
+        return;
+    }
     
 
     // ライティングの処理

@@ -81,8 +81,8 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 		}
 
 
-		// ボリュームフォグ用デバッグ情報
-		ImGui::Begin("VolumeFog");
+		// ボリュームノイズ用デバッグ情報
+		ImGui::Begin("3DNoise");
 		ImGui::SetWindowSize(ImVec2(400, 100), ImGuiCond_::ImGuiCond_FirstUseEver);
 
 		//風の速度
@@ -92,10 +92,10 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 		ImGui::DragFloat("WindStrength", &RayEngine::Ins()->noiseConstData_.windStrength_, 0.1f, 0.1f, 1.0f);
 
 		//風のしきい値 ノイズを風として判断するためのもの
-		ImGui::DragFloat("WindThreshold", &RayEngine::Ins()->noiseConstData_.windStrength_, 0.01f, 0.01f, 1.0f);
+		ImGui::DragFloat("WindThreshold", &RayEngine::Ins()->noiseConstData_.threshold_, 0.01f, 0.01f, 1.0f);
 
 		//ノイズのスケール
-		ImGui::DragFloat("NoiseScale", &RayEngine::Ins()->noiseConstData_.scale_, 1.0f, 1.0f, 1000.0f);
+		ImGui::DragFloat("NoiseScale", &RayEngine::Ins()->noiseConstData_.scale_, 1.0f, 1.0f, 2000.0f);
 
 		//ノイズのオクターブ数
 		ImGui::DragInt("NoiseOctaves", &RayEngine::Ins()->noiseConstData_.octaves_, 1, 1, 10);
@@ -105,6 +105,34 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 
 		//ノイズの黒っぽさ
 		ImGui::DragFloat("NoiseLacunarity", &RayEngine::Ins()->noiseConstData_.lacunarity_, 0.01f, 0.01f, 10.0f);
+
+
+		ImGui::End();
+
+
+		// ボリュームフォグ用デバッグ情報
+		ImGui::Begin("VolumeFog");
+		ImGui::SetWindowSize(ImVec2(400, 100), ImGuiCond_::ImGuiCond_FirstUseEver);
+
+		//ボリュームテクスチャの座標
+		std::array<float, 3> boxPos = { RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_.x_,RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_.y_, RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_.z_};
+		ImGui::DragFloat3("Position", boxPos.data(), 0.1f);
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_ = Vec3(boxPos[0], boxPos[1], boxPos[2]);
+
+		//フォグの色
+		std::array<float, 3> fogColor = { RayEngine::Ins()->constBufferData_.volumeTextureData_.color_.x_,RayEngine::Ins()->constBufferData_.volumeTextureData_.color_.y_, RayEngine::Ins()->constBufferData_.volumeTextureData_.color_.z_ };
+		ImGui::DragFloat3("FogColor", fogColor.data(), 0.001f, 0.001f, 1.0f);
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.color_ = Vec3(fogColor[0], fogColor[1], fogColor[2]);
+
+		ImGui::DragFloat("WrapCount", &RayEngine::Ins()->constBufferData_.volumeTextureData_.wrapCount_, 1.0f, 1.0f, 100.0f);
+
+		ImGui::DragFloat("GridSize", &RayEngine::Ins()->constBufferData_.volumeTextureData_.gridSize_, 0.1f, 1.0f, 1000.0f);
+
+		ImGui::DragFloat("SamplingLength", &RayEngine::Ins()->constBufferData_.volumeTextureData_.samplingLength_, 0.1f, 1.0f, 1000.0f);
+
+		ImGui::DragFloat("MaxSamplingCount", &RayEngine::Ins()->constBufferData_.volumeTextureData_.sanplingMaxCount_, 1.0f, 1.0f, 1000.0f);
+
+		ImGui::DragFloat("Density", &RayEngine::Ins()->constBufferData_.volumeTextureData_.density_, 0.01f, 0.0f, 10.0f);
 
 
 		ImGui::End();
