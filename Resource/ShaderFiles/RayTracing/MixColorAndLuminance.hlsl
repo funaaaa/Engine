@@ -38,10 +38,12 @@ void main(uint3 DTid : SV_DispatchThreadID)
     float4 color = InputColor[DTid.xy];
     color.w = 1.0f;
     
-    // ??I?I??S???e?N?X?`??????????????B
-    float3 resultColor = (aoLuminance + lightLuminance) * (color) + emissive;
+
     
-    OutputImg[DTid.xy] = saturate(float4(ReinhardExtended(resultColor, 1), 1.0f) + fog);
+    // ??I?I??S???e?N?X?`??????????????B
+    float3 resultColor = (aoLuminance.xyz + lightLuminance.xyz) * (color.xyz) + emissive.xyz + fog.xyz;
+    
+    OutputImg[DTid.xy] = float4(ReinhardExtended(resultColor, 1), 1.0f);
     OutputImg[DTid.xy] *= 0.9f;
     
 }

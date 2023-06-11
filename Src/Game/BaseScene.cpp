@@ -126,7 +126,7 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 
 		ImGui::DragFloat("WrapCount", &RayEngine::Ins()->constBufferData_.volumeTextureData_.wrapCount_, 1.0f, 1.0f, 100.0f);
 
-		ImGui::DragFloat("GridSize", &RayEngine::Ins()->constBufferData_.volumeTextureData_.gridSize_, 0.1f, 1.0f, 1000.0f);
+		ImGui::DragFloat("GridSize", &RayEngine::Ins()->constBufferData_.volumeTextureData_.gridSize_, 0.1f, 0.1f, 1000.0f);
 
 		ImGui::DragFloat("SamplingLength", &RayEngine::Ins()->constBufferData_.volumeTextureData_.samplingLength_, 0.1f, 1.0f, 1000.0f);
 

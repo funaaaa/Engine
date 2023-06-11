@@ -24,10 +24,11 @@ RWTexture3D<float4> fogVolumeTexture : register(u4);
 RWTexture2D<float4> fogOutput : register(u5);
 
 //全部の要素が既定の値以内に収まっているか。
-bool IsInRange(float3 value, float range)
+bool IsInRange(float3 value, float range, float wrapCount)
 {
-    float3 absValue = abs(value);
-    bool isInRange = absValue.x < range && absValue.y < range && absValue.z < range;
+    
+    bool isInRange = value.x / range <= wrapCount && value.y / range <= wrapCount && value.z / range <= wrapCount;
+    isInRange &= 0 < value.x && 0 < value.y && 0 < value.z;
     return isInRange;
 }
 
@@ -37,23 +38,51 @@ void VolumeFog(inout float3 fog)
         
     // レイマーチングの回数を計算。
     float rayLength = RayTCurrent();
-    int marchingCount = rayLength / gSceneParam.raymarchingData_.samplingLength_;
-    marchingCount = clamp(marchingCount, 0.0f, gSceneParam.raymarchingData_.sanplingMaxCount_);
+    float marchingMovedLength = 0;   //レイマーチングで動いた距離
     float3 fogColor = float3(0, 0, 0);
     float3 marchingPos = WorldRayOrigin();
     float3 marchingDir = WorldRayDirection();
-    for (int index = 0; index < marchingCount; ++index)
+    for (int index = 0; index < 10000; ++index)
     {
         
+        //マーチングを進める量。
+        float marchingMoveLength = gSceneParam.raymarchingData_.samplingLength_;
+        
+        //マーチングが上限より移動していたら。
+        bool isFinish = false;
+        if (rayLength < marchingMovedLength + marchingMoveLength)
+        {
+            
+            //残りの量を移動させる。
+            marchingMoveLength = rayLength - marchingMovedLength;
+            isFinish = true;
+
+        }
+        else
+        {
+            
+            //動いた量を保存。
+            marchingMovedLength += marchingMoveLength;
+            
+        }
+        
         //マーチングを進める。
-        marchingPos += marchingDir * gSceneParam.raymarchingData_.samplingLength_;
+        marchingPos += marchingDir * marchingMoveLength;
         
         //レイマーチングの座標をボクセル座標空間に直す。
-        int3 boxPos = marchingPos - gSceneParam.raymarchingData_.pos_; // プレイヤーの移動量を引くことにより原点基準にする。
+        float3 volumeTexPos = gSceneParam.raymarchingData_.pos_;
+        volumeTexPos -= gSceneParam.raymarchingData_.gridSize_ * ((256.0f / 2.0f) * gSceneParam.raymarchingData_.wrapCount_);
+        int3 boxPos = marchingPos - volumeTexPos; //マーチングのサンプリング地点をボリュームテクスチャの中心基準の座標にずらす。
         boxPos /= gSceneParam.raymarchingData_.gridSize_;
         
-        if (!IsInRange(boxPos, 256.0f))
+        //マーチング座標がボクセルの位置より離れていたらサンプリングしない。
+        if (!IsInRange(boxPos, 256.0f, gSceneParam.raymarchingData_.wrapCount_))
         {
+        
+            if (isFinish)
+            {
+                break;
+            }
             continue;
         }
         
@@ -62,21 +91,19 @@ void VolumeFog(inout float3 fog)
         boxPos.z = boxPos.z % 256;
         boxPos = clamp(boxPos, 0, 255);
         
-        //boxPos += FOG_GRID_SIZE * 10000.0f;
-        //boxPos /= FOG_GRID_SIZE;
-        //boxPos.x = boxPos.x % 256;
-        //boxPos.y = boxPos.y % 256;
-        //boxPos.z = boxPos.z % 256;
-        //boxPos = clamp(boxPos, 0, 255);
-        
         //ノイズを抜き取る。
         float3 noise = fogVolumeTexture[boxPos].xyz / 100.0f;
         
-        float3 weights = float3(0.5, 0.3, 0.2); // 各ノイズの重み
+        float3 weights = float3(0.8f, 0.1f, 0.1f); // 各ノイズの重み
         float fogDensity = dot(noise, weights) * gSceneParam.raymarchingData_.density_;
         
         //その部分の色を抜き取る。
         fogColor += float3(fogDensity, fogDensity, fogDensity) * gSceneParam.raymarchingData_.color_;
+        
+        if (isFinish)
+        {
+            break;
+        }
         
     }
     

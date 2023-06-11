@@ -77,8 +77,8 @@ void VolumeTextureData::Init()
 {
 
 	color_ = Vec3(1.0f, 1.0f, 1.0f);
-	gridSize_ = 10.0f;
-	wrapCount_ = 100.0f;
+	gridSize_ = 0.5f;
+	wrapCount_ = 1.0f;
 	samplingLength_ = 10.0f;
 	sanplingMaxCount_ = 100.0f;
 	density_ = 1.0f;
