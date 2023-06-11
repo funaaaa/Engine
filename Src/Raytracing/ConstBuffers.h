@@ -32,6 +32,23 @@ struct DebugData {
 
 };
 
+//ボリュームテクスチャ用
+struct VolumeTextureData {
+
+	Vec3 pos_;                //ボリュームテクスチャのサイズ
+	Vec3 color_;              //フォグの色
+	float gridSize_;            //サンプリングするグリッドのサイズ
+	float wrapCount_;           //サンプリング座標がはみ出した際に何回までWrapするか
+	float samplingLength_;      //サンプリング距離
+	float sanplingMaxCount_;    //最大サンプリング数
+	float density_;             //濃度係数
+	float pad;
+
+	// 初期化処理
+	void Init();
+
+};
+
 struct RayLightConstBufferData {
 
 	// ディレクショナルライト用定数バッファ
@@ -94,6 +111,8 @@ struct RayConstBufferData {
 	AlphaConstBufferData alphaData_;
 	// デバッグ用情報
 	DebugData debug_;
+	// ボリュームテクスチャ用
+	VolumeTextureData volumeTextureData_;
 
 	// 初期化処理
 	void Init();
