@@ -1103,7 +1103,38 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     }
     
     // ボリュームフォグの計算
-    VolumeFog(payload.fogColor_);
+    if (gSceneParam.raymarchingData_.isSimpleFog)
+    {
+        // フォグの開始距離
+        float fogStart = 1.0f;
+
+        // フォグの終了距離
+        float fogEnd = 5000.0f;
+        
+        // カメラからの距離に基づいてフォグを計算
+        float depth = RayTCurrent();
+        depth = clamp(depth * (fogStart / fogEnd), 0.0f, 1.0f) * gSceneParam.raymarchingData_.density_;
+        
+        payload.fogColor_ += float3(depth, depth, depth);
+        
+    }
+    else
+    {
+        // フォグの開始距離
+        float fogStart = 1.0f;
+
+        // フォグの終了距離
+        float fogEnd = 5000.0f;
+        
+        // カメラからの距離に基づいてフォグを計算
+        float depth = RayTCurrent();
+        depth = clamp(depth * (fogStart / fogEnd), 0.0f, 1.0f) * 0.3f;
+        
+        payload.fogColor_ += float3(depth, depth, depth);
+        
+        VolumeFog(payload.fogColor_);
+        
+    }
     
     
     texColor.xyz -= payload.fogColor_;

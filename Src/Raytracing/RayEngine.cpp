@@ -110,6 +110,8 @@ void RayEngine::Setting()
 	noiseConstBuffer_->Generate(sizeof(NoiseConstData), L"NoiseConstBuffer");
 	noiseConstBuffer_->Write(Engine::Ins()->swapchain_.swapchain_->GetCurrentBackBufferIndex(), &noiseConstData_, sizeof(NoiseConstData));
 
+	fogMode_ = VOLUME_FOG;
+
 }
 
 void RayEngine::SettingTLAS()

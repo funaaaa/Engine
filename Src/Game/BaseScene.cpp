@@ -130,13 +130,27 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 
 		ImGui::DragFloat("SamplingLength", &RayEngine::Ins()->constBufferData_.volumeTextureData_.samplingLength_, 0.1f, 1.0f, 1000.0f);
 
-		ImGui::DragFloat("MaxSamplingCount", &RayEngine::Ins()->constBufferData_.volumeTextureData_.sanplingMaxCount_, 1.0f, 1.0f, 1000.0f);
-
 		ImGui::DragFloat("Density", &RayEngine::Ins()->constBufferData_.volumeTextureData_.density_, 0.01f, 0.0f, 10.0f);
 
 
 		ImGui::End();
 
+
+		// ボリュームフォグ用デバッグ情報
+		ImGui::Begin("FogMode");
+		ImGui::SetWindowSize(ImVec2(400, 100), ImGuiCond_::ImGuiCond_FirstUseEver);
+
+		int fogMode = RayEngine::Ins()->fogMode_;
+		ImGui::RadioButton("VolumeFog", &fogMode, RayEngine::VOLUME_FOG);
+		ImGui::SameLine();
+		ImGui::RadioButton("SimpleFog", &fogMode, RayEngine::SIMPLE_FOG);
+		ImGui::SameLine();
+		ImGui::RadioButton("DebugBox", &fogMode, RayEngine::DEBUG_BOX);
+		ImGui::SameLine();
+		ImGui::RadioButton("Custom", &fogMode, RayEngine::CUSTOM);
+		RayEngine::Ins()->fogMode_ = static_cast<RayEngine::FOG_MODE>(fogMode);
+
+		ImGui::End();
 
 
 
@@ -145,6 +159,52 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 	// フリーカメラ状態だったら
 	if (Engine::Ins()->isFreeCamera_) {
 		Camera::Ins()->FreeCamera();
+	}
+
+
+	//フォグの状態を更新
+	switch (RayEngine::Ins()->fogMode_)
+	{
+	case RayEngine::VOLUME_FOG:
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_ = Vec3();
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.color_ = Vec3(1.0f, 1.0f, 1.0f);
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.wrapCount_ = 20.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.gridSize_ = 15.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.samplingLength_ = 30.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.density_ = 0.65f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.isSimpleFog = 0;
+		RayEngine::Ins()->noiseConstData_.windSpeed_ = 7.0f;
+		RayEngine::Ins()->noiseConstData_.windStrength_ = 0.1f;
+		RayEngine::Ins()->noiseConstData_.threshold_ = 0.5f;
+		RayEngine::Ins()->noiseConstData_.scale_ = 1600.0f;
+		RayEngine::Ins()->noiseConstData_.octaves_ = 7;
+		RayEngine::Ins()->noiseConstData_.persistence_ = 0.73f;
+		RayEngine::Ins()->noiseConstData_.lacunarity_ = 2.3f;
+		break;
+	case RayEngine::SIMPLE_FOG:
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.isSimpleFog = 1;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.density_ = 1.0f;
+		break;
+	case RayEngine::DEBUG_BOX:
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_ = Vec3();
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.color_ = Vec3(1.0f, 1.0f, 1.0f);
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.wrapCount_ = 1.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.gridSize_ = 0.4f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.samplingLength_ = 1.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.density_ = 1.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.isSimpleFog = 0;
+		RayEngine::Ins()->noiseConstData_.windSpeed_ = 7.0f;
+		RayEngine::Ins()->noiseConstData_.windStrength_ = 0.1f;
+		RayEngine::Ins()->noiseConstData_.threshold_ = 0.5f;
+		RayEngine::Ins()->noiseConstData_.scale_ = 1600.0f;
+		RayEngine::Ins()->noiseConstData_.octaves_ = 7;
+		RayEngine::Ins()->noiseConstData_.persistence_ = 0.73f;
+		RayEngine::Ins()->noiseConstData_.lacunarity_ = 2.3f;
+		break;
+	case RayEngine::CUSTOM:
+		break;
+	default:
+		break;
 	}
 
 }

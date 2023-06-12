@@ -76,6 +76,13 @@ public:
 	}noiseConstData_;
 	std::shared_ptr<DynamicConstBuffer> noiseConstBuffer_;
 
+	enum FOG_MODE {
+		VOLUME_FOG,
+		SIMPLE_FOG,
+		DEBUG_BOX,
+		CUSTOM
+	}fogMode_;
+
 
 public:
 

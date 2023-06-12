@@ -80,7 +80,7 @@ void VolumeTextureData::Init()
 	gridSize_ = 0.5f;
 	wrapCount_ = 1.0f;
 	samplingLength_ = 10.0f;
-	sanplingMaxCount_ = 100.0f;
+	isSimpleFog = 0;
 	density_ = 1.0f;
 
 }

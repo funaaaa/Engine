@@ -40,8 +40,8 @@ struct VolumeTextureData {
 	Vec3 color_;              //フォグの色
 	float wrapCount_;           //サンプリング座標がはみ出した際に何回までWrapするか
 	float samplingLength_;      //サンプリング距離
-	float sanplingMaxCount_;    //最大サンプリング数
 	float density_;             //濃度係数
+	int isSimpleFog;
 	float pad;
 
 	// 初期化処理
