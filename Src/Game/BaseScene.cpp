@@ -182,8 +182,20 @@ void BaseScene::ImGuiDebug(bool& IsMoveOnly1F, float& SunAngle)
 		RayEngine::Ins()->noiseConstData_.lacunarity_ = 2.3f;
 		break;
 	case RayEngine::SIMPLE_FOG:
-		RayEngine::Ins()->constBufferData_.volumeTextureData_.isSimpleFog = 1;
-		RayEngine::Ins()->constBufferData_.volumeTextureData_.density_ = 1.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_ = Vec3();
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.color_ = Vec3(1.0f, 1.0f, 1.0f);
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.wrapCount_ = 20.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.gridSize_ = 15.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.samplingLength_ = 30.0f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.density_ = 0.65f;
+		RayEngine::Ins()->constBufferData_.volumeTextureData_.isSimpleFog = 0;
+		RayEngine::Ins()->noiseConstData_.windSpeed_ = 7.0f;
+		RayEngine::Ins()->noiseConstData_.windStrength_ = 0.1f;
+		RayEngine::Ins()->noiseConstData_.threshold_ = 0.01f;
+		RayEngine::Ins()->noiseConstData_.scale_ = 1600.0f;
+		RayEngine::Ins()->noiseConstData_.octaves_ = 7;
+		RayEngine::Ins()->noiseConstData_.persistence_ = 0.73f;
+		RayEngine::Ins()->noiseConstData_.lacunarity_ = 2.3f;
 		break;
 	case RayEngine::DEBUG_BOX:
 		RayEngine::Ins()->constBufferData_.volumeTextureData_.pos_ = Vec3();

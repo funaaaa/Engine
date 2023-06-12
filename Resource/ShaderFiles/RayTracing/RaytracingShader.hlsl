@@ -38,7 +38,7 @@ void VolumeFog(inout float3 fog)
         
     // レイマーチングの回数を計算。
     float rayLength = RayTCurrent();
-    float marchingMovedLength = 0;   //レイマーチングで動いた距離
+    float marchingMovedLength = 0; //レイマーチングで動いた距離
     float3 fogColor = float3(0, 0, 0);
     float3 marchingPos = WorldRayOrigin();
     float3 marchingDir = WorldRayDirection();
@@ -96,6 +96,10 @@ void VolumeFog(inout float3 fog)
         
         float3 weights = float3(0.8f, 0.1f, 0.1f); // 各ノイズの重み
         float fogDensity = dot(noise, weights) * gSceneParam.raymarchingData_.density_;
+        
+        //Y軸の高さで減衰させる。
+        float maxY = 200.0f;
+        fogDensity *= 1.0f - saturate(marchingPos.y / maxY);
         
         //その部分の色を抜き取る。
         fogColor += float3(fogDensity, fogDensity, fogDensity) * gSceneParam.raymarchingData_.color_;
@@ -1103,38 +1107,20 @@ void ProccessingAfterLighting(inout Payload PayloadData, Vertex Vtx, float3 Worl
     }
     
     // ボリュームフォグの計算
-    if (gSceneParam.raymarchingData_.isSimpleFog)
-    {
-        // フォグの開始距離
-        float fogStart = 1.0f;
+ 
+    // フォグの開始距離
+    float fogStart = 1.0f;
 
-        // フォグの終了距離
-        float fogEnd = 5000.0f;
+    // フォグの終了距離
+    float fogEnd = 5000.0f;
         
-        // カメラからの距離に基づいてフォグを計算
-        float depth = RayTCurrent();
-        depth = clamp(depth * (fogStart / fogEnd), 0.0f, 1.0f) * gSceneParam.raymarchingData_.density_;
+    // カメラからの距離に基づいてフォグを計算
+    float depth = RayTCurrent();
+    depth = clamp(depth * (fogStart / fogEnd), 0.0f, 1.0f) * 0.3f;
         
-        payload.fogColor_ += float3(depth, depth, depth);
+    payload.fogColor_ += float3(depth, depth, depth);
         
-    }
-    else
-    {
-        // フォグの開始距離
-        float fogStart = 1.0f;
-
-        // フォグの終了距離
-        float fogEnd = 5000.0f;
-        
-        // カメラからの距離に基づいてフォグを計算
-        float depth = RayTCurrent();
-        depth = clamp(depth * (fogStart / fogEnd), 0.0f, 1.0f) * 0.3f;
-        
-        payload.fogColor_ += float3(depth, depth, depth);
-        
-        VolumeFog(payload.fogColor_);
-        
-    }
+    VolumeFog(payload.fogColor_);
     
     
     texColor.xyz -= payload.fogColor_;
